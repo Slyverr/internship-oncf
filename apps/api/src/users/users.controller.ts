@@ -1,5 +1,9 @@
-import { Controller, Get } from "@nestjs/common";
+import { Controller, Get, Param } from "@nestjs/common";
+import { users } from "drizzle/schema";
+import { InferSelectModel } from "drizzle-orm";
 import { UsersService } from "./users.service";
+
+type User = InferSelectModel<typeof users>;
 
 @Controller("users")
 export class UsersController {
@@ -8,5 +12,10 @@ export class UsersController {
 	@Get()
 	findAll() {
 		return this.usersService.findAll();
+	}
+
+	@Get(":id")
+	async findOneById(@Param("id") id: User["id"]) {
+		return this.usersService.findOneById(id);
 	}
 }
