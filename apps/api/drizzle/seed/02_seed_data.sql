@@ -58,9 +58,9 @@ INSERT INTO customers (company_name, address, city, phone, email, type_id, custo
 ('ALF Maroc', 'Route de Rabat', 'Rabat', '0522080805', 'contact@alfmaroc.ma', 1, 'CLI013', TRUE),
 ('Ceralog', 'Zone logistique Tanger Med', 'Tanger', '0522080806', 'contact@ceralog.ma', 1, 'CLI014', TRUE);
 
--- Admin user
+-- Admin user (password: 'password123')
 INSERT INTO users (email, password, last_name, first_name, employee_id, type, role_id, is_active)
-SELECT 'admin@oncf.ma', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
+SELECT 'admin@oncf.ma', '$2b$10$E2dqNoISzVAup22rRyZ.2u5xzIJsLElJgqLOWnGQV99g0J2K1muTm',
        'Admin', 'System', 'ADMIN001', 'internal', r.id, TRUE
 FROM roles r WHERE r.name = 'ADMIN'
 ON CONFLICT (email) DO NOTHING;
