@@ -1,9 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { users } from "drizzle/schema";
-import { InferSelectModel } from "drizzle-orm";
 import { DrizzleService } from "src/db/drizzle.service";
-
-type User = InferSelectModel<typeof users>;
+import { UserEmail, UserId } from "./users.types";
 
 @Injectable()
 export class UsersService {
@@ -13,7 +10,7 @@ export class UsersService {
 		return this.drizzle.db.query.users.findMany();
 	}
 
-	async findOneById(id: User["id"]) {
+	async findOneById(id: UserId) {
 		return this.drizzle.db.query.users.findFirst({
 			where: {
 				id,
@@ -21,7 +18,7 @@ export class UsersService {
 		});
 	}
 
-	async findOneByEmail(email: User["email"]) {
+	async findOneByEmail(email: UserEmail) {
 		return this.drizzle.db.query.users.findFirst({
 			where: {
 				email,

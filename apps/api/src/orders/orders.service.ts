@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { DrizzleService } from "src/db/drizzle.service";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
+import type { OrderId } from "./orders.types";
 
 @Injectable()
 export class OrdersService {
@@ -21,7 +22,7 @@ export class OrdersService {
 		return this.drizzle.db.query.orders.findMany();
 	}
 
-	async findOne(id: number) {
+	async findOne(id: OrderId) {
 		const order = await this.drizzle.db.query.orders.findFirst({
 			where: {
 				id,
@@ -33,7 +34,7 @@ export class OrdersService {
 		return order;
 	}
 
-	async update(id: number, dto: UpdateOrderDto) {
+	async update(id: OrderId, dto: UpdateOrderDto) {
 		const [updated] = await this.drizzle.db
 			.update(orders)
 			.set(dto)
@@ -45,7 +46,7 @@ export class OrdersService {
 		return updated;
 	}
 
-	async remove(id: number) {
+	async remove(id: OrderId) {
 		const [deleted] = await this.drizzle.db
 			.delete(orders)
 			.where(eq(orders.id, id))
