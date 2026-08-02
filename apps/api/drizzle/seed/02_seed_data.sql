@@ -65,6 +65,20 @@ SELECT 'admin@oncf.ma', '$2b$10$E2dqNoISzVAup22rRyZ.2u5xzIJsLElJgqLOWnGQV99g0J2K
 FROM roles r WHERE r.name = 'ADMIN'
 ON CONFLICT (email) DO NOTHING;
 
+-- Client representative user (password: 'password123')
+INSERT INTO users (email, password, last_name, first_name, employee_id, type, role_id, is_active)
+SELECT 'client@oncf.ma', '$2b$10$E2dqNoISzVAup22rRyZ.2u5xzIJsLElJgqLOWnGQV99g0J2K1muTm',
+       'Client', 'Representative', 'CLI001', 'external', r.id, TRUE
+FROM roles r WHERE r.name = 'CLIENT_REPRESENTATIVE'
+ON CONFLICT (email) DO NOTHING;
+
+-- Commercial agent user (password: 'password123')
+INSERT INTO users (email, password, last_name, first_name, employee_id, type, role_id, is_active)
+SELECT 'agent@oncf.ma', '$2b$10$E2dqNoISzVAup22rRyZ.2u5xzIJsLElJgqLOWnGQV99g0J2K1muTm',
+       'Commercial', 'Agent', 'AGT001', 'internal', r.id, TRUE
+FROM roles r WHERE r.name = 'AGENT_COMMERCIAL'
+ON CONFLICT (email) DO NOTHING;
+
 -- Vessels
 INSERT INTO vessels (name) VALUES
 ('CMA CGM TOPAZ'),

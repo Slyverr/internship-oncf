@@ -7,65 +7,79 @@ ON CONFLICT (name) DO NOTHING;
 
 -- Permissions
 INSERT INTO permissions (name, description, is_active) VALUES
-('create_user', 'Create users', TRUE),
-('view_user', 'View users', TRUE),
-('update_user', 'Update users', TRUE),
-('delete_user', 'Delete users', TRUE),
-('create_order', 'Create orders', TRUE),
-('view_order', 'View orders', TRUE),
-('update_order', 'Update orders', TRUE),
-('delete_order', 'Delete orders', TRUE),
-('approve_order', 'Approve orders', TRUE),
-('reject_order', 'Reject orders', TRUE),
-('execute_order', 'Execute orders', TRUE),
-('create_customer', 'Create customers', TRUE),
-('view_customer', 'View customers', TRUE),
-('update_customer', 'Update customers', TRUE),
-('delete_customer', 'Delete customers', TRUE),
-('create_claim', 'Create claims', TRUE),
-('view_claim', 'View claims', TRUE),
-('update_claim', 'Update claims', TRUE),
-('close_claim', 'Close claims', TRUE),
-('delete_claim', 'Delete claims', TRUE),
-('view_tracking', 'View wagon/train tracking', TRUE),
-('update_tracking', 'Update tracking', TRUE),
-('view_reports', 'View reports', TRUE),
-('export_data', 'Export data', TRUE),
-('manage_roles', 'Manage roles', TRUE),
-('manage_permissions', 'Manage permissions', TRUE),
-('view_logs', 'View system logs', TRUE),
-('update_profile', 'Update own profile', TRUE),
-('MANAGE_ARCHIVAL', 'Trigger manual archival operations', TRUE),
-('VIEW_ARCHIVAL_LOGS', 'View archival execution logs', TRUE),
-('create_program', 'Create forecast programs', TRUE),
-('view_program', 'View forecast programs', TRUE),
-('approve_program', 'Approve forecast programs', TRUE),
-('send_program_to_dtm', 'Send program to DTM', TRUE),
-('record_execution', 'Record daily program executions', TRUE)
+('users:create', 'Create users', TRUE),
+('users:read', 'View users', TRUE),
+('users:update', 'Update users', TRUE),
+('users:delete', 'Delete users', TRUE),
+('orders:create', 'Create orders', TRUE),
+('orders:read', 'View orders', TRUE),
+('orders:update', 'Update orders', TRUE),
+('orders:delete', 'Delete orders', TRUE),
+('orders:approve', 'Approve orders', TRUE),
+('orders:reject', 'Reject orders', TRUE),
+('orders:execute', 'Execute orders', TRUE),
+('customers:create', 'Create customers', TRUE),
+('customers:read', 'View customers', TRUE),
+('customers:update', 'Update customers', TRUE),
+('customers:delete', 'Delete customers', TRUE),
+('claims:create', 'Create claims', TRUE),
+('claims:read', 'View claims', TRUE),
+('claims:update', 'Update claims', TRUE),
+('claims:close', 'Close claims', TRUE),
+('claims:delete', 'Delete claims', TRUE),
+('tracking:read', 'View wagon/train tracking', TRUE),
+('tracking:update', 'Update tracking', TRUE),
+('reports:read', 'View reports', TRUE),
+('reports:export', 'Export data', TRUE),
+('roles:manage', 'Manage roles', TRUE),
+('permissions:manage', 'Manage permissions', TRUE),
+('logs:read', 'View system logs', TRUE),
+('profile:update', 'Update own profile', TRUE),
+('archival:manage', 'Trigger manual archival operations', TRUE),
+('archival:read', 'View archival execution logs', TRUE),
+('programs:create', 'Create forecast programs', TRUE),
+('programs:read', 'View forecast programs', TRUE),
+('programs:approve', 'Approve forecast programs', TRUE),
+('programs:send', 'Send program to DTM', TRUE),
+('programs:execute', 'Record daily program executions', TRUE)
 ON CONFLICT (name) DO NOTHING;
 
 -- Role permissions
+-- ADMIN: all permissions
 INSERT INTO role_permissions (role_id, permission_id)
 SELECT r.id, p.id
 FROM roles r CROSS JOIN permissions p
 WHERE r.name = 'ADMIN'
 ON CONFLICT DO NOTHING;
 
+-- CLIENT_REPRESENTATIVE: limited to own data
 INSERT INTO role_permissions (role_id, permission_id)
 SELECT r.id, p.id
 FROM roles r CROSS JOIN permissions p
 WHERE r.name = 'CLIENT_REPRESENTATIVE'
-AND p.name IN ('create_order', 'view_order', 'create_claim', 'view_claim', 'view_tracking', 'update_profile', 'view_program')
+AND p.name IN (
+  'orders:create', 'orders:read',
+  'claims:create', 'claims:read',
+  'tracking:read',
+  'profile:update',
+  'programs:read'
+)
 ON CONFLICT DO NOTHING;
 
+-- AGENT_COMMERCIAL: broader but not admin
 INSERT INTO role_permissions (role_id, permission_id)
 SELECT r.id, p.id
 FROM roles r CROSS JOIN permissions p
 WHERE r.name = 'AGENT_COMMERCIAL'
-AND p.name IN ('create_order', 'view_order', 'update_order', 'view_customer', 'update_customer',
-               'view_claim', 'view_tracking', 'view_reports', 'update_profile', 'execute_order',
-               'update_claim', 'delete_claim', 'create_program', 'view_program', 'approve_program',
-               'send_program_to_dtm', 'record_execution')
+AND p.name IN (
+  'orders:create', 'orders:read', 'orders:update', 'orders:execute',
+  'customers:read', 'customers:update',
+  'claims:read', 'claims:update', 'claims:delete',
+  'tracking:read',
+  'reports:read',
+  'profile:update',
+  'programs:create', 'programs:read', 'programs:approve', 'programs:send', 'programs:execute'
+)
 ON CONFLICT DO NOTHING;
 
 -- Customer types
