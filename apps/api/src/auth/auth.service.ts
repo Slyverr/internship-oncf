@@ -1,11 +1,8 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import bcrypt from "bcryptjs";
-import { users } from "drizzle/schema";
-import { InferSelectModel } from "drizzle-orm";
 import { UsersService } from "src/users/users.service";
-
-type User = InferSelectModel<typeof users>;
+import { User } from "src/users/users.types";
 
 @Injectable()
 export class AuthService {
@@ -24,8 +21,20 @@ export class AuthService {
 		return null;
 	}
 
-	async login(user: User) {
-		const payload = { sub: user.id, username: user.email };
-		return { access_token: await this.jwtService.signAsync(payload) };
+	async login(user: Omit<User, "password">) {
+		const authUser = await this.usersService.findUserWithPermissions(user.id);
+		if (!authUser) {
+			throw new UnauthorizedException();
+		}
+
+		const payload = {
+			sub: authUser.id,
+			username: authUser.email,
+			permissions: authUser.permissions,
+			role: authUser.role,
+		};
+
+		const access_token = await this.jwtService.signAsync(payload);
+		return { access_token };
 	}
 }
