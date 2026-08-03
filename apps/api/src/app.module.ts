@@ -5,6 +5,7 @@ import { AppService } from "./app.service";
 import { AuthModule } from "./auth/auth.module";
 import { DrizzleModule } from "./db/drizzle.module";
 import { OrdersModule } from "./orders/orders.module";
+import { ProgramsModule } from "./programs/programs.module";
 import { UsersModule } from "./users/users.module";
 
 @Module({
@@ -14,6 +15,7 @@ import { UsersModule } from "./users/users.module";
 		UsersModule,
 		AuthModule,
 		OrdersModule,
+		ProgramsModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],
