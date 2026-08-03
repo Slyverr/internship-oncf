@@ -70,4 +70,13 @@ export class UsersService {
 			),
 		};
 	}
+
+	async exists(id: UserId) {
+		const user = await this.drizzle.db.query.users.findFirst({
+			where: { id },
+			columns: { id: true },
+		});
+
+		return !!user;
+	}
 }

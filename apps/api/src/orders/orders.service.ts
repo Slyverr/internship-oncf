@@ -1,16 +1,28 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+	Injectable,
+	NotFoundException,
+	UnprocessableEntityException,
+} from "@nestjs/common";
 import { orders } from "drizzle/schema";
 import { eq } from "drizzle-orm";
 import { DrizzleService } from "src/db/drizzle.service";
+import { UsersService } from "src/users/users.service";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
 import type { OrderId } from "./orders.types";
 
 @Injectable()
 export class OrdersService {
-	constructor(private readonly drizzle: DrizzleService) {}
+	constructor(
+		private readonly drizzle: DrizzleService,
+		private usersService: UsersService,
+	) {}
 
 	async create(dto: CreateOrderDto) {
+		const exists = await this.usersService.exists(dto.userId);
+		if (!exists)
+			throw new UnprocessableEntityException(`User ${dto.userId} not found`);
+
 		const [created] = await this.drizzle.db
 			.insert(orders)
 			.values(dto)
