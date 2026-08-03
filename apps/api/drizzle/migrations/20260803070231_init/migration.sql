@@ -7,7 +7,7 @@ CREATE TABLE "accessory_operations" (
 --> statement-breakpoint
 CREATE TABLE "agencies" (
 	"id" bigserial PRIMARY KEY,
-	"name" varchar(200) NOT NULL,
+	"name" varchar(200) NOT NULL CONSTRAINT "agencies_name_key" UNIQUE,
 	"city" varchar(100),
 	"address" varchar(500),
 	"phone" varchar(20),
@@ -149,7 +149,7 @@ CREATE TABLE "customers" (
 	"created_at" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	"updated_at" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	"is_active" boolean DEFAULT true NOT NULL,
-	"customer_code" varchar(50)
+	"customer_code" varchar(50) CONSTRAINT "customers_customer_code_key" UNIQUE
 );
 --> statement-breakpoint
 CREATE TABLE "dispatch_types" (

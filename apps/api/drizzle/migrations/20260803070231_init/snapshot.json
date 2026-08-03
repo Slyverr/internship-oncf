@@ -1,7 +1,7 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "80a14099-b4e9-4684-900c-57f9d8e80e99",
+  "id": "47e540c4-34f8-4b57-8ebf-e5e5e1381adc",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
@@ -14540,6 +14540,17 @@
         "name"
       ],
       "nullsNotDistinct": false,
+      "name": "agencies_name_key",
+      "entityType": "uniques",
+      "schema": "public",
+      "table": "agencies"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "name"
+      ],
+      "nullsNotDistinct": false,
       "name": "attributes_name_key",
       "entityType": "uniques",
       "schema": "public",
@@ -14591,6 +14602,17 @@
       "entityType": "uniques",
       "schema": "public",
       "table": "customer_types"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "customer_code"
+      ],
+      "nullsNotDistinct": false,
+      "name": "customers_customer_code_key",
+      "entityType": "uniques",
+      "schema": "public",
+      "table": "customers"
     },
     {
       "nameExplicit": true,

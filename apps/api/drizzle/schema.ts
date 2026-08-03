@@ -104,6 +104,7 @@ export const customers = pgTable(
 		),
 		index("idx_customers_email").using("btree", table.email.asc().nullsLast()),
 		index("idx_customers_type").using("btree", table.typeId.asc().nullsLast()),
+		unique("customers_customer_code_key").on(table.customerCode),
 		foreignKey({
 			columns: [table.typeId],
 			foreignColumns: [customerTypes.id],
@@ -136,6 +137,7 @@ export const agencies = pgTable(
 		),
 		index("idx_agencies_city").using("btree", table.city.asc().nullsLast()),
 		index("idx_agencies_name").using("btree", table.name.asc().nullsLast()),
+		unique("agencies_name_key").on(table.name),
 	],
 );
 
