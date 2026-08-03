@@ -56,4 +56,13 @@ export class OrdersService {
 		}
 		return deleted;
 	}
+
+	async exists(id: OrderId) {
+		const order = await this.drizzle.db.query.orders.findFirst({
+			where: { id },
+			columns: { id: true },
+		});
+
+		return !!order;
+	}
 }

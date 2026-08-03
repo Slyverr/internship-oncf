@@ -2,19 +2,28 @@ import {
 	Injectable,
 	NotFoundException,
 	UnauthorizedException,
+	UnprocessableEntityException,
 } from "@nestjs/common";
 import { forecastPrograms } from "drizzle/schema";
 import { eq } from "drizzle-orm";
 import { DrizzleService } from "src/db/drizzle.service";
+import { OrdersService } from "src/orders/orders.service";
 import { CreateProgramDto } from "./dto/create-program.dto";
 import { UpdateProgramDto } from "./dto/update-program.dto";
 import { ProgramId } from "./programs.types";
 
 @Injectable()
 export class ProgramsService {
-	constructor(private drizzle: DrizzleService) {}
+	constructor(
+		private drizzle: DrizzleService,
+		private ordersService: OrdersService,
+	) {}
 
 	async create(dto: CreateProgramDto, userId: number) {
+		const exists = await this.ordersService.exists(dto.orderId);
+		if (!exists)
+			throw new UnprocessableEntityException(`Order ${dto.orderId} not found`);
+
 		const programNumber = `PRG-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 		const [program] = await this.drizzle.db
 			.insert(forecastPrograms)
