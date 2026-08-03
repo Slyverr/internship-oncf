@@ -4,6 +4,7 @@ import {
 	Delete,
 	Get,
 	Param,
+	ParseIntPipe,
 	Patch,
 	Post,
 } from "@nestjs/common";
@@ -11,6 +12,8 @@ import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
 import { OrdersService } from "./orders.service";
 import type { OrderId } from "./orders.types";
+
+const OrderIdParam = () => Param("id", ParseIntPipe);
 
 @Controller("orders")
 export class OrdersController {
@@ -27,17 +30,17 @@ export class OrdersController {
 	}
 
 	@Get(":id")
-	findOne(@Param("id") id: OrderId) {
+	findOne(@OrderIdParam() id: OrderId) {
 		return this.ordersService.findOne(+id);
 	}
 
 	@Patch(":id")
-	update(@Param("id") id: OrderId, @Body() updateOrderDto: UpdateOrderDto) {
+	update(@OrderIdParam() id: OrderId, @Body() updateOrderDto: UpdateOrderDto) {
 		return this.ordersService.update(+id, updateOrderDto);
 	}
 
 	@Delete(":id")
-	remove(@Param("id") id: OrderId) {
+	remove(@OrderIdParam() id: OrderId) {
 		return this.ordersService.remove(+id);
 	}
 }
