@@ -10,6 +10,7 @@ import {
 	Request,
 } from "@nestjs/common";
 import { Permissions } from "src/auth/permissions.decorator";
+import { Permission } from "src/db/reference-data";
 import { CreateProgramDto } from "./dto/create-program.dto";
 import { UpdateProgramDto } from "./dto/update-program.dto";
 import { ProgramsService } from "./programs.service";
@@ -22,49 +23,49 @@ export class ProgramsController {
 	constructor(private programsService: ProgramsService) {}
 
 	@Post()
-	@Permissions("programs:create")
+	@Permissions(Permission.PROGRAMS_CREATE)
 	create(@Body() dto: CreateProgramDto, @Request() req) {
 		return this.programsService.create(dto, req.user.id);
 	}
 
 	@Get()
-	@Permissions("programs:read")
+	@Permissions(Permission.PROGRAMS_READ)
 	findAll() {
 		return this.programsService.findAll();
 	}
 
 	@Get(":id")
-	@Permissions("programs:read")
+	@Permissions(Permission.PROGRAMS_READ)
 	findOne(@ProgramIdParam() id: ProgramId) {
 		return this.programsService.findOne(id);
 	}
 
 	@Patch(":id")
-	@Permissions("programs:update")
+	@Permissions(Permission.PROGRAMS_UPDATE)
 	update(@ProgramIdParam() id: ProgramId, @Body() dto: UpdateProgramDto) {
 		return this.programsService.update(id, dto);
 	}
 
 	@Patch(":id/approve")
-	@Permissions("programs:approve")
+	@Permissions(Permission.PROGRAMS_APPROVE)
 	approve(@ProgramIdParam() id: ProgramId) {
 		return this.programsService.approve(id);
 	}
 
 	@Patch(":id/reject")
-	@Permissions("programs:approve")
+	@Permissions(Permission.PROGRAMS_APPROVE)
 	reject(@ProgramIdParam() id: ProgramId) {
 		return this.programsService.reject(id);
 	}
 
 	@Patch(":id/send")
-	@Permissions("programs:send")
+	@Permissions(Permission.PROGRAMS_SEND)
 	sendToDtm(@ProgramIdParam() id: ProgramId) {
 		return this.programsService.sendToDtm(id);
 	}
 
 	@Delete(":id")
-	@Permissions("programs:delete")
+	@Permissions(Permission.PROGRAMS_DELETE)
 	remove(@ProgramIdParam() id: ProgramId) {
 		return this.programsService.remove(id);
 	}

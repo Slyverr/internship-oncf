@@ -1,5 +1,6 @@
 import { Controller, Get, Param, ParseIntPipe } from "@nestjs/common";
 import { Permissions } from "src/auth/permissions.decorator";
+import { Permission } from "src/db/reference-data";
 import { UsersService } from "./users.service";
 import type { UserId } from "./users.types";
 
@@ -10,13 +11,13 @@ export class UsersController {
 	constructor(private usersService: UsersService) {}
 
 	@Get()
-	@Permissions("users:read")
+	@Permissions(Permission.USERS_READ)
 	findAll() {
 		return this.usersService.findAll();
 	}
 
 	@Get(":id")
-	@Permissions("users:read")
+	@Permissions(Permission.USERS_READ)
 	async findOneById(@UserIdParam() id: UserId) {
 		return this.usersService.findOneById(id);
 	}
