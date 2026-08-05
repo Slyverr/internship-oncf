@@ -21,30 +21,30 @@ import {
 	roles,
 	units,
 } from "drizzle/schema";
-import { eq } from "drizzle-orm";
+import { inArray } from "drizzle-orm";
 import { DrizzleService } from "src/db/drizzle.service";
 import {
-	AccessoryOperation,
+	ACCESSORY_OPERATIONS,
 	ATTRIBUTES,
-	ClaimStatus,
-	ClaimType,
-	CustomerType,
-	DispatchType,
-	DtmRequestType,
-	GoodsType,
+	CLAIM_STATUSES,
+	CLAIM_TYPES,
+	CUSTOMER_TYPES,
+	DISPATCH_TYPES,
+	DTM_REQUEST_TYPES,
+	GOODS_TYPES,
 	LEGACY_UNITS,
-	MovementType,
-	NotificationChannel,
-	NotificationType,
-	OrderStatus,
+	MOVEMENT_TYPES,
+	NOTIFICATION_CHANNELS,
+	NOTIFICATION_TYPES,
+	ORDER_STATUSES,
 	PARAMETRIZATION,
-	Permission,
-	PickupLocationType,
-	ProgramStatus,
-	RejectionReason,
+	PERMISSIONS,
+	PICKUP_LOCATION_TYPES,
+	PROGRAM_STATUSES,
+	REJECTION_REASONS,
 	ROLE_PERMISSIONS,
-	Role,
-	Unit,
+	ROLES,
+	UNITS,
 } from ".";
 
 @Injectable()
@@ -52,277 +52,94 @@ export class ReferenceDataSeederService implements OnModuleInit {
 	constructor(private drizzle: DrizzleService) {}
 
 	async onModuleInit() {
-		await this.seedRoles();
-		await this.seedPermissions();
-		await this.seedRolePermissions();
-		await this.seedCustomerTypes();
-		await this.seedGoodsTypes();
-		await this.seedAttributes();
-		await this.seedParametrization();
-		await this.seedOrderStatus();
-		await this.seedProgramStatus();
-		await this.seedClaimTypes();
-		await this.seedClaimStatus();
-		await this.seedMovementTypes();
-		await this.seedPickupLocationTypes();
-		await this.seedDispatchTypes();
-		await this.seedRejectionReasons();
-		await this.seedNotificationTypes();
-		await this.seedNotificationChannels();
-		await this.seedDtmRequestTypes();
-		await this.seedAccessoryOperations();
-		await this.seedUnits();
+		await this.drizzle.db.transaction(async (tx) => {
+			await this.seedSimpleTables(tx);
+			await this.deactivateLegacyUnits(tx);
+			await this.seedRolePermissions(tx);
+			await this.seedParametrization(tx);
+		});
 	}
 
-	private async seedRoles() {
-		for (const [name] of Object.entries(Role)) {
-			await this.drizzle.db
-				.insert(roles)
-				.values({ name, description: `${name} role`, isActive: true })
-				.onConflictDoNothing({ target: roles.name });
-		}
-	}
+	private async seedSimpleTables(tx: DrizzleService["db"]) {
+		const tables = [
+			{ table: roles, data: ROLES },
+			{ table: permissions, data: PERMISSIONS },
+			{ table: customerTypes, data: CUSTOMER_TYPES },
+			{ table: goodsTypes, data: GOODS_TYPES },
+			{ table: attributes, data: ATTRIBUTES },
+			{ table: orderStatus, data: ORDER_STATUSES },
+			{ table: programStatus, data: PROGRAM_STATUSES },
+			{ table: claimTypes, data: CLAIM_TYPES },
+			{ table: claimStatus, data: CLAIM_STATUSES },
+			{ table: movementTypes, data: MOVEMENT_TYPES },
+			{ table: pickupLocationTypes, data: PICKUP_LOCATION_TYPES },
+			{ table: dispatchTypes, data: DISPATCH_TYPES },
+			{ table: rejectionReasons, data: REJECTION_REASONS },
+			{ table: notificationTypes, data: NOTIFICATION_TYPES },
+			{ table: notificationChannels, data: NOTIFICATION_CHANNELS },
+			{ table: dtmRequestTypes, data: DTM_REQUEST_TYPES },
+			{ table: accessoryOperations, data: ACCESSORY_OPERATIONS },
+			{ table: units, data: UNITS },
+		];
 
-	private async seedPermissions() {
-		for (const name of Object.values(Permission)) {
-			await this.drizzle.db
-				.insert(permissions)
-				.values({
-					name,
-					description: `Permission to ${name.replace(":", " ")}`,
-					isActive: true,
-				})
-				.onConflictDoNothing({ target: permissions.name });
-		}
-	}
-
-	private async seedRolePermissions() {
-		for (const [roleName, perms] of Object.entries(ROLE_PERMISSIONS)) {
-			const role = await this.drizzle.db.query.roles.findFirst({
-				where: { name: roleName },
-			});
-			if (!role) continue;
-
-			const permissionList =
-				perms === "ALL" ? Object.values(Permission) : perms;
-
-			for (const permName of permissionList) {
-				const perm = await this.drizzle.db.query.permissions.findFirst({
-					where: { name: permName },
+		for (const { table, data } of tables) {
+			for (const item of Object.values(data)) {
+				const values = { ...item, isActive: true };
+				await tx.insert(table).values(values).onConflictDoUpdate({
+					target: table.id,
+					set: values,
 				});
-				if (!perm) continue;
+			}
+		}
+	}
 
-				await this.drizzle.db
+	private async deactivateLegacyUnits(tx: DrizzleService["db"]) {
+		if (LEGACY_UNITS.length === 0) return;
+		await tx
+			.update(units)
+			.set({ isActive: false })
+			.where(inArray(units.name, LEGACY_UNITS));
+	}
+
+	private async seedRolePermissions(tx: DrizzleService["db"]) {
+		for (const [role, perms] of Object.entries(ROLE_PERMISSIONS)) {
+			const roleId = ROLES[role as keyof typeof ROLES].id;
+			const permissionIds =
+				perms === "ALL"
+					? Object.values(PERMISSIONS).map((p) => p.id)
+					: perms.map((p) => PERMISSIONS[p].id);
+
+			for (const permissionId of permissionIds) {
+				await tx
 					.insert(rolePermissions)
-					.values({ roleId: role.id, permissionId: perm.id })
+					.values({ roleId, permissionId })
 					.onConflictDoNothing();
 			}
 		}
 	}
 
-	private async seedCustomerTypes() {
-		for (const name of Object.values(CustomerType)) {
-			await this.drizzle.db
-				.insert(customerTypes)
-				.values({ name, isActive: true })
-				.onConflictDoNothing({ target: customerTypes.name });
-		}
-	}
+	private async seedParametrization(tx: DrizzleService["db"]) {
+		const attrIdByName = new Map(ATTRIBUTES.map((a) => [a.name, a.id]));
 
-	private async seedGoodsTypes() {
-		for (const name of Object.values(GoodsType)) {
-			await this.drizzle.db
-				.insert(goodsTypes)
-				.values({ name, isActive: true })
-				.onConflictDoNothing({ target: goodsTypes.name });
-		}
-	}
-
-	private async seedAttributes() {
-		for (const attr of ATTRIBUTES) {
-			await this.drizzle.db
-				.insert(attributes)
-				.values({
-					name: attr.name,
-					dataType: attr.dataType,
-					isActive: true,
-				})
-				.onConflictDoNothing({ target: attributes.name });
-		}
-	}
-
-	private async seedParametrization() {
 		for (const [goodsTypeName, requiredAttrs] of Object.entries(
 			PARAMETRIZATION,
 		)) {
-			const goodsType = await this.drizzle.db.query.goodsTypes.findFirst({
-				where: { name: goodsTypeName },
-			});
-			if (!goodsType) continue;
+			const goodsTypeId =
+				GOODS_TYPES[goodsTypeName as keyof typeof GOODS_TYPES]?.id;
+			if (!goodsTypeId) continue;
 
 			for (const { attributeName, isRequired } of requiredAttrs) {
-				const attr = await this.drizzle.db.query.attributes.findFirst({
-					where: { name: attributeName },
-				});
-				if (!attr) continue;
+				const attributeId = attrIdByName.get(attributeName);
+				if (!attributeId) continue;
 
-				await this.drizzle.db
+				await tx
 					.insert(parametrization)
-					.values({
-						goodsTypeId: goodsType.id,
-						attributeId: attr.id,
-						isRequired,
-					})
-					.onConflictDoNothing();
+					.values({ goodsTypeId, attributeId, isRequired })
+					.onConflictDoUpdate({
+						target: [parametrization.goodsTypeId, parametrization.attributeId],
+						set: { isRequired },
+					});
 			}
-		}
-	}
-
-	private async seedOrderStatus() {
-		for (const name of Object.values(OrderStatus)) {
-			await this.drizzle.db
-				.insert(orderStatus)
-				.values({ name, isActive: true })
-				.onConflictDoNothing({ target: orderStatus.name });
-		}
-	}
-
-	private async seedProgramStatus() {
-		for (const name of Object.values(ProgramStatus)) {
-			await this.drizzle.db
-				.insert(programStatus)
-				.values({
-					name,
-					description: `${name} status`,
-					isActive: true,
-				})
-				.onConflictDoNothing({ target: programStatus.name });
-		}
-	}
-
-	private async seedClaimTypes() {
-		for (const name of Object.values(ClaimType)) {
-			await this.drizzle.db
-				.insert(claimTypes)
-				.values({ name, isActive: true })
-				.onConflictDoNothing({ target: claimTypes.name });
-		}
-	}
-
-	private async seedClaimStatus() {
-		for (const name of Object.values(ClaimStatus)) {
-			await this.drizzle.db
-				.insert(claimStatus)
-				.values({ name, isActive: true })
-				.onConflictDoNothing({ target: claimStatus.name });
-		}
-	}
-
-	private async seedMovementTypes() {
-		for (const name of Object.values(MovementType)) {
-			await this.drizzle.db
-				.insert(movementTypes)
-				.values({
-					name,
-					description: `${name} movement`,
-					isActive: true,
-				})
-				.onConflictDoNothing({ target: movementTypes.name });
-		}
-	}
-
-	private async seedPickupLocationTypes() {
-		for (const name of Object.values(PickupLocationType)) {
-			await this.drizzle.db
-				.insert(pickupLocationTypes)
-				.values({
-					name,
-					description: `${name} location`,
-					isActive: true,
-				})
-				.onConflictDoNothing({ target: pickupLocationTypes.name });
-		}
-	}
-
-	private async seedDispatchTypes() {
-		for (const name of Object.values(DispatchType)) {
-			await this.drizzle.db
-				.insert(dispatchTypes)
-				.values({
-					name,
-					description: `${name} dispatch`,
-					isActive: true,
-				})
-				.onConflictDoNothing({ target: dispatchTypes.name });
-		}
-	}
-
-	private async seedRejectionReasons() {
-		for (const name of Object.values(RejectionReason)) {
-			await this.drizzle.db
-				.insert(rejectionReasons)
-				.values({ name, isActive: true })
-				.onConflictDoNothing({ target: rejectionReasons.name });
-		}
-	}
-
-	private async seedNotificationTypes() {
-		for (const name of Object.values(NotificationType)) {
-			await this.drizzle.db
-				.insert(notificationTypes)
-				.values({
-					name,
-					description: `${name} notification`,
-					isActive: true,
-				})
-				.onConflictDoNothing({ target: notificationTypes.name });
-		}
-	}
-
-	private async seedNotificationChannels() {
-		for (const name of Object.values(NotificationChannel)) {
-			await this.drizzle.db
-				.insert(notificationChannels)
-				.values({ name, isActive: true })
-				.onConflictDoNothing({ target: notificationChannels.name });
-		}
-	}
-
-	private async seedDtmRequestTypes() {
-		for (const name of Object.values(DtmRequestType)) {
-			await this.drizzle.db
-				.insert(dtmRequestTypes)
-				.values({
-					name,
-					description: `${name} DTM request`,
-					isActive: true,
-				})
-				.onConflictDoNothing({ target: dtmRequestTypes.name });
-		}
-	}
-
-	private async seedAccessoryOperations() {
-		for (const name of Object.values(AccessoryOperation)) {
-			await this.drizzle.db
-				.insert(accessoryOperations)
-				.values({ name, isActive: true })
-				.onConflictDoNothing({ target: accessoryOperations.name });
-		}
-	}
-
-	private async seedUnits() {
-		for (const name of Object.values(Unit)) {
-			await this.drizzle.db
-				.insert(units)
-				.values({ name, isActive: true })
-				.onConflictDoNothing({ target: units.name });
-		}
-
-		for (const name of LEGACY_UNITS) {
-			await this.drizzle.db
-				.update(units)
-				.set({ isActive: false })
-				.where(eq(units.name, name));
 		}
 	}
 }
