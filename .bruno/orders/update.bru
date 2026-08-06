@@ -1,0 +1,89 @@
+meta {
+  name: update
+  type: http
+  seq: 4
+  tags: [
+    Orders
+  ]
+}
+
+patch {
+  url: {{baseUrl}}/orders/:id
+  body: json
+  auth: inherit
+}
+
+params:path {
+  id: {{order_id}}
+}
+
+body:json {
+  {
+    "statusId": 3,
+    "supervisor": "Youssef Benani",
+    "quantityDemanded": "200.000",
+    "quantityAchieved": "75.500",
+    "remarks": "Updated order - quantity increased",
+    "endDate": "2026-08-25T18:00:00Z"
+  }
+}
+
+example {
+  name: 200 Response
+  
+  request: {
+    url: {{baseUrl}}/orders/:id
+    method: PATCH
+    mode: json
+    params:path: {
+      id: 
+    }
+  
+    body:json: {
+      {
+        "goodsId": 0,
+        "customerId": 0,
+        "userId": 0,
+        "statusId": 0,
+        "supervisor": "",
+        "orderNumber": "",
+        "movementTypeId": 0,
+        "parentOrderId": 0,
+        "quantityDemanded": "",
+        "quantityAchieved": "",
+        "unitId": 0,
+        "departureStationId": 0,
+        "debtorCustomerId": 0,
+        "pickupLocationTypeId": 0,
+        "dispatchTypeId": 0,
+        "destinationCustomerId": 0,
+        "arrivalStationId": 0,
+        "deliveryLocationTypeId": 0,
+        "pickupPortId": 0,
+        "pickupBerthId": 0,
+        "pickupSidingId": 0,
+        "deliveryPortId": 0,
+        "deliveryBerthId": 0,
+        "deliverySidingId": 0,
+        "remarks": "",
+        "orderDate": "",
+        "startDate": "",
+        "endDate": ""
+      }
+    }
+  }
+  
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

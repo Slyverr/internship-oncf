@@ -1,0 +1,64 @@
+meta {
+  name: update
+  type: http
+  seq: 4
+  tags: [
+    Programs
+  ]
+}
+
+patch {
+  url: {{baseUrl}}/programs/:id
+  body: json
+  auth: inherit
+}
+
+params:path {
+  id: {{program_id}}
+}
+
+body:json {
+  {
+    "quantityPlanned": "150.000",
+    "quantityRealized": "75.000",
+    "dtmStatus": "IN_PROGRESS"
+  }
+}
+
+example {
+  name: 200 Response
+  
+  request: {
+    url: {{baseUrl}}/programs/:id
+    method: PATCH
+    mode: json
+    params:path: {
+      id: 
+    }
+  
+    body:json: {
+      {
+        "orderId": 0,
+        "plannedDate": "",
+        "quantityPlanned": "",
+        "quantityRealized": "",
+        "dtmStatus": "",
+        "statusId": 0
+      }
+    }
+  }
+  
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

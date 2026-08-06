@@ -1,0 +1,38 @@
+meta {
+  name: list
+  type: http
+  seq: 2
+  tags: [
+    Programs
+  ]
+}
+
+get {
+  url: {{baseUrl}}/programs
+  body: none
+  auth: inherit
+}
+
+example {
+  name: 200 Response
+  
+  request: {
+    url: {{baseUrl}}/programs
+    method: GET
+    mode: none
+  }
+  
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

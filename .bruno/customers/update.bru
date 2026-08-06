@@ -1,0 +1,81 @@
+meta {
+  name: update
+  type: http
+  seq: 4
+  tags: [
+    Customers
+  ]
+}
+
+put {
+  url: {{baseUrl}}/customers/:id
+  body: json
+  auth: inherit
+}
+
+params:path {
+  id: {{customer_id}}
+}
+
+body:json {
+  {
+    "companyName": "ONCF Logistics Updated",
+    "address": "456 Railway Avenue",
+    "city": "Rabat",
+    "phone": "+212522654321",
+    "email": "updated@oncf.ma",
+    "typeId": 2,
+    "isActive": true
+  }
+}
+
+settings {
+  encodeUrl: false
+  timeout: inherit
+  followRedirects: true
+  maxRedirects: 5
+}
+
+example {
+  name: 200 Response
+  
+  request: {
+    url: {{baseUrl}}/customers/:id
+    method: PUT
+    mode: json
+    params:path: {
+      id: 
+    }
+  
+    body:json: {
+      {
+        "companyName": "",
+        "address": "",
+        "city": "",
+        "phone": "",
+        "email": "",
+        "typeId": 0,
+        "customerCode": "",
+        "isActive": false
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {}
+      '''
+    }
+  }
+}

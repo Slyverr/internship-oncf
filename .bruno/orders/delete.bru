@@ -1,0 +1,45 @@
+meta {
+  name: delete
+  type: http
+  seq: 5
+  tags: [
+    Orders
+  ]
+}
+
+delete {
+  url: {{baseUrl}}/orders/:id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  id: {{order_id}}
+}
+
+example {
+  name: 200 Response
+  
+  request: {
+    url: {{baseUrl}}/orders/:id
+    method: DELETE
+    mode: none
+    params:path: {
+      id: 
+    }
+  }
+  
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

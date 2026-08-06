@@ -1,0 +1,38 @@
+meta {
+  name: list
+  type: http
+  seq: 2
+  tags: [
+    Orders
+  ]
+}
+
+get {
+  url: {{baseUrl}}/orders
+  body: none
+  auth: inherit
+}
+
+example {
+  name: 200 Response
+  
+  request: {
+    url: {{baseUrl}}/orders
+    method: GET
+    mode: none
+  }
+  
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

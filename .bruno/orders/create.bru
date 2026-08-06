@@ -1,0 +1,105 @@
+meta {
+  name: create
+  type: http
+  seq: 1
+  tags: [
+    Orders
+  ]
+}
+
+post {
+  url: {{baseUrl}}/orders
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "goodsId": 1,
+    "customerId": 1,
+    "userId": {{user_id}},
+    "statusId": 1,
+    "supervisor": "Ahmed El Mansouri",
+    "movementTypeId": 2,
+    "parentOrderId": null,
+    "quantityDemanded": "150.000",
+    "quantityAchieved": "0.000",
+    "unitId": 1,
+    "departureStationId": 1,
+    "debtorCustomerId": null,
+    "pickupLocationTypeId": 1,
+    "dispatchTypeId": 1,
+    "destinationCustomerId": 2,
+    "arrivalStationId": 2,
+    "deliveryLocationTypeId": 2,
+    "pickupPortId": 1,
+    "pickupBerthId": 1,
+    "pickupSidingId": null,
+    "deliveryPortId": 2,
+    "deliveryBerthId": null,
+    "deliverySidingId": 1,
+    "remarks": "Urgent delivery - priority handling required",
+    "orderDate": "2026-08-05T10:30:00Z",
+    "startDate": "2026-08-10T08:00:00Z",
+    "endDate": "2026-08-20T18:00:00Z"
+  }
+}
+
+vars:post-response {
+  order_id: res.body.id
+}
+
+example {
+  name: 201 Response
+  
+  request: {
+    url: {{baseUrl}}/orders
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "goodsId": 0,
+        "customerId": 0,
+        "userId": 0,
+        "statusId": 0,
+        "supervisor": "",
+        "movementTypeId": 0,
+        "parentOrderId": 0,
+        "quantityDemanded": "",
+        "quantityAchieved": "",
+        "unitId": 0,
+        "departureStationId": 0,
+        "debtorCustomerId": 0,
+        "pickupLocationTypeId": 0,
+        "dispatchTypeId": 0,
+        "destinationCustomerId": 0,
+        "arrivalStationId": 0,
+        "deliveryLocationTypeId": 0,
+        "pickupPortId": 0,
+        "pickupBerthId": 0,
+        "pickupSidingId": 0,
+        "deliveryPortId": 0,
+        "deliveryBerthId": 0,
+        "deliverySidingId": 0,
+        "remarks": "",
+        "orderDate": "",
+        "startDate": "",
+        "endDate": ""
+      }
+    }
+  }
+  
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
