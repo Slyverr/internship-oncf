@@ -2,42 +2,34 @@ import {
 	Injectable,
 	NotFoundException,
 	UnauthorizedException,
-	UnprocessableEntityException,
 } from "@nestjs/common";
 import { forecastPrograms } from "drizzle/schema";
 import { eq } from "drizzle-orm";
+import { AuthUser } from "src/auth/auth.types";
 import { DrizzleService } from "src/db/drizzle.service";
-import { OrdersService } from "src/orders/orders.service";
+import { withDbErrorHandling } from "src/db/drizzle.util";
+import { PROGRAM_STATUSES, ProgramStatus } from "src/db/reference-data";
 import { CreateProgramDto } from "./dto/create-program.dto";
 import { UpdateProgramDto } from "./dto/update-program.dto";
 import { ProgramId } from "./programs.types";
 
 @Injectable()
 export class ProgramsService {
-	constructor(
-		private drizzle: DrizzleService,
-		private ordersService: OrdersService,
-	) {}
+	constructor(private drizzle: DrizzleService) {}
 
-	async create(dto: CreateProgramDto, userId: number) {
-		const exists = await this.ordersService.exists(dto.orderId);
-		if (!exists)
-			throw new UnprocessableEntityException(`Order ${dto.orderId} not found`);
-
+	async create(dto: CreateProgramDto, user: AuthUser) {
 		const programNumber = `PRG-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-		const [program] = await this.drizzle.db
-			.insert(forecastPrograms)
-			.values({
-				orderId: dto.orderId,
-				plannedDate: dto.plannedDate,
-				quantityPlanned: dto.quantityPlanned,
-				quantityRealized: dto.quantityRealized,
-				dtmStatus: dto.dtmStatus,
-				statusId: 1,
-				createdBy: userId,
-				programNumber,
-			})
-			.returning();
+		const values = {
+			...dto,
+			programNumber,
+			createdBy: user.id,
+			statusId: PROGRAM_STATUSES[ProgramStatus.DRAFT].id,
+		};
+
+		const [program] = await withDbErrorHandling(
+			() => this.drizzle.db.insert(forecastPrograms).values(values).returning(),
+			values,
+		);
 
 		return program;
 	}
@@ -55,11 +47,15 @@ export class ProgramsService {
 	}
 
 	async update(id: ProgramId, dto: UpdateProgramDto) {
-		const [updated] = await this.drizzle.db
-			.update(forecastPrograms)
-			.set(dto) // works directly
-			.where(eq(forecastPrograms.id, id))
-			.returning();
+		const [updated] = await withDbErrorHandling(
+			() =>
+				this.drizzle.db
+					.update(forecastPrograms)
+					.set(dto)
+					.where(eq(forecastPrograms.id, id))
+					.returning(),
+			dto,
+		);
 
 		if (!updated) throw new NotFoundException(`Program ${id} not found`);
 		return updated;
@@ -67,12 +63,12 @@ export class ProgramsService {
 
 	async approve(id: ProgramId) {
 		const program = await this.findOne(id);
-		if (program.statusId === 4)
+		if (program.statusId === PROGRAM_STATUSES[ProgramStatus.SENT_TO_DTM].id)
 			throw new UnauthorizedException("Already sent to DTM");
 
 		const [updated] = await this.drizzle.db
 			.update(forecastPrograms)
-			.set({ statusId: 3 })
+			.set({ statusId: PROGRAM_STATUSES[ProgramStatus.APPROVED].id })
 			.where(eq(forecastPrograms.id, id))
 			.returning();
 
@@ -81,12 +77,12 @@ export class ProgramsService {
 
 	async reject(id: ProgramId) {
 		const program = await this.findOne(id);
-		if (program.statusId === 4)
+		if (program.statusId === PROGRAM_STATUSES[ProgramStatus.SENT_TO_DTM].id)
 			throw new UnauthorizedException("Already sent to DTM");
 
 		const [updated] = await this.drizzle.db
 			.update(forecastPrograms)
-			.set({ statusId: 5 })
+			.set({ statusId: PROGRAM_STATUSES[ProgramStatus.CONFIRMED].id })
 			.where(eq(forecastPrograms.id, id))
 			.returning();
 
@@ -95,12 +91,12 @@ export class ProgramsService {
 
 	async sendToDtm(id: ProgramId) {
 		const program = await this.findOne(id);
-		if (program.statusId !== 3)
+		if (program.statusId !== PROGRAM_STATUSES[ProgramStatus.APPROVED].id)
 			throw new UnauthorizedException("Program must be approved first");
 
 		const [updated] = await this.drizzle.db
 			.update(forecastPrograms)
-			.set({ statusId: 4 })
+			.set({ statusId: PROGRAM_STATUSES[ProgramStatus.SENT_TO_DTM].id })
 			.where(eq(forecastPrograms.id, id))
 			.returning();
 

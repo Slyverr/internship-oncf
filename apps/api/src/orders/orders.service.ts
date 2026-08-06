@@ -1,32 +1,21 @@
-import {
-	Injectable,
-	NotFoundException,
-	UnprocessableEntityException,
-} from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { orders } from "drizzle/schema";
 import { eq } from "drizzle-orm";
 import { DrizzleService } from "src/db/drizzle.service";
-import { UsersService } from "src/users/users.service";
+import { withDbErrorHandling } from "src/db/drizzle.util";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
 import type { OrderId } from "./orders.types";
 
 @Injectable()
 export class OrdersService {
-	constructor(
-		private readonly drizzle: DrizzleService,
-		private usersService: UsersService,
-	) {}
+	constructor(private readonly drizzle: DrizzleService) {}
 
 	async create(dto: CreateOrderDto) {
-		const exists = await this.usersService.exists(dto.userId);
-		if (!exists)
-			throw new UnprocessableEntityException(`User ${dto.userId} not found`);
-
-		const [created] = await this.drizzle.db
-			.insert(orders)
-			.values(dto)
-			.returning();
+		const [created] = await withDbErrorHandling(
+			() => this.drizzle.db.insert(orders).values(dto).returning(),
+			dto,
+		);
 		return created;
 	}
 
@@ -47,14 +36,20 @@ export class OrdersService {
 	}
 
 	async update(id: OrderId, dto: UpdateOrderDto) {
-		const [updated] = await this.drizzle.db
-			.update(orders)
-			.set(dto)
-			.where(eq(orders.id, id))
-			.returning();
+		const [updated] = await withDbErrorHandling(
+			() =>
+				this.drizzle.db
+					.update(orders)
+					.set(dto)
+					.where(eq(orders.id, id))
+					.returning(),
+			dto,
+		);
+
 		if (!updated) {
 			throw new NotFoundException(`Order with id ${id} not found`);
 		}
+
 		return updated;
 	}
 
@@ -67,14 +62,5 @@ export class OrdersService {
 			throw new NotFoundException(`Order with id ${id} not found`);
 		}
 		return deleted;
-	}
-
-	async exists(id: OrderId) {
-		const order = await this.drizzle.db.query.orders.findFirst({
-			where: { id },
-			columns: { id: true },
-		});
-
-		return !!order;
 	}
 }

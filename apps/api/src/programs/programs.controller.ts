@@ -26,7 +26,7 @@ export class ProgramsController {
 	@Post()
 	@Permissions(Permission.PROGRAMS_CREATE)
 	create(@Body() dto: CreateProgramDto, @Request() req: AuthRequest) {
-		return this.programsService.create(dto, req.user.id);
+		return this.programsService.create(dto, req.user);
 	}
 
 	@Get()
