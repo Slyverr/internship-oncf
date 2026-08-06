@@ -13,6 +13,10 @@ get {
   auth: inherit
 }
 
+vars:post-response {
+  user_id: res.body.id
+}
+
 example {
   name: 200 Response
   
