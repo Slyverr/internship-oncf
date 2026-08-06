@@ -14,9 +14,8 @@ export enum Permission {
 	ORDERS_READ = "orders:read",
 	ORDERS_UPDATE = "orders:update",
 	ORDERS_DELETE = "orders:delete",
-	ORDERS_APPROVE = "orders:approve",
-	ORDERS_REJECT = "orders:reject",
-	ORDERS_EXECUTE = "orders:execute",
+	ORDERS_MANAGE_USER = "orders:manage:user",
+	ORDERS_MANAGE_STATUS = "orders:manage:status",
 
 	CUSTOMERS_CREATE = "customers:create",
 	CUSTOMERS_READ = "customers:read",

@@ -70,20 +70,15 @@ export const PERMISSIONS: Record<
 		name: Permission.ORDERS_DELETE,
 		description: "Delete orders from the system",
 	},
-	[Permission.ORDERS_APPROVE]: {
+	[Permission.ORDERS_MANAGE_USER]: {
 		id: 105,
-		name: Permission.ORDERS_APPROVE,
-		description: "Approve pending orders for processing",
+		name: Permission.ORDERS_MANAGE_USER,
+		description: "Manage order owner",
 	},
-	[Permission.ORDERS_REJECT]: {
+	[Permission.ORDERS_MANAGE_STATUS]: {
 		id: 106,
-		name: Permission.ORDERS_REJECT,
-		description: "Reject orders and provide rejection reasons",
-	},
-	[Permission.ORDERS_EXECUTE]: {
-		id: 107,
-		name: Permission.ORDERS_EXECUTE,
-		description: "Execute and finalize approved orders",
+		name: Permission.ORDERS_MANAGE_STATUS,
+		description: "Manage order status",
 	},
 
 	// Customers: 201-300
@@ -252,7 +247,8 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[] | "ALL"> = {
 		Permission.ORDERS_CREATE,
 		Permission.ORDERS_READ,
 		Permission.ORDERS_UPDATE,
-		Permission.ORDERS_EXECUTE,
+		Permission.ORDERS_MANAGE_USER,
+		Permission.ORDERS_MANAGE_STATUS,
 		Permission.CUSTOMERS_READ,
 		Permission.CUSTOMERS_UPDATE,
 		Permission.CLAIMS_READ,
