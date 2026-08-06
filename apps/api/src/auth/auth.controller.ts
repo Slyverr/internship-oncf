@@ -7,6 +7,7 @@ import {
 	UseGuards,
 } from "@nestjs/common";
 import { AuthService } from "./auth.service";
+import type { AuthRequest, LocalAuthRequest } from "./auth.types";
 import { LoginDto } from "./dto/login.dto";
 import { LocalAuthGuard } from "./guards/local-auth.guard";
 import { Public } from "./public.decorator";
@@ -18,12 +19,12 @@ export class AuthController {
 	@Public()
 	@Post("login")
 	@UseGuards(LocalAuthGuard)
-	async login(@Request() req, @Body() _loginDto: LoginDto) {
+	async login(@Request() req: LocalAuthRequest, @Body() _loginDto: LoginDto) {
 		return this.authService.login(req.user);
 	}
 
 	@Get("profile")
-	getProfile(@Request() req) {
+	getProfile(@Request() req: AuthRequest) {
 		return req.user;
 	}
 }

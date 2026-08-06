@@ -9,6 +9,7 @@ import {
 	Post,
 	Request,
 } from "@nestjs/common";
+import type { AuthRequest } from "src/auth/auth.types";
 import { Permissions } from "src/auth/permissions.decorator";
 import { Permission } from "src/db/reference-data";
 import { CreateProgramDto } from "./dto/create-program.dto";
@@ -24,7 +25,7 @@ export class ProgramsController {
 
 	@Post()
 	@Permissions(Permission.PROGRAMS_CREATE)
-	create(@Body() dto: CreateProgramDto, @Request() req) {
+	create(@Body() dto: CreateProgramDto, @Request() req: AuthRequest) {
 		return this.programsService.create(dto, req.user.id);
 	}
 
