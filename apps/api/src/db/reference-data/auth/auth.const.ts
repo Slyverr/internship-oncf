@@ -80,6 +80,21 @@ export const PERMISSIONS: Record<
 		name: Permission.ORDERS_MANAGE_STATUS,
 		description: "Manage order status",
 	},
+	[Permission.ORDERS_APPROVE]: {
+		id: 107,
+		name: Permission.ORDERS_APPROVE,
+		description: "Approve orders",
+	},
+	[Permission.ORDERS_REJECT]: {
+		id: 108,
+		name: Permission.ORDERS_REJECT,
+		description: "Reject orders",
+	},
+	[Permission.ORDERS_EXECUTE]: {
+		id: 109,
+		name: Permission.ORDERS_EXECUTE,
+		description: "Execute orders (send to DTM)",
+	},
 
 	// Customers: 201-300
 	[Permission.CUSTOMERS_CREATE]: {
@@ -236,6 +251,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[] | "ALL"> = {
 	[Role.CLIENT_REPRESENTATIVE]: [
 		Permission.ORDERS_CREATE,
 		Permission.ORDERS_READ,
+		Permission.ORDERS_UPDATE,
 		Permission.CLAIMS_CREATE,
 		Permission.CLAIMS_READ,
 		Permission.TRACKING_READ,
@@ -249,6 +265,9 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[] | "ALL"> = {
 		Permission.ORDERS_UPDATE,
 		Permission.ORDERS_MANAGE_USER,
 		Permission.ORDERS_MANAGE_STATUS,
+		Permission.ORDERS_APPROVE,
+		Permission.ORDERS_REJECT,
+		Permission.ORDERS_EXECUTE,
 		Permission.CUSTOMERS_READ,
 		Permission.CUSTOMERS_UPDATE,
 		Permission.CLAIMS_READ,
