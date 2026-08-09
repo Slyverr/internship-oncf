@@ -1,28 +1,34 @@
 meta {
-  name: delete
+  name: reject
   type: http
   seq: 5
   tags: [
-    Customers
+    Orders
   ]
 }
 
-delete {
-  url: {{baseUrl}}/customers/:id
-  body: none
+post {
+  url: {{baseUrl}}/orders/:id/reject
+  body: json
   auth: inherit
 }
 
 params:path {
-  id: {{customer_id}}
+  id: {{order_id}}
+}
+
+body:json {
+  {
+    "reason": "Rejection reason for order #{{order_id}}"
+  }
 }
 
 example {
-  name: 200 Response
+  name: 201 Response
   
   request: {
-    url: {{baseUrl}}/customers/:id
-    method: DELETE
+    url: {{baseUrl}}/orders/:id/reject
+    method: POST
     mode: none
     params:path: {
       id: 
@@ -35,8 +41,8 @@ example {
     }
   
     status: {
-      code: 200
-      text: OK
+      code: 201
+      text: Created
     }
   
     body: {

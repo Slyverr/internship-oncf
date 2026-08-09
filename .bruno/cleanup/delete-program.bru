@@ -1,45 +1,44 @@
 meta {
-  name: /profile
+  name: delete-program
   type: http
-  seq: 3
+  seq: 2
   tags: [
-    Auth
+    Cleanup
   ]
 }
 
-get {
-  url: {{baseUrl}}/auth/profile
+delete {
+  url: {{baseUrl}}/programs/:id
   body: none
   auth: inherit
 }
 
-vars:post-response {
-  user_id: res.body.id
+params:path {
+  id: {{program_id}}
 }
 
 example {
   name: 200 Response
   
   request: {
-    url: {{baseUrl}}/auth/profile
-    method: GET
+    url: {{baseUrl}}/programs/:id
+    method: DELETE
     mode: none
+    params:path: {
+      id: 
+    }
   }
   
   response: {
-    headers: {
-      Content-Type: application/json
-    }
-  
     status: {
       code: 200
       text: OK
     }
   
     body: {
-      type: json
+      type: text
       content: '''
-        {}
+  
       '''
     }
   }

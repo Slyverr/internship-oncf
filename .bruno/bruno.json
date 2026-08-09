@@ -5,16 +5,6 @@
     "node_modules",
     ".git"
   ],
-  "openapi": [
-    {
-      "sourceUrl": "http://localhost:8000/api-docs-json",
-      "groupBy": "tags",
-      "autoCheck": true,
-      "autoCheckInterval": 5,
-      "lastSyncDate": "2026-08-06T09:47:02.102Z",
-      "specHash": "1c65fe02bd9bd92b49d9ac2d482cc10d"
-    }
-  ],
   "version": "1",
   "collectionVersion": "v0.1.0"
 }

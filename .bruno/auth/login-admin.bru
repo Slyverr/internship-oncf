@@ -1,0 +1,55 @@
+meta {
+  name: /login-admin
+  type: http
+  seq: 2
+  tags: [
+    Auth
+  ]
+}
+
+post {
+  url: {{baseUrl}}/auth/login
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "username": "admin@oncf.ma",
+    "password": "password123"
+  }
+}
+
+vars:post-response {
+  admin_token: res.body.access_token
+}
+
+example {
+  name: 201 Response
+  
+  request: {
+    url: {{baseUrl}}/auth/login
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "username": "",
+        "password": ""
+      }
+    }
+  }
+  
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

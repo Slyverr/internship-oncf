@@ -1,45 +1,44 @@
 meta {
-  name: /profile
+  name: delete-order
   type: http
   seq: 3
   tags: [
-    Auth
+    Cleanup
   ]
 }
 
-get {
-  url: {{baseUrl}}/auth/profile
+delete {
+  url: {{baseUrl}}/orders/:id
   body: none
   auth: inherit
 }
 
-vars:post-response {
-  user_id: res.body.id
+params:path {
+  id: {{order_id}}
 }
 
 example {
   name: 200 Response
   
   request: {
-    url: {{baseUrl}}/auth/profile
-    method: GET
+    url: {{baseUrl}}/orders/:id
+    method: DELETE
     mode: none
+    params:path: {
+      id: 
+    }
   }
   
   response: {
-    headers: {
-      Content-Type: application/json
-    }
-  
     status: {
       code: 200
       text: OK
     }
   
     body: {
-      type: json
+      type: text
       content: '''
-        {}
+  
       '''
     }
   }

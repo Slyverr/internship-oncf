@@ -1,29 +1,32 @@
 meta {
-  name: /profile
+  name: cancel
   type: http
-  seq: 3
+  seq: 7
   tags: [
-    Auth
+    Orders
   ]
 }
 
-get {
-  url: {{baseUrl}}/auth/profile
+post {
+  url: {{baseUrl}}/orders/:id/cancel
   body: none
   auth: inherit
 }
 
-vars:post-response {
-  user_id: res.body.id
+params:path {
+  id: {{order_id}}
 }
 
 example {
-  name: 200 Response
+  name: 201 Response
   
   request: {
-    url: {{baseUrl}}/auth/profile
-    method: GET
+    url: {{baseUrl}}/orders/:id/cancel
+    method: POST
     mode: none
+    params:path: {
+      id: 
+    }
   }
   
   response: {
@@ -32,8 +35,8 @@ example {
     }
   
     status: {
-      code: 200
-      text: OK
+      code: 201
+      text: Created
     }
   
     body: {
