@@ -19,13 +19,8 @@ import type { OrderId } from "./orders.types";
 export class OrdersService {
 	constructor(private readonly drizzle: DrizzleService) {}
 
-	private normalize<T extends CreateOrderDto | UpdateOrderDto>(
-		dto: T,
-		user: AuthUser,
-	) {
-		let statusId = ORDER_STATUSES[dto.status ?? OrderStatus.DRAFT].id;
+	private normalizeCreate(dto: CreateOrderDto, user: AuthUser) {
 		const userId = dto.userId ?? user.id;
-
 		if (
 			!hasPermission(user, Permission.ORDERS_MANAGE_USER) &&
 			userId !== user.id
@@ -33,11 +28,30 @@ export class OrdersService {
 			throw new ForbiddenException("Cannot assign orders to other users");
 		}
 
-		if (!hasPermission(user, Permission.ORDERS_MANAGE_STATUS)) {
-			statusId = ORDER_STATUSES[OrderStatus.DRAFT].id;
+		const status = hasPermission(user, Permission.ORDERS_MANAGE_STATUS)
+			? (dto.status ?? OrderStatus.DRAFT)
+			: OrderStatus.DRAFT;
+
+		return { ...dto, userId, statusId: ORDER_STATUSES[status].id };
+	}
+
+	private normalizeUpdate(dto: UpdateOrderDto, user: AuthUser) {
+		if (dto.userId !== undefined && dto.userId !== user.id) {
+			if (!hasPermission(user, Permission.ORDERS_MANAGE_USER)) {
+				throw new ForbiddenException("Cannot assign orders to other users");
+			}
 		}
 
-		return { ...dto, userId, statusId };
+		const result = { ...dto };
+		if (dto.status !== undefined) {
+			if (!hasPermission(user, Permission.ORDERS_MANAGE_STATUS)) {
+				throw new ForbiddenException("Cannot change order status");
+			}
+
+			result["statusId"] = ORDER_STATUSES[dto.status].id;
+		}
+
+		return result;
 	}
 
 	private async recordHistory(
@@ -97,7 +111,7 @@ export class OrdersService {
 	}
 
 	async create(dto: CreateOrderDto, user: AuthUser) {
-		const values = this.normalize(dto, user);
+		const values = this.normalizeCreate(dto, user);
 
 		const [created] = await withDbErrorHandling(
 			() => this.drizzle.db.insert(orders).values(values).returning(),
@@ -124,7 +138,7 @@ export class OrdersService {
 	}
 
 	async update(id: OrderId, dto: UpdateOrderDto, user: AuthUser) {
-		const values = this.normalize(dto, user);
+		const values = this.normalizeUpdate(dto, user);
 
 		const [updated] = await withDbErrorHandling(
 			() =>
