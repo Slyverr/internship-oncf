@@ -1,11 +1,13 @@
 import { Type } from "class-transformer";
 import {
 	IsDateString,
+	IsEnum,
 	IsInt,
 	IsOptional,
 	IsString,
 	MaxLength,
 } from "class-validator";
+import { OrderStatus } from "src/db/reference-data";
 
 export class CreateOrderDto {
 	@IsInt()
@@ -17,12 +19,13 @@ export class CreateOrderDto {
 	customerId: number;
 
 	@IsInt()
+	@IsOptional()
 	@Type(() => Number)
-	userId: number;
+	userId?: number;
 
-	@IsInt()
-	@Type(() => Number)
-	statusId: number;
+	@IsOptional()
+	@IsEnum(OrderStatus)
+	status?: OrderStatus;
 
 	@IsOptional()
 	@IsString()

@@ -1,5 +1,6 @@
 import {
 	BadRequestException,
+	ForbiddenException,
 	Injectable,
 	NotFoundException,
 } from "@nestjs/common";
@@ -17,6 +18,27 @@ import type { OrderId } from "./orders.types";
 @Injectable()
 export class OrdersService {
 	constructor(private readonly drizzle: DrizzleService) {}
+
+	private normalize<T extends CreateOrderDto | UpdateOrderDto>(
+		dto: T,
+		user: AuthUser,
+	) {
+		let statusId = ORDER_STATUSES[dto.status ?? OrderStatus.DRAFT].id;
+		const userId = dto.userId ?? user.id;
+
+		if (
+			!hasPermission(user, Permission.ORDERS_MANAGE_USER) &&
+			userId !== user.id
+		) {
+			throw new ForbiddenException("Cannot assign orders to other users");
+		}
+
+		if (!hasPermission(user, Permission.ORDERS_MANAGE_STATUS)) {
+			statusId = ORDER_STATUSES[OrderStatus.DRAFT].id;
+		}
+
+		return { ...dto, userId, statusId };
+	}
 
 	private async recordHistory(
 		orderId: OrderId,
@@ -75,17 +97,11 @@ export class OrdersService {
 	}
 
 	async create(dto: CreateOrderDto, user: AuthUser) {
-		if (!hasPermission(user, Permission.ORDERS_MANAGE_USER)) {
-			dto.userId = user.id;
-		}
-
-		if (!hasPermission(user, Permission.ORDERS_MANAGE_STATUS)) {
-			dto.statusId = ORDER_STATUSES[OrderStatus.DRAFT].id;
-		}
+		const values = this.normalize(dto, user);
 
 		const [created] = await withDbErrorHandling(
-			() => this.drizzle.db.insert(orders).values(dto).returning(),
-			dto,
+			() => this.drizzle.db.insert(orders).values(values).returning(),
+			values,
 		);
 		return created;
 	}
@@ -108,22 +124,16 @@ export class OrdersService {
 	}
 
 	async update(id: OrderId, dto: UpdateOrderDto, user: AuthUser) {
-		if (!hasPermission(user, Permission.ORDERS_MANAGE_USER)) {
-			dto.userId = user.id;
-		}
-
-		if (!hasPermission(user, Permission.ORDERS_MANAGE_STATUS)) {
-			delete dto.statusId;
-		}
+		const values = this.normalize(dto, user);
 
 		const [updated] = await withDbErrorHandling(
 			() =>
 				this.drizzle.db
 					.update(orders)
-					.set(dto)
+					.set(values)
 					.where(eq(orders.id, id))
 					.returning(),
-			dto,
+			values,
 		);
 
 		if (!updated) throw new NotFoundException(`Order ${id} not found`);
