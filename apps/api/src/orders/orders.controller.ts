@@ -3,6 +3,8 @@ import {
 	Controller,
 	Delete,
 	Get,
+	HttpCode,
+	HttpStatus,
 	Param,
 	Patch,
 	Post,
@@ -55,18 +57,21 @@ export class OrdersController {
 	}
 
 	@Post(":id/submit")
+	@HttpCode(HttpStatus.OK)
 	@Permissions(Permission.ORDERS_UPDATE)
 	submit(@OrderIdParam() id: OrderId, @Request() req: AuthRequest) {
 		return this.ordersService.submit(id, req.user);
 	}
 
 	@Post(":id/approve")
+	@HttpCode(HttpStatus.OK)
 	@Permissions(Permission.ORDERS_APPROVE)
 	approve(@OrderIdParam() id: OrderId, @Request() req: AuthRequest) {
 		return this.ordersService.approve(id, req.user);
 	}
 
 	@Post(":id/reject")
+	@HttpCode(HttpStatus.OK)
 	@Permissions(Permission.ORDERS_REJECT)
 	reject(
 		@OrderIdParam() id: OrderId,
@@ -77,12 +82,14 @@ export class OrdersController {
 	}
 
 	@Post(":id/cancel")
+	@HttpCode(HttpStatus.OK)
 	@Permissions(Permission.ORDERS_UPDATE)
 	cancel(@OrderIdParam() id: OrderId, @Request() req: AuthRequest) {
 		return this.ordersService.cancel(id, req.user);
 	}
 
 	@Post(":id/send-to-dtm")
+	@HttpCode(HttpStatus.OK)
 	@Permissions(Permission.ORDERS_EXECUTE)
 	sendToDtm(@OrderIdParam() id: OrderId, @Request() req: AuthRequest) {
 		return this.ordersService.sendToDtm(id, req.user);
