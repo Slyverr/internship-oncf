@@ -1,4 +1,4 @@
-import { Type } from "class-transformer";
+import { Transform, Type } from "class-transformer";
 import {
 	IsDateString,
 	IsEnum,
@@ -24,6 +24,7 @@ export class CreateOrderDto {
 	userId?: number;
 
 	@IsOptional()
+	@Transform(({ value }) => value?.toUpperCase())
 	@IsEnum(OrderStatus)
 	status?: OrderStatus;
 
