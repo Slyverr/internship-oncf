@@ -3,71 +3,100 @@ import {
 	Controller,
 	Delete,
 	Get,
+	HttpCode,
+	HttpStatus,
 	Param,
-	ParseIntPipe,
 	Patch,
 	Post,
 	Request,
+	UseGuards,
 } from "@nestjs/common";
 import type { AuthRequest } from "src/auth/auth.types";
 import { Permissions } from "src/auth/permissions.decorator";
 import { Permission } from "src/db/reference-data";
 import { CreateProgramDto } from "./dto/create-program.dto";
 import { UpdateProgramDto } from "./dto/update-program.dto";
+import { ProgramOwnershipGuard } from "./guards/program-ownership.guard";
+import { ProgramIdPipe } from "./pipes/program-id.pipe";
 import { ProgramsService } from "./programs.service";
 import type { ProgramId } from "./programs.types";
 
-const ProgramIdParam = () => Param("id", ParseIntPipe);
+const ProgramIdParam = () => Param("id", ProgramIdPipe);
 
 @Controller("programs")
+@UseGuards(ProgramOwnershipGuard)
 export class ProgramsController {
 	constructor(private programsService: ProgramsService) {}
 
 	@Post()
 	@Permissions(Permission.PROGRAMS_CREATE)
-	create(@Body() dto: CreateProgramDto, @Request() req: AuthRequest) {
+	async create(@Body() dto: CreateProgramDto, @Request() req: AuthRequest) {
 		return this.programsService.create(dto, req.user);
 	}
 
 	@Get()
 	@Permissions(Permission.PROGRAMS_READ)
-	findAll() {
+	async findAll() {
 		return this.programsService.findAll();
 	}
 
 	@Get(":id")
 	@Permissions(Permission.PROGRAMS_READ)
-	findOne(@ProgramIdParam() id: ProgramId) {
+	async findOne(@ProgramIdParam() id: ProgramId) {
 		return this.programsService.findOne(id);
 	}
 
 	@Patch(":id")
 	@Permissions(Permission.PROGRAMS_UPDATE)
-	update(@ProgramIdParam() id: ProgramId, @Body() dto: UpdateProgramDto) {
-		return this.programsService.update(id, dto);
+	async update(
+		@ProgramIdParam() id: ProgramId,
+		@Body() dto: UpdateProgramDto,
+		@Request() req: AuthRequest,
+	) {
+		return this.programsService.update(id, dto, req.user);
 	}
 
-	@Patch(":id/approve")
+	@Post(":id/submit")
+	@HttpCode(HttpStatus.OK)
 	@Permissions(Permission.PROGRAMS_APPROVE)
-	approve(@ProgramIdParam() id: ProgramId) {
-		return this.programsService.approve(id);
+	async submit(@ProgramIdParam() id: ProgramId, @Request() req: AuthRequest) {
+		return this.programsService.submit(id, req.user);
 	}
 
-	@Patch(":id/reject")
+	@Post(":id/approve")
+	@HttpCode(HttpStatus.OK)
 	@Permissions(Permission.PROGRAMS_APPROVE)
-	reject(@ProgramIdParam() id: ProgramId) {
-		return this.programsService.reject(id);
+	async approve(@ProgramIdParam() id: ProgramId, @Request() req: AuthRequest) {
+		return this.programsService.approve(id, req.user);
 	}
 
-	@Patch(":id/send")
+	@Post(":id/confirm")
+	@HttpCode(HttpStatus.OK)
+	@Permissions(Permission.PROGRAMS_APPROVE)
+	async confirm(@ProgramIdParam() id: ProgramId, @Request() req: AuthRequest) {
+		return this.programsService.confirm(id, req.user);
+	}
+
+	@Post(":id/send")
+	@HttpCode(HttpStatus.OK)
 	@Permissions(Permission.PROGRAMS_SEND)
-	sendToDtm(@ProgramIdParam() id: ProgramId) {
-		return this.programsService.sendToDtm(id);
+	async sendToDtm(
+		@ProgramIdParam() id: ProgramId,
+		@Request() req: AuthRequest,
+	) {
+		return this.programsService.sendToDtm(id, req.user);
+	}
+
+	@Post(":id/cancel")
+	@HttpCode(HttpStatus.OK)
+	@Permissions(Permission.PROGRAMS_UPDATE)
+	async cancel(@ProgramIdParam() id: ProgramId, @Request() req: AuthRequest) {
+		return this.programsService.cancel(id, req.user);
 	}
 
 	@Delete(":id")
 	@Permissions(Permission.PROGRAMS_DELETE)
-	remove(@ProgramIdParam() id: ProgramId) {
+	async remove(@ProgramIdParam() id: ProgramId) {
 		return this.programsService.remove(id);
 	}
 }

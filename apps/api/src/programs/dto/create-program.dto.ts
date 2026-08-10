@@ -1,9 +1,28 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { Transform, Type } from "class-transformer";
+import {
+	IsEnum,
+	IsInt,
+	IsNotEmpty,
+	IsOptional,
+	IsString,
+} from "class-validator";
+import { ProgramStatus } from "src/db/reference-data";
 
 export class CreateProgramDto {
-	@IsNumber()
+	@IsInt()
+	@Type(() => Number)
 	@IsNotEmpty()
 	orderId: number;
+
+	@IsOptional()
+	@IsInt()
+	@Type(() => Number)
+	userId?: number;
+
+	@IsOptional()
+	@Transform(({ value }) => value?.toUpperCase())
+	@IsEnum(ProgramStatus)
+	status?: ProgramStatus;
 
 	@IsString()
 	@IsNotEmpty()
@@ -13,11 +32,11 @@ export class CreateProgramDto {
 	@IsNotEmpty()
 	quantityPlanned: string;
 
-	@IsString()
 	@IsOptional()
+	@IsString()
 	quantityRealized?: string;
 
-	@IsString()
 	@IsOptional()
+	@IsString()
 	dtmStatus?: string;
 }

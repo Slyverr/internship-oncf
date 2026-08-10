@@ -1,27 +1,4 @@
-import { IsNumber, IsOptional, IsString } from "class-validator";
+import { PartialType } from "@nestjs/swagger";
+import { CreateProgramDto } from "./create-program.dto";
 
-export class UpdateProgramDto {
-	@IsNumber()
-	@IsOptional()
-	orderId?: number;
-
-	@IsString()
-	@IsOptional()
-	plannedDate?: string;
-
-	@IsString()
-	@IsOptional()
-	quantityPlanned?: string;
-
-	@IsString()
-	@IsOptional()
-	quantityRealized?: string;
-
-	@IsString()
-	@IsOptional()
-	dtmStatus?: string;
-
-	@IsNumber()
-	@IsOptional()
-	statusId?: number;
-}
+export class UpdateProgramDto extends PartialType(CreateProgramDto) {}
