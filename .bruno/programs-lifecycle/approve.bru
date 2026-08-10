@@ -1,0 +1,45 @@
+meta {
+  name: approve
+  type: http
+  seq: 2
+  tags: [
+    Programs
+  ]
+}
+
+post {
+  url: {{baseUrl}}/programs/:id/approve
+  body: none
+  auth: inherit
+}
+
+params:path {
+  id: {{program_id}}
+}
+
+example {
+  name: 201 Response
+  
+  request: {
+    url: {{baseUrl}}/programs/:id/approve
+    method: POST
+    mode: none
+    params:path: {
+      id: 
+    }
+  }
+  
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

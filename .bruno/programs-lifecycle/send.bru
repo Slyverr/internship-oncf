@@ -1,0 +1,45 @@
+meta {
+  name: send
+  type: http
+  seq: 3
+  tags: [
+    Programs
+  ]
+}
+
+post {
+  url: {{baseUrl}}/programs/:id/send
+  body: none
+  auth: inherit
+}
+
+params:path {
+  id: {{program_id}}
+}
+
+example {
+  name: 201 Response
+  
+  request: {
+    url: {{baseUrl}}/programs/:id/send
+    method: POST
+    mode: none
+    params:path: {
+      id: 
+    }
+  }
+  
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

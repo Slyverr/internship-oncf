@@ -1,0 +1,89 @@
+meta {
+  name: reset-to-draft
+  type: http
+  seq: 6
+  tags: [
+    Programs
+  ]
+}
+
+patch {
+  url: {{baseUrl}}/programs/:id
+  body: json
+  auth: inherit
+}
+
+params:path {
+  id: {{program_id}}
+}
+
+headers {
+  Authorization: Bearer {{admin_token}}
+}
+
+body:json {
+  {
+    "status": "DRAFT"
+  }
+  
+}
+
+example {
+  name: 200 Response
+  
+  request: {
+    url: {{baseUrl}}/orders/:id
+    method: PATCH
+    mode: json
+    params:path: {
+      id: 
+    }
+  
+    body:json: {
+      {
+        "goodsId": 0,
+        "customerId": 0,
+        "userId": 0,
+        "statusId": 0,
+        "supervisor": "",
+        "orderNumber": "",
+        "movementTypeId": 0,
+        "parentOrderId": 0,
+        "quantityDemanded": "",
+        "quantityAchieved": "",
+        "unitId": 0,
+        "departureStationId": 0,
+        "debtorCustomerId": 0,
+        "pickupLocationTypeId": 0,
+        "dispatchTypeId": 0,
+        "destinationCustomerId": 0,
+        "arrivalStationId": 0,
+        "deliveryLocationTypeId": 0,
+        "pickupPortId": 0,
+        "pickupBerthId": 0,
+        "pickupSidingId": 0,
+        "deliveryPortId": 0,
+        "deliveryBerthId": 0,
+        "deliverySidingId": 0,
+        "remarks": "",
+        "orderDate": "",
+        "startDate": "",
+        "endDate": ""
+      }
+    }
+  }
+  
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
