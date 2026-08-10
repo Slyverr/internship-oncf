@@ -13,6 +13,8 @@
 		"start:debug": "nest start --debug --watch",
 		"start:prod": "node dist/main",
 		"seed:dev": "tsx ./drizzle/seed/seed-dev.ts",
+		"seed:ref": "tsx ./drizzle/seed/seed-ref.ts",
+		"seed": "tsx ./drizzle/seed/seed-ref.ts && tsx ./drizzle/seed/seed-dev.ts",
 		"test": "jest",
 		"test:watch": "jest --watch",
 		"test:cov": "jest --coverage",
