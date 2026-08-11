@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { AppController } from "./app.controller";
 import { AuthModule } from "./auth/auth.module";
+import { ClaimsModule } from "./claims/claims.module";
 import { CustomersModule } from "./customers/customers.module";
 import { DrizzleModule } from "./db/drizzle.module";
 import { OrdersModule } from "./orders/orders.module";
@@ -17,6 +18,7 @@ import { UsersModule } from "./users/users.module";
 		OrdersModule,
 		ProgramsModule,
 		CustomersModule,
+		ClaimsModule,
 	],
 	controllers: [AppController],
 })
