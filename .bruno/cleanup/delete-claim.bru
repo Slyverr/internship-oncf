@@ -1,27 +1,27 @@
 meta {
-  name: delete-order
+  name: delete-claim
   type: http
-  seq: 4
+  seq: 3
   tags: [
     Cleanup
   ]
 }
 
 delete {
-  url: {{baseUrl}}/orders/:id
+  url: {{baseUrl}}/claims/:id
   body: none
   auth: inherit
 }
 
 params:path {
-  id: {{order_id}}
+  id: {{claim_id}}
 }
 
 example {
   name: 200 Response
   
   request: {
-    url: {{baseUrl}}/orders/:id
+    url: {{baseUrl}}/customers/:id
     method: DELETE
     mode: none
     params:path: {
@@ -30,15 +30,19 @@ example {
   }
   
   response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
     status: {
       code: 200
       text: OK
     }
   
     body: {
-      type: text
+      type: json
       content: '''
-  
+        {}
       '''
     }
   }

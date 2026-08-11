@@ -1,32 +1,25 @@
 meta {
-  name: delete-order
+  name: list
   type: http
-  seq: 4
+  seq: 2
   tags: [
-    Cleanup
+    Claims
   ]
 }
 
-delete {
-  url: {{baseUrl}}/orders/:id
+get {
+  url: {{baseUrl}}/claims
   body: none
   auth: inherit
-}
-
-params:path {
-  id: {{order_id}}
 }
 
 example {
   name: 200 Response
   
   request: {
-    url: {{baseUrl}}/orders/:id
-    method: DELETE
+    url: {{baseUrl}}/programs
+    method: GET
     mode: none
-    params:path: {
-      id: 
-    }
   }
   
   response: {

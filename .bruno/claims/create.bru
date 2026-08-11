@@ -1,0 +1,62 @@
+meta {
+  name: create
+  type: http
+  seq: 1
+  tags: [
+    Claims
+  ]
+}
+
+post {
+  url: {{baseUrl}}/claims
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "customerId": {{customer_id}},
+    "orderId": {{order_id}},
+    "type": "DELIVERY_DELAY",
+    "priority": "high",
+    "description": "Order arrived 3 days late, caused production delay",
+    "resolution": ""
+  }
+}
+
+vars:post-response {
+  claim_id: res.body.id
+}
+
+example {
+  name: 201 Response
+  
+  request: {
+    url: {{baseUrl}}/programs
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "orderId": 0,
+        "plannedDate": "",
+        "quantityPlanned": "",
+        "quantityRealized": "",
+        "dtmStatus": ""
+      }
+    }
+  }
+  
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
