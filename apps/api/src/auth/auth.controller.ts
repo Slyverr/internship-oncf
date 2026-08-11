@@ -8,7 +8,9 @@ import {
 } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import type { AuthRequest, LocalAuthRequest } from "./auth.types";
+import { ForgotPasswordDto } from "./dto/forgot-password.dto";
 import { LoginDto } from "./dto/login.dto";
+import { ResetPasswordDto } from "./dto/reset-password.dto";
 import { LocalAuthGuard } from "./guards/local-auth.guard";
 import { Public } from "./public.decorator";
 
@@ -26,5 +28,22 @@ export class AuthController {
 	@Get("profile")
 	getProfile(@Request() req: AuthRequest) {
 		return req.user;
+	}
+
+	@Public()
+	@Post("forgot-password")
+	async forgotPassword(@Body() dto: ForgotPasswordDto) {
+		await this.authService.forgotPassword(dto.email, dto.redirectUrl);
+		return {
+			message:
+				"If an account exists with this email, a reset link has been sent.",
+		};
+	}
+
+	@Public()
+	@Post("reset-password")
+	async resetPassword(@Body() dto: ResetPasswordDto) {
+		await this.authService.resetPassword(dto.token, dto.newPassword);
+		return { message: "Password has been reset successfully." };
 	}
 }
