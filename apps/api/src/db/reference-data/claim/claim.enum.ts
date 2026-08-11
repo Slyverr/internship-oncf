@@ -20,6 +20,13 @@ export enum ClaimStatus {
 	SENT_TO_DTM = "SENT_TO_DTM",
 }
 
+export enum ClaimPriority {
+	LOW = "low",
+	MEDIUM = "medium",
+	HIGH = "high",
+	URGENT = "urgent",
+}
+
 export enum RejectionReason {
 	INSUFFICIENT_CAPACITY = "Insufficient capacity",
 	INCOMPLETE_DOCUMENTATION = "Incomplete documentation",
