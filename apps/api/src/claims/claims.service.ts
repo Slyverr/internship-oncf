@@ -1,3 +1,4 @@
+import { ClaimStatus, Permission } from "@ecommand/shared";
 import {
 	BadRequestException,
 	ConflictException,
@@ -11,12 +12,7 @@ import { AuthUser } from "src/auth/auth.types";
 import { hasPermission } from "src/auth/auth.utils";
 import { DrizzleService } from "src/db/drizzle.service";
 import { withDbErrorHandling } from "src/db/drizzle.util";
-import {
-	CLAIM_STATUSES,
-	CLAIM_TYPES,
-	ClaimStatus,
-	Permission,
-} from "src/db/reference-data";
+import { CLAIM_STATUSES, CLAIM_TYPES } from "src/db/reference-data";
 import { ClaimId } from "./claims.types";
 import { CreateClaimDto } from "./dto/create-claim-dto";
 import { UpdateClaimDto } from "./dto/update-claim-dto";

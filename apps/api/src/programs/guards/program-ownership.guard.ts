@@ -1,3 +1,4 @@
+import { Permission } from "@ecommand/shared";
 import {
 	CanActivate,
 	ExecutionContext,
@@ -5,7 +6,6 @@ import {
 	Injectable,
 } from "@nestjs/common";
 import { hasPermission } from "src/auth/auth.utils";
-import { Permission } from "src/db/reference-data";
 import { ProgramIdPipe } from "../pipes/program-id.pipe";
 import { ProgramsService } from "../programs.service";
 

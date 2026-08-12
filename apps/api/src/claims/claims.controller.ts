@@ -1,3 +1,4 @@
+import { Permission } from "@ecommand/shared";
 import {
 	Body,
 	Controller,
@@ -13,7 +14,6 @@ import {
 } from "@nestjs/common";
 import type { AuthRequest } from "src/auth/auth.types";
 import { Permissions } from "src/auth/permissions.decorator";
-import { Permission } from "src/db/reference-data";
 import { ClaimsService } from "./claims.service";
 import type { ClaimId } from "./claims.types";
 import { CreateClaimDto } from "./dto/create-claim-dto";

@@ -1,4 +1,4 @@
-import { Permission, Role } from "./auth.enum";
+import { Permission, Role } from "@ecommand/shared";
 
 export const ROLES: Record<
 	Role,

@@ -1,3 +1,4 @@
+import { Permission } from "@ecommand/shared";
 import {
 	Body,
 	Controller,
@@ -20,7 +21,6 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import type { Response } from "express";
 import type { AuthRequest } from "src/auth/auth.types";
 import { Permissions } from "src/auth/permissions.decorator";
-import { Permission } from "src/db/reference-data";
 import { OrderOwnershipGuard } from "src/orders/guards/order-ownership.guard";
 import type { OrderId } from "src/orders/orders.types";
 import { OrderIdPipe } from "src/orders/pipes/order-id.pipe";

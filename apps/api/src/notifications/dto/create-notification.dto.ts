@@ -1,34 +1,41 @@
-import { IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, MaxLength } from "class-validator";
+import { NotificationChannel, NotificationType } from "@ecommand/shared";
 import { Type } from "class-transformer";
-import { NotificationChannel, NotificationType } from "src/db/reference-data";
+import {
+	IsEnum,
+	IsInt,
+	IsNotEmpty,
+	IsOptional,
+	IsString,
+	MaxLength,
+} from "class-validator";
 
 export class CreateNotificationDto {
-  @IsInt()
-  @Type(() => Number)
-  @IsNotEmpty()
-  userId: number;
+	@IsInt()
+	@Type(() => Number)
+	@IsNotEmpty()
+	userId: number;
 
-  @IsEnum(NotificationType)
-  type: NotificationType;
+	@IsEnum(NotificationType)
+	type: NotificationType;
 
-  @IsEnum(NotificationChannel)
-  channel: NotificationChannel;
+	@IsEnum(NotificationChannel)
+	channel: NotificationChannel;
 
-  @IsString()
-  @MaxLength(200)
-  @IsNotEmpty()
-  title: string;
+	@IsString()
+	@MaxLength(200)
+	@IsNotEmpty()
+	title: string;
 
-  @IsString()
-  @IsNotEmpty()
-  message: string;
+	@IsString()
+	@IsNotEmpty()
+	message: string;
 
-  @IsOptional()
-  @IsString()
-  relatedEntityType?: string;
+	@IsOptional()
+	@IsString()
+	relatedEntityType?: string;
 
-  @IsOptional()
-  @IsInt()
-  @Type(() => Number)
-  relatedEntityId?: number;
+	@IsOptional()
+	@IsInt()
+	@Type(() => Number)
+	relatedEntityId?: number;
 }

@@ -1,3 +1,4 @@
+import { ClaimPriority, ClaimStatus, ClaimType } from "@ecommand/shared";
 import { Transform, Type } from "class-transformer";
 import {
 	IsEnum,
@@ -7,7 +8,6 @@ import {
 	IsString,
 	MaxLength,
 } from "class-validator";
-import { ClaimPriority, ClaimStatus, ClaimType } from "src/db/reference-data";
 
 export class CreateClaimDto {
 	@IsInt()

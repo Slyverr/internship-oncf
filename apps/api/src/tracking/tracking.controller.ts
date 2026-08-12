@@ -1,3 +1,4 @@
+import { Permission } from "@ecommand/shared";
 import {
 	Body,
 	Controller,
@@ -9,7 +10,6 @@ import {
 } from "@nestjs/common";
 import type { AuthRequest } from "src/auth/auth.types";
 import { Permissions } from "src/auth/permissions.decorator";
-import { Permission } from "src/db/reference-data";
 import { UpdateTrainPositionDto } from "./dto/update-train-position.dto";
 import { UpdateWagonPositionDto } from "./dto/update-wagon-position.dto";
 import { TrackingOwnershipGuard } from "./guards/tracking-ownership.guard";

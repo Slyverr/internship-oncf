@@ -1,3 +1,4 @@
+import { OrderStatus } from "@ecommand/shared";
 import { Transform, Type } from "class-transformer";
 import {
 	IsDateString,
@@ -7,7 +8,6 @@ import {
 	IsString,
 	MaxLength,
 } from "class-validator";
-import { OrderStatus } from "src/db/reference-data";
 
 export class CreateOrderDto {
 	@IsInt()

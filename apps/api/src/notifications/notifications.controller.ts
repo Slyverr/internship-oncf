@@ -1,3 +1,4 @@
+import { Permission } from "@ecommand/shared";
 import {
 	Controller,
 	Get,
@@ -8,7 +9,6 @@ import {
 } from "@nestjs/common";
 import type { AuthRequest } from "src/auth/auth.types";
 import { Permissions } from "src/auth/permissions.decorator";
-import { Permission } from "src/db/reference-data";
 import { NotificationOwnershipGuard } from "./guards/notification-ownership.guard";
 import { NotificationsService } from "./notifications.service";
 import type { NotificationId } from "./notifications.types";

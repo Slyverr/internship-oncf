@@ -1,3 +1,4 @@
+import { OrderStatus, Permission } from "@ecommand/shared";
 import {
 	BadRequestException,
 	ForbiddenException,
@@ -10,7 +11,7 @@ import { AuthUser } from "src/auth/auth.types";
 import { hasPermission } from "src/auth/auth.utils";
 import { DrizzleService } from "src/db/drizzle.service";
 import { withDbErrorHandling } from "src/db/drizzle.util";
-import { ORDER_STATUSES, OrderStatus, Permission } from "src/db/reference-data";
+import { ORDER_STATUSES } from "src/db/reference-data";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
 import type { OrderId } from "./orders.types";

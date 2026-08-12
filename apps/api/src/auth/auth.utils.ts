@@ -1,4 +1,4 @@
-import { Permission } from "src/db/reference-data";
+import { Permission } from "@ecommand/shared";
 import { AuthUser } from "./auth.types";
 
 export function hasPermission(

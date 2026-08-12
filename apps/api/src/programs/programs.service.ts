@@ -1,3 +1,4 @@
+import { Permission, ProgramStatus } from "@ecommand/shared";
 import {
 	ConflictException,
 	ForbiddenException,
@@ -10,11 +11,7 @@ import { AuthUser } from "src/auth/auth.types";
 import { hasPermission } from "src/auth/auth.utils";
 import { DrizzleService } from "src/db/drizzle.service";
 import { withDbErrorHandling } from "src/db/drizzle.util";
-import {
-	Permission,
-	PROGRAM_STATUSES,
-	ProgramStatus,
-} from "src/db/reference-data";
+import { PROGRAM_STATUSES } from "src/db/reference-data";
 import { CreateProgramDto } from "./dto/create-program.dto";
 import { UpdateProgramDto } from "./dto/update-program.dto";
 import { ProgramId } from "./programs.types";

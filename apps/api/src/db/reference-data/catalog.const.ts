@@ -3,7 +3,7 @@ import {
 	CustomerType,
 	GoodsType,
 	Unit,
-} from "./catalog.enum";
+} from "@ecommand/shared";
 
 export const CUSTOMER_TYPES: Record<
 	CustomerType,

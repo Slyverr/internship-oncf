@@ -1,3 +1,4 @@
+import { ProgramStatus } from "@ecommand/shared";
 import { Transform, Type } from "class-transformer";
 import {
 	IsEnum,
@@ -6,7 +7,6 @@ import {
 	IsOptional,
 	IsString,
 } from "class-validator";
-import { ProgramStatus } from "src/db/reference-data";
 
 export class CreateProgramDto {
 	@IsInt()

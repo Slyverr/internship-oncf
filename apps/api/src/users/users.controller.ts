@@ -1,6 +1,6 @@
+import { Permission } from "@ecommand/shared";
 import { Controller, Get, Param, ParseIntPipe } from "@nestjs/common";
 import { Permissions } from "src/auth/permissions.decorator";
-import { Permission } from "src/db/reference-data";
 import { UsersService } from "./users.service";
 import type { UserId } from "./users.types";
 

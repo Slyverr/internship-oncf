@@ -1,3 +1,4 @@
+import { Permission } from "@ecommand/shared";
 import {
 	Body,
 	Controller,
@@ -9,7 +10,6 @@ import {
 	Put,
 } from "@nestjs/common";
 import { Permissions } from "src/auth/permissions.decorator";
-import { Permission } from "src/db/reference-data";
 import { CustomersService } from "./customers.service";
 import type { CustomerId } from "./customers.types";
 import { CreateCustomerDto } from "./dto/create-customer.dto";

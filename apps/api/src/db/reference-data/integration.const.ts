@@ -1,4 +1,4 @@
-import { DtmRequestType } from "./integration.enum";
+import { DtmRequestType } from "@ecommand/shared";
 
 export const DTM_REQUEST_TYPES: Record<
 	DtmRequestType,

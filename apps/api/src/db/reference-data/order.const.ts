@@ -4,7 +4,7 @@ import {
 	OrderStatus,
 	PickupLocationType,
 	ProgramStatus,
-} from "./order.enum";
+} from "@ecommand/shared";
 
 export const ORDER_STATUSES: Record<
 	OrderStatus,

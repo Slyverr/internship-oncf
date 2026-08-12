@@ -1,3 +1,4 @@
+import { Permission } from "@ecommand/shared";
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { trains, trainTracking, wagonTracking } from "drizzle/schema";
 import { eq } from "drizzle-orm";
@@ -5,7 +6,6 @@ import { AuthUser } from "src/auth/auth.types";
 import { hasPermission } from "src/auth/auth.utils";
 import { DrizzleService } from "src/db/drizzle.service";
 import { withDbErrorHandling } from "src/db/drizzle.util";
-import { Permission } from "src/db/reference-data";
 import { UpdateTrainPositionDto } from "./dto/update-train-position.dto";
 import { UpdateWagonPositionDto } from "./dto/update-wagon-position.dto";
 import { TrainId, WagonId } from "./tracking.types";

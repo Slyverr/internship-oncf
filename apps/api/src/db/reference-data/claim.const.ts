@@ -1,4 +1,4 @@
-import { ClaimStatus, ClaimType, RejectionReason } from "./claim.enum";
+import { ClaimStatus, ClaimType, RejectionReason } from "@ecommand/shared";
 
 export const CLAIM_TYPES: Record<ClaimType, { id: number; name: ClaimType }> = {
 	[ClaimType.DELIVERY_DELAY]: { id: 1, name: ClaimType.DELIVERY_DELAY },

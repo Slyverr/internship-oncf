@@ -1,4 +1,4 @@
-import { NotificationChannel, NotificationType } from "./notification.enum";
+import { NotificationChannel, NotificationType } from "@ecommand/shared";
 
 export const NOTIFICATION_TYPES: Record<
 	NotificationType,
