@@ -1,11 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
-
-const BACKEND_API_URL = process.env.BACKEND_API_URL;
-if (!BACKEND_API_URL) {
-  throw new Error("BACKEND_API_URL environment variable is required");
-}
+import { authControllerLogin } from "@/lib/api/generated";
 
 export type LoginState = {
   errors?: {
@@ -47,36 +43,12 @@ export async function loginAction(
   }
 
   try {
-    const response = await fetch(`${BACKEND_API_URL}/auth/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ username, password }),
+    const response = await authControllerLogin({
+      username,
+      password,
     });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      let formError = "Invalid email or password";
-
-      if (response.status === 429) {
-        formError = "Too many attempts. Please try again later";
-      } else if (response.status >= 500) {
-        formError = "Server error. Please try again later";
-      }
-
-      return {
-        errors: {
-          form: formError,
-        },
-        success: false,
-        data: { username, remember },
-      };
-    }
-
-    const sessionToken = data.access_token;
-
+    const sessionToken = response.data.access_token;
     if (!sessionToken) {
       return {
         errors: {
@@ -100,10 +72,20 @@ export async function loginAction(
       success: true,
       data: { username, remember },
     };
-  } catch (error) {
+  } catch (error: any) {
+    let formError = "Network error. Please check your connection.";
+
+    if (error.response?.status === 401) {
+      formError = "Invalid email or password";
+    } else if (error.response?.status === 429) {
+      formError = "Too many attempts. Please try again later";
+    } else if (error.response?.status >= 500) {
+      formError = "Server error. Please try again later";
+    }
+
     return {
       errors: {
-        form: "Network error. Please check your connection.",
+        form: formError,
       },
       success: false,
       data: { username, remember },
