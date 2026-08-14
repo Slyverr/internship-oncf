@@ -48,8 +48,8 @@ export async function loginAction(
       password,
     });
 
-    const sessionToken = response.data.access_token;
-    if (!sessionToken) {
+    const accessToken = response.access_token;
+    if (!accessToken) {
       return {
         errors: {
           form: "Invalid email or password",
@@ -60,7 +60,7 @@ export async function loginAction(
     }
 
     const cookieStore = await cookies();
-    cookieStore.set("session", sessionToken, {
+    cookieStore.set("access_token", accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
