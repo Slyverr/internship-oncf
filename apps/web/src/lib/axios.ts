@@ -1,18 +1,24 @@
-import axios, { AxiosError, AxiosRequestConfig } from 'axios';
-import { cookies } from 'next/headers';
+import axios, { AxiosRequestConfig } from 'axios';
 
-export const customInstance = async <T>(config: AxiosRequestConfig, options?: AxiosRequestConfig): Promise<T> => {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('access_token')?.value;
+const client = axios.create({
+  baseURL: `${process.env.NEXT_PUBLIC_SITE_URL}/api/proxy`,
+  withCredentials: true,
+});
 
-  const instance = axios.create({
-    baseURL: process.env.BACKEND_API_URL,
-    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+export const customFetch = async <T>(
+  config: AxiosRequestConfig,
+  options?: AxiosRequestConfig,
+): Promise<T> => {
+  const isServer = typeof window === 'undefined';
+  const cookie = isServer ? (await (await import('next/headers')).cookies()).toString() : undefined;
+
+  const { data } = await client({
+    ...config,
+    ...options,
+    headers: { ...config.headers, ...options?.headers, ...(cookie && { Cookie: cookie }) },
   });
 
-  return instance({ ...config, ...options }).then((res) => res.data);
+  return data;
 };
 
-export default customInstance;
-
-export type ErrorType<Error> = AxiosError<Error>;
+export default customFetch;

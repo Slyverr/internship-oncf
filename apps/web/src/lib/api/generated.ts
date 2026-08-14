@@ -5,7 +5,26 @@
  * ONCF freight order management
  * OpenAPI spec version: 1.0
  */
-import { customInstance } from '../axios';
+import {
+  useMutation,
+  useQuery
+} from '@tanstack/react-query';
+import type {
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
+  MutationFunction,
+  QueryClient,
+  QueryFunction,
+  QueryKey,
+  UndefinedInitialDataOptions,
+  UseMutationOptions,
+  UseMutationResult,
+  UseQueryOptions,
+  UseQueryResult
+} from '@tanstack/react-query';
+
+import { customFetch } from '../axios';
 export interface LoginDto {
   username: string;
   /** @minLength 8 */
@@ -210,574 +229,3643 @@ export type AuthControllerGetProfile200 = { [key: string]: unknown };
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
-  export const appControllerHealth = (
 
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/health`, method: 'GET'
+const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
+  const result = { queryKey } as T & { queryKey: K };
+  for (const key of Object.keys(query)) {
+    // The explicit queryKey always wins, matching the previous
+    // `{ ...query, queryKey }` spread where it was set last.
+    if (key === 'queryKey') continue;
+    Object.defineProperty(result, key, {
+      enumerable: true,
+      configurable: true,
+      get: () => (query as Record<string, unknown>)[key],
+    });
+  }
+  return result;
+};
+
+export const appControllerHealth = (
+
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/health`, method: 'GET', signal
     },
       options);
     }
+
+
+
+
+export const getAppControllerHealthQueryKey = () => {
+    return [
+    `/health`
+    ] as const;
+    }
+
+
+export const getAppControllerHealthQueryOptions = <TData = Awaited<ReturnType<typeof appControllerHealth>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerHealth>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAppControllerHealthQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof appControllerHealth>>> = ({ signal }) => appControllerHealth(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof appControllerHealth>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type AppControllerHealthQueryResult = NonNullable<Awaited<ReturnType<typeof appControllerHealth>>>
+export type AppControllerHealthQueryError = unknown
+
+
+export function useAppControllerHealth<TData = Awaited<ReturnType<typeof appControllerHealth>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerHealth>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof appControllerHealth>>,
+          TError,
+          Awaited<ReturnType<typeof appControllerHealth>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAppControllerHealth<TData = Awaited<ReturnType<typeof appControllerHealth>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerHealth>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof appControllerHealth>>,
+          TError,
+          Awaited<ReturnType<typeof appControllerHealth>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAppControllerHealth<TData = Awaited<ReturnType<typeof appControllerHealth>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerHealth>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useAppControllerHealth<TData = Awaited<ReturnType<typeof appControllerHealth>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerHealth>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getAppControllerHealthQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const usersControllerFindAll = (
 
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/users`, method: 'GET'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/users`, method: 'GET', signal
     },
       options);
     }
+
+
+
+
+export const getUsersControllerFindAllQueryKey = () => {
+    return [
+    `/users`
+    ] as const;
+    }
+
+
+export const getUsersControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof usersControllerFindAll>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getUsersControllerFindAllQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof usersControllerFindAll>>> = ({ signal }) => usersControllerFindAll(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindAll>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type UsersControllerFindAllQueryResult = NonNullable<Awaited<ReturnType<typeof usersControllerFindAll>>>
+export type UsersControllerFindAllQueryError = unknown
+
+
+export function useUsersControllerFindAll<TData = Awaited<ReturnType<typeof usersControllerFindAll>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindAll>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof usersControllerFindAll>>,
+          TError,
+          Awaited<ReturnType<typeof usersControllerFindAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useUsersControllerFindAll<TData = Awaited<ReturnType<typeof usersControllerFindAll>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindAll>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof usersControllerFindAll>>,
+          TError,
+          Awaited<ReturnType<typeof usersControllerFindAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useUsersControllerFindAll<TData = Awaited<ReturnType<typeof usersControllerFindAll>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useUsersControllerFindAll<TData = Awaited<ReturnType<typeof usersControllerFindAll>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getUsersControllerFindAllQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const usersControllerFindOneById = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/users/${id}`, method: 'GET'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/users/${id}`, method: 'GET', signal
     },
       options);
     }
 
+
+
+
+export const getUsersControllerFindOneByIdQueryKey = (id: number,) => {
+    return [
+    `/users/${id}`
+    ] as const;
+    }
+
+
+export const getUsersControllerFindOneByIdQueryOptions = <TData = Awaited<ReturnType<typeof usersControllerFindOneById>>, TError = unknown>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindOneById>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getUsersControllerFindOneByIdQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof usersControllerFindOneById>>> = ({ signal }) => usersControllerFindOneById(id, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindOneById>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type UsersControllerFindOneByIdQueryResult = NonNullable<Awaited<ReturnType<typeof usersControllerFindOneById>>>
+export type UsersControllerFindOneByIdQueryError = unknown
+
+
+export function useUsersControllerFindOneById<TData = Awaited<ReturnType<typeof usersControllerFindOneById>>, TError = unknown>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindOneById>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof usersControllerFindOneById>>,
+          TError,
+          Awaited<ReturnType<typeof usersControllerFindOneById>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useUsersControllerFindOneById<TData = Awaited<ReturnType<typeof usersControllerFindOneById>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindOneById>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof usersControllerFindOneById>>,
+          TError,
+          Awaited<ReturnType<typeof usersControllerFindOneById>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useUsersControllerFindOneById<TData = Awaited<ReturnType<typeof usersControllerFindOneById>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindOneById>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useUsersControllerFindOneById<TData = Awaited<ReturnType<typeof usersControllerFindOneById>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindOneById>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getUsersControllerFindOneByIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const authControllerLogin = (
     loginDto: LoginDto,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
       {url: `/auth/login`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
-      data: loginDto
+      data: loginDto, signal
     },
       options);
+    }
+
+
+
+
+export const getAuthControllerLoginMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerLogin>>, TError,{data: LoginDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof authControllerLogin>>, TError,{data: LoginDto}, TContext> => {
+
+const mutationKey = ['authControllerLogin'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof authControllerLogin>>, {data: LoginDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  authControllerLogin(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AuthControllerLoginMutationResult = NonNullable<Awaited<ReturnType<typeof authControllerLogin>>>
+    export type AuthControllerLoginMutationBody = LoginDto
+    export type AuthControllerLoginMutationError = unknown
+
+    export const useAuthControllerLogin = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerLogin>>, TError,{data: LoginDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof authControllerLogin>>,
+        TError,
+        {data: LoginDto},
+        TContext
+      > => {
+      return useMutation(getAuthControllerLoginMutationOptions(options), queryClient);
     }
 
 export const authControllerGetProfile = (
 
- options?: SecondParameter<typeof customInstance<AuthControllerGetProfile200>>,) => {
-      return customInstance<AuthControllerGetProfile200>(
-      {url: `/auth/profile`, method: 'GET'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<AuthControllerGetProfile200>(
+      {url: `/auth/profile`, method: 'GET', signal
     },
       options);
     }
 
+
+
+
+export const getAuthControllerGetProfileQueryKey = () => {
+    return [
+    `/auth/profile`
+    ] as const;
+    }
+
+
+export const getAuthControllerGetProfileQueryOptions = <TData = Awaited<ReturnType<typeof authControllerGetProfile>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetProfile>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getAuthControllerGetProfileQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof authControllerGetProfile>>> = ({ signal }) => authControllerGetProfile(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof authControllerGetProfile>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type AuthControllerGetProfileQueryResult = NonNullable<Awaited<ReturnType<typeof authControllerGetProfile>>>
+export type AuthControllerGetProfileQueryError = unknown
+
+
+export function useAuthControllerGetProfile<TData = Awaited<ReturnType<typeof authControllerGetProfile>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetProfile>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof authControllerGetProfile>>,
+          TError,
+          Awaited<ReturnType<typeof authControllerGetProfile>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAuthControllerGetProfile<TData = Awaited<ReturnType<typeof authControllerGetProfile>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetProfile>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof authControllerGetProfile>>,
+          TError,
+          Awaited<ReturnType<typeof authControllerGetProfile>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useAuthControllerGetProfile<TData = Awaited<ReturnType<typeof authControllerGetProfile>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetProfile>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useAuthControllerGetProfile<TData = Awaited<ReturnType<typeof authControllerGetProfile>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetProfile>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getAuthControllerGetProfileQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const authControllerForgotPassword = (
     forgotPasswordDto: ForgotPasswordDto,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
       {url: `/auth/forgot-password`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
-      data: forgotPasswordDto
+      data: forgotPasswordDto, signal
     },
       options);
+    }
+
+
+
+
+export const getAuthControllerForgotPasswordMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerForgotPassword>>, TError,{data: ForgotPasswordDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof authControllerForgotPassword>>, TError,{data: ForgotPasswordDto}, TContext> => {
+
+const mutationKey = ['authControllerForgotPassword'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof authControllerForgotPassword>>, {data: ForgotPasswordDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  authControllerForgotPassword(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AuthControllerForgotPasswordMutationResult = NonNullable<Awaited<ReturnType<typeof authControllerForgotPassword>>>
+    export type AuthControllerForgotPasswordMutationBody = ForgotPasswordDto
+    export type AuthControllerForgotPasswordMutationError = unknown
+
+    export const useAuthControllerForgotPassword = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerForgotPassword>>, TError,{data: ForgotPasswordDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof authControllerForgotPassword>>,
+        TError,
+        {data: ForgotPasswordDto},
+        TContext
+      > => {
+      return useMutation(getAuthControllerForgotPasswordMutationOptions(options), queryClient);
     }
 
 export const authControllerResetPassword = (
     resetPasswordDto: ResetPasswordDto,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
       {url: `/auth/reset-password`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
-      data: resetPasswordDto
+      data: resetPasswordDto, signal
     },
       options);
+    }
+
+
+
+
+export const getAuthControllerResetPasswordMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerResetPassword>>, TError,{data: ResetPasswordDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof authControllerResetPassword>>, TError,{data: ResetPasswordDto}, TContext> => {
+
+const mutationKey = ['authControllerResetPassword'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof authControllerResetPassword>>, {data: ResetPasswordDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  authControllerResetPassword(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AuthControllerResetPasswordMutationResult = NonNullable<Awaited<ReturnType<typeof authControllerResetPassword>>>
+    export type AuthControllerResetPasswordMutationBody = ResetPasswordDto
+    export type AuthControllerResetPasswordMutationError = unknown
+
+    export const useAuthControllerResetPassword = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerResetPassword>>, TError,{data: ResetPasswordDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof authControllerResetPassword>>,
+        TError,
+        {data: ResetPasswordDto},
+        TContext
+      > => {
+      return useMutation(getAuthControllerResetPasswordMutationOptions(options), queryClient);
     }
 
 export const ordersControllerCreate = (
     createOrderDto: CreateOrderDto,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
       {url: `/orders`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
-      data: createOrderDto
+      data: createOrderDto, signal
     },
       options);
+    }
+
+
+
+
+export const getOrdersControllerCreateMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersControllerCreate>>, TError,{data: CreateOrderDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof ordersControllerCreate>>, TError,{data: CreateOrderDto}, TContext> => {
+
+const mutationKey = ['ordersControllerCreate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof ordersControllerCreate>>, {data: CreateOrderDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  ordersControllerCreate(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type OrdersControllerCreateMutationResult = NonNullable<Awaited<ReturnType<typeof ordersControllerCreate>>>
+    export type OrdersControllerCreateMutationBody = CreateOrderDto
+    export type OrdersControllerCreateMutationError = unknown
+
+    export const useOrdersControllerCreate = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersControllerCreate>>, TError,{data: CreateOrderDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof ordersControllerCreate>>,
+        TError,
+        {data: CreateOrderDto},
+        TContext
+      > => {
+      return useMutation(getOrdersControllerCreateMutationOptions(options), queryClient);
     }
 
 export const ordersControllerFindAll = (
 
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/orders`, method: 'GET'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/orders`, method: 'GET', signal
     },
       options);
     }
 
+
+
+
+export const getOrdersControllerFindAllQueryKey = () => {
+    return [
+    `/orders`
+    ] as const;
+    }
+
+
+export const getOrdersControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof ordersControllerFindAll>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getOrdersControllerFindAllQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof ordersControllerFindAll>>> = ({ signal }) => ordersControllerFindAll(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindAll>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type OrdersControllerFindAllQueryResult = NonNullable<Awaited<ReturnType<typeof ordersControllerFindAll>>>
+export type OrdersControllerFindAllQueryError = unknown
+
+
+export function useOrdersControllerFindAll<TData = Awaited<ReturnType<typeof ordersControllerFindAll>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindAll>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof ordersControllerFindAll>>,
+          TError,
+          Awaited<ReturnType<typeof ordersControllerFindAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useOrdersControllerFindAll<TData = Awaited<ReturnType<typeof ordersControllerFindAll>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindAll>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof ordersControllerFindAll>>,
+          TError,
+          Awaited<ReturnType<typeof ordersControllerFindAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useOrdersControllerFindAll<TData = Awaited<ReturnType<typeof ordersControllerFindAll>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useOrdersControllerFindAll<TData = Awaited<ReturnType<typeof ordersControllerFindAll>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getOrdersControllerFindAllQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const ordersControllerFindOne = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/orders/${id}`, method: 'GET'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/orders/${id}`, method: 'GET', signal
     },
       options);
     }
+
+
+
+
+export const getOrdersControllerFindOneQueryKey = (id: number,) => {
+    return [
+    `/orders/${id}`
+    ] as const;
+    }
+
+
+export const getOrdersControllerFindOneQueryOptions = <TData = Awaited<ReturnType<typeof ordersControllerFindOne>>, TError = unknown>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getOrdersControllerFindOneQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof ordersControllerFindOne>>> = ({ signal }) => ordersControllerFindOne(id, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindOne>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type OrdersControllerFindOneQueryResult = NonNullable<Awaited<ReturnType<typeof ordersControllerFindOne>>>
+export type OrdersControllerFindOneQueryError = unknown
+
+
+export function useOrdersControllerFindOne<TData = Awaited<ReturnType<typeof ordersControllerFindOne>>, TError = unknown>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindOne>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof ordersControllerFindOne>>,
+          TError,
+          Awaited<ReturnType<typeof ordersControllerFindOne>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useOrdersControllerFindOne<TData = Awaited<ReturnType<typeof ordersControllerFindOne>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindOne>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof ordersControllerFindOne>>,
+          TError,
+          Awaited<ReturnType<typeof ordersControllerFindOne>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useOrdersControllerFindOne<TData = Awaited<ReturnType<typeof ordersControllerFindOne>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useOrdersControllerFindOne<TData = Awaited<ReturnType<typeof ordersControllerFindOne>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getOrdersControllerFindOneQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const ordersControllerUpdate = (
     id: number,
     updateOrderDto: UpdateOrderDto,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
       {url: `/orders/${id}`, method: 'PATCH',
       headers: {'Content-Type': 'application/json', },
-      data: updateOrderDto
+      data: updateOrderDto, signal
     },
       options);
+    }
+
+
+
+
+export const getOrdersControllerUpdateMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersControllerUpdate>>, TError,{id: number;data: UpdateOrderDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof ordersControllerUpdate>>, TError,{id: number;data: UpdateOrderDto}, TContext> => {
+
+const mutationKey = ['ordersControllerUpdate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof ordersControllerUpdate>>, {id: number;data: UpdateOrderDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  ordersControllerUpdate(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type OrdersControllerUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof ordersControllerUpdate>>>
+    export type OrdersControllerUpdateMutationBody = UpdateOrderDto
+    export type OrdersControllerUpdateMutationError = unknown
+
+    export const useOrdersControllerUpdate = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersControllerUpdate>>, TError,{id: number;data: UpdateOrderDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof ordersControllerUpdate>>,
+        TError,
+        {id: number;data: UpdateOrderDto},
+        TContext
+      > => {
+      return useMutation(getOrdersControllerUpdateMutationOptions(options), queryClient);
     }
 
 export const ordersControllerRemove = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/orders/${id}`, method: 'DELETE'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/orders/${id}`, method: 'DELETE', signal
     },
       options);
+    }
+
+
+
+
+export const getOrdersControllerRemoveMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersControllerRemove>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof ordersControllerRemove>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['ordersControllerRemove'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof ordersControllerRemove>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  ordersControllerRemove(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type OrdersControllerRemoveMutationResult = NonNullable<Awaited<ReturnType<typeof ordersControllerRemove>>>
+
+    export type OrdersControllerRemoveMutationError = unknown
+
+    export const useOrdersControllerRemove = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersControllerRemove>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof ordersControllerRemove>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getOrdersControllerRemoveMutationOptions(options), queryClient);
     }
 
 export const ordersControllerSubmit = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/orders/${id}/submit`, method: 'POST'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/orders/${id}/submit`, method: 'POST', signal
     },
       options);
+    }
+
+
+
+
+export const getOrdersControllerSubmitMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersControllerSubmit>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof ordersControllerSubmit>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['ordersControllerSubmit'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof ordersControllerSubmit>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  ordersControllerSubmit(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type OrdersControllerSubmitMutationResult = NonNullable<Awaited<ReturnType<typeof ordersControllerSubmit>>>
+
+    export type OrdersControllerSubmitMutationError = unknown
+
+    export const useOrdersControllerSubmit = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersControllerSubmit>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof ordersControllerSubmit>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getOrdersControllerSubmitMutationOptions(options), queryClient);
     }
 
 export const ordersControllerApprove = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/orders/${id}/approve`, method: 'POST'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/orders/${id}/approve`, method: 'POST', signal
     },
       options);
+    }
+
+
+
+
+export const getOrdersControllerApproveMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersControllerApprove>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof ordersControllerApprove>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['ordersControllerApprove'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof ordersControllerApprove>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  ordersControllerApprove(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type OrdersControllerApproveMutationResult = NonNullable<Awaited<ReturnType<typeof ordersControllerApprove>>>
+
+    export type OrdersControllerApproveMutationError = unknown
+
+    export const useOrdersControllerApprove = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersControllerApprove>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof ordersControllerApprove>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getOrdersControllerApproveMutationOptions(options), queryClient);
     }
 
 export const ordersControllerReject = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/orders/${id}/reject`, method: 'POST'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/orders/${id}/reject`, method: 'POST', signal
     },
       options);
+    }
+
+
+
+
+export const getOrdersControllerRejectMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersControllerReject>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof ordersControllerReject>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['ordersControllerReject'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof ordersControllerReject>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  ordersControllerReject(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type OrdersControllerRejectMutationResult = NonNullable<Awaited<ReturnType<typeof ordersControllerReject>>>
+
+    export type OrdersControllerRejectMutationError = unknown
+
+    export const useOrdersControllerReject = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersControllerReject>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof ordersControllerReject>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getOrdersControllerRejectMutationOptions(options), queryClient);
     }
 
 export const ordersControllerCancel = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/orders/${id}/cancel`, method: 'POST'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/orders/${id}/cancel`, method: 'POST', signal
     },
       options);
     }
 
+
+
+
+export const getOrdersControllerCancelMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersControllerCancel>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof ordersControllerCancel>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['ordersControllerCancel'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof ordersControllerCancel>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  ordersControllerCancel(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type OrdersControllerCancelMutationResult = NonNullable<Awaited<ReturnType<typeof ordersControllerCancel>>>
+
+    export type OrdersControllerCancelMutationError = unknown
+
+    export const useOrdersControllerCancel = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersControllerCancel>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof ordersControllerCancel>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getOrdersControllerCancelMutationOptions(options), queryClient);
+    }
+
 export const ordersControllerSendToDtm = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/orders/${id}/send-to-dtm`, method: 'POST'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/orders/${id}/send-to-dtm`, method: 'POST', signal
     },
       options);
+    }
+
+
+
+
+export const getOrdersControllerSendToDtmMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersControllerSendToDtm>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof ordersControllerSendToDtm>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['ordersControllerSendToDtm'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof ordersControllerSendToDtm>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  ordersControllerSendToDtm(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type OrdersControllerSendToDtmMutationResult = NonNullable<Awaited<ReturnType<typeof ordersControllerSendToDtm>>>
+
+    export type OrdersControllerSendToDtmMutationError = unknown
+
+    export const useOrdersControllerSendToDtm = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersControllerSendToDtm>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof ordersControllerSendToDtm>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getOrdersControllerSendToDtmMutationOptions(options), queryClient);
     }
 
 export const filesControllerUploadFile = (
     id: number,
     uploadFileDto: UploadFileDto,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
       {url: `/orders/${id}/files`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
-      data: uploadFileDto
+      data: uploadFileDto, signal
     },
       options);
+    }
+
+
+
+
+export const getFilesControllerUploadFileMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof filesControllerUploadFile>>, TError,{id: number;data: UploadFileDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof filesControllerUploadFile>>, TError,{id: number;data: UploadFileDto}, TContext> => {
+
+const mutationKey = ['filesControllerUploadFile'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof filesControllerUploadFile>>, {id: number;data: UploadFileDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  filesControllerUploadFile(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type FilesControllerUploadFileMutationResult = NonNullable<Awaited<ReturnType<typeof filesControllerUploadFile>>>
+    export type FilesControllerUploadFileMutationBody = UploadFileDto
+    export type FilesControllerUploadFileMutationError = unknown
+
+    export const useFilesControllerUploadFile = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof filesControllerUploadFile>>, TError,{id: number;data: UploadFileDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof filesControllerUploadFile>>,
+        TError,
+        {id: number;data: UploadFileDto},
+        TContext
+      > => {
+      return useMutation(getFilesControllerUploadFileMutationOptions(options), queryClient);
     }
 
 export const filesControllerListFiles = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/orders/${id}/files`, method: 'GET'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/orders/${id}/files`, method: 'GET', signal
     },
       options);
     }
+
+
+
+
+export const getFilesControllerListFilesQueryKey = (id: number,) => {
+    return [
+    `/orders/${id}/files`
+    ] as const;
+    }
+
+
+export const getFilesControllerListFilesQueryOptions = <TData = Awaited<ReturnType<typeof filesControllerListFiles>>, TError = unknown>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof filesControllerListFiles>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getFilesControllerListFilesQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof filesControllerListFiles>>> = ({ signal }) => filesControllerListFiles(id, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof filesControllerListFiles>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type FilesControllerListFilesQueryResult = NonNullable<Awaited<ReturnType<typeof filesControllerListFiles>>>
+export type FilesControllerListFilesQueryError = unknown
+
+
+export function useFilesControllerListFiles<TData = Awaited<ReturnType<typeof filesControllerListFiles>>, TError = unknown>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof filesControllerListFiles>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof filesControllerListFiles>>,
+          TError,
+          Awaited<ReturnType<typeof filesControllerListFiles>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useFilesControllerListFiles<TData = Awaited<ReturnType<typeof filesControllerListFiles>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof filesControllerListFiles>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof filesControllerListFiles>>,
+          TError,
+          Awaited<ReturnType<typeof filesControllerListFiles>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useFilesControllerListFiles<TData = Awaited<ReturnType<typeof filesControllerListFiles>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof filesControllerListFiles>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useFilesControllerListFiles<TData = Awaited<ReturnType<typeof filesControllerListFiles>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof filesControllerListFiles>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getFilesControllerListFilesQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const filesControllerDownloadFile = (
     id: number,
     fileId: string,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/orders/${id}/files/${fileId}/download`, method: 'GET'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/orders/${id}/files/${fileId}/download`, method: 'GET', signal
     },
       options);
     }
+
+
+
+
+export const getFilesControllerDownloadFileQueryKey = (id: number,
+    fileId: string,) => {
+    return [
+    `/orders/${id}/files/${fileId}/download`
+    ] as const;
+    }
+
+
+export const getFilesControllerDownloadFileQueryOptions = <TData = Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError = unknown>(id: number,
+    fileId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getFilesControllerDownloadFileQueryKey(id,fileId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof filesControllerDownloadFile>>> = ({ signal }) => filesControllerDownloadFile(id,fileId, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined && fileId !== null && fileId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type FilesControllerDownloadFileQueryResult = NonNullable<Awaited<ReturnType<typeof filesControllerDownloadFile>>>
+export type FilesControllerDownloadFileQueryError = unknown
+
+
+export function useFilesControllerDownloadFile<TData = Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError = unknown>(
+ id: number,
+    fileId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof filesControllerDownloadFile>>,
+          TError,
+          Awaited<ReturnType<typeof filesControllerDownloadFile>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useFilesControllerDownloadFile<TData = Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError = unknown>(
+ id: number,
+    fileId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof filesControllerDownloadFile>>,
+          TError,
+          Awaited<ReturnType<typeof filesControllerDownloadFile>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useFilesControllerDownloadFile<TData = Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError = unknown>(
+ id: number,
+    fileId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useFilesControllerDownloadFile<TData = Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError = unknown>(
+ id: number,
+    fileId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getFilesControllerDownloadFileQueryOptions(id,fileId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const filesControllerDeleteFile = (
     id: number,
     fileId: string,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/orders/${id}/files/${fileId}`, method: 'DELETE'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/orders/${id}/files/${fileId}`, method: 'DELETE', signal
     },
       options);
+    }
+
+
+
+
+export const getFilesControllerDeleteFileMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof filesControllerDeleteFile>>, TError,{id: number;fileId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof filesControllerDeleteFile>>, TError,{id: number;fileId: string}, TContext> => {
+
+const mutationKey = ['filesControllerDeleteFile'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof filesControllerDeleteFile>>, {id: number;fileId: string}> = (props) => {
+          const {id,fileId} = props ?? {};
+
+          return  filesControllerDeleteFile(id,fileId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type FilesControllerDeleteFileMutationResult = NonNullable<Awaited<ReturnType<typeof filesControllerDeleteFile>>>
+
+    export type FilesControllerDeleteFileMutationError = unknown
+
+    export const useFilesControllerDeleteFile = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof filesControllerDeleteFile>>, TError,{id: number;fileId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof filesControllerDeleteFile>>,
+        TError,
+        {id: number;fileId: string},
+        TContext
+      > => {
+      return useMutation(getFilesControllerDeleteFileMutationOptions(options), queryClient);
     }
 
 export const programsControllerCreate = (
     createProgramDto: CreateProgramDto,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
       {url: `/programs`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
-      data: createProgramDto
+      data: createProgramDto, signal
     },
       options);
+    }
+
+
+
+
+export const getProgramsControllerCreateMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof programsControllerCreate>>, TError,{data: CreateProgramDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof programsControllerCreate>>, TError,{data: CreateProgramDto}, TContext> => {
+
+const mutationKey = ['programsControllerCreate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof programsControllerCreate>>, {data: CreateProgramDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  programsControllerCreate(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ProgramsControllerCreateMutationResult = NonNullable<Awaited<ReturnType<typeof programsControllerCreate>>>
+    export type ProgramsControllerCreateMutationBody = CreateProgramDto
+    export type ProgramsControllerCreateMutationError = unknown
+
+    export const useProgramsControllerCreate = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof programsControllerCreate>>, TError,{data: CreateProgramDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof programsControllerCreate>>,
+        TError,
+        {data: CreateProgramDto},
+        TContext
+      > => {
+      return useMutation(getProgramsControllerCreateMutationOptions(options), queryClient);
     }
 
 export const programsControllerFindAll = (
 
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/programs`, method: 'GET'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/programs`, method: 'GET', signal
     },
       options);
     }
 
+
+
+
+export const getProgramsControllerFindAllQueryKey = () => {
+    return [
+    `/programs`
+    ] as const;
+    }
+
+
+export const getProgramsControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof programsControllerFindAll>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof programsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getProgramsControllerFindAllQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof programsControllerFindAll>>> = ({ signal }) => programsControllerFindAll(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof programsControllerFindAll>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ProgramsControllerFindAllQueryResult = NonNullable<Awaited<ReturnType<typeof programsControllerFindAll>>>
+export type ProgramsControllerFindAllQueryError = unknown
+
+
+export function useProgramsControllerFindAll<TData = Awaited<ReturnType<typeof programsControllerFindAll>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof programsControllerFindAll>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof programsControllerFindAll>>,
+          TError,
+          Awaited<ReturnType<typeof programsControllerFindAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useProgramsControllerFindAll<TData = Awaited<ReturnType<typeof programsControllerFindAll>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof programsControllerFindAll>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof programsControllerFindAll>>,
+          TError,
+          Awaited<ReturnType<typeof programsControllerFindAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useProgramsControllerFindAll<TData = Awaited<ReturnType<typeof programsControllerFindAll>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof programsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useProgramsControllerFindAll<TData = Awaited<ReturnType<typeof programsControllerFindAll>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof programsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getProgramsControllerFindAllQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const programsControllerFindOne = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/programs/${id}`, method: 'GET'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/programs/${id}`, method: 'GET', signal
     },
       options);
     }
+
+
+
+
+export const getProgramsControllerFindOneQueryKey = (id: number,) => {
+    return [
+    `/programs/${id}`
+    ] as const;
+    }
+
+
+export const getProgramsControllerFindOneQueryOptions = <TData = Awaited<ReturnType<typeof programsControllerFindOne>>, TError = unknown>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof programsControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getProgramsControllerFindOneQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof programsControllerFindOne>>> = ({ signal }) => programsControllerFindOne(id, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof programsControllerFindOne>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ProgramsControllerFindOneQueryResult = NonNullable<Awaited<ReturnType<typeof programsControllerFindOne>>>
+export type ProgramsControllerFindOneQueryError = unknown
+
+
+export function useProgramsControllerFindOne<TData = Awaited<ReturnType<typeof programsControllerFindOne>>, TError = unknown>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof programsControllerFindOne>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof programsControllerFindOne>>,
+          TError,
+          Awaited<ReturnType<typeof programsControllerFindOne>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useProgramsControllerFindOne<TData = Awaited<ReturnType<typeof programsControllerFindOne>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof programsControllerFindOne>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof programsControllerFindOne>>,
+          TError,
+          Awaited<ReturnType<typeof programsControllerFindOne>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useProgramsControllerFindOne<TData = Awaited<ReturnType<typeof programsControllerFindOne>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof programsControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useProgramsControllerFindOne<TData = Awaited<ReturnType<typeof programsControllerFindOne>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof programsControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getProgramsControllerFindOneQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const programsControllerUpdate = (
     id: number,
     updateProgramDto: UpdateProgramDto,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
       {url: `/programs/${id}`, method: 'PATCH',
       headers: {'Content-Type': 'application/json', },
-      data: updateProgramDto
+      data: updateProgramDto, signal
     },
       options);
+    }
+
+
+
+
+export const getProgramsControllerUpdateMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof programsControllerUpdate>>, TError,{id: number;data: UpdateProgramDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof programsControllerUpdate>>, TError,{id: number;data: UpdateProgramDto}, TContext> => {
+
+const mutationKey = ['programsControllerUpdate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof programsControllerUpdate>>, {id: number;data: UpdateProgramDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  programsControllerUpdate(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ProgramsControllerUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof programsControllerUpdate>>>
+    export type ProgramsControllerUpdateMutationBody = UpdateProgramDto
+    export type ProgramsControllerUpdateMutationError = unknown
+
+    export const useProgramsControllerUpdate = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof programsControllerUpdate>>, TError,{id: number;data: UpdateProgramDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof programsControllerUpdate>>,
+        TError,
+        {id: number;data: UpdateProgramDto},
+        TContext
+      > => {
+      return useMutation(getProgramsControllerUpdateMutationOptions(options), queryClient);
     }
 
 export const programsControllerRemove = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/programs/${id}`, method: 'DELETE'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/programs/${id}`, method: 'DELETE', signal
     },
       options);
+    }
+
+
+
+
+export const getProgramsControllerRemoveMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof programsControllerRemove>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof programsControllerRemove>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['programsControllerRemove'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof programsControllerRemove>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  programsControllerRemove(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ProgramsControllerRemoveMutationResult = NonNullable<Awaited<ReturnType<typeof programsControllerRemove>>>
+
+    export type ProgramsControllerRemoveMutationError = unknown
+
+    export const useProgramsControllerRemove = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof programsControllerRemove>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof programsControllerRemove>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getProgramsControllerRemoveMutationOptions(options), queryClient);
     }
 
 export const programsControllerSubmit = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/programs/${id}/submit`, method: 'POST'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/programs/${id}/submit`, method: 'POST', signal
     },
       options);
+    }
+
+
+
+
+export const getProgramsControllerSubmitMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof programsControllerSubmit>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof programsControllerSubmit>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['programsControllerSubmit'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof programsControllerSubmit>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  programsControllerSubmit(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ProgramsControllerSubmitMutationResult = NonNullable<Awaited<ReturnType<typeof programsControllerSubmit>>>
+
+    export type ProgramsControllerSubmitMutationError = unknown
+
+    export const useProgramsControllerSubmit = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof programsControllerSubmit>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof programsControllerSubmit>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getProgramsControllerSubmitMutationOptions(options), queryClient);
     }
 
 export const programsControllerApprove = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/programs/${id}/approve`, method: 'POST'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/programs/${id}/approve`, method: 'POST', signal
     },
       options);
+    }
+
+
+
+
+export const getProgramsControllerApproveMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof programsControllerApprove>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof programsControllerApprove>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['programsControllerApprove'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof programsControllerApprove>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  programsControllerApprove(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ProgramsControllerApproveMutationResult = NonNullable<Awaited<ReturnType<typeof programsControllerApprove>>>
+
+    export type ProgramsControllerApproveMutationError = unknown
+
+    export const useProgramsControllerApprove = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof programsControllerApprove>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof programsControllerApprove>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getProgramsControllerApproveMutationOptions(options), queryClient);
     }
 
 export const programsControllerConfirm = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/programs/${id}/confirm`, method: 'POST'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/programs/${id}/confirm`, method: 'POST', signal
     },
       options);
+    }
+
+
+
+
+export const getProgramsControllerConfirmMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof programsControllerConfirm>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof programsControllerConfirm>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['programsControllerConfirm'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof programsControllerConfirm>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  programsControllerConfirm(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ProgramsControllerConfirmMutationResult = NonNullable<Awaited<ReturnType<typeof programsControllerConfirm>>>
+
+    export type ProgramsControllerConfirmMutationError = unknown
+
+    export const useProgramsControllerConfirm = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof programsControllerConfirm>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof programsControllerConfirm>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getProgramsControllerConfirmMutationOptions(options), queryClient);
     }
 
 export const programsControllerSendToDtm = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/programs/${id}/send`, method: 'POST'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/programs/${id}/send`, method: 'POST', signal
     },
       options);
+    }
+
+
+
+
+export const getProgramsControllerSendToDtmMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof programsControllerSendToDtm>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof programsControllerSendToDtm>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['programsControllerSendToDtm'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof programsControllerSendToDtm>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  programsControllerSendToDtm(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ProgramsControllerSendToDtmMutationResult = NonNullable<Awaited<ReturnType<typeof programsControllerSendToDtm>>>
+
+    export type ProgramsControllerSendToDtmMutationError = unknown
+
+    export const useProgramsControllerSendToDtm = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof programsControllerSendToDtm>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof programsControllerSendToDtm>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getProgramsControllerSendToDtmMutationOptions(options), queryClient);
     }
 
 export const programsControllerCancel = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/programs/${id}/cancel`, method: 'POST'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/programs/${id}/cancel`, method: 'POST', signal
     },
       options);
+    }
+
+
+
+
+export const getProgramsControllerCancelMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof programsControllerCancel>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof programsControllerCancel>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['programsControllerCancel'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof programsControllerCancel>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  programsControllerCancel(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ProgramsControllerCancelMutationResult = NonNullable<Awaited<ReturnType<typeof programsControllerCancel>>>
+
+    export type ProgramsControllerCancelMutationError = unknown
+
+    export const useProgramsControllerCancel = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof programsControllerCancel>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof programsControllerCancel>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getProgramsControllerCancelMutationOptions(options), queryClient);
     }
 
 export const customersControllerFindAll = (
 
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/customers`, method: 'GET'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/customers`, method: 'GET', signal
     },
       options);
     }
 
+
+
+
+export const getCustomersControllerFindAllQueryKey = () => {
+    return [
+    `/customers`
+    ] as const;
+    }
+
+
+export const getCustomersControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof customersControllerFindAll>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getCustomersControllerFindAllQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof customersControllerFindAll>>> = ({ signal }) => customersControllerFindAll(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindAll>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type CustomersControllerFindAllQueryResult = NonNullable<Awaited<ReturnType<typeof customersControllerFindAll>>>
+export type CustomersControllerFindAllQueryError = unknown
+
+
+export function useCustomersControllerFindAll<TData = Awaited<ReturnType<typeof customersControllerFindAll>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindAll>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof customersControllerFindAll>>,
+          TError,
+          Awaited<ReturnType<typeof customersControllerFindAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCustomersControllerFindAll<TData = Awaited<ReturnType<typeof customersControllerFindAll>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindAll>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof customersControllerFindAll>>,
+          TError,
+          Awaited<ReturnType<typeof customersControllerFindAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCustomersControllerFindAll<TData = Awaited<ReturnType<typeof customersControllerFindAll>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useCustomersControllerFindAll<TData = Awaited<ReturnType<typeof customersControllerFindAll>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getCustomersControllerFindAllQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const customersControllerCreate = (
     createCustomerDto: CreateCustomerDto,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
       {url: `/customers`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
-      data: createCustomerDto
+      data: createCustomerDto, signal
     },
       options);
+    }
+
+
+
+
+export const getCustomersControllerCreateMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof customersControllerCreate>>, TError,{data: CreateCustomerDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof customersControllerCreate>>, TError,{data: CreateCustomerDto}, TContext> => {
+
+const mutationKey = ['customersControllerCreate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof customersControllerCreate>>, {data: CreateCustomerDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  customersControllerCreate(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CustomersControllerCreateMutationResult = NonNullable<Awaited<ReturnType<typeof customersControllerCreate>>>
+    export type CustomersControllerCreateMutationBody = CreateCustomerDto
+    export type CustomersControllerCreateMutationError = unknown
+
+    export const useCustomersControllerCreate = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof customersControllerCreate>>, TError,{data: CreateCustomerDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof customersControllerCreate>>,
+        TError,
+        {data: CreateCustomerDto},
+        TContext
+      > => {
+      return useMutation(getCustomersControllerCreateMutationOptions(options), queryClient);
     }
 
 export const customersControllerFindOne = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/customers/${id}`, method: 'GET'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/customers/${id}`, method: 'GET', signal
     },
       options);
     }
+
+
+
+
+export const getCustomersControllerFindOneQueryKey = (id: number,) => {
+    return [
+    `/customers/${id}`
+    ] as const;
+    }
+
+
+export const getCustomersControllerFindOneQueryOptions = <TData = Awaited<ReturnType<typeof customersControllerFindOne>>, TError = unknown>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getCustomersControllerFindOneQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof customersControllerFindOne>>> = ({ signal }) => customersControllerFindOne(id, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindOne>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type CustomersControllerFindOneQueryResult = NonNullable<Awaited<ReturnType<typeof customersControllerFindOne>>>
+export type CustomersControllerFindOneQueryError = unknown
+
+
+export function useCustomersControllerFindOne<TData = Awaited<ReturnType<typeof customersControllerFindOne>>, TError = unknown>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindOne>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof customersControllerFindOne>>,
+          TError,
+          Awaited<ReturnType<typeof customersControllerFindOne>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCustomersControllerFindOne<TData = Awaited<ReturnType<typeof customersControllerFindOne>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindOne>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof customersControllerFindOne>>,
+          TError,
+          Awaited<ReturnType<typeof customersControllerFindOne>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCustomersControllerFindOne<TData = Awaited<ReturnType<typeof customersControllerFindOne>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useCustomersControllerFindOne<TData = Awaited<ReturnType<typeof customersControllerFindOne>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getCustomersControllerFindOneQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const customersControllerUpdate = (
     id: number,
     updateCustomerDto: UpdateCustomerDto,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
       {url: `/customers/${id}`, method: 'PUT',
       headers: {'Content-Type': 'application/json', },
-      data: updateCustomerDto
+      data: updateCustomerDto, signal
     },
       options);
+    }
+
+
+
+
+export const getCustomersControllerUpdateMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof customersControllerUpdate>>, TError,{id: number;data: UpdateCustomerDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof customersControllerUpdate>>, TError,{id: number;data: UpdateCustomerDto}, TContext> => {
+
+const mutationKey = ['customersControllerUpdate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof customersControllerUpdate>>, {id: number;data: UpdateCustomerDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  customersControllerUpdate(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CustomersControllerUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof customersControllerUpdate>>>
+    export type CustomersControllerUpdateMutationBody = UpdateCustomerDto
+    export type CustomersControllerUpdateMutationError = unknown
+
+    export const useCustomersControllerUpdate = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof customersControllerUpdate>>, TError,{id: number;data: UpdateCustomerDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof customersControllerUpdate>>,
+        TError,
+        {id: number;data: UpdateCustomerDto},
+        TContext
+      > => {
+      return useMutation(getCustomersControllerUpdateMutationOptions(options), queryClient);
     }
 
 export const customersControllerRemove = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/customers/${id}`, method: 'DELETE'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/customers/${id}`, method: 'DELETE', signal
     },
       options);
+    }
+
+
+
+
+export const getCustomersControllerRemoveMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof customersControllerRemove>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof customersControllerRemove>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['customersControllerRemove'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof customersControllerRemove>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  customersControllerRemove(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CustomersControllerRemoveMutationResult = NonNullable<Awaited<ReturnType<typeof customersControllerRemove>>>
+
+    export type CustomersControllerRemoveMutationError = unknown
+
+    export const useCustomersControllerRemove = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof customersControllerRemove>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof customersControllerRemove>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getCustomersControllerRemoveMutationOptions(options), queryClient);
     }
 
 export const claimsControllerCreate = (
     createClaimDto: CreateClaimDto,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
       {url: `/claims`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
-      data: createClaimDto
+      data: createClaimDto, signal
     },
       options);
+    }
+
+
+
+
+export const getClaimsControllerCreateMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerCreate>>, TError,{data: CreateClaimDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof claimsControllerCreate>>, TError,{data: CreateClaimDto}, TContext> => {
+
+const mutationKey = ['claimsControllerCreate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof claimsControllerCreate>>, {data: CreateClaimDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  claimsControllerCreate(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ClaimsControllerCreateMutationResult = NonNullable<Awaited<ReturnType<typeof claimsControllerCreate>>>
+    export type ClaimsControllerCreateMutationBody = CreateClaimDto
+    export type ClaimsControllerCreateMutationError = unknown
+
+    export const useClaimsControllerCreate = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerCreate>>, TError,{data: CreateClaimDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof claimsControllerCreate>>,
+        TError,
+        {data: CreateClaimDto},
+        TContext
+      > => {
+      return useMutation(getClaimsControllerCreateMutationOptions(options), queryClient);
     }
 
 export const claimsControllerFindAll = (
 
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/claims`, method: 'GET'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/claims`, method: 'GET', signal
     },
       options);
     }
 
+
+
+
+export const getClaimsControllerFindAllQueryKey = () => {
+    return [
+    `/claims`
+    ] as const;
+    }
+
+
+export const getClaimsControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof claimsControllerFindAll>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getClaimsControllerFindAllQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof claimsControllerFindAll>>> = ({ signal }) => claimsControllerFindAll(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof claimsControllerFindAll>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ClaimsControllerFindAllQueryResult = NonNullable<Awaited<ReturnType<typeof claimsControllerFindAll>>>
+export type ClaimsControllerFindAllQueryError = unknown
+
+
+export function useClaimsControllerFindAll<TData = Awaited<ReturnType<typeof claimsControllerFindAll>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerFindAll>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof claimsControllerFindAll>>,
+          TError,
+          Awaited<ReturnType<typeof claimsControllerFindAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useClaimsControllerFindAll<TData = Awaited<ReturnType<typeof claimsControllerFindAll>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerFindAll>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof claimsControllerFindAll>>,
+          TError,
+          Awaited<ReturnType<typeof claimsControllerFindAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useClaimsControllerFindAll<TData = Awaited<ReturnType<typeof claimsControllerFindAll>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useClaimsControllerFindAll<TData = Awaited<ReturnType<typeof claimsControllerFindAll>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getClaimsControllerFindAllQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const claimsControllerFindOne = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/claims/${id}`, method: 'GET'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/claims/${id}`, method: 'GET', signal
     },
       options);
     }
+
+
+
+
+export const getClaimsControllerFindOneQueryKey = (id: number,) => {
+    return [
+    `/claims/${id}`
+    ] as const;
+    }
+
+
+export const getClaimsControllerFindOneQueryOptions = <TData = Awaited<ReturnType<typeof claimsControllerFindOne>>, TError = unknown>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getClaimsControllerFindOneQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof claimsControllerFindOne>>> = ({ signal }) => claimsControllerFindOne(id, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof claimsControllerFindOne>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ClaimsControllerFindOneQueryResult = NonNullable<Awaited<ReturnType<typeof claimsControllerFindOne>>>
+export type ClaimsControllerFindOneQueryError = unknown
+
+
+export function useClaimsControllerFindOne<TData = Awaited<ReturnType<typeof claimsControllerFindOne>>, TError = unknown>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerFindOne>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof claimsControllerFindOne>>,
+          TError,
+          Awaited<ReturnType<typeof claimsControllerFindOne>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useClaimsControllerFindOne<TData = Awaited<ReturnType<typeof claimsControllerFindOne>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerFindOne>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof claimsControllerFindOne>>,
+          TError,
+          Awaited<ReturnType<typeof claimsControllerFindOne>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useClaimsControllerFindOne<TData = Awaited<ReturnType<typeof claimsControllerFindOne>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useClaimsControllerFindOne<TData = Awaited<ReturnType<typeof claimsControllerFindOne>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getClaimsControllerFindOneQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const claimsControllerUpdate = (
     id: number,
     updateClaimDto: UpdateClaimDto,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
       {url: `/claims/${id}`, method: 'PATCH',
       headers: {'Content-Type': 'application/json', },
-      data: updateClaimDto
+      data: updateClaimDto, signal
     },
       options);
+    }
+
+
+
+
+export const getClaimsControllerUpdateMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerUpdate>>, TError,{id: number;data: UpdateClaimDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof claimsControllerUpdate>>, TError,{id: number;data: UpdateClaimDto}, TContext> => {
+
+const mutationKey = ['claimsControllerUpdate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof claimsControllerUpdate>>, {id: number;data: UpdateClaimDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  claimsControllerUpdate(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ClaimsControllerUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof claimsControllerUpdate>>>
+    export type ClaimsControllerUpdateMutationBody = UpdateClaimDto
+    export type ClaimsControllerUpdateMutationError = unknown
+
+    export const useClaimsControllerUpdate = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerUpdate>>, TError,{id: number;data: UpdateClaimDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof claimsControllerUpdate>>,
+        TError,
+        {id: number;data: UpdateClaimDto},
+        TContext
+      > => {
+      return useMutation(getClaimsControllerUpdateMutationOptions(options), queryClient);
     }
 
 export const claimsControllerRemove = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/claims/${id}`, method: 'DELETE'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/claims/${id}`, method: 'DELETE', signal
     },
       options);
+    }
+
+
+
+
+export const getClaimsControllerRemoveMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerRemove>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof claimsControllerRemove>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['claimsControllerRemove'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof claimsControllerRemove>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  claimsControllerRemove(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ClaimsControllerRemoveMutationResult = NonNullable<Awaited<ReturnType<typeof claimsControllerRemove>>>
+
+    export type ClaimsControllerRemoveMutationError = unknown
+
+    export const useClaimsControllerRemove = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerRemove>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof claimsControllerRemove>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getClaimsControllerRemoveMutationOptions(options), queryClient);
     }
 
 export const claimsControllerAddComment = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/claims/${id}/comments`, method: 'POST'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/claims/${id}/comments`, method: 'POST', signal
     },
       options);
+    }
+
+
+
+
+export const getClaimsControllerAddCommentMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerAddComment>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof claimsControllerAddComment>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['claimsControllerAddComment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof claimsControllerAddComment>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  claimsControllerAddComment(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ClaimsControllerAddCommentMutationResult = NonNullable<Awaited<ReturnType<typeof claimsControllerAddComment>>>
+
+    export type ClaimsControllerAddCommentMutationError = unknown
+
+    export const useClaimsControllerAddComment = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerAddComment>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof claimsControllerAddComment>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getClaimsControllerAddCommentMutationOptions(options), queryClient);
     }
 
 export const claimsControllerGetComments = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/claims/${id}/comments`, method: 'GET'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/claims/${id}/comments`, method: 'GET', signal
     },
       options);
     }
 
+
+
+
+export const getClaimsControllerGetCommentsQueryKey = (id: number,) => {
+    return [
+    `/claims/${id}/comments`
+    ] as const;
+    }
+
+
+export const getClaimsControllerGetCommentsQueryOptions = <TData = Awaited<ReturnType<typeof claimsControllerGetComments>>, TError = unknown>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerGetComments>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getClaimsControllerGetCommentsQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof claimsControllerGetComments>>> = ({ signal }) => claimsControllerGetComments(id, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof claimsControllerGetComments>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ClaimsControllerGetCommentsQueryResult = NonNullable<Awaited<ReturnType<typeof claimsControllerGetComments>>>
+export type ClaimsControllerGetCommentsQueryError = unknown
+
+
+export function useClaimsControllerGetComments<TData = Awaited<ReturnType<typeof claimsControllerGetComments>>, TError = unknown>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerGetComments>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof claimsControllerGetComments>>,
+          TError,
+          Awaited<ReturnType<typeof claimsControllerGetComments>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useClaimsControllerGetComments<TData = Awaited<ReturnType<typeof claimsControllerGetComments>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerGetComments>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof claimsControllerGetComments>>,
+          TError,
+          Awaited<ReturnType<typeof claimsControllerGetComments>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useClaimsControllerGetComments<TData = Awaited<ReturnType<typeof claimsControllerGetComments>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerGetComments>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useClaimsControllerGetComments<TData = Awaited<ReturnType<typeof claimsControllerGetComments>>, TError = unknown>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerGetComments>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getClaimsControllerGetCommentsQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const claimsControllerStartProgress = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/claims/${id}/start-progress`, method: 'POST'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/claims/${id}/start-progress`, method: 'POST', signal
     },
       options);
+    }
+
+
+
+
+export const getClaimsControllerStartProgressMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerStartProgress>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof claimsControllerStartProgress>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['claimsControllerStartProgress'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof claimsControllerStartProgress>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  claimsControllerStartProgress(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ClaimsControllerStartProgressMutationResult = NonNullable<Awaited<ReturnType<typeof claimsControllerStartProgress>>>
+
+    export type ClaimsControllerStartProgressMutationError = unknown
+
+    export const useClaimsControllerStartProgress = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerStartProgress>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof claimsControllerStartProgress>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getClaimsControllerStartProgressMutationOptions(options), queryClient);
     }
 
 export const claimsControllerAwaitInfo = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/claims/${id}/await-info`, method: 'POST'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/claims/${id}/await-info`, method: 'POST', signal
     },
       options);
+    }
+
+
+
+
+export const getClaimsControllerAwaitInfoMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerAwaitInfo>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof claimsControllerAwaitInfo>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['claimsControllerAwaitInfo'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof claimsControllerAwaitInfo>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  claimsControllerAwaitInfo(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ClaimsControllerAwaitInfoMutationResult = NonNullable<Awaited<ReturnType<typeof claimsControllerAwaitInfo>>>
+
+    export type ClaimsControllerAwaitInfoMutationError = unknown
+
+    export const useClaimsControllerAwaitInfo = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerAwaitInfo>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof claimsControllerAwaitInfo>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getClaimsControllerAwaitInfoMutationOptions(options), queryClient);
     }
 
 export const claimsControllerStartTreatment = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/claims/${id}/start-treatment`, method: 'POST'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/claims/${id}/start-treatment`, method: 'POST', signal
     },
       options);
+    }
+
+
+
+
+export const getClaimsControllerStartTreatmentMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerStartTreatment>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof claimsControllerStartTreatment>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['claimsControllerStartTreatment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof claimsControllerStartTreatment>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  claimsControllerStartTreatment(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ClaimsControllerStartTreatmentMutationResult = NonNullable<Awaited<ReturnType<typeof claimsControllerStartTreatment>>>
+
+    export type ClaimsControllerStartTreatmentMutationError = unknown
+
+    export const useClaimsControllerStartTreatment = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerStartTreatment>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof claimsControllerStartTreatment>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getClaimsControllerStartTreatmentMutationOptions(options), queryClient);
     }
 
 export const claimsControllerResolve = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/claims/${id}/resolve`, method: 'POST'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/claims/${id}/resolve`, method: 'POST', signal
     },
       options);
+    }
+
+
+
+
+export const getClaimsControllerResolveMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerResolve>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof claimsControllerResolve>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['claimsControllerResolve'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof claimsControllerResolve>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  claimsControllerResolve(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ClaimsControllerResolveMutationResult = NonNullable<Awaited<ReturnType<typeof claimsControllerResolve>>>
+
+    export type ClaimsControllerResolveMutationError = unknown
+
+    export const useClaimsControllerResolve = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerResolve>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof claimsControllerResolve>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getClaimsControllerResolveMutationOptions(options), queryClient);
     }
 
 export const claimsControllerClose = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/claims/${id}/close`, method: 'POST'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/claims/${id}/close`, method: 'POST', signal
     },
       options);
+    }
+
+
+
+
+export const getClaimsControllerCloseMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerClose>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof claimsControllerClose>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['claimsControllerClose'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof claimsControllerClose>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  claimsControllerClose(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ClaimsControllerCloseMutationResult = NonNullable<Awaited<ReturnType<typeof claimsControllerClose>>>
+
+    export type ClaimsControllerCloseMutationError = unknown
+
+    export const useClaimsControllerClose = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerClose>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof claimsControllerClose>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getClaimsControllerCloseMutationOptions(options), queryClient);
     }
 
 export const claimsControllerReject = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/claims/${id}/reject`, method: 'POST'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/claims/${id}/reject`, method: 'POST', signal
     },
       options);
+    }
+
+
+
+
+export const getClaimsControllerRejectMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerReject>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof claimsControllerReject>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['claimsControllerReject'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof claimsControllerReject>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  claimsControllerReject(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ClaimsControllerRejectMutationResult = NonNullable<Awaited<ReturnType<typeof claimsControllerReject>>>
+
+    export type ClaimsControllerRejectMutationError = unknown
+
+    export const useClaimsControllerReject = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerReject>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof claimsControllerReject>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getClaimsControllerRejectMutationOptions(options), queryClient);
     }
 
 export const claimsControllerSendToDtm = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/claims/${id}/send-to-dtm`, method: 'POST'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/claims/${id}/send-to-dtm`, method: 'POST', signal
     },
       options);
+    }
+
+
+
+
+export const getClaimsControllerSendToDtmMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerSendToDtm>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof claimsControllerSendToDtm>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['claimsControllerSendToDtm'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof claimsControllerSendToDtm>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  claimsControllerSendToDtm(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ClaimsControllerSendToDtmMutationResult = NonNullable<Awaited<ReturnType<typeof claimsControllerSendToDtm>>>
+
+    export type ClaimsControllerSendToDtmMutationError = unknown
+
+    export const useClaimsControllerSendToDtm = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerSendToDtm>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof claimsControllerSendToDtm>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getClaimsControllerSendToDtmMutationOptions(options), queryClient);
     }
 
 export const notificationsControllerFindAll = (
 
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/notifications`, method: 'GET'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/notifications`, method: 'GET', signal
     },
       options);
     }
+
+
+
+
+export const getNotificationsControllerFindAllQueryKey = () => {
+    return [
+    `/notifications`
+    ] as const;
+    }
+
+
+export const getNotificationsControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof notificationsControllerFindAll>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof notificationsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getNotificationsControllerFindAllQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof notificationsControllerFindAll>>> = ({ signal }) => notificationsControllerFindAll(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof notificationsControllerFindAll>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type NotificationsControllerFindAllQueryResult = NonNullable<Awaited<ReturnType<typeof notificationsControllerFindAll>>>
+export type NotificationsControllerFindAllQueryError = unknown
+
+
+export function useNotificationsControllerFindAll<TData = Awaited<ReturnType<typeof notificationsControllerFindAll>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof notificationsControllerFindAll>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof notificationsControllerFindAll>>,
+          TError,
+          Awaited<ReturnType<typeof notificationsControllerFindAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useNotificationsControllerFindAll<TData = Awaited<ReturnType<typeof notificationsControllerFindAll>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof notificationsControllerFindAll>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof notificationsControllerFindAll>>,
+          TError,
+          Awaited<ReturnType<typeof notificationsControllerFindAll>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useNotificationsControllerFindAll<TData = Awaited<ReturnType<typeof notificationsControllerFindAll>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof notificationsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useNotificationsControllerFindAll<TData = Awaited<ReturnType<typeof notificationsControllerFindAll>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof notificationsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getNotificationsControllerFindAllQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const notificationsControllerGetUnreadCount = (
 
- options?: SecondParameter<typeof customInstance<number>>,) => {
-      return customInstance<number>(
-      {url: `/notifications/unread-count`, method: 'GET'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<number>(
+      {url: `/notifications/unread-count`, method: 'GET', signal
     },
       options);
     }
 
+
+
+
+export const getNotificationsControllerGetUnreadCountQueryKey = () => {
+    return [
+    `/notifications/unread-count`
+    ] as const;
+    }
+
+
+export const getNotificationsControllerGetUnreadCountQueryOptions = <TData = Awaited<ReturnType<typeof notificationsControllerGetUnreadCount>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof notificationsControllerGetUnreadCount>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getNotificationsControllerGetUnreadCountQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof notificationsControllerGetUnreadCount>>> = ({ signal }) => notificationsControllerGetUnreadCount(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof notificationsControllerGetUnreadCount>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type NotificationsControllerGetUnreadCountQueryResult = NonNullable<Awaited<ReturnType<typeof notificationsControllerGetUnreadCount>>>
+export type NotificationsControllerGetUnreadCountQueryError = unknown
+
+
+export function useNotificationsControllerGetUnreadCount<TData = Awaited<ReturnType<typeof notificationsControllerGetUnreadCount>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof notificationsControllerGetUnreadCount>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof notificationsControllerGetUnreadCount>>,
+          TError,
+          Awaited<ReturnType<typeof notificationsControllerGetUnreadCount>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useNotificationsControllerGetUnreadCount<TData = Awaited<ReturnType<typeof notificationsControllerGetUnreadCount>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof notificationsControllerGetUnreadCount>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof notificationsControllerGetUnreadCount>>,
+          TError,
+          Awaited<ReturnType<typeof notificationsControllerGetUnreadCount>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useNotificationsControllerGetUnreadCount<TData = Awaited<ReturnType<typeof notificationsControllerGetUnreadCount>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof notificationsControllerGetUnreadCount>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useNotificationsControllerGetUnreadCount<TData = Awaited<ReturnType<typeof notificationsControllerGetUnreadCount>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof notificationsControllerGetUnreadCount>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getNotificationsControllerGetUnreadCountQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const notificationsControllerMarkAsRead = (
     id: number,
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/notifications/${id}/read`, method: 'PATCH'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/notifications/${id}/read`, method: 'PATCH', signal
     },
       options);
+    }
+
+
+
+
+export const getNotificationsControllerMarkAsReadMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof notificationsControllerMarkAsRead>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof notificationsControllerMarkAsRead>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['notificationsControllerMarkAsRead'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof notificationsControllerMarkAsRead>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  notificationsControllerMarkAsRead(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type NotificationsControllerMarkAsReadMutationResult = NonNullable<Awaited<ReturnType<typeof notificationsControllerMarkAsRead>>>
+
+    export type NotificationsControllerMarkAsReadMutationError = unknown
+
+    export const useNotificationsControllerMarkAsRead = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof notificationsControllerMarkAsRead>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof notificationsControllerMarkAsRead>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getNotificationsControllerMarkAsReadMutationOptions(options), queryClient);
     }
 
 export const notificationsControllerMarkAllAsRead = (
 
- options?: SecondParameter<typeof customInstance<void>>,) => {
-      return customInstance<void>(
-      {url: `/notifications/read-all`, method: 'PATCH'
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/notifications/read-all`, method: 'PATCH', signal
     },
       options);
     }
 
-export type AppControllerHealthResult = NonNullable<Awaited<ReturnType<typeof appControllerHealth>>>
-export type UsersControllerFindAllResult = NonNullable<Awaited<ReturnType<typeof usersControllerFindAll>>>
-export type UsersControllerFindOneByIdResult = NonNullable<Awaited<ReturnType<typeof usersControllerFindOneById>>>
-export type AuthControllerLoginResult = NonNullable<Awaited<ReturnType<typeof authControllerLogin>>>
-export type AuthControllerGetProfileResult = NonNullable<Awaited<ReturnType<typeof authControllerGetProfile>>>
-export type AuthControllerForgotPasswordResult = NonNullable<Awaited<ReturnType<typeof authControllerForgotPassword>>>
-export type AuthControllerResetPasswordResult = NonNullable<Awaited<ReturnType<typeof authControllerResetPassword>>>
-export type OrdersControllerCreateResult = NonNullable<Awaited<ReturnType<typeof ordersControllerCreate>>>
-export type OrdersControllerFindAllResult = NonNullable<Awaited<ReturnType<typeof ordersControllerFindAll>>>
-export type OrdersControllerFindOneResult = NonNullable<Awaited<ReturnType<typeof ordersControllerFindOne>>>
-export type OrdersControllerUpdateResult = NonNullable<Awaited<ReturnType<typeof ordersControllerUpdate>>>
-export type OrdersControllerRemoveResult = NonNullable<Awaited<ReturnType<typeof ordersControllerRemove>>>
-export type OrdersControllerSubmitResult = NonNullable<Awaited<ReturnType<typeof ordersControllerSubmit>>>
-export type OrdersControllerApproveResult = NonNullable<Awaited<ReturnType<typeof ordersControllerApprove>>>
-export type OrdersControllerRejectResult = NonNullable<Awaited<ReturnType<typeof ordersControllerReject>>>
-export type OrdersControllerCancelResult = NonNullable<Awaited<ReturnType<typeof ordersControllerCancel>>>
-export type OrdersControllerSendToDtmResult = NonNullable<Awaited<ReturnType<typeof ordersControllerSendToDtm>>>
-export type FilesControllerUploadFileResult = NonNullable<Awaited<ReturnType<typeof filesControllerUploadFile>>>
-export type FilesControllerListFilesResult = NonNullable<Awaited<ReturnType<typeof filesControllerListFiles>>>
-export type FilesControllerDownloadFileResult = NonNullable<Awaited<ReturnType<typeof filesControllerDownloadFile>>>
-export type FilesControllerDeleteFileResult = NonNullable<Awaited<ReturnType<typeof filesControllerDeleteFile>>>
-export type ProgramsControllerCreateResult = NonNullable<Awaited<ReturnType<typeof programsControllerCreate>>>
-export type ProgramsControllerFindAllResult = NonNullable<Awaited<ReturnType<typeof programsControllerFindAll>>>
-export type ProgramsControllerFindOneResult = NonNullable<Awaited<ReturnType<typeof programsControllerFindOne>>>
-export type ProgramsControllerUpdateResult = NonNullable<Awaited<ReturnType<typeof programsControllerUpdate>>>
-export type ProgramsControllerRemoveResult = NonNullable<Awaited<ReturnType<typeof programsControllerRemove>>>
-export type ProgramsControllerSubmitResult = NonNullable<Awaited<ReturnType<typeof programsControllerSubmit>>>
-export type ProgramsControllerApproveResult = NonNullable<Awaited<ReturnType<typeof programsControllerApprove>>>
-export type ProgramsControllerConfirmResult = NonNullable<Awaited<ReturnType<typeof programsControllerConfirm>>>
-export type ProgramsControllerSendToDtmResult = NonNullable<Awaited<ReturnType<typeof programsControllerSendToDtm>>>
-export type ProgramsControllerCancelResult = NonNullable<Awaited<ReturnType<typeof programsControllerCancel>>>
-export type CustomersControllerFindAllResult = NonNullable<Awaited<ReturnType<typeof customersControllerFindAll>>>
-export type CustomersControllerCreateResult = NonNullable<Awaited<ReturnType<typeof customersControllerCreate>>>
-export type CustomersControllerFindOneResult = NonNullable<Awaited<ReturnType<typeof customersControllerFindOne>>>
-export type CustomersControllerUpdateResult = NonNullable<Awaited<ReturnType<typeof customersControllerUpdate>>>
-export type CustomersControllerRemoveResult = NonNullable<Awaited<ReturnType<typeof customersControllerRemove>>>
-export type ClaimsControllerCreateResult = NonNullable<Awaited<ReturnType<typeof claimsControllerCreate>>>
-export type ClaimsControllerFindAllResult = NonNullable<Awaited<ReturnType<typeof claimsControllerFindAll>>>
-export type ClaimsControllerFindOneResult = NonNullable<Awaited<ReturnType<typeof claimsControllerFindOne>>>
-export type ClaimsControllerUpdateResult = NonNullable<Awaited<ReturnType<typeof claimsControllerUpdate>>>
-export type ClaimsControllerRemoveResult = NonNullable<Awaited<ReturnType<typeof claimsControllerRemove>>>
-export type ClaimsControllerAddCommentResult = NonNullable<Awaited<ReturnType<typeof claimsControllerAddComment>>>
-export type ClaimsControllerGetCommentsResult = NonNullable<Awaited<ReturnType<typeof claimsControllerGetComments>>>
-export type ClaimsControllerStartProgressResult = NonNullable<Awaited<ReturnType<typeof claimsControllerStartProgress>>>
-export type ClaimsControllerAwaitInfoResult = NonNullable<Awaited<ReturnType<typeof claimsControllerAwaitInfo>>>
-export type ClaimsControllerStartTreatmentResult = NonNullable<Awaited<ReturnType<typeof claimsControllerStartTreatment>>>
-export type ClaimsControllerResolveResult = NonNullable<Awaited<ReturnType<typeof claimsControllerResolve>>>
-export type ClaimsControllerCloseResult = NonNullable<Awaited<ReturnType<typeof claimsControllerClose>>>
-export type ClaimsControllerRejectResult = NonNullable<Awaited<ReturnType<typeof claimsControllerReject>>>
-export type ClaimsControllerSendToDtmResult = NonNullable<Awaited<ReturnType<typeof claimsControllerSendToDtm>>>
-export type NotificationsControllerFindAllResult = NonNullable<Awaited<ReturnType<typeof notificationsControllerFindAll>>>
-export type NotificationsControllerGetUnreadCountResult = NonNullable<Awaited<ReturnType<typeof notificationsControllerGetUnreadCount>>>
-export type NotificationsControllerMarkAsReadResult = NonNullable<Awaited<ReturnType<typeof notificationsControllerMarkAsRead>>>
-export type NotificationsControllerMarkAllAsReadResult = NonNullable<Awaited<ReturnType<typeof notificationsControllerMarkAllAsRead>>>
+
+
+
+export const getNotificationsControllerMarkAllAsReadMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof notificationsControllerMarkAllAsRead>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof notificationsControllerMarkAllAsRead>>, TError,void, TContext> => {
+
+const mutationKey = ['notificationsControllerMarkAllAsRead'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof notificationsControllerMarkAllAsRead>>, void> = () => {
+
+
+          return  notificationsControllerMarkAllAsRead(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type NotificationsControllerMarkAllAsReadMutationResult = NonNullable<Awaited<ReturnType<typeof notificationsControllerMarkAllAsRead>>>
+
+    export type NotificationsControllerMarkAllAsReadMutationError = unknown
+
+    export const useNotificationsControllerMarkAllAsRead = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof notificationsControllerMarkAllAsRead>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof notificationsControllerMarkAllAsRead>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getNotificationsControllerMarkAllAsReadMutationOptions(options), queryClient);
+    }
