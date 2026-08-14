@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { type LoginState, loginAction } from "./actions";
 
 
-export default function LoginPage() {
+export default function Page() {
   const router = useRouter();
   const [state, action, pending] = useActionState(loginAction, null as LoginState | null);
 

@@ -6,6 +6,6 @@ export const metadata: Metadata = {
 	description: "",
 };
 
-export default function ForgotPasswordPage() {
+export default function Page() {
   return <UnderConstruction />;
 }
