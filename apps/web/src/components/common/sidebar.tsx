@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronsUpDownIcon, HomeIcon, LogOutIcon, SettingsIcon, UserIcon } from "lucide-react"
+import { ChevronsUpDownIcon, HomeIcon, LogOutIcon, PackageIcon, SettingsIcon, UserIcon } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import * as React from "react"
@@ -33,6 +33,11 @@ const routes = [
     title: "Home",
     url: "/dashboard",
     icon: HomeIcon,
+  },
+  {
+    title: "Orders",
+    url: "/dashboard/orders",
+    icon: PackageIcon,
   },
 ]
 
