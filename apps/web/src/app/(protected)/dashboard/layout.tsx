@@ -6,7 +6,7 @@ export default async function Layout({ children }: Readonly<{ children: React.Re
     <SidebarProvider >
       <AppSidebar />
 
-      <SidebarInset>
+      <SidebarInset className="p-4 space-y-8">
         { children }
       </SidebarInset>
     </SidebarProvider>
