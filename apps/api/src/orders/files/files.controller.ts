@@ -18,14 +18,25 @@ import {
 	UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
+import {
+	ApiBadRequestResponse,
+	ApiConsumes,
+	ApiForbiddenResponse,
+	ApiNotFoundResponse,
+	ApiOkResponse,
+	ApiUnauthorizedResponse,
+} from "@nestjs/swagger";
 import type { Response } from "express";
 import type { AuthRequest } from "src/auth/auth.types";
 import { Permissions } from "src/auth/permissions.decorator";
+import { MessageResponseDto } from "src/common/dto/message.response.dto";
 import { OrderOwnershipGuard } from "src/orders/guards/order-ownership.guard";
 import type { OrderId } from "src/orders/orders.types";
 import { OrderIdPipe } from "src/orders/pipes/order-id.pipe";
 import type { MulterFile } from "src/storage/storage.types";
+import { ListFilesResponseDto } from "./dto/list-files.response.dto";
 import { UploadFileDto } from "./dto/upload-file.dto";
+import { UploadFileResponseDto } from "./dto/upload-file.response.dto";
 import { FilesService } from "./files.service";
 
 const OrderIdParam = () => Param("id", OrderIdPipe);
@@ -39,6 +50,12 @@ export class FilesController {
 	@Post()
 	@Permissions(Permission.ORDERS_UPDATE)
 	@UseInterceptors(FileInterceptor("file"))
+	@ApiConsumes("multipart/form-data")
+	@ApiOkResponse({ type: UploadFileResponseDto })
+	@ApiUnauthorizedResponse()
+	@ApiBadRequestResponse()
+	@ApiForbiddenResponse()
+	@ApiNotFoundResponse()
 	async uploadFile(
 		@OrderIdParam() id: OrderId,
 		@UploadedFile(
@@ -62,12 +79,20 @@ export class FilesController {
 
 	@Get()
 	@Permissions(Permission.ORDERS_READ)
+	@ApiOkResponse({ type: [ListFilesResponseDto] })
+	@ApiUnauthorizedResponse()
+	@ApiForbiddenResponse()
+	@ApiNotFoundResponse()
 	async listFiles(@OrderIdParam() id: OrderId) {
 		return this.filesService.listFiles(id);
 	}
 
 	@Get(":fileId/download")
 	@Permissions(Permission.ORDERS_READ)
+	@ApiOkResponse({ description: "File downloaded successfully" })
+	@ApiUnauthorizedResponse()
+	@ApiForbiddenResponse()
+	@ApiNotFoundResponse()
 	async downloadFile(
 		@OrderIdParam() id: OrderId,
 		@Param("fileId") fileId: string,
@@ -85,6 +110,10 @@ export class FilesController {
 	@Delete(":fileId")
 	@HttpCode(HttpStatus.OK)
 	@Permissions(Permission.ORDERS_UPDATE)
+	@ApiOkResponse({ type: MessageResponseDto })
+	@ApiUnauthorizedResponse()
+	@ApiForbiddenResponse()
+	@ApiNotFoundResponse()
 	async deleteFile(
 		@OrderIdParam() id: OrderId,
 		@Param("fileId") fileId: string,

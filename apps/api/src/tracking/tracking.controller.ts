@@ -8,8 +8,19 @@ import {
 	Request,
 	UseGuards,
 } from "@nestjs/common";
+import {
+	ApiBadRequestResponse,
+	ApiForbiddenResponse,
+	ApiNotFoundResponse,
+	ApiOkResponse,
+	ApiUnauthorizedResponse,
+} from "@nestjs/swagger";
 import type { AuthRequest } from "src/auth/auth.types";
 import { Permissions } from "src/auth/permissions.decorator";
+import { TrackOrderResponseDto } from "./dto/track-order.response.dto";
+import { TrackTrainResponseDto } from "./dto/track-train.response.dto";
+import { TrackWagonResponseDto } from "./dto/track-wagon.response.dto";
+import { UpdatePositionResponseDto } from "./dto/update-position.response.dto";
 import { UpdateTrainPositionDto } from "./dto/update-train-position.dto";
 import { UpdateWagonPositionDto } from "./dto/update-wagon-position.dto";
 import { TrackingOwnershipGuard } from "./guards/tracking-ownership.guard";
@@ -24,12 +35,18 @@ export class TrackingController {
 
 	@Get("wagon/:wagonNumber")
 	@Permissions(Permission.TRACKING_READ)
+	@ApiOkResponse({ type: TrackWagonResponseDto })
+	@ApiUnauthorizedResponse()
+	@ApiNotFoundResponse()
 	async trackWagon(@Param("wagonNumber") wagonNumber: string) {
 		return this.trackingService.trackWagon(wagonNumber);
 	}
 
 	@Get("train/:trainNumber")
 	@Permissions(Permission.TRACKING_READ)
+	@ApiOkResponse({ type: TrackTrainResponseDto })
+	@ApiUnauthorizedResponse()
+	@ApiNotFoundResponse()
 	async trackTrain(@Param("trainNumber") trainNumber: string) {
 		return this.trackingService.trackTrain(trainNumber);
 	}
@@ -37,6 +54,10 @@ export class TrackingController {
 	@Get("order/:orderId")
 	@Permissions(Permission.TRACKING_READ)
 	@UseGuards(TrackingOwnershipGuard)
+	@ApiOkResponse({ type: [TrackOrderResponseDto] })
+	@ApiUnauthorizedResponse()
+	@ApiForbiddenResponse()
+	@ApiNotFoundResponse()
 	async trackOrder(
 		@Param("orderId") orderId: number,
 		@Request() req: AuthRequest,
@@ -46,6 +67,11 @@ export class TrackingController {
 
 	@Post("wagon/:id/position")
 	@Permissions(Permission.TRACKING_UPDATE)
+	@ApiOkResponse({ type: UpdatePositionResponseDto })
+	@ApiUnauthorizedResponse()
+	@ApiBadRequestResponse()
+	@ApiForbiddenResponse()
+	@ApiNotFoundResponse()
 	async updateWagonPosition(
 		@Param("id", WagonIdPipe) id: WagonId,
 		@Body() dto: UpdateWagonPositionDto,
@@ -55,6 +81,11 @@ export class TrackingController {
 
 	@Post("train/:id/position")
 	@Permissions(Permission.TRACKING_UPDATE)
+	@ApiOkResponse({ type: UpdatePositionResponseDto })
+	@ApiUnauthorizedResponse()
+	@ApiBadRequestResponse()
+	@ApiForbiddenResponse()
+	@ApiNotFoundResponse()
 	async updateTrainPosition(
 		@Param("id", TrainIdPipe) id: TrainId,
 		@Body() dto: UpdateTrainPositionDto,
