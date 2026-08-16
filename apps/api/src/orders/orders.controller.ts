@@ -118,7 +118,7 @@ export class OrdersController {
 	@ApiNotFoundResponse()
 	async reject(
 		@OrderIdParam() id: OrderId,
-		@Body("reason") reason: string,
+		@Body() body: RejectOrderDto,
 		@Request() req: AuthRequest,
 	) {
 		return this.ordersService.reject(id, body.reason, req.user);
