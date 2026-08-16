@@ -21,13 +21,13 @@ import {
 } from "@nestjs/swagger";
 import type { AuthRequest } from "src/auth/auth.types";
 import { Permissions } from "src/auth/permissions.decorator";
-import { CreateOrderDto } from "./dto/create-order.dto";
-import { RejectOrderDto } from "./dto/reject-order.dto";
-import { UpdateOrderDto } from "./dto/update-order.dto";
 import { OrderOwnershipGuard } from "./guards/order-ownership.guard";
 import { OrdersService } from "./orders.service";
 import type { OrderId } from "./orders.types";
 import { OrderIdPipe } from "./pipes/order-id.pipe";
+import { CreateOrderDto } from "./requests/create-order.dto";
+import { RejectOrderDto } from "./requests/reject-order.dto";
+import { UpdateOrderDto } from "./requests/update-order.dto";
 import { OrderDeleteDto } from "./responses/order-delete.dto";
 import { OrderDetailDto } from "./responses/order-detail.dto";
 import { OrderListDto } from "./responses/order-list.dto";

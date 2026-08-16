@@ -12,14 +12,14 @@ import { hasPermission } from "src/auth/auth.utils";
 import { DrizzleService } from "src/db/drizzle.service";
 import { withDbErrorHandling } from "src/db/drizzle.util";
 import { ORDER_STATUSES } from "src/db/reference-data";
-import { CreateOrderDto } from "./dto/create-order.dto";
-import { UpdateOrderDto } from "./dto/update-order.dto";
 import {
 	orderDetailRelations,
 	orderListColumns,
 	orderListRelations,
 } from "./orders.query";
 import type { OrderId } from "./orders.types";
+import { CreateOrderDto } from "./requests/create-order.dto";
+import { UpdateOrderDto } from "./requests/update-order.dto";
 
 @Injectable()
 export class OrdersService {

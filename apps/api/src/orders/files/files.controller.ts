@@ -34,10 +34,10 @@ import { OrderOwnershipGuard } from "src/orders/guards/order-ownership.guard";
 import type { OrderId } from "src/orders/orders.types";
 import { OrderIdPipe } from "src/orders/pipes/order-id.pipe";
 import type { MulterFile } from "src/storage/storage.types";
-import { ListFilesResponseDto } from "./dto/list-files.response.dto";
-import { UploadFileDto } from "./dto/upload-file.dto";
-import { UploadFileResponseDto } from "./dto/upload-file.response.dto";
 import { FilesService } from "./files.service";
+import { UploadFileDto } from "./requests/upload-file.dto";
+import { ListFilesResponseDto } from "./responses/list-files.dto";
+import { UploadFileResponseDto } from "./responses/upload-file.dto";
 
 const OrderIdParam = () => Param("id", OrderIdPipe);
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB

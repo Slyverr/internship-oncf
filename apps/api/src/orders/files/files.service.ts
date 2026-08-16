@@ -10,7 +10,7 @@ import { withDbErrorHandling } from "src/db/drizzle.util";
 import type { OrderId } from "src/orders/orders.types";
 import { StorageService } from "src/storage/storage.service";
 import { MulterFile } from "src/storage/storage.types";
-import { UploadFileDto } from "./dto/upload-file.dto";
+import { UploadFileDto } from "./requests/upload-file.dto";
 
 @Injectable()
 export class FilesService {
