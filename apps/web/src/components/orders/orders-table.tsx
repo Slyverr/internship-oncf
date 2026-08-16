@@ -1,5 +1,6 @@
 "use client";
 
+import { OrderStatus } from "@ecommand/shared";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
     createSortedRowModel,
@@ -32,13 +33,10 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import {
-    CreateOrderResponseDto,
-    CreateOrderResponseDtoStatus,
-} from "@/lib/api/generated";
+import { OrderListDto } from "@/lib/api/generated";
 
 interface OrdersTableProps {
-  data: CreateOrderResponseDto[];
+  data: OrderListDto[];
   isLoading?: boolean;
 }
 
@@ -48,7 +46,7 @@ const features = tableFeatures({
   sortFns,
 });
 
-const columns: ColumnDef<typeof features, CreateOrderResponseDto>[] = [
+const columns: ColumnDef<typeof features, OrderListDto>[] = [
   {
     accessorKey: "orderNumber",
     header: "Order #",
@@ -107,10 +105,10 @@ export function OrdersTable({ data, isLoading }: OrdersTableProps) {
       const matchesSearch =
         !search ||
         order.orderNumber?.toLowerCase().includes(search) ||
-        String(order.customerId).includes(search);
+        String(order.customer.id).includes(search);
 
       const matchesStatus =
-        statusFilter === "ALL" || order.status === statusFilter;
+        statusFilter === "ALL" || order.orderStatus.name === statusFilter;
 
       return matchesSearch && matchesStatus;
     });
@@ -151,7 +149,7 @@ export function OrdersTable({ data, isLoading }: OrdersTableProps) {
           <SelectContent>
             <SelectItem value="ALL">All statuses</SelectItem>
 
-            {Object.values(CreateOrderResponseDtoStatus).map((status) => (
+            {Object.values(OrderStatus).map((status) => (
               <SelectItem key={status} value={status}>
                 {status}
               </SelectItem>
@@ -209,12 +207,12 @@ export function OrdersTable({ data, isLoading }: OrdersTableProps) {
                   tabIndex={0}
                   className="cursor-pointer transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   onClick={() =>
-                    router.push(`/orders/${row.original.id}/edit`)
+                    router.push(`/dashboard/orders/${row.original.id}`)
                   }
                   onKeyDown={(event) => {
                     if (event.key === "Enter" || event.key === " ") {
                       event.preventDefault();
-                      router.push(`/orders/${row.original.id}/edit`);
+                      router.push(`/dashboard/orders/${row.original.id}/edit`);
                     }
                   }}
                 >
