@@ -106,24 +106,22 @@ export class OrdersService {
 		const toStatusId = ORDER_STATUSES[toStatus].id;
 
 		await this.recordHistory(id, toStatusId, user.id, comment);
-
-		const [updated] = await this.drizzle.db
-			.update(orders)
-			.set({ statusId: toStatusId })
-			.where(eq(orders.id, id))
-			.returning();
-
-		return updated;
+		return this.update(id, { status: toStatus }, user);
 	}
 
 	async create(dto: CreateOrderDto, user: AuthUser) {
 		const values = this.normalizeCreate(dto, user);
 
 		const [created] = await withDbErrorHandling(
-			() => this.drizzle.db.insert(orders).values(values).returning(),
+			() =>
+				this.drizzle.db
+					.insert(orders)
+					.values(values)
+					.returning({ id: orders.id }),
 			values,
 		);
-		return created;
+
+		return this.findOne(created.id);
 	}
 
 	async findAll(user: AuthUser) {
@@ -154,26 +152,20 @@ export class OrdersService {
 	async update(id: OrderId, dto: UpdateOrderDto, user: AuthUser) {
 		const values = this.normalizeUpdate(dto, user);
 
-		const [updated] = await withDbErrorHandling(
-			() =>
-				this.drizzle.db
-					.update(orders)
-					.set(values)
-					.where(eq(orders.id, id))
-					.returning(),
+		await withDbErrorHandling(
+			() => this.drizzle.db.update(orders).set(values).where(eq(orders.id, id)),
 			values,
 		);
 
-		if (!updated) throw new NotFoundException(`Order ${id} not found`);
-		return updated;
+		return this.findOne(id);
 	}
 
 	async remove(id: OrderId) {
 		const [deleted] = await this.drizzle.db
 			.delete(orders)
 			.where(eq(orders.id, id))
-			.returning();
-		if (!deleted) throw new NotFoundException(`Order ${id} not found`);
+			.returning({ id: orders.id });
+
 		return deleted;
 	}
 

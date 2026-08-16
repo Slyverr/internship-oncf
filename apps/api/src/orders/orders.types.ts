@@ -10,3 +10,6 @@ export type OrderList = Awaited<ReturnType<OrdersService["findAll"]>>[number];
 export type OrderDetail = NonNullable<
 	Awaited<ReturnType<OrdersService["findOne"]>>
 >;
+export type OrderDelete = NonNullable<
+	Awaited<ReturnType<OrdersService["remove"]>>
+>;
