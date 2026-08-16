@@ -19,12 +19,17 @@ export class OrderOwnershipGuard implements CanActivate {
 		const request = context.switchToHttp().getRequest();
 		const user = request.user;
 
-		if (!request.params.id) return true;
-		if (hasPermission(user, Permission.ORDERS_MANAGE_USER)) return true;
+		if (!request.params.id) {
+			return true;
+		}
 
 		const id = this.orderIdPipe.transform(request.params.id);
-		const order = await this.ordersService.findOne(id);
-		if (order.userId !== user.id) {
+		const order = await this.ordersService.findOneForOwnership(id);
+
+		if (
+			order.userId !== user.id &&
+			!hasPermission(user, Permission.ORDERS_MANAGE_USER)
+		) {
 			throw new ForbiddenException("You can only access your own orders");
 		}
 

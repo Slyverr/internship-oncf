@@ -149,6 +149,22 @@ export class OrdersService {
 		return order;
 	}
 
+	async findOneForOwnership(id: OrderId) {
+		const order = await this.drizzle.db.query.orders.findFirst({
+			where: { id },
+			columns: {
+				id: true,
+				userId: true,
+			},
+		});
+
+		if (!order) {
+			throw new NotFoundException(`Order ${id} not found`);
+		}
+
+		return order;
+	}
+
 	async update(id: OrderId, dto: UpdateOrderDto, user: AuthUser) {
 		const values = this.normalizeUpdate(dto, user);
 
