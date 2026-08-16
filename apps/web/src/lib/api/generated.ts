@@ -25,10 +25,6 @@ import type {
 } from '@tanstack/react-query';
 
 import { customFetch } from '../axios';
-export interface MessageResponseDto {
-  message: string;
-}
-
 export interface UsersResponseDto {
   id: number;
   email: string;
@@ -63,6 +59,10 @@ export interface ProfileResponseDto {
 export interface ForgotPasswordDto {
   email: string;
   redirectUrl: string;
+}
+
+export interface MessageResponseDto {
+  message: string;
 }
 
 export interface ResetPasswordDto {
@@ -117,29 +117,14 @@ export interface CreateOrderDto {
   endDate?: string;
 }
 
-export type CreateOrderResponseDtoStatus = typeof CreateOrderResponseDtoStatus[keyof typeof CreateOrderResponseDtoStatus];
-
-
-export const CreateOrderResponseDtoStatus = {
-  DRAFT: 'DRAFT',
-  SUBMITTED: 'SUBMITTED',
-  APPROVED: 'APPROVED',
-  REJECTED: 'REJECTED',
-  IN_PROGRESS: 'IN_PROGRESS',
-  PARTIALLY_EXECUTED: 'PARTIALLY_EXECUTED',
-  COMPLETED: 'COMPLETED',
-  CANCELLED: 'CANCELLED',
-  SENT_TO_DTM: 'SENT_TO_DTM',
-} as const;
-
-export interface CreateOrderResponseDto {
+export interface OrderMutationResponseDto {
   id: number;
-  orderNumber: string;
+  /** @nullable */
+  orderNumber: string | null;
   goodsId: number;
   customerId: number;
   userId: number;
   statusId: number;
-  status: CreateOrderResponseDtoStatus;
   supervisor?: string;
   movementTypeId?: number;
   parentOrderId?: number;
@@ -147,12 +132,12 @@ export interface CreateOrderResponseDto {
   quantityAchieved?: string;
   unitId: number;
   departureStationId?: number;
-  debtorCustomerId?: number;
-  pickupLocationTypeId?: number;
-  dispatchTypeId?: number;
-  destinationCustomerId?: number;
   arrivalStationId?: number;
+  debtorCustomerId?: number;
+  destinationCustomerId?: number;
+  pickupLocationTypeId?: number;
   deliveryLocationTypeId?: number;
+  dispatchTypeId?: number;
   pickupPortId?: number;
   pickupBerthId?: number;
   pickupSidingId?: number;
@@ -165,6 +150,228 @@ export interface CreateOrderResponseDto {
   endDate?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export type OrderListDtoOrderStatus = {
+  id: number;
+  name: string;
+};
+
+export type OrderListDtoUnit = {
+  name: string;
+};
+
+export type OrderListDtoCustomer = {
+  id: number;
+  companyName: string;
+};
+
+export type OrderListDtoUser = {
+  id: number;
+  lastName: string;
+  firstName: string;
+};
+
+export type OrderListDtoGood = {
+  id: number;
+  name: string;
+};
+
+export interface OrderListDto {
+  id: number;
+  createdAt: string;
+  /** @nullable */
+  orderNumber: string | null;
+  quantityDemanded: string;
+  /** @nullable */
+  quantityAchieved: string | null;
+  orderDate: string;
+  /** @nullable */
+  startDate: string | null;
+  /** @nullable */
+  endDate: string | null;
+  orderStatus: OrderListDtoOrderStatus;
+  unit: OrderListDtoUnit;
+  customer: OrderListDtoCustomer;
+  user: OrderListDtoUser;
+  good: OrderListDtoGood;
+}
+
+export type OrderDetailDtoOrderStatus = {
+  id: number;
+  name: string;
+};
+
+export type OrderDetailDtoForecastProgramsItem = {
+  id: number;
+  statusId: number;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: number;
+  /** @nullable */
+  quantityRealized: string | null;
+  /** @nullable */
+  deviationReason: string | null;
+  orderId: number;
+  plannedDate: string;
+  quantityPlanned: string;
+  /** @nullable */
+  sentToDtmAt: string | null;
+  /** @nullable */
+  realizedAt: string | null;
+  /** @nullable */
+  realizedBy: number | null;
+  programNumber: string;
+  /** @nullable */
+  dtmStatus: string | null;
+};
+
+export type OrderDetailDtoOrderExecutionsItem = {
+  id: number;
+  createdAt: string;
+  /** @nullable */
+  completionRate: string | null;
+  orderId: number;
+  /** @nullable */
+  comment: string | null;
+  executionDate: string;
+  quantityExecuted: string;
+  executedBy: number;
+};
+
+export type OrderDetailDtoOrderFilesItem = {
+  /** @nullable */
+  description: string | null;
+  orderId: number;
+  fileId: number;
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+  filePath: string;
+  /** @nullable */
+  mimeType: string | null;
+  uploadedBy: number;
+  uploadedAt: string;
+};
+
+export type OrderDetailDtoClaimsItem = {
+  id: number;
+  customerId: number;
+  userId: number;
+  statusId: number;
+  createdAt: string;
+  updatedAt: string;
+  typeId: number;
+  description: string;
+  /** @nullable */
+  orderId: number | null;
+  /** @nullable */
+  operationId: number | null;
+  /** @nullable */
+  priority: string | null;
+  /** @nullable */
+  resolution: string | null;
+  /** @nullable */
+  closedBy: number | null;
+  /** @nullable */
+  closedAt: string | null;
+};
+
+export type OrderDetailDtoUnit = {
+  name: string;
+};
+
+export type OrderDetailDtoCustomer = {
+  id: number;
+  companyName: string;
+};
+
+export type OrderDetailDtoOrderStatusHistoriesItem = {
+  id: number;
+  statusId: number;
+  changedAt: string;
+  orderId: number;
+  changedById: number;
+  /** @nullable */
+  comment: string | null;
+  /** @nullable */
+  rejectionReasonId: number | null;
+};
+
+export type OrderDetailDtoUser = {
+  id: number;
+  lastName: string;
+  firstName: string;
+};
+
+export type OrderDetailDtoGood = {
+  id: number;
+  name: string;
+};
+
+export interface OrderDetailDto {
+  id: number;
+  goodsId: number;
+  customerId: number;
+  userId: number;
+  statusId: number;
+  /** @nullable */
+  supervisor: string | null;
+  /** @nullable */
+  orderNumber: string | null;
+  /** @nullable */
+  movementTypeId: number | null;
+  /** @nullable */
+  parentOrderId: number | null;
+  quantityDemanded: string;
+  /** @nullable */
+  quantityAchieved: string | null;
+  unitId: number;
+  /** @nullable */
+  departureStationId: number | null;
+  /** @nullable */
+  debtorCustomerId: number | null;
+  /** @nullable */
+  pickupLocationTypeId: number | null;
+  /** @nullable */
+  dispatchTypeId: number | null;
+  /** @nullable */
+  destinationCustomerId: number | null;
+  /** @nullable */
+  arrivalStationId: number | null;
+  /** @nullable */
+  deliveryLocationTypeId: number | null;
+  /** @nullable */
+  pickupPortId: number | null;
+  /** @nullable */
+  pickupBerthId: number | null;
+  /** @nullable */
+  pickupSidingId: number | null;
+  /** @nullable */
+  deliveryPortId: number | null;
+  /** @nullable */
+  deliveryBerthId: number | null;
+  /** @nullable */
+  deliverySidingId: number | null;
+  /** @nullable */
+  remarks: string | null;
+  orderDate: string;
+  /** @nullable */
+  startDate: string | null;
+  /** @nullable */
+  endDate: string | null;
+  createdAt: string;
+  updatedAt: string;
+  orderStatus: OrderDetailDtoOrderStatus;
+  forecastPrograms: OrderDetailDtoForecastProgramsItem[];
+  orderExecutions: OrderDetailDtoOrderExecutionsItem[];
+  orderFiles: OrderDetailDtoOrderFilesItem[];
+  claims: OrderDetailDtoClaimsItem[];
+  unit: OrderDetailDtoUnit;
+  customer: OrderDetailDtoCustomer;
+  orderStatusHistories: OrderDetailDtoOrderStatusHistoriesItem[];
+  user: OrderDetailDtoUser;
+  good: OrderDetailDtoGood;
 }
 
 export type UpdateOrderDtoStatus = typeof UpdateOrderDtoStatus[keyof typeof UpdateOrderDtoStatus];
@@ -211,56 +418,6 @@ export interface UpdateOrderDto {
   orderDate?: string;
   startDate?: string;
   endDate?: string;
-}
-
-export type UpdateOrderResponseDtoStatus = typeof UpdateOrderResponseDtoStatus[keyof typeof UpdateOrderResponseDtoStatus];
-
-
-export const UpdateOrderResponseDtoStatus = {
-  DRAFT: 'DRAFT',
-  SUBMITTED: 'SUBMITTED',
-  APPROVED: 'APPROVED',
-  REJECTED: 'REJECTED',
-  IN_PROGRESS: 'IN_PROGRESS',
-  PARTIALLY_EXECUTED: 'PARTIALLY_EXECUTED',
-  COMPLETED: 'COMPLETED',
-  CANCELLED: 'CANCELLED',
-  SENT_TO_DTM: 'SENT_TO_DTM',
-} as const;
-
-export interface UpdateOrderResponseDto {
-  id: number;
-  orderNumber: string;
-  goodsId: number;
-  customerId: number;
-  userId: number;
-  statusId: number;
-  status: UpdateOrderResponseDtoStatus;
-  supervisor?: string;
-  movementTypeId?: number;
-  parentOrderId?: number;
-  quantityDemanded: string;
-  quantityAchieved?: string;
-  unitId: number;
-  departureStationId?: number;
-  debtorCustomerId?: number;
-  pickupLocationTypeId?: number;
-  dispatchTypeId?: number;
-  destinationCustomerId?: number;
-  arrivalStationId?: number;
-  deliveryLocationTypeId?: number;
-  pickupPortId?: number;
-  pickupBerthId?: number;
-  pickupSidingId?: number;
-  deliveryPortId?: number;
-  deliveryBerthId?: number;
-  deliverySidingId?: number;
-  remarks?: string;
-  orderDate?: string;
-  startDate?: string;
-  endDate?: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface UploadFileDto {
@@ -598,7 +755,7 @@ export const appControllerHealth = (
 ) => {
 
 
-      return customFetch<MessageResponseDto>(
+      return customFetch<void>(
       {url: `/health`, method: 'GET', signal
     },
       options);
@@ -1123,7 +1280,7 @@ export const ordersControllerCreate = (
 ) => {
 
 
-      return customFetch<CreateOrderResponseDto>(
+      return customFetch<OrderMutationResponseDto>(
       {url: `/orders`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: createOrderDto, signal
@@ -1182,7 +1339,7 @@ export const ordersControllerFindAll = (
 ) => {
 
 
-      return customFetch<CreateOrderResponseDto[]>(
+      return customFetch<OrderListDto[]>(
       {url: `/orders`, method: 'GET', signal
     },
       options);
@@ -1269,7 +1426,7 @@ export const ordersControllerFindOne = (
 ) => {
 
 
-      return customFetch<CreateOrderResponseDto>(
+      return customFetch<OrderDetailDto>(
       {url: `/orders/${id}`, method: 'GET', signal
     },
       options);
@@ -1357,7 +1514,7 @@ export const ordersControllerUpdate = (
 ) => {
 
 
-      return customFetch<UpdateOrderResponseDto>(
+      return customFetch<OrderMutationResponseDto>(
       {url: `/orders/${id}`, method: 'PATCH',
       headers: {'Content-Type': 'application/json', },
       data: updateOrderDto, signal
@@ -1416,7 +1573,7 @@ export const ordersControllerRemove = (
 ) => {
 
 
-      return customFetch<CreateOrderResponseDto>(
+      return customFetch<OrderMutationResponseDto>(
       {url: `/orders/${id}`, method: 'DELETE', signal
     },
       options);
@@ -1473,7 +1630,7 @@ export const ordersControllerSubmit = (
 ) => {
 
 
-      return customFetch<CreateOrderResponseDto>(
+      return customFetch<OrderMutationResponseDto>(
       {url: `/orders/${id}/submit`, method: 'POST', signal
     },
       options);
@@ -1530,7 +1687,7 @@ export const ordersControllerApprove = (
 ) => {
 
 
-      return customFetch<CreateOrderResponseDto>(
+      return customFetch<OrderMutationResponseDto>(
       {url: `/orders/${id}/approve`, method: 'POST', signal
     },
       options);
@@ -1587,7 +1744,7 @@ export const ordersControllerReject = (
 ) => {
 
 
-      return customFetch<CreateOrderResponseDto>(
+      return customFetch<OrderMutationResponseDto>(
       {url: `/orders/${id}/reject`, method: 'POST', signal
     },
       options);
@@ -1644,7 +1801,7 @@ export const ordersControllerCancel = (
 ) => {
 
 
-      return customFetch<CreateOrderResponseDto>(
+      return customFetch<OrderMutationResponseDto>(
       {url: `/orders/${id}/cancel`, method: 'POST', signal
     },
       options);
@@ -1701,7 +1858,7 @@ export const ordersControllerSendToDtm = (
 ) => {
 
 
-      return customFetch<CreateOrderResponseDto>(
+      return customFetch<OrderMutationResponseDto>(
       {url: `/orders/${id}/send-to-dtm`, method: 'POST', signal
     },
       options);
