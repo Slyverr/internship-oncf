@@ -22,13 +22,14 @@ import {
 import type { AuthRequest } from "src/auth/auth.types";
 import { Permissions } from "src/auth/permissions.decorator";
 import { CreateOrderDto } from "./dto/create-order.dto";
-import { CreateOrderResponseDto } from "./dto/create-order.response.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
-import { UpdateOrderResponseDto } from "./dto/update-order.response.dto";
 import { OrderOwnershipGuard } from "./guards/order-ownership.guard";
 import { OrdersService } from "./orders.service";
 import type { OrderId } from "./orders.types";
 import { OrderIdPipe } from "./pipes/order-id.pipe";
+import { OrderDetailDto } from "./responses/order-detail.dto";
+import { OrderListDto } from "./responses/order-list.dto";
+import { OrderMutationResponseDto } from "./responses/order-mutation.dto";
 
 const OrderIdParam = () => Param("id", OrderIdPipe);
 
@@ -39,7 +40,7 @@ export class OrdersController {
 
 	@Post()
 	@Permissions(Permission.ORDERS_CREATE)
-	@ApiOkResponse({ type: CreateOrderResponseDto })
+	@ApiOkResponse({ type: OrderMutationResponseDto })
 	@ApiUnauthorizedResponse()
 	@ApiBadRequestResponse()
 	@ApiForbiddenResponse()
@@ -52,7 +53,7 @@ export class OrdersController {
 
 	@Get()
 	@Permissions(Permission.ORDERS_READ)
-	@ApiOkResponse({ type: [CreateOrderResponseDto] })
+	@ApiOkResponse({ type: [OrderListDto] })
 	@ApiUnauthorizedResponse()
 	async findAll(@Request() req: AuthRequest) {
 		return this.ordersService.findAll(req.user);
@@ -60,7 +61,7 @@ export class OrdersController {
 
 	@Get(":id")
 	@Permissions(Permission.ORDERS_READ)
-	@ApiOkResponse({ type: CreateOrderResponseDto })
+	@ApiOkResponse({ type: OrderDetailDto })
 	@ApiUnauthorizedResponse()
 	@ApiNotFoundResponse()
 	async findOne(@OrderIdParam() id: OrderId) {
@@ -69,7 +70,7 @@ export class OrdersController {
 
 	@Patch(":id")
 	@Permissions(Permission.ORDERS_UPDATE)
-	@ApiOkResponse({ type: UpdateOrderResponseDto })
+	@ApiOkResponse({ type: OrderMutationResponseDto })
 	@ApiUnauthorizedResponse()
 	@ApiBadRequestResponse()
 	@ApiForbiddenResponse()
@@ -85,7 +86,7 @@ export class OrdersController {
 	@Post(":id/submit")
 	@HttpCode(HttpStatus.OK)
 	@Permissions(Permission.ORDERS_UPDATE)
-	@ApiOkResponse({ type: CreateOrderResponseDto })
+	@ApiOkResponse({ type: OrderMutationResponseDto })
 	@ApiUnauthorizedResponse()
 	@ApiBadRequestResponse()
 	@ApiForbiddenResponse()
@@ -97,7 +98,7 @@ export class OrdersController {
 	@Post(":id/approve")
 	@HttpCode(HttpStatus.OK)
 	@Permissions(Permission.ORDERS_APPROVE)
-	@ApiOkResponse({ type: CreateOrderResponseDto })
+	@ApiOkResponse({ type: OrderMutationResponseDto })
 	@ApiUnauthorizedResponse()
 	@ApiBadRequestResponse()
 	@ApiForbiddenResponse()
@@ -109,7 +110,7 @@ export class OrdersController {
 	@Post(":id/reject")
 	@HttpCode(HttpStatus.OK)
 	@Permissions(Permission.ORDERS_REJECT)
-	@ApiOkResponse({ type: CreateOrderResponseDto })
+	@ApiOkResponse({ type: OrderMutationResponseDto })
 	@ApiUnauthorizedResponse()
 	@ApiBadRequestResponse()
 	@ApiForbiddenResponse()
@@ -125,7 +126,7 @@ export class OrdersController {
 	@Post(":id/cancel")
 	@HttpCode(HttpStatus.OK)
 	@Permissions(Permission.ORDERS_UPDATE)
-	@ApiOkResponse({ type: CreateOrderResponseDto })
+	@ApiOkResponse({ type: OrderMutationResponseDto })
 	@ApiUnauthorizedResponse()
 	@ApiBadRequestResponse()
 	@ApiForbiddenResponse()
@@ -137,7 +138,7 @@ export class OrdersController {
 	@Post(":id/send-to-dtm")
 	@HttpCode(HttpStatus.OK)
 	@Permissions(Permission.ORDERS_EXECUTE)
-	@ApiOkResponse({ type: CreateOrderResponseDto })
+	@ApiOkResponse({ type: OrderMutationResponseDto })
 	@ApiUnauthorizedResponse()
 	@ApiBadRequestResponse()
 	@ApiForbiddenResponse()
@@ -148,7 +149,7 @@ export class OrdersController {
 
 	@Delete(":id")
 	@Permissions(Permission.ORDERS_DELETE)
-	@ApiOkResponse({ type: CreateOrderResponseDto })
+	@ApiOkResponse({ type: OrderMutationResponseDto })
 	@ApiUnauthorizedResponse()
 	@ApiForbiddenResponse()
 	@ApiNotFoundResponse()

@@ -1,36 +1,46 @@
-import { OrderStatus } from "@ecommand/shared";
-
-export class UpdateOrderResponseDto {
+export class OrderMutationResponseDto {
 	id: number;
-	orderNumber: string;
+	orderNumber: string | null;
+
 	goodsId: number;
 	customerId: number;
 	userId: number;
 	statusId: number;
-	status: OrderStatus;
+
 	supervisor?: string;
 	movementTypeId?: number;
 	parentOrderId?: number;
+
 	quantityDemanded: string;
 	quantityAchieved?: string;
+
 	unitId: number;
+
 	departureStationId?: number;
-	debtorCustomerId?: number;
-	pickupLocationTypeId?: number;
-	dispatchTypeId?: number;
-	destinationCustomerId?: number;
 	arrivalStationId?: number;
+
+	debtorCustomerId?: number;
+	destinationCustomerId?: number;
+
+	pickupLocationTypeId?: number;
 	deliveryLocationTypeId?: number;
+
+	dispatchTypeId?: number;
+
 	pickupPortId?: number;
 	pickupBerthId?: number;
 	pickupSidingId?: number;
+
 	deliveryPortId?: number;
 	deliveryBerthId?: number;
 	deliverySidingId?: number;
+
 	remarks?: string;
+
 	orderDate?: string;
 	startDate?: string;
 	endDate?: string;
+
 	createdAt: string;
 	updatedAt: string;
 }

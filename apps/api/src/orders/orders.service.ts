@@ -14,6 +14,11 @@ import { withDbErrorHandling } from "src/db/drizzle.util";
 import { ORDER_STATUSES } from "src/db/reference-data";
 import { CreateOrderDto } from "./dto/create-order.dto";
 import { UpdateOrderDto } from "./dto/update-order.dto";
+import {
+	orderDetailRelations,
+	orderListColumns,
+	orderListRelations,
+} from "./orders.query";
 import type { OrderId } from "./orders.types";
 
 @Injectable()
@@ -122,19 +127,27 @@ export class OrdersService {
 	}
 
 	async findAll(user: AuthUser) {
-		if (hasPermission(user, Permission.ORDERS_MANAGE_USER)) {
-			return this.drizzle.db.query.orders.findMany();
-		}
+		const where = !hasPermission(user, Permission.ORDERS_MANAGE_USER)
+			? { userId: user.id }
+			: {};
+
 		return this.drizzle.db.query.orders.findMany({
-			where: { userId: user.id },
+			where,
+			columns: orderListColumns,
+			with: orderListRelations,
 		});
 	}
 
 	async findOne(id: OrderId) {
 		const order = await this.drizzle.db.query.orders.findFirst({
 			where: { id },
+			with: orderDetailRelations,
 		});
-		if (!order) throw new NotFoundException(`Order ${id} not found`);
+
+		if (!order) {
+			throw new NotFoundException(`Order ${id} not found`);
+		}
+
 		return order;
 	}
 
