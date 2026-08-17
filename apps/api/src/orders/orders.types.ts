@@ -1,8 +1,10 @@
 import { orders } from "drizzle/schema";
-import { InferSelectModel } from "drizzle-orm";
+import { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import { OrdersService } from "./orders.service";
 
 export type Order = InferSelectModel<typeof orders>;
+export type OrderInsert = InferInsertModel<typeof orders>;
+export type OrderUpdate = Partial<OrderInsert>;
 
 export type OrderId = Order["id"];
 
