@@ -1,7 +1,6 @@
 import { OrderStatus, Permission } from "@ecommand/shared";
 import {
-	BadRequestException,
-	ForbiddenException,
+	ConflictException,
 	Injectable,
 	NotFoundException,
 } from "@nestjs/common";
@@ -12,6 +11,9 @@ import { hasPermission } from "src/auth/auth.utils";
 import { DrizzleService } from "src/db/drizzle.service";
 import { withDbErrorHandling } from "src/db/drizzle.util";
 import { ORDER_STATUSES } from "src/db/reference-data";
+import { UserId } from "src/users/users.types";
+import { ORDER_STATUS_BY_ID, ORDER_TRANSITION } from "./orders.constants";
+import { toCreate, toUpdate } from "./orders.mapper";
 import {
 	orderDetailRelations,
 	orderListColumns,
@@ -25,92 +27,8 @@ import { UpdateOrderDto } from "./requests/update-order.dto";
 export class OrdersService {
 	constructor(private readonly drizzle: DrizzleService) {}
 
-	private normalizeCreate(dto: CreateOrderDto, user: AuthUser) {
-		const userId = dto.userId ?? user.id;
-		if (
-			!hasPermission(user, Permission.ORDERS_MANAGE_USER) &&
-			userId !== user.id
-		) {
-			throw new ForbiddenException("Cannot assign orders to other users");
-		}
-
-		const status = hasPermission(user, Permission.ORDERS_MANAGE_STATUS)
-			? (dto.status ?? OrderStatus.DRAFT)
-			: OrderStatus.DRAFT;
-
-		return { ...dto, userId, statusId: ORDER_STATUSES[status].id };
-	}
-
-	private normalizeUpdate(dto: UpdateOrderDto, user: AuthUser) {
-		if (dto.userId !== undefined && dto.userId !== user.id) {
-			if (!hasPermission(user, Permission.ORDERS_MANAGE_USER)) {
-				throw new ForbiddenException("Cannot assign orders to other users");
-			}
-		}
-
-		const result = { ...dto };
-		if (dto.status !== undefined) {
-			if (!hasPermission(user, Permission.ORDERS_MANAGE_STATUS)) {
-				throw new ForbiddenException("Cannot change order status");
-			}
-
-			result["statusId"] = ORDER_STATUSES[dto.status].id;
-		}
-
-		return result;
-	}
-
-	private async recordHistory(
-		orderId: OrderId,
-		statusId: number,
-		userId: number,
-		comment?: string,
-	) {
-		await this.drizzle.db.insert(orderStatusHistory).values({
-			orderId,
-			statusId,
-			changedById: userId,
-			comment: comment ?? null,
-		});
-	}
-
-	private async transition(
-		id: OrderId,
-		toStatus: OrderStatus,
-		user: AuthUser,
-		comment?: string,
-	) {
-		const order = await this.findOne(id);
-
-		// Get from status name from constants
-		const fromStatusName = Object.keys(ORDER_STATUSES).find(
-			(key) => ORDER_STATUSES[key as OrderStatus].id === order.statusId,
-		) as OrderStatus;
-
-		// Validate transition
-		const allowedTransitions: Record<string, string[]> = {
-			[OrderStatus.DRAFT]: [OrderStatus.SUBMITTED, OrderStatus.CANCELLED],
-			[OrderStatus.SUBMITTED]: [OrderStatus.APPROVED, OrderStatus.REJECTED],
-			[OrderStatus.APPROVED]: [OrderStatus.SENT_TO_DTM],
-			[OrderStatus.SENT_TO_DTM]: [OrderStatus.IN_PROGRESS],
-			[OrderStatus.IN_PROGRESS]: [OrderStatus.COMPLETED, OrderStatus.CANCELLED],
-		};
-
-		const allowed = allowedTransitions[fromStatusName] || [];
-		if (!allowed.includes(toStatus)) {
-			throw new BadRequestException(
-				`Cannot transition from ${fromStatusName} to ${toStatus}`,
-			);
-		}
-
-		const toStatusId = ORDER_STATUSES[toStatus].id;
-
-		await this.recordHistory(id, toStatusId, user.id, comment);
-		return this.update(id, { status: toStatus }, user);
-	}
-
 	async create(dto: CreateOrderDto, user: AuthUser) {
-		const values = this.normalizeCreate(dto, user);
+		const values = toCreate(dto, user);
 
 		const [created] = await withDbErrorHandling(
 			() =>
@@ -165,8 +83,23 @@ export class OrdersService {
 		return order;
 	}
 
+	async findOneForTransition(id: OrderId) {
+		const order = await this.drizzle.db.query.orders.findFirst({
+			where: { id },
+			columns: {
+				statusId: true,
+			},
+		});
+
+		if (!order) {
+			throw new NotFoundException(`Order ${id} not found`);
+		}
+
+		return order;
+	}
+
 	async update(id: OrderId, dto: UpdateOrderDto, user: AuthUser) {
-		const values = this.normalizeUpdate(dto, user);
+		const values = toUpdate(dto, user);
 
 		await withDbErrorHandling(
 			() => this.drizzle.db.update(orders).set(values).where(eq(orders.id, id)),
@@ -174,6 +107,47 @@ export class OrdersService {
 		);
 
 		return this.findOne(id);
+	}
+
+	async transition(
+		id: OrderId,
+		user: AuthUser,
+		toStatus: OrderStatus,
+		comment?: string,
+	) {
+		const { statusId } = await this.findOneForTransition(id);
+
+		const fromStatus = ORDER_STATUS_BY_ID[statusId];
+		const allowed = ORDER_TRANSITION[fromStatus];
+
+		if (!allowed.includes(toStatus)) {
+			throw new ConflictException(
+				`Cannot transition from ${fromStatus} to ${toStatus}`,
+			);
+		}
+
+		await this.recordHistory(id, ORDER_STATUSES[toStatus].id, user.id, comment);
+		return this.update(id, { status: toStatus }, user);
+	}
+
+	async submit(id: OrderId, user: AuthUser) {
+		return this.transition(id, user, OrderStatus.SUBMITTED);
+	}
+
+	async approve(id: OrderId, user: AuthUser) {
+		return this.transition(id, user, OrderStatus.APPROVED);
+	}
+
+	async reject(id: OrderId, reason: string, user: AuthUser) {
+		return this.transition(id, user, OrderStatus.REJECTED, reason);
+	}
+
+	async cancel(id: OrderId, user: AuthUser) {
+		return this.transition(id, user, OrderStatus.CANCELLED);
+	}
+
+	async sendToDtm(id: OrderId, user: AuthUser) {
+		return this.transition(id, user, OrderStatus.SENT_TO_DTM);
 	}
 
 	async remove(id: OrderId) {
@@ -185,24 +159,17 @@ export class OrdersService {
 		return deleted;
 	}
 
-	async submit(id: OrderId, user: AuthUser) {
-		return this.transition(id, OrderStatus.SUBMITTED, user);
-	}
-
-	async approve(id: OrderId, user: AuthUser) {
-		return this.transition(id, OrderStatus.APPROVED, user);
-	}
-
-	async reject(id: OrderId, reason: string, user: AuthUser) {
-		if (!reason) throw new BadRequestException("Rejection reason required");
-		return this.transition(id, OrderStatus.REJECTED, user, reason);
-	}
-
-	async cancel(id: OrderId, user: AuthUser) {
-		return this.transition(id, OrderStatus.CANCELLED, user);
-	}
-
-	async sendToDtm(id: OrderId, user: AuthUser) {
-		return this.transition(id, OrderStatus.SENT_TO_DTM, user);
+	private async recordHistory(
+		orderId: OrderId,
+		userId: UserId,
+		statusId: number,
+		comment?: string,
+	) {
+		await this.drizzle.db.insert(orderStatusHistory).values({
+			orderId,
+			statusId,
+			changedById: userId,
+			comment: comment ?? null,
+		});
 	}
 }
