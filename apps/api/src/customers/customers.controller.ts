@@ -17,7 +17,7 @@ import {
 	ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
 import { Permissions } from "src/auth/permissions.decorator";
-import { MessageResponseDto } from "src/common/dto/message.response.dto";
+import { MessageResponseDto } from "src/common/responses/message.dto";
 import { CustomersService } from "./customers.service";
 import type { CustomerId } from "./customers.types";
 import { CreateCustomerDto } from "./dto/create-customer.dto";

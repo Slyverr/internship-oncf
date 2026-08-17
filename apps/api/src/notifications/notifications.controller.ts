@@ -16,7 +16,7 @@ import {
 } from "@nestjs/swagger";
 import type { AuthRequest } from "src/auth/auth.types";
 import { Permissions } from "src/auth/permissions.decorator";
-import { MessageResponseDto } from "src/common/dto/message.response.dto";
+import { MessageResponseDto } from "src/common/responses/message.dto";
 import { NotificationResponseDto } from "./dto/notification.response.dto";
 import { UnreadCountResponseDto } from "./dto/unread-count.response.dto";
 import { NotificationOwnershipGuard } from "./guards/notification-ownership.guard";

@@ -29,7 +29,7 @@ import {
 import type { Response } from "express";
 import type { AuthRequest } from "src/auth/auth.types";
 import { Permissions } from "src/auth/permissions.decorator";
-import { MessageResponseDto } from "src/common/dto/message.response.dto";
+import { MessageResponseDto } from "src/common/responses/message.dto";
 import { OrderOwnershipGuard } from "src/orders/guards/order-ownership.guard";
 import type { OrderId } from "src/orders/orders.types";
 import { OrderIdPipe } from "src/orders/pipes/order-id.pipe";

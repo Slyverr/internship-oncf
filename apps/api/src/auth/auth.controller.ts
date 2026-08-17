@@ -11,7 +11,7 @@ import {
 	ApiOkResponse,
 	ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
-import { MessageResponseDto } from "src/common/dto/message.response.dto";
+import { MessageResponseDto } from "src/common/responses/message.dto";
 import { AuthService } from "./auth.service";
 import type { AuthRequest, LocalAuthRequest } from "./auth.types";
 import { ForgotPasswordDto } from "./dto/forgot-password.dto";

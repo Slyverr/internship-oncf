@@ -21,7 +21,7 @@ import {
 } from "@nestjs/swagger";
 import type { AuthRequest } from "src/auth/auth.types";
 import { Permissions } from "src/auth/permissions.decorator";
-import { MessageResponseDto } from "src/common/dto/message.response.dto";
+import { MessageResponseDto } from "src/common/responses/message.dto";
 import { ClaimsService } from "./claims.service";
 import type { ClaimId } from "./claims.types";
 import { CreateClaimResponseDto } from "./dto/create-claim.response.dto";
