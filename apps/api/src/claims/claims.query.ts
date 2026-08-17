@@ -1,0 +1,70 @@
+import { QueryColumns, QueryRelations } from "src/db/drizzle.types";
+
+type ClaimsColumns = QueryColumns<"claims">;
+type ClaimsRelations = QueryRelations<"claims">;
+
+export const claimListColumns = {
+	id: true,
+	customerId: true,
+	userId: true,
+	orderId: true,
+	operationId: true,
+	typeId: true,
+	statusId: true,
+	priority: true,
+	description: true,
+	resolution: true,
+	closedBy: true,
+	closedAt: true,
+	createdAt: true,
+	updatedAt: true,
+} satisfies ClaimsColumns;
+
+export const claimDetailRelations = {
+	customer: {
+		columns: {
+			id: true,
+			companyName: true,
+		},
+	},
+	user: {
+		columns: {
+			id: true,
+			firstName: true,
+			lastName: true,
+		},
+	},
+	order: {
+		columns: {
+			id: true,
+			orderNumber: true,
+		},
+	},
+	accessoryOperation: {
+		columns: {
+			id: true,
+			name: true,
+		},
+	},
+	claimType: {
+		columns: {
+			id: true,
+			name: true,
+		},
+	},
+	claimStatus: {
+		columns: {
+			id: true,
+			name: true,
+		},
+	},
+	closedByUser: {
+		columns: {
+			id: true,
+			firstName: true,
+			lastName: true,
+		},
+	},
+	claimStatusHistories: true,
+	claimComments: true,
+} satisfies ClaimsRelations;

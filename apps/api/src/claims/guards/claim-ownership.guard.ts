@@ -19,13 +19,17 @@ export class ClaimOwnershipGuard implements CanActivate {
 		const request = context.switchToHttp().getRequest();
 		const user = request.user;
 
-		if (!request.params.id) return true;
-		if (hasPermission(user, Permission.CLAIMS_READ)) return true;
+		if (!request.params.id) {
+			return true;
+		}
 
 		const id = this.claimIdPipe.transform(request.params.id);
-		const claim = await this.claimsService.findOne(id);
+		const claim = await this.claimsService.findOneForOwnership(id);
 
-		if (claim.userId !== user.id) {
+		if (
+			claim.userId !== user.id &&
+			!hasPermission(user, Permission.CLAIMS_READ)
+		) {
 			throw new ForbiddenException("You can only access your own claims");
 		}
 

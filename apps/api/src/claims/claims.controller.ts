@@ -12,26 +12,56 @@ import {
 	Request,
 	UseGuards,
 } from "@nestjs/common";
-import {
-	ApiBadRequestResponse,
-	ApiForbiddenResponse,
-	ApiNotFoundResponse,
-	ApiOkResponse,
-	ApiUnauthorizedResponse,
-} from "@nestjs/swagger";
 import type { AuthRequest } from "src/auth/auth.types";
 import { Permissions } from "src/auth/permissions.decorator";
-import { MessageResponseDto } from "src/common/responses/message.dto";
+import {
+	ApiResponses,
+	type ApiResponsesOptions,
+	ApiResponsesPatch,
+} from "src/common/decorators/api-responses.decorator";
 import { ClaimsService } from "./claims.service";
 import type { ClaimId } from "./claims.types";
-import { CreateClaimResponseDto } from "./dto/create-claim.response.dto";
-import { CreateClaimDto } from "./dto/create-claim-dto";
-import { UpdateClaimResponseDto } from "./dto/update-claim.response.dto";
-import { UpdateClaimDto } from "./dto/update-claim-dto";
 import { ClaimOwnershipGuard } from "./guards/claim-ownership.guard";
 import { ClaimIdPipe } from "./pipes/claim-id.pipe";
+import { CreateClaimDto } from "./requests/create-claim.dto";
+import { UpdateClaimDto } from "./requests/update-claim.dto";
+import { ClaimCommentDto } from "./responses/claim-comment.dto";
+import { ClaimDeleteDto } from "./responses/claim-delete.dto";
+import { ClaimDetailDto } from "./responses/claim-detail.dto";
+import { ClaimListDto } from "./responses/claim-list.dto";
 
 const ClaimIdParam = () => Param("id", ClaimIdPipe);
+
+const ClaimBaseResponse: ApiResponsesOptions = {
+	status: HttpStatus.OK,
+	type: ClaimDetailDto,
+	errors: [
+		HttpStatus.UNAUTHORIZED,
+		HttpStatus.BAD_REQUEST,
+		HttpStatus.FORBIDDEN,
+		HttpStatus.NOT_FOUND,
+	],
+};
+
+const ClaimDetailResponse = () => ApiResponses(ClaimBaseResponse);
+
+const ClaimCreateResponse = () =>
+	ApiResponsesPatch(ClaimBaseResponse, {
+		status: HttpStatus.CREATED,
+		removeErrors: [HttpStatus.NOT_FOUND],
+	});
+
+const ClaimListResponse = () =>
+	ApiResponsesPatch(ClaimBaseResponse, {
+		type: [ClaimListDto],
+		errors: [HttpStatus.UNAUTHORIZED],
+	});
+
+const ClaimDeleteResponse = () =>
+	ApiResponsesPatch(ClaimBaseResponse, {
+		type: ClaimDeleteDto,
+		removeErrors: [HttpStatus.BAD_REQUEST],
+	});
 
 @Controller("claims")
 @UseGuards(ClaimOwnershipGuard)
@@ -40,38 +70,28 @@ export class ClaimsController {
 
 	@Post()
 	@Permissions(Permission.CLAIMS_CREATE)
-	@ApiOkResponse({ type: CreateClaimResponseDto })
-	@ApiUnauthorizedResponse()
-	@ApiBadRequestResponse()
-	@ApiForbiddenResponse()
+	@ClaimCreateResponse()
 	async create(@Body() dto: CreateClaimDto, @Request() req: AuthRequest) {
 		return this.claimsService.create(dto, req.user);
 	}
 
 	@Get()
 	@Permissions(Permission.CLAIMS_READ)
-	@ApiOkResponse({ type: [CreateClaimResponseDto] })
-	@ApiUnauthorizedResponse()
+	@ClaimListResponse()
 	async findAll(@Request() req: AuthRequest) {
 		return this.claimsService.findAll(req.user);
 	}
 
 	@Get(":id")
 	@Permissions(Permission.CLAIMS_READ)
-	@ApiOkResponse({ type: CreateClaimResponseDto })
-	@ApiUnauthorizedResponse()
-	@ApiNotFoundResponse()
+	@ClaimDetailResponse()
 	async findOne(@ClaimIdParam() id: ClaimId) {
 		return this.claimsService.findOne(id);
 	}
 
 	@Patch(":id")
 	@Permissions(Permission.CLAIMS_UPDATE)
-	@ApiOkResponse({ type: UpdateClaimResponseDto })
-	@ApiUnauthorizedResponse()
-	@ApiBadRequestResponse()
-	@ApiForbiddenResponse()
-	@ApiNotFoundResponse()
+	@ClaimDetailResponse()
 	async update(
 		@ClaimIdParam() id: ClaimId,
 		@Body() dto: UpdateClaimDto,
@@ -82,21 +102,14 @@ export class ClaimsController {
 
 	@Delete(":id")
 	@Permissions(Permission.CLAIMS_DELETE)
-	@ApiOkResponse({ type: CreateClaimResponseDto })
-	@ApiUnauthorizedResponse()
-	@ApiForbiddenResponse()
-	@ApiNotFoundResponse()
+	@ClaimDeleteResponse()
 	async remove(@ClaimIdParam() id: ClaimId) {
 		return this.claimsService.remove(id);
 	}
 
 	@Post(":id/comments")
 	@Permissions(Permission.CLAIMS_UPDATE)
-	@ApiOkResponse({ type: MessageResponseDto })
-	@ApiUnauthorizedResponse()
-	@ApiBadRequestResponse()
-	@ApiForbiddenResponse()
-	@ApiNotFoundResponse()
+	@ApiResponses({ status: HttpStatus.OK, type: ClaimCommentDto })
 	async addComment(
 		@ClaimIdParam() id: ClaimId,
 		@Body("content") content: string,
@@ -107,10 +120,7 @@ export class ClaimsController {
 
 	@Get(":id/comments")
 	@Permissions(Permission.CLAIMS_READ)
-	@ApiOkResponse({ type: [MessageResponseDto] })
-	@ApiUnauthorizedResponse()
-	@ApiForbiddenResponse()
-	@ApiNotFoundResponse()
+	@ApiResponses({ status: HttpStatus.OK, type: [ClaimCommentDto] })
 	async getComments(@ClaimIdParam() id: ClaimId) {
 		return this.claimsService.getComments(id);
 	}
@@ -118,11 +128,7 @@ export class ClaimsController {
 	@Post(":id/start-progress")
 	@HttpCode(HttpStatus.OK)
 	@Permissions(Permission.CLAIMS_UPDATE)
-	@ApiOkResponse({ type: CreateClaimResponseDto })
-	@ApiUnauthorizedResponse()
-	@ApiBadRequestResponse()
-	@ApiForbiddenResponse()
-	@ApiNotFoundResponse()
+	@ClaimDetailResponse()
 	async startProgress(
 		@ClaimIdParam() id: ClaimId,
 		@Request() req: AuthRequest,
@@ -133,11 +139,7 @@ export class ClaimsController {
 	@Post(":id/await-info")
 	@HttpCode(HttpStatus.OK)
 	@Permissions(Permission.CLAIMS_UPDATE)
-	@ApiOkResponse({ type: CreateClaimResponseDto })
-	@ApiUnauthorizedResponse()
-	@ApiBadRequestResponse()
-	@ApiForbiddenResponse()
-	@ApiNotFoundResponse()
+	@ClaimDetailResponse()
 	async awaitInfo(@ClaimIdParam() id: ClaimId, @Request() req: AuthRequest) {
 		return this.claimsService.awaitInfo(id, req.user);
 	}
@@ -145,11 +147,7 @@ export class ClaimsController {
 	@Post(":id/start-treatment")
 	@HttpCode(HttpStatus.OK)
 	@Permissions(Permission.CLAIMS_UPDATE)
-	@ApiOkResponse({ type: CreateClaimResponseDto })
-	@ApiUnauthorizedResponse()
-	@ApiBadRequestResponse()
-	@ApiForbiddenResponse()
-	@ApiNotFoundResponse()
+	@ClaimDetailResponse()
 	async startTreatment(
 		@ClaimIdParam() id: ClaimId,
 		@Request() req: AuthRequest,
@@ -160,11 +158,7 @@ export class ClaimsController {
 	@Post(":id/resolve")
 	@HttpCode(HttpStatus.OK)
 	@Permissions(Permission.CLAIMS_UPDATE)
-	@ApiOkResponse({ type: CreateClaimResponseDto })
-	@ApiUnauthorizedResponse()
-	@ApiBadRequestResponse()
-	@ApiForbiddenResponse()
-	@ApiNotFoundResponse()
+	@ClaimDetailResponse()
 	async resolve(
 		@ClaimIdParam() id: ClaimId,
 		@Body("resolution") resolution: string,
@@ -176,11 +170,7 @@ export class ClaimsController {
 	@Post(":id/close")
 	@HttpCode(HttpStatus.OK)
 	@Permissions(Permission.CLAIMS_CLOSE)
-	@ApiOkResponse({ type: CreateClaimResponseDto })
-	@ApiUnauthorizedResponse()
-	@ApiBadRequestResponse()
-	@ApiForbiddenResponse()
-	@ApiNotFoundResponse()
+	@ClaimDetailResponse()
 	async close(@ClaimIdParam() id: ClaimId, @Request() req: AuthRequest) {
 		return this.claimsService.close(id, req.user);
 	}
@@ -188,11 +178,7 @@ export class ClaimsController {
 	@Post(":id/reject")
 	@HttpCode(HttpStatus.OK)
 	@Permissions(Permission.CLAIMS_UPDATE)
-	@ApiOkResponse({ type: CreateClaimResponseDto })
-	@ApiUnauthorizedResponse()
-	@ApiBadRequestResponse()
-	@ApiForbiddenResponse()
-	@ApiNotFoundResponse()
+	@ClaimDetailResponse()
 	async reject(@ClaimIdParam() id: ClaimId, @Request() req: AuthRequest) {
 		return this.claimsService.reject(id, req.user);
 	}
@@ -200,11 +186,7 @@ export class ClaimsController {
 	@Post(":id/send-to-dtm")
 	@HttpCode(HttpStatus.OK)
 	@Permissions(Permission.CLAIMS_UPDATE)
-	@ApiOkResponse({ type: CreateClaimResponseDto })
-	@ApiUnauthorizedResponse()
-	@ApiBadRequestResponse()
-	@ApiForbiddenResponse()
-	@ApiNotFoundResponse()
+	@ClaimDetailResponse()
 	async sendToDtm(@ClaimIdParam() id: ClaimId, @Request() req: AuthRequest) {
 		return this.claimsService.sendToDtm(id, req.user);
 	}
