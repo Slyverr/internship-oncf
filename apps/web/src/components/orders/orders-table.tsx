@@ -33,7 +33,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { OrderListDto } from "@/lib/api/generated";
+import { OrderListDto } from "@/lib/api/generated.schemas";
 
 interface OrdersTableProps {
   data: OrderListDto[];
@@ -48,7 +48,7 @@ const features = tableFeatures({
 
 const columns: ColumnDef<typeof features, OrderListDto>[] = [
   {
-    accessorKey: "orderNumber",
+    accessorFn: (d) => d.orderNumber,
     header: "Order #",
     cell: (info) => (
       <span className="font-medium text-primary">
@@ -58,21 +58,21 @@ const columns: ColumnDef<typeof features, OrderListDto>[] = [
     enableSorting: true,
   },
   {
-    accessorKey: "customerId",
+    accessorFn: (d) => d.customer.companyName,
     header: "Customer",
-    cell: (info) => `Customer ${info.getValue<number>()}`,
+    cell: (info) => `${info.getValue<number>()}`,
   },
   {
-    accessorKey: "goodsId",
+    accessorFn: (d) => d.good.name,
     header: "Goods",
-    cell: (info) => `Goods ${info.getValue<number>()}`,
+    cell: (info) => `${info.getValue()}`,
   },
   {
     accessorKey: "quantityDemanded",
     header: "Qty",
   },
   {
-    accessorKey: "status",
+    accessorFn: (d) => d.orderStatus.name,
     header: "Status",
     cell: (info) => (
       <span className="capitalize">
