@@ -12,15 +12,13 @@ import {
 	Request,
 	UseGuards,
 } from "@nestjs/common";
-import {
-	ApiBadRequestResponse,
-	ApiForbiddenResponse,
-	ApiNotFoundResponse,
-	ApiOkResponse,
-	ApiUnauthorizedResponse,
-} from "@nestjs/swagger";
 import type { AuthRequest } from "src/auth/auth.types";
 import { Permissions } from "src/auth/permissions.decorator";
+import {
+	ApiResponses,
+	type ApiResponsesOptions,
+	ApiResponsesPatch,
+} from "src/common/decorators/api-responses.decorator";
 import { OrderOwnershipGuard } from "./guards/order-ownership.guard";
 import { OrdersService } from "./orders.service";
 import type { OrderId } from "./orders.types";
@@ -34,6 +32,37 @@ import { OrderListDto } from "./responses/order-list.dto";
 
 const OrderIdParam = () => Param("id", OrderIdPipe);
 
+const OrderBaseResponse: ApiResponsesOptions = {
+	status: HttpStatus.OK,
+	type: OrderDetailDto,
+	errors: [
+		HttpStatus.UNAUTHORIZED,
+		HttpStatus.BAD_REQUEST,
+		HttpStatus.FORBIDDEN,
+		HttpStatus.NOT_FOUND,
+	],
+};
+
+const OrderDetailResponse = () => ApiResponses(OrderBaseResponse);
+
+const OrderCreateResponse = () =>
+	ApiResponsesPatch(OrderBaseResponse, {
+		status: HttpStatus.CREATED,
+		removeErrors: [HttpStatus.NOT_FOUND],
+	});
+
+const OrderListResponse = () =>
+	ApiResponsesPatch(OrderBaseResponse, {
+		type: [OrderListDto],
+		errors: [HttpStatus.UNAUTHORIZED],
+	});
+
+const OrderDeleteResponse = () =>
+	ApiResponsesPatch(OrderBaseResponse, {
+		type: OrderDeleteDto,
+		removeErrors: [HttpStatus.BAD_REQUEST],
+	});
+
 @Controller("orders")
 @UseGuards(OrderOwnershipGuard)
 export class OrdersController {
@@ -41,10 +70,7 @@ export class OrdersController {
 
 	@Post()
 	@Permissions(Permission.ORDERS_CREATE)
-	@ApiOkResponse({ type: OrderDetailDto })
-	@ApiUnauthorizedResponse()
-	@ApiBadRequestResponse()
-	@ApiForbiddenResponse()
+	@OrderCreateResponse()
 	async create(
 		@Body() createOrderDto: CreateOrderDto,
 		@Request() req: AuthRequest,
@@ -54,28 +80,21 @@ export class OrdersController {
 
 	@Get()
 	@Permissions(Permission.ORDERS_READ)
-	@ApiOkResponse({ type: [OrderListDto] })
-	@ApiUnauthorizedResponse()
+	@OrderListResponse()
 	async findAll(@Request() req: AuthRequest) {
 		return this.ordersService.findAll(req.user);
 	}
 
 	@Get(":id")
 	@Permissions(Permission.ORDERS_READ)
-	@ApiOkResponse({ type: OrderDetailDto })
-	@ApiUnauthorizedResponse()
-	@ApiNotFoundResponse()
+	@OrderDetailResponse()
 	async findOne(@OrderIdParam() id: OrderId) {
 		return this.ordersService.findOne(id);
 	}
 
 	@Patch(":id")
 	@Permissions(Permission.ORDERS_UPDATE)
-	@ApiOkResponse({ type: OrderDetailDto })
-	@ApiUnauthorizedResponse()
-	@ApiBadRequestResponse()
-	@ApiForbiddenResponse()
-	@ApiNotFoundResponse()
+	@OrderDetailResponse()
 	async update(
 		@OrderIdParam() id: OrderId,
 		@Body() updateOrderDto: UpdateOrderDto,
@@ -87,11 +106,7 @@ export class OrdersController {
 	@Post(":id/submit")
 	@HttpCode(HttpStatus.OK)
 	@Permissions(Permission.ORDERS_UPDATE)
-	@ApiOkResponse({ type: OrderDetailDto })
-	@ApiUnauthorizedResponse()
-	@ApiBadRequestResponse()
-	@ApiForbiddenResponse()
-	@ApiNotFoundResponse()
+	@OrderDetailResponse()
 	async submit(@OrderIdParam() id: OrderId, @Request() req: AuthRequest) {
 		return this.ordersService.submit(id, req.user);
 	}
@@ -99,11 +114,7 @@ export class OrdersController {
 	@Post(":id/approve")
 	@HttpCode(HttpStatus.OK)
 	@Permissions(Permission.ORDERS_APPROVE)
-	@ApiOkResponse({ type: OrderDetailDto })
-	@ApiUnauthorizedResponse()
-	@ApiBadRequestResponse()
-	@ApiForbiddenResponse()
-	@ApiNotFoundResponse()
+	@OrderDetailResponse()
 	async approve(@OrderIdParam() id: OrderId, @Request() req: AuthRequest) {
 		return this.ordersService.approve(id, req.user);
 	}
@@ -111,11 +122,7 @@ export class OrdersController {
 	@Post(":id/reject")
 	@HttpCode(HttpStatus.OK)
 	@Permissions(Permission.ORDERS_REJECT)
-	@ApiOkResponse({ type: OrderDetailDto })
-	@ApiUnauthorizedResponse()
-	@ApiBadRequestResponse()
-	@ApiForbiddenResponse()
-	@ApiNotFoundResponse()
+	@OrderDetailResponse()
 	async reject(
 		@OrderIdParam() id: OrderId,
 		@Body() body: RejectOrderDto,
@@ -127,11 +134,7 @@ export class OrdersController {
 	@Post(":id/cancel")
 	@HttpCode(HttpStatus.OK)
 	@Permissions(Permission.ORDERS_UPDATE)
-	@ApiOkResponse({ type: OrderDetailDto })
-	@ApiUnauthorizedResponse()
-	@ApiBadRequestResponse()
-	@ApiForbiddenResponse()
-	@ApiNotFoundResponse()
+	@OrderDetailResponse()
 	async cancel(@OrderIdParam() id: OrderId, @Request() req: AuthRequest) {
 		return this.ordersService.cancel(id, req.user);
 	}
@@ -139,21 +142,14 @@ export class OrdersController {
 	@Post(":id/send-to-dtm")
 	@HttpCode(HttpStatus.OK)
 	@Permissions(Permission.ORDERS_EXECUTE)
-	@ApiOkResponse({ type: OrderDetailDto })
-	@ApiUnauthorizedResponse()
-	@ApiBadRequestResponse()
-	@ApiForbiddenResponse()
-	@ApiNotFoundResponse()
+	@OrderDetailResponse()
 	async sendToDtm(@OrderIdParam() id: OrderId, @Request() req: AuthRequest) {
 		return this.ordersService.sendToDtm(id, req.user);
 	}
 
 	@Delete(":id")
 	@Permissions(Permission.ORDERS_DELETE)
-	@ApiOkResponse({ type: OrderDeleteDto })
-	@ApiUnauthorizedResponse()
-	@ApiForbiddenResponse()
-	@ApiNotFoundResponse()
+	@OrderDeleteResponse()
 	async remove(@OrderIdParam() id: OrderId) {
 		return this.ordersService.remove(id);
 	}
