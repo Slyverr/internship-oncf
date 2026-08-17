@@ -5,6 +5,7 @@ export default defineConfig({
   api: {
     input: process.env.BACKEND_OPENAPI_URL,
     output: {
+      mode: "tags",
       target: "./src/lib/api/generated.ts",
       client: "react-query",
       httpClient: "axios",

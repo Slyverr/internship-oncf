@@ -1,7 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { authControllerLogin } from "@/lib/api/generated";
+import { authControllerLogin } from "@/lib/api/auth";
 
 export type LoginState = {
   errors?: {

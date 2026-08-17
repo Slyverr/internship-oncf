@@ -1,5 +1,5 @@
 import { OrdersTable } from "@/components/orders/orders-table";
-import { ordersControllerFindAll } from "@/lib/api/generated";
+import { ordersControllerFindAll } from "@/lib/api/orders";
 
 export default async function Page() {
   const orders = await ordersControllerFindAll();
