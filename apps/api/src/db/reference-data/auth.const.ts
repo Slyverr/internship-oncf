@@ -144,6 +144,11 @@ export const PERMISSIONS: Record<
 		name: Permission.CLAIMS_DELETE,
 		description: "Delete claims from the system",
 	},
+	[Permission.CLAIMS_MANAGE]: {
+		id: 306,
+		name: Permission.CLAIMS_MANAGE,
+		description: "Manage all claims",
+	},
 
 	// Tracking: 401-500
 	[Permission.TRACKING_READ]: {
@@ -273,6 +278,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[] | "ALL"> = {
 		Permission.CLAIMS_READ,
 		Permission.CLAIMS_UPDATE,
 		Permission.CLAIMS_DELETE,
+		Permission.CLAIMS_MANAGE,
 		Permission.TRACKING_READ,
 		Permission.REPORTS_READ,
 		Permission.PROFILE_UPDATE,

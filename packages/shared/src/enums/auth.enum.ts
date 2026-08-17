@@ -30,6 +30,7 @@ export enum Permission {
 	CLAIMS_UPDATE = "claims:update",
 	CLAIMS_CLOSE = "claims:close",
 	CLAIMS_DELETE = "claims:delete",
+	CLAIMS_MANAGE = "claims:manage",
 
 	TRACKING_READ = "tracking:read",
 	TRACKING_UPDATE = "tracking:update",
