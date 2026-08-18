@@ -1,4 +1,7 @@
+import { Assert, Equals } from "src/common/utils/type-assertions";
 import { ClaimList } from "../claims.types";
+
+type _Assertion = Assert<Equals<ClaimListDto, ClaimList>>;
 
 export class ClaimListDto implements ClaimList {
 	id: number;

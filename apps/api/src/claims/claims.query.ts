@@ -34,4 +34,4 @@ export const claimDetailRelations = {
 	closedByUser: { columns: { id: true, firstName: true, lastName: true } },
 	claimStatusHistories: true,
 	claimComments: true,
-};
+} satisfies ClaimsRelations;
