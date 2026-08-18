@@ -23,9 +23,8 @@ export function hasOnePermission(
 	user: AuthUser,
 	permission: Permission,
 ): boolean {
-	return user.permissions.includes(
-		MANAGE_PERMISSION_PARENT_MAP[permission] ?? permission,
-	);
+	const parent = MANAGE_PERMISSION_PARENT_MAP[permission];
+	return user.permissions.some((p) => p === permission || p === parent);
 }
 
 export function hasAllPermissions(
