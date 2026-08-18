@@ -27,6 +27,7 @@ import {
     SidebarMenuItem,
     SidebarRail,
 } from "@/components/ui/sidebar"
+import { logout } from "@/actions/auth"
 
 const routes = [
   {
@@ -128,7 +129,7 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
                   Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={logout}>
                   <LogOutIcon />
                   Log out
                 </DropdownMenuItem>
