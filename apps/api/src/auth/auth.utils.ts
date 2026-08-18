@@ -1,34 +1,16 @@
 import { Permission } from "@ecommand/shared";
 import { AuthUser } from "./auth.types";
 
-const MANAGE_PERMISSION_PARENT_MAP: Readonly<
-	Partial<Record<Permission, Permission>>
-> = Object.values(Permission).reduce(
-	(map, permission) => {
-		const parts = permission.split(":");
-
-		if (parts.length === 3 && parts[1] === "manage") {
-			const parent = `${parts[0]}:manage` as Permission;
-			if (Object.values(Permission).includes(parent)) {
-				map[permission] = parent;
-			}
-		}
-
-		return map;
-	},
-	{} as Partial<Record<Permission, Permission>>,
-);
-
 export function hasOnePermission(
 	user: AuthUser,
 	permission: Permission,
 ): boolean {
-	const parent = MANAGE_PERMISSION_PARENT_MAP[permission];
+	if (user.permissions.has(permission)) {
+		return true;
+	}
 
-	return (
-		user.permissions.has(permission) ||
-		(parent !== undefined && user.permissions.has(parent))
-	);
+	const [module] = permission.split(":");
+	return user.permissions.has(`${module}:manage` as Permission);
 }
 
 export function hasAllPermissions(
