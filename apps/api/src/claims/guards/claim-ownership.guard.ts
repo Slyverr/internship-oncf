@@ -5,7 +5,7 @@ import {
 	ForbiddenException,
 	Injectable,
 } from "@nestjs/common";
-import { hasAnyPermission } from "src/auth/auth.utils";
+import { hasOnePermission } from "src/auth/auth.utils";
 import { ClaimsService } from "../claims.service";
 import { ClaimIdPipe } from "../pipes/claim-id.pipe";
 
@@ -28,7 +28,7 @@ export class ClaimOwnershipGuard implements CanActivate {
 
 		if (
 			claim.userId !== user.id &&
-			!hasAnyPermission(user, Permission.CLAIMS_MANAGE)
+			!hasOnePermission(user, Permission.CLAIMS_MANAGE_OTHER)
 		) {
 			throw new ForbiddenException("You can only access your own claims");
 		}

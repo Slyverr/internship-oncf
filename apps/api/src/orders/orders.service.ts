@@ -7,7 +7,7 @@ import {
 import { orderStatusHistory, orders } from "drizzle/schema";
 import { eq } from "drizzle-orm";
 import { AuthUser } from "src/auth/auth.types";
-import { hasPermission } from "src/auth/auth.utils";
+import { hasOnePermission } from "src/auth/auth.utils";
 import { DrizzleService } from "src/db/drizzle.service";
 import { withDbErrorHandling } from "src/db/drizzle.util";
 import { ORDER_STATUSES } from "src/db/reference-data";
@@ -43,7 +43,7 @@ export class OrdersService {
 	}
 
 	async findAll(user: AuthUser) {
-		const where = !hasPermission(user, Permission.ORDERS_MANAGE_USER)
+		const where = !hasOnePermission(user, Permission.ORDERS_MANAGE_OTHER)
 			? { userId: user.id }
 			: {};
 

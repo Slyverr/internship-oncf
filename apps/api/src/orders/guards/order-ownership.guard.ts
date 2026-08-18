@@ -5,7 +5,7 @@ import {
 	ForbiddenException,
 	Injectable,
 } from "@nestjs/common";
-import { hasPermission } from "src/auth/auth.utils";
+import { hasOnePermission } from "src/auth/auth.utils";
 import { OrdersService } from "../orders.service";
 import { OrderIdPipe } from "../pipes/order-id.pipe";
 
@@ -28,7 +28,7 @@ export class OrderOwnershipGuard implements CanActivate {
 
 		if (
 			order.userId !== user.id &&
-			!hasPermission(user, Permission.ORDERS_MANAGE_USER)
+			!hasOnePermission(user, Permission.ORDERS_MANAGE_OTHER)
 		) {
 			throw new ForbiddenException("You can only access your own orders");
 		}

@@ -5,7 +5,7 @@ import {
 	ForbiddenException,
 	Injectable,
 } from "@nestjs/common";
-import { hasPermission } from "src/auth/auth.utils";
+import { hasOnePermission } from "src/auth/auth.utils";
 import { ProgramIdPipe } from "../pipes/program-id.pipe";
 import { ProgramsService } from "../programs.service";
 
@@ -20,7 +20,7 @@ export class ProgramOwnershipGuard implements CanActivate {
 		const user = request.user;
 
 		if (!request.params.id) return true;
-		if (hasPermission(user, Permission.ORDERS_MANAGE_USER)) return true;
+		if (hasOnePermission(user, Permission.PROGRAMS_MANAGE_OTHER)) return true;
 
 		const id = this.programIdPipe.transform(request.params.id);
 		const program = await this.programsService.findOne(id);

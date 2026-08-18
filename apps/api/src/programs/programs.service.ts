@@ -44,13 +44,13 @@ export class ProgramsService {
 	private normalizeCreate(dto: CreateProgramDto, user: AuthUser) {
 		const userId = dto.userId ?? user.id;
 		if (
-			!hasPermission(user, Permission.ORDERS_MANAGE_USER) &&
+			!hasPermission(user, Permission.ORDERS_MANAGE_OWNERSHIP) &&
 			userId !== user.id
 		) {
 			throw new ForbiddenException("Cannot assign programs to other users");
 		}
 
-		const status = hasPermission(user, Permission.ORDERS_MANAGE_STATUS)
+		const status = hasPermission(user, Permission.ORDERS_STATUS_UPDATE)
 			? (dto.status ?? ProgramStatus.DRAFT)
 			: ProgramStatus.DRAFT;
 
@@ -59,7 +59,7 @@ export class ProgramsService {
 
 	private normalizeUpdate(dto: UpdateProgramDto, user: AuthUser) {
 		if (dto.userId !== undefined && dto.userId !== user.id) {
-			if (!hasPermission(user, Permission.ORDERS_MANAGE_USER)) {
+			if (!hasPermission(user, Permission.ORDERS_MANAGE_OWNERSHIP)) {
 				throw new ForbiddenException("Cannot assign programs to other users");
 			}
 		}
@@ -68,7 +68,7 @@ export class ProgramsService {
 			...dto,
 		};
 		if (dto.status !== undefined) {
-			if (!hasPermission(user, Permission.ORDERS_MANAGE_STATUS)) {
+			if (!hasPermission(user, Permission.ORDERS_STATUS_UPDATE)) {
 				throw new ForbiddenException("Cannot change program status");
 			}
 			result.statusId = PROGRAM_STATUSES[dto.status].id;

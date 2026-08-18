@@ -48,6 +48,16 @@ export const PERMISSIONS: Record<
 		name: Permission.USERS_DELETE,
 		description: "Delete user accounts from the system",
 	},
+	[Permission.USERS_MANAGE]: {
+		id: 5,
+		name: Permission.USERS_MANAGE,
+		description: "Manage user operations",
+	},
+	[Permission.USERS_MANAGE_OTHER]: {
+		id: 6,
+		name: Permission.USERS_MANAGE_OTHER,
+		description: "Manage users belonging to other accounts",
+	},
 
 	// Orders: 101-200
 	[Permission.ORDERS_CREATE]: {
@@ -70,30 +80,45 @@ export const PERMISSIONS: Record<
 		name: Permission.ORDERS_DELETE,
 		description: "Delete orders from the system",
 	},
-	[Permission.ORDERS_MANAGE_USER]: {
+	[Permission.ORDERS_MANAGE]: {
 		id: 105,
-		name: Permission.ORDERS_MANAGE_USER,
-		description: "Manage order owner",
+		name: Permission.ORDERS_MANAGE,
+		description: "Manage all order operations",
 	},
-	[Permission.ORDERS_MANAGE_STATUS]: {
+	[Permission.ORDERS_MANAGE_OTHER]: {
 		id: 106,
-		name: Permission.ORDERS_MANAGE_STATUS,
-		description: "Manage order status",
+		name: Permission.ORDERS_MANAGE_OTHER,
+		description: "Manage orders belonging to other users",
+	},
+	[Permission.ORDERS_MANAGE_OWNERSHIP]: {
+		id: 107,
+		name: Permission.ORDERS_MANAGE_OWNERSHIP,
+		description: "Change order ownership and assignment",
+	},
+	[Permission.ORDERS_STATUS_UPDATE]: {
+		id: 108,
+		name: Permission.ORDERS_STATUS_UPDATE,
+		description: "Update order status according to workflow rules",
 	},
 	[Permission.ORDERS_APPROVE]: {
-		id: 107,
+		id: 109,
 		name: Permission.ORDERS_APPROVE,
 		description: "Approve orders",
 	},
 	[Permission.ORDERS_REJECT]: {
-		id: 108,
+		id: 110,
 		name: Permission.ORDERS_REJECT,
 		description: "Reject orders",
 	},
 	[Permission.ORDERS_EXECUTE]: {
-		id: 109,
+		id: 111,
 		name: Permission.ORDERS_EXECUTE,
-		description: "Execute orders (send to DTM)",
+		description: "Execute orders",
+	},
+	[Permission.ORDERS_SEND]: {
+		id: 112,
+		name: Permission.ORDERS_SEND,
+		description: "Send orders for processing",
 	},
 
 	// Customers: 201-300
@@ -117,6 +142,16 @@ export const PERMISSIONS: Record<
 		name: Permission.CUSTOMERS_DELETE,
 		description: "Delete customer profiles from the system",
 	},
+	[Permission.CUSTOMERS_MANAGE]: {
+		id: 205,
+		name: Permission.CUSTOMERS_MANAGE,
+		description: "Manage customer operations",
+	},
+	[Permission.CUSTOMERS_MANAGE_OTHER]: {
+		id: 206,
+		name: Permission.CUSTOMERS_MANAGE_OTHER,
+		description: "Manage customers belonging to other users",
+	},
 
 	// Claims: 301-400
 	[Permission.CLAIMS_CREATE]: {
@@ -132,7 +167,7 @@ export const PERMISSIONS: Record<
 	[Permission.CLAIMS_UPDATE]: {
 		id: 303,
 		name: Permission.CLAIMS_UPDATE,
-		description: "Update claim information and status",
+		description: "Update claim information",
 	},
 	[Permission.CLAIMS_CLOSE]: {
 		id: 304,
@@ -149,6 +184,16 @@ export const PERMISSIONS: Record<
 		name: Permission.CLAIMS_MANAGE,
 		description: "Manage all claims",
 	},
+	[Permission.CLAIMS_MANAGE_OTHER]: {
+		id: 307,
+		name: Permission.CLAIMS_MANAGE_OTHER,
+		description: "Manage claims belonging to other users",
+	},
+	[Permission.CLAIMS_STATUS_UPDATE]: {
+		id: 308,
+		name: Permission.CLAIMS_STATUS_UPDATE,
+		description: "Update claim status according to workflow rules",
+	},
 
 	// Tracking: 401-500
 	[Permission.TRACKING_READ]: {
@@ -160,6 +205,11 @@ export const PERMISSIONS: Record<
 		id: 402,
 		name: Permission.TRACKING_UPDATE,
 		description: "Update tracking information and shipment details",
+	},
+	[Permission.TRACKING_MANAGE]: {
+		id: 403,
+		name: Permission.TRACKING_MANAGE,
+		description: "Manage tracking operations",
 	},
 
 	// Reports: 501-600
@@ -216,37 +266,52 @@ export const PERMISSIONS: Record<
 	[Permission.PROGRAMS_CREATE]: {
 		id: 1001,
 		name: Permission.PROGRAMS_CREATE,
-		description: "Create new programs or initiatives",
+		description: "Create new programs",
 	},
 	[Permission.PROGRAMS_READ]: {
 		id: 1002,
 		name: Permission.PROGRAMS_READ,
 		description: "View program details and lists",
 	},
-	[Permission.PROGRAMS_APPROVE]: {
-		id: 1003,
-		name: Permission.PROGRAMS_APPROVE,
-		description: "Approve programs for implementation",
-	},
-	[Permission.PROGRAMS_SEND]: {
-		id: 1004,
-		name: Permission.PROGRAMS_SEND,
-		description: "Submit programs for review or approval",
-	},
-	[Permission.PROGRAMS_EXECUTE]: {
-		id: 1005,
-		name: Permission.PROGRAMS_EXECUTE,
-		description: "Execute approved programs",
-	},
 	[Permission.PROGRAMS_UPDATE]: {
-		id: 1006,
+		id: 1003,
 		name: Permission.PROGRAMS_UPDATE,
-		description: "Update program details and parameters",
+		description: "Update program information",
 	},
 	[Permission.PROGRAMS_DELETE]: {
-		id: 1007,
+		id: 1004,
 		name: Permission.PROGRAMS_DELETE,
-		description: "Delete programs from the system",
+		description: "Delete programs",
+	},
+	[Permission.PROGRAMS_MANAGE]: {
+		id: 1005,
+		name: Permission.PROGRAMS_MANAGE,
+		description: "Manage program operations",
+	},
+	[Permission.PROGRAMS_MANAGE_OTHER]: {
+		id: 1006,
+		name: Permission.PROGRAMS_MANAGE_OTHER,
+		description: "Manage programs belonging to other users",
+	},
+	[Permission.PROGRAMS_STATUS_UPDATE]: {
+		id: 1007,
+		name: Permission.PROGRAMS_STATUS_UPDATE,
+		description: "Update program status according to workflow rules",
+	},
+	[Permission.PROGRAMS_APPROVE]: {
+		id: 1008,
+		name: Permission.PROGRAMS_APPROVE,
+		description: "Approve programs",
+	},
+	[Permission.PROGRAMS_SEND]: {
+		id: 1009,
+		name: Permission.PROGRAMS_SEND,
+		description: "Send programs for processing",
+	},
+	[Permission.PROGRAMS_EXECUTE]: {
+		id: 1010,
+		name: Permission.PROGRAMS_EXECUTE,
+		description: "Execute programs",
 	},
 };
 
@@ -257,10 +322,15 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[] | "ALL"> = {
 		Permission.ORDERS_CREATE,
 		Permission.ORDERS_READ,
 		Permission.ORDERS_UPDATE,
+		Permission.ORDERS_DELETE,
+
 		Permission.CLAIMS_CREATE,
 		Permission.CLAIMS_READ,
-		Permission.TRACKING_READ,
+
+		Permission.REPORTS_READ,
+
 		Permission.PROFILE_UPDATE,
+
 		Permission.PROGRAMS_READ,
 	],
 
@@ -268,22 +338,32 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[] | "ALL"> = {
 		Permission.ORDERS_CREATE,
 		Permission.ORDERS_READ,
 		Permission.ORDERS_UPDATE,
-		Permission.ORDERS_MANAGE_USER,
-		Permission.ORDERS_MANAGE_STATUS,
+		Permission.ORDERS_STATUS_UPDATE,
 		Permission.ORDERS_APPROVE,
 		Permission.ORDERS_REJECT,
+		Permission.ORDERS_SEND,
 		Permission.ORDERS_EXECUTE,
+		Permission.ORDERS_MANAGE_OTHER,
+
 		Permission.CUSTOMERS_READ,
 		Permission.CUSTOMERS_UPDATE,
+
+		Permission.CLAIMS_CREATE,
 		Permission.CLAIMS_READ,
 		Permission.CLAIMS_UPDATE,
-		Permission.CLAIMS_DELETE,
-		Permission.CLAIMS_MANAGE,
+		Permission.CLAIMS_STATUS_UPDATE,
+		Permission.CLAIMS_CLOSE,
+
 		Permission.TRACKING_READ,
+
 		Permission.REPORTS_READ,
+
 		Permission.PROFILE_UPDATE,
+
 		Permission.PROGRAMS_CREATE,
 		Permission.PROGRAMS_READ,
+		Permission.PROGRAMS_UPDATE,
+		Permission.PROGRAMS_STATUS_UPDATE,
 		Permission.PROGRAMS_APPROVE,
 		Permission.PROGRAMS_SEND,
 		Permission.PROGRAMS_EXECUTE,
