@@ -11,16 +11,17 @@ import {
 	ApiOkResponse,
 	ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
+import { plainToInstance } from "class-transformer";
 import { MessageResponseDto } from "src/common/responses/message.dto";
 import { AuthService } from "./auth.service";
 import type { AuthRequest, LocalAuthRequest } from "./auth.types";
 import { ForgotPasswordDto } from "./dto/forgot-password.dto";
 import { LoginDto } from "./dto/login.dto";
 import { LoginResponseDto } from "./dto/login.response.dto";
-import { ProfileResponseDto } from "./dto/profile.response.dto";
 import { ResetPasswordDto } from "./dto/reset-password.dto";
 import { LocalAuthGuard } from "./guards/local-auth.guard";
 import { Public } from "./public.decorator";
+import { ProfileDto } from "./responses/profile.dto";
 
 @Controller("auth")
 export class AuthController {
@@ -36,10 +37,10 @@ export class AuthController {
 	}
 
 	@Get("profile")
-	@ApiOkResponse({ type: ProfileResponseDto })
+	@ApiOkResponse({ type: ProfileDto })
 	@ApiUnauthorizedResponse()
-	getProfile(@Request() req: AuthRequest) {
-		return req.user;
+	async getProfile(@Request() req: AuthRequest) {
+		return plainToInstance(ProfileDto, req.user);
 	}
 
 	@Public()

@@ -1,3 +1,4 @@
+import { Permission } from "@ecommand/shared";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
@@ -22,10 +23,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 	}
 
 	async validate(payload: JwtPayload): Promise<AuthUser> {
+		const permissions = (payload.permissions ?? []) as Permission[];
+
 		return {
 			id: payload.sub,
 			email: payload.username,
-			permissions: payload.permissions ?? [],
+			permissions: new Set(permissions),
 			role: payload.role,
 		};
 	}

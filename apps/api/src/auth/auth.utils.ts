@@ -24,7 +24,11 @@ export function hasOnePermission(
 	permission: Permission,
 ): boolean {
 	const parent = MANAGE_PERMISSION_PARENT_MAP[permission];
-	return user.permissions.some((p) => p === permission || p === parent);
+
+	return (
+		user.permissions.has(permission) ||
+		(parent !== undefined && user.permissions.has(parent))
+	);
 }
 
 export function hasAllPermissions(
