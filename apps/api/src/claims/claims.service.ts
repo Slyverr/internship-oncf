@@ -8,13 +8,17 @@ import {
 import { claimComments, claimStatusHistory, claims } from "drizzle/schema";
 import { eq } from "drizzle-orm";
 import { AuthUser } from "src/auth/auth.types";
-import { hasPermission } from "src/auth/auth.utils";
+import { hasAnyPermission } from "src/auth/auth.utils";
 import { DrizzleService } from "src/db/drizzle.service";
 import { withDbErrorHandling } from "src/db/drizzle.util";
 import { CLAIM_STATUSES } from "src/db/reference-data";
 import { CLAIM_STATUS_BY_ID, CLAIM_TRANSITION } from "./claims.constants";
 import { toCreate, toUpdate } from "./claims.mapper";
-import { claimDetailRelations, claimListColumns } from "./claims.query";
+import {
+	claimDetailRelations,
+	claimListColumns,
+	claimListRelations,
+} from "./claims.query";
 import { ClaimId } from "./claims.types";
 import { CreateClaimDto } from "./requests/create-claim.dto";
 import { UpdateClaimDto } from "./requests/update-claim.dto";
@@ -43,7 +47,7 @@ export class ClaimsService {
 		userId: number,
 		comment?: string,
 	) {
-		const claim = await this.findOne(claimId);
+		const claim = await this.findOneForTransition(claimId);
 		const fromStatus = CLAIM_STATUS_BY_ID[claim.statusId];
 		if (!fromStatus) {
 			throw new BadRequestException(`Invalid status for claim ${claimId}`);
@@ -53,7 +57,7 @@ export class ClaimsService {
 		}
 		const allowed = CLAIM_TRANSITION[fromStatus] ?? [];
 		if (!allowed.includes(toStatus)) {
-			throw new BadRequestException(
+			throw new ConflictException(
 				`Cannot transition from ${fromStatus} to ${toStatus}`,
 			);
 		}
@@ -82,16 +86,16 @@ export class ClaimsService {
 	}
 
 	async findAll(user: AuthUser) {
-		if (hasPermission(user, Permission.CLAIMS_READ)) {
+		if (hasAnyPermission(user, Permission.CLAIMS_READ)) {
 			return this.drizzle.db.query.claims.findMany({
 				columns: claimListColumns,
-				with: claimDetailRelations,
+				with: claimListRelations,
 			});
 		}
 		return this.drizzle.db.query.claims.findMany({
 			where: { userId: user.id },
 			columns: claimListColumns,
-			with: claimDetailRelations,
+			with: claimListRelations,
 		});
 	}
 
@@ -108,6 +112,15 @@ export class ClaimsService {
 		const claim = await this.drizzle.db.query.claims.findFirst({
 			where: { id },
 			columns: { userId: true, customerId: true },
+		});
+		if (!claim) throw new NotFoundException(`Claim ${id} not found`);
+		return claim;
+	}
+
+	async findOneForTransition(id: ClaimId) {
+		const claim = await this.drizzle.db.query.claims.findFirst({
+			where: { id },
+			columns: { statusId: true },
 		});
 		if (!claim) throw new NotFoundException(`Claim ${id} not found`);
 		return claim;
@@ -207,7 +220,7 @@ export class ClaimsService {
 	async sendToDtm(claimId: ClaimId, user: AuthUser) {
 		const claim = await this.findOne(claimId);
 		if (claim.statusId !== CLAIM_STATUSES[ClaimStatus.RESOLVED].id) {
-			throw new BadRequestException("Only resolved claims can be sent to DTM");
+			throw new ConflictException("Only resolved claims can be sent to DTM");
 		}
 		return this.transition(claimId, ClaimStatus.SENT_TO_DTM, user.id);
 	}

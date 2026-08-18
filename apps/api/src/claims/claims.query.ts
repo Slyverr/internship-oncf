@@ -20,51 +20,18 @@ export const claimListColumns = {
 	updatedAt: true,
 } satisfies ClaimsColumns;
 
+export const claimListRelations = {
+	customer: { columns: { id: true, companyName: true } },
+	user: { columns: { id: true, firstName: true, lastName: true } },
+	order: { columns: { id: true, orderNumber: true } },
+	accessoryOperation: { columns: { id: true, name: true } },
+	claimType: { columns: { id: true, name: true } },
+	claimStatus: { columns: { id: true, name: true } },
+} satisfies ClaimsRelations;
+
 export const claimDetailRelations = {
-	customer: {
-		columns: {
-			id: true,
-			companyName: true,
-		},
-	},
-	user: {
-		columns: {
-			id: true,
-			firstName: true,
-			lastName: true,
-		},
-	},
-	order: {
-		columns: {
-			id: true,
-			orderNumber: true,
-		},
-	},
-	accessoryOperation: {
-		columns: {
-			id: true,
-			name: true,
-		},
-	},
-	claimType: {
-		columns: {
-			id: true,
-			name: true,
-		},
-	},
-	claimStatus: {
-		columns: {
-			id: true,
-			name: true,
-		},
-	},
-	closedByUser: {
-		columns: {
-			id: true,
-			firstName: true,
-			lastName: true,
-		},
-	},
+	...claimListRelations,
+	closedByUser: { columns: { id: true, firstName: true, lastName: true } },
 	claimStatusHistories: true,
 	claimComments: true,
-} satisfies ClaimsRelations;
+};
