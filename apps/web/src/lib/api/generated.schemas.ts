@@ -688,27 +688,9 @@ export type ClaimListDtoClaimStatus = {
   name: string;
 };
 
-export type ClaimListDtoClaimCommentsItem = {
-  id: number;
-  createdAt: string;
-  userId: number;
-  comment: string;
-  claimId: number;
-};
-
 export type ClaimListDtoCustomer = {
   id: number;
   companyName: string;
-};
-
-export type ClaimListDtoClaimStatusHistoriesItem = {
-  id: number;
-  statusId: number;
-  changedBy: number;
-  changedAt: string;
-  /** @nullable */
-  comment: string | null;
-  claimId: number;
 };
 
 export type ClaimListDtoUser = {
@@ -733,12 +715,6 @@ export type ClaimListDtoClaimType = {
   name: string;
 };
 
-export type ClaimListDtoClosedByUser = {
-  id: number;
-  lastName: string;
-  firstName: string;
-};
-
 export interface ClaimListDto {
   id: number;
   createdAt: string;
@@ -761,14 +737,11 @@ export interface ClaimListDto {
   /** @nullable */
   closedAt: string | null;
   claimStatus: ClaimListDtoClaimStatus;
-  claimComments: ClaimListDtoClaimCommentsItem[];
   customer: ClaimListDtoCustomer;
-  claimStatusHistories: ClaimListDtoClaimStatusHistoriesItem[];
   user: ClaimListDtoUser;
   order: ClaimListDtoOrder;
   accessoryOperation: ClaimListDtoAccessoryOperation;
   claimType: ClaimListDtoClaimType;
-  closedByUser: ClaimListDtoClosedByUser;
 }
 
 export type UpdateClaimDtoType = typeof UpdateClaimDtoType[keyof typeof UpdateClaimDtoType];
