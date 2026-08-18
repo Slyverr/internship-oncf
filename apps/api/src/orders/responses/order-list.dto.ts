@@ -1,4 +1,7 @@
+import { Assert, Equals } from "src/common/utils/type-assertions";
 import { OrderList } from "../orders.types";
+
+type _Assertion = Assert<Equals<OrderListDto, OrderList>>;
 
 export class OrderListDto implements OrderList {
 	id: number;
