@@ -1,3 +1,4 @@
+import { Permission } from "@ecommand/shared";
 import {
 	CanActivate,
 	ExecutionContext,
@@ -5,35 +6,36 @@ import {
 	Injectable,
 } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
-import { PERMISSIONS_KEY } from "../permissions.decorator";
+import { hasAllPermissions, hasAnyPermission } from "../auth.utils";
+import {
+	PERMISSIONS_ALL_KEY,
+	PERMISSIONS_ANY_KEY,
+} from "../permissions.decorator";
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
-	constructor(private reflector: Reflector) {}
+	constructor(private readonly reflector: Reflector) {}
 
 	canActivate(context: ExecutionContext): boolean {
-		const requiredPermissions = this.reflector.getAllAndOverride<string[]>(
-			PERMISSIONS_KEY,
+		const any = this.reflector.getAllAndOverride<Permission[]>(
+			PERMISSIONS_ANY_KEY,
 			[context.getHandler(), context.getClass()],
 		);
 
-		if (!requiredPermissions || requiredPermissions.length === 0) {
+		const all = this.reflector.getAllAndOverride<Permission[]>(
+			PERMISSIONS_ALL_KEY,
+			[context.getHandler(), context.getClass()],
+		);
+
+		if (!any && !all) {
 			return true;
 		}
 
 		const { user } = context.switchToHttp().getRequest();
 
-		if (!user?.permissions) {
-			throw new ForbiddenException("User has no permissions assigned");
-		}
-
-		const hasAllPermissions = requiredPermissions.every((permission) =>
-			user.permissions.includes(permission),
-		);
-
-		if (!hasAllPermissions) {
-			throw new ForbiddenException("Insufficient permissions");
-		}
+		if (!user) throw new ForbiddenException();
+		if (any && !hasAnyPermission(user, ...any)) throw new ForbiddenException();
+		if (all && !hasAllPermissions(user, ...all)) throw new ForbiddenException();
 
 		return true;
 	}
