@@ -313,6 +313,11 @@ export const PERMISSIONS: Record<
 		name: Permission.PROGRAMS_EXECUTE,
 		description: "Execute programs",
 	},
+	[Permission.PROGRAMS_MANAGE_OWNERSHIP]: {
+		id: 1011,
+		name: Permission.PROGRAMS_MANAGE_OWNERSHIP,
+		description: "Change program ownership and assignment",
+	},
 };
 
 export const ROLE_PERMISSIONS: Record<Role, Permission[] | "ALL"> = {

@@ -64,6 +64,7 @@ export enum Permission {
 	PROGRAMS_DELETE = "programs:delete",
 	PROGRAMS_MANAGE = "programs:manage",
 	PROGRAMS_MANAGE_OTHER = "programs:manage:other",
+	PROGRAMS_MANAGE_OWNERSHIP = "programs:manage:ownership",
 	PROGRAMS_STATUS_UPDATE = "programs:status:update",
 	PROGRAMS_APPROVE = "programs:approve",
 	PROGRAMS_SEND = "programs:send",
