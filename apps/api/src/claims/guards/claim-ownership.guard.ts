@@ -1,38 +1,19 @@
 import { Permission } from "@ecommand/shared";
-import {
-	CanActivate,
-	ExecutionContext,
-	ForbiddenException,
-	Injectable,
-} from "@nestjs/common";
-import { hasOnePermission } from "src/auth/auth.utils";
+import { createOwnershipGuard } from "src/auth/guards/ownership.factory";
 import { ClaimsService } from "../claims.service";
+import { ClaimId } from "../claims.types";
 import { ClaimIdPipe } from "../pipes/claim-id.pipe";
 
-@Injectable()
-export class ClaimOwnershipGuard implements CanActivate {
-	private readonly claimIdPipe = new ClaimIdPipe();
+export const ClaimOwnershipGuard = createOwnershipGuard<ClaimsService, ClaimId>(
+	{
+		service: ClaimsService,
+		resolveOwnerId: async (service, id) => {
+			const owner = await service.findOneForOwnership(id);
+			return owner.userId;
+		},
 
-	constructor(private readonly claimsService: ClaimsService) {}
-
-	async canActivate(context: ExecutionContext) {
-		const request = context.switchToHttp().getRequest();
-		const user = request.user;
-
-		if (!request.params.id) {
-			return true;
-		}
-
-		const id = this.claimIdPipe.transform(request.params.id);
-		const claim = await this.claimsService.findOneForOwnership(id);
-
-		if (
-			claim.userId !== user.id &&
-			!hasOnePermission(user, Permission.CLAIMS_MANAGE_OTHER)
-		) {
-			throw new ForbiddenException("You can only access your own claims");
-		}
-
-		return true;
-	}
-}
+		pipe: new ClaimIdPipe(),
+		permission: Permission.CLAIMS_MANAGE_OTHER,
+		errorMessage: "You can only access your own claims",
+	},
+);
