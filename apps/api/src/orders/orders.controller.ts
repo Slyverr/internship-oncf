@@ -14,11 +14,7 @@ import {
 } from "@nestjs/common";
 import type { AuthRequest } from "src/auth/auth.types";
 import { RequireAny } from "src/auth/permissions.decorator";
-import {
-	ApiResponses,
-	type ApiResponsesOptions,
-	ApiResponsesPatch,
-} from "src/common/decorators/api-responses.decorator";
+import { createCrudResponses } from "src/common/decorators/api-crud-responses.decorator";
 import { OrderOwnershipGuard } from "./guards/order-ownership.guard";
 import { OrdersService } from "./orders.service";
 import type { OrderId } from "./orders.types";
@@ -32,36 +28,16 @@ import { OrderListDto } from "./responses/order-list.dto";
 
 const OrderIdParam = () => Param("id", OrderIdPipe);
 
-const OrderBaseResponse: ApiResponsesOptions = {
-	status: HttpStatus.OK,
-	type: OrderDetailDto,
-	errors: [
-		HttpStatus.UNAUTHORIZED,
-		HttpStatus.BAD_REQUEST,
-		HttpStatus.FORBIDDEN,
-		HttpStatus.NOT_FOUND,
-	],
-};
-
-const OrderDetailResponse = () => ApiResponses(OrderBaseResponse);
-
-const OrderCreateResponse = () =>
-	ApiResponsesPatch(OrderBaseResponse, {
-		status: HttpStatus.CREATED,
-		removeErrors: [HttpStatus.NOT_FOUND],
-	});
-
-const OrderListResponse = () =>
-	ApiResponsesPatch(OrderBaseResponse, {
-		type: [OrderListDto],
-		errors: [HttpStatus.UNAUTHORIZED],
-	});
-
-const OrderDeleteResponse = () =>
-	ApiResponsesPatch(OrderBaseResponse, {
-		type: OrderDeleteDto,
-		removeErrors: [HttpStatus.BAD_REQUEST],
-	});
+const {
+	list: OrderListResponse,
+	detail: OrderDetailResponse,
+	create: OrderCreateResponse,
+	remove: OrderDeleteResponse,
+} = createCrudResponses({
+	list: OrderListDto,
+	detail: OrderDetailDto,
+	remove: OrderDeleteDto,
+});
 
 @Controller("orders")
 @UseGuards(OrderOwnershipGuard)
