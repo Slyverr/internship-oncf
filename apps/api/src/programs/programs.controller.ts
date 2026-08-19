@@ -12,64 +12,61 @@ import {
 	Request,
 	UseGuards,
 } from "@nestjs/common";
-import {
-	ApiBadRequestResponse,
-	ApiForbiddenResponse,
-	ApiNotFoundResponse,
-	ApiOkResponse,
-	ApiUnauthorizedResponse,
-} from "@nestjs/swagger";
 import type { AuthRequest } from "src/auth/auth.types";
 import { RequireAny } from "src/auth/permissions.decorator";
-import { CreateProgramDto } from "./dto/create-program.dto";
-import { CreateProgramResponseDto } from "./dto/create-program.response.dto";
-import { UpdateProgramDto } from "./dto/update-program.dto";
+import { createCrudResponses } from "src/common/decorators/api-crud-responses.decorator";
 import { ProgramOwnershipGuard } from "./guards/program-ownership.guard";
 import { ProgramIdPipe } from "./pipes/program-id.pipe";
 import { ProgramsService } from "./programs.service";
 import type { ProgramId } from "./programs.types";
+import { CreateProgramDto } from "./requests/create-program.dto";
+import { UpdateProgramDto } from "./requests/update-program.dto";
+import { ProgramDeleteDto } from "./responses/program-delete.dto";
+import { ProgramDetailDto } from "./responses/program-detail.dto";
+import { ProgramListDto } from "./responses/program-list.dto";
 
 const ProgramIdParam = () => Param("id", ProgramIdPipe);
+
+const {
+	list: ProgramListResponse,
+	create: ProgramCreateResponse,
+	detail: ProgramDetailResponse,
+	remove: ProgramDeleteResponse,
+} = createCrudResponses({
+	list: ProgramListDto,
+	detail: ProgramDetailDto,
+	remove: ProgramDeleteDto,
+});
 
 @Controller("programs")
 @UseGuards(ProgramOwnershipGuard)
 export class ProgramsController {
-	constructor(private programsService: ProgramsService) {}
+	constructor(private readonly programsService: ProgramsService) {}
 
 	@Post()
 	@RequireAny(Permission.PROGRAMS_CREATE)
-	@ApiOkResponse({ type: CreateProgramResponseDto })
-	@ApiUnauthorizedResponse()
-	@ApiBadRequestResponse()
-	@ApiForbiddenResponse()
+	@ProgramCreateResponse()
 	async create(@Body() dto: CreateProgramDto, @Request() req: AuthRequest) {
 		return this.programsService.create(dto, req.user);
 	}
 
 	@Get()
 	@RequireAny(Permission.PROGRAMS_READ)
-	@ApiOkResponse({ type: [CreateProgramResponseDto] })
-	@ApiUnauthorizedResponse()
-	async findAll() {
-		return this.programsService.findAll();
+	@ProgramListResponse()
+	async findAll(@Request() req: AuthRequest) {
+		return this.programsService.findAll(req.user);
 	}
 
 	@Get(":id")
 	@RequireAny(Permission.PROGRAMS_READ)
-	@ApiOkResponse({ type: CreateProgramResponseDto })
-	@ApiUnauthorizedResponse()
-	@ApiNotFoundResponse()
+	@ProgramDetailResponse()
 	async findOne(@ProgramIdParam() id: ProgramId) {
 		return this.programsService.findOne(id);
 	}
 
 	@Patch(":id")
 	@RequireAny(Permission.PROGRAMS_UPDATE)
-	@ApiOkResponse({ type: CreateProgramResponseDto })
-	@ApiUnauthorizedResponse()
-	@ApiBadRequestResponse()
-	@ApiForbiddenResponse()
-	@ApiNotFoundResponse()
+	@ProgramDetailResponse()
 	async update(
 		@ProgramIdParam() id: ProgramId,
 		@Body() dto: UpdateProgramDto,
@@ -81,11 +78,7 @@ export class ProgramsController {
 	@Post(":id/submit")
 	@HttpCode(HttpStatus.OK)
 	@RequireAny(Permission.PROGRAMS_APPROVE)
-	@ApiOkResponse({ type: CreateProgramResponseDto })
-	@ApiUnauthorizedResponse()
-	@ApiBadRequestResponse()
-	@ApiForbiddenResponse()
-	@ApiNotFoundResponse()
+	@ProgramDetailResponse()
 	async submit(@ProgramIdParam() id: ProgramId, @Request() req: AuthRequest) {
 		return this.programsService.submit(id, req.user);
 	}
@@ -93,11 +86,7 @@ export class ProgramsController {
 	@Post(":id/approve")
 	@HttpCode(HttpStatus.OK)
 	@RequireAny(Permission.PROGRAMS_APPROVE)
-	@ApiOkResponse({ type: CreateProgramResponseDto })
-	@ApiUnauthorizedResponse()
-	@ApiBadRequestResponse()
-	@ApiForbiddenResponse()
-	@ApiNotFoundResponse()
+	@ProgramDetailResponse()
 	async approve(@ProgramIdParam() id: ProgramId, @Request() req: AuthRequest) {
 		return this.programsService.approve(id, req.user);
 	}
@@ -105,11 +94,7 @@ export class ProgramsController {
 	@Post(":id/confirm")
 	@HttpCode(HttpStatus.OK)
 	@RequireAny(Permission.PROGRAMS_APPROVE)
-	@ApiOkResponse({ type: CreateProgramResponseDto })
-	@ApiUnauthorizedResponse()
-	@ApiBadRequestResponse()
-	@ApiForbiddenResponse()
-	@ApiNotFoundResponse()
+	@ProgramDetailResponse()
 	async confirm(@ProgramIdParam() id: ProgramId, @Request() req: AuthRequest) {
 		return this.programsService.confirm(id, req.user);
 	}
@@ -117,11 +102,7 @@ export class ProgramsController {
 	@Post(":id/send")
 	@HttpCode(HttpStatus.OK)
 	@RequireAny(Permission.PROGRAMS_SEND)
-	@ApiOkResponse({ type: CreateProgramResponseDto })
-	@ApiUnauthorizedResponse()
-	@ApiBadRequestResponse()
-	@ApiForbiddenResponse()
-	@ApiNotFoundResponse()
+	@ProgramDetailResponse()
 	async sendToDtm(
 		@ProgramIdParam() id: ProgramId,
 		@Request() req: AuthRequest,
@@ -132,21 +113,14 @@ export class ProgramsController {
 	@Post(":id/cancel")
 	@HttpCode(HttpStatus.OK)
 	@RequireAny(Permission.PROGRAMS_UPDATE)
-	@ApiOkResponse({ type: CreateProgramResponseDto })
-	@ApiUnauthorizedResponse()
-	@ApiBadRequestResponse()
-	@ApiForbiddenResponse()
-	@ApiNotFoundResponse()
+	@ProgramDetailResponse()
 	async cancel(@ProgramIdParam() id: ProgramId, @Request() req: AuthRequest) {
 		return this.programsService.cancel(id, req.user);
 	}
 
 	@Delete(":id")
 	@RequireAny(Permission.PROGRAMS_DELETE)
-	@ApiOkResponse({ type: CreateProgramResponseDto })
-	@ApiUnauthorizedResponse()
-	@ApiForbiddenResponse()
-	@ApiNotFoundResponse()
+	@ProgramDeleteResponse()
 	async remove(@ProgramIdParam() id: ProgramId) {
 		return this.programsService.remove(id);
 	}

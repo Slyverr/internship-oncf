@@ -1,187 +1,179 @@
 import { Permission, ProgramStatus } from "@ecommand/shared";
 import {
 	ConflictException,
-	ForbiddenException,
 	Injectable,
 	NotFoundException,
 } from "@nestjs/common";
 import { forecastPrograms } from "drizzle/schema";
 import { eq } from "drizzle-orm";
 import { AuthUser } from "src/auth/auth.types";
-import { hasPermission } from "src/auth/auth.utils";
+import { hasOnePermission } from "src/auth/auth.utils";
 import { DrizzleService } from "src/db/drizzle.service";
 import { withDbErrorHandling } from "src/db/drizzle.util";
 import { PROGRAM_STATUSES } from "src/db/reference-data";
-import { CreateProgramDto } from "./dto/create-program.dto";
-import { UpdateProgramDto } from "./dto/update-program.dto";
-import { ProgramId } from "./programs.types";
+import { PROGRAM_STATUS_BY_ID, PROGRAM_TRANSITION } from "./programs.constants";
+import { toCreate, toUpdate } from "./programs.mapper";
+import {
+	programDetailRelations,
+	programListColumns,
+	programListRelations,
+} from "./programs.query";
+import type { ProgramId } from "./programs.types";
+import { CreateProgramDto } from "./requests/create-program.dto";
+import { UpdateProgramDto } from "./requests/update-program.dto";
 
 @Injectable()
 export class ProgramsService {
-	constructor(private drizzle: DrizzleService) {}
-
-	private readonly PROGRAM_TRANSITIONS: Record<ProgramStatus, ProgramStatus[]> =
-		{
-			[ProgramStatus.DRAFT]: [
-				ProgramStatus.PENDING_APPROVAL,
-				ProgramStatus.CANCELLED,
-			],
-			[ProgramStatus.PENDING_APPROVAL]: [
-				ProgramStatus.APPROVED,
-				ProgramStatus.CONFIRMED,
-			],
-			[ProgramStatus.APPROVED]: [ProgramStatus.SENT_TO_DTM],
-			[ProgramStatus.SENT_TO_DTM]: [ProgramStatus.IN_PROGRESS],
-			[ProgramStatus.IN_PROGRESS]: [
-				ProgramStatus.COMPLETED,
-				ProgramStatus.CANCELLED,
-			],
-			[ProgramStatus.CONFIRMED]: [],
-			[ProgramStatus.COMPLETED]: [],
-			[ProgramStatus.CANCELLED]: [],
-		};
-
-	private normalizeCreate(dto: CreateProgramDto, user: AuthUser) {
-		const userId = dto.userId ?? user.id;
-		if (
-			!hasPermission(user, Permission.ORDERS_MANAGE_OWNERSHIP) &&
-			userId !== user.id
-		) {
-			throw new ForbiddenException("Cannot assign programs to other users");
-		}
-
-		const status = hasPermission(user, Permission.ORDERS_STATUS_UPDATE)
-			? (dto.status ?? ProgramStatus.DRAFT)
-			: ProgramStatus.DRAFT;
-
-		return { ...dto, userId, statusId: PROGRAM_STATUSES[status].id };
-	}
-
-	private normalizeUpdate(dto: UpdateProgramDto, user: AuthUser) {
-		if (dto.userId !== undefined && dto.userId !== user.id) {
-			if (!hasPermission(user, Permission.ORDERS_MANAGE_OWNERSHIP)) {
-				throw new ForbiddenException("Cannot assign programs to other users");
-			}
-		}
-
-		const result: Partial<UpdateProgramDto> & { statusId?: number } = {
-			...dto,
-		};
-		if (dto.status !== undefined) {
-			if (!hasPermission(user, Permission.ORDERS_STATUS_UPDATE)) {
-				throw new ForbiddenException("Cannot change program status");
-			}
-			result.statusId = PROGRAM_STATUSES[dto.status].id;
-		}
-
-		return result;
-	}
-
-	private async updateStatus(id: ProgramId, status: ProgramStatus) {
-		const statusId = PROGRAM_STATUSES[status].id;
-		const [updated] = await this.drizzle.db
-			.update(forecastPrograms)
-			.set({ statusId })
-			.where(eq(forecastPrograms.id, id))
-			.returning();
-		return updated;
-	}
-
-	private async transition(id: ProgramId, toStatus: ProgramStatus) {
-		const program = await this.findOne(id);
-		const fromName = Object.keys(PROGRAM_STATUSES).find(
-			(key) => PROGRAM_STATUSES[key as ProgramStatus].id === program.statusId,
-		) as ProgramStatus;
-
-		if (!fromName) {
-			throw new ConflictException(
-				`Invalid status ${program.statusId} for program ${id}`,
-			);
-		}
-
-		if (fromName === toStatus) {
-			throw new ConflictException(`Program is already ${toStatus}`);
-		}
-
-		const allowed = this.PROGRAM_TRANSITIONS[fromName] || [];
-		if (!allowed.includes(toStatus)) {
-			throw new ConflictException(
-				`Cannot transition from ${fromName} to ${toStatus}`,
-			);
-		}
-
-		return this.updateStatus(id, toStatus);
-	}
+	constructor(private readonly drizzle: DrizzleService) {}
 
 	async create(dto: CreateProgramDto, user: AuthUser) {
-		const values = {
-			...this.normalizeCreate(dto, user),
-			programNumber: `PRG-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-			createdBy: user.id,
-		};
+		const values = toCreate(dto, user);
 
-		const [program] = await withDbErrorHandling(
-			() => this.drizzle.db.insert(forecastPrograms).values(values).returning(),
+		const [created] = await withDbErrorHandling(
+			() =>
+				this.drizzle.db
+					.insert(forecastPrograms)
+					.values(values)
+					.returning({ id: forecastPrograms.id }),
 			values,
 		);
-		return program;
+
+		return this.findOne(created.id);
 	}
 
-	async findAll() {
-		return this.drizzle.db.query.forecastPrograms.findMany();
+	async findAll(user: AuthUser) {
+		const where = !hasOnePermission(user, Permission.PROGRAMS_MANAGE_OTHER)
+			? { createdBy: user.id }
+			: {};
+
+		return this.drizzle.db.query.forecastPrograms.findMany({
+			where,
+			columns: programListColumns,
+			with: programListRelations,
+		});
 	}
 
 	async findOne(id: ProgramId) {
 		const program = await this.drizzle.db.query.forecastPrograms.findFirst({
 			where: { id },
+			with: programDetailRelations,
 		});
-		if (!program) throw new NotFoundException(`Program ${id} not found`);
+
+		if (!program) {
+			throw new NotFoundException(`Program ${id} not found`);
+		}
+
+		return program;
+	}
+
+	async findOneForOwnership(id: ProgramId) {
+		const program = await this.drizzle.db.query.forecastPrograms.findFirst({
+			where: { id },
+			columns: {
+				id: true,
+				createdBy: true,
+			},
+		});
+
+		if (!program) {
+			throw new NotFoundException(`Program ${id} not found`);
+		}
+
+		return program;
+	}
+
+	async findOneForTransition(id: ProgramId) {
+		const program = await this.drizzle.db.query.forecastPrograms.findFirst({
+			where: { id },
+			columns: {
+				statusId: true,
+			},
+		});
+
+		if (!program) {
+			throw new NotFoundException(`Program ${id} not found`);
+		}
+
 		return program;
 	}
 
 	async update(id: ProgramId, dto: UpdateProgramDto, user: AuthUser) {
-		const values = this.normalizeUpdate(dto, user);
+		const values = toUpdate(dto, user);
 
-		const [updated] = await withDbErrorHandling(
+		await withDbErrorHandling(
 			() =>
 				this.drizzle.db
 					.update(forecastPrograms)
 					.set(values)
-					.where(eq(forecastPrograms.id, id))
-					.returning(),
+					.where(eq(forecastPrograms.id, id)),
 			values,
 		);
 
-		if (!updated) throw new NotFoundException(`Program ${id} not found`);
-		return updated;
+		return this.findOne(id);
+	}
+
+	async transition(id: ProgramId, _user: AuthUser, toStatus: ProgramStatus) {
+		const { statusId } = await this.findOneForTransition(id);
+
+		const fromStatus = PROGRAM_STATUS_BY_ID[statusId];
+		const allowed = PROGRAM_TRANSITION[fromStatus] ?? [];
+
+		if (!allowed.includes(toStatus)) {
+			throw new ConflictException(
+				`Cannot transition from ${fromStatus} to ${toStatus}`,
+			);
+		}
+
+		await withDbErrorHandling(
+			() =>
+				this.drizzle.db
+					.update(forecastPrograms)
+					.set({
+						statusId: PROGRAM_STATUSES[toStatus].id,
+					})
+					.where(eq(forecastPrograms.id, id)),
+			{
+				statusId: PROGRAM_STATUSES[toStatus].id,
+			},
+		);
+
+		return this.findOne(id);
+	}
+
+	async submit(id: ProgramId, user: AuthUser) {
+		return this.transition(id, user, ProgramStatus.PENDING_APPROVAL);
+	}
+
+	async approve(id: ProgramId, user: AuthUser) {
+		return this.transition(id, user, ProgramStatus.APPROVED);
+	}
+
+	async confirm(id: ProgramId, user: AuthUser) {
+		return this.transition(id, user, ProgramStatus.CONFIRMED);
+	}
+
+	async cancel(id: ProgramId, user: AuthUser) {
+		return this.transition(id, user, ProgramStatus.CANCELLED);
+	}
+
+	async sendToDtm(id: ProgramId, user: AuthUser) {
+		return this.transition(id, user, ProgramStatus.SENT_TO_DTM);
 	}
 
 	async remove(id: ProgramId) {
-		const [deleted] = await this.drizzle.db
-			.delete(forecastPrograms)
-			.where(eq(forecastPrograms.id, id))
-			.returning();
-		if (!deleted) throw new NotFoundException(`Program ${id} not found`);
+		const [deleted] = await withDbErrorHandling(
+			() =>
+				this.drizzle.db
+					.delete(forecastPrograms)
+					.where(eq(forecastPrograms.id, id))
+					.returning({ id: forecastPrograms.id }),
+			{},
+		);
+
+		if (!deleted) {
+			throw new NotFoundException(`Program ${id} not found`);
+		}
+
 		return deleted;
-	}
-
-	async submit(id: ProgramId, _user: AuthUser) {
-		return this.transition(id, ProgramStatus.PENDING_APPROVAL);
-	}
-
-	async approve(id: ProgramId, _user: AuthUser) {
-		return this.transition(id, ProgramStatus.APPROVED);
-	}
-
-	async confirm(id: ProgramId, _user: AuthUser) {
-		return this.transition(id, ProgramStatus.CONFIRMED);
-	}
-
-	async cancel(id: ProgramId, _user: AuthUser) {
-		return this.transition(id, ProgramStatus.CANCELLED);
-	}
-
-	async sendToDtm(id: ProgramId, _user: AuthUser) {
-		return this.transition(id, ProgramStatus.SENT_TO_DTM);
 	}
 }
