@@ -1,6 +1,8 @@
 import { applyDecorators, HttpStatus, Type } from "@nestjs/common";
 import { ApiResponse } from "@nestjs/swagger";
 
+type ResponseType = Type<unknown> | [Type<unknown>];
+
 type CrudResponseConfig = {
 	detail: Type<unknown>;
 	list: Type<unknown>;
@@ -16,7 +18,7 @@ type CrudResponseConfig = {
 
 function withApiResponses(
 	status: HttpStatus,
-	type: Type<unknown>,
+	type: ResponseType,
 	errors: HttpStatus[] = [],
 ) {
 	return applyDecorators(
@@ -42,7 +44,7 @@ export function createCrudResponses(config: CrudResponseConfig) {
 		list: () =>
 			withApiResponses(
 				HttpStatus.OK,
-				config.list,
+				[config.list],
 				config.listErrors ?? [HttpStatus.UNAUTHORIZED],
 			),
 
