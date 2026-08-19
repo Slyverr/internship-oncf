@@ -13,7 +13,7 @@ import {
 	UseGuards,
 } from "@nestjs/common";
 import type { AuthRequest } from "src/auth/auth.types";
-import { Permissions } from "src/auth/permissions.decorator";
+import { RequireAny } from "src/auth/permissions.decorator";
 import {
 	ApiResponses,
 	type ApiResponsesOptions,
@@ -69,7 +69,7 @@ export class OrdersController {
 	constructor(private readonly ordersService: OrdersService) {}
 
 	@Post()
-	@Permissions(Permission.ORDERS_CREATE)
+	@RequireAny(Permission.ORDERS_CREATE)
 	@OrderCreateResponse()
 	async create(
 		@Body() createOrderDto: CreateOrderDto,
@@ -79,21 +79,21 @@ export class OrdersController {
 	}
 
 	@Get()
-	@Permissions(Permission.ORDERS_READ)
+	@RequireAny(Permission.ORDERS_READ)
 	@OrderListResponse()
 	async findAll(@Request() req: AuthRequest) {
 		return this.ordersService.findAll(req.user);
 	}
 
 	@Get(":id")
-	@Permissions(Permission.ORDERS_READ)
+	@RequireAny(Permission.ORDERS_READ)
 	@OrderDetailResponse()
 	async findOne(@OrderIdParam() id: OrderId) {
 		return this.ordersService.findOne(id);
 	}
 
 	@Patch(":id")
-	@Permissions(Permission.ORDERS_UPDATE)
+	@RequireAny(Permission.ORDERS_UPDATE)
 	@OrderDetailResponse()
 	async update(
 		@OrderIdParam() id: OrderId,
@@ -105,7 +105,7 @@ export class OrdersController {
 
 	@Post(":id/submit")
 	@HttpCode(HttpStatus.OK)
-	@Permissions(Permission.ORDERS_UPDATE)
+	@RequireAny(Permission.ORDERS_UPDATE)
 	@OrderDetailResponse()
 	async submit(@OrderIdParam() id: OrderId, @Request() req: AuthRequest) {
 		return this.ordersService.submit(id, req.user);
@@ -113,7 +113,7 @@ export class OrdersController {
 
 	@Post(":id/approve")
 	@HttpCode(HttpStatus.OK)
-	@Permissions(Permission.ORDERS_APPROVE)
+	@RequireAny(Permission.ORDERS_APPROVE)
 	@OrderDetailResponse()
 	async approve(@OrderIdParam() id: OrderId, @Request() req: AuthRequest) {
 		return this.ordersService.approve(id, req.user);
@@ -121,7 +121,7 @@ export class OrdersController {
 
 	@Post(":id/reject")
 	@HttpCode(HttpStatus.OK)
-	@Permissions(Permission.ORDERS_REJECT)
+	@RequireAny(Permission.ORDERS_REJECT)
 	@OrderDetailResponse()
 	async reject(
 		@OrderIdParam() id: OrderId,
@@ -133,7 +133,7 @@ export class OrdersController {
 
 	@Post(":id/cancel")
 	@HttpCode(HttpStatus.OK)
-	@Permissions(Permission.ORDERS_UPDATE)
+	@RequireAny(Permission.ORDERS_UPDATE)
 	@OrderDetailResponse()
 	async cancel(@OrderIdParam() id: OrderId, @Request() req: AuthRequest) {
 		return this.ordersService.cancel(id, req.user);
@@ -141,14 +141,14 @@ export class OrdersController {
 
 	@Post(":id/send-to-dtm")
 	@HttpCode(HttpStatus.OK)
-	@Permissions(Permission.ORDERS_EXECUTE)
+	@RequireAny(Permission.ORDERS_EXECUTE)
 	@OrderDetailResponse()
 	async sendToDtm(@OrderIdParam() id: OrderId, @Request() req: AuthRequest) {
 		return this.ordersService.sendToDtm(id, req.user);
 	}
 
 	@Delete(":id")
-	@Permissions(Permission.ORDERS_DELETE)
+	@RequireAny(Permission.ORDERS_DELETE)
 	@OrderDeleteResponse()
 	async remove(@OrderIdParam() id: OrderId) {
 		return this.ordersService.remove(id);

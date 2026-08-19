@@ -8,7 +8,7 @@ import {
 	ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
 import type { AuthRequest } from "src/auth/auth.types";
-import { Permissions } from "src/auth/permissions.decorator";
+import { RequireAny } from "src/auth/permissions.decorator";
 import { TrackOrderResponseDto } from "./dto/track-order.response.dto";
 import { TrackTrainResponseDto } from "./dto/track-train.response.dto";
 import { TrackWagonResponseDto } from "./dto/track-wagon.response.dto";
@@ -25,7 +25,7 @@ export class TrackingController {
 	constructor(private readonly trackingService: TrackingService) {}
 
 	@Get("wagon/:wagonNumber")
-	@Permissions(Permission.TRACKING_READ)
+	@RequireAny(Permission.TRACKING_READ)
 	@ApiOkResponse({ type: TrackWagonResponseDto })
 	@ApiUnauthorizedResponse()
 	@ApiNotFoundResponse()
@@ -34,7 +34,7 @@ export class TrackingController {
 	}
 
 	@Get("train/:trainNumber")
-	@Permissions(Permission.TRACKING_READ)
+	@RequireAny(Permission.TRACKING_READ)
 	@ApiOkResponse({ type: TrackTrainResponseDto })
 	@ApiUnauthorizedResponse()
 	@ApiNotFoundResponse()
@@ -43,7 +43,7 @@ export class TrackingController {
 	}
 
 	@Get("order/:orderId")
-	@Permissions(Permission.TRACKING_READ)
+	@RequireAny(Permission.TRACKING_READ)
 	@ApiOkResponse({ type: [TrackOrderResponseDto] })
 	@ApiUnauthorizedResponse()
 	@ApiForbiddenResponse()
@@ -56,7 +56,7 @@ export class TrackingController {
 	}
 
 	@Post("wagon/:id/position")
-	@Permissions(Permission.TRACKING_UPDATE)
+	@RequireAny(Permission.TRACKING_UPDATE)
 	@ApiOkResponse({ type: UpdatePositionResponseDto })
 	@ApiUnauthorizedResponse()
 	@ApiBadRequestResponse()
@@ -70,7 +70,7 @@ export class TrackingController {
 	}
 
 	@Post("train/:id/position")
-	@Permissions(Permission.TRACKING_UPDATE)
+	@RequireAny(Permission.TRACKING_UPDATE)
 	@ApiOkResponse({ type: UpdatePositionResponseDto })
 	@ApiUnauthorizedResponse()
 	@ApiBadRequestResponse()

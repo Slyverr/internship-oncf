@@ -28,7 +28,7 @@ import {
 } from "@nestjs/swagger";
 import type { Response } from "express";
 import type { AuthRequest } from "src/auth/auth.types";
-import { Permissions } from "src/auth/permissions.decorator";
+import { RequireAny } from "src/auth/permissions.decorator";
 import { MessageResponseDto } from "src/common/responses/message.dto";
 import { OrderOwnershipGuard } from "src/orders/guards/order-ownership.guard";
 import type { OrderId } from "src/orders/orders.types";
@@ -48,7 +48,7 @@ export class FilesController {
 	constructor(private readonly filesService: FilesService) {}
 
 	@Post()
-	@Permissions(Permission.ORDERS_UPDATE)
+	@RequireAny(Permission.ORDERS_UPDATE)
 	@UseInterceptors(FileInterceptor("file"))
 	@ApiConsumes("multipart/form-data")
 	@ApiOkResponse({ type: UploadFileResponseDto })
@@ -78,7 +78,7 @@ export class FilesController {
 	}
 
 	@Get()
-	@Permissions(Permission.ORDERS_READ)
+	@RequireAny(Permission.ORDERS_READ)
 	@ApiOkResponse({ type: [ListFilesResponseDto] })
 	@ApiUnauthorizedResponse()
 	@ApiForbiddenResponse()
@@ -88,7 +88,7 @@ export class FilesController {
 	}
 
 	@Get(":fileId/download")
-	@Permissions(Permission.ORDERS_READ)
+	@RequireAny(Permission.ORDERS_READ)
 	@ApiOkResponse({ description: "File downloaded successfully" })
 	@ApiUnauthorizedResponse()
 	@ApiForbiddenResponse()
@@ -109,7 +109,7 @@ export class FilesController {
 
 	@Delete(":fileId")
 	@HttpCode(HttpStatus.OK)
-	@Permissions(Permission.ORDERS_UPDATE)
+	@RequireAny(Permission.ORDERS_UPDATE)
 	@ApiOkResponse({ type: MessageResponseDto })
 	@ApiUnauthorizedResponse()
 	@ApiForbiddenResponse()

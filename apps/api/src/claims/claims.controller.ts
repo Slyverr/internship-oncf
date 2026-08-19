@@ -13,7 +13,7 @@ import {
 	UseGuards,
 } from "@nestjs/common";
 import type { AuthRequest } from "src/auth/auth.types";
-import { Permissions } from "src/auth/permissions.decorator";
+import { RequireAny } from "src/auth/permissions.decorator";
 import {
 	ApiResponses,
 	type ApiResponsesOptions,
@@ -69,28 +69,28 @@ export class ClaimsController {
 	constructor(private readonly claimsService: ClaimsService) {}
 
 	@Post()
-	@Permissions(Permission.CLAIMS_CREATE)
+	@RequireAny(Permission.CLAIMS_CREATE)
 	@ClaimCreateResponse()
 	async create(@Body() dto: CreateClaimDto, @Request() req: AuthRequest) {
 		return this.claimsService.create(dto, req.user);
 	}
 
 	@Get()
-	@Permissions(Permission.CLAIMS_READ)
+	@RequireAny(Permission.CLAIMS_READ)
 	@ClaimListResponse()
 	async findAll(@Request() req: AuthRequest) {
 		return this.claimsService.findAll(req.user);
 	}
 
 	@Get(":id")
-	@Permissions(Permission.CLAIMS_READ)
+	@RequireAny(Permission.CLAIMS_READ)
 	@ClaimDetailResponse()
 	async findOne(@ClaimIdParam() id: ClaimId) {
 		return this.claimsService.findOne(id);
 	}
 
 	@Patch(":id")
-	@Permissions(Permission.CLAIMS_UPDATE)
+	@RequireAny(Permission.CLAIMS_UPDATE)
 	@ClaimDetailResponse()
 	async update(
 		@ClaimIdParam() id: ClaimId,
@@ -101,14 +101,14 @@ export class ClaimsController {
 	}
 
 	@Delete(":id")
-	@Permissions(Permission.CLAIMS_DELETE)
+	@RequireAny(Permission.CLAIMS_DELETE)
 	@ClaimDeleteResponse()
 	async remove(@ClaimIdParam() id: ClaimId) {
 		return this.claimsService.remove(id);
 	}
 
 	@Post(":id/comments")
-	@Permissions(Permission.CLAIMS_UPDATE)
+	@RequireAny(Permission.CLAIMS_UPDATE)
 	@ApiResponses({ status: HttpStatus.OK, type: ClaimCommentDto })
 	async addComment(
 		@ClaimIdParam() id: ClaimId,
@@ -119,7 +119,7 @@ export class ClaimsController {
 	}
 
 	@Get(":id/comments")
-	@Permissions(Permission.CLAIMS_READ)
+	@RequireAny(Permission.CLAIMS_READ)
 	@ApiResponses({ status: HttpStatus.OK, type: [ClaimCommentDto] })
 	async getComments(@ClaimIdParam() id: ClaimId) {
 		return this.claimsService.getComments(id);
@@ -127,7 +127,7 @@ export class ClaimsController {
 
 	@Post(":id/start-progress")
 	@HttpCode(HttpStatus.OK)
-	@Permissions(Permission.CLAIMS_UPDATE)
+	@RequireAny(Permission.CLAIMS_UPDATE)
 	@ClaimDetailResponse()
 	async startProgress(
 		@ClaimIdParam() id: ClaimId,
@@ -138,7 +138,7 @@ export class ClaimsController {
 
 	@Post(":id/await-info")
 	@HttpCode(HttpStatus.OK)
-	@Permissions(Permission.CLAIMS_UPDATE)
+	@RequireAny(Permission.CLAIMS_UPDATE)
 	@ClaimDetailResponse()
 	async awaitInfo(@ClaimIdParam() id: ClaimId, @Request() req: AuthRequest) {
 		return this.claimsService.awaitInfo(id, req.user);
@@ -146,7 +146,7 @@ export class ClaimsController {
 
 	@Post(":id/start-treatment")
 	@HttpCode(HttpStatus.OK)
-	@Permissions(Permission.CLAIMS_UPDATE)
+	@RequireAny(Permission.CLAIMS_UPDATE)
 	@ClaimDetailResponse()
 	async startTreatment(
 		@ClaimIdParam() id: ClaimId,
@@ -157,7 +157,7 @@ export class ClaimsController {
 
 	@Post(":id/resolve")
 	@HttpCode(HttpStatus.OK)
-	@Permissions(Permission.CLAIMS_UPDATE)
+	@RequireAny(Permission.CLAIMS_UPDATE)
 	@ClaimDetailResponse()
 	async resolve(
 		@ClaimIdParam() id: ClaimId,
@@ -169,7 +169,7 @@ export class ClaimsController {
 
 	@Post(":id/close")
 	@HttpCode(HttpStatus.OK)
-	@Permissions(Permission.CLAIMS_CLOSE)
+	@RequireAny(Permission.CLAIMS_CLOSE)
 	@ClaimDetailResponse()
 	async close(@ClaimIdParam() id: ClaimId, @Request() req: AuthRequest) {
 		return this.claimsService.close(id, req.user);
@@ -177,7 +177,7 @@ export class ClaimsController {
 
 	@Post(":id/reject")
 	@HttpCode(HttpStatus.OK)
-	@Permissions(Permission.CLAIMS_UPDATE)
+	@RequireAny(Permission.CLAIMS_UPDATE)
 	@ClaimDetailResponse()
 	async reject(@ClaimIdParam() id: ClaimId, @Request() req: AuthRequest) {
 		return this.claimsService.reject(id, req.user);
@@ -185,7 +185,7 @@ export class ClaimsController {
 
 	@Post(":id/send-to-dtm")
 	@HttpCode(HttpStatus.OK)
-	@Permissions(Permission.CLAIMS_UPDATE)
+	@RequireAny(Permission.CLAIMS_UPDATE)
 	@ClaimDetailResponse()
 	async sendToDtm(@ClaimIdParam() id: ClaimId, @Request() req: AuthRequest) {
 		return this.claimsService.sendToDtm(id, req.user);

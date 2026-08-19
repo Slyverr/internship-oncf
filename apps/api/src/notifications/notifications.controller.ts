@@ -15,7 +15,7 @@ import {
 	ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
 import type { AuthRequest } from "src/auth/auth.types";
-import { Permissions } from "src/auth/permissions.decorator";
+import { RequireAny } from "src/auth/permissions.decorator";
 import { MessageResponseDto } from "src/common/responses/message.dto";
 import { NotificationResponseDto } from "./dto/notification.response.dto";
 import { UnreadCountResponseDto } from "./dto/unread-count.response.dto";
@@ -32,7 +32,7 @@ export class NotificationsController {
 	constructor(private readonly notificationsService: NotificationsService) {}
 
 	@Get()
-	@Permissions(Permission.TRACKING_READ)
+	@RequireAny(Permission.TRACKING_READ)
 	@ApiOkResponse({ type: [NotificationResponseDto] })
 	@ApiUnauthorizedResponse()
 	async findAll(@Request() req: AuthRequest) {
@@ -40,7 +40,7 @@ export class NotificationsController {
 	}
 
 	@Get("unread-count")
-	@Permissions(Permission.TRACKING_READ)
+	@RequireAny(Permission.TRACKING_READ)
 	@ApiOkResponse({ type: UnreadCountResponseDto })
 	@ApiUnauthorizedResponse()
 	async getUnreadCount(@Request() req: AuthRequest) {
@@ -48,7 +48,7 @@ export class NotificationsController {
 	}
 
 	@Patch(":id/read")
-	@Permissions(Permission.TRACKING_READ)
+	@RequireAny(Permission.TRACKING_READ)
 	@ApiOkResponse({ type: NotificationResponseDto })
 	@ApiUnauthorizedResponse()
 	@ApiBadRequestResponse()
@@ -62,7 +62,7 @@ export class NotificationsController {
 	}
 
 	@Patch("read-all")
-	@Permissions(Permission.TRACKING_READ)
+	@RequireAny(Permission.TRACKING_READ)
 	@ApiOkResponse({ type: MessageResponseDto })
 	@ApiUnauthorizedResponse()
 	async markAllAsRead(@Request() req: AuthRequest) {

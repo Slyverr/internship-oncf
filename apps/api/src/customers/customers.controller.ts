@@ -16,7 +16,7 @@ import {
 	ApiOkResponse,
 	ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
-import { Permissions } from "src/auth/permissions.decorator";
+import { RequireAny } from "src/auth/permissions.decorator";
 import { MessageResponseDto } from "src/common/responses/message.dto";
 import { CustomersService } from "./customers.service";
 import type { CustomerId } from "./customers.types";
@@ -32,7 +32,7 @@ export class CustomersController {
 	constructor(private readonly customersService: CustomersService) {}
 
 	@Get()
-	@Permissions(Permission.CUSTOMERS_READ)
+	@RequireAny(Permission.CUSTOMERS_READ)
 	@ApiOkResponse({ type: [CreateCustomerResponseDto] })
 	@ApiUnauthorizedResponse()
 	async findAll() {
@@ -40,7 +40,7 @@ export class CustomersController {
 	}
 
 	@Get(":id")
-	@Permissions(Permission.CUSTOMERS_READ)
+	@RequireAny(Permission.CUSTOMERS_READ)
 	@ApiOkResponse({ type: CreateCustomerResponseDto })
 	@ApiUnauthorizedResponse()
 	@ApiNotFoundResponse()
@@ -49,7 +49,7 @@ export class CustomersController {
 	}
 
 	@Post()
-	@Permissions(Permission.CUSTOMERS_CREATE)
+	@RequireAny(Permission.CUSTOMERS_CREATE)
 	@ApiOkResponse({ type: CreateCustomerResponseDto })
 	@ApiUnauthorizedResponse()
 	@ApiBadRequestResponse()
@@ -59,7 +59,7 @@ export class CustomersController {
 	}
 
 	@Put(":id")
-	@Permissions(Permission.CUSTOMERS_UPDATE)
+	@RequireAny(Permission.CUSTOMERS_UPDATE)
 	@ApiOkResponse({ type: UpdateCustomerResponseDto })
 	@ApiUnauthorizedResponse()
 	@ApiBadRequestResponse()
@@ -73,7 +73,7 @@ export class CustomersController {
 	}
 
 	@Delete(":id")
-	@Permissions(Permission.CUSTOMERS_DELETE)
+	@RequireAny(Permission.CUSTOMERS_DELETE)
 	@ApiOkResponse({ type: MessageResponseDto })
 	@ApiUnauthorizedResponse()
 	@ApiForbiddenResponse()

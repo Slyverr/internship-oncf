@@ -5,7 +5,7 @@ import {
 	ApiOkResponse,
 	ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
-import { Permissions } from "src/auth/permissions.decorator";
+import { RequireAny } from "src/auth/permissions.decorator";
 import { UsersResponseDto } from "./dto/users.response.dto";
 import { UsersService } from "./users.service";
 import type { UserId } from "./users.types";
@@ -17,7 +17,7 @@ export class UsersController {
 	constructor(private usersService: UsersService) {}
 
 	@Get()
-	@Permissions(Permission.USERS_READ)
+	@RequireAny(Permission.USERS_READ)
 	@ApiOkResponse({ type: [UsersResponseDto] })
 	@ApiUnauthorizedResponse()
 	async findAll() {
@@ -25,7 +25,7 @@ export class UsersController {
 	}
 
 	@Get(":id")
-	@Permissions(Permission.USERS_READ)
+	@RequireAny(Permission.USERS_READ)
 	@ApiOkResponse({ type: UsersResponseDto })
 	@ApiUnauthorizedResponse()
 	@ApiNotFoundResponse()

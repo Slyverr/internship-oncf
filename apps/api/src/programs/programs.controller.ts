@@ -20,7 +20,7 @@ import {
 	ApiUnauthorizedResponse,
 } from "@nestjs/swagger";
 import type { AuthRequest } from "src/auth/auth.types";
-import { Permissions } from "src/auth/permissions.decorator";
+import { RequireAny } from "src/auth/permissions.decorator";
 import { CreateProgramDto } from "./dto/create-program.dto";
 import { CreateProgramResponseDto } from "./dto/create-program.response.dto";
 import { UpdateProgramDto } from "./dto/update-program.dto";
@@ -37,7 +37,7 @@ export class ProgramsController {
 	constructor(private programsService: ProgramsService) {}
 
 	@Post()
-	@Permissions(Permission.PROGRAMS_CREATE)
+	@RequireAny(Permission.PROGRAMS_CREATE)
 	@ApiOkResponse({ type: CreateProgramResponseDto })
 	@ApiUnauthorizedResponse()
 	@ApiBadRequestResponse()
@@ -47,7 +47,7 @@ export class ProgramsController {
 	}
 
 	@Get()
-	@Permissions(Permission.PROGRAMS_READ)
+	@RequireAny(Permission.PROGRAMS_READ)
 	@ApiOkResponse({ type: [CreateProgramResponseDto] })
 	@ApiUnauthorizedResponse()
 	async findAll() {
@@ -55,7 +55,7 @@ export class ProgramsController {
 	}
 
 	@Get(":id")
-	@Permissions(Permission.PROGRAMS_READ)
+	@RequireAny(Permission.PROGRAMS_READ)
 	@ApiOkResponse({ type: CreateProgramResponseDto })
 	@ApiUnauthorizedResponse()
 	@ApiNotFoundResponse()
@@ -64,7 +64,7 @@ export class ProgramsController {
 	}
 
 	@Patch(":id")
-	@Permissions(Permission.PROGRAMS_UPDATE)
+	@RequireAny(Permission.PROGRAMS_UPDATE)
 	@ApiOkResponse({ type: CreateProgramResponseDto })
 	@ApiUnauthorizedResponse()
 	@ApiBadRequestResponse()
@@ -80,7 +80,7 @@ export class ProgramsController {
 
 	@Post(":id/submit")
 	@HttpCode(HttpStatus.OK)
-	@Permissions(Permission.PROGRAMS_APPROVE)
+	@RequireAny(Permission.PROGRAMS_APPROVE)
 	@ApiOkResponse({ type: CreateProgramResponseDto })
 	@ApiUnauthorizedResponse()
 	@ApiBadRequestResponse()
@@ -92,7 +92,7 @@ export class ProgramsController {
 
 	@Post(":id/approve")
 	@HttpCode(HttpStatus.OK)
-	@Permissions(Permission.PROGRAMS_APPROVE)
+	@RequireAny(Permission.PROGRAMS_APPROVE)
 	@ApiOkResponse({ type: CreateProgramResponseDto })
 	@ApiUnauthorizedResponse()
 	@ApiBadRequestResponse()
@@ -104,7 +104,7 @@ export class ProgramsController {
 
 	@Post(":id/confirm")
 	@HttpCode(HttpStatus.OK)
-	@Permissions(Permission.PROGRAMS_APPROVE)
+	@RequireAny(Permission.PROGRAMS_APPROVE)
 	@ApiOkResponse({ type: CreateProgramResponseDto })
 	@ApiUnauthorizedResponse()
 	@ApiBadRequestResponse()
@@ -116,7 +116,7 @@ export class ProgramsController {
 
 	@Post(":id/send")
 	@HttpCode(HttpStatus.OK)
-	@Permissions(Permission.PROGRAMS_SEND)
+	@RequireAny(Permission.PROGRAMS_SEND)
 	@ApiOkResponse({ type: CreateProgramResponseDto })
 	@ApiUnauthorizedResponse()
 	@ApiBadRequestResponse()
@@ -131,7 +131,7 @@ export class ProgramsController {
 
 	@Post(":id/cancel")
 	@HttpCode(HttpStatus.OK)
-	@Permissions(Permission.PROGRAMS_UPDATE)
+	@RequireAny(Permission.PROGRAMS_UPDATE)
 	@ApiOkResponse({ type: CreateProgramResponseDto })
 	@ApiUnauthorizedResponse()
 	@ApiBadRequestResponse()
@@ -142,7 +142,7 @@ export class ProgramsController {
 	}
 
 	@Delete(":id")
-	@Permissions(Permission.PROGRAMS_DELETE)
+	@RequireAny(Permission.PROGRAMS_DELETE)
 	@ApiOkResponse({ type: CreateProgramResponseDto })
 	@ApiUnauthorizedResponse()
 	@ApiForbiddenResponse()
