@@ -1,13 +1,5 @@
 import { Permission } from "@ecommand/shared";
-import {
-	Body,
-	Controller,
-	Get,
-	Param,
-	Post,
-	Request,
-	UseGuards,
-} from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Request } from "@nestjs/common";
 import {
 	ApiBadRequestResponse,
 	ApiForbiddenResponse,
@@ -23,7 +15,6 @@ import { TrackWagonResponseDto } from "./dto/track-wagon.response.dto";
 import { UpdatePositionResponseDto } from "./dto/update-position.response.dto";
 import { UpdateTrainPositionDto } from "./dto/update-train-position.dto";
 import { UpdateWagonPositionDto } from "./dto/update-wagon-position.dto";
-import { TrackingOwnershipGuard } from "./guards/tracking-ownership.guard";
 import { TrainIdPipe } from "./pipes/train-id.pipe";
 import { WagonIdPipe } from "./pipes/wagon-id.pipe";
 import { TrackingService } from "./tracking.service";
@@ -53,7 +44,6 @@ export class TrackingController {
 
 	@Get("order/:orderId")
 	@Permissions(Permission.TRACKING_READ)
-	@UseGuards(TrackingOwnershipGuard)
 	@ApiOkResponse({ type: [TrackOrderResponseDto] })
 	@ApiUnauthorizedResponse()
 	@ApiForbiddenResponse()
