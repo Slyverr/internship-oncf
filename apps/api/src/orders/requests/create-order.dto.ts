@@ -4,6 +4,8 @@ import {
 	IsDateString,
 	IsEnum,
 	IsInt,
+	IsNotEmpty,
+	IsNumberString,
 	IsOptional,
 	IsString,
 	MaxLength,
@@ -18,8 +20,8 @@ export class CreateOrderDto {
 	@Type(() => Number)
 	customerId: number;
 
-	@IsInt()
 	@IsOptional()
+	@IsInt()
 	@Type(() => Number)
 	userId?: number;
 
@@ -43,11 +45,12 @@ export class CreateOrderDto {
 	@Type(() => Number)
 	parentOrderId?: number;
 
-	@IsString()
+	@IsNumberString()
+	@IsNotEmpty()
 	quantityDemanded: string;
 
 	@IsOptional()
-	@IsString()
+	@IsNumberString()
 	quantityAchieved?: string;
 
 	@IsInt()
