@@ -1,9 +1,11 @@
 import { ProgramStatus } from "@ecommand/shared";
 import { Transform, Type } from "class-transformer";
 import {
+	IsDateString,
 	IsEnum,
 	IsInt,
 	IsNotEmpty,
+	IsNumberString,
 	IsOptional,
 	IsString,
 } from "class-validator";
@@ -24,11 +26,11 @@ export class CreateProgramDto {
 	@IsEnum(ProgramStatus)
 	status?: ProgramStatus;
 
-	@IsString()
+	@IsDateString()
 	@IsNotEmpty()
 	plannedDate: string;
 
-	@IsString()
+	@IsNumberString()
 	@IsNotEmpty()
 	quantityPlanned: string;
 
