@@ -10,10 +10,9 @@ export const ProgramOwnershipGuard = createOwnershipGuard<
 >({
 	service: ProgramsService,
 	resolveOwnerId: async (service, id) => {
-		const owner = await service.findOne(id);
-		return owner.createdBy;
+		const program = await service.findOneForOwnership(id);
+		return program.createdBy;
 	},
-
 	pipe: new ProgramIdPipe(),
 	permission: Permission.PROGRAMS_MANAGE_OTHER,
 	errorMessage: "You can only access your own programs",

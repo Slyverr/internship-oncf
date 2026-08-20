@@ -5,10 +5,11 @@ import {
 	NotFoundException,
 } from "@nestjs/common";
 import { forecastPrograms } from "drizzle/schema";
-import { eq } from "drizzle-orm";
+import { and, eq, type SQL } from "drizzle-orm";
 import { AuthUser } from "src/auth/auth.types";
 import { hasOnePermission } from "src/auth/auth.utils";
 import { DrizzleService } from "src/db/drizzle.service";
+import { DrizzleDb } from "src/db/drizzle.types";
 import { withDbErrorHandling } from "src/db/drizzle.util";
 import { PROGRAM_STATUSES } from "src/db/reference-data";
 import { PROGRAM_STATUS_BY_ID, PROGRAM_TRANSITION } from "./programs.constants";
@@ -18,7 +19,7 @@ import {
 	programListColumns,
 	programListRelations,
 } from "./programs.query";
-import type { ProgramId } from "./programs.types";
+import type { ProgramId, ProgramUpdate } from "./programs.types";
 import { CreateProgramDto } from "./requests/create-program.dto";
 import { UpdateProgramDto } from "./requests/update-program.dto";
 
@@ -42,9 +43,9 @@ export class ProgramsService {
 	}
 
 	async findAll(user: AuthUser) {
-		const where = !hasOnePermission(user, Permission.PROGRAMS_MANAGE_OTHER)
-			? { createdBy: user.id }
-			: {};
+		const where = hasOnePermission(user, Permission.PROGRAMS_MANAGE_OTHER)
+			? {}
+			: { createdBy: user.id };
 
 		return this.drizzle.db.query.forecastPrograms.findMany({
 			where,
@@ -59,83 +60,20 @@ export class ProgramsService {
 			with: programDetailRelations,
 		});
 
-		if (!program) {
-			throw new NotFoundException(`Program ${id} not found`);
-		}
-
-		return program;
+		return this.ensure(program, id);
 	}
 
 	async findOneForOwnership(id: ProgramId) {
 		const program = await this.drizzle.db.query.forecastPrograms.findFirst({
 			where: { id },
-			columns: {
-				id: true,
-				createdBy: true,
-			},
+			columns: { createdBy: true },
 		});
 
-		if (!program) {
-			throw new NotFoundException(`Program ${id} not found`);
-		}
-
-		return program;
-	}
-
-	async findOneForTransition(id: ProgramId) {
-		const program = await this.drizzle.db.query.forecastPrograms.findFirst({
-			where: { id },
-			columns: {
-				statusId: true,
-			},
-		});
-
-		if (!program) {
-			throw new NotFoundException(`Program ${id} not found`);
-		}
-
-		return program;
+		return this.ensure(program, id);
 	}
 
 	async update(id: ProgramId, dto: UpdateProgramDto, user: AuthUser) {
-		const values = toUpdate(dto, user);
-
-		await withDbErrorHandling(
-			() =>
-				this.drizzle.db
-					.update(forecastPrograms)
-					.set(values)
-					.where(eq(forecastPrograms.id, id)),
-			values,
-		);
-
-		return this.findOne(id);
-	}
-
-	async transition(id: ProgramId, _user: AuthUser, toStatus: ProgramStatus) {
-		const { statusId } = await this.findOneForTransition(id);
-
-		const fromStatus = PROGRAM_STATUS_BY_ID[statusId];
-		const allowed = PROGRAM_TRANSITION[fromStatus] ?? [];
-
-		if (!allowed.includes(toStatus)) {
-			throw new ConflictException(
-				`Cannot transition from ${fromStatus} to ${toStatus}`,
-			);
-		}
-
-		await withDbErrorHandling(
-			() =>
-				this.drizzle.db
-					.update(forecastPrograms)
-					.set({
-						statusId: PROGRAM_STATUSES[toStatus].id,
-					})
-					.where(eq(forecastPrograms.id, id)),
-			{
-				statusId: PROGRAM_STATUSES[toStatus].id,
-			},
-		);
+		await this.persistUpdate(this.drizzle.db, id, toUpdate(dto, user));
 
 		return this.findOne(id);
 	}
@@ -161,19 +99,92 @@ export class ProgramsService {
 	}
 
 	async remove(id: ProgramId) {
-		const [deleted] = await withDbErrorHandling(
-			() =>
-				this.drizzle.db
-					.delete(forecastPrograms)
-					.where(eq(forecastPrograms.id, id))
-					.returning({ id: forecastPrograms.id }),
-			{},
-		);
+		const [deleted] = await this.drizzle.db
+			.delete(forecastPrograms)
+			.where(eq(forecastPrograms.id, id))
+			.returning({ id: forecastPrograms.id });
 
 		if (!deleted) {
 			throw new NotFoundException(`Program ${id} not found`);
 		}
 
 		return deleted;
+	}
+
+	private ensure<T>(program: T | undefined, id: ProgramId) {
+		if (!program) {
+			throw new NotFoundException(`Program ${id} not found`);
+		}
+
+		return program;
+	}
+
+	private async persistUpdate(
+		db: DrizzleDb,
+		id: ProgramId,
+		values: ProgramUpdate,
+		where: SQL = eq(forecastPrograms.id, id),
+	) {
+		const [updated] = await withDbErrorHandling(
+			() =>
+				db
+					.update(forecastPrograms)
+					.set(values)
+					.where(where)
+					.returning({ id: forecastPrograms.id }),
+			values,
+		);
+
+		if (!updated) {
+			throw new ConflictException(
+				`Program ${id} was modified or does not exist`,
+			);
+		}
+
+		return updated;
+	}
+
+	private async transition(
+		id: ProgramId,
+		user: AuthUser,
+		toStatus: ProgramStatus,
+	) {
+		const { statusId: fromStatusId } = this.ensure(
+			await this.drizzle.db.query.forecastPrograms.findFirst({
+				where: { id },
+				columns: { statusId: true },
+			}),
+			id,
+		);
+
+		const fromStatus = PROGRAM_STATUS_BY_ID[fromStatusId];
+		if (!fromStatus) {
+			throw new ConflictException(
+				`Invalid status ${fromStatusId} for program ${id}`,
+			);
+		}
+
+		const allowed = PROGRAM_TRANSITION[fromStatus] ?? [];
+		if (!allowed.includes(toStatus)) {
+			throw new ConflictException(
+				`Cannot transition from ${fromStatus} to ${toStatus}`,
+			);
+		}
+
+		const statusId = PROGRAM_STATUSES[toStatus].id;
+
+		await this.drizzle.db.transaction(async (tx) => {
+			await this.persistUpdate(
+				tx,
+				id,
+				{ statusId },
+				and(
+					eq(forecastPrograms.id, id),
+					eq(forecastPrograms.statusId, fromStatusId),
+				),
+			);
+		});
+
+		return this.findOne(id);
 	}
 }
