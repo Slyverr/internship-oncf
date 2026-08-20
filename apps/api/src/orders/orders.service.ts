@@ -5,7 +5,7 @@ import {
 	NotFoundException,
 } from "@nestjs/common";
 import { orderStatusHistory, orders } from "drizzle/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, type SQL } from "drizzle-orm";
 import { AuthUser } from "src/auth/auth.types";
 import { hasOnePermission } from "src/auth/auth.utils";
 import { DrizzleService } from "src/db/drizzle.service";
@@ -74,7 +74,12 @@ export class OrdersService {
 	}
 
 	async update(id: OrderId, dto: UpdateOrderDto, user: AuthUser) {
-		await this.persistUpdate(this.drizzle.db, id, toUpdate(dto, user));
+		await this.persistUpdate(this.drizzle.db, id, toUpdate(dto, user), {
+			history: {
+				userId: user.id,
+			},
+		});
+
 		return this.findOne(id);
 	}
 
@@ -120,13 +125,37 @@ export class OrdersService {
 		db: DrizzleDb,
 		id: OrderId,
 		values: OrderUpdate,
-		where = eq(orders.id, id),
+		options?: {
+			where?: SQL;
+			history?: {
+				userId: UserId;
+				comment?: string;
+			};
+		},
 	) {
 		const [updated] = await withDbErrorHandling(
 			() =>
-				db.update(orders).set(values).where(where).returning({ id: orders.id }),
+				db
+					.update(orders)
+					.set(values)
+					.where(options?.where ?? eq(orders.id, id))
+					.returning({ id: orders.id }),
 			values,
 		);
+
+		if (!updated) {
+			throw new ConflictException(`Order ${id} was modified or does not exist`);
+		}
+
+		if (values.statusId !== undefined && options?.history) {
+			await this.recordHistory(
+				db,
+				id,
+				options.history.userId,
+				values.statusId,
+				options.history.comment,
+			);
+		}
 
 		return updated;
 	}
@@ -140,14 +169,13 @@ export class OrdersService {
 		const { statusId: fromStatusId } = this.ensure(
 			await this.drizzle.db.query.orders.findFirst({
 				where: { id },
-				columns: {
-					statusId: true,
-				},
+				columns: { statusId: true },
 			}),
 			id,
 		);
 
 		const fromStatus = ORDER_STATUS_BY_ID[fromStatusId];
+
 		if (!fromStatus) {
 			throw new ConflictException(
 				`Invalid status ${fromStatusId} for order ${id}`,
@@ -155,6 +183,7 @@ export class OrdersService {
 		}
 
 		const allowed = ORDER_TRANSITION[fromStatus] ?? [];
+
 		if (!allowed.includes(toStatus)) {
 			throw new ConflictException(
 				`Cannot transition from ${fromStatus} to ${toStatus}`,
@@ -162,21 +191,20 @@ export class OrdersService {
 		}
 
 		const statusId = ORDER_STATUSES[toStatus].id;
+
 		await this.drizzle.db.transaction(async (tx) => {
-			const updated = await this.persistUpdate(
+			await this.persistUpdate(
 				tx,
 				id,
 				{ statusId },
-				and(eq(orders.id, id), eq(orders.statusId, fromStatusId)),
+				{
+					where: and(eq(orders.id, id), eq(orders.statusId, fromStatusId)),
+					history: {
+						userId: user.id,
+						comment,
+					},
+				},
 			);
-
-			if (!updated) {
-				throw new ConflictException(
-					`Order ${id} was modified by another request`,
-				);
-			}
-
-			await this.recordHistory(tx, id, user.id, statusId, comment);
 		});
 
 		return this.findOne(id);
