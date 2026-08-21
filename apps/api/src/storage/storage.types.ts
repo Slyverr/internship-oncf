@@ -5,7 +5,7 @@ export interface MulterFile {
 	mimetype: string;
 	size: number;
 	buffer: Buffer;
-	stream?: any;
+	stream?: NodeJS.ReadableStream;
 	destination?: string;
 	filename?: string;
 	path?: string;
