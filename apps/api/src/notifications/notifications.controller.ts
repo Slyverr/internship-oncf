@@ -1,4 +1,3 @@
-import { Permission } from "@ecommand/shared";
 import {
 	Controller,
 	Get,
@@ -7,24 +6,25 @@ import {
 	Request,
 	UseGuards,
 } from "@nestjs/common";
-import {
-	ApiBadRequestResponse,
-	ApiForbiddenResponse,
-	ApiNotFoundResponse,
-	ApiOkResponse,
-	ApiUnauthorizedResponse,
-} from "@nestjs/swagger";
+import { ApiOkResponse, ApiUnauthorizedResponse } from "@nestjs/swagger";
 import type { AuthRequest } from "src/auth/auth.types";
-import { RequireAny } from "src/auth/permissions.decorator";
+import { createCrudResponses } from "src/common/decorators/api-crud-responses.decorator";
 import { MessageResponseDto } from "src/common/responses/message.dto";
-import { NotificationResponseDto } from "./dto/notification.response.dto";
-import { UnreadCountResponseDto } from "./dto/unread-count.response.dto";
 import { NotificationOwnershipGuard } from "./guards/notification-ownership.guard";
 import { NotificationsService } from "./notifications.service";
 import type { NotificationId } from "./notifications.types";
 import { NotificationIdPipe } from "./pipes/notification-id.pipe";
+import { NotificationDetailDto } from "./responses/notification-detail.dto";
+import { NotificationListDto } from "./responses/notification-list.dto";
+import { NotificationUnreadCountDto } from "./responses/notification-unread-count.dto";
 
 const NotificationIdParam = () => Param("id", NotificationIdPipe);
+
+const { list: NotificationListResponse, detail: NotificationDetailResponse } =
+	createCrudResponses({
+		list: NotificationListDto,
+		detail: NotificationDetailDto,
+	});
 
 @Controller("notifications")
 @UseGuards(NotificationOwnershipGuard)
@@ -32,28 +32,20 @@ export class NotificationsController {
 	constructor(private readonly notificationsService: NotificationsService) {}
 
 	@Get()
-	@RequireAny(Permission.TRACKING_READ)
-	@ApiOkResponse({ type: [NotificationResponseDto] })
-	@ApiUnauthorizedResponse()
+	@NotificationListResponse()
 	async findAll(@Request() req: AuthRequest) {
 		return this.notificationsService.findAll(req.user);
 	}
 
 	@Get("unread-count")
-	@RequireAny(Permission.TRACKING_READ)
-	@ApiOkResponse({ type: UnreadCountResponseDto })
+	@ApiOkResponse({ type: NotificationUnreadCountDto })
 	@ApiUnauthorizedResponse()
 	async getUnreadCount(@Request() req: AuthRequest) {
 		return this.notificationsService.getUnreadCount(req.user.id);
 	}
 
 	@Patch(":id/read")
-	@RequireAny(Permission.TRACKING_READ)
-	@ApiOkResponse({ type: NotificationResponseDto })
-	@ApiUnauthorizedResponse()
-	@ApiBadRequestResponse()
-	@ApiForbiddenResponse()
-	@ApiNotFoundResponse()
+	@NotificationDetailResponse()
 	async markAsRead(
 		@NotificationIdParam() id: NotificationId,
 		@Request() req: AuthRequest,
@@ -62,7 +54,6 @@ export class NotificationsController {
 	}
 
 	@Patch("read-all")
-	@RequireAny(Permission.TRACKING_READ)
 	@ApiOkResponse({ type: MessageResponseDto })
 	@ApiUnauthorizedResponse()
 	async markAllAsRead(@Request() req: AuthRequest) {

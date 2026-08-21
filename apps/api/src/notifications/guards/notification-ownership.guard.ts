@@ -9,10 +9,9 @@ export const NotificationOwnershipGuard = createOwnershipGuard<
 >({
 	service: NotificationsService,
 	resolveOwnerId: async (service, id) => {
-		const owner = await service.findOne(id);
-		return owner.userId;
+		const notification = await service.findOneForOwnership(id);
+		return notification.userId;
 	},
-
 	pipe: new NotificationIdPipe(),
 	errorMessage: "You can only access your own notifications",
 });
