@@ -1,4 +1,3 @@
-// src/common/email/email.service.ts
 import { Injectable, Logger } from "@nestjs/common";
 
 @Injectable()
