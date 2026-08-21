@@ -9,7 +9,3 @@ export const RequireAny = (...permissions: Permission[]) =>
 
 export const RequireAll = (...permissions: Permission[]) =>
 	SetMetadata(PERMISSIONS_ALL_KEY, permissions);
-
-/** @deprecated Use RequireAll instead */
-export const Permissions = (...permissions: Permission[]) =>
-	SetMetadata(PERMISSIONS_ALL_KEY, permissions);

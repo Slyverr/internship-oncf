@@ -12,6 +12,7 @@ export interface AuthRequest {
 export interface AuthUser {
 	id: UserId;
 	email: string;
+	sessionId: string;
 	permissions: Set<Permission>;
 	role?: string;
 }

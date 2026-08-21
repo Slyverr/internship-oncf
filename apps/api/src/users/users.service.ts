@@ -2,13 +2,14 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { users } from "drizzle/schema";
 import { eq } from "drizzle-orm";
 import { AuthUser } from "src/auth/auth.types";
+import { UpdateProfileDto } from "src/auth/requests/update-profile.dto";
 import { DrizzleService } from "src/db/drizzle.service";
 import { withDbErrorHandling } from "src/db/drizzle.util";
 import { CreateUserDto } from "./requests/create-user.dto";
 import { UpdateUserDto } from "./requests/update-user.dto";
 import { toCreate, toUpdate } from "./users.mapper";
 import { userDetailColumns, userListColumns } from "./users.query";
-import { UserEmail, UserId } from "./users.types";
+import { UserEmail, UserId, UserUpdate } from "./users.types";
 
 @Injectable()
 export class UsersService {
@@ -41,6 +42,19 @@ export class UsersService {
 		return user;
 	}
 
+	async findOneForAuth(id: UserId) {
+		const user = await this.drizzle.db.query.users.findFirst({
+			where: { id },
+			columns: {
+				id: true,
+				email: true,
+				password: true,
+			},
+		});
+
+		return this.ensure(user, id);
+	}
+
 	async create(dto: CreateUserDto, user: AuthUser) {
 		const values = await toCreate(dto, user);
 
@@ -64,6 +78,12 @@ export class UsersService {
 		return this.findOne(id);
 	}
 
+	async updateProfile(id: UserId, dto: UpdateProfileDto) {
+		await this.persistUpdate(id, dto);
+
+		return this.findOne(id);
+	}
+
 	async deactivate(id: UserId) {
 		const user = await this.persistUpdate(id, {
 			isActive: false,
@@ -74,12 +94,13 @@ export class UsersService {
 		};
 	}
 
-	async findUserWithPermissions(id: UserId) {
+	async findOneWithPermissions(id: UserId) {
 		const user = await this.drizzle.db.query.users.findFirst({
 			where: { id },
 			columns: {
 				id: true,
 				email: true,
+				isActive: true,
 			},
 			with: {
 				role: {
@@ -98,7 +119,9 @@ export class UsersService {
 			},
 		});
 
-		if (!user) return null;
+		if (!user?.isActive) {
+			return null;
+		}
 
 		return {
 			id: user.id,
@@ -119,10 +142,7 @@ export class UsersService {
 		return !!user;
 	}
 
-	private async persistUpdate(
-		id: UserId,
-		values: Partial<typeof users.$inferInsert>,
-	) {
+	private async persistUpdate(id: UserId, values: UserUpdate) {
 		const [updated] = await withDbErrorHandling(
 			() =>
 				this.drizzle.db

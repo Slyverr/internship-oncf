@@ -1,20 +1,25 @@
 import { Permission } from "@ecommand/shared";
-import { Injectable } from "@nestjs/common";
+import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
+import { DrizzleService } from "src/db/drizzle.service";
+import { UsersService } from "src/users/users.service";
 import { AuthUser } from "../auth.types";
 
 export interface JwtPayload {
 	sub: number;
 	username: string;
-	permissions?: string[];
-	role?: string;
+	sid: string;
 }
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-	constructor(config: ConfigService) {
+	constructor(
+		config: ConfigService,
+		private readonly drizzle: DrizzleService,
+		private readonly usersService: UsersService,
+	) {
 		super({
 			jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
 			ignoreExpiration: false,
@@ -23,13 +28,32 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 	}
 
 	async validate(payload: JwtPayload): Promise<AuthUser> {
-		const permissions = (payload.permissions ?? []) as Permission[];
+		const session = await this.drizzle.db.query.userSessions.findFirst({
+			where: {
+				sessionToken: payload.sid,
+				userId: payload.sub,
+			},
+		});
+
+		if (
+			!session ||
+			session.logoutAt ||
+			new Date(session.expiredAt) <= new Date()
+		) {
+			throw new UnauthorizedException();
+		}
+
+		const user = await this.usersService.findOneWithPermissions(payload.sub);
+		if (!user) {
+			throw new UnauthorizedException();
+		}
 
 		return {
-			id: payload.sub,
-			email: payload.username,
-			permissions: new Set(permissions),
-			role: payload.role,
+			id: user.id,
+			email: user.email,
+			permissions: new Set(user.permissions as Permission[]),
+			role: user.role,
+			sessionId: payload.sid,
 		};
 	}
 }
