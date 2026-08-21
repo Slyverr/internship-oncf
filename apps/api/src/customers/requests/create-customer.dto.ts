@@ -1,4 +1,3 @@
-import { Transform } from "class-transformer";
 import {
 	IsBoolean,
 	IsEmail,
@@ -44,6 +43,5 @@ export class CreateCustomerDto {
 
 	@IsOptional()
 	@IsBoolean()
-	@Transform(({ value }) => value ?? true)
 	isActive?: boolean;
 }

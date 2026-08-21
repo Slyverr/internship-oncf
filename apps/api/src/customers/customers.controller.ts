@@ -9,23 +9,28 @@ import {
 	Post,
 	Put,
 } from "@nestjs/common";
-import {
-	ApiBadRequestResponse,
-	ApiForbiddenResponse,
-	ApiNotFoundResponse,
-	ApiOkResponse,
-	ApiUnauthorizedResponse,
-} from "@nestjs/swagger";
 import { RequireAny } from "src/auth/permissions.decorator";
-import { MessageResponseDto } from "src/common/responses/message.dto";
+import { createCrudResponses } from "src/common/decorators/api-crud-responses.decorator";
 import { CustomersService } from "./customers.service";
 import type { CustomerId } from "./customers.types";
-import { CreateCustomerDto } from "./dto/create-customer.dto";
-import { CreateCustomerResponseDto } from "./dto/create-customer.response.dto";
-import { UpdateCustomerDto } from "./dto/update-customer.dto";
-import { UpdateCustomerResponseDto } from "./dto/update-customer.response.dto";
+import { CreateCustomerDto } from "./requests/create-customer.dto";
+import { UpdateCustomerDto } from "./requests/update-customer.dto";
+import { CustomerDeleteDto } from "./responses/customer-delete.dto";
+import { CustomerDetailDto } from "./responses/customer-detail.dto";
+import { CustomerListDto } from "./responses/customer-list.dto";
 
 const CustomerIdParam = () => Param("id", ParseIntPipe);
+
+const {
+	list: CustomerListResponse,
+	detail: CustomerDetailResponse,
+	create: CustomerCreateResponse,
+	remove: CustomerDeleteResponse,
+} = createCrudResponses({
+	list: CustomerListDto,
+	detail: CustomerDetailDto,
+	remove: CustomerDeleteDto,
+});
 
 @Controller("customers")
 export class CustomersController {
@@ -33,38 +38,28 @@ export class CustomersController {
 
 	@Get()
 	@RequireAny(Permission.CUSTOMERS_READ)
-	@ApiOkResponse({ type: [CreateCustomerResponseDto] })
-	@ApiUnauthorizedResponse()
+	@CustomerListResponse()
 	async findAll() {
 		return this.customersService.findAll();
 	}
 
 	@Get(":id")
 	@RequireAny(Permission.CUSTOMERS_READ)
-	@ApiOkResponse({ type: CreateCustomerResponseDto })
-	@ApiUnauthorizedResponse()
-	@ApiNotFoundResponse()
+	@CustomerDetailResponse()
 	async findOne(@CustomerIdParam() id: CustomerId) {
 		return this.customersService.findOne(id);
 	}
 
 	@Post()
 	@RequireAny(Permission.CUSTOMERS_CREATE)
-	@ApiOkResponse({ type: CreateCustomerResponseDto })
-	@ApiUnauthorizedResponse()
-	@ApiBadRequestResponse()
-	@ApiForbiddenResponse()
+	@CustomerCreateResponse()
 	async create(@Body() dto: CreateCustomerDto) {
 		return this.customersService.create(dto);
 	}
 
 	@Put(":id")
 	@RequireAny(Permission.CUSTOMERS_UPDATE)
-	@ApiOkResponse({ type: UpdateCustomerResponseDto })
-	@ApiUnauthorizedResponse()
-	@ApiBadRequestResponse()
-	@ApiForbiddenResponse()
-	@ApiNotFoundResponse()
+	@CustomerDetailResponse()
 	async update(
 		@CustomerIdParam() id: CustomerId,
 		@Body() dto: UpdateCustomerDto,
@@ -74,11 +69,8 @@ export class CustomersController {
 
 	@Delete(":id")
 	@RequireAny(Permission.CUSTOMERS_DELETE)
-	@ApiOkResponse({ type: MessageResponseDto })
-	@ApiUnauthorizedResponse()
-	@ApiForbiddenResponse()
-	@ApiNotFoundResponse()
-	async remove(@CustomerIdParam() id: CustomerId) {
-		return this.customersService.remove(id);
+	@CustomerDeleteResponse()
+	async deactivate(@CustomerIdParam() id: CustomerId) {
+		return this.customersService.deactivate(id);
 	}
 }

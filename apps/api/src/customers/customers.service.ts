@@ -3,55 +3,79 @@ import { customers } from "drizzle/schema";
 import { eq } from "drizzle-orm";
 import { DrizzleService } from "src/db/drizzle.service";
 import { withDbErrorHandling } from "src/db/drizzle.util";
-import { CustomerId } from "./customers.types";
-import { CreateCustomerDto } from "./dto/create-customer.dto";
-import { UpdateCustomerDto } from "./dto/update-customer.dto";
+import { toCreate, toUpdate } from "./customers.mapper";
+import { customerDetailColumns, customerListColumns } from "./customers.query";
+import { CustomerId, CustomerUpdate } from "./customers.types";
+import { CreateCustomerDto } from "./requests/create-customer.dto";
+import { UpdateCustomerDto } from "./requests/update-customer.dto";
 
 @Injectable()
 export class CustomersService {
 	constructor(private readonly drizzle: DrizzleService) {}
 
 	async findAll() {
-		return this.drizzle.db.query.customers.findMany();
+		return this.drizzle.db.query.customers.findMany({
+			columns: customerListColumns,
+		});
 	}
 
 	async findOne(id: CustomerId) {
 		const customer = await this.drizzle.db.query.customers.findFirst({
 			where: { id },
+			columns: customerDetailColumns,
 		});
-		if (!customer) throw new NotFoundException(`Customer ${id} not found`);
-		return customer;
+
+		return this.ensure(customer, id);
 	}
 
 	async create(dto: CreateCustomerDto) {
-		const [customer] = await withDbErrorHandling(
-			() => this.drizzle.db.insert(customers).values(dto).returning(),
-			dto,
+		const values = toCreate(dto);
+
+		const [created] = await withDbErrorHandling(
+			() =>
+				this.drizzle.db
+					.insert(customers)
+					.values(values)
+					.returning({ id: customers.id }),
+			values,
 		);
-		return customer;
+
+		return this.findOne(created.id);
 	}
 
 	async update(id: CustomerId, dto: UpdateCustomerDto) {
-		const [customer] = await withDbErrorHandling(
+		const values = toUpdate(dto);
+
+		await this.persistUpdate(id, values);
+
+		return this.findOne(id);
+	}
+
+	async deactivate(id: CustomerId) {
+		const customer = await this.persistUpdate(id, {
+			isActive: false,
+		});
+
+		return {
+			id: customer.id,
+		};
+	}
+
+	private async persistUpdate(id: CustomerId, values: CustomerUpdate) {
+		const [updated] = await withDbErrorHandling(
 			() =>
 				this.drizzle.db
 					.update(customers)
-					.set(dto)
+					.set(values)
 					.where(eq(customers.id, id))
-					.returning(),
-			dto,
+					.returning({ id: customers.id }),
+			values,
 		);
 
-		return customer;
+		return this.ensure(updated, id);
 	}
 
-	async remove(id: CustomerId) {
-		const [customer] = await this.drizzle.db
-			.update(customers)
-			.set({ isActive: false })
-			.where(eq(customers.id, id))
-			.returning();
-
+	private ensure<T>(customer: T | undefined, id: CustomerId): T {
 		if (!customer) {
 			throw new NotFoundException(`Customer ${id} not found`);
 		}
