@@ -9,7 +9,8 @@ import { DrizzleService } from "src/db/drizzle.service";
 import { withDbErrorHandling } from "src/db/drizzle.util";
 import type { OrderId } from "src/orders/orders.types";
 import { StorageService } from "src/storage/storage.service";
-import { MulterFile } from "src/storage/storage.types";
+import type { MulterFile } from "src/storage/storage.types";
+import { fileColumns } from "./files.query";
 import { UploadFileDto } from "./requests/upload-file.dto";
 
 @Injectable()
@@ -30,6 +31,7 @@ export class FilesService {
 		}
 
 		const filePath = `orders/${orderId}/${Date.now()}-${file.originalname}`;
+
 		await this.storageService.uploadFile(filePath, file);
 
 		const [record] = await withDbErrorHandling(
@@ -56,15 +58,22 @@ export class FilesService {
 	async listFiles(orderId: OrderId) {
 		return this.drizzle.db.query.orderFiles.findMany({
 			where: { orderId },
+			columns: fileColumns,
 			orderBy: (files, { desc }) => [desc(files.uploadedAt)],
 		});
 	}
 
-	async downloadFile(orderId: OrderId, fileId: string) {
+	async downloadFile(orderId: OrderId, fileId: number) {
 		const file = await this.drizzle.db.query.orderFiles.findFirst({
 			where: {
-				fileId: parseInt(fileId, 10),
+				fileId,
 				orderId,
+			},
+			columns: {
+				fileId: true,
+				fileName: true,
+				filePath: true,
+				mimeType: true,
 			},
 		});
 
@@ -79,15 +88,19 @@ export class FilesService {
 		return {
 			buffer,
 			fileName: file.fileName,
-			mimeType: file.mimeType || "application/octet-stream",
+			mimeType: file.mimeType ?? "application/octet-stream",
 		};
 	}
 
-	async deleteFile(orderId: OrderId, fileId: string) {
+	async deleteFile(orderId: OrderId, fileId: number) {
 		const file = await this.drizzle.db.query.orderFiles.findFirst({
 			where: {
-				fileId: parseInt(fileId, 10),
+				fileId,
 				orderId,
+			},
+			columns: {
+				fileId: true,
+				filePath: true,
 			},
 		});
 
@@ -102,10 +115,7 @@ export class FilesService {
 		await this.drizzle.db
 			.delete(orderFiles)
 			.where(
-				and(
-					eq(orderFiles.fileId, parseInt(fileId, 10)),
-					eq(orderFiles.orderId, orderId),
-				),
+				and(eq(orderFiles.fileId, fileId), eq(orderFiles.orderId, orderId)),
 			);
 	}
 }
