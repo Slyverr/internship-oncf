@@ -1,4 +1,4 @@
-import AppSidebar from "@/components/common/sidebar";
+import AppSidebar from "@/components/sidebar/sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 export default async function Layout({
