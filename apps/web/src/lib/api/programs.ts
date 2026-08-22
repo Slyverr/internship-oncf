@@ -26,7 +26,9 @@ import type {
 
 import type {
   CreateProgramDto,
-  CreateProgramResponseDto,
+  ProgramDeleteDto,
+  ProgramDetailDto,
+  ProgramListDto,
   UpdateProgramDto
 } from './generated.schemas';
 
@@ -59,7 +61,7 @@ export const programsControllerCreate = (
 ) => {
 
 
-      return customFetch<CreateProgramResponseDto>(
+      return customFetch<ProgramDetailDto>(
       {url: `/programs`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: createProgramDto, signal
@@ -117,7 +119,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 ) => {
 
 
-      return customFetch<CreateProgramResponseDto[]>(
+      return customFetch<ProgramListDto[]>(
       {url: `/programs`, method: 'GET', signal
     },
       options);
@@ -203,7 +205,7 @@ export const programsControllerFindOne = (
 ) => {
 
 
-      return customFetch<CreateProgramResponseDto>(
+      return customFetch<ProgramDetailDto>(
       {url: `/programs/${id}`, method: 'GET', signal
     },
       options);
@@ -290,7 +292,7 @@ export const programsControllerUpdate = (
 ) => {
 
 
-      return customFetch<CreateProgramResponseDto>(
+      return customFetch<ProgramDetailDto>(
       {url: `/programs/${id}`, method: 'PATCH',
       headers: {'Content-Type': 'application/json', },
       data: updateProgramDto, signal
@@ -348,7 +350,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 ) => {
 
 
-      return customFetch<CreateProgramResponseDto>(
+      return customFetch<ProgramDeleteDto>(
       {url: `/programs/${id}`, method: 'DELETE', signal
     },
       options);
@@ -404,7 +406,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 ) => {
 
 
-      return customFetch<CreateProgramResponseDto>(
+      return customFetch<ProgramDetailDto>(
       {url: `/programs/${id}/submit`, method: 'POST', signal
     },
       options);
@@ -460,7 +462,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 ) => {
 
 
-      return customFetch<CreateProgramResponseDto>(
+      return customFetch<ProgramDetailDto>(
       {url: `/programs/${id}/approve`, method: 'POST', signal
     },
       options);
@@ -516,7 +518,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 ) => {
 
 
-      return customFetch<CreateProgramResponseDto>(
+      return customFetch<ProgramDetailDto>(
       {url: `/programs/${id}/confirm`, method: 'POST', signal
     },
       options);
@@ -572,7 +574,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 ) => {
 
 
-      return customFetch<CreateProgramResponseDto>(
+      return customFetch<ProgramDetailDto>(
       {url: `/programs/${id}/send`, method: 'POST', signal
     },
       options);
@@ -628,7 +630,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 ) => {
 
 
-      return customFetch<CreateProgramResponseDto>(
+      return customFetch<ProgramDetailDto>(
       {url: `/programs/${id}/cancel`, method: 'POST', signal
     },
       options);

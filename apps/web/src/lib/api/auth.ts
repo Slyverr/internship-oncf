@@ -25,12 +25,13 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  ChangePasswordDto,
   ForgotPasswordDto,
+  LoginDetailDto,
   LoginDto,
-  LoginResponseDto,
-  MessageResponseDto,
-  ProfileResponseDto,
-  ResetPasswordDto
+  ProfileDto,
+  ResetPasswordDto,
+  UpdateProfileDto
 } from './generated.schemas';
 
 import { customFetch } from '../axios';
@@ -62,7 +63,7 @@ export const authControllerLogin = (
 ) => {
 
 
-      return customFetch<LoginResponseDto>(
+      return customFetch<LoginDetailDto>(
       {url: `/auth/login`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: loginDto, signal
@@ -120,7 +121,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 ) => {
 
 
-      return customFetch<ProfileResponseDto>(
+      return customFetch<ProfileDto>(
       {url: `/auth/profile`, method: 'GET', signal
     },
       options);
@@ -200,13 +201,185 @@ export function useAuthControllerGetProfile<TData = Awaited<ReturnType<typeof au
 
 
 
-export const authControllerForgotPassword = (
+export const authControllerUpdateProfile = (
+    updateProfileDto: UpdateProfileDto,
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<ProfileDto>(
+      {url: `/auth/profile`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: updateProfileDto, signal
+    },
+      options);
+    }
+
+
+
+
+export const getAuthControllerUpdateProfileMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerUpdateProfile>>, TError,{data: UpdateProfileDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof authControllerUpdateProfile>>, TError,{data: UpdateProfileDto}, TContext> => {
+
+const mutationKey = ['authControllerUpdateProfile'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof authControllerUpdateProfile>>, {data: UpdateProfileDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  authControllerUpdateProfile(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AuthControllerUpdateProfileMutationResult = NonNullable<Awaited<ReturnType<typeof authControllerUpdateProfile>>>
+    export type AuthControllerUpdateProfileMutationBody = UpdateProfileDto
+    export type AuthControllerUpdateProfileMutationError = void
+
+    export const useAuthControllerUpdateProfile = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerUpdateProfile>>, TError,{data: UpdateProfileDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof authControllerUpdateProfile>>,
+        TError,
+        {data: UpdateProfileDto},
+        TContext
+      > => {
+      return useMutation(getAuthControllerUpdateProfileMutationOptions(options), queryClient);
+    }
+    export const authControllerChangePassword = (
+    changePasswordDto: ChangePasswordDto,
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/auth/change-password`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: changePasswordDto, signal
+    },
+      options);
+    }
+
+
+
+
+export const getAuthControllerChangePasswordMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerChangePassword>>, TError,{data: ChangePasswordDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof authControllerChangePassword>>, TError,{data: ChangePasswordDto}, TContext> => {
+
+const mutationKey = ['authControllerChangePassword'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof authControllerChangePassword>>, {data: ChangePasswordDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  authControllerChangePassword(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AuthControllerChangePasswordMutationResult = NonNullable<Awaited<ReturnType<typeof authControllerChangePassword>>>
+    export type AuthControllerChangePasswordMutationBody = ChangePasswordDto
+    export type AuthControllerChangePasswordMutationError = unknown
+
+    export const useAuthControllerChangePassword = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerChangePassword>>, TError,{data: ChangePasswordDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof authControllerChangePassword>>,
+        TError,
+        {data: ChangePasswordDto},
+        TContext
+      > => {
+      return useMutation(getAuthControllerChangePasswordMutationOptions(options), queryClient);
+    }
+    export const authControllerLogout = (
+
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<void>(
+      {url: `/auth/logout`, method: 'POST', signal
+    },
+      options);
+    }
+
+
+
+
+export const getAuthControllerLogoutMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerLogout>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof authControllerLogout>>, TError,void, TContext> => {
+
+const mutationKey = ['authControllerLogout'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof authControllerLogout>>, void> = () => {
+
+
+          return  authControllerLogout(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AuthControllerLogoutMutationResult = NonNullable<Awaited<ReturnType<typeof authControllerLogout>>>
+
+    export type AuthControllerLogoutMutationError = unknown
+
+    export const useAuthControllerLogout = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerLogout>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof authControllerLogout>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getAuthControllerLogoutMutationOptions(options), queryClient);
+    }
+    export const authControllerForgotPassword = (
     forgotPasswordDto: ForgotPasswordDto,
  options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
 ) => {
 
 
-      return customFetch<MessageResponseDto>(
+      return customFetch<void>(
       {url: `/auth/forgot-password`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: forgotPasswordDto, signal
@@ -217,7 +390,7 @@ export const authControllerForgotPassword = (
 
 
 
-export const getAuthControllerForgotPasswordMutationOptions = <TError = void,
+export const getAuthControllerForgotPasswordMutationOptions = <TError = unknown,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerForgotPassword>>, TError,{data: ForgotPasswordDto}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof authControllerForgotPassword>>, TError,{data: ForgotPasswordDto}, TContext> => {
 
@@ -246,9 +419,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type AuthControllerForgotPasswordMutationResult = NonNullable<Awaited<ReturnType<typeof authControllerForgotPassword>>>
     export type AuthControllerForgotPasswordMutationBody = ForgotPasswordDto
-    export type AuthControllerForgotPasswordMutationError = void
+    export type AuthControllerForgotPasswordMutationError = unknown
 
-    export const useAuthControllerForgotPassword = <TError = void,
+    export const useAuthControllerForgotPassword = <TError = unknown,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerForgotPassword>>, TError,{data: ForgotPasswordDto}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof authControllerForgotPassword>>,
@@ -264,7 +437,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 ) => {
 
 
-      return customFetch<MessageResponseDto>(
+      return customFetch<void>(
       {url: `/auth/reset-password`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: resetPasswordDto, signal
@@ -275,7 +448,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-export const getAuthControllerResetPasswordMutationOptions = <TError = void,
+export const getAuthControllerResetPasswordMutationOptions = <TError = unknown,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerResetPassword>>, TError,{data: ResetPasswordDto}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof authControllerResetPassword>>, TError,{data: ResetPasswordDto}, TContext> => {
 
@@ -304,9 +477,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type AuthControllerResetPasswordMutationResult = NonNullable<Awaited<ReturnType<typeof authControllerResetPassword>>>
     export type AuthControllerResetPasswordMutationBody = ResetPasswordDto
-    export type AuthControllerResetPasswordMutationError = void
+    export type AuthControllerResetPasswordMutationError = unknown
 
-    export const useAuthControllerResetPassword = <TError = void,
+    export const useAuthControllerResetPassword = <TError = unknown,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerResetPassword>>, TError,{data: ResetPasswordDto}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof authControllerResetPassword>>,

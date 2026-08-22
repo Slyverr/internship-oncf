@@ -26,10 +26,10 @@ import type {
 
 import type {
   CreateCustomerDto,
-  CreateCustomerResponseDto,
-  MessageResponseDto,
-  UpdateCustomerDto,
-  UpdateCustomerResponseDto
+  CustomerDeleteDto,
+  CustomerDetailDto,
+  CustomerListDto,
+  UpdateCustomerDto
 } from './generated.schemas';
 
 import { customFetch } from '../axios';
@@ -61,7 +61,7 @@ export const customersControllerFindAll = (
 ) => {
 
 
-      return customFetch<CreateCustomerResponseDto[]>(
+      return customFetch<CustomerListDto[]>(
       {url: `/customers`, method: 'GET', signal
     },
       options);
@@ -147,7 +147,7 @@ export const customersControllerCreate = (
 ) => {
 
 
-      return customFetch<CreateCustomerResponseDto>(
+      return customFetch<CustomerDetailDto>(
       {url: `/customers`, method: 'POST',
       headers: {'Content-Type': 'application/json', },
       data: createCustomerDto, signal
@@ -205,7 +205,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 ) => {
 
 
-      return customFetch<CreateCustomerResponseDto>(
+      return customFetch<CustomerDetailDto>(
       {url: `/customers/${id}`, method: 'GET', signal
     },
       options);
@@ -292,7 +292,7 @@ export const customersControllerUpdate = (
 ) => {
 
 
-      return customFetch<UpdateCustomerResponseDto>(
+      return customFetch<CustomerDetailDto>(
       {url: `/customers/${id}`, method: 'PUT',
       headers: {'Content-Type': 'application/json', },
       data: updateCustomerDto, signal
@@ -344,13 +344,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getCustomersControllerUpdateMutationOptions(options), queryClient);
     }
-    export const customersControllerRemove = (
+    export const customersControllerDeactivate = (
     id: number,
  options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
 ) => {
 
 
-      return customFetch<MessageResponseDto>(
+      return customFetch<CustomerDeleteDto>(
       {url: `/customers/${id}`, method: 'DELETE', signal
     },
       options);
@@ -359,11 +359,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-export const getCustomersControllerRemoveMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof customersControllerRemove>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof customersControllerRemove>>, TError,{id: number}, TContext> => {
+export const getCustomersControllerDeactivateMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof customersControllerDeactivate>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof customersControllerDeactivate>>, TError,{id: number}, TContext> => {
 
-const mutationKey = ['customersControllerRemove'];
+const mutationKey = ['customersControllerDeactivate'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -373,10 +373,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof customersControllerRemove>>, {id: number}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof customersControllerDeactivate>>, {id: number}> = (props) => {
           const {id} = props ?? {};
 
-          return  customersControllerRemove(id,requestOptions)
+          return  customersControllerDeactivate(id,requestOptions)
         }
 
 
@@ -386,17 +386,17 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type CustomersControllerRemoveMutationResult = NonNullable<Awaited<ReturnType<typeof customersControllerRemove>>>
+    export type CustomersControllerDeactivateMutationResult = NonNullable<Awaited<ReturnType<typeof customersControllerDeactivate>>>
 
-    export type CustomersControllerRemoveMutationError = void
+    export type CustomersControllerDeactivateMutationError = void
 
-    export const useCustomersControllerRemove = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof customersControllerRemove>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+    export const useCustomersControllerDeactivate = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof customersControllerDeactivate>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof customersControllerRemove>>,
+        Awaited<ReturnType<typeof customersControllerDeactivate>>,
         TError,
         {id: number},
         TContext
       > => {
-      return useMutation(getCustomersControllerRemoveMutationOptions(options), queryClient);
+      return useMutation(getCustomersControllerDeactivateMutationOptions(options), queryClient);
     }

@@ -26,8 +26,9 @@ import type {
 
 import type {
   MessageResponseDto,
-  NotificationResponseDto,
-  UnreadCountResponseDto
+  NotificationDetailDto,
+  NotificationListDto,
+  NotificationUnreadCountDto
 } from './generated.schemas';
 
 import { customFetch } from '../axios';
@@ -59,7 +60,7 @@ export const notificationsControllerFindAll = (
 ) => {
 
 
-      return customFetch<NotificationResponseDto[]>(
+      return customFetch<NotificationListDto[]>(
       {url: `/notifications`, method: 'GET', signal
     },
       options);
@@ -145,7 +146,7 @@ export const notificationsControllerGetUnreadCount = (
 ) => {
 
 
-      return customFetch<UnreadCountResponseDto>(
+      return customFetch<NotificationUnreadCountDto>(
       {url: `/notifications/unread-count`, method: 'GET', signal
     },
       options);
@@ -231,7 +232,7 @@ export const notificationsControllerMarkAsRead = (
 ) => {
 
 
-      return customFetch<NotificationResponseDto>(
+      return customFetch<NotificationDetailDto>(
       {url: `/notifications/${id}/read`, method: 'PATCH', signal
     },
       options);

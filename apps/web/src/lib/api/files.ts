@@ -25,10 +25,9 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  ListFilesResponseDto,
+  FileDto,
   MessageResponseDto,
-  UploadFileDto,
-  UploadFileResponseDto
+  UploadFileDto
 } from './generated.schemas';
 
 import { customFetch } from '../axios';
@@ -65,7 +64,7 @@ if(uploadFileDto.description !== undefined) {
  formData.append(`description`, uploadFileDto.description);
  }
 
-      return customFetch<UploadFileResponseDto>(
+      return customFetch<FileDto>(
       {url: `/orders/${id}/files`, method: 'POST',
       headers: {'Content-Type': 'multipart/form-data', },
        data: formData, signal
@@ -123,7 +122,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 ) => {
 
 
-      return customFetch<ListFilesResponseDto[]>(
+      return customFetch<FileDto[]>(
       {url: `/orders/${id}/files`, method: 'GET', signal
     },
       options);
@@ -205,7 +204,7 @@ export function useFilesControllerListFiles<TData = Awaited<ReturnType<typeof fi
 
 export const filesControllerDownloadFile = (
     id: number,
-    fileId: string,
+    fileId: number,
  options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
 ) => {
 
@@ -220,15 +219,15 @@ export const filesControllerDownloadFile = (
 
 
 export const getFilesControllerDownloadFileQueryKey = (id: number,
-    fileId: string,) => {
+    fileId: number,) => {
     return [
     `/orders/${id}/files/${fileId}/download`
     ] as const;
     }
 
 
-export const getFilesControllerDownloadFileQueryOptions = <TData = Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError = void>(id: number,
-    fileId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getFilesControllerDownloadFileQueryOptions = <TData = Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError = unknown>(id: number,
+    fileId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -247,12 +246,12 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type FilesControllerDownloadFileQueryResult = NonNullable<Awaited<ReturnType<typeof filesControllerDownloadFile>>>
-export type FilesControllerDownloadFileQueryError = void
+export type FilesControllerDownloadFileQueryError = unknown
 
 
-export function useFilesControllerDownloadFile<TData = Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError = void>(
+export function useFilesControllerDownloadFile<TData = Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError = unknown>(
  id: number,
-    fileId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError, TData>> & Pick<
+    fileId: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof filesControllerDownloadFile>>,
           TError,
@@ -261,9 +260,9 @@ export function useFilesControllerDownloadFile<TData = Awaited<ReturnType<typeof
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useFilesControllerDownloadFile<TData = Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError = void>(
+export function useFilesControllerDownloadFile<TData = Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError = unknown>(
  id: number,
-    fileId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError, TData>> & Pick<
+    fileId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof filesControllerDownloadFile>>,
           TError,
@@ -272,15 +271,15 @@ export function useFilesControllerDownloadFile<TData = Awaited<ReturnType<typeof
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useFilesControllerDownloadFile<TData = Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError = void>(
+export function useFilesControllerDownloadFile<TData = Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError = unknown>(
  id: number,
-    fileId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+    fileId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useFilesControllerDownloadFile<TData = Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError = void>(
+export function useFilesControllerDownloadFile<TData = Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError = unknown>(
  id: number,
-    fileId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+    fileId: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof filesControllerDownloadFile>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
@@ -298,7 +297,7 @@ export function useFilesControllerDownloadFile<TData = Awaited<ReturnType<typeof
 
 export const filesControllerDeleteFile = (
     id: number,
-    fileId: string,
+    fileId: number,
  options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
 ) => {
 
@@ -313,8 +312,8 @@ export const filesControllerDeleteFile = (
 
 
 export const getFilesControllerDeleteFileMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof filesControllerDeleteFile>>, TError,{id: number;fileId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof filesControllerDeleteFile>>, TError,{id: number;fileId: string}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof filesControllerDeleteFile>>, TError,{id: number;fileId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof filesControllerDeleteFile>>, TError,{id: number;fileId: number}, TContext> => {
 
 const mutationKey = ['filesControllerDeleteFile'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -326,7 +325,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof filesControllerDeleteFile>>, {id: number;fileId: string}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof filesControllerDeleteFile>>, {id: number;fileId: number}> = (props) => {
           const {id,fileId} = props ?? {};
 
           return  filesControllerDeleteFile(id,fileId,requestOptions)
@@ -344,11 +343,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type FilesControllerDeleteFileMutationError = void
 
     export const useFilesControllerDeleteFile = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof filesControllerDeleteFile>>, TError,{id: number;fileId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof filesControllerDeleteFile>>, TError,{id: number;fileId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof filesControllerDeleteFile>>,
         TError,
-        {id: number;fileId: string},
+        {id: number;fileId: number},
         TContext
       > => {
       return useMutation(getFilesControllerDeleteFileMutationOptions(options), queryClient);

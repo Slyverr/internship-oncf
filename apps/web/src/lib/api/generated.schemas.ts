@@ -5,18 +5,129 @@
  * ONCF freight order management
  * OpenAPI spec version: 1.0
  */
-export interface UsersResponseDto {
+export interface UserListDto {
   id: number;
   email: string;
-  firstName?: string;
-  lastName?: string;
-  roleId?: number;
-  customerId?: number;
-  agencyId?: number;
-  isActive: boolean;
-  lastLogin?: string;
+  lastName: string;
+  firstName: string;
+  /** @nullable */
+  employeeId: string | null;
+  /** @nullable */
+  type: string | null;
+  roleId: number;
+  /** @nullable */
+  customerId: number | null;
+  /** @nullable */
+  agencyId: number | null;
   createdAt: string;
   updatedAt: string;
+  isActive: boolean;
+  /** @nullable */
+  lastLogin: string | null;
+}
+
+export interface UserDetailDto {
+  id: number;
+  email: string;
+  lastName: string;
+  firstName: string;
+  /** @nullable */
+  employeeId: string | null;
+  /** @nullable */
+  type: string | null;
+  roleId: number;
+  /** @nullable */
+  customerId: number | null;
+  /** @nullable */
+  agencyId: number | null;
+  createdAt: string;
+  updatedAt: string;
+  isActive: boolean;
+  /** @nullable */
+  lastLogin: string | null;
+}
+
+export type CreateUserDtoRole = typeof CreateUserDtoRole[keyof typeof CreateUserDtoRole];
+
+
+export const CreateUserDtoRole = {
+  ADMIN: 'ADMIN',
+  CLIENT_REPRESENTATIVE: 'CLIENT_REPRESENTATIVE',
+  AGENT_COMMERCIAL: 'AGENT_COMMERCIAL',
+} as const;
+
+/**
+ * @maxLength 20
+ */
+export type CreateUserDtoType = typeof CreateUserDtoType[keyof typeof CreateUserDtoType];
+
+
+export const CreateUserDtoType = {
+  internal: 'internal',
+  external: 'external',
+} as const;
+
+export interface CreateUserDto {
+  /** @maxLength 100 */
+  email: string;
+  /**
+     * @minLength 8
+     * @maxLength 255
+     */
+  password: string;
+  /** @maxLength 100 */
+  firstName: string;
+  /** @maxLength 100 */
+  lastName: string;
+  role: CreateUserDtoRole;
+  /** @maxLength 50 */
+  employeeId?: string;
+  /** @maxLength 20 */
+  type?: CreateUserDtoType;
+  customerId?: number;
+  agencyId?: number;
+  isActive?: boolean;
+}
+
+export type UpdateUserDtoRole = typeof UpdateUserDtoRole[keyof typeof UpdateUserDtoRole];
+
+
+export const UpdateUserDtoRole = {
+  ADMIN: 'ADMIN',
+  CLIENT_REPRESENTATIVE: 'CLIENT_REPRESENTATIVE',
+  AGENT_COMMERCIAL: 'AGENT_COMMERCIAL',
+} as const;
+
+/**
+ * @maxLength 20
+ */
+export type UpdateUserDtoType = typeof UpdateUserDtoType[keyof typeof UpdateUserDtoType];
+
+
+export const UpdateUserDtoType = {
+  internal: 'internal',
+  external: 'external',
+} as const;
+
+export interface UpdateUserDto {
+  /** @maxLength 100 */
+  email?: string;
+  /** @maxLength 100 */
+  firstName?: string;
+  /** @maxLength 100 */
+  lastName?: string;
+  role?: UpdateUserDtoRole;
+  /** @maxLength 50 */
+  employeeId?: string;
+  /** @maxLength 20 */
+  type?: UpdateUserDtoType;
+  customerId?: number;
+  agencyId?: number;
+  isActive?: boolean;
+}
+
+export interface UserDeleteDto {
+  id: number;
 }
 
 export interface LoginDto {
@@ -25,24 +136,95 @@ export interface LoginDto {
   password: string;
 }
 
-export interface LoginResponseDto {
+export interface LoginDetailDto {
   access_token: string;
 }
 
-export interface ProfileResponseDto {
+export type ProfileDtoPermissionsItem = typeof ProfileDtoPermissionsItem[keyof typeof ProfileDtoPermissionsItem];
+
+
+export const ProfileDtoPermissionsItem = {
+  'users:create': 'users:create',
+  'users:read': 'users:read',
+  'users:update': 'users:update',
+  'users:delete': 'users:delete',
+  'users:manage': 'users:manage',
+  'users:manage:other': 'users:manage:other',
+  'orders:create': 'orders:create',
+  'orders:read': 'orders:read',
+  'orders:update': 'orders:update',
+  'orders:delete': 'orders:delete',
+  'orders:manage': 'orders:manage',
+  'orders:manage:other': 'orders:manage:other',
+  'orders:manage:ownership': 'orders:manage:ownership',
+  'orders:status:update': 'orders:status:update',
+  'orders:approve': 'orders:approve',
+  'orders:execute': 'orders:execute',
+  'orders:reject': 'orders:reject',
+  'orders:send': 'orders:send',
+  'customers:create': 'customers:create',
+  'customers:read': 'customers:read',
+  'customers:update': 'customers:update',
+  'customers:delete': 'customers:delete',
+  'customers:manage': 'customers:manage',
+  'customers:manage:other': 'customers:manage:other',
+  'claims:create': 'claims:create',
+  'claims:read': 'claims:read',
+  'claims:update': 'claims:update',
+  'claims:delete': 'claims:delete',
+  'claims:manage': 'claims:manage',
+  'claims:manage:other': 'claims:manage:other',
+  'claims:close': 'claims:close',
+  'claims:status:update': 'claims:status:update',
+  'tracking:read': 'tracking:read',
+  'tracking:update': 'tracking:update',
+  'tracking:manage': 'tracking:manage',
+  'reports:read': 'reports:read',
+  'reports:export': 'reports:export',
+  'roles:manage': 'roles:manage',
+  'permissions:manage': 'permissions:manage',
+  'logs:read': 'logs:read',
+  'profile:update': 'profile:update',
+  'archival:read': 'archival:read',
+  'archival:manage': 'archival:manage',
+  'programs:create': 'programs:create',
+  'programs:read': 'programs:read',
+  'programs:update': 'programs:update',
+  'programs:delete': 'programs:delete',
+  'programs:manage': 'programs:manage',
+  'programs:manage:other': 'programs:manage:other',
+  'programs:manage:ownership': 'programs:manage:ownership',
+  'programs:status:update': 'programs:status:update',
+  'programs:approve': 'programs:approve',
+  'programs:send': 'programs:send',
+  'programs:execute': 'programs:execute',
+} as const;
+
+export interface ProfileDto {
   id: number;
   email: string;
-  permissions: string[];
   role?: string;
+  permissions: ProfileDtoPermissionsItem[];
+}
+
+export interface UpdateProfileDto {
+  /** @maxLength 100 */
+  email?: string;
+  /** @maxLength 100 */
+  firstName?: string;
+  /** @maxLength 100 */
+  lastName?: string;
+}
+
+export interface ChangePasswordDto {
+  currentPassword: string;
+  /** @minLength 8 */
+  newPassword: string;
 }
 
 export interface ForgotPasswordDto {
   email: string;
   redirectUrl: string;
-}
-
-export interface MessageResponseDto {
-  message: string;
 }
 
 export interface ResetPasswordDto {
@@ -377,30 +559,23 @@ export interface UploadFileDto {
   description?: string;
 }
 
-export interface UploadFileResponseDto {
+export interface FileDto {
   fileId: number;
   orderId: number;
   fileName: string;
   fileType: string;
   fileSize: number;
   filePath: string;
-  mimeType: string;
+  /** @nullable */
+  mimeType: string | null;
   uploadedBy: number;
-  description?: string;
+  /** @nullable */
+  description: string | null;
   uploadedAt: string;
 }
 
-export interface ListFilesResponseDto {
-  fileId: number;
-  orderId: number;
-  fileName: string;
-  fileType: string;
-  fileSize: number;
-  filePath: string;
-  mimeType: string;
-  uploadedBy: number;
-  description?: string;
-  uploadedAt: string;
+export interface MessageResponseDto {
+  message: string;
 }
 
 export type CreateProgramDtoStatus = typeof CreateProgramDtoStatus[keyof typeof CreateProgramDtoStatus];
@@ -427,35 +602,161 @@ export interface CreateProgramDto {
   dtmStatus?: string;
 }
 
-export type CreateProgramResponseDtoStatus = typeof CreateProgramResponseDtoStatus[keyof typeof CreateProgramResponseDtoStatus];
+export type ProgramDetailDtoProgramStatus = {
+  id: number;
+  name: string;
+};
 
-
-export const CreateProgramResponseDtoStatus = {
-  DRAFT: 'DRAFT',
-  PENDING_APPROVAL: 'PENDING_APPROVAL',
-  APPROVED: 'APPROVED',
-  SENT_TO_DTM: 'SENT_TO_DTM',
-  CONFIRMED: 'CONFIRMED',
-  IN_PROGRESS: 'IN_PROGRESS',
-  COMPLETED: 'COMPLETED',
-  CANCELLED: 'CANCELLED',
-} as const;
-
-export interface CreateProgramResponseDto {
+export type ProgramDetailDtoOrderWagonsItem = {
   id: number;
   orderId: number;
-  userId: number;
-  programNumber: string;
-  statusId: number;
-  status: CreateProgramResponseDtoStatus;
-  plannedDate: string;
-  quantityPlanned: string;
-  quantityRealized?: string;
-  dtmStatus?: string;
-  createdBy: number;
-  realizedBy?: number;
+  createdAt: string;
+  /** @nullable */
+  trainId: number | null;
+  wagonId: number;
+  /** @nullable */
+  quantityLoaded: string | null;
+  /** @nullable */
+  forecastProgramId: number | null;
+};
+
+export type ProgramDetailDtoForecastProgramHistoriesItem = {
+  id: number;
+  /** @nullable */
+  quantityRealized: string | null;
+  /** @nullable */
+  deviationReason: string | null;
+  /** @nullable */
+  programId: number | null;
+  /** @nullable */
+  oldQuantity: string | null;
+  /** @nullable */
+  newQuantity: string | null;
+  changedBy: number;
+  changedAt: string;
+  /** @nullable */
+  reason: string | null;
+  eventType: string;
+  /** @nullable */
+  oldStatusId: number | null;
+  /** @nullable */
+  newStatusId: number | null;
+  /** @nullable */
+  oldPlannedDate: string | null;
+  /** @nullable */
+  newPlannedDate: string | null;
+  /** @nullable */
+  completionRate: string | null;
+  /** @nullable */
+  changedByName: string | null;
+};
+
+export type ProgramDetailDtoOrder = {
+  id: number;
+  /** @nullable */
+  orderNumber: string | null;
+};
+
+export type ProgramDetailDtoCreatedByUser = {
+  id: number;
+  lastName: string;
+  firstName: string;
+};
+
+export type ProgramDetailDtoRealizedByUser = {
+  id: number;
+  lastName: string;
+  firstName: string;
+};
+
+export type ProgramDetailDtoProgramConvoisItem = {
+  id: number;
   createdAt: string;
   updatedAt: string;
+  /** @nullable */
+  status: string | null;
+  trainId: number;
+  forecastProgramId: number;
+  /** @nullable */
+  lastLatitude: string | null;
+  /** @nullable */
+  lastLongitude: string | null;
+  convoy: string;
+  /** @nullable */
+  since: string | null;
+  /** @nullable */
+  quantity: string | null;
+  /** @nullable */
+  unit: string | null;
+  /** @nullable */
+  wagonCount: number | null;
+  /** @nullable */
+  eta: string | null;
+  /** @nullable */
+  delayMinutes: number | null;
+};
+
+export interface ProgramDetailDto {
+  id: number;
+  orderId: number;
+  statusId: number;
+  plannedDate: string;
+  quantityPlanned: string;
+  createdBy: number;
+  createdAt: string;
+  updatedAt: string;
+  /** @nullable */
+  sentToDtmAt: string | null;
+  /** @nullable */
+  quantityRealized: string | null;
+  /** @nullable */
+  deviationReason: string | null;
+  /** @nullable */
+  realizedAt: string | null;
+  /** @nullable */
+  realizedBy: number | null;
+  programNumber: string;
+  /** @nullable */
+  dtmStatus: string | null;
+  programStatus: ProgramDetailDtoProgramStatus;
+  orderWagons: ProgramDetailDtoOrderWagonsItem[];
+  forecastProgramHistories: ProgramDetailDtoForecastProgramHistoriesItem[];
+  order: ProgramDetailDtoOrder;
+  createdByUser: ProgramDetailDtoCreatedByUser;
+  realizedByUser: ProgramDetailDtoRealizedByUser;
+  programConvois: ProgramDetailDtoProgramConvoisItem[];
+}
+
+export type ProgramListDtoProgramStatus = {
+  id: number;
+  name: string;
+};
+
+export type ProgramListDtoOrder = {
+  id: number;
+  /** @nullable */
+  orderNumber: string | null;
+};
+
+export type ProgramListDtoCreatedByUser = {
+  id: number;
+  lastName: string;
+  firstName: string;
+};
+
+export interface ProgramListDto {
+  id: number;
+  createdAt: string;
+  /** @nullable */
+  quantityRealized: string | null;
+  plannedDate: string;
+  quantityPlanned: string;
+  /** @nullable */
+  sentToDtmAt: string | null;
+  programNumber: string;
+  programStatus: ProgramListDtoProgramStatus;
+  order: ProgramListDtoOrder;
+  createdByUser: ProgramListDtoCreatedByUser;
 }
 
 export type UpdateProgramDtoStatus = typeof UpdateProgramDtoStatus[keyof typeof UpdateProgramDtoStatus];
@@ -482,18 +783,48 @@ export interface UpdateProgramDto {
   dtmStatus?: string;
 }
 
-export interface CreateCustomerResponseDto {
+export interface ProgramDeleteDto {
+  id: number;
+}
+
+export interface CustomerListDto {
+  id: number;
+  createdAt: string;
+  isActive: boolean;
+  updatedAt: string;
+  companyName: string;
+  /** @nullable */
+  address: string | null;
+  /** @nullable */
+  city: string | null;
+  /** @nullable */
+  phone: string | null;
+  /** @nullable */
+  email: string | null;
+  /** @nullable */
+  typeId: number | null;
+  /** @nullable */
+  customerCode: string | null;
+}
+
+export interface CustomerDetailDto {
   id: number;
   companyName: string;
-  address?: string;
-  city?: string;
-  phone?: string;
-  email?: string;
-  typeId?: number;
-  customerCode?: string;
-  isActive: boolean;
+  /** @nullable */
+  address: string | null;
+  /** @nullable */
+  city: string | null;
+  /** @nullable */
+  phone: string | null;
+  /** @nullable */
+  email: string | null;
+  /** @nullable */
+  typeId: number | null;
   createdAt: string;
   updatedAt: string;
+  isActive: boolean;
+  /** @nullable */
+  customerCode: string | null;
 }
 
 export interface CreateCustomerDto {
@@ -530,18 +861,8 @@ export interface UpdateCustomerDto {
   isActive?: boolean;
 }
 
-export interface UpdateCustomerResponseDto {
+export interface CustomerDeleteDto {
   id: number;
-  companyName: string;
-  address?: string;
-  city?: string;
-  phone?: string;
-  email?: string;
-  typeId?: number;
-  customerCode?: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export type CreateClaimDtoType = typeof CreateClaimDtoType[keyof typeof CreateClaimDtoType];
@@ -807,24 +1128,82 @@ export interface ClaimCommentDto {
   createdAt: string;
 }
 
-export interface NotificationResponseDto {
+export type NotificationListDtoNotificationType = {
+  id: number;
+  name: string;
+};
+
+export type NotificationListDtoNotificationChannel = {
+  id: number;
+  name: string;
+};
+
+export interface NotificationListDto {
+  id: number;
+  createdAt: string;
+  typeId: number;
+  userId: number;
+  status: string;
+  channelId: number;
+  title: string;
+  message: string;
+  /** @nullable */
+  relatedEntityType: string | null;
+  /** @nullable */
+  relatedEntityId: number | null;
+  /** @nullable */
+  sentAt: string | null;
+  /** @nullable */
+  readAt: string | null;
+  /** @nullable */
+  retryCount: number | null;
+  notificationType: NotificationListDtoNotificationType;
+  notificationChannel: NotificationListDtoNotificationChannel;
+}
+
+export interface NotificationUnreadCountDto {
+  count: number;
+}
+
+export type NotificationDetailDtoUser = {
+  id: number;
+  lastName: string;
+  firstName: string;
+};
+
+export type NotificationDetailDtoNotificationType = {
+  id: number;
+  name: string;
+};
+
+export type NotificationDetailDtoNotificationChannel = {
+  id: number;
+  name: string;
+};
+
+export interface NotificationDetailDto {
   id: number;
   userId: number;
   typeId: number;
   channelId: number;
   title: string;
   message: string;
+  /** @nullable */
+  relatedEntityType: string | null;
+  /** @nullable */
+  relatedEntityId: number | null;
   status: string;
-  readAt?: string;
-  sentAt?: string;
-  relatedEntityType?: string;
-  relatedEntityId?: number;
-  retryCount: number;
-  errorMessage?: string;
+  /** @nullable */
+  sentAt: string | null;
+  /** @nullable */
+  readAt: string | null;
+  /** @nullable */
+  errorMessage: string | null;
+  /** @nullable */
+  retryCount: number | null;
   createdAt: string;
-}
-
-export interface UnreadCountResponseDto {
-  count: number;
+  user: NotificationDetailDtoUser;
+  notificationType: NotificationDetailDtoNotificationType;
+  notificationChannel: NotificationDetailDtoNotificationChannel;
 }
 
