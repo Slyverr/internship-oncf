@@ -5,10 +5,8 @@ export const metadata: Metadata = {
 	description: "",
 };
 
-export default function Layout({ children }: Readonly<{ children: React.ReactNode; }>) {
-	return (
-    <>
-      { children }
-    </>
-  );
+export default function Layout({
+	children,
+}: Readonly<{ children: React.ReactNode }>) {
+	return <>{children}</>;
 }

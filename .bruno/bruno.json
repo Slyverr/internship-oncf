@@ -1,10 +1,7 @@
 {
-  "name": ".bruno",
-  "type": "collection",
-  "ignore": [
-    "node_modules",
-    ".git"
-  ],
-  "version": "1",
-  "collectionVersion": "v0.1.0"
+	"name": ".bruno",
+	"type": "collection",
+	"ignore": ["node_modules", ".git"],
+	"version": "1",
+	"collectionVersion": "v0.1.0"
 }
