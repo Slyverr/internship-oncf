@@ -8,7 +8,7 @@ import {
 	UseGuards,
 } from "@nestjs/common";
 import { ApiOkResponse, ApiUnauthorizedResponse } from "@nestjs/swagger";
-import { plainToInstance } from "class-transformer";
+import { ProfileDto } from "src/users/responses/profile.dto";
 import { AuthService } from "./auth.service";
 import type { AuthRequest, LocalAuthRequest } from "./auth.types";
 import { LocalAuthGuard } from "./guards/local-auth.guard";
@@ -19,7 +19,6 @@ import { LoginDto } from "./requests/login.dto";
 import { ResetPasswordDto } from "./requests/reset-password.dto";
 import { UpdateProfileDto } from "./requests/update-profile.dto";
 import { LoginDetailDto } from "./responses/login-detail.dto";
-import { ProfileDto } from "./responses/profile.dto";
 
 @Controller("auth")
 export class AuthController {
@@ -38,7 +37,7 @@ export class AuthController {
 	@ApiOkResponse({ type: ProfileDto })
 	@ApiUnauthorizedResponse()
 	async getProfile(@Request() req: AuthRequest) {
-		return plainToInstance(ProfileDto, req.user);
+		return this.authService.getProfile(req.user.id);
 	}
 
 	@Put("profile")
@@ -48,12 +47,7 @@ export class AuthController {
 		@Body() dto: UpdateProfileDto,
 		@Request() req: AuthRequest,
 	) {
-		const user = await this.authService.updateProfile(req.user.id, dto);
-
-		return plainToInstance(ProfileDto, {
-			...user,
-			permissions: new Set(user.permissions ?? []),
-		});
+		return this.authService.updateProfile(req.user.id, dto);
 	}
 
 	@Post("change-password")
