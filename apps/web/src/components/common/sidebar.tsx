@@ -68,6 +68,7 @@ export default function AppSidebar({
 						<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shrink-0">
 							<span className="text-lg font-bold">L</span>
 						</div>
+
 						<span className="text-xl font-bold group-data-[collapsible=icon]:hidden">
 							Logo
 						</span>
@@ -88,9 +89,13 @@ export default function AppSidebar({
 									render={<Link href={route.url} />}
 									isActive={isActive}
 									tooltip={route.title}
+									className="group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
 								>
-									{Icon && <Icon />}
-									<span>{route.title}</span>
+									<Icon className="size-4 shrink-0" />
+
+									<span className="group-data-[collapsible=icon]:hidden">
+										{route.title}
+									</span>
 								</SidebarMenuButton>
 							</SidebarMenuItem>
 						);
@@ -116,12 +121,15 @@ export default function AppSidebar({
 										{user.name.charAt(0)}
 									</AvatarFallback>
 								</Avatar>
+
 								<div className="grid flex-1 text-left text-sm leading-tight">
 									<span className="truncate font-medium">{user.name}</span>
 									<span className="truncate text-xs">{user.email}</span>
 								</div>
+
 								<ChevronsUpDownIcon className="ml-auto size-4" />
 							</DropdownMenuTrigger>
+
 							<DropdownMenuContent
 								className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
 								align="end"
@@ -131,11 +139,14 @@ export default function AppSidebar({
 									<UserIcon />
 									Profile
 								</DropdownMenuItem>
+
 								<DropdownMenuItem>
 									<SettingsIcon />
 									Settings
 								</DropdownMenuItem>
+
 								<DropdownMenuSeparator />
+
 								<DropdownMenuItem onClick={logout}>
 									<LogOutIcon />
 									Log out
