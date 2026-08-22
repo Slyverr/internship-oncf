@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"dev": "next dev",
+		"dev": "concurrently --names next,tsc \"next dev\" \"tsc --noEmit --watch\"",
 		"build": "next build",
 		"start": "next start",
 		"generate:api": "orval",
@@ -43,6 +43,7 @@
 		"@types/react-dom": "^19",
 		"@types/react-query": "^1.2.9",
 		"babel-plugin-react-compiler": "1.0.0",
+		"concurrently": "^10.0.5",
 		"dotenv": "^17.4.2",
 		"orval": "^8.24.0",
 		"tailwindcss": "^4",
