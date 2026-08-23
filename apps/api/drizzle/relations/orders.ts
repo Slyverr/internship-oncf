@@ -26,8 +26,8 @@ const ordersPart = defineRelationsPart(schema, (r) => ({
 			to: r.customers.id,
 			alias: "customer",
 		}),
-		user: r.one.users({
-			from: r.orders.userId,
+		createdBy: r.one.users({
+			from: r.orders.createdByUserId,
 			to: r.users.id,
 		}),
 		orderStatus: r.one.orderStatus({

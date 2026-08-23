@@ -45,7 +45,7 @@ export class OrdersService {
 
 	async findAll(user: AuthUser) {
 		const where = !hasOnePermission(user, Permission.ORDERS_MANAGE_OTHER)
-			? { userId: user.id }
+			? { createdByUserId: user.id }
 			: {};
 
 		return this.drizzle.db.query.orders.findMany({
@@ -67,7 +67,7 @@ export class OrdersService {
 	async findOneForOwnership(id: OrderId) {
 		const order = await this.drizzle.db.query.orders.findFirst({
 			where: { id },
-			columns: { userId: true },
+			columns: { createdByUserId: true },
 		});
 
 		return this.ensure(order, id);

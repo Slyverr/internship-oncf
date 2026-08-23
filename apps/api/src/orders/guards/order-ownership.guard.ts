@@ -9,7 +9,7 @@ export const OrderOwnershipGuard = createOwnershipGuard<OrdersService, OrderId>(
 		service: OrdersService,
 		resolveOwnerId: async (service, id) => {
 			const owner = await service.findOneForOwnership(id);
-			return owner.userId;
+			return owner.createdByUserId;
 		},
 
 		pipe: new OrderIdPipe(),

@@ -25,7 +25,7 @@ const usersPart = defineRelationsPart(schema, (r) => ({
 		}),
 		orders: r.many.orders({
 			from: r.users.id,
-			to: r.orders.userId,
+			to: r.orders.createdByUserId,
 		}),
 		forecastProgramHistories: r.many.forecastProgramHistory({
 			from: r.users.id,

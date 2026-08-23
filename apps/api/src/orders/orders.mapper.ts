@@ -9,6 +9,7 @@ import { UpdateOrderDto } from "./requests/update-order.dto";
 
 export const toCreate = (dto: CreateOrderDto, user: AuthUser): OrderInsert => {
 	const id = dto.userId ?? user.id;
+
 	if (
 		id !== user.id &&
 		!hasOnePermission(user, Permission.ORDERS_MANAGE_OWNERSHIP)
@@ -22,7 +23,7 @@ export const toCreate = (dto: CreateOrderDto, user: AuthUser): OrderInsert => {
 
 	return {
 		...dto,
-		userId: id,
+		createdByUserId: id,
 		statusId: ORDER_STATUSES[status].id,
 	};
 };
@@ -35,6 +36,7 @@ export const toUpdate = (dto: UpdateOrderDto, user: AuthUser): OrderUpdate => {
 	}
 
 	let statusId: OrderUpdate["statusId"];
+
 	if (dto.status !== undefined) {
 		if (!hasOnePermission(user, Permission.ORDERS_STATUS_UPDATE)) {
 			throw new ForbiddenException("Cannot change order status");
@@ -43,5 +45,9 @@ export const toUpdate = (dto: UpdateOrderDto, user: AuthUser): OrderUpdate => {
 		statusId = ORDER_STATUSES[dto.status].id;
 	}
 
-	return { ...dto, statusId };
+	return {
+		...dto,
+		createdByUserId: dto.userId !== undefined ? dto.userId : undefined,
+		statusId,
+	};
 };

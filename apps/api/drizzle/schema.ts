@@ -743,49 +743,100 @@ export const orders = pgTable(
 	"orders",
 	{
 		id: bigserial({ mode: "number" }).primaryKey().notNull(),
-		goodsId: bigint("goods_id", { mode: "number" }).notNull(),
+
 		customerId: bigint("customer_id", { mode: "number" }).notNull(),
-		userId: bigint("user_id", { mode: "number" }).notNull(),
+
+		createdByUserId: bigint("created_by_user_id", {
+			mode: "number",
+		}).notNull(),
+
+		goodsId: bigint("goods_id", { mode: "number" }).notNull(),
 		statusId: bigint("status_id", { mode: "number" }).notNull(),
+
 		supervisor: varchar({ length: 200 }),
 		orderNumber: varchar("order_number", { length: 50 }),
+
 		movementTypeId: bigint("movement_type_id", { mode: "number" }),
 		parentOrderId: bigint("parent_order_id", { mode: "number" }),
+
 		quantityDemanded: numeric("quantity_demanded", {
 			precision: 18,
 			scale: 3,
 		}).notNull(),
+
 		quantityAchieved: numeric("quantity_achieved", {
 			precision: 18,
 			scale: 3,
 		}).default("0"),
+
 		unitId: bigint("unit_id", { mode: "number" }).notNull(),
-		departureStationId: bigint("departure_station_id", { mode: "number" }),
-		debtorCustomerId: bigint("debtor_customer_id", { mode: "number" }),
-		pickupLocationTypeId: bigint("pickup_location_type_id", { mode: "number" }),
-		dispatchTypeId: bigint("dispatch_type_id", { mode: "number" }),
+
+		departureStationId: bigint("departure_station_id", {
+			mode: "number",
+		}),
+
+		debtorCustomerId: bigint("debtor_customer_id", {
+			mode: "number",
+		}),
+
+		pickupLocationTypeId: bigint("pickup_location_type_id", {
+			mode: "number",
+		}),
+
+		dispatchTypeId: bigint("dispatch_type_id", {
+			mode: "number",
+		}),
+
 		destinationCustomerId: bigint("destination_customer_id", {
 			mode: "number",
 		}),
-		arrivalStationId: bigint("arrival_station_id", { mode: "number" }),
+
+		arrivalStationId: bigint("arrival_station_id", {
+			mode: "number",
+		}),
+
 		deliveryLocationTypeId: bigint("delivery_location_type_id", {
 			mode: "number",
 		}),
-		pickupPortId: bigint("pickup_port_id", { mode: "number" }),
-		pickupBerthId: bigint("pickup_berth_id", { mode: "number" }),
-		pickupSidingId: bigint("pickup_siding_id", { mode: "number" }),
-		deliveryPortId: bigint("delivery_port_id", { mode: "number" }),
-		deliveryBerthId: bigint("delivery_berth_id", { mode: "number" }),
-		deliverySidingId: bigint("delivery_siding_id", { mode: "number" }),
+
+		pickupPortId: bigint("pickup_port_id", {
+			mode: "number",
+		}),
+
+		pickupBerthId: bigint("pickup_berth_id", {
+			mode: "number",
+		}),
+
+		pickupSidingId: bigint("pickup_siding_id", {
+			mode: "number",
+		}),
+
+		deliveryPortId: bigint("delivery_port_id", {
+			mode: "number",
+		}),
+
+		deliveryBerthId: bigint("delivery_berth_id", {
+			mode: "number",
+		}),
+
+		deliverySidingId: bigint("delivery_siding_id", {
+			mode: "number",
+		}),
+
 		remarks: text(),
+
 		orderDate: timestamp("order_date", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
 			.notNull(),
+
 		startDate: timestamp("start_date", { mode: "string" }),
+
 		endDate: timestamp("end_date", { mode: "string" }),
+
 		createdAt: timestamp("created_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
 			.notNull(),
+
 		updatedAt: timestamp("updated_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
 			.notNull(),
@@ -795,75 +846,96 @@ export const orders = pgTable(
 			"btree",
 			table.arrivalStationId.asc().nullsLast(),
 		),
+
 		index("idx_orders_created").using(
 			"btree",
 			table.createdAt.asc().nullsLast(),
 		),
+
 		index("idx_orders_customer").using(
 			"btree",
 			table.customerId.asc().nullsLast(),
 		),
+
 		index("idx_orders_customer_status").using(
 			"btree",
 			table.customerId.asc().nullsLast(),
 			table.statusId.asc().nullsLast(),
 		),
+
 		index("idx_orders_date").using("btree", table.orderDate.asc().nullsLast()),
+
 		index("idx_orders_date_range_status").using(
 			"btree",
 			table.startDate.asc().nullsLast(),
 			table.endDate.asc().nullsLast(),
 			table.statusId.asc().nullsLast(),
 		),
+
 		index("idx_orders_debtor_customer").using(
 			"btree",
 			table.debtorCustomerId.asc().nullsLast(),
 		),
+
 		index("idx_orders_delivery_location_type").using(
 			"btree",
 			table.deliveryLocationTypeId.asc().nullsLast(),
 		),
+
 		index("idx_orders_departure_station").using(
 			"btree",
 			table.departureStationId.asc().nullsLast(),
 		),
+
 		index("idx_orders_destination_customer").using(
 			"btree",
 			table.destinationCustomerId.asc().nullsLast(),
 		),
+
 		index("idx_orders_dispatch_type").using(
 			"btree",
 			table.dispatchTypeId.asc().nullsLast(),
 		),
+
 		index("idx_orders_dtm_sync").using(
 			"btree",
 			table.statusId.asc().nullsLast(),
 		),
+
 		index("idx_orders_end").using("btree", table.endDate.asc().nullsLast()),
+
 		index("idx_orders_goods").using("btree", table.goodsId.asc().nullsLast()),
+
 		index("idx_orders_movement_type").using(
 			"btree",
 			table.movementTypeId.asc().nullsLast(),
 		),
+
 		index("idx_orders_number")
 			.using("btree", table.orderNumber.asc().nullsLast())
 			.where(sql`(order_number IS NOT NULL)`),
+
 		index("idx_orders_parent").using(
 			"btree",
 			table.parentOrderId.asc().nullsLast(),
 		),
+
 		index("idx_orders_pickup_location_type").using(
 			"btree",
 			table.pickupLocationTypeId.asc().nullsLast(),
 		),
+
 		index("idx_orders_quantities").using(
 			"btree",
 			table.quantityDemanded.asc().nullsLast(),
 			table.quantityAchieved.asc().nullsLast(),
 			table.statusId.asc().nullsLast(),
 		),
+
 		index("idx_orders_start").using("btree", table.startDate.asc().nullsLast()),
+
 		index("idx_orders_status").using("btree", table.statusId.asc().nullsLast()),
+
 		index("idx_orders_tc_export")
 			.using(
 				"btree",
@@ -872,107 +944,132 @@ export const orders = pgTable(
 				table.statusId.asc().nullsLast(),
 			)
 			.where(sql`(parent_order_id IS NULL)`),
-		index("idx_orders_user").using("btree", table.userId.asc().nullsLast()),
+
+		index("idx_orders_created_by_user").using(
+			"btree",
+			table.createdByUserId.asc().nullsLast(),
+		),
+
 		foreignKey({
 			columns: [table.parentOrderId],
 			foreignColumns: [table.id],
 			name: "orders_parent_order_id_fkey",
 		}),
+
 		foreignKey({
 			columns: [table.unitId],
 			foreignColumns: [units.id],
 			name: "orders_unit_id_fkey",
 		}),
+
 		foreignKey({
 			columns: [table.goodsId],
 			foreignColumns: [goods.id],
 			name: "orders_goods_id_fkey",
 		}),
+
 		foreignKey({
 			columns: [table.customerId],
 			foreignColumns: [customers.id],
 			name: "orders_customer_id_fkey",
 		}),
+
 		foreignKey({
-			columns: [table.userId],
+			columns: [table.createdByUserId],
 			foreignColumns: [users.id],
-			name: "orders_user_id_fkey",
+			name: "orders_created_by_user_id_fkey",
 		}),
+
 		foreignKey({
 			columns: [table.statusId],
 			foreignColumns: [orderStatus.id],
 			name: "orders_status_id_fkey",
 		}),
+
 		foreignKey({
 			columns: [table.movementTypeId],
 			foreignColumns: [movementTypes.id],
 			name: "orders_movement_type_id_fkey",
 		}),
+
 		foreignKey({
 			columns: [table.departureStationId],
 			foreignColumns: [stations.id],
 			name: "orders_departure_station_id_fkey",
 		}),
+
 		foreignKey({
 			columns: [table.debtorCustomerId],
 			foreignColumns: [customers.id],
 			name: "orders_debtor_customer_id_fkey",
 		}),
+
 		foreignKey({
 			columns: [table.pickupLocationTypeId],
 			foreignColumns: [pickupLocationTypes.id],
 			name: "orders_pickup_location_type_id_fkey",
 		}),
+
 		foreignKey({
 			columns: [table.dispatchTypeId],
 			foreignColumns: [dispatchTypes.id],
 			name: "orders_dispatch_type_id_fkey",
 		}),
+
 		foreignKey({
 			columns: [table.destinationCustomerId],
 			foreignColumns: [customers.id],
 			name: "orders_destination_customer_id_fkey",
 		}),
+
 		foreignKey({
 			columns: [table.arrivalStationId],
 			foreignColumns: [stations.id],
 			name: "orders_arrival_station_id_fkey",
 		}),
+
 		foreignKey({
 			columns: [table.deliveryLocationTypeId],
 			foreignColumns: [pickupLocationTypes.id],
 			name: "orders_delivery_location_type_id_fkey",
 		}),
+
 		foreignKey({
 			columns: [table.pickupPortId],
 			foreignColumns: [ports.id],
 			name: "orders_pickup_port_id_fkey",
 		}),
+
 		foreignKey({
 			columns: [table.pickupBerthId],
 			foreignColumns: [berths.id],
 			name: "orders_pickup_berth_id_fkey",
 		}),
+
 		foreignKey({
 			columns: [table.pickupSidingId],
 			foreignColumns: [sidings.id],
 			name: "orders_pickup_siding_id_fkey",
 		}),
+
 		foreignKey({
 			columns: [table.deliveryPortId],
 			foreignColumns: [ports.id],
 			name: "orders_delivery_port_id_fkey",
 		}),
+
 		foreignKey({
 			columns: [table.deliveryBerthId],
 			foreignColumns: [berths.id],
 			name: "orders_delivery_berth_id_fkey",
 		}),
+
 		foreignKey({
 			columns: [table.deliverySidingId],
 			foreignColumns: [sidings.id],
 			name: "orders_delivery_siding_id_fkey",
 		}),
+
 		unique("orders_order_number_key").on(table.orderNumber),
 	],
 );

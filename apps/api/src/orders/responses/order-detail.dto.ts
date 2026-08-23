@@ -5,9 +5,9 @@ type _Assertion = Assert<Equals<OrderDetailDto, OrderDetail>>;
 
 export class OrderDetailDto implements OrderDetail {
 	id: number;
-	goodsId: number;
 	customerId: number;
-	userId: number;
+	createdByUserId: number;
+	goodsId: number;
 	statusId: number;
 	supervisor: string | null;
 	orderNumber: string | null;
@@ -35,6 +35,7 @@ export class OrderDetailDto implements OrderDetail {
 	endDate: string | null;
 	createdAt: string;
 	updatedAt: string;
+	createdBy: { id: number; lastName: string; firstName: string } | null;
 	orderStatus: { id: number; name: string } | null;
 	forecastPrograms: {
 		id: number;
@@ -78,12 +79,12 @@ export class OrderDetailDto implements OrderDetail {
 	claims: {
 		id: number;
 		customerId: number;
-		userId: number;
 		statusId: number;
 		createdAt: string;
 		updatedAt: string;
 		typeId: number;
 		description: string;
+		userId: number;
 		orderId: number | null;
 		operationId: number | null;
 		priority: string | null;
@@ -102,6 +103,5 @@ export class OrderDetailDto implements OrderDetail {
 		comment: string | null;
 		rejectionReasonId: number | null;
 	}[];
-	user: { id: number; lastName: string; firstName: string } | null;
 	good: { id: number; name: string } | null;
 }

@@ -12,9 +12,9 @@ export class OrderListDto implements OrderList {
 	orderDate: string;
 	startDate: string | null;
 	endDate: string | null;
+	createdBy: { id: number; lastName: string; firstName: string } | null;
 	orderStatus: { id: number; name: string } | null;
 	unit: { name: string } | null;
 	customer: { id: number; companyName: string } | null;
-	user: { id: number; lastName: string; firstName: string } | null;
 	good: { id: number; name: string } | null;
 }

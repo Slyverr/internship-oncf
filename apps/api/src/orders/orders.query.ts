@@ -15,7 +15,7 @@ export const orderListColumns = {
 } satisfies OrdersColumns;
 
 export const orderListRelations = {
-	user: {
+	createdBy: {
 		columns: {
 			id: true,
 			firstName: true,
