@@ -4,6 +4,7 @@ import {
 	SettingsIcon,
 	UserIcon,
 } from "lucide-react";
+import Link from "next/link";
 import { logout } from "@/actions/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -18,14 +19,16 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
-
-const user = {
-	name: "John Doe",
-	email: "john@example.com",
-	avatar: "",
-};
+import { useAuth } from "@/providers/auth-provider";
 
 export function SidebarUser() {
+	const {
+		user: { firstName, lastName, role },
+	} = useAuth();
+
+	const name = `${firstName} ${lastName}`;
+	const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`;
+
 	return (
 		<SidebarMenu>
 			<SidebarMenuItem>
@@ -39,25 +42,24 @@ export function SidebarUser() {
 						}
 					>
 						<Avatar className="h-8 w-8 rounded-lg">
-							<AvatarImage src={user.avatar} alt={user.name} />
-							<AvatarFallback className="rounded-lg">
-								{user.name.charAt(0)}
-							</AvatarFallback>
+							<AvatarImage alt={name} />
+							<AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
 						</Avatar>
 
 						<div className="grid flex-1 text-left text-sm leading-tight">
-							<span className="truncate font-medium">{user.name}</span>
-							<span className="truncate text-xs">{user.email}</span>
+							<span className="truncate font-medium">{name}</span>
+							<span className="truncate text-xs">{role}</span>
 						</div>
 
 						<ChevronsUpDownIcon className="ml-auto size-4" />
 					</DropdownMenuTrigger>
+
 					<DropdownMenuContent
 						className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
 						align="end"
 						sideOffset={4}
 					>
-						<DropdownMenuItem>
+						<DropdownMenuItem render={<Link href="/profile" />}>
 							<UserIcon />
 							Profile
 						</DropdownMenuItem>
