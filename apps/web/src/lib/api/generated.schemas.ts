@@ -203,6 +203,12 @@ export interface CreateOrderDto {
   endDate?: string;
 }
 
+export type OrderDetailDtoCreatedBy = {
+  id: number;
+  lastName: string;
+  firstName: string;
+};
+
 export type OrderDetailDtoOrderStatus = {
   id: number;
   name: string;
@@ -263,12 +269,12 @@ export type OrderDetailDtoOrderFilesItem = {
 export type OrderDetailDtoClaimsItem = {
   id: number;
   customerId: number;
-  userId: number;
   statusId: number;
   createdAt: string;
   updatedAt: string;
   typeId: number;
   description: string;
+  userId: number;
   /** @nullable */
   orderId: number | null;
   /** @nullable */
@@ -304,12 +310,6 @@ export type OrderDetailDtoOrderStatusHistoriesItem = {
   rejectionReasonId: number | null;
 };
 
-export type OrderDetailDtoUser = {
-  id: number;
-  lastName: string;
-  firstName: string;
-};
-
 export type OrderDetailDtoGood = {
   id: number;
   name: string;
@@ -317,9 +317,9 @@ export type OrderDetailDtoGood = {
 
 export interface OrderDetailDto {
   id: number;
-  goodsId: number;
   customerId: number;
-  userId: number;
+  createdByUserId: number;
+  goodsId: number;
   statusId: number;
   /** @nullable */
   supervisor: string | null;
@@ -368,6 +368,7 @@ export interface OrderDetailDto {
   endDate: string | null;
   createdAt: string;
   updatedAt: string;
+  createdBy: OrderDetailDtoCreatedBy;
   orderStatus: OrderDetailDtoOrderStatus;
   forecastPrograms: OrderDetailDtoForecastProgramsItem[];
   orderExecutions: OrderDetailDtoOrderExecutionsItem[];
@@ -376,9 +377,14 @@ export interface OrderDetailDto {
   unit: OrderDetailDtoUnit;
   customer: OrderDetailDtoCustomer;
   orderStatusHistories: OrderDetailDtoOrderStatusHistoriesItem[];
-  user: OrderDetailDtoUser;
   good: OrderDetailDtoGood;
 }
+
+export type OrderListDtoCreatedBy = {
+  id: number;
+  lastName: string;
+  firstName: string;
+};
 
 export type OrderListDtoOrderStatus = {
   id: number;
@@ -392,12 +398,6 @@ export type OrderListDtoUnit = {
 export type OrderListDtoCustomer = {
   id: number;
   companyName: string;
-};
-
-export type OrderListDtoUser = {
-  id: number;
-  lastName: string;
-  firstName: string;
 };
 
 export type OrderListDtoGood = {
@@ -418,10 +418,10 @@ export interface OrderListDto {
   startDate: string | null;
   /** @nullable */
   endDate: string | null;
+  createdBy: OrderListDtoCreatedBy;
   orderStatus: OrderListDtoOrderStatus;
   unit: OrderListDtoUnit;
   customer: OrderListDtoCustomer;
-  user: OrderListDtoUser;
   good: OrderListDtoGood;
 }
 
