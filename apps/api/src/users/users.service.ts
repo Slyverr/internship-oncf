@@ -1,23 +1,13 @@
-import {
-	Injectable,
-	InternalServerErrorException,
-	NotFoundException,
-} from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { users } from "drizzle/schema";
 import { eq } from "drizzle-orm";
 import { AuthUser } from "src/auth/auth.types";
-import { UpdateProfileDto } from "src/auth/requests/update-profile.dto";
 import { DrizzleService } from "src/db/drizzle.service";
 import { withDbErrorHandling } from "src/db/drizzle.util";
 import { CreateUserDto } from "./requests/create-user.dto";
 import { UpdateUserDto } from "./requests/update-user.dto";
 import { toCreate, toUpdate } from "./users.mapper";
-import {
-	userDetailColumns,
-	userListColumns,
-	userProfileColumns,
-	userProfileRelations,
-} from "./users.query";
+import { userDetailColumns, userListColumns } from "./users.query";
 import { UserEmail, UserId, UserUpdate } from "./users.types";
 
 @Injectable()
@@ -64,30 +54,6 @@ export class UsersService {
 		return this.ensure(user, id);
 	}
 
-	async findProfile(id: UserId) {
-		const user = await this.drizzle.db.query.users.findFirst({
-			where: { id },
-			columns: userProfileColumns,
-			with: userProfileRelations,
-		});
-
-		if (!user) {
-			throw new NotFoundException(`User with id ${id} not found`);
-		}
-
-		if (!user.role) {
-			throw new InternalServerErrorException(`User ${id} has no role assigned`);
-		}
-
-		return {
-			...user,
-			role: user.role.name,
-			permissions: user.role.rolePermissions.flatMap(
-				(rp) => rp.permission?.name ?? [],
-			),
-		};
-	}
-
 	async create(dto: CreateUserDto, user: AuthUser) {
 		const values = await toCreate(dto, user);
 
@@ -109,11 +75,6 @@ export class UsersService {
 		await this.persistUpdate(id, values);
 
 		return this.findOne(id);
-	}
-
-	async updateProfile(id: UserId, dto: UpdateProfileDto) {
-		await this.persistUpdate(id, dto);
-		return this.findProfile(id);
 	}
 
 	async deactivate(id: UserId) {

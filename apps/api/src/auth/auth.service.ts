@@ -11,10 +11,9 @@ import { eq } from "drizzle-orm";
 import { DrizzleService } from "src/db/drizzle.service";
 import { EmailService } from "src/email/email.service";
 import { UsersService } from "src/users/users.service";
-import { User, UserId } from "src/users/users.types";
+import { User } from "src/users/users.types";
 import { AuthUser } from "./auth.types";
 import { ChangePasswordDto } from "./requests/change-password.dto";
-import { UpdateProfileDto } from "./requests/update-profile.dto";
 
 @Injectable()
 export class AuthService {
@@ -46,10 +45,6 @@ export class AuthService {
 		} catch {
 			return null;
 		}
-	}
-
-	async getProfile(id: UserId) {
-		return this.usersService.findProfile(id);
 	}
 
 	async login(user: Omit<User, "password">) {
@@ -88,10 +83,6 @@ export class AuthService {
 				logoutAt: new Date().toISOString(),
 			})
 			.where(eq(userSessions.sessionToken, user.sessionId));
-	}
-
-	async updateProfile(id: number, dto: UpdateProfileDto) {
-		return this.usersService.updateProfile(id, dto);
 	}
 
 	async changePassword(id: number, dto: ChangePasswordDto) {

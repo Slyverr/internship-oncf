@@ -1,9 +1,9 @@
 import { Assert, Equals } from "src/common/utils/type-assertions";
-import { UserProfile } from "../users.types";
+import { Profile } from "../profile.types";
 
-type _Assertion = Assert<Equals<ProfileDto, UserProfile>>;
+type _Assertion = Assert<Equals<ProfileDto, Profile>>;
 
-export class ProfileDto implements UserProfile {
+export class ProfileDto implements Profile {
 	id: number;
 	email: string;
 	lastName: string;

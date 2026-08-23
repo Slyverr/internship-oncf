@@ -7,6 +7,7 @@ import { CustomersModule } from "./customers/customers.module";
 import { DrizzleModule } from "./db/drizzle.module";
 import { NotificationsModule } from "./notifications/notifications.module";
 import { OrdersModule } from "./orders/orders.module";
+import { ProfileModule } from "./profile/profile.module";
 import { ProgramsModule } from "./programs/programs.module";
 import { UsersModule } from "./users/users.module";
 
@@ -21,6 +22,7 @@ import { UsersModule } from "./users/users.module";
 		CustomersModule,
 		ClaimsModule,
 		NotificationsModule,
+		ProfileModule,
 	],
 	controllers: [AppController],
 })

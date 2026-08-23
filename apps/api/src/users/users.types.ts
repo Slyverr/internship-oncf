@@ -14,9 +14,6 @@ export type UserList = Awaited<ReturnType<UsersService["findAll"]>>[number];
 export type UserDetail = NonNullable<
 	Awaited<ReturnType<UsersService["findOne"]>>
 >;
-export type UserProfile = NonNullable<
-	Awaited<ReturnType<UsersService["findProfile"]>>
->;
 export type UserDelete = NonNullable<
 	Awaited<ReturnType<UsersService["deactivate"]>>
 >;

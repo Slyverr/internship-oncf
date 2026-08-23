@@ -1,14 +1,5 @@
-import {
-	Body,
-	Controller,
-	Get,
-	Post,
-	Put,
-	Request,
-	UseGuards,
-} from "@nestjs/common";
+import { Body, Controller, Post, Request, UseGuards } from "@nestjs/common";
 import { ApiOkResponse, ApiUnauthorizedResponse } from "@nestjs/swagger";
-import { ProfileDto } from "src/users/responses/profile.dto";
 import { AuthService } from "./auth.service";
 import type { AuthRequest, LocalAuthRequest } from "./auth.types";
 import { LocalAuthGuard } from "./guards/local-auth.guard";
@@ -17,7 +8,6 @@ import { ChangePasswordDto } from "./requests/change-password.dto";
 import { ForgotPasswordDto } from "./requests/forgot-password.dto";
 import { LoginDto } from "./requests/login.dto";
 import { ResetPasswordDto } from "./requests/reset-password.dto";
-import { UpdateProfileDto } from "./requests/update-profile.dto";
 import { LoginDetailDto } from "./responses/login-detail.dto";
 
 @Controller("auth")
@@ -31,23 +21,6 @@ export class AuthController {
 	@ApiUnauthorizedResponse()
 	async login(@Request() req: LocalAuthRequest, @Body() _dto: LoginDto) {
 		return this.authService.login(req.user);
-	}
-
-	@Get("profile")
-	@ApiOkResponse({ type: ProfileDto })
-	@ApiUnauthorizedResponse()
-	async getProfile(@Request() req: AuthRequest) {
-		return this.authService.getProfile(req.user.id);
-	}
-
-	@Put("profile")
-	@ApiOkResponse({ type: ProfileDto })
-	@ApiUnauthorizedResponse()
-	async updateProfile(
-		@Body() dto: UpdateProfileDto,
-		@Request() req: AuthRequest,
-	) {
-		return this.authService.updateProfile(req.user.id, dto);
 	}
 
 	@Post("change-password")
