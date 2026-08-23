@@ -1,3 +1,4 @@
+import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { OrderActions } from "@/components/orders/order-actions";
 import { OrderDetails } from "@/components/orders/order-details";
 import { OrderDetailDto } from "@/lib/api/generated.schemas";
@@ -16,6 +17,13 @@ export default async function Page({ params }: PageProps) {
 
 	return (
 		<>
+			<Breadcrumbs
+				items={[
+					{ label: "Orders", href: "/dashboard/orders" },
+					{ label: `#${id}` },
+				]}
+			/>
+
 			<OrderDetails order={order} />
 			<OrderActions order={order} />
 		</>

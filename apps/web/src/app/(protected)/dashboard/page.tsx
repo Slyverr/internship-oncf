@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { UnderConstruction } from "@/components/under-construction";
 
 export const metadata: Metadata = {
@@ -7,5 +8,10 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-	return <UnderConstruction />;
+	return (
+		<>
+			<Breadcrumbs items={[]} />
+			<UnderConstruction />
+		</>
+	);
 }

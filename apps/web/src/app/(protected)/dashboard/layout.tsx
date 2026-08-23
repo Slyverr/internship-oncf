@@ -1,5 +1,7 @@
+import { AppHeader } from "@/components/common/app-header";
 import AppSidebar from "@/components/sidebar/sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { BreadcrumbProvider } from "@/providers/breadcrumb-provider";
 
 export default async function Layout({
 	children,
@@ -8,7 +10,15 @@ export default async function Layout({
 		<SidebarProvider>
 			<AppSidebar />
 
-			<SidebarInset className="p-4 space-y-8">{children}</SidebarInset>
+			<SidebarInset>
+				<BreadcrumbProvider
+					prefix={[{ label: "Dashboard", href: "/dashboard" }]}
+				>
+					<AppHeader />
+
+					<div className="space-y-8 p-4">{children}</div>
+				</BreadcrumbProvider>
+			</SidebarInset>
 		</SidebarProvider>
 	);
 }

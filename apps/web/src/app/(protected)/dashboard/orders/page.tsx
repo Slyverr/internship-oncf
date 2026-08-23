@@ -1,3 +1,5 @@
+import { Breadcrumbs } from "@/components/common/breadcrumbs";
+import { PageHeader } from "@/components/common/page-header";
 import { OrdersTable } from "@/components/orders/orders-table";
 import { ordersControllerFindAll } from "@/lib/api/orders";
 
@@ -6,12 +8,12 @@ export default async function Page() {
 
 	return (
 		<>
-			<div>
-				<h1 className="text-3xl font-bold tracking-tight">Orders</h1>
-				<p className="text-muted-foreground">
-					Manage and edit customer orders.
-				</p>
-			</div>
+			<Breadcrumbs items={[{ label: "Orders", href: "/dashboard/orders" }]} />
+
+			<PageHeader
+				title="Orders"
+				description="Manage and edit customer orders."
+			/>
 
 			<OrdersTable data={orders} />
 		</>
