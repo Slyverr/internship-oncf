@@ -27,7 +27,7 @@ import {
 import { useAuth } from "@/providers/auth-provider";
 
 export function OrderActions({ order }: { order: OrderDetailDto }) {
-	const { hasPermissions } = useAuth();
+	const { hasPermission } = useAuth();
 	const queryClient = useQueryClient();
 
 	const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
@@ -84,7 +84,7 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 	return (
 		<>
 			<div className="flex items-center space-x-2">
-				{hasPermissions(Permission.ORDERS_UPDATE) &&
+				{hasPermission(Permission.ORDERS_UPDATE) &&
 					status === OrderStatus.DRAFT && (
 						<Button
 							disabled={isPending}
@@ -103,7 +103,7 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 						</Button>
 					)}
 
-				{hasPermissions(Permission.ORDERS_APPROVE) &&
+				{hasPermission(Permission.ORDERS_APPROVE) &&
 					status === OrderStatus.SUBMITTED && (
 						<Button
 							variant="secondary"
@@ -123,7 +123,7 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 						</Button>
 					)}
 
-				{hasPermissions(Permission.ORDERS_REJECT) &&
+				{hasPermission(Permission.ORDERS_REJECT) &&
 					status === OrderStatus.SUBMITTED && (
 						<Button
 							variant="destructive"
@@ -134,7 +134,7 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 						</Button>
 					)}
 
-				{hasPermissions(Permission.ORDERS_EXECUTE) &&
+				{hasPermission(Permission.ORDERS_EXECUTE) &&
 					status === OrderStatus.APPROVED && (
 						<Button
 							variant="outline"
