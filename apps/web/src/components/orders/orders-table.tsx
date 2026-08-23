@@ -48,31 +48,35 @@ const features = tableFeatures({
 
 const columns: ColumnDef<typeof features, OrderListDto>[] = [
 	{
-		accessorFn: (d) => d.orderNumber,
+		accessorKey: "orderNumber",
 		header: "Order #",
 		cell: (info) => (
 			<span className="font-medium text-primary">
-				{String(info.getValue())}
+				{info.getValue<string | null>() ?? "—"}
 			</span>
 		),
 		enableSorting: true,
 	},
 	{
-		accessorFn: (d) => d.customer.companyName,
+		accessorFn: (row) => row.customer.companyName,
+		id: "customer",
 		header: "Customer",
-		cell: (info) => `${info.getValue<number>()}`,
+		cell: (info) => info.getValue<string>(),
 	},
 	{
-		accessorFn: (d) => d.good.name,
-		header: "Goods",
-		cell: (info) => `${info.getValue()}`,
+		accessorFn: (row) => row.good.name,
+		id: "good",
+		header: "Good",
+		cell: (info) => info.getValue<string>(),
 	},
 	{
 		accessorKey: "quantityDemanded",
 		header: "Qty",
+		cell: (info) => info.getValue<string>(),
 	},
 	{
-		accessorFn: (d) => d.orderStatus.name,
+		accessorFn: (row) => row.orderStatus.name,
+		id: "status",
 		header: "Status",
 		cell: (info) => (
 			<span className="capitalize">
@@ -85,7 +89,6 @@ const columns: ColumnDef<typeof features, OrderListDto>[] = [
 		header: "Order Date",
 		cell: (info) => {
 			const value = info.getValue<string | null | undefined>();
-
 			return value ? new Date(value).toLocaleDateString() : "—";
 		},
 		enableSorting: true,
@@ -94,7 +97,6 @@ const columns: ColumnDef<typeof features, OrderListDto>[] = [
 
 export function OrdersTable({ data, isLoading }: OrdersTableProps) {
 	const router = useRouter();
-
 	const [globalFilter, setGlobalFilter] = useState("");
 	const [statusFilter, setStatusFilter] = useState("ALL");
 
@@ -105,7 +107,11 @@ export function OrdersTable({ data, isLoading }: OrdersTableProps) {
 			const matchesSearch =
 				!search ||
 				order.orderNumber?.toLowerCase().includes(search) ||
-				String(order.customer.id).includes(search);
+				order.customer.companyName.toLowerCase().includes(search) ||
+				order.good.name.toLowerCase().includes(search) ||
+				`${order.user.firstName} ${order.user.lastName}`
+					.toLowerCase()
+					.includes(search);
 
 			const matchesStatus =
 				statusFilter === "ALL" || order.orderStatus.name === statusFilter;
@@ -130,19 +136,19 @@ export function OrdersTable({ data, isLoading }: OrdersTableProps) {
 
 	return (
 		<div className="space-y-4">
-			<div className="flex flex-wrap items-center gap-3">
+			<div className="flex flex-wrap items-center gap-4">
 				<Input
-					placeholder="Search by order # or customer…"
+					placeholder="Search orders..."
 					value={globalFilter}
-					onChange={(e) => setGlobalFilter(e.target.value)}
-					className="max-w-sm"
+					onChange={(event) => setGlobalFilter(event.target.value)}
+					className="w-full max-w-sm"
 				/>
 
 				<Select
 					value={statusFilter}
 					onValueChange={(value) => setStatusFilter(value ?? "ALL")}
 				>
-					<SelectTrigger className="w-48">
+					<SelectTrigger className="w-full max-w-48">
 						<SelectValue placeholder="Filter by status" />
 					</SelectTrigger>
 
@@ -163,37 +169,41 @@ export function OrdersTable({ data, isLoading }: OrdersTableProps) {
 					<TableHeader>
 						{table.getHeaderGroups().map((headerGroup) => (
 							<TableRow key={headerGroup.id}>
-								{headerGroup.headers.map((header) => (
-									<TableHead key={header.id}>
-										{header.isPlaceholder ? null : (
-											<button
-												type="button"
-												disabled={!header.column.getCanSort()}
-												className={
-													header.column.getCanSort()
-														? "group flex w-full cursor-pointer items-center gap-1 text-left"
-														: "flex w-full items-center gap-1 text-left"
-												}
-												onClick={header.column.getToggleSortingHandler()}
-											>
-												<FlexRender header={header} />
+								{headerGroup.headers.map((header) => {
+									const canSort = header.column.getCanSort();
+									const sortState = header.column.getIsSorted();
 
-												{header.column.getIsSorted() === "asc" && (
-													<ChevronUpIcon className="size-4 text-foreground/70" />
-												)}
+									return (
+										<TableHead key={header.id}>
+											{header.isPlaceholder ? null : (
+												<button
+													type="button"
+													disabled={!canSort}
+													onClick={header.column.getToggleSortingHandler()}
+													className={
+														canSort
+															? "flex w-full items-center gap-2 text-left"
+															: "flex w-full items-center gap-2 text-left"
+													}
+												>
+													<FlexRender header={header} />
 
-												{header.column.getIsSorted() === "desc" && (
-													<ChevronDownIcon className="size-4 text-foreground/70" />
-												)}
-
-												{!header.column.getIsSorted() &&
-													header.column.getCanSort() && (
-														<ChevronsUpDownIcon className="size-4 text-muted-foreground/50 transition-opacity group-hover:text-muted-foreground" />
+													{sortState === "asc" && (
+														<ChevronUpIcon className="size-4 text-foreground/70" />
 													)}
-											</button>
-										)}
-									</TableHead>
-								))}
+
+													{sortState === "desc" && (
+														<ChevronDownIcon className="size-4 text-foreground/70" />
+													)}
+
+													{!sortState && canSort && (
+														<ChevronsUpDownIcon className="size-4 text-muted-foreground/50" />
+													)}
+												</button>
+											)}
+										</TableHead>
+									);
+								})}
 							</TableRow>
 						))}
 					</TableHeader>
@@ -203,7 +213,7 @@ export function OrdersTable({ data, isLoading }: OrdersTableProps) {
 							table.getRowModel().rows.map((row) => (
 								<TableRow
 									key={row.id}
-									role="button"
+									role="link"
 									tabIndex={0}
 									className="cursor-pointer transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 									onClick={() =>
@@ -212,13 +222,13 @@ export function OrdersTable({ data, isLoading }: OrdersTableProps) {
 									onKeyDown={(event) => {
 										if (event.key === "Enter" || event.key === " ") {
 											event.preventDefault();
-											router.push(`/dashboard/orders/${row.original.id}/edit`);
+											router.push(`/dashboard/orders/${row.original.id}`);
 										}
 									}}
 								>
 									{row.getAllCells().map((cell) => (
 										<TableCell key={cell.id}>
-											<table.FlexRender cell={cell} />
+											<FlexRender cell={cell} />
 										</TableCell>
 									))}
 								</TableRow>
@@ -227,7 +237,7 @@ export function OrdersTable({ data, isLoading }: OrdersTableProps) {
 							<TableRow>
 								<TableCell
 									colSpan={columns.length}
-									className="h-24 text-center"
+									className="py-8 text-center"
 								>
 									No orders found.
 								</TableCell>
