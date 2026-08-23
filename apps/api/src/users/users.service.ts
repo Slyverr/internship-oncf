@@ -1,3 +1,4 @@
+import { Permission, Role } from "@ecommand/shared";
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { users } from "drizzle/schema";
 import { eq } from "drizzle-orm";
@@ -7,7 +8,12 @@ import { withDbErrorHandling } from "src/db/drizzle.util";
 import { CreateUserDto } from "./requests/create-user.dto";
 import { UpdateUserDto } from "./requests/update-user.dto";
 import { toCreate, toUpdate } from "./users.mapper";
-import { userDetailColumns, userListColumns } from "./users.query";
+import {
+	userAuthColumns,
+	userAuthRelations,
+	userDetailColumns,
+	userListColumns,
+} from "./users.query";
 import { UserEmail, UserId, UserUpdate } from "./users.types";
 
 @Injectable()
@@ -44,14 +50,30 @@ export class UsersService {
 	async findOneForAuth(id: UserId) {
 		const user = await this.drizzle.db.query.users.findFirst({
 			where: { id },
-			columns: {
-				id: true,
-				email: true,
-				password: true,
-			},
+			columns: userAuthColumns,
+			with: userAuthRelations,
 		});
 
-		return this.ensure(user, id);
+		if (!user) {
+			throw new NotFoundException(`User with id ${id} not found`);
+		}
+
+		if (!user.role) {
+			throw new NotFoundException(`Role not found for user ${id}`);
+		}
+
+		return {
+			id: user.id,
+			email: user.email,
+			password: user.password,
+			isActive: user.isActive,
+			customerId: user.customerId,
+			agencyId: user.agencyId,
+			role: user.role.name as Role,
+			permissions: user.role.rolePermissions
+				.map((rp) => rp.permission?.name)
+				.filter((name): name is Permission => name !== undefined),
+		};
 	}
 
 	async create(dto: CreateUserDto, user: AuthUser) {
@@ -84,45 +106,6 @@ export class UsersService {
 
 		return {
 			id: user.id,
-		};
-	}
-
-	async findOneWithPermissions(id: UserId) {
-		const user = await this.drizzle.db.query.users.findFirst({
-			where: { id },
-			columns: {
-				id: true,
-				email: true,
-				isActive: true,
-			},
-			with: {
-				role: {
-					columns: { name: true },
-					with: {
-						rolePermissions: {
-							columns: {},
-							with: {
-								permission: {
-									columns: { name: true },
-								},
-							},
-						},
-					},
-				},
-			},
-		});
-
-		if (!user?.isActive) {
-			return null;
-		}
-
-		return {
-			id: user.id,
-			email: user.email,
-			role: user.role?.name,
-			permissions: user.role?.rolePermissions.flatMap(
-				(rp) => rp.permission?.name ?? [],
-			),
 		};
 	}
 

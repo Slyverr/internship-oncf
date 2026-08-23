@@ -15,6 +15,11 @@ import { User } from "src/users/users.types";
 import { AuthUser } from "./auth.types";
 import { ChangePasswordDto } from "./requests/change-password.dto";
 
+export interface JwtPayload {
+	sub: number;
+	sid: string;
+}
+
 @Injectable()
 export class AuthService {
 	constructor(
@@ -25,39 +30,30 @@ export class AuthService {
 	) {}
 
 	async validateUser(email: string, password: string) {
-		try {
-			const user = await this.usersService.findOneByEmail(email);
-			if (!user.isActive) return null;
+		const user = await this.usersService.findOneByEmail(email);
+		if (!user.isActive) return null;
 
-			if (
-				user.accountLockedUntil &&
-				new Date(user.accountLockedUntil) > new Date()
-			) {
-				return null;
-			}
-
-			if (!(await bcrypt.compare(password, user.password))) {
-				return null;
-			}
-
-			const { password: _, ...result } = user;
-			return result;
-		} catch {
+		if (
+			user.accountLockedUntil &&
+			new Date(user.accountLockedUntil) > new Date()
+		) {
 			return null;
 		}
+
+		const passwordMatches = await bcrypt.compare(password, user.password);
+		if (!passwordMatches) {
+			return null;
+		}
+
+		const { password: _, ...safeUser } = user;
+		return safeUser;
 	}
 
 	async login(user: Omit<User, "password">) {
-		const authUser = await this.usersService.findOneWithPermissions(user.id);
-		if (!authUser) {
-			throw new UnauthorizedException();
-		}
-
 		const sessionId = crypto.randomUUID();
 
 		const accessToken = await this.jwtService.signAsync({
-			sub: authUser.id,
-			username: authUser.email,
+			sub: user.id,
 			sid: sessionId,
 		});
 
@@ -66,13 +62,46 @@ export class AuthService {
 		};
 
 		await this.drizzle.db.insert(userSessions).values({
-			userId: authUser.id,
+			userId: user.id,
 			sessionToken: sessionId,
 			expiredAt: new Date(payload.exp * 1000).toISOString(),
 		});
 
 		return {
 			access_token: accessToken,
+		};
+	}
+
+	async validateSession(userId: number, sessionId: string): Promise<AuthUser> {
+		const session = await this.drizzle.db.query.userSessions.findFirst({
+			where: {
+				sessionToken: sessionId,
+				userId,
+			},
+		});
+
+		if (
+			!session ||
+			session.logoutAt ||
+			new Date(session.expiredAt) <= new Date()
+		) {
+			throw new UnauthorizedException();
+		}
+
+		const user = await this.usersService.findOneForAuth(userId);
+
+		if (!user.isActive) {
+			throw new UnauthorizedException();
+		}
+
+		return {
+			id: user.id,
+			email: user.email,
+			role: user.role,
+			permissions: new Set(user.permissions),
+			sessionId,
+			customerId: user.customerId,
+			agencyId: user.agencyId,
 		};
 	}
 
@@ -116,7 +145,9 @@ export class AuthService {
 			},
 		});
 
-		if (!user) return;
+		if (!user) {
+			return;
+		}
 
 		const token = crypto.randomUUID();
 		const expiresAt = new Date();

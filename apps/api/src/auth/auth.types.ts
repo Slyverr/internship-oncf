@@ -1,4 +1,4 @@
-import { Permission } from "@ecommand/shared";
+import { Permission, Role } from "@ecommand/shared";
 import { User, UserId } from "src/users/users.types";
 
 export interface LocalAuthRequest {
@@ -12,7 +12,10 @@ export interface AuthRequest {
 export interface AuthUser {
 	id: UserId;
 	email: string;
-	sessionId: string;
+	role: Role;
 	permissions: Set<Permission>;
-	role?: string;
+	sessionId: string;
+
+	customerId: number | null;
+	agencyId: number | null;
 }
