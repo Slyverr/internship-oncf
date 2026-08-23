@@ -15,11 +15,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { OrderDetailDto } from "@/lib/api/generated.schemas";
+import type { OrderDetailDto } from "@/lib/api/generated.schemas";
 import {
 	getOrdersControllerFindOneQueryKey,
 	useOrdersControllerApprove,
-	useOrdersControllerFindOne,
 	useOrdersControllerReject,
 	useOrdersControllerSendToDtm,
 	useOrdersControllerSubmit,
@@ -33,12 +32,6 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 	const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
 	const [rejectionReason, setRejectionReason] = useState("");
 
-	const { data: currentOrder } = useOrdersControllerFindOne(order.id, {
-		query: {
-			initialData: order,
-		},
-	});
-
 	const submitMutation = useOrdersControllerSubmit();
 	const approveMutation = useOrdersControllerApprove();
 	const rejectMutation = useOrdersControllerReject();
@@ -51,11 +44,7 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 		);
 	};
 
-	const status = currentOrder?.orderStatus?.name;
-
-	if (!status) {
-		return null;
-	}
+	const status = order.orderStatus.name;
 
 	const isPending =
 		submitMutation.isPending ||
@@ -83,19 +72,15 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 
 	return (
 		<>
-			<div className="flex items-center space-x-2">
+			<div className="flex flex-wrap items-center gap-4">
 				{hasPermission(Permission.ORDERS_UPDATE) &&
 					status === OrderStatus.DRAFT && (
 						<Button
 							disabled={isPending}
 							onClick={() =>
 								submitMutation.mutate(
-									{
-										id: order.id,
-									},
-									{
-										onSuccess: updateOrderCache,
-									},
+									{ id: order.id },
+									{ onSuccess: updateOrderCache },
 								)
 							}
 						>
@@ -110,12 +95,8 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 							disabled={isPending}
 							onClick={() =>
 								approveMutation.mutate(
-									{
-										id: order.id,
-									},
-									{
-										onSuccess: updateOrderCache,
-									},
+									{ id: order.id },
+									{ onSuccess: updateOrderCache },
 								)
 							}
 						>
@@ -141,12 +122,8 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 							disabled={isPending}
 							onClick={() =>
 								sendToDtmMutation.mutate(
-									{
-										id: order.id,
-									},
-									{
-										onSuccess: updateOrderCache,
-									},
+									{ id: order.id },
+									{ onSuccess: updateOrderCache },
 								)
 							}
 						>
@@ -159,7 +136,6 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>Reject order</AlertDialogTitle>
-
 						<AlertDialogDescription>
 							Please provide a reason for rejecting this order.
 						</AlertDialogDescription>

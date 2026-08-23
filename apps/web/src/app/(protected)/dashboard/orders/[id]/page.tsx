@@ -1,31 +1,25 @@
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
-import { OrderActions } from "@/components/orders/order-actions";
-import { OrderDetails } from "@/components/orders/order-details";
-import { OrderDetailDto } from "@/lib/api/generated.schemas";
+import { OrderDetailsClient } from "@/components/orders/order-details-client";
 import { ordersControllerFindOne } from "@/lib/api/orders";
 
-interface PageProps {
-	params: Promise<{
-		id: OrderDetailDto["id"];
-	}>;
-}
-
-export default async function Page({ params }: PageProps) {
+export default async function Page({
+	params,
+}: {
+	params: Promise<{ id: string }>;
+}) {
 	const { id } = await params;
-
-	const order = await ordersControllerFindOne(id);
+	const order = await ordersControllerFindOne(Number(id));
 
 	return (
 		<>
 			<Breadcrumbs
 				items={[
 					{ label: "Orders", href: "/dashboard/orders" },
-					{ label: `#${id}` },
+					{ label: order.orderNumber ?? `#${order.id}` },
 				]}
 			/>
 
-			<OrderDetails order={order} />
-			<OrderActions order={order} />
+			<OrderDetailsClient order={order} />
 		</>
 	);
 }
