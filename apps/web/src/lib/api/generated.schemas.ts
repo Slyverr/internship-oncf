@@ -140,82 +140,6 @@ export interface LoginDetailDto {
   access_token: string;
 }
 
-export type ProfileDtoPermissionsItem = typeof ProfileDtoPermissionsItem[keyof typeof ProfileDtoPermissionsItem];
-
-
-export const ProfileDtoPermissionsItem = {
-  'users:create': 'users:create',
-  'users:read': 'users:read',
-  'users:update': 'users:update',
-  'users:delete': 'users:delete',
-  'users:manage': 'users:manage',
-  'users:manage:other': 'users:manage:other',
-  'orders:create': 'orders:create',
-  'orders:read': 'orders:read',
-  'orders:update': 'orders:update',
-  'orders:delete': 'orders:delete',
-  'orders:manage': 'orders:manage',
-  'orders:manage:other': 'orders:manage:other',
-  'orders:manage:ownership': 'orders:manage:ownership',
-  'orders:status:update': 'orders:status:update',
-  'orders:approve': 'orders:approve',
-  'orders:execute': 'orders:execute',
-  'orders:reject': 'orders:reject',
-  'orders:send': 'orders:send',
-  'customers:create': 'customers:create',
-  'customers:read': 'customers:read',
-  'customers:update': 'customers:update',
-  'customers:delete': 'customers:delete',
-  'customers:manage': 'customers:manage',
-  'customers:manage:other': 'customers:manage:other',
-  'claims:create': 'claims:create',
-  'claims:read': 'claims:read',
-  'claims:update': 'claims:update',
-  'claims:delete': 'claims:delete',
-  'claims:manage': 'claims:manage',
-  'claims:manage:other': 'claims:manage:other',
-  'claims:close': 'claims:close',
-  'claims:status:update': 'claims:status:update',
-  'tracking:read': 'tracking:read',
-  'tracking:update': 'tracking:update',
-  'tracking:manage': 'tracking:manage',
-  'reports:read': 'reports:read',
-  'reports:export': 'reports:export',
-  'roles:manage': 'roles:manage',
-  'permissions:manage': 'permissions:manage',
-  'logs:read': 'logs:read',
-  'profile:update': 'profile:update',
-  'archival:read': 'archival:read',
-  'archival:manage': 'archival:manage',
-  'programs:create': 'programs:create',
-  'programs:read': 'programs:read',
-  'programs:update': 'programs:update',
-  'programs:delete': 'programs:delete',
-  'programs:manage': 'programs:manage',
-  'programs:manage:other': 'programs:manage:other',
-  'programs:manage:ownership': 'programs:manage:ownership',
-  'programs:status:update': 'programs:status:update',
-  'programs:approve': 'programs:approve',
-  'programs:send': 'programs:send',
-  'programs:execute': 'programs:execute',
-} as const;
-
-export interface ProfileDto {
-  id: number;
-  email: string;
-  role?: string;
-  permissions: ProfileDtoPermissionsItem[];
-}
-
-export interface UpdateProfileDto {
-  /** @maxLength 100 */
-  email?: string;
-  /** @maxLength 100 */
-  firstName?: string;
-  /** @maxLength 100 */
-  lastName?: string;
-}
-
 export interface ChangePasswordDto {
   currentPassword: string;
   /** @minLength 8 */
@@ -1205,5 +1129,35 @@ export interface NotificationDetailDto {
   user: NotificationDetailDtoUser;
   notificationType: NotificationDetailDtoNotificationType;
   notificationChannel: NotificationDetailDtoNotificationChannel;
+}
+
+export interface ProfileDto {
+  id: number;
+  email: string;
+  lastName: string;
+  firstName: string;
+  role: string;
+  permissions: string[];
+  /** @nullable */
+  employeeId: string | null;
+  /** @nullable */
+  type: string | null;
+  roleId: number;
+  /** @nullable */
+  customerId: number | null;
+  /** @nullable */
+  agencyId: number | null;
+  createdAt: string;
+  /** @nullable */
+  lastLogin: string | null;
+}
+
+export interface UpdateProfileDto {
+  /** @maxLength 100 */
+  email?: string;
+  /** @maxLength 100 */
+  firstName?: string;
+  /** @maxLength 100 */
+  lastName?: string;
 }
 

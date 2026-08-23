@@ -3,11 +3,11 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
-import { authControllerGetProfile } from "@/lib/api/auth";
+import { profileControllerGetCurrent } from "@/lib/api/profile";
 
 export const getCurrentUser = cache(async () => {
 	try {
-		return await authControllerGetProfile();
+		return await profileControllerGetCurrent();
 	} catch (_) {
 		return null;
 	}

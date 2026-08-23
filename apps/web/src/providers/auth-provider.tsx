@@ -2,10 +2,10 @@
 
 import { Permission } from "@ecommand/shared";
 import { createContext, ReactNode, useContext } from "react";
-import { ProfileResponseDto } from "@/lib/api/generated";
+import { ProfileDto } from "@/lib/api/generated.schemas";
 
 interface AuthContextType {
-	user: ProfileResponseDto;
+	user: ProfileDto;
 	hasPermissions: (...permissions: Permission[]) => boolean;
 }
 
@@ -15,7 +15,7 @@ export function AuthProvider({
 	user,
 	children,
 }: {
-	user: ProfileResponseDto;
+	user: ProfileDto;
 	children: ReactNode;
 }) {
 	const value: AuthContextType = {

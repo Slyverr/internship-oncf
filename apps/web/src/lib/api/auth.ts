@@ -6,22 +6,13 @@
  * OpenAPI spec version: 1.0
  */
 import {
-  useMutation,
-  useQuery
+  useMutation
 } from '@tanstack/react-query';
 import type {
-  DataTag,
-  DefinedInitialDataOptions,
-  DefinedUseQueryResult,
   MutationFunction,
   QueryClient,
-  QueryFunction,
-  QueryKey,
-  UndefinedInitialDataOptions,
   UseMutationOptions,
-  UseMutationResult,
-  UseQueryOptions,
-  UseQueryResult
+  UseMutationResult
 } from '@tanstack/react-query';
 
 import type {
@@ -29,9 +20,7 @@ import type {
   ForgotPasswordDto,
   LoginDetailDto,
   LoginDto,
-  ProfileDto,
-  ResetPasswordDto,
-  UpdateProfileDto
+  ResetPasswordDto
 } from './generated.schemas';
 
 import { customFetch } from '../axios';
@@ -41,21 +30,6 @@ import { customFetch } from '../axios';
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
-
-const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
-  const result = { queryKey } as T & { queryKey: K };
-  for (const key of Object.keys(query)) {
-    // The explicit queryKey always wins, matching the previous
-    // `{ ...query, queryKey }` spread where it was set last.
-    if (key === 'queryKey') continue;
-    Object.defineProperty(result, key, {
-      enumerable: true,
-      configurable: true,
-      get: () => (query as Record<string, unknown>)[key],
-    });
-  }
-  return result;
-};
 
 export const authControllerLogin = (
     loginDto: LoginDto,
@@ -114,150 +88,6 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getAuthControllerLoginMutationOptions(options), queryClient);
-    }
-    export const authControllerGetProfile = (
-
- options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
-) => {
-
-
-      return customFetch<ProfileDto>(
-      {url: `/auth/profile`, method: 'GET', signal
-    },
-      options);
-    }
-
-
-
-
-export const getAuthControllerGetProfileQueryKey = () => {
-    return [
-    `/auth/profile`
-    ] as const;
-    }
-
-
-export const getAuthControllerGetProfileQueryOptions = <TData = Awaited<ReturnType<typeof authControllerGetProfile>>, TError = void>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetProfile>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getAuthControllerGetProfileQueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof authControllerGetProfile>>> = ({ signal }) => authControllerGetProfile(requestOptions, signal);
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof authControllerGetProfile>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type AuthControllerGetProfileQueryResult = NonNullable<Awaited<ReturnType<typeof authControllerGetProfile>>>
-export type AuthControllerGetProfileQueryError = void
-
-
-export function useAuthControllerGetProfile<TData = Awaited<ReturnType<typeof authControllerGetProfile>>, TError = void>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetProfile>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof authControllerGetProfile>>,
-          TError,
-          Awaited<ReturnType<typeof authControllerGetProfile>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useAuthControllerGetProfile<TData = Awaited<ReturnType<typeof authControllerGetProfile>>, TError = void>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetProfile>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof authControllerGetProfile>>,
-          TError,
-          Awaited<ReturnType<typeof authControllerGetProfile>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useAuthControllerGetProfile<TData = Awaited<ReturnType<typeof authControllerGetProfile>>, TError = void>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetProfile>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useAuthControllerGetProfile<TData = Awaited<ReturnType<typeof authControllerGetProfile>>, TError = void>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof authControllerGetProfile>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getAuthControllerGetProfileQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-export const authControllerUpdateProfile = (
-    updateProfileDto: UpdateProfileDto,
- options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
-) => {
-
-
-      return customFetch<ProfileDto>(
-      {url: `/auth/profile`, method: 'PUT',
-      headers: {'Content-Type': 'application/json', },
-      data: updateProfileDto, signal
-    },
-      options);
-    }
-
-
-
-
-export const getAuthControllerUpdateProfileMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerUpdateProfile>>, TError,{data: UpdateProfileDto}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof authControllerUpdateProfile>>, TError,{data: UpdateProfileDto}, TContext> => {
-
-const mutationKey = ['authControllerUpdateProfile'];
-const {mutation: mutationOptions, request: requestOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, request: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof authControllerUpdateProfile>>, {data: UpdateProfileDto}> = (props) => {
-          const {data} = props ?? {};
-
-          return  authControllerUpdateProfile(data,requestOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type AuthControllerUpdateProfileMutationResult = NonNullable<Awaited<ReturnType<typeof authControllerUpdateProfile>>>
-    export type AuthControllerUpdateProfileMutationBody = UpdateProfileDto
-    export type AuthControllerUpdateProfileMutationError = void
-
-    export const useAuthControllerUpdateProfile = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerUpdateProfile>>, TError,{data: UpdateProfileDto}, TContext>, request?: SecondParameter<typeof customFetch>}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof authControllerUpdateProfile>>,
-        TError,
-        {data: UpdateProfileDto},
-        TContext
-      > => {
-      return useMutation(getAuthControllerUpdateProfileMutationOptions(options), queryClient);
     }
     export const authControllerChangePassword = (
     changePasswordDto: ChangePasswordDto,
