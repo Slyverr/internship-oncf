@@ -109,7 +109,7 @@ export function OrdersTable({ data, isLoading }: OrdersTableProps) {
 				order.orderNumber?.toLowerCase().includes(search) ||
 				order.customer.companyName.toLowerCase().includes(search) ||
 				order.good.name.toLowerCase().includes(search) ||
-				`${order.createdBy.firstName} ${order.createdBy.lastName}`
+				`${order.createdByUser.firstName} ${order.createdByUser.lastName}`
 					.toLowerCase()
 					.includes(search);
 

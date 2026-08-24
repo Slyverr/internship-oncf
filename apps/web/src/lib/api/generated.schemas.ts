@@ -175,7 +175,6 @@ export const CreateOrderDtoStatus = {
 export interface CreateOrderDto {
   goodsId: number;
   customerId: number;
-  userId?: number;
   status?: CreateOrderDtoStatus;
   /** @maxLength 200 */
   supervisor?: string;
@@ -203,12 +202,6 @@ export interface CreateOrderDto {
   endDate?: string;
 }
 
-export type OrderDetailDtoCreatedBy = {
-  id: number;
-  lastName: string;
-  firstName: string;
-};
-
 export type OrderDetailDtoOrderStatus = {
   id: number;
   name: string;
@@ -216,24 +209,24 @@ export type OrderDetailDtoOrderStatus = {
 
 export type OrderDetailDtoForecastProgramsItem = {
   id: number;
+  createdByUserId: number;
   statusId: number;
   createdAt: string;
   updatedAt: string;
-  createdBy: number;
+  orderId: number;
+  programNumber: string;
+  plannedDate: string;
+  quantityPlanned: string;
   /** @nullable */
   quantityRealized: string | null;
   /** @nullable */
   deviationReason: string | null;
-  orderId: number;
-  plannedDate: string;
-  quantityPlanned: string;
-  /** @nullable */
-  sentToDtmAt: string | null;
   /** @nullable */
   realizedAt: string | null;
   /** @nullable */
-  realizedBy: number | null;
-  programNumber: string;
+  realizedByUserId: number | null;
+  /** @nullable */
+  sentToDtmAt: string | null;
   /** @nullable */
   dtmStatus: string | null;
 };
@@ -241,14 +234,14 @@ export type OrderDetailDtoForecastProgramsItem = {
 export type OrderDetailDtoOrderExecutionsItem = {
   id: number;
   createdAt: string;
-  /** @nullable */
-  completionRate: string | null;
   orderId: number;
   /** @nullable */
   comment: string | null;
+  /** @nullable */
+  completionRate: string | null;
   executionDate: string;
   quantityExecuted: string;
-  executedBy: number;
+  executedByUserId: number;
 };
 
 export type OrderDetailDtoOrderFilesItem = {
@@ -262,19 +255,19 @@ export type OrderDetailDtoOrderFilesItem = {
   filePath: string;
   /** @nullable */
   mimeType: string | null;
-  uploadedBy: number;
+  uploadedByUserId: number;
   uploadedAt: string;
 };
 
 export type OrderDetailDtoClaimsItem = {
   id: number;
   customerId: number;
+  createdByUserId: number;
   statusId: number;
   createdAt: string;
   updatedAt: string;
   typeId: number;
   description: string;
-  userId: number;
   /** @nullable */
   orderId: number | null;
   /** @nullable */
@@ -284,7 +277,7 @@ export type OrderDetailDtoClaimsItem = {
   /** @nullable */
   resolution: string | null;
   /** @nullable */
-  closedBy: number | null;
+  closedByUserId: number | null;
   /** @nullable */
   closedAt: string | null;
 };
@@ -301,9 +294,9 @@ export type OrderDetailDtoCustomer = {
 export type OrderDetailDtoOrderStatusHistoriesItem = {
   id: number;
   statusId: number;
-  changedAt: string;
   orderId: number;
   changedById: number;
+  changedAt: string;
   /** @nullable */
   comment: string | null;
   /** @nullable */
@@ -315,11 +308,17 @@ export type OrderDetailDtoGood = {
   name: string;
 };
 
+export type OrderDetailDtoCreatedByUser = {
+  id: number;
+  lastName: string;
+  firstName: string;
+};
+
 export interface OrderDetailDto {
   id: number;
+  goodsId: number;
   customerId: number;
   createdByUserId: number;
-  goodsId: number;
   statusId: number;
   /** @nullable */
   supervisor: string | null;
@@ -368,7 +367,6 @@ export interface OrderDetailDto {
   endDate: string | null;
   createdAt: string;
   updatedAt: string;
-  createdBy: OrderDetailDtoCreatedBy;
   orderStatus: OrderDetailDtoOrderStatus;
   forecastPrograms: OrderDetailDtoForecastProgramsItem[];
   orderExecutions: OrderDetailDtoOrderExecutionsItem[];
@@ -378,13 +376,8 @@ export interface OrderDetailDto {
   customer: OrderDetailDtoCustomer;
   orderStatusHistories: OrderDetailDtoOrderStatusHistoriesItem[];
   good: OrderDetailDtoGood;
+  createdByUser: OrderDetailDtoCreatedByUser;
 }
-
-export type OrderListDtoCreatedBy = {
-  id: number;
-  lastName: string;
-  firstName: string;
-};
 
 export type OrderListDtoOrderStatus = {
   id: number;
@@ -405,6 +398,12 @@ export type OrderListDtoGood = {
   name: string;
 };
 
+export type OrderListDtoCreatedByUser = {
+  id: number;
+  lastName: string;
+  firstName: string;
+};
+
 export interface OrderListDto {
   id: number;
   createdAt: string;
@@ -418,11 +417,11 @@ export interface OrderListDto {
   startDate: string | null;
   /** @nullable */
   endDate: string | null;
-  createdBy: OrderListDtoCreatedBy;
   orderStatus: OrderListDtoOrderStatus;
   unit: OrderListDtoUnit;
   customer: OrderListDtoCustomer;
   good: OrderListDtoGood;
+  createdByUser: OrderListDtoCreatedByUser;
 }
 
 export type UpdateOrderDtoStatus = typeof UpdateOrderDtoStatus[keyof typeof UpdateOrderDtoStatus];
@@ -443,7 +442,6 @@ export const UpdateOrderDtoStatus = {
 export interface UpdateOrderDto {
   goodsId?: number;
   customerId?: number;
-  userId?: number;
   status?: UpdateOrderDtoStatus;
   /** @maxLength 200 */
   supervisor?: string;
@@ -484,17 +482,17 @@ export interface UploadFileDto {
 }
 
 export interface FileDto {
-  fileId: number;
+  /** @nullable */
+  description: string | null;
   orderId: number;
+  fileId: number;
   fileName: string;
   fileType: string;
   fileSize: number;
   filePath: string;
   /** @nullable */
   mimeType: string | null;
-  uploadedBy: number;
-  /** @nullable */
-  description: string | null;
+  uploadedByUserId: number;
   uploadedAt: string;
 }
 
@@ -550,17 +548,14 @@ export type ProgramDetailDtoForecastProgramHistoriesItem = {
   quantityRealized: string | null;
   /** @nullable */
   deviationReason: string | null;
+  changedAt: string;
   /** @nullable */
   programId: number | null;
+  eventType: string;
   /** @nullable */
   oldQuantity: string | null;
   /** @nullable */
   newQuantity: string | null;
-  changedBy: number;
-  changedAt: string;
-  /** @nullable */
-  reason: string | null;
-  eventType: string;
   /** @nullable */
   oldStatusId: number | null;
   /** @nullable */
@@ -573,6 +568,9 @@ export type ProgramDetailDtoForecastProgramHistoriesItem = {
   completionRate: string | null;
   /** @nullable */
   changedByName: string | null;
+  changedByUserId: number;
+  /** @nullable */
+  reason: string | null;
 };
 
 export type ProgramDetailDtoOrder = {
@@ -622,15 +620,11 @@ export type ProgramDetailDtoProgramConvoisItem = {
 
 export interface ProgramDetailDto {
   id: number;
+  programNumber: string;
   orderId: number;
   statusId: number;
   plannedDate: string;
   quantityPlanned: string;
-  createdBy: number;
-  createdAt: string;
-  updatedAt: string;
-  /** @nullable */
-  sentToDtmAt: string | null;
   /** @nullable */
   quantityRealized: string | null;
   /** @nullable */
@@ -638,8 +632,12 @@ export interface ProgramDetailDto {
   /** @nullable */
   realizedAt: string | null;
   /** @nullable */
-  realizedBy: number | null;
-  programNumber: string;
+  realizedByUserId: number | null;
+  createdByUserId: number;
+  createdAt: string;
+  updatedAt: string;
+  /** @nullable */
+  sentToDtmAt: string | null;
   /** @nullable */
   dtmStatus: string | null;
   programStatus: ProgramDetailDtoProgramStatus;
@@ -847,10 +845,10 @@ export type ClaimDetailDtoClaimStatus = {
 
 export type ClaimDetailDtoClaimCommentsItem = {
   id: number;
-  userId: number;
   createdAt: string;
   comment: string;
   claimId: number;
+  authorUserId: number;
 };
 
 export type ClaimDetailDtoCustomer = {
@@ -861,14 +859,14 @@ export type ClaimDetailDtoCustomer = {
 export type ClaimDetailDtoClaimStatusHistoriesItem = {
   id: number;
   statusId: number;
-  changedBy: number;
   changedAt: string;
   /** @nullable */
   comment: string | null;
+  changedByUserId: number;
   claimId: number;
 };
 
-export type ClaimDetailDtoUser = {
+export type ClaimDetailDtoCreatedByUser = {
   id: number;
   lastName: string;
   firstName: string;
@@ -899,7 +897,7 @@ export type ClaimDetailDtoClosedByUser = {
 export interface ClaimDetailDto {
   id: number;
   customerId: number;
-  userId: number;
+  createdByUserId: number;
   /** @nullable */
   orderId: number | null;
   /** @nullable */
@@ -914,14 +912,14 @@ export interface ClaimDetailDto {
   createdAt: string;
   updatedAt: string;
   /** @nullable */
-  closedBy: number | null;
+  closedByUserId: number | null;
   /** @nullable */
   closedAt: string | null;
   claimStatus: ClaimDetailDtoClaimStatus;
   claimComments: ClaimDetailDtoClaimCommentsItem[];
   customer: ClaimDetailDtoCustomer;
   claimStatusHistories: ClaimDetailDtoClaimStatusHistoriesItem[];
-  user: ClaimDetailDtoUser;
+  createdByUser: ClaimDetailDtoCreatedByUser;
   order: ClaimDetailDtoOrder;
   accessoryOperation: ClaimDetailDtoAccessoryOperation;
   claimType: ClaimDetailDtoClaimType;
@@ -938,7 +936,7 @@ export type ClaimListDtoCustomer = {
   companyName: string;
 };
 
-export type ClaimListDtoUser = {
+export type ClaimListDtoCreatedByUser = {
   id: number;
   lastName: string;
   firstName: string;
@@ -962,12 +960,12 @@ export type ClaimListDtoClaimType = {
 
 export interface ClaimListDto {
   id: number;
-  createdAt: string;
   description: string;
+  createdAt: string;
   updatedAt: string;
   typeId: number;
   customerId: number;
-  userId: number;
+  createdByUserId: number;
   statusId: number;
   /** @nullable */
   orderId: number | null;
@@ -978,12 +976,12 @@ export interface ClaimListDto {
   /** @nullable */
   resolution: string | null;
   /** @nullable */
-  closedBy: number | null;
+  closedByUserId: number | null;
   /** @nullable */
   closedAt: string | null;
   claimStatus: ClaimListDtoClaimStatus;
   customer: ClaimListDtoCustomer;
-  user: ClaimListDtoUser;
+  createdByUser: ClaimListDtoCreatedByUser;
   order: ClaimListDtoOrder;
   accessoryOperation: ClaimListDtoAccessoryOperation;
   claimType: ClaimListDtoClaimType;
@@ -1047,7 +1045,7 @@ export interface ClaimDeleteDto {
 export interface ClaimCommentDto {
   id: number;
   claimId: number;
-  userId: number;
+  authorUserId: number;
   comment: string;
   createdAt: string;
 }
@@ -1066,7 +1064,7 @@ export interface NotificationListDto {
   id: number;
   createdAt: string;
   typeId: number;
-  userId: number;
+  recipientUserId: number;
   status: string;
   channelId: number;
   title: string;
@@ -1089,7 +1087,7 @@ export interface NotificationUnreadCountDto {
   count: number;
 }
 
-export type NotificationDetailDtoUser = {
+export type NotificationDetailDtoRecipientUser = {
   id: number;
   lastName: string;
   firstName: string;
@@ -1107,7 +1105,7 @@ export type NotificationDetailDtoNotificationChannel = {
 
 export interface NotificationDetailDto {
   id: number;
-  userId: number;
+  recipientUserId: number;
   typeId: number;
   channelId: number;
   title: string;
@@ -1126,7 +1124,7 @@ export interface NotificationDetailDto {
   /** @nullable */
   retryCount: number | null;
   createdAt: string;
-  user: NotificationDetailDtoUser;
+  recipientUser: NotificationDetailDtoRecipientUser;
   notificationType: NotificationDetailDtoNotificationType;
   notificationChannel: NotificationDetailDtoNotificationChannel;
 }
