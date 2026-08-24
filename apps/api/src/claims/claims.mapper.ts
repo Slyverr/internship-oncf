@@ -19,7 +19,7 @@ export const toCreate = (dto: CreateClaimDto, user: AuthUser): ClaimInsert => {
 
 	return {
 		...dto,
-		userId,
+		createdByUserId: userId,
 		typeId: CLAIM_TYPES[dto.type].id,
 		statusId: CLAIM_STATUSES[status].id,
 	};
@@ -32,7 +32,7 @@ export const toUpdate = (dto: UpdateClaimDto, user: AuthUser): ClaimUpdate => {
 		if (!hasAnyPermission(user, Permission.CLAIMS_MANAGE)) {
 			throw new ForbiddenException("Cannot reassign claims to other users");
 		}
-		result.userId = dto.userId;
+		result.createdByUserId = dto.userId;
 	}
 
 	if (dto.type !== undefined) {

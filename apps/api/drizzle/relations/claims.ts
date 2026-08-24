@@ -11,10 +11,10 @@ const claimsPart = defineRelationsPart(schema, (r) => ({
 			from: r.claims.customerId,
 			to: r.customers.id,
 		}),
-		user: r.one.users({
-			from: r.claims.userId,
+		createdByUser: r.one.users({
+			from: r.claims.createdByUserId,
 			to: r.users.id,
-			alias: "user",
+			alias: "claims_createdByUser",
 		}),
 		order: r.one.orders({
 			from: r.claims.orderId,
@@ -33,9 +33,9 @@ const claimsPart = defineRelationsPart(schema, (r) => ({
 			to: r.claimStatus.id,
 		}),
 		closedByUser: r.one.users({
-			from: r.claims.closedBy,
+			from: r.claims.closedByUserId,
 			to: r.users.id,
-			alias: "closedBy",
+			alias: "claims_closedByUser",
 		}),
 		claimStatusHistories: r.many.claimStatusHistory({
 			from: r.claims.id,
@@ -80,8 +80,8 @@ const claimStatusHistoryPart = defineRelationsPart(schema, (r) => ({
 			from: r.claimStatusHistory.statusId,
 			to: r.claimStatus.id,
 		}),
-		user: r.one.users({
-			from: r.claimStatusHistory.changedBy,
+		changedByUser: r.one.users({
+			from: r.claimStatusHistory.changedByUserId,
 			to: r.users.id,
 		}),
 	},
@@ -93,8 +93,8 @@ const claimCommentsPart = defineRelationsPart(schema, (r) => ({
 			from: r.claimComments.claimId,
 			to: r.claims.id,
 		}),
-		user: r.one.users({
-			from: r.claimComments.userId,
+		authorUser: r.one.users({
+			from: r.claimComments.authorUserId,
 			to: r.users.id,
 		}),
 	},
@@ -106,8 +106,8 @@ const claimFilesPart = defineRelationsPart(schema, (r) => ({
 			from: r.claimFiles.claimId,
 			to: r.claims.id,
 		}),
-		user: r.one.users({
-			from: r.claimFiles.uploadedBy,
+		uploadedByUser: r.one.users({
+			from: r.claimFiles.uploadedByUserId,
 			to: r.users.id,
 		}),
 	},

@@ -35,7 +35,7 @@ export class NotificationsService {
 
 	async findAll(user: AuthUser) {
 		return this.drizzle.db.query.notifications.findMany({
-			where: { userId: user.id },
+			where: { recipientUserId: user.id },
 			columns: notificationListColumns,
 			with: notificationListRelations,
 			orderBy: (notifications, { desc }) => [desc(notifications.createdAt)],
@@ -55,7 +55,7 @@ export class NotificationsService {
 	async findOneForOwnership(id: NotificationId) {
 		const notification = await this.drizzle.db.query.notifications.findFirst({
 			where: { id },
-			columns: { userId: true },
+			columns: { recipientUserId: true },
 		});
 
 		return this.ensure(notification, id);
@@ -67,7 +67,7 @@ export class NotificationsService {
 			.from(notifications)
 			.where(
 				and(
-					eq(notifications.userId, userId),
+					eq(notifications.recipientUserId, userId),
 					isNull(notifications.readAt),
 					eq(notifications.status, "SENT"),
 				),
@@ -83,7 +83,10 @@ export class NotificationsService {
 					.update(notifications)
 					.set({ readAt: new Date().toISOString() })
 					.where(
-						and(eq(notifications.id, id), eq(notifications.userId, userId)),
+						and(
+							eq(notifications.id, id),
+							eq(notifications.recipientUserId, userId),
+						),
 					)
 					.returning({ id: notifications.id }),
 			{ id, userId },
@@ -102,7 +105,7 @@ export class NotificationsService {
 			.set({ readAt: new Date().toISOString() })
 			.where(
 				and(
-					eq(notifications.userId, userId),
+					eq(notifications.recipientUserId, userId),
 					isNull(notifications.readAt),
 					eq(notifications.status, "SENT"),
 				),

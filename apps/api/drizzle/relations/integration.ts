@@ -7,8 +7,8 @@ const dtmIntegrationLogPart = defineRelationsPart(schema, (r) => ({
 			from: r.dtmIntegrationLog.requestTypeId,
 			to: r.dtmRequestTypes.id,
 		}),
-		user: r.one.users({
-			from: r.dtmIntegrationLog.createdBy,
+		createdByUser: r.one.users({
+			from: r.dtmIntegrationLog.createdByUserId,
 			to: r.users.id,
 		}),
 	},

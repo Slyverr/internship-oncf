@@ -45,7 +45,7 @@ export class FilesService {
 						fileSize: file.size,
 						filePath,
 						mimeType: file.mimetype,
-						uploadedBy: userId,
+						uploadedByUserId: userId,
 						description: dto.description ?? null,
 					})
 					.returning(),

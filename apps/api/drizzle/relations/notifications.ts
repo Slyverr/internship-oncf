@@ -3,8 +3,8 @@ import * as schema from "../schema";
 
 const notificationsPart = defineRelationsPart(schema, (r) => ({
 	notifications: {
-		user: r.one.users({
-			from: r.notifications.userId,
+		recipientUser: r.one.users({
+			from: r.notifications.recipientUserId,
 			to: r.users.id,
 		}),
 		notificationType: r.one.notificationTypes({

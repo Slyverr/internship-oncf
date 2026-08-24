@@ -11,9 +11,9 @@ export const toCreate = (
 	dto: CreateProgramDto,
 	user: AuthUser,
 ): ProgramInsert => {
-	const createdBy = dto.userId ?? user.id;
+	const createdByUserId = dto.userId ?? user.id;
 	if (
-		createdBy !== user.id &&
+		createdByUserId !== user.id &&
 		!hasOnePermission(user, Permission.PROGRAMS_MANAGE_OWNERSHIP)
 	) {
 		throw new ForbiddenException("Cannot assign programs to other users");
@@ -25,7 +25,7 @@ export const toCreate = (
 
 	return {
 		...dto,
-		createdBy,
+		createdByUserId,
 		statusId: PROGRAM_STATUSES[status].id,
 		programNumber: `PRG-${Date.now()}-${Math.random()
 			.toString(36)

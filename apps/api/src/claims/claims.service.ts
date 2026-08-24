@@ -45,7 +45,7 @@ export class ClaimsService {
 
 	async findAll(user: AuthUser) {
 		const where = !hasOnePermission(user, Permission.CLAIMS_READ)
-			? { userId: user.id }
+			? { createdByUserId: user.id }
 			: {};
 
 		return this.drizzle.db.query.claims.findMany({
@@ -67,7 +67,7 @@ export class ClaimsService {
 	async findOneForOwnership(id: ClaimId) {
 		const claim = await this.drizzle.db.query.claims.findFirst({
 			where: { id },
-			columns: { userId: true },
+			columns: { createdByUserId: true },
 		});
 
 		return this.ensure(claim, id);
@@ -101,7 +101,7 @@ export class ClaimsService {
 			() =>
 				this.drizzle.db
 					.insert(claimComments)
-					.values({ claimId, userId, comment: content })
+					.values({ claimId, authorUserId: userId, comment: content })
 					.returning(),
 			{ claimId, content },
 		);
@@ -142,7 +142,7 @@ export class ClaimsService {
 
 	async close(claimId: ClaimId, user: AuthUser) {
 		return this.transition(claimId, user.id, ClaimStatus.CLOSED, undefined, {
-			closedBy: user.id,
+			closedByUserId: user.id,
 			closedAt: new Date().toISOString(),
 		});
 	}
@@ -201,7 +201,7 @@ export class ClaimsService {
 			await db.insert(claimStatusHistory).values({
 				claimId,
 				statusId: values.statusId,
-				changedBy: options.history.userId,
+				changedByUserId: options.history.userId,
 				comment: options.history.comment ?? null,
 			});
 		}

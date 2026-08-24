@@ -5,7 +5,7 @@ type NotificationsRelations = QueryRelations<"notifications">;
 
 export const notificationListColumns = {
 	id: true,
-	userId: true,
+	recipientUserId: true,
 	typeId: true,
 	channelId: true,
 	title: true,
@@ -43,7 +43,7 @@ export const notificationDetailColumns = {
 export const notificationDetailRelations = {
 	...notificationListRelations,
 
-	user: {
+	recipientUser: {
 		columns: {
 			id: true,
 			firstName: true,

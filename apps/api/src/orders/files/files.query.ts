@@ -10,7 +10,7 @@ export const fileColumns = {
 	fileSize: true,
 	filePath: true,
 	mimeType: true,
-	uploadedBy: true,
+	uploadedByUserId: true,
 	description: true,
 	uploadedAt: true,
 } satisfies OrderFilesColumns;

@@ -5,14 +5,14 @@ type _UploadAssertion = Assert<Equals<FileDto, UploadFile>>;
 type _ListAssertion = Assert<Equals<FileDto, ListFiles>>;
 
 export class FileDto implements UploadFile, ListFiles {
-	fileId: number;
+	description: string | null;
 	orderId: number;
+	fileId: number;
 	fileName: string;
 	fileType: string;
 	fileSize: number;
 	filePath: string;
 	mimeType: string | null;
-	uploadedBy: number;
-	description: string | null;
+	uploadedByUserId: number;
 	uploadedAt: string;
 }

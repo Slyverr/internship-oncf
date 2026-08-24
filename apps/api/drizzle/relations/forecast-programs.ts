@@ -16,14 +16,14 @@ const forecastProgramsPart = defineRelationsPart(schema, (r) => ({
 			to: r.programStatus.id,
 		}),
 		createdByUser: r.one.users({
-			from: r.forecastPrograms.createdBy,
+			from: r.forecastPrograms.createdByUserId,
 			to: r.users.id,
-			alias: "createdByUser",
+			alias: "forecastPrograms_createdByUserId",
 		}),
 		realizedByUser: r.one.users({
-			from: r.forecastPrograms.realizedBy,
+			from: r.forecastPrograms.realizedByUserId,
 			to: r.users.id,
-			alias: "realizedByUser",
+			alias: "forecastPrograms_realizedByUserId",
 		}),
 		orderWagons: r.many.orderWagons({
 			from: r.forecastPrograms.id,
@@ -42,8 +42,8 @@ const forecastProgramHistoryPart = defineRelationsPart(schema, (r) => ({
 			from: r.forecastProgramHistory.programId,
 			to: r.forecastPrograms.id,
 		}),
-		user: r.one.users({
-			from: r.forecastProgramHistory.changedBy,
+		changedByUser: r.one.users({
+			from: r.forecastProgramHistory.changedByUserId,
 			to: r.users.id,
 		}),
 		oldStatus: r.one.programStatus({

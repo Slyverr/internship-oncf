@@ -21,15 +21,15 @@ const usersPart = defineRelationsPart(schema, (r) => ({
 		}),
 		userActivityLogs: r.many.userActivityLog({
 			from: r.users.id,
-			to: r.userActivityLog.userId,
+			to: r.userActivityLog.actorUserId,
 		}),
-		orders: r.many.orders({
+		orders_created: r.many.orders({
 			from: r.users.id,
 			to: r.orders.createdByUserId,
 		}),
 		forecastProgramHistories: r.many.forecastProgramHistory({
 			from: r.users.id,
-			to: r.forecastProgramHistory.changedBy,
+			to: r.forecastProgramHistory.changedByUserId,
 		}),
 		orderStatusHistories: r.many.orderStatusHistory({
 			from: r.users.id,
@@ -37,21 +37,21 @@ const usersPart = defineRelationsPart(schema, (r) => ({
 		}),
 		forecastPrograms_createdBy: r.many.forecastPrograms({
 			from: r.users.id,
-			to: r.forecastPrograms.createdBy,
-			alias: "forecastPrograms_createdBy",
+			to: r.forecastPrograms.createdByUserId,
+			alias: "forecastPrograms_createdByUserId",
 		}),
 		forecastPrograms_realizedBy: r.many.forecastPrograms({
 			from: r.users.id,
-			to: r.forecastPrograms.realizedBy,
-			alias: "forecastPrograms_realizedBy",
+			to: r.forecastPrograms.realizedByUserId,
+			alias: "forecastPrograms_realizedByUserId",
 		}),
 		orderExecutions: r.many.orderExecutions({
 			from: r.users.id,
-			to: r.orderExecutions.executedBy,
+			to: r.orderExecutions.executedByUserId,
 		}),
 		orderFiles: r.many.orderFiles({
 			from: r.users.id,
-			to: r.orderFiles.uploadedBy,
+			to: r.orderFiles.uploadedByUserId,
 		}),
 		orderShares: r.many.orderShares({
 			from: r.users.id,
@@ -59,33 +59,33 @@ const usersPart = defineRelationsPart(schema, (r) => ({
 		}),
 		orderDateModifications: r.many.orderDateModifications({
 			from: r.users.id,
-			to: r.orderDateModifications.modifiedById,
+			to: r.orderDateModifications.modifiedByUserId,
 		}),
 		claimFiles: r.many.claimFiles({
 			from: r.users.id,
-			to: r.claimFiles.uploadedBy,
+			to: r.claimFiles.uploadedByUserId,
 		}),
-		claims_userId: r.many.claims({
+		claims_createdBy: r.many.claims({
 			from: r.users.id,
-			to: r.claims.userId,
-			alias: "claims_userId",
+			to: r.claims.createdByUserId,
+			alias: "claims_createdByUser",
 		}),
 		claims_closedBy: r.many.claims({
 			from: r.users.id,
-			to: r.claims.closedBy,
-			alias: "claims_closedBy",
+			to: r.claims.closedByUserId,
+			alias: "claims_closedByUser",
 		}),
 		claimStatusHistories: r.many.claimStatusHistory({
 			from: r.users.id,
-			to: r.claimStatusHistory.changedBy,
+			to: r.claimStatusHistory.changedByUserId,
 		}),
 		claimComments: r.many.claimComments({
 			from: r.users.id,
-			to: r.claimComments.userId,
+			to: r.claimComments.authorUserId,
 		}),
 		notifications: r.many.notifications({
 			from: r.users.id,
-			to: r.notifications.userId,
+			to: r.notifications.recipientUserId,
 		}),
 		passwordResetTokens: r.many.passwordResetTokens({
 			from: r.users.id,
@@ -93,7 +93,7 @@ const usersPart = defineRelationsPart(schema, (r) => ({
 		}),
 		dtmIntegrationLogs: r.many.dtmIntegrationLog({
 			from: r.users.id,
-			to: r.dtmIntegrationLog.createdBy,
+			to: r.dtmIntegrationLog.createdByUserId,
 		}),
 		archivalExecutionLogs: r.many.archivalExecutionLog({
 			from: r.users.id,
@@ -152,8 +152,8 @@ const userSessionsPart = defineRelationsPart(schema, (r) => ({
 
 const userActivityLogPart = defineRelationsPart(schema, (r) => ({
 	userActivityLog: {
-		user: r.one.users({
-			from: r.userActivityLog.userId,
+		actorUser: r.one.users({
+			from: r.userActivityLog.actorUserId,
 			to: r.users.id,
 		}),
 		customer: r.one.customers({

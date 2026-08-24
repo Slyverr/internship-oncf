@@ -6,7 +6,7 @@ import { NotificationInsert } from "./notifications.types";
 import { CreateNotificationDto } from "./requests/create-notification.dto";
 
 export const toCreate = (dto: CreateNotificationDto): NotificationInsert => ({
-	userId: dto.userId,
+	recipientUserId: dto.userId,
 	typeId: NOTIFICATION_TYPES[dto.type].id,
 	channelId: NOTIFICATION_CHANNELS[dto.channel].id,
 	title: dto.title,

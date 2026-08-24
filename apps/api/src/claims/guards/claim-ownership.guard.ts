@@ -9,7 +9,7 @@ export const ClaimOwnershipGuard = createOwnershipGuard<ClaimsService, ClaimId>(
 		service: ClaimsService,
 		resolveOwnerId: async (service, id) => {
 			const claim = await service.findOneForOwnership(id);
-			return claim.userId;
+			return claim.createdByUserId;
 		},
 
 		pipe: new ClaimIdPipe(),

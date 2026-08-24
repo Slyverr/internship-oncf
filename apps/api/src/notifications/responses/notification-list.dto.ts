@@ -7,7 +7,7 @@ export class NotificationListDto implements NotificationList {
 	id: number;
 	createdAt: string;
 	typeId: number;
-	userId: number;
+	recipientUserId: number;
 	status: string;
 	channelId: number;
 	title: string;

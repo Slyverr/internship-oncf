@@ -113,13 +113,13 @@ async function seed() {
 		const portsData = [
 			{ name: "Casa", type: "normal", city: "Casablanca" },
 			{ name: "Jorf Lasfar", type: "normal", city: "El Jadida" },
-			{ name: "Mita", type: "sec", city: "Casablanca" },
-			{ name: "Port Casa", type: "sec", city: "Casablanca" },
-			{ name: "MARRAKECH SIDI GHANEM", type: "sec", city: "MARRAKECH" },
+			{ name: "Mita", type: "dry", city: "Casablanca" },
+			{ name: "Port Casa", type: "dry", city: "Casablanca" },
+			{ name: "MARRAKECH SIDI GHANEM", type: "dry", city: "MARRAKECH" },
 			{ name: "Nador", type: "normal", city: "Nador" },
 			{ name: "Safi", type: "normal", city: "Safi" },
 			{ name: "Port TM", type: "normal", city: "Tanger" },
-			{ name: "FES BENSOUDA", type: "sec", city: "Fes" },
+			{ name: "FES BENSOUDA", type: "dry", city: "Fes" },
 		];
 
 		for (const data of portsData) {

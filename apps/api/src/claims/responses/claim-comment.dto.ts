@@ -6,7 +6,7 @@ type _Assertion = Assert<Equals<ClaimCommentDto, ClaimComment>>;
 export class ClaimCommentDto implements ClaimComment {
 	id: number;
 	claimId: number;
-	userId: number;
+	authorUserId: number;
 	comment: string;
 	createdAt: string;
 }

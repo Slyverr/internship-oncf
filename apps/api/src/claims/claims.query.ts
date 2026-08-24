@@ -6,7 +6,7 @@ type ClaimsRelations = QueryRelations<"claims">;
 export const claimListColumns = {
 	id: true,
 	customerId: true,
-	userId: true,
+	createdByUserId: true,
 	orderId: true,
 	operationId: true,
 	typeId: true,
@@ -14,7 +14,7 @@ export const claimListColumns = {
 	priority: true,
 	description: true,
 	resolution: true,
-	closedBy: true,
+	closedByUserId: true,
 	closedAt: true,
 	createdAt: true,
 	updatedAt: true,
@@ -22,7 +22,7 @@ export const claimListColumns = {
 
 export const claimListRelations = {
 	customer: { columns: { id: true, companyName: true } },
-	user: { columns: { id: true, firstName: true, lastName: true } },
+	createdByUser: { columns: { id: true, firstName: true, lastName: true } },
 	order: { columns: { id: true, orderNumber: true } },
 	accessoryOperation: { columns: { id: true, name: true } },
 	claimType: { columns: { id: true, name: true } },

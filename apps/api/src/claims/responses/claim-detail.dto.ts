@@ -6,7 +6,7 @@ type _Assertion = Assert<Equals<ClaimDetailDto, ClaimDetail>>;
 export class ClaimDetailDto implements ClaimDetail {
 	id: number;
 	customerId: number;
-	userId: number;
+	createdByUserId: number;
 	orderId: number | null;
 	operationId: number | null;
 	typeId: number;
@@ -16,26 +16,26 @@ export class ClaimDetailDto implements ClaimDetail {
 	resolution: string | null;
 	createdAt: string;
 	updatedAt: string;
-	closedBy: number | null;
+	closedByUserId: number | null;
 	closedAt: string | null;
 	claimStatus: { id: number; name: string } | null;
 	claimComments: {
 		id: number;
-		userId: number;
 		createdAt: string;
 		comment: string;
 		claimId: number;
+		authorUserId: number;
 	}[];
 	customer: { id: number; companyName: string } | null;
 	claimStatusHistories: {
 		id: number;
 		statusId: number;
-		changedBy: number;
 		changedAt: string;
 		comment: string | null;
+		changedByUserId: number;
 		claimId: number;
 	}[];
-	user: { id: number; lastName: string; firstName: string } | null;
+	createdByUser: { id: number; lastName: string; firstName: string } | null;
 	order: { id: number; orderNumber: string | null } | null;
 	accessoryOperation: { id: number; name: string } | null;
 	claimType: { id: number; name: string } | null;

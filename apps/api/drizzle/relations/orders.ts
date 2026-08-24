@@ -26,7 +26,7 @@ const ordersPart = defineRelationsPart(schema, (r) => ({
 			to: r.customers.id,
 			alias: "customer",
 		}),
-		createdBy: r.one.users({
+		createdByUser: r.one.users({
 			from: r.orders.createdByUserId,
 			to: r.users.id,
 		}),
@@ -168,7 +168,7 @@ const orderStatusHistoryPart = defineRelationsPart(schema, (r) => ({
 			from: r.orderStatusHistory.statusId,
 			to: r.orderStatus.id,
 		}),
-		user: r.one.users({
+		changedByUser: r.one.users({
 			from: r.orderStatusHistory.changedById,
 			to: r.users.id,
 		}),
@@ -198,8 +198,8 @@ const orderExecutionsPart = defineRelationsPart(schema, (r) => ({
 			from: r.orderExecutions.orderId,
 			to: r.orders.id,
 		}),
-		user: r.one.users({
-			from: r.orderExecutions.executedBy,
+		executedByUser: r.one.users({
+			from: r.orderExecutions.executedByUserId,
 			to: r.users.id,
 		}),
 	},
@@ -211,8 +211,8 @@ const orderFilesPart = defineRelationsPart(schema, (r) => ({
 			from: r.orderFiles.orderId,
 			to: r.orders.id,
 		}),
-		user: r.one.users({
-			from: r.orderFiles.uploadedBy,
+		uploadedByUser: r.one.users({
+			from: r.orderFiles.uploadedByUserId,
 			to: r.users.id,
 		}),
 	},
@@ -228,7 +228,7 @@ const orderSharesPart = defineRelationsPart(schema, (r) => ({
 			from: r.orderShares.agencyId,
 			to: r.agencies.id,
 		}),
-		user: r.one.users({
+		sharedByUser: r.one.users({
 			from: r.orderShares.sharedByUserId,
 			to: r.users.id,
 		}),
@@ -241,8 +241,8 @@ const orderDateModificationsPart = defineRelationsPart(schema, (r) => ({
 			from: r.orderDateModifications.orderId,
 			to: r.orders.id,
 		}),
-		user: r.one.users({
-			from: r.orderDateModifications.modifiedById,
+		modifiedByUser: r.one.users({
+			from: r.orderDateModifications.modifiedByUserId,
 			to: r.users.id,
 		}),
 	},

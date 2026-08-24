@@ -11,7 +11,7 @@ export const ProgramOwnershipGuard = createOwnershipGuard<
 	service: ProgramsService,
 	resolveOwnerId: async (service, id) => {
 		const program = await service.findOneForOwnership(id);
-		return program.createdBy;
+		return program.createdByUserId;
 	},
 	pipe: new ProgramIdPipe(),
 	permission: Permission.PROGRAMS_MANAGE_OTHER,

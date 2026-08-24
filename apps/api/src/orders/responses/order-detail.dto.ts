@@ -5,9 +5,9 @@ type _Assertion = Assert<Equals<OrderDetailDto, OrderDetail>>;
 
 export class OrderDetailDto implements OrderDetail {
 	id: number;
+	goodsId: number;
 	customerId: number;
 	createdByUserId: number;
-	goodsId: number;
 	statusId: number;
 	supervisor: string | null;
 	orderNumber: string | null;
@@ -35,34 +35,33 @@ export class OrderDetailDto implements OrderDetail {
 	endDate: string | null;
 	createdAt: string;
 	updatedAt: string;
-	createdBy: { id: number; lastName: string; firstName: string } | null;
 	orderStatus: { id: number; name: string } | null;
 	forecastPrograms: {
 		id: number;
+		createdByUserId: number;
 		statusId: number;
 		createdAt: string;
 		updatedAt: string;
-		createdBy: number;
-		quantityRealized: string | null;
-		deviationReason: string | null;
 		orderId: number;
+		programNumber: string;
 		plannedDate: string;
 		quantityPlanned: string;
-		sentToDtmAt: string | null;
+		quantityRealized: string | null;
+		deviationReason: string | null;
 		realizedAt: string | null;
-		realizedBy: number | null;
-		programNumber: string;
+		realizedByUserId: number | null;
+		sentToDtmAt: string | null;
 		dtmStatus: string | null;
 	}[];
 	orderExecutions: {
 		id: number;
 		createdAt: string;
-		completionRate: string | null;
 		orderId: number;
 		comment: string | null;
+		completionRate: string | null;
 		executionDate: string;
 		quantityExecuted: string;
-		executedBy: number;
+		executedByUserId: number;
 	}[];
 	orderFiles: {
 		description: string | null;
@@ -73,23 +72,23 @@ export class OrderDetailDto implements OrderDetail {
 		fileSize: number;
 		filePath: string;
 		mimeType: string | null;
-		uploadedBy: number;
+		uploadedByUserId: number;
 		uploadedAt: string;
 	}[];
 	claims: {
 		id: number;
 		customerId: number;
+		createdByUserId: number;
 		statusId: number;
 		createdAt: string;
 		updatedAt: string;
 		typeId: number;
 		description: string;
-		userId: number;
 		orderId: number | null;
 		operationId: number | null;
 		priority: string | null;
 		resolution: string | null;
-		closedBy: number | null;
+		closedByUserId: number | null;
 		closedAt: string | null;
 	}[];
 	unit: { name: string } | null;
@@ -97,11 +96,12 @@ export class OrderDetailDto implements OrderDetail {
 	orderStatusHistories: {
 		id: number;
 		statusId: number;
-		changedAt: string;
 		orderId: number;
 		changedById: number;
+		changedAt: string;
 		comment: string | null;
 		rejectionReasonId: number | null;
 	}[];
 	good: { id: number; name: string } | null;
+	createdByUser: { id: number; lastName: string; firstName: string } | null;
 }

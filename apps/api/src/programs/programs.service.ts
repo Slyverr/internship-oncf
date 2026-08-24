@@ -45,7 +45,7 @@ export class ProgramsService {
 	async findAll(user: AuthUser) {
 		const where = hasOnePermission(user, Permission.PROGRAMS_MANAGE_OTHER)
 			? {}
-			: { createdBy: user.id };
+			: { createdByUserId: user.id };
 
 		return this.drizzle.db.query.forecastPrograms.findMany({
 			where,
@@ -66,7 +66,7 @@ export class ProgramsService {
 	async findOneForOwnership(id: ProgramId) {
 		const program = await this.drizzle.db.query.forecastPrograms.findFirst({
 			where: { id },
-			columns: { createdBy: true },
+			columns: { createdByUserId: true },
 		});
 
 		return this.ensure(program, id);
