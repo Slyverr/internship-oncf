@@ -1,3 +1,5 @@
+"use client";
+
 import {
 	ChevronsUpDownIcon,
 	LogOutIcon,
@@ -5,6 +7,7 @@ import {
 	UserIcon,
 } from "lucide-react";
 import Link from "next/link";
+
 import { logout } from "@/actions/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -37,21 +40,25 @@ export function SidebarUser() {
 						render={
 							<SidebarMenuButton
 								size="lg"
-								className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+								className="h-12 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
 							/>
 						}
 					>
-						<Avatar className="h-8 w-8 rounded-lg">
+						<Avatar className="size-8 shrink-0 rounded-sm">
 							<AvatarImage alt={name} />
-							<AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
+							<AvatarFallback className="rounded-sm bg-sidebar-primary text-sidebar-primary-foreground font-bold shadow-sm shadow-sidebar-primary/30">
+								{initials}
+							</AvatarFallback>
 						</Avatar>
 
-						<div className="grid flex-1 text-left text-sm leading-tight">
+						<div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
 							<span className="truncate font-medium">{name}</span>
-							<span className="truncate text-xs">{role}</span>
+							<span className="truncate text-xs text-muted-foreground">
+								{role}
+							</span>
 						</div>
 
-						<ChevronsUpDownIcon className="ml-auto size-4" />
+						<ChevronsUpDownIcon className="ml-auto size-4 group-data-[collapsible=icon]:hidden" />
 					</DropdownMenuTrigger>
 
 					<DropdownMenuContent
@@ -60,19 +67,22 @@ export function SidebarUser() {
 						sideOffset={4}
 					>
 						<DropdownMenuItem render={<Link href="/profile" />}>
-							<UserIcon />
+							<UserIcon className="mr-2 size-4 text-muted-foreground" />
 							Profile
 						</DropdownMenuItem>
 
 						<DropdownMenuItem>
-							<SettingsIcon />
+							<SettingsIcon className="mr-2 size-4 text-muted-foreground" />
 							Settings
 						</DropdownMenuItem>
 
 						<DropdownMenuSeparator />
 
-						<DropdownMenuItem onClick={logout}>
-							<LogOutIcon />
+						<DropdownMenuItem
+							onClick={logout}
+							className="text-destructive focus:text-destructive"
+						>
+							<LogOutIcon className="mr-2 size-4" />
 							Log out
 						</DropdownMenuItem>
 					</DropdownMenuContent>
