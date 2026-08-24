@@ -73,6 +73,19 @@ export class OrdersService {
 		return this.ensure(order, id);
 	}
 
+	async findOneForAccess(id: OrderId) {
+		const order = await this.drizzle.db.query.orders.findFirst({
+			where: { id },
+			columns: {
+				id: true,
+				customerId: true,
+				createdByUserId: true,
+			},
+		});
+
+		return this.ensure(order, id);
+	}
+
 	async update(id: OrderId, dto: UpdateOrderDto, user: AuthUser) {
 		await this.persistUpdate(this.drizzle.db, id, toUpdate(dto, user), {
 			history: {

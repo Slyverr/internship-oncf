@@ -7,9 +7,18 @@ import { OrderIdPipe } from "../pipes/order-id.pipe";
 export const OrderOwnershipGuard = createOwnershipGuard<OrdersService, OrderId>(
 	{
 		service: OrdersService,
-		resolveOwnerId: async (service, id) => {
-			const owner = await service.findOneForOwnership(id);
-			return owner.createdByUserId;
+
+		canAccess: async (service, id, user) => {
+			const order = await service.findOneForAccess(id);
+			if (user.customerId === order.customerId) {
+				return true;
+			}
+
+			if (user.id === order.createdByUserId) {
+				return true;
+			}
+
+			return false;
 		},
 
 		pipe: new OrderIdPipe(),
