@@ -21,11 +21,6 @@ export class CreateOrderDto {
 	customerId: number;
 
 	@IsOptional()
-	@IsInt()
-	@Type(() => Number)
-	userId?: number;
-
-	@IsOptional()
 	@Transform(({ value }) => value?.toUpperCase())
 	@IsEnum(OrderStatus)
 	status?: OrderStatus;
