@@ -14,7 +14,13 @@ import { UserId } from "src/users/users.types";
 
 export interface OwnershipGuardOptions<TService, TId> {
 	service: Type<TService>;
-	resolveOwnerId: (service: TService, id: TId) => Promise<UserId>;
+
+	/**
+	 * @deprecated Use canAccess instead.
+	 */
+	resolveOwnerId?: (service: TService, id: TId) => Promise<UserId>;
+
+	canAccess?: (service: TService, id: TId, user: AuthUser) => Promise<boolean>;
 
 	pipe: PipeTransform<string, TId>;
 	permission?: Permission;
@@ -32,7 +38,14 @@ export function createOwnershipGuard<TService, TId>(
 		errorMessage = "You can only access your own resources",
 		param = "id",
 		resolveOwnerId,
+		canAccess,
 	} = options;
+
+	if (!canAccess && !resolveOwnerId) {
+		throw new Error(
+			"OwnershipGuard requires either canAccess or resolveOwnerId",
+		);
+	}
 
 	@Injectable()
 	class OwnershipGuard implements CanActivate {
@@ -51,8 +64,11 @@ export function createOwnershipGuard<TService, TId>(
 				strict: false,
 			});
 
-			const ownerId = await resolveOwnerId(serviceInstance, id);
-			if (ownerId !== user.id) {
+			const accessGranted = canAccess
+				? await canAccess(serviceInstance, id, user)
+				: (await resolveOwnerId!(serviceInstance, id)) === user.id;
+
+			if (!accessGranted) {
 				throw new ForbiddenException(errorMessage);
 			}
 
