@@ -6,7 +6,6 @@ import {
 	createSortedRowModel,
 	FlexRender,
 	rowSortingFeature,
-	sortFns,
 	tableFeatures,
 	useTable,
 } from "@tanstack/react-table";
@@ -16,7 +15,7 @@ import {
 	ChevronUpIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import {
 	Select,
@@ -43,7 +42,6 @@ interface OrdersTableProps {
 const features = tableFeatures({
 	rowSortingFeature,
 	sortedRowModel: createSortedRowModel(),
-	sortFns,
 });
 
 const columns: ColumnDef<typeof features, OrderListDto>[] = [
@@ -100,25 +98,22 @@ export function OrdersTable({ data, isLoading }: OrdersTableProps) {
 	const [globalFilter, setGlobalFilter] = useState("");
 	const [statusFilter, setStatusFilter] = useState("ALL");
 
-	const filteredData = useMemo(() => {
-		const search = globalFilter.trim().toLowerCase();
+	const search = globalFilter.trim().toLowerCase();
+	const filteredData = data.filter((order) => {
+		const matchesSearch =
+			!search ||
+			order.orderNumber?.toLowerCase().includes(search) ||
+			order.customer.companyName.toLowerCase().includes(search) ||
+			order.good.name.toLowerCase().includes(search) ||
+			`${order.createdByUser.firstName} ${order.createdByUser.lastName}`
+				.toLowerCase()
+				.includes(search);
 
-		return data.filter((order) => {
-			const matchesSearch =
-				!search ||
-				order.orderNumber?.toLowerCase().includes(search) ||
-				order.customer.companyName.toLowerCase().includes(search) ||
-				order.good.name.toLowerCase().includes(search) ||
-				`${order.createdByUser.firstName} ${order.createdByUser.lastName}`
-					.toLowerCase()
-					.includes(search);
+		const matchesStatus =
+			statusFilter === "ALL" || order.orderStatus.name === statusFilter;
 
-			const matchesStatus =
-				statusFilter === "ALL" || order.orderStatus.name === statusFilter;
-
-			return matchesSearch && matchesStatus;
-		});
-	}, [data, globalFilter, statusFilter]);
+		return matchesSearch && matchesStatus;
+	});
 
 	const table = useTable({
 		key: "orders-table",
@@ -180,11 +175,7 @@ export function OrdersTable({ data, isLoading }: OrdersTableProps) {
 													type="button"
 													disabled={!canSort}
 													onClick={header.column.getToggleSortingHandler()}
-													className={
-														canSort
-															? "flex w-full items-center gap-2 text-left"
-															: "flex w-full items-center gap-2 text-left"
-													}
+													className="flex w-full items-center gap-2 text-left"
 												>
 													<FlexRender header={header} />
 
