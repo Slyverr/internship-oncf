@@ -1,4 +1,4 @@
-import { HomeIcon, PackageIcon } from "lucide-react";
+import { CalendarIcon, HomeIcon, PackageIcon } from "lucide-react";
 
 export const sidebarRoutes = [
 	{
@@ -11,6 +11,12 @@ export const sidebarRoutes = [
 		title: "Orders",
 		url: "/dashboard/orders",
 		icon: PackageIcon,
+		exact: false,
+	},
+	{
+		title: "Programs",
+		url: "/dashboard/programs",
+		icon: CalendarIcon,
 		exact: false,
 	},
 ];
