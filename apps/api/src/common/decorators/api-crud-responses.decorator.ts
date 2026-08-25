@@ -3,18 +3,26 @@ import { ApiResponse } from "@nestjs/swagger";
 
 type ResponseType = Type<unknown> | [Type<unknown>];
 
-type CrudResponseConfig = {
-	detail: Type<unknown>;
-	list: Type<unknown>;
-	create?: Type<unknown>;
-	update?: Type<unknown>;
-	remove?: Type<unknown>;
-	detailErrors?: HttpStatus[];
-	listErrors?: HttpStatus[];
-	createErrors?: HttpStatus[];
-	updateErrors?: HttpStatus[];
-	removeErrors?: HttpStatus[];
+type CustomResponseConfig = {
+	type: ResponseType;
+	status?: HttpStatus;
+	errors?: HttpStatus[];
 };
+
+type CrudResponseConfig<TCustom extends Record<string, CustomResponseConfig>> =
+	{
+		list: Type<unknown>;
+		detail: Type<unknown>;
+		create?: Type<unknown>;
+		update?: Type<unknown>;
+		remove?: Type<unknown>;
+		listErrors?: HttpStatus[];
+		detailErrors?: HttpStatus[];
+		createErrors?: HttpStatus[];
+		updateErrors?: HttpStatus[];
+		removeErrors?: HttpStatus[];
+		custom?: TCustom;
+	};
 
 function withApiResponses(
 	status: HttpStatus,
@@ -23,12 +31,14 @@ function withApiResponses(
 ) {
 	return applyDecorators(
 		ApiResponse({ status, type }),
-		...errors.map((error) => ApiResponse({ status: error })),
+		...errors.map((status) => ApiResponse({ status })),
 	);
 }
 
-export function createCrudResponses(config: CrudResponseConfig) {
-	return {
+export function createCrudResponses<
+	TCustom extends Record<string, CustomResponseConfig>,
+>(config: CrudResponseConfig<TCustom>) {
+	const base = {
 		detail: () =>
 			withApiResponses(
 				HttpStatus.OK,
@@ -82,4 +92,20 @@ export function createCrudResponses(config: CrudResponseConfig) {
 				],
 			),
 	};
+
+	const custom = Object.fromEntries(
+		Object.entries(config.custom ?? {}).map(([name, options]) => [
+			name,
+			() =>
+				withApiResponses(
+					options.status ?? HttpStatus.OK,
+					options.type,
+					options.errors ?? [HttpStatus.UNAUTHORIZED],
+				),
+		]),
+	) as {
+		[K in keyof TCustom]: () => ReturnType<typeof applyDecorators>;
+	};
+
+	return { ...base, ...custom };
 }
