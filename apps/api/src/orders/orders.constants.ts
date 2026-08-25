@@ -1,5 +1,5 @@
 import { OrderStatus } from "@ecommand/shared";
-import { ORDER_STATUSES } from "src/db/reference-data";
+import { ORDER_STATUSES } from "src/database/reference-data";
 
 export const ORDER_TRANSITION: Record<OrderStatus, OrderStatus[]> = {
 	[OrderStatus.DRAFT]: [OrderStatus.SUBMITTED, OrderStatus.CANCELLED],

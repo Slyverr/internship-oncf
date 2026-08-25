@@ -8,10 +8,10 @@ import { forecastPrograms } from "drizzle/schema";
 import { and, eq, type SQL } from "drizzle-orm";
 import { AuthUser } from "src/auth/auth.types";
 import { hasOnePermission } from "src/auth/auth.utils";
-import { DrizzleService } from "src/db/drizzle.service";
-import { DrizzleDb } from "src/db/drizzle.types";
-import { withDbErrorHandling } from "src/db/drizzle.util";
-import { PROGRAM_STATUSES } from "src/db/reference-data";
+import { DrizzleService } from "src/database/drizzle.service";
+import { DrizzleDb } from "src/database/drizzle.types";
+import { withDbErrorHandling } from "src/database/drizzle.util";
+import { PROGRAM_STATUSES } from "src/database/reference-data";
 import { PROGRAM_STATUS_BY_ID, PROGRAM_TRANSITION } from "./programs.constants";
 import { toCreate, toUpdate } from "./programs.mapper";
 import {

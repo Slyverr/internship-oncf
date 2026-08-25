@@ -1,5 +1,5 @@
 import { ClaimStatus } from "@ecommand/shared";
-import { CLAIM_STATUSES } from "src/db/reference-data";
+import { CLAIM_STATUSES } from "src/database/reference-data";
 
 export const CLAIM_TRANSITION: Record<ClaimStatus, ClaimStatus[]> = {
 	[ClaimStatus.NEW]: [ClaimStatus.IN_PROGRESS, ClaimStatus.REJECTED],

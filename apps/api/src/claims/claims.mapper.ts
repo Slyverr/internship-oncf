@@ -2,7 +2,7 @@ import { ClaimStatus, Permission } from "@ecommand/shared";
 import { ForbiddenException } from "@nestjs/common";
 import { AuthUser } from "src/auth/auth.types";
 import { hasAnyPermission } from "src/auth/auth.utils";
-import { CLAIM_STATUSES, CLAIM_TYPES } from "src/db/reference-data";
+import { CLAIM_STATUSES, CLAIM_TYPES } from "src/database/reference-data";
 import { ClaimInsert, ClaimUpdate } from "./claims.types";
 import { CreateClaimDto } from "./requests/create-claim.dto";
 import { UpdateClaimDto } from "./requests/update-claim.dto";

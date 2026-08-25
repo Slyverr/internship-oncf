@@ -9,10 +9,10 @@ import { claimComments, claimStatusHistory, claims } from "drizzle/schema";
 import { and, eq, type SQL } from "drizzle-orm";
 import { AuthUser } from "src/auth/auth.types";
 import { hasOnePermission } from "src/auth/auth.utils";
-import { DrizzleService } from "src/db/drizzle.service";
-import { DrizzleDb } from "src/db/drizzle.types";
-import { withDbErrorHandling } from "src/db/drizzle.util";
-import { CLAIM_STATUSES } from "src/db/reference-data";
+import { DrizzleService } from "src/database/drizzle.service";
+import { DrizzleDb } from "src/database/drizzle.types";
+import { withDbErrorHandling } from "src/database/drizzle.util";
+import { CLAIM_STATUSES } from "src/database/reference-data";
 import { CLAIM_STATUS_BY_ID, CLAIM_TRANSITION } from "./claims.constants";
 import { toCreate, toUpdate } from "./claims.mapper";
 import {

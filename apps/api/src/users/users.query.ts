@@ -1,4 +1,4 @@
-import { QueryColumns, QueryRelations } from "src/db/drizzle.types";
+import { QueryColumns, QueryRelations } from "src/database/drizzle.types";
 
 type UsersColumns = QueryColumns<"users">;
 type UsersRelations = QueryRelations<"users">;

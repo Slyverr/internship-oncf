@@ -1,5 +1,5 @@
 import { ProgramStatus } from "@ecommand/shared";
-import { PROGRAM_STATUSES } from "src/db/reference-data";
+import { PROGRAM_STATUSES } from "src/database/reference-data";
 
 export const PROGRAM_TRANSITION: Record<ProgramStatus, ProgramStatus[]> = {
 	[ProgramStatus.DRAFT]: [

@@ -6,7 +6,7 @@ import {
 	FindManyQueryOptions,
 	QueryColumns,
 	QueryRelations,
-} from "src/db/drizzle.types";
+} from "src/database/drizzle.types";
 
 type OrdersColumns = QueryColumns<"orders">;
 type OrdersRelations = QueryRelations<"orders">;

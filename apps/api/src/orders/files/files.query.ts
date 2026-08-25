@@ -1,4 +1,4 @@
-import { QueryColumns } from "src/db/drizzle.types";
+import { QueryColumns } from "src/database/drizzle.types";
 
 type OrderFilesColumns = QueryColumns<"orderFiles">;
 

@@ -8,7 +8,7 @@ import { JwtService } from "@nestjs/jwt";
 import bcrypt from "bcryptjs";
 import { passwordResetTokens, userSessions, users } from "drizzle/schema";
 import { eq } from "drizzle-orm";
-import { DrizzleService } from "src/db/drizzle.service";
+import { DrizzleService } from "src/database/drizzle.service";
 import { EmailService } from "src/email/email.service";
 import { UsersService } from "src/users/users.service";
 import { User } from "src/users/users.types";

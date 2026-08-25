@@ -5,8 +5,8 @@ import {
 } from "@nestjs/common";
 import { orderFiles } from "drizzle/schema";
 import { and, eq } from "drizzle-orm";
-import { DrizzleService } from "src/db/drizzle.service";
-import { withDbErrorHandling } from "src/db/drizzle.util";
+import { DrizzleService } from "src/database/drizzle.service";
+import { withDbErrorHandling } from "src/database/drizzle.util";
 import type { OrderId } from "src/orders/orders.types";
 import { StorageService } from "src/storage/storage.service";
 import type { MulterFile } from "src/storage/storage.types";

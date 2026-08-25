@@ -5,8 +5,8 @@ import {
 } from "@nestjs/common";
 import { users } from "drizzle/schema";
 import { eq } from "drizzle-orm";
-import { DrizzleService } from "src/db/drizzle.service";
-import { withDbErrorHandling } from "src/db/drizzle.util";
+import { DrizzleService } from "src/database/drizzle.service";
+import { withDbErrorHandling } from "src/database/drizzle.util";
 import { UserId } from "src/users/users.types";
 import { profileColumns, profileRelations } from "./profile.query";
 import { UpdateProfileDto } from "./requests/update-profile.dto";

@@ -4,7 +4,7 @@ import { AppController } from "./app.controller";
 import { AuthModule } from "./auth/auth.module";
 import { ClaimsModule } from "./claims/claims.module";
 import { CustomersModule } from "./customers/customers.module";
-import { DrizzleModule } from "./db/drizzle.module";
+import { DrizzleModule } from "./database/drizzle.module";
 import { NotificationsModule } from "./notifications/notifications.module";
 import { OrdersModule } from "./orders/orders.module";
 import { ProfileModule } from "./profile/profile.module";

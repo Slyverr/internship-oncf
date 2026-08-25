@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { trains, trainTracking, wagonTracking } from "drizzle/schema";
 import { eq } from "drizzle-orm";
-import { DrizzleService } from "src/db/drizzle.service";
-import { withDbErrorHandling } from "src/db/drizzle.util";
+import { DrizzleService } from "src/database/drizzle.service";
+import { withDbErrorHandling } from "src/database/drizzle.util";
 import { UpdateTrainPositionDto } from "./requests/update-train-position.dto";
 import { UpdateWagonPositionDto } from "./requests/update-wagon-position.dto";
 import {

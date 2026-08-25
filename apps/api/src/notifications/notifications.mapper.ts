@@ -1,7 +1,7 @@
 import {
 	NOTIFICATION_CHANNELS,
 	NOTIFICATION_TYPES,
-} from "src/db/reference-data";
+} from "src/database/reference-data";
 import { NotificationInsert } from "./notifications.types";
 import { CreateNotificationDto } from "./requests/create-notification.dto";
 
