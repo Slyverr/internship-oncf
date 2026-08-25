@@ -2,11 +2,11 @@ import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { OrderDetailsClient } from "@/components/orders/order-details-client";
 import { ordersControllerFindOne } from "@/lib/api/orders";
 
-export default async function Page({
-	params,
-}: {
+interface PageProps {
 	params: Promise<{ id: string }>;
-}) {
+}
+
+export default async function Page({ params }: PageProps) {
 	const { id } = await params;
 	const order = await ordersControllerFindOne(Number(id));
 
