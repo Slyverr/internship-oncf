@@ -1,8 +1,8 @@
 import { Permission, ProgramStatus } from "@ecommand/shared";
 import { ForbiddenException } from "@nestjs/common";
-import { AuthUser } from "src/auth/auth.types";
-import { hasOnePermission } from "src/auth/auth.utils";
-import { PROGRAM_STATUSES } from "src/database/reference-data";
+import { AuthUser } from "@/auth/auth.types";
+import { hasOnePermission } from "@/auth/auth.utils";
+import { PROGRAM_STATUSES } from "@/database/reference-data";
 import { ProgramInsert, ProgramUpdate } from "./programs.types";
 import { CreateProgramDto } from "./requests/create-program.dto";
 import { UpdateProgramDto } from "./requests/update-program.dto";

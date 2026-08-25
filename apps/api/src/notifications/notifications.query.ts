@@ -1,4 +1,4 @@
-import { QueryColumns, QueryRelations } from "src/database/drizzle.types";
+import { QueryColumns, QueryRelations } from "@/database/drizzle.types";
 
 type NotificationsColumns = QueryColumns<"notifications">;
 type NotificationsRelations = QueryRelations<"notifications">;

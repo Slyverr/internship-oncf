@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Put, Request } from "@nestjs/common";
 import { ApiOkResponse, ApiUnauthorizedResponse } from "@nestjs/swagger";
-import type { AuthRequest } from "src/auth/auth.types";
+import type { AuthRequest } from "@/auth/auth.types";
 import { ProfileService } from "./profile.service";
 import { UpdateProfileDto } from "./requests/update-profile.dto";
 import { ProfileDto } from "./responses/profile.dto";

@@ -2,7 +2,7 @@ import * as dotenv from "dotenv";
 import { relations } from "drizzle/relations";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { seedReferenceData } from "src/database/reference-data/reference-data.seeder";
+import { seedReferenceData } from "@/database/reference-data/reference-data.seeder";
 
 dotenv.config();
 

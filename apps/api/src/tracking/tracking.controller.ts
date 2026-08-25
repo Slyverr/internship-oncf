@@ -1,10 +1,10 @@
 import { Permission } from "@ecommand/shared";
 import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
-import { RequireAny } from "src/auth/permissions.decorator";
-import { createCrudResponses } from "src/common/decorators/api-crud-responses.decorator";
-import { OrderOwnershipGuard } from "src/orders/guards/order-ownership.guard";
-import type { OrderId } from "src/orders/orders.types";
-import { OrderIdPipe } from "src/orders/pipes/order-id.pipe";
+import { RequireAny } from "@/auth/permissions.decorator";
+import { createCrudResponses } from "@/common/decorators/api-crud-responses.decorator";
+import { OrderOwnershipGuard } from "@/orders/guards/order-ownership.guard";
+import type { OrderId } from "@/orders/orders.types";
+import { OrderIdPipe } from "@/orders/pipes/order-id.pipe";
 import { TrainIdPipe } from "./pipes/train-id.pipe";
 import { WagonIdPipe } from "./pipes/wagon-id.pipe";
 import { UpdateTrainPositionDto } from "./requests/update-train-position.dto";

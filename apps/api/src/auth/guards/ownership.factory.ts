@@ -8,9 +8,9 @@ import {
 	Type,
 } from "@nestjs/common";
 import { ModuleRef } from "@nestjs/core";
-import { AuthUser } from "src/auth/auth.types";
-import { hasOnePermission } from "src/auth/auth.utils";
-import { UserId } from "src/users/users.types";
+import { AuthUser } from "@/auth/auth.types";
+import { hasOnePermission } from "@/auth/auth.utils";
+import { UserId } from "@/users/users.types";
 
 export interface OwnershipGuardOptions<TService, TId> {
 	service: Type<TService>;

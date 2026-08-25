@@ -9,8 +9,8 @@ import {
 	Post,
 	Put,
 } from "@nestjs/common";
-import { RequireAny } from "src/auth/permissions.decorator";
-import { createCrudResponses } from "src/common/decorators/api-crud-responses.decorator";
+import { RequireAny } from "@/auth/permissions.decorator";
+import { createCrudResponses } from "@/common/decorators/api-crud-responses.decorator";
 import { CustomersService } from "./customers.service";
 import type { CustomerId } from "./customers.types";
 import { CreateCustomerDto } from "./requests/create-customer.dto";

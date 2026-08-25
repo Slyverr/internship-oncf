@@ -12,13 +12,13 @@ import {
 	Request,
 	UseGuards,
 } from "@nestjs/common";
-import type { AuthRequest } from "src/auth/auth.types";
-import { RequireAny } from "src/auth/permissions.decorator";
+import type { AuthRequest } from "@/auth/auth.types";
+import { RequireAny } from "@/auth/permissions.decorator";
 import {
 	ApiResponses,
 	type ApiResponsesOptions,
 	ApiResponsesPatch,
-} from "src/common/decorators/api-responses.decorator";
+} from "@/common/decorators/api-responses.decorator";
 import { ClaimsService } from "./claims.service";
 import type { ClaimId } from "./claims.types";
 import { ClaimOwnershipGuard } from "./guards/claim-ownership.guard";

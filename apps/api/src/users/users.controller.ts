@@ -10,9 +10,9 @@ import {
 	Put,
 	Request,
 } from "@nestjs/common";
-import type { AuthRequest } from "src/auth/auth.types";
-import { RequireAny } from "src/auth/permissions.decorator";
-import { createCrudResponses } from "src/common/decorators/api-crud-responses.decorator";
+import type { AuthRequest } from "@/auth/auth.types";
+import { RequireAny } from "@/auth/permissions.decorator";
+import { createCrudResponses } from "@/common/decorators/api-crud-responses.decorator";
 import { CreateUserDto } from "./requests/create-user.dto";
 import { UpdateUserDto } from "./requests/update-user.dto";
 import { UserDeleteDto } from "./responses/user-delete.dto";

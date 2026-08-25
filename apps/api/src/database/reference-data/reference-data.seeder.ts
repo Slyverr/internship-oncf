@@ -45,7 +45,7 @@ import {
 	ROLE_PERMISSIONS,
 	ROLES,
 	UNITS,
-} from "src/database/reference-data";
+} from "@/database/reference-data";
 
 export type DatabaseClient = NodePgDatabase<typeof relations>;
 

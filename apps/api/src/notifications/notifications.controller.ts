@@ -7,9 +7,9 @@ import {
 	UseGuards,
 } from "@nestjs/common";
 import { ApiOkResponse, ApiUnauthorizedResponse } from "@nestjs/swagger";
-import type { AuthRequest } from "src/auth/auth.types";
-import { createCrudResponses } from "src/common/decorators/api-crud-responses.decorator";
-import { MessageResponseDto } from "src/common/responses/message.dto";
+import type { AuthRequest } from "@/auth/auth.types";
+import { createCrudResponses } from "@/common/decorators/api-crud-responses.decorator";
+import { MessageResponseDto } from "@/common/responses/message.dto";
 import { NotificationOwnershipGuard } from "./guards/notification-ownership.guard";
 import { NotificationsService } from "./notifications.service";
 import type { NotificationId } from "./notifications.types";

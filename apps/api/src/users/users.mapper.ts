@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
-import { AuthUser } from "src/auth/auth.types";
-import { ROLES } from "src/database/reference-data";
+import { AuthUser } from "@/auth/auth.types";
+import { ROLES } from "@/database/reference-data";
 import { CreateUserDto } from "./requests/create-user.dto";
 import { UpdateUserDto } from "./requests/update-user.dto";
 import { UserInsert, UserUpdate } from "./users.types";

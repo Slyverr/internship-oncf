@@ -1,4 +1,4 @@
-import { createOwnershipGuard } from "src/auth/guards/ownership.factory";
+import { createOwnershipGuard } from "@/auth/guards/ownership.factory";
 import { NotificationsService } from "../notifications.service";
 import { NotificationId } from "../notifications.types";
 import { NotificationIdPipe } from "../pipes/notification-id.pipe";

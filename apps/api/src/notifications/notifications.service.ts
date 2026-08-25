@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { notifications } from "drizzle/schema";
 import { and, eq, isNull, sql } from "drizzle-orm";
-import { AuthUser } from "src/auth/auth.types";
-import { DrizzleService } from "src/database/drizzle.service";
-import { withDbErrorHandling } from "src/database/drizzle.util";
+import { AuthUser } from "@/auth/auth.types";
+import { DrizzleService } from "@/database/drizzle.service";
+import { withDbErrorHandling } from "@/database/drizzle.util";
 import { toCreate } from "./notifications.mapper";
 import {
 	notificationDetailColumns,

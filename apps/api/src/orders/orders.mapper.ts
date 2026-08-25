@@ -1,8 +1,8 @@
 import { OrderStatus, Permission } from "@ecommand/shared";
 import { BadRequestException, ForbiddenException } from "@nestjs/common";
-import { AuthUser } from "src/auth/auth.types";
-import { hasOnePermission } from "src/auth/auth.utils";
-import { ORDER_STATUSES } from "src/database/reference-data";
+import { AuthUser } from "@/auth/auth.types";
+import { hasOnePermission } from "@/auth/auth.utils";
+import { ORDER_STATUSES } from "@/database/reference-data";
 import { OrderInsert, OrderUpdate } from "./orders.types";
 import { CreateOrderDto } from "./requests/create-order.dto";
 import { UpdateOrderDto } from "./requests/update-order.dto";

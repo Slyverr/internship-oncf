@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
-import { StorageModule } from "src/storage/storage.module";
-import { UsersModule } from "src/users/users.module";
+import { StorageModule } from "@/storage/storage.module";
+import { UsersModule } from "@/users/users.module";
 import { FilesController } from "./files/files.controller";
 import { FilesService } from "./files/files.service";
 import { OrdersController } from "./orders.controller";

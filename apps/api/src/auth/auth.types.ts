@@ -1,5 +1,5 @@
 import { Permission, Role } from "@ecommand/shared";
-import { User, UserId } from "src/users/users.types";
+import { User, UserId } from "@/users/users.types";
 
 export interface LocalAuthRequest {
 	user: Omit<User, "password">;

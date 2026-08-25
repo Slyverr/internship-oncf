@@ -1,4 +1,4 @@
-import { Assert, Equals } from "src/common/utils/type-assertions";
+import { Assert, Equals } from "@/common/utils/type-assertions";
 import { OrdersService } from "../orders.service";
 
 type EligibleOrderForProgram = Awaited<

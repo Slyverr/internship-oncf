@@ -1,12 +1,12 @@
 import { OrderStatus, Permission } from "@ecommand/shared";
-import { AuthUser } from "src/auth/auth.types";
-import { hasOnePermission } from "src/auth/auth.utils";
-import { ListQueryDto } from "src/common/requests/list-query.dto";
+import { AuthUser } from "@/auth/auth.types";
+import { hasOnePermission } from "@/auth/auth.utils";
+import { ListQueryDto } from "@/common/requests/list-query.dto";
 import {
 	FindManyQueryOptions,
 	QueryColumns,
 	QueryRelations,
-} from "src/database/drizzle.types";
+} from "@/database/drizzle.types";
 
 type OrdersColumns = QueryColumns<"orders">;
 type OrdersRelations = QueryRelations<"orders">;

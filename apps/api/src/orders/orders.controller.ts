@@ -13,10 +13,10 @@ import {
 	Request,
 	UseGuards,
 } from "@nestjs/common";
-import type { AuthRequest } from "src/auth/auth.types";
-import { RequireAny } from "src/auth/permissions.decorator";
-import { createCrudResponses } from "src/common/decorators/api-crud-responses.decorator";
-import { ListQueryDto } from "src/common/requests/list-query.dto";
+import type { AuthRequest } from "@/auth/auth.types";
+import { RequireAny } from "@/auth/permissions.decorator";
+import { createCrudResponses } from "@/common/decorators/api-crud-responses.decorator";
+import { ListQueryDto } from "@/common/requests/list-query.dto";
 import { OrderOwnershipGuard } from "./guards/order-ownership.guard";
 import { OrdersService } from "./orders.service";
 import type { OrderId } from "./orders.types";

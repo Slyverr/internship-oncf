@@ -1,5 +1,5 @@
 import { Permission } from "@ecommand/shared";
-import { createOwnershipGuard } from "src/auth/guards/ownership.factory";
+import { createOwnershipGuard } from "@/auth/guards/ownership.factory";
 import { OrdersService } from "../orders.service";
 import { OrderId } from "../orders.types";
 import { OrderIdPipe } from "../pipes/order-id.pipe";

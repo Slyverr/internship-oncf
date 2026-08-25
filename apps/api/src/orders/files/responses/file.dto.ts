@@ -1,4 +1,4 @@
-import { Assert, Equals } from "src/common/utils/type-assertions";
+import { Assert, Equals } from "@/common/utils/type-assertions";
 import { ListFiles, UploadFile } from "../files.types";
 
 type _UploadAssertion = Assert<Equals<FileDto, UploadFile>>;

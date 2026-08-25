@@ -1,4 +1,4 @@
-import { Assert, Equals } from "src/common/utils/type-assertions";
+import { Assert, Equals } from "@/common/utils/type-assertions";
 import { OrderDetail } from "../orders.types";
 
 type _Assertion = Assert<Equals<OrderDetailDto, OrderDetail>>;

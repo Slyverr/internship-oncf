@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { customers } from "drizzle/schema";
 import { eq } from "drizzle-orm";
-import { DrizzleService } from "src/database/drizzle.service";
-import { withDbErrorHandling } from "src/database/drizzle.util";
+import { DrizzleService } from "@/database/drizzle.service";
+import { withDbErrorHandling } from "@/database/drizzle.util";
 import { toCreate, toUpdate } from "./customers.mapper";
 import { customerDetailColumns, customerListColumns } from "./customers.query";
 import { CustomerId, CustomerUpdate } from "./customers.types";
