@@ -1,5 +1,6 @@
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
-import { UnderConstruction } from "@/components/under-construction";
+import { ProgramDetailsClient } from "@/components/programs/program-details-client";
+import { programsControllerFindOne } from "@/lib/api/programs";
 
 interface PageProps {
 	params: Promise<{ id: string }>;
@@ -7,6 +8,7 @@ interface PageProps {
 
 export default async function Page({ params }: PageProps) {
 	const { id } = await params;
+	const program = await programsControllerFindOne(Number(id));
 
 	return (
 		<>
@@ -17,7 +19,7 @@ export default async function Page({ params }: PageProps) {
 				]}
 			/>
 
-			<UnderConstruction />
+			<ProgramDetailsClient program={program} />
 		</>
 	);
 }
