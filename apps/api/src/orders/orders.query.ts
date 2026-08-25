@@ -1,4 +1,12 @@
-import { QueryColumns, QueryRelations } from "src/db/drizzle.types";
+import { OrderStatus, Permission } from "@ecommand/shared";
+import { AuthUser } from "src/auth/auth.types";
+import { hasOnePermission } from "src/auth/auth.utils";
+import { ListQueryDto } from "src/common/requests/list-query.dto";
+import {
+	FindManyQueryOptions,
+	QueryColumns,
+	QueryRelations,
+} from "src/db/drizzle.types";
 
 type OrdersColumns = QueryColumns<"orders">;
 type OrdersRelations = QueryRelations<"orders">;
@@ -60,3 +68,82 @@ export const orderDetailRelations = {
 	orderExecutions: true,
 	orderFiles: true,
 } satisfies OrdersRelations;
+
+type EligibleProgramOrdersWhere = FindManyQueryOptions<"orders">["where"];
+
+export function buildEligibleProgramOrdersFilters(
+	user: AuthUser,
+	query: ListQueryDto,
+): EligibleProgramOrdersWhere {
+	const filters: EligibleProgramOrdersWhere = {
+		orderStatus: {
+			name: {
+				in: [
+					OrderStatus.APPROVED,
+					OrderStatus.SENT_TO_DTM,
+					OrderStatus.IN_PROGRESS,
+				],
+			},
+		},
+	};
+
+	if (!hasOnePermission(user, Permission.ORDERS_MANAGE_OTHER)) {
+		filters.createdByUserId = user.id;
+	}
+
+	if (query.search) {
+		filters.orderNumber = {
+			ilike: `%${query.search}%`,
+		};
+	}
+
+	return filters;
+}
+
+type EligibleProgramOrdersOrderBy = FindManyQueryOptions<"orders">["orderBy"];
+
+export function buildEligibleProgramOrdersOrder(
+	query: ListQueryDto,
+): EligibleProgramOrdersOrderBy {
+	const sortOrder = query.sortOrder ?? "desc";
+
+	switch (query.sortBy) {
+		case "orderNumber":
+			return {
+				orderNumber: sortOrder,
+				id: sortOrder,
+			};
+
+		case "createdAt":
+			return {
+				createdAt: sortOrder,
+				id: sortOrder,
+			};
+
+		default:
+			return {
+				orderDate: "desc",
+				id: "desc",
+			};
+	}
+}
+
+export function buildEligibleProgramOrdersQuery(
+	user: AuthUser,
+	query: ListQueryDto,
+) {
+	return {
+		where: buildEligibleProgramOrdersFilters(user, query),
+
+		columns: {
+			id: true,
+			orderNumber: true,
+			quantityDemanded: true,
+		},
+
+		orderBy: buildEligibleProgramOrdersOrder(query),
+
+		limit: query.limit,
+		offset: (query.page - 1) * query.limit,
+	} satisfies FindManyQueryOptions<"orders">;
+}

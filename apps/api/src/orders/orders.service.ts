@@ -8,6 +8,7 @@ import { orderStatusHistory, orders } from "drizzle/schema";
 import { and, eq, type SQL } from "drizzle-orm";
 import { AuthUser } from "src/auth/auth.types";
 import { hasOnePermission } from "src/auth/auth.utils";
+import { ListQueryDto } from "src/common/requests/list-query.dto";
 import { DrizzleService } from "src/db/drizzle.service";
 import { DrizzleDb } from "src/db/drizzle.types";
 import { withDbErrorHandling } from "src/db/drizzle.util";
@@ -16,6 +17,7 @@ import { UserId } from "src/users/users.types";
 import { ORDER_STATUS_BY_ID, ORDER_TRANSITION } from "./orders.constants";
 import { toCreate, toUpdate } from "./orders.mapper";
 import {
+	buildEligibleProgramOrdersQuery,
 	orderDetailRelations,
 	orderListColumns,
 	orderListRelations,
@@ -53,6 +55,12 @@ export class OrdersService {
 			columns: orderListColumns,
 			with: orderListRelations,
 		});
+	}
+
+	async findEligibleForPrograms(user: AuthUser, query: ListQueryDto) {
+		return this.drizzle.db.query.orders.findMany(
+			buildEligibleProgramOrdersQuery(user, query),
+		);
 	}
 
 	async findOne(id: OrderId) {

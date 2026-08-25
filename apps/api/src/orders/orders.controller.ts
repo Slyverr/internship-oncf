@@ -9,12 +9,14 @@ import {
 	Param,
 	Patch,
 	Post,
+	Query,
 	Request,
 	UseGuards,
 } from "@nestjs/common";
 import type { AuthRequest } from "src/auth/auth.types";
 import { RequireAny } from "src/auth/permissions.decorator";
 import { createCrudResponses } from "src/common/decorators/api-crud-responses.decorator";
+import { ListQueryDto } from "src/common/requests/list-query.dto";
 import { OrderOwnershipGuard } from "./guards/order-ownership.guard";
 import { OrdersService } from "./orders.service";
 import type { OrderId } from "./orders.types";
@@ -22,6 +24,7 @@ import { OrderIdPipe } from "./pipes/order-id.pipe";
 import { CreateOrderDto } from "./requests/create-order.dto";
 import { RejectOrderDto } from "./requests/reject-order.dto";
 import { UpdateOrderDto } from "./requests/update-order.dto";
+import { EligibleOrderForProgramDto } from "./responses/eligible-order-for-program.dto";
 import { OrderDeleteDto } from "./responses/order-delete.dto";
 import { OrderDetailDto } from "./responses/order-detail.dto";
 import { OrderListDto } from "./responses/order-list.dto";
@@ -33,10 +36,19 @@ const {
 	detail: OrderDetailResponse,
 	create: OrderCreateResponse,
 	remove: OrderDeleteResponse,
+	eligibleForPrograms: EligibleOrderForProgramsResponse,
 } = createCrudResponses({
 	list: OrderListDto,
 	detail: OrderDetailDto,
 	remove: OrderDeleteDto,
+
+	custom: {
+		eligibleForPrograms: {
+			type: [EligibleOrderForProgramDto],
+			status: HttpStatus.OK,
+			errors: [HttpStatus.UNAUTHORIZED],
+		},
+	},
 });
 
 @Controller("orders")
@@ -59,6 +71,17 @@ export class OrdersController {
 	@OrderListResponse()
 	async findAll(@Request() req: AuthRequest) {
 		return this.ordersService.findAll(req.user);
+	}
+
+	@Get("eligible-for-programs")
+	@RequireAny(Permission.ORDERS_READ)
+	@EligibleOrderForProgramsResponse()
+	async findEligibleForPrograms(
+		@Request()
+		req: AuthRequest,
+		@Query() query: ListQueryDto,
+	) {
+		return this.ordersService.findEligibleForPrograms(req.user, query);
 	}
 
 	@Get(":id")
