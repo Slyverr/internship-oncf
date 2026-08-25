@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
-import { UnderConstruction } from "@/components/under-construction";
+import { ProgramCreateForm } from "@/components/programs/program-create-form";
 
 export const metadata: Metadata = {
 	title: "New Program",
@@ -17,7 +17,7 @@ export default function Page() {
 				]}
 			/>
 
-			<UnderConstruction />
+			<ProgramCreateForm />
 		</>
 	);
 }
