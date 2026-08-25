@@ -26,9 +26,11 @@ import type {
 
 import type {
   CreateOrderDto,
+  EligibleOrderForProgramDto,
   OrderDeleteDto,
   OrderDetailDto,
   OrderListDto,
+  OrdersControllerFindEligibleForProgramsParams,
   RejectOrderDto,
   UpdateOrderDto
 } from './generated.schemas';
@@ -189,6 +191,93 @@ export function useOrdersControllerFindAll<TData = Awaited<ReturnType<typeof ord
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getOrdersControllerFindAllQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const ordersControllerFindEligibleForPrograms = (
+    params: OrdersControllerFindEligibleForProgramsParams,
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<EligibleOrderForProgramDto[]>(
+      {url: `/orders/eligible-for-programs`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+
+
+
+
+export const getOrdersControllerFindEligibleForProgramsQueryKey = (params?: OrdersControllerFindEligibleForProgramsParams,) => {
+    return [
+    `/orders/eligible-for-programs`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getOrdersControllerFindEligibleForProgramsQueryOptions = <TData = Awaited<ReturnType<typeof ordersControllerFindEligibleForPrograms>>, TError = void>(params: OrdersControllerFindEligibleForProgramsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindEligibleForPrograms>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getOrdersControllerFindEligibleForProgramsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof ordersControllerFindEligibleForPrograms>>> = ({ signal }) => ordersControllerFindEligibleForPrograms(params, requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindEligibleForPrograms>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type OrdersControllerFindEligibleForProgramsQueryResult = NonNullable<Awaited<ReturnType<typeof ordersControllerFindEligibleForPrograms>>>
+export type OrdersControllerFindEligibleForProgramsQueryError = void
+
+
+export function useOrdersControllerFindEligibleForPrograms<TData = Awaited<ReturnType<typeof ordersControllerFindEligibleForPrograms>>, TError = void>(
+ params: OrdersControllerFindEligibleForProgramsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindEligibleForPrograms>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof ordersControllerFindEligibleForPrograms>>,
+          TError,
+          Awaited<ReturnType<typeof ordersControllerFindEligibleForPrograms>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useOrdersControllerFindEligibleForPrograms<TData = Awaited<ReturnType<typeof ordersControllerFindEligibleForPrograms>>, TError = void>(
+ params: OrdersControllerFindEligibleForProgramsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindEligibleForPrograms>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof ordersControllerFindEligibleForPrograms>>,
+          TError,
+          Awaited<ReturnType<typeof ordersControllerFindEligibleForPrograms>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useOrdersControllerFindEligibleForPrograms<TData = Awaited<ReturnType<typeof ordersControllerFindEligibleForPrograms>>, TError = void>(
+ params: OrdersControllerFindEligibleForProgramsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindEligibleForPrograms>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useOrdersControllerFindEligibleForPrograms<TData = Awaited<ReturnType<typeof ordersControllerFindEligibleForPrograms>>, TError = void>(
+ params: OrdersControllerFindEligibleForProgramsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ordersControllerFindEligibleForPrograms>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getOrdersControllerFindEligibleForProgramsQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

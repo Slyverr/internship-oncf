@@ -424,6 +424,15 @@ export interface OrderListDto {
   createdByUser: OrderListDtoCreatedByUser;
 }
 
+export interface Object { [key: string]: unknown }
+
+export interface EligibleOrderForProgramDto {
+  id: number;
+  /** @nullable */
+  orderNumber: string | null;
+  quantityDemanded: string;
+}
+
 export type UpdateOrderDtoStatus = typeof UpdateOrderDtoStatus[keyof typeof UpdateOrderDtoStatus];
 
 
@@ -1158,4 +1167,27 @@ export interface UpdateProfileDto {
   /** @maxLength 100 */
   lastName?: string;
 }
+
+export type OrdersControllerFindEligibleForProgramsParams = {
+search?: string;
+sortBy?: string;
+sortOrder?: OrdersControllerFindEligibleForProgramsSortOrder;
+/**
+ * @minimum 1
+ */
+page?: Object;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+limit?: Object;
+};
+
+export type OrdersControllerFindEligibleForProgramsSortOrder = typeof OrdersControllerFindEligibleForProgramsSortOrder[keyof typeof OrdersControllerFindEligibleForProgramsSortOrder];
+
+
+export const OrdersControllerFindEligibleForProgramsSortOrder = {
+  asc: 'asc',
+  desc: 'desc',
+} as const;
 
