@@ -9,6 +9,7 @@ import {
 	Param,
 	Patch,
 	Post,
+	Query,
 	Request,
 	UseGuards,
 } from "@nestjs/common";
@@ -20,6 +21,7 @@ import { ProgramIdPipe } from "./pipes/program-id.pipe";
 import { ProgramsService } from "./programs.service";
 import type { ProgramId } from "./programs.types";
 import { CreateProgramDto } from "./requests/create-program.dto";
+import { ListProgramQueryDto } from "./requests/list-program.dto";
 import { UpdateProgramDto } from "./requests/update-program.dto";
 import { ProgramDeleteDto } from "./responses/program-delete.dto";
 import { ProgramDetailDto } from "./responses/program-detail.dto";
@@ -53,8 +55,11 @@ export class ProgramsController {
 	@Get()
 	@RequireAny(Permission.PROGRAMS_READ)
 	@ProgramListResponse()
-	async findAll(@Request() req: AuthRequest) {
-		return this.programsService.findAll(req.user);
+	async findAll(
+		@Request() req: AuthRequest,
+		@Query() query: ListProgramQueryDto,
+	) {
+		return this.programsService.findAll(req.user, query);
 	}
 
 	@Get(":id")

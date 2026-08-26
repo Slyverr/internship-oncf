@@ -1,9 +1,13 @@
+import { Permission } from "@ecommand/shared";
 import { forecastPrograms } from "drizzle/schema";
 import { eq, type SQL } from "drizzle-orm";
+import { AuthUser } from "@/auth/auth.types";
+import { hasOnePermission } from "@/auth/auth.utils";
 import type { DrizzleDb } from "@/database/drizzle.types";
 import { QueryColumns, QueryRelations } from "@/database/drizzle.types";
 import { withDbErrorHandling } from "@/database/drizzle.util";
 import type { ProgramId, ProgramInsert, ProgramUpdate } from "./programs.types";
+import { ListProgramQueryDto } from "./requests/list-program.dto";
 
 type ProgramsColumns = QueryColumns<"forecastPrograms">;
 type ProgramsRelations = QueryRelations<"forecastPrograms">;
@@ -73,12 +77,54 @@ export async function createProgram(db: DrizzleDb, values: ProgramInsert) {
 
 export async function findPrograms(
 	db: DrizzleDb,
-	where: Partial<{ createdByUserId: number }>,
+	user: AuthUser,
+	query: ListProgramQueryDto,
 ) {
+	const {
+		page = 1,
+		limit = 10,
+		search,
+		orderId,
+		userId,
+		status,
+		dtmStatus,
+		sortBy = "createdAt",
+		sortOrder = "desc",
+	} = query;
+
+	const createdByUserId = hasOnePermission(
+		user,
+		Permission.PROGRAMS_MANAGE_OTHER,
+	)
+		? userId
+		: user.id;
+
 	return db.query.forecastPrograms.findMany({
-		where,
+		where: {
+			...(createdByUserId !== undefined && { createdByUserId }),
+			...(orderId !== undefined && { orderId }),
+			...(status && {
+				programStatus: {
+					name: status,
+				},
+			}),
+			...(dtmStatus && { dtmStatus }),
+			...(search && {
+				programNumber: {
+					ilike: `%${search}%`,
+				},
+			}),
+		},
+
 		columns: programListColumns,
 		with: programListRelations,
+
+		orderBy: {
+			[sortBy]: sortOrder,
+		},
+
+		limit,
+		offset: (page - 1) * limit,
 	});
 }
 

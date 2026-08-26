@@ -1,4 +1,4 @@
-import { Permission, ProgramStatus } from "@ecommand/shared";
+import { ProgramStatus } from "@ecommand/shared";
 import {
 	ConflictException,
 	Injectable,
@@ -7,7 +7,6 @@ import {
 import { forecastPrograms } from "drizzle/schema";
 import { and, eq } from "drizzle-orm";
 import { AuthUser } from "@/auth/auth.types";
-import { hasOnePermission } from "@/auth/auth.utils";
 import { DrizzleService } from "@/database/drizzle.service";
 import { PROGRAM_STATUSES } from "@/database/reference-data";
 import { PROGRAM_STATUS_BY_ID, PROGRAM_TRANSITION } from "./programs.constants";
@@ -23,6 +22,7 @@ import {
 } from "./programs.query";
 import type { ProgramId } from "./programs.types";
 import { CreateProgramDto } from "./requests/create-program.dto";
+import { ListProgramQueryDto } from "./requests/list-program.dto";
 import { UpdateProgramDto } from "./requests/update-program.dto";
 
 @Injectable()
@@ -34,12 +34,8 @@ export class ProgramsService {
 		return this.findOne(created.id);
 	}
 
-	async findAll(user: AuthUser) {
-		const where = !hasOnePermission(user, Permission.PROGRAMS_MANAGE_OTHER)
-			? { createdByUserId: user.id }
-			: {};
-
-		return findPrograms(this.drizzle.db, where);
+	async findAll(user: AuthUser, query: ListProgramQueryDto) {
+		return findPrograms(this.drizzle.db, user, query);
 	}
 
 	async findOne(id: ProgramId) {
