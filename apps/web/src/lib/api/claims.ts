@@ -29,6 +29,7 @@ import type {
   ClaimDeleteDto,
   ClaimDetailDto,
   ClaimListDto,
+  ClaimsControllerFindAllParams,
   CreateClaimDto,
   UpdateClaimDto
 } from './generated.schemas';
@@ -115,13 +116,14 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getClaimsControllerCreateMutationOptions(options), queryClient);
     }
     export const claimsControllerFindAll = (
-
+    params: ClaimsControllerFindAllParams,
  options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
 ) => {
 
 
       return customFetch<ClaimListDto[]>(
-      {url: `/claims`, method: 'GET', signal
+      {url: `/claims`, method: 'GET',
+        params, signal
     },
       options);
     }
@@ -129,23 +131,23 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-export const getClaimsControllerFindAllQueryKey = () => {
+export const getClaimsControllerFindAllQueryKey = (params?: ClaimsControllerFindAllParams,) => {
     return [
-    `/claims`
+    `/claims`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getClaimsControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof claimsControllerFindAll>>, TError = void>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getClaimsControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof claimsControllerFindAll>>, TError = void>(params: ClaimsControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getClaimsControllerFindAllQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getClaimsControllerFindAllQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof claimsControllerFindAll>>> = ({ signal }) => claimsControllerFindAll(requestOptions, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof claimsControllerFindAll>>> = ({ signal }) => claimsControllerFindAll(params, requestOptions, signal);
 
 
 
@@ -159,7 +161,7 @@ export type ClaimsControllerFindAllQueryError = void
 
 
 export function useClaimsControllerFindAll<TData = Awaited<ReturnType<typeof claimsControllerFindAll>>, TError = void>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerFindAll>>, TError, TData>> & Pick<
+ params: ClaimsControllerFindAllParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerFindAll>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof claimsControllerFindAll>>,
           TError,
@@ -169,7 +171,7 @@ export function useClaimsControllerFindAll<TData = Awaited<ReturnType<typeof cla
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useClaimsControllerFindAll<TData = Awaited<ReturnType<typeof claimsControllerFindAll>>, TError = void>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerFindAll>>, TError, TData>> & Pick<
+ params: ClaimsControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerFindAll>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof claimsControllerFindAll>>,
           TError,
@@ -179,16 +181,16 @@ export function useClaimsControllerFindAll<TData = Awaited<ReturnType<typeof cla
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useClaimsControllerFindAll<TData = Awaited<ReturnType<typeof claimsControllerFindAll>>, TError = void>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ params: ClaimsControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
 export function useClaimsControllerFindAll<TData = Awaited<ReturnType<typeof claimsControllerFindAll>>, TError = void>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ params: ClaimsControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getClaimsControllerFindAllQueryOptions(options)
+  const queryOptions = getClaimsControllerFindAllQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

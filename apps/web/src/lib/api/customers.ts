@@ -29,6 +29,7 @@ import type {
   CustomerDeleteDto,
   CustomerDetailDto,
   CustomerListDto,
+  CustomersControllerFindAllParams,
   UpdateCustomerDto
 } from './generated.schemas';
 
@@ -56,13 +57,14 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 };
 
 export const customersControllerFindAll = (
-
+    params: CustomersControllerFindAllParams,
  options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
 ) => {
 
 
       return customFetch<CustomerListDto[]>(
-      {url: `/customers`, method: 'GET', signal
+      {url: `/customers`, method: 'GET',
+        params, signal
     },
       options);
     }
@@ -70,23 +72,23 @@ export const customersControllerFindAll = (
 
 
 
-export const getCustomersControllerFindAllQueryKey = () => {
+export const getCustomersControllerFindAllQueryKey = (params?: CustomersControllerFindAllParams,) => {
     return [
-    `/customers`
+    `/customers`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getCustomersControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof customersControllerFindAll>>, TError = void>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getCustomersControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof customersControllerFindAll>>, TError = void>(params: CustomersControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getCustomersControllerFindAllQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getCustomersControllerFindAllQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof customersControllerFindAll>>> = ({ signal }) => customersControllerFindAll(requestOptions, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof customersControllerFindAll>>> = ({ signal }) => customersControllerFindAll(params, requestOptions, signal);
 
 
 
@@ -100,7 +102,7 @@ export type CustomersControllerFindAllQueryError = void
 
 
 export function useCustomersControllerFindAll<TData = Awaited<ReturnType<typeof customersControllerFindAll>>, TError = void>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindAll>>, TError, TData>> & Pick<
+ params: CustomersControllerFindAllParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindAll>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof customersControllerFindAll>>,
           TError,
@@ -110,7 +112,7 @@ export function useCustomersControllerFindAll<TData = Awaited<ReturnType<typeof 
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useCustomersControllerFindAll<TData = Awaited<ReturnType<typeof customersControllerFindAll>>, TError = void>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindAll>>, TError, TData>> & Pick<
+ params: CustomersControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindAll>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof customersControllerFindAll>>,
           TError,
@@ -120,16 +122,16 @@ export function useCustomersControllerFindAll<TData = Awaited<ReturnType<typeof 
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useCustomersControllerFindAll<TData = Awaited<ReturnType<typeof customersControllerFindAll>>, TError = void>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ params: CustomersControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
 export function useCustomersControllerFindAll<TData = Awaited<ReturnType<typeof customersControllerFindAll>>, TError = void>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ params: CustomersControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getCustomersControllerFindAllQueryOptions(options)
+  const queryOptions = getCustomersControllerFindAllQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

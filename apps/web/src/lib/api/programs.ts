@@ -29,6 +29,7 @@ import type {
   ProgramDeleteDto,
   ProgramDetailDto,
   ProgramListDto,
+  ProgramsControllerFindAllParams,
   UpdateProgramDto
 } from './generated.schemas';
 
@@ -114,13 +115,14 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getProgramsControllerCreateMutationOptions(options), queryClient);
     }
     export const programsControllerFindAll = (
-
+    params: ProgramsControllerFindAllParams,
  options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
 ) => {
 
 
       return customFetch<ProgramListDto[]>(
-      {url: `/programs`, method: 'GET', signal
+      {url: `/programs`, method: 'GET',
+        params, signal
     },
       options);
     }
@@ -128,23 +130,23 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-export const getProgramsControllerFindAllQueryKey = () => {
+export const getProgramsControllerFindAllQueryKey = (params?: ProgramsControllerFindAllParams,) => {
     return [
-    `/programs`
+    `/programs`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getProgramsControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof programsControllerFindAll>>, TError = void>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof programsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getProgramsControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof programsControllerFindAll>>, TError = void>(params: ProgramsControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof programsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getProgramsControllerFindAllQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getProgramsControllerFindAllQueryKey(params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof programsControllerFindAll>>> = ({ signal }) => programsControllerFindAll(requestOptions, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof programsControllerFindAll>>> = ({ signal }) => programsControllerFindAll(params, requestOptions, signal);
 
 
 
@@ -158,7 +160,7 @@ export type ProgramsControllerFindAllQueryError = void
 
 
 export function useProgramsControllerFindAll<TData = Awaited<ReturnType<typeof programsControllerFindAll>>, TError = void>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof programsControllerFindAll>>, TError, TData>> & Pick<
+ params: ProgramsControllerFindAllParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof programsControllerFindAll>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof programsControllerFindAll>>,
           TError,
@@ -168,7 +170,7 @@ export function useProgramsControllerFindAll<TData = Awaited<ReturnType<typeof p
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useProgramsControllerFindAll<TData = Awaited<ReturnType<typeof programsControllerFindAll>>, TError = void>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof programsControllerFindAll>>, TError, TData>> & Pick<
+ params: ProgramsControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof programsControllerFindAll>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof programsControllerFindAll>>,
           TError,
@@ -178,16 +180,16 @@ export function useProgramsControllerFindAll<TData = Awaited<ReturnType<typeof p
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useProgramsControllerFindAll<TData = Awaited<ReturnType<typeof programsControllerFindAll>>, TError = void>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof programsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ params: ProgramsControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof programsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
 export function useProgramsControllerFindAll<TData = Awaited<ReturnType<typeof programsControllerFindAll>>, TError = void>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof programsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ params: ProgramsControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof programsControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getProgramsControllerFindAllQueryOptions(options)
+  const queryOptions = getProgramsControllerFindAllQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

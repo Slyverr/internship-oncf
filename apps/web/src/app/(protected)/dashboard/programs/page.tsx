@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-	const programs = await programsControllerFindAll();
+	const programs = await programsControllerFindAll({});
 
 	return (
 		<>

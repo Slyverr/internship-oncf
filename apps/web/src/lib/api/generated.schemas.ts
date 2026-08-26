@@ -322,8 +322,7 @@ export interface OrderDetailDto {
   statusId: number;
   /** @nullable */
   supervisor: string | null;
-  /** @nullable */
-  orderNumber: string | null;
+  orderNumber: string;
   /** @nullable */
   movementTypeId: number | null;
   /** @nullable */
@@ -409,8 +408,7 @@ export type OrderListDtoCreatedByUser = {
 export interface OrderListDto {
   id: number;
   createdAt: string;
-  /** @nullable */
-  orderNumber: string | null;
+  orderNumber: string;
   quantityDemanded: string;
   /** @nullable */
   quantityAchieved: string | null;
@@ -428,8 +426,7 @@ export interface OrderListDto {
 
 export interface EligibleOrderForProgramDto {
   id: number;
-  /** @nullable */
-  orderNumber: string | null;
+  orderNumber: string;
   quantityDemanded: string;
 }
 
@@ -584,8 +581,7 @@ export type ProgramDetailDtoForecastProgramHistoriesItem = {
 
 export type ProgramDetailDtoOrder = {
   id: number;
-  /** @nullable */
-  orderNumber: string | null;
+  orderNumber: string;
 };
 
 export type ProgramDetailDtoCreatedByUser = {
@@ -665,8 +661,7 @@ export type ProgramListDtoProgramStatus = {
 
 export type ProgramListDtoOrder = {
   id: number;
-  /** @nullable */
-  orderNumber: string | null;
+  orderNumber: string;
 };
 
 export type ProgramListDtoCreatedByUser = {
@@ -883,8 +878,7 @@ export type ClaimDetailDtoCreatedByUser = {
 
 export type ClaimDetailDtoOrder = {
   id: number;
-  /** @nullable */
-  orderNumber: string | null;
+  orderNumber: string;
 };
 
 export type ClaimDetailDtoAccessoryOperation = {
@@ -953,8 +947,7 @@ export type ClaimListDtoCreatedByUser = {
 
 export type ClaimListDtoOrder = {
   id: number;
-  /** @nullable */
-  orderNumber: string | null;
+  orderNumber: string;
 };
 
 export type ClaimListDtoAccessoryOperation = {
@@ -1231,6 +1224,140 @@ export type OrdersControllerFindEligibleForProgramsSortOrder = typeof OrdersCont
 
 
 export const OrdersControllerFindEligibleForProgramsSortOrder = {
+  asc: 'asc',
+  desc: 'desc',
+} as const;
+
+export type ProgramsControllerFindAllParams = {
+orderId?: number;
+userId?: number;
+status?: ProgramsControllerFindAllStatus;
+dtmStatus?: string;
+/**
+ * @minimum 1
+ */
+page?: Object;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+limit?: Object;
+search?: string;
+sortBy?: string;
+sortOrder?: ProgramsControllerFindAllSortOrder;
+};
+
+export type ProgramsControllerFindAllStatus = typeof ProgramsControllerFindAllStatus[keyof typeof ProgramsControllerFindAllStatus];
+
+
+export const ProgramsControllerFindAllStatus = {
+  DRAFT: 'DRAFT',
+  PENDING_APPROVAL: 'PENDING_APPROVAL',
+  APPROVED: 'APPROVED',
+  SENT_TO_DTM: 'SENT_TO_DTM',
+  CONFIRMED: 'CONFIRMED',
+  IN_PROGRESS: 'IN_PROGRESS',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED',
+} as const;
+
+export type ProgramsControllerFindAllSortOrder = typeof ProgramsControllerFindAllSortOrder[keyof typeof ProgramsControllerFindAllSortOrder];
+
+
+export const ProgramsControllerFindAllSortOrder = {
+  asc: 'asc',
+  desc: 'desc',
+} as const;
+
+export type CustomersControllerFindAllParams = {
+typeId?: number;
+isActive?: boolean;
+/**
+ * @minimum 1
+ */
+page?: Object;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+limit?: Object;
+search?: string;
+sortBy?: string;
+sortOrder?: CustomersControllerFindAllSortOrder;
+};
+
+export type CustomersControllerFindAllSortOrder = typeof CustomersControllerFindAllSortOrder[keyof typeof CustomersControllerFindAllSortOrder];
+
+
+export const CustomersControllerFindAllSortOrder = {
+  asc: 'asc',
+  desc: 'desc',
+} as const;
+
+export type ClaimsControllerFindAllParams = {
+customerId?: number;
+userId?: number;
+orderId?: number;
+operationId?: number;
+type?: ClaimsControllerFindAllType;
+status?: ClaimsControllerFindAllStatus;
+priority?: ClaimsControllerFindAllPriority;
+/**
+ * @minimum 1
+ */
+page?: Object;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+limit?: Object;
+search?: string;
+sortBy?: string;
+sortOrder?: ClaimsControllerFindAllSortOrder;
+};
+
+export type ClaimsControllerFindAllType = typeof ClaimsControllerFindAllType[keyof typeof ClaimsControllerFindAllType];
+
+
+export const ClaimsControllerFindAllType = {
+  DELIVERY_DELAY: 'DELIVERY_DELAY',
+  DAMAGED_GOODS: 'DAMAGED_GOODS',
+  INCORRECT_QUANTITY: 'INCORRECT_QUANTITY',
+  NON_COMPLIANT_QUALITY: 'NON_COMPLIANT_QUALITY',
+  BILLING_ISSUE: 'BILLING_ISSUE',
+  DOCUMENTATION_PROBLEM: 'DOCUMENTATION_PROBLEM',
+  CUSTOMER_SERVICE: 'CUSTOMER_SERVICE',
+  OTHER: 'OTHER',
+} as const;
+
+export type ClaimsControllerFindAllStatus = typeof ClaimsControllerFindAllStatus[keyof typeof ClaimsControllerFindAllStatus];
+
+
+export const ClaimsControllerFindAllStatus = {
+  NEW: 'NEW',
+  IN_PROGRESS: 'IN_PROGRESS',
+  AWAITING_INFO: 'AWAITING_INFO',
+  IN_TREATMENT: 'IN_TREATMENT',
+  RESOLVED: 'RESOLVED',
+  CLOSED: 'CLOSED',
+  REJECTED: 'REJECTED',
+  SENT_TO_DTM: 'SENT_TO_DTM',
+} as const;
+
+export type ClaimsControllerFindAllPriority = typeof ClaimsControllerFindAllPriority[keyof typeof ClaimsControllerFindAllPriority];
+
+
+export const ClaimsControllerFindAllPriority = {
+  low: 'low',
+  medium: 'medium',
+  high: 'high',
+  urgent: 'urgent',
+} as const;
+
+export type ClaimsControllerFindAllSortOrder = typeof ClaimsControllerFindAllSortOrder[keyof typeof ClaimsControllerFindAllSortOrder];
+
+
+export const ClaimsControllerFindAllSortOrder = {
   asc: 'asc',
   desc: 'desc',
 } as const;

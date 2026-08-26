@@ -15,7 +15,7 @@ interface CustomerSelectProps {
 }
 
 export function CustomerSelect({ value, onChange }: CustomerSelectProps) {
-	const { data: customers = [], isLoading } = useCustomersControllerFindAll();
+	const { data: customers = [], isLoading } = useCustomersControllerFindAll({});
 
 	const selectedCustomer = customers.find((customer) => customer.id === value);
 
