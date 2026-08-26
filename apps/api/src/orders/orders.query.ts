@@ -13,6 +13,7 @@ import {
 import { withDbErrorHandling } from "@/database/drizzle.util";
 import type { UserId } from "@/users/users.types";
 import type { OrderId, OrderInsert, OrderUpdate } from "./orders.types";
+import { OrderListQueryDto } from "./requests/order-list-query.dto";
 
 type OrdersColumns = QueryColumns<"orders">;
 type OrdersRelations = QueryRelations<"orders">;
@@ -87,14 +88,87 @@ export async function createOrder(db: DrizzleDb, values: OrderInsert) {
 	return created;
 }
 
-export async function findOrders(db: DrizzleDb, user: AuthUser) {
+export async function findOrders(
+	db: DrizzleDb,
+	user: AuthUser,
+	query: OrderListQueryDto,
+) {
+	const {
+		search,
+		status,
+		goodsId,
+		customerId,
+		movementTypeId,
+		startDate,
+		endDate,
+		page,
+		limit,
+	} = query;
+
 	return db.query.orders.findMany({
-		where: !hasOnePermission(user, Permission.ORDERS_MANAGE_OTHER)
-			? { createdByUserId: user.id }
-			: undefined,
+		where: {
+			...(!hasOnePermission(user, Permission.ORDERS_MANAGE_OTHER)
+				? { createdByUserId: user.id }
+				: {}),
+
+			...(status ? { status } : {}),
+			...(goodsId ? { goodsId } : {}),
+			...(customerId ? { customerId } : {}),
+			...(movementTypeId ? { movementTypeId } : {}),
+
+			...(startDate
+				? {
+						startDate: {
+							gte: startDate,
+						},
+					}
+				: {}),
+
+			...(endDate
+				? {
+						endDate: {
+							lte: endDate,
+						},
+					}
+				: {}),
+
+			...(search
+				? {
+						OR: [
+							{
+								orderNumber: {
+									ilike: `%${search}%`,
+								},
+							},
+							{
+								supervisor: {
+									ilike: `%${search}%`,
+								},
+							},
+							{
+								customer: {
+									companyName: {
+										ilike: `%${search}%`,
+									},
+								},
+							},
+							{
+								orderStatus: {
+									name: {
+										ilike: `%${search}%`,
+									},
+								},
+							},
+						],
+					}
+				: {}),
+		},
 
 		columns: orderListColumns,
 		with: orderBaseRelations,
+
+		limit,
+		offset: (page - 1) * limit,
 	});
 }
 

@@ -25,6 +25,7 @@ import {
 } from "./orders.query";
 import type { OrderId } from "./orders.types";
 import { CreateOrderDto } from "./requests/create-order.dto";
+import { OrderListQueryDto } from "./requests/order-list-query.dto";
 import { UpdateOrderDto } from "./requests/update-order.dto";
 
 @Injectable()
@@ -36,8 +37,8 @@ export class OrdersService {
 		return this.findOne(created.id);
 	}
 
-	async findAll(user: AuthUser) {
-		return findOrders(this.drizzle.db, user);
+	async findAll(user: AuthUser, query: OrderListQueryDto) {
+		return findOrders(this.drizzle.db, user, query);
 	}
 
 	async findEligibleForPrograms(user: AuthUser, query: ListQueryDto) {

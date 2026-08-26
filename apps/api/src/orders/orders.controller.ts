@@ -22,6 +22,7 @@ import { OrdersService } from "./orders.service";
 import type { OrderId } from "./orders.types";
 import { OrderIdPipe } from "./pipes/order-id.pipe";
 import { CreateOrderDto } from "./requests/create-order.dto";
+import { OrderListQueryDto } from "./requests/order-list-query.dto";
 import { RejectOrderDto } from "./requests/reject-order.dto";
 import { UpdateOrderDto } from "./requests/update-order.dto";
 import { EligibleOrderForProgramDto } from "./responses/eligible-order-for-program.dto";
@@ -69,8 +70,11 @@ export class OrdersController {
 	@Get()
 	@RequireAny(Permission.ORDERS_READ)
 	@OrderListResponse()
-	async findAll(@Request() req: AuthRequest) {
-		return this.ordersService.findAll(req.user);
+	async findAll(
+		@Request() req: AuthRequest,
+		@Query() query: OrderListQueryDto,
+	) {
+		return this.ordersService.findAll(req.user, query);
 	}
 
 	@Get("eligible-for-programs")
