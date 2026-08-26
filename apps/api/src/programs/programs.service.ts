@@ -5,21 +5,23 @@ import {
 	NotFoundException,
 } from "@nestjs/common";
 import { forecastPrograms } from "drizzle/schema";
-import { and, eq, type SQL } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { AuthUser } from "@/auth/auth.types";
 import { hasOnePermission } from "@/auth/auth.utils";
 import { DrizzleService } from "@/database/drizzle.service";
-import { DrizzleDb } from "@/database/drizzle.types";
-import { withDbErrorHandling } from "@/database/drizzle.util";
 import { PROGRAM_STATUSES } from "@/database/reference-data";
 import { PROGRAM_STATUS_BY_ID, PROGRAM_TRANSITION } from "./programs.constants";
 import { toCreate, toUpdate } from "./programs.mapper";
 import {
-	programDetailRelations,
-	programListColumns,
-	programListRelations,
+	createProgram,
+	findProgram,
+	findProgramForOwnership,
+	findProgramStatus,
+	findPrograms,
+	removeProgram,
+	updateProgram,
 } from "./programs.query";
-import type { ProgramId, ProgramUpdate } from "./programs.types";
+import type { ProgramId } from "./programs.types";
 import { CreateProgramDto } from "./requests/create-program.dto";
 import { UpdateProgramDto } from "./requests/update-program.dto";
 
@@ -28,52 +30,28 @@ export class ProgramsService {
 	constructor(private readonly drizzle: DrizzleService) {}
 
 	async create(dto: CreateProgramDto, user: AuthUser) {
-		const values = toCreate(dto, user);
-
-		const [created] = await withDbErrorHandling(
-			() =>
-				this.drizzle.db
-					.insert(forecastPrograms)
-					.values(values)
-					.returning({ id: forecastPrograms.id }),
-			values,
-		);
-
+		const created = await createProgram(this.drizzle.db, toCreate(dto, user));
 		return this.findOne(created.id);
 	}
 
 	async findAll(user: AuthUser) {
-		const where = hasOnePermission(user, Permission.PROGRAMS_MANAGE_OTHER)
-			? {}
-			: { createdByUserId: user.id };
+		const where = !hasOnePermission(user, Permission.PROGRAMS_MANAGE_OTHER)
+			? { createdByUserId: user.id }
+			: {};
 
-		return this.drizzle.db.query.forecastPrograms.findMany({
-			where,
-			columns: programListColumns,
-			with: programListRelations,
-		});
+		return findPrograms(this.drizzle.db, where);
 	}
 
 	async findOne(id: ProgramId) {
-		const program = await this.drizzle.db.query.forecastPrograms.findFirst({
-			where: { id },
-			with: programDetailRelations,
-		});
-
-		return this.ensure(program, id);
+		return this.ensure(await findProgram(this.drizzle.db, id), id);
 	}
 
 	async findOneForOwnership(id: ProgramId) {
-		const program = await this.drizzle.db.query.forecastPrograms.findFirst({
-			where: { id },
-			columns: { createdByUserId: true },
-		});
-
-		return this.ensure(program, id);
+		return this.ensure(await findProgramForOwnership(this.drizzle.db, id), id);
 	}
 
 	async update(id: ProgramId, dto: UpdateProgramDto, user: AuthUser) {
-		await this.persistUpdate(this.drizzle.db, id, toUpdate(dto, user));
+		await updateProgram(this.drizzle.db, id, toUpdate(dto, user));
 
 		return this.findOne(id);
 	}
@@ -99,16 +77,8 @@ export class ProgramsService {
 	}
 
 	async remove(id: ProgramId) {
-		const [deleted] = await this.drizzle.db
-			.delete(forecastPrograms)
-			.where(eq(forecastPrograms.id, id))
-			.returning({ id: forecastPrograms.id });
-
-		if (!deleted) {
-			throw new NotFoundException(`Program ${id} not found`);
-		}
-
-		return deleted;
+		const deleted = await removeProgram(this.drizzle.db, id);
+		return this.ensure(deleted, id);
 	}
 
 	private ensure<T>(program: T | undefined, id: ProgramId) {
@@ -119,48 +89,20 @@ export class ProgramsService {
 		return program;
 	}
 
-	private async persistUpdate(
-		db: DrizzleDb,
-		id: ProgramId,
-		values: ProgramUpdate,
-		where: SQL = eq(forecastPrograms.id, id),
-	) {
-		const [updated] = await withDbErrorHandling(
-			() =>
-				db
-					.update(forecastPrograms)
-					.set(values)
-					.where(where)
-					.returning({ id: forecastPrograms.id }),
-			values,
-		);
-
-		if (!updated) {
-			throw new ConflictException(
-				`Program ${id} was modified or does not exist`,
-			);
-		}
-
-		return updated;
-	}
-
 	private async transition(
 		id: ProgramId,
 		user: AuthUser,
 		toStatus: ProgramStatus,
 	) {
-		const { statusId: fromStatusId } = this.ensure(
-			await this.drizzle.db.query.forecastPrograms.findFirst({
-				where: { id },
-				columns: { statusId: true },
-			}),
+		const program = this.ensure(
+			await findProgramStatus(this.drizzle.db, id),
 			id,
 		);
 
-		const fromStatus = PROGRAM_STATUS_BY_ID[fromStatusId];
+		const fromStatus = PROGRAM_STATUS_BY_ID[program.statusId];
 		if (!fromStatus) {
 			throw new ConflictException(
-				`Invalid status ${fromStatusId} for program ${id}`,
+				`Invalid status ${program.statusId} for program ${id}`,
 			);
 		}
 
@@ -171,19 +113,17 @@ export class ProgramsService {
 			);
 		}
 
-		const statusId = PROGRAM_STATUSES[toStatus].id;
-
-		await this.drizzle.db.transaction(async (tx) => {
-			await this.persistUpdate(
-				tx,
-				id,
-				{ statusId },
-				and(
-					eq(forecastPrograms.id, id),
-					eq(forecastPrograms.statusId, fromStatusId),
-				),
-			);
-		});
+		await updateProgram(
+			this.drizzle.db,
+			id,
+			{
+				statusId: PROGRAM_STATUSES[toStatus].id,
+			},
+			and(
+				eq(forecastPrograms.id, id),
+				eq(forecastPrograms.statusId, program.statusId),
+			),
+		);
 
 		return this.findOne(id);
 	}
