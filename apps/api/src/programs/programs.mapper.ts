@@ -2,6 +2,7 @@ import { Permission, ProgramStatus } from "@ecommand/shared";
 import { ForbiddenException } from "@nestjs/common";
 import { AuthUser } from "@/auth/auth.types";
 import { hasOnePermission } from "@/auth/auth.utils";
+import { generateDocumentNumber } from "@/common/utils/document-number";
 import { PROGRAM_STATUSES } from "@/database/reference-data";
 import { ProgramInsert, ProgramUpdate } from "./programs.types";
 import { CreateProgramDto } from "./requests/create-program.dto";
@@ -23,13 +24,13 @@ export const toCreate = (
 		? (dto.status ?? ProgramStatus.DRAFT)
 		: ProgramStatus.DRAFT;
 
+	const programNumber = generateDocumentNumber("PRG");
+
 	return {
 		...dto,
+		programNumber,
 		createdByUserId,
 		statusId: PROGRAM_STATUSES[status].id,
-		programNumber: `PRG-${Date.now()}-${Math.random()
-			.toString(36)
-			.slice(2, 7)}`,
 	};
 };
 

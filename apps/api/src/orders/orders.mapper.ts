@@ -2,6 +2,7 @@ import { OrderStatus, Permission } from "@ecommand/shared";
 import { BadRequestException, ForbiddenException } from "@nestjs/common";
 import { AuthUser } from "@/auth/auth.types";
 import { hasOnePermission } from "@/auth/auth.utils";
+import { generateDocumentNumber } from "@/common/utils/document-number";
 import { ORDER_STATUSES } from "@/database/reference-data";
 import { OrderInsert, OrderUpdate } from "./orders.types";
 import { CreateOrderDto } from "./requests/create-order.dto";
@@ -28,9 +29,12 @@ export const toCreate = (dto: CreateOrderDto, user: AuthUser): OrderInsert => {
 		? (dto.status ?? OrderStatus.DRAFT)
 		: OrderStatus.DRAFT;
 
+	const orderNumber = generateDocumentNumber("ORD");
+
 	return {
 		...dto,
 		customerId,
+		orderNumber,
 		createdByUserId: user.id,
 		statusId: ORDER_STATUSES[targetStatus].id,
 	};
