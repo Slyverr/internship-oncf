@@ -1,17 +1,23 @@
 import { OrderStatus, Permission } from "@ecommand/shared";
+import { ConflictException } from "@nestjs/common";
+import { orderStatusHistory, orders } from "drizzle/schema";
+import { eq, type SQL } from "drizzle-orm";
 import { AuthUser } from "@/auth/auth.types";
 import { hasOnePermission } from "@/auth/auth.utils";
 import { ListQueryDto } from "@/common/requests/list-query.dto";
 import {
-	FindManyQueryOptions,
+	DrizzleDb,
 	QueryColumns,
 	QueryRelations,
 } from "@/database/drizzle.types";
+import { withDbErrorHandling } from "@/database/drizzle.util";
+import type { UserId } from "@/users/users.types";
+import type { OrderId, OrderInsert, OrderUpdate } from "./orders.types";
 
 type OrdersColumns = QueryColumns<"orders">;
 type OrdersRelations = QueryRelations<"orders">;
 
-export const orderListColumns = {
+const orderListColumns = {
 	id: true,
 	orderNumber: true,
 	quantityDemanded: true,
@@ -22,7 +28,7 @@ export const orderListColumns = {
 	createdAt: true,
 } satisfies OrdersColumns;
 
-export const orderListRelations = {
+const orderBaseRelations = {
 	createdByUser: {
 		columns: {
 			id: true,
@@ -59,8 +65,8 @@ export const orderListRelations = {
 	},
 } satisfies OrdersRelations;
 
-export const orderDetailRelations = {
-	...orderListRelations,
+const orderDetailRelations = {
+	...orderBaseRelations,
 
 	claims: true,
 	forecastPrograms: true,
@@ -69,71 +75,87 @@ export const orderDetailRelations = {
 	orderFiles: true,
 } satisfies OrdersRelations;
 
-type EligibleProgramOrdersWhere = FindManyQueryOptions<"orders">["where"];
+export async function createOrder(db: DrizzleDb, values: OrderInsert) {
+	const [created] = await withDbErrorHandling(
+		() =>
+			db.insert(orders).values(values).returning({
+				id: orders.id,
+			}),
+		values,
+	);
 
-export function buildEligibleProgramOrdersFilters(
-	user: AuthUser,
-	query: ListQueryDto,
-): EligibleProgramOrdersWhere {
-	const filters: EligibleProgramOrdersWhere = {
-		orderStatus: {
-			name: {
-				in: [
-					OrderStatus.APPROVED,
-					OrderStatus.SENT_TO_DTM,
-					OrderStatus.IN_PROGRESS,
-				],
-			},
+	return created;
+}
+
+export async function findOrders(db: DrizzleDb, user: AuthUser) {
+	return db.query.orders.findMany({
+		where: !hasOnePermission(user, Permission.ORDERS_MANAGE_OTHER)
+			? { createdByUserId: user.id }
+			: undefined,
+
+		columns: orderListColumns,
+		with: orderBaseRelations,
+	});
+}
+
+export async function findOrder(db: DrizzleDb, id: OrderId) {
+	return db.query.orders.findFirst({
+		where: { id },
+		with: orderDetailRelations,
+	});
+}
+
+export async function findOrderForOwnership(db: DrizzleDb, id: OrderId) {
+	return db.query.orders.findFirst({
+		where: { id },
+		columns: {
+			createdByUserId: true,
 		},
-	};
-
-	if (!hasOnePermission(user, Permission.ORDERS_MANAGE_OTHER)) {
-		filters.createdByUserId = user.id;
-	}
-
-	if (query.search) {
-		filters.orderNumber = {
-			ilike: `%${query.search}%`,
-		};
-	}
-
-	return filters;
+	});
 }
 
-type EligibleProgramOrdersOrderBy = FindManyQueryOptions<"orders">["orderBy"];
-
-export function buildEligibleProgramOrdersOrder(
-	query: ListQueryDto,
-): EligibleProgramOrdersOrderBy {
-	const sortOrder = query.sortOrder ?? "desc";
-
-	switch (query.sortBy) {
-		case "orderNumber":
-			return {
-				orderNumber: sortOrder,
-				id: sortOrder,
-			};
-
-		case "createdAt":
-			return {
-				createdAt: sortOrder,
-				id: sortOrder,
-			};
-
-		default:
-			return {
-				orderDate: "desc",
-				id: "desc",
-			};
-	}
+export async function findOrderForAccess(db: DrizzleDb, id: OrderId) {
+	return db.query.orders.findFirst({
+		where: { id },
+		columns: {
+			id: true,
+			customerId: true,
+			createdByUserId: true,
+		},
+	});
 }
 
-export function buildEligibleProgramOrdersQuery(
+export async function findEligibleOrdersForPrograms(
+	db: DrizzleDb,
 	user: AuthUser,
 	query: ListQueryDto,
 ) {
-	return {
-		where: buildEligibleProgramOrdersFilters(user, query),
+	return db.query.orders.findMany({
+		where: {
+			orderStatus: {
+				name: {
+					in: [
+						OrderStatus.APPROVED,
+						OrderStatus.SENT_TO_DTM,
+						OrderStatus.IN_PROGRESS,
+					],
+				},
+			},
+
+			...(hasOnePermission(user, Permission.ORDERS_MANAGE_OTHER)
+				? {}
+				: {
+						createdByUserId: user.id,
+					}),
+
+			...(query.search
+				? {
+						orderNumber: {
+							ilike: `%${query.search}%`,
+						},
+					}
+				: {}),
+		},
 
 		columns: {
 			id: true,
@@ -141,9 +163,99 @@ export function buildEligibleProgramOrdersQuery(
 			quantityDemanded: true,
 		},
 
-		orderBy: buildEligibleProgramOrdersOrder(query),
+		orderBy: {
+			orderDate: "desc",
+			id: "desc",
+		},
 
 		limit: query.limit,
 		offset: (query.page - 1) * query.limit,
-	} satisfies FindManyQueryOptions<"orders">;
+	});
+}
+
+export async function findOrderStatus(db: DrizzleDb, id: OrderId) {
+	return db.query.orders.findFirst({
+		where: { id },
+		columns: {
+			statusId: true,
+		},
+	});
+}
+
+export async function updateOrder(
+	db: DrizzleDb,
+	id: OrderId,
+	values: OrderUpdate,
+	options: {
+		where?: SQL;
+		history: {
+			userId: UserId;
+			comment?: string;
+		};
+	},
+) {
+	return db.transaction(async (tx) => {
+		const previous =
+			values.statusId !== undefined ? await findOrderStatus(tx, id) : undefined;
+
+		const [updated] = await withDbErrorHandling(
+			() =>
+				tx
+					.update(orders)
+					.set(values)
+					.where(options.where ?? eq(orders.id, id))
+					.returning({
+						id: orders.id,
+					}),
+			values,
+		);
+
+		if (!updated) {
+			throw new ConflictException(`Order ${id} was modified or does not exist`);
+		}
+
+		if (
+			previous &&
+			values.statusId !== undefined &&
+			values.statusId !== previous.statusId
+		) {
+			await recordOrderStatus(tx, {
+				orderId: id,
+				statusId: values.statusId,
+				userId: options.history.userId,
+				comment: options.history.comment,
+			});
+		}
+
+		return updated;
+	});
+}
+
+export async function recordOrderStatus(
+	db: DrizzleDb,
+	data: {
+		orderId: OrderId;
+		statusId: number;
+		userId: UserId;
+		comment?: string;
+	},
+) {
+	return withDbErrorHandling(
+		() =>
+			db.insert(orderStatusHistory).values({
+				orderId: data.orderId,
+				statusId: data.statusId,
+				changedById: data.userId,
+				comment: data.comment ?? null,
+			}),
+		data,
+	);
+}
+
+export async function deleteOrder(db: DrizzleDb, id: OrderId) {
+	const [deleted] = await db.delete(orders).where(eq(orders.id, id)).returning({
+		id: orders.id,
+	});
+
+	return deleted;
 }

@@ -1,28 +1,29 @@
-import { OrderStatus, Permission } from "@ecommand/shared";
+import { OrderStatus } from "@ecommand/shared";
 import {
 	ConflictException,
 	Injectable,
 	NotFoundException,
 } from "@nestjs/common";
-import { orderStatusHistory, orders } from "drizzle/schema";
-import { and, eq, type SQL } from "drizzle-orm";
+import { orders } from "drizzle/schema";
+import { and, eq } from "drizzle-orm";
 import { AuthUser } from "@/auth/auth.types";
-import { hasOnePermission } from "@/auth/auth.utils";
 import { ListQueryDto } from "@/common/requests/list-query.dto";
 import { DrizzleService } from "@/database/drizzle.service";
-import { DrizzleDb } from "@/database/drizzle.types";
-import { withDbErrorHandling } from "@/database/drizzle.util";
 import { ORDER_STATUSES } from "@/database/reference-data";
-import { UserId } from "@/users/users.types";
 import { ORDER_STATUS_BY_ID, ORDER_TRANSITION } from "./orders.constants";
 import { toCreate, toUpdate } from "./orders.mapper";
 import {
-	buildEligibleProgramOrdersQuery,
-	orderDetailRelations,
-	orderListColumns,
-	orderListRelations,
+	createOrder,
+	deleteOrder,
+	findEligibleOrdersForPrograms,
+	findOrder,
+	findOrderForAccess,
+	findOrderForOwnership,
+	findOrderStatus,
+	findOrders,
+	updateOrder,
 } from "./orders.query";
-import type { OrderId, OrderUpdate } from "./orders.types";
+import type { OrderId } from "./orders.types";
 import { CreateOrderDto } from "./requests/create-order.dto";
 import { UpdateOrderDto } from "./requests/update-order.dto";
 
@@ -31,71 +32,35 @@ export class OrdersService {
 	constructor(private readonly drizzle: DrizzleService) {}
 
 	async create(dto: CreateOrderDto, user: AuthUser) {
-		const values = toCreate(dto, user);
-
-		const [created] = await withDbErrorHandling(
-			() =>
-				this.drizzle.db
-					.insert(orders)
-					.values(values)
-					.returning({ id: orders.id }),
-			values,
-		);
-
+		const created = await createOrder(this.drizzle.db, toCreate(dto, user));
 		return this.findOne(created.id);
 	}
 
 	async findAll(user: AuthUser) {
-		const where = !hasOnePermission(user, Permission.ORDERS_MANAGE_OTHER)
-			? { createdByUserId: user.id }
-			: {};
-
-		return this.drizzle.db.query.orders.findMany({
-			where,
-			columns: orderListColumns,
-			with: orderListRelations,
-		});
+		return findOrders(this.drizzle.db, user);
 	}
 
 	async findEligibleForPrograms(user: AuthUser, query: ListQueryDto) {
-		return this.drizzle.db.query.orders.findMany(
-			buildEligibleProgramOrdersQuery(user, query),
-		);
+		return findEligibleOrdersForPrograms(this.drizzle.db, user, query);
 	}
 
 	async findOne(id: OrderId) {
-		const order = await this.drizzle.db.query.orders.findFirst({
-			where: { id },
-			with: orderDetailRelations,
-		});
-
+		const order = await findOrder(this.drizzle.db, id);
 		return this.ensure(order, id);
 	}
 
 	async findOneForOwnership(id: OrderId) {
-		const order = await this.drizzle.db.query.orders.findFirst({
-			where: { id },
-			columns: { createdByUserId: true },
-		});
-
+		const order = await findOrderForOwnership(this.drizzle.db, id);
 		return this.ensure(order, id);
 	}
 
 	async findOneForAccess(id: OrderId) {
-		const order = await this.drizzle.db.query.orders.findFirst({
-			where: { id },
-			columns: {
-				id: true,
-				customerId: true,
-				createdByUserId: true,
-			},
-		});
-
+		const order = await findOrderForAccess(this.drizzle.db, id);
 		return this.ensure(order, id);
 	}
 
 	async update(id: OrderId, dto: UpdateOrderDto, user: AuthUser) {
-		await this.persistUpdate(this.drizzle.db, id, toUpdate(dto, user), {
+		await updateOrder(this.drizzle.db, id, toUpdate(dto, user), {
 			history: {
 				userId: user.id,
 			},
@@ -125,60 +90,8 @@ export class OrdersService {
 	}
 
 	async remove(id: OrderId) {
-		const [deleted] = await this.drizzle.db
-			.delete(orders)
-			.where(eq(orders.id, id))
-			.returning({ id: orders.id });
-
-		if (!deleted) {
-			throw new NotFoundException(`Order ${id} not found`);
-		}
-
-		return deleted;
-	}
-
-	private ensure<T>(order: T | undefined, id: OrderId) {
-		if (!order) throw new NotFoundException(`Order ${id} not found`);
-		return order;
-	}
-
-	private async persistUpdate(
-		db: DrizzleDb,
-		id: OrderId,
-		values: OrderUpdate,
-		options?: {
-			where?: SQL;
-			history?: {
-				userId: UserId;
-				comment?: string;
-			};
-		},
-	) {
-		const [updated] = await withDbErrorHandling(
-			() =>
-				db
-					.update(orders)
-					.set(values)
-					.where(options?.where ?? eq(orders.id, id))
-					.returning({ id: orders.id }),
-			values,
-		);
-
-		if (!updated) {
-			throw new ConflictException(`Order ${id} was modified or does not exist`);
-		}
-
-		if (values.statusId !== undefined && options?.history) {
-			await this.recordHistory(
-				db,
-				id,
-				options.history.userId,
-				values.statusId,
-				options.history.comment,
-			);
-		}
-
-		return updated;
+		const deleted = await deleteOrder(this.drizzle.db, id);
+		return this.ensure(deleted, id);
 	}
 
 	private async transition(
@@ -187,24 +100,16 @@ export class OrdersService {
 		toStatus: OrderStatus,
 		comment?: string,
 	) {
-		const { statusId: fromStatusId } = this.ensure(
-			await this.drizzle.db.query.orders.findFirst({
-				where: { id },
-				columns: { statusId: true },
-			}),
-			id,
-		);
+		const order = this.ensure(await findOrderStatus(this.drizzle.db, id), id);
 
-		const fromStatus = ORDER_STATUS_BY_ID[fromStatusId];
-
+		const fromStatus = ORDER_STATUS_BY_ID[order.statusId];
 		if (!fromStatus) {
 			throw new ConflictException(
-				`Invalid status ${fromStatusId} for order ${id}`,
+				`Invalid status ${order.statusId} for order ${id}`,
 			);
 		}
 
 		const allowed = ORDER_TRANSITION[fromStatus] ?? [];
-
 		if (!allowed.includes(toStatus)) {
 			throw new ConflictException(
 				`Cannot transition from ${fromStatus} to ${toStatus}`,
@@ -212,37 +117,26 @@ export class OrdersService {
 		}
 
 		const statusId = ORDER_STATUSES[toStatus].id;
-
-		await this.drizzle.db.transaction(async (tx) => {
-			await this.persistUpdate(
-				tx,
-				id,
-				{ statusId },
-				{
-					where: and(eq(orders.id, id), eq(orders.statusId, fromStatusId)),
-					history: {
-						userId: user.id,
-						comment,
-					},
+		await updateOrder(
+			this.drizzle.db,
+			id,
+			{ statusId },
+			{
+				where: and(eq(orders.id, id), eq(orders.statusId, order.statusId)),
+				history: {
+					userId: user.id,
+					comment,
 				},
-			);
-		});
+			},
+		);
 
 		return this.findOne(id);
 	}
 
-	private async recordHistory(
-		db: DrizzleDb,
-		orderId: OrderId,
-		userId: UserId,
-		statusId: number,
-		comment?: string,
-	) {
-		await db.insert(orderStatusHistory).values({
-			orderId,
-			statusId,
-			changedById: userId,
-			comment: comment ?? null,
-		});
+	private ensure<T>(value: T | undefined, id: OrderId) {
+		if (!value) {
+			throw new NotFoundException(`Order ${id} not found`);
+		}
+		return value;
 	}
 }
