@@ -2,6 +2,8 @@
 
 import { OrderStatus, Permission } from "@ecommand/shared";
 import { useQueryClient } from "@tanstack/react-query";
+import { EllipsisVerticalIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
 	AlertDialog,
@@ -14,28 +16,39 @@ import {
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
 import type { OrderDetailDto } from "@/lib/api/generated.schemas";
 import {
 	getOrdersControllerFindOneQueryKey,
 	useOrdersControllerApprove,
 	useOrdersControllerReject,
+	useOrdersControllerRemove,
 	useOrdersControllerSendToDtm,
 	useOrdersControllerSubmit,
 } from "@/lib/api/orders";
 import { useAuth } from "@/providers/auth-provider";
+import { ConfirmDialog } from "../common/confirm-dialog";
 
 export function OrderActions({ order }: { order: OrderDetailDto }) {
 	const { hasPermission } = useAuth();
 	const queryClient = useQueryClient();
+	const router = useRouter();
 
 	const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 	const [rejectionReason, setRejectionReason] = useState("");
 
 	const submitMutation = useOrdersControllerSubmit();
 	const approveMutation = useOrdersControllerApprove();
 	const rejectMutation = useOrdersControllerReject();
 	const sendToDtmMutation = useOrdersControllerSendToDtm();
+	const removeMutation = useOrdersControllerRemove();
 
 	const updateOrderCache = (updatedOrder: OrderDetailDto) => {
 		queryClient.setQueryData(
@@ -50,7 +63,8 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 		submitMutation.isPending ||
 		approveMutation.isPending ||
 		rejectMutation.isPending ||
-		sendToDtmMutation.isPending;
+		sendToDtmMutation.isPending ||
+		removeMutation.isPending;
 
 	const handleReject = () => {
 		rejectMutation.mutate(
@@ -65,6 +79,18 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 					updateOrderCache(updatedOrder);
 					setRejectDialogOpen(false);
 					setRejectionReason("");
+				},
+			},
+		);
+	};
+
+	const handleDelete = () => {
+		removeMutation.mutate(
+			{ id: order.id },
+			{
+				onSuccess: () => {
+					setDeleteDialogOpen(false);
+					router.push("/dashboard/orders");
 				},
 			},
 		);
@@ -130,6 +156,40 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 							Send to DTM
 						</Button>
 					)}
+
+				{(hasPermission(Permission.ORDERS_UPDATE) ||
+					hasPermission(Permission.ORDERS_DELETE)) && (
+					<DropdownMenu>
+						<DropdownMenuTrigger
+							render={<Button variant="ghost" size="icon" />}
+							disabled={isPending}
+						>
+							<EllipsisVerticalIcon />
+							<span className="sr-only">More actions</span>
+						</DropdownMenuTrigger>
+
+						<DropdownMenuContent align="end">
+							{hasPermission(Permission.ORDERS_UPDATE) && (
+								<DropdownMenuItem
+									onClick={() =>
+										router.push(`/dashboard/orders/${order.id}/edit`)
+									}
+								>
+									Edit
+								</DropdownMenuItem>
+							)}
+
+							{hasPermission(Permission.ORDERS_DELETE) && (
+								<DropdownMenuItem
+									className="text-destructive"
+									onClick={() => setDeleteDialogOpen(true)}
+								>
+									Delete
+								</DropdownMenuItem>
+							)}
+						</DropdownMenuContent>
+					</DropdownMenu>
+				)}
 			</div>
 
 			<AlertDialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
@@ -159,6 +219,17 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>
+
+			<ConfirmDialog
+				open={deleteDialogOpen}
+				onOpenChange={setDeleteDialogOpen}
+				title="Delete order?"
+				description="This will permanently delete this order. This action cannot be undone."
+				confirmLabel="Delete"
+				variant="destructive"
+				disabled={isPending}
+				onConfirm={handleDelete}
+			/>
 		</>
 	);
 }
