@@ -12,6 +12,6 @@ export class ProgramListDto implements ProgramList {
 	sentToDtmAt: string | null;
 	programNumber: string;
 	programStatus: { id: number; name: string } | null;
-	order: { id: number; orderNumber: string | null } | null;
+	order: { id: number; orderNumber: string } | null;
 	createdByUser: { id: number; lastName: string; firstName: string } | null;
 }

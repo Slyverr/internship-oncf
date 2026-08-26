@@ -11,6 +11,6 @@ type _Assertion = Assert<
 
 export class EligibleOrderForProgramDto implements EligibleOrderForProgram {
 	id: number;
-	orderNumber: string | null;
+	orderNumber: string;
 	quantityDemanded: string;
 }

@@ -855,7 +855,7 @@ export const orders = pgTable(
 		createdByUserId: bigint("created_by_user_id", { mode: "number" }).notNull(),
 		statusId: bigint("status_id", { mode: "number" }).notNull(),
 		supervisor: varchar("supervisor", { length: 200 }),
-		orderNumber: varchar("order_number", { length: 50 }),
+		orderNumber: varchar("order_number", { length: 50 }).notNull(),
 		movementTypeId: bigint("movement_type_id", { mode: "number" }),
 		parentOrderId: bigint("parent_order_id", { mode: "number" }),
 		quantityDemanded: numeric("quantity_demanded", {

@@ -21,7 +21,7 @@ export class ClaimListDto implements ClaimList {
 	claimStatus: { id: number; name: string } | null;
 	customer: { id: number; companyName: string } | null;
 	createdByUser: { id: number; lastName: string; firstName: string } | null;
-	order: { id: number; orderNumber: string | null } | null;
+	order: { id: number; orderNumber: string } | null;
 	accessoryOperation: { id: number; name: string } | null;
 	claimType: { id: number; name: string } | null;
 }

@@ -6,7 +6,7 @@ type _Assertion = Assert<Equals<OrderListDto, OrderList>>;
 export class OrderListDto implements OrderList {
 	id: number;
 	createdAt: string;
-	orderNumber: string | null;
+	orderNumber: string;
 	quantityDemanded: string;
 	quantityAchieved: string | null;
 	orderDate: string;

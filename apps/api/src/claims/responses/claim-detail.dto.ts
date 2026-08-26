@@ -36,7 +36,7 @@ export class ClaimDetailDto implements ClaimDetail {
 		claimId: number;
 	}[];
 	createdByUser: { id: number; lastName: string; firstName: string } | null;
-	order: { id: number; orderNumber: string | null } | null;
+	order: { id: number; orderNumber: string } | null;
 	accessoryOperation: { id: number; name: string } | null;
 	claimType: { id: number; name: string } | null;
 	closedByUser: { id: number; lastName: string; firstName: string } | null;

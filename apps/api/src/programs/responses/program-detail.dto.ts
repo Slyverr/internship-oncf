@@ -47,7 +47,7 @@ export class ProgramDetailDto implements ProgramDetail {
 		changedByUserId: number;
 		reason: string | null;
 	}[];
-	order: { id: number; orderNumber: string | null } | null;
+	order: { id: number; orderNumber: string } | null;
 	createdByUser: { id: number; lastName: string; firstName: string } | null;
 	realizedByUser: { id: number; lastName: string; firstName: string } | null;
 	programConvois: {

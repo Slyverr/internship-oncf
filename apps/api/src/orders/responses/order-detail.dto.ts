@@ -10,7 +10,7 @@ export class OrderDetailDto implements OrderDetail {
 	createdByUserId: number;
 	statusId: number;
 	supervisor: string | null;
-	orderNumber: string | null;
+	orderNumber: string;
 	movementTypeId: number | null;
 	parentOrderId: number | null;
 	quantityDemanded: string;
