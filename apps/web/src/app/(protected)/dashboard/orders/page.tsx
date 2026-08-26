@@ -4,10 +4,16 @@ import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { PageHeader } from "@/components/common/page-header";
 import { OrdersTable } from "@/components/orders/orders-table";
 import { buttonVariants } from "@/components/ui/button";
+import { OrdersControllerFindAllParams } from "@/lib/api/generated.schemas";
 import { ordersControllerFindAll } from "@/lib/api/orders";
 
-export default async function Page() {
-	const orders = await ordersControllerFindAll();
+interface PageProps {
+	searchParams: Promise<OrdersControllerFindAllParams>;
+}
+
+export default async function Page({ searchParams }: PageProps) {
+	const query = await searchParams;
+	const orders = await ordersControllerFindAll(query);
 
 	return (
 		<>
