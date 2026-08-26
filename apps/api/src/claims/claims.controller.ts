@@ -14,11 +14,7 @@ import {
 } from "@nestjs/common";
 import type { AuthRequest } from "@/auth/auth.types";
 import { RequireAny } from "@/auth/permissions.decorator";
-import {
-	ApiResponses,
-	type ApiResponsesOptions,
-	ApiResponsesPatch,
-} from "@/common/decorators/api-responses.decorator";
+import { createCrudResponses } from "@/common/decorators/api-crud-responses.decorator";
 import { ClaimsService } from "./claims.service";
 import type { ClaimId } from "./claims.types";
 import { ClaimOwnershipGuard } from "./guards/claim-ownership.guard";
@@ -32,36 +28,32 @@ import { ClaimListDto } from "./responses/claim-list.dto";
 
 const ClaimIdParam = () => Param("id", ClaimIdPipe);
 
-const ClaimBaseResponse: ApiResponsesOptions = {
-	status: HttpStatus.OK,
-	type: ClaimDetailDto,
-	errors: [
-		HttpStatus.UNAUTHORIZED,
-		HttpStatus.BAD_REQUEST,
-		HttpStatus.FORBIDDEN,
-		HttpStatus.NOT_FOUND,
-	],
-};
+const {
+	list: ClaimListResponse,
+	detail: ClaimDetailResponse,
+	create: ClaimCreateResponse,
+	remove: ClaimDeleteResponse,
+	comment: ClaimCommentResponse,
+	comments: ClaimCommentsResponse,
+} = createCrudResponses({
+	list: ClaimListDto,
+	detail: ClaimDetailDto,
+	create: ClaimDetailDto,
+	remove: ClaimDeleteDto,
 
-const ClaimDetailResponse = () => ApiResponses(ClaimBaseResponse);
-
-const ClaimCreateResponse = () =>
-	ApiResponsesPatch(ClaimBaseResponse, {
-		status: HttpStatus.CREATED,
-		removeErrors: [HttpStatus.NOT_FOUND],
-	});
-
-const ClaimListResponse = () =>
-	ApiResponsesPatch(ClaimBaseResponse, {
-		type: [ClaimListDto],
-		errors: [HttpStatus.UNAUTHORIZED],
-	});
-
-const ClaimDeleteResponse = () =>
-	ApiResponsesPatch(ClaimBaseResponse, {
-		type: ClaimDeleteDto,
-		removeErrors: [HttpStatus.BAD_REQUEST],
-	});
+	custom: {
+		comment: {
+			type: ClaimCommentDto,
+			status: HttpStatus.OK,
+			errors: [HttpStatus.UNAUTHORIZED],
+		},
+		comments: {
+			type: [ClaimCommentDto],
+			status: HttpStatus.OK,
+			errors: [HttpStatus.UNAUTHORIZED],
+		},
+	},
+});
 
 @Controller("claims")
 @UseGuards(ClaimOwnershipGuard)
@@ -109,7 +101,7 @@ export class ClaimsController {
 
 	@Post(":id/comments")
 	@RequireAny(Permission.CLAIMS_UPDATE)
-	@ApiResponses({ status: HttpStatus.OK, type: ClaimCommentDto })
+	@ClaimCommentResponse()
 	async addComment(
 		@ClaimIdParam() id: ClaimId,
 		@Body("content") content: string,
@@ -120,7 +112,7 @@ export class ClaimsController {
 
 	@Get(":id/comments")
 	@RequireAny(Permission.CLAIMS_READ)
-	@ApiResponses({ status: HttpStatus.OK, type: [ClaimCommentDto] })
+	@ClaimCommentsResponse()
 	async getComments(@ClaimIdParam() id: ClaimId) {
 		return this.claimsService.getComments(id);
 	}
