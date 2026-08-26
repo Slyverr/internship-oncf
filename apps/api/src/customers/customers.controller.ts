@@ -8,12 +8,14 @@ import {
 	ParseIntPipe,
 	Post,
 	Put,
+	Query,
 } from "@nestjs/common";
 import { RequireAny } from "@/auth/permissions.decorator";
 import { createCrudResponses } from "@/common/decorators/api-crud-responses.decorator";
 import { CustomersService } from "./customers.service";
 import type { CustomerId } from "./customers.types";
 import { CreateCustomerDto } from "./requests/create-customer.dto";
+import { ListCustomerQueryDto } from "./requests/list-customer.dto";
 import { UpdateCustomerDto } from "./requests/update-customer.dto";
 import { CustomerDeleteDto } from "./responses/customer-delete.dto";
 import { CustomerDetailDto } from "./responses/customer-detail.dto";
@@ -39,8 +41,8 @@ export class CustomersController {
 	@Get()
 	@RequireAny(Permission.CUSTOMERS_READ)
 	@CustomerListResponse()
-	async findAll() {
-		return this.customersService.findAll();
+	async findAll(@Query() query: ListCustomerQueryDto) {
+		return this.customersService.findAll(query);
 	}
 
 	@Get(":id")

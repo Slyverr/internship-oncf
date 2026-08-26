@@ -7,6 +7,7 @@ import type {
 	CustomerInsert,
 	CustomerUpdate,
 } from "./customers.types";
+import { ListCustomerQueryDto } from "./requests/list-customer.dto";
 
 type CustomersColumns = QueryColumns<"customers">;
 
@@ -24,9 +25,64 @@ const customerListColumns = {
 	updatedAt: true,
 } satisfies CustomersColumns;
 
-export async function findCustomers(db: DrizzleDb) {
+export async function findCustomers(
+	db: DrizzleDb,
+	query: ListCustomerQueryDto,
+) {
+	const {
+		page = 1,
+		limit = 20,
+		search,
+		typeId,
+		isActive,
+		sortBy = "createdAt",
+		sortOrder = "desc",
+	} = query;
+
 	return db.query.customers.findMany({
+		where: {
+			...(typeId !== undefined && { typeId }),
+			...(isActive !== undefined && { isActive }),
+
+			...(search && {
+				OR: [
+					{
+						companyName: {
+							ilike: `%${search}%`,
+						},
+					},
+					{
+						customerCode: {
+							ilike: `%${search}%`,
+						},
+					},
+					{
+						city: {
+							ilike: `%${search}%`,
+						},
+					},
+					{
+						email: {
+							ilike: `%${search}%`,
+						},
+					},
+					{
+						phone: {
+							ilike: `%${search}%`,
+						},
+					},
+				],
+			}),
+		},
+
 		columns: customerListColumns,
+
+		orderBy: {
+			[sortBy]: sortOrder,
+		},
+
+		limit,
+		offset: (page - 1) * limit,
 	});
 }
 

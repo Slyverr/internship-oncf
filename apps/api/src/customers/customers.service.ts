@@ -9,14 +9,15 @@ import {
 } from "./customers.query";
 import type { CustomerId } from "./customers.types";
 import { CreateCustomerDto } from "./requests/create-customer.dto";
+import { ListCustomerQueryDto } from "./requests/list-customer.dto";
 import { UpdateCustomerDto } from "./requests/update-customer.dto";
 
 @Injectable()
 export class CustomersService {
 	constructor(private readonly drizzle: DrizzleService) {}
 
-	async findAll() {
-		return findCustomers(this.drizzle.db);
+	async findAll(query: ListCustomerQueryDto) {
+		return findCustomers(this.drizzle.db, query);
 	}
 
 	async findOne(id: CustomerId) {
