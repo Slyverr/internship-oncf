@@ -3,14 +3,17 @@ import {
 	Injectable,
 	NotFoundException,
 } from "@nestjs/common";
-import { orderFiles } from "drizzle/schema";
-import { and, eq } from "drizzle-orm";
 import { DrizzleService } from "@/database/drizzle.service";
-import { withDbErrorHandling } from "@/database/drizzle.util";
 import type { OrderId } from "@/orders/orders.types";
 import { StorageService } from "@/storage/storage.service";
 import type { MulterFile } from "@/storage/storage.types";
-import { fileColumns } from "./files.query";
+import {
+	createFile,
+	findFileForDelete,
+	findFileForDownload,
+	findFiles,
+	removeFile,
+} from "./files.query";
 import { UploadFileDto } from "./requests/upload-file.dto";
 
 @Injectable()
@@ -31,52 +34,26 @@ export class FilesService {
 		}
 
 		const filePath = `orders/${orderId}/${Date.now()}-${file.originalname}`;
-
 		await this.storageService.uploadFile(filePath, file);
 
-		const [record] = await withDbErrorHandling(
-			() =>
-				this.drizzle.db
-					.insert(orderFiles)
-					.values({
-						orderId,
-						fileName: file.originalname,
-						fileType: file.mimetype,
-						fileSize: file.size,
-						filePath,
-						mimeType: file.mimetype,
-						uploadedByUserId: userId,
-						description: dto.description ?? null,
-					})
-					.returning(),
-			{ orderId, file: file.originalname },
-		);
-
-		return record;
+		return createFile(this.drizzle.db, {
+			orderId,
+			fileName: file.originalname,
+			fileType: file.mimetype,
+			fileSize: file.size,
+			filePath,
+			mimeType: file.mimetype,
+			uploadedByUserId: userId,
+			description: dto.description ?? null,
+		});
 	}
 
 	async listFiles(orderId: OrderId) {
-		return this.drizzle.db.query.orderFiles.findMany({
-			where: { orderId },
-			columns: fileColumns,
-			orderBy: (files, { desc }) => [desc(files.uploadedAt)],
-		});
+		return findFiles(this.drizzle.db, orderId);
 	}
 
 	async downloadFile(orderId: OrderId, fileId: number) {
-		const file = await this.drizzle.db.query.orderFiles.findFirst({
-			where: {
-				fileId,
-				orderId,
-			},
-			columns: {
-				fileId: true,
-				fileName: true,
-				filePath: true,
-				mimeType: true,
-			},
-		});
-
+		const file = await findFileForDownload(this.drizzle.db, orderId, fileId);
 		if (!file) {
 			throw new NotFoundException(
 				`File ${fileId} not found for order ${orderId}`,
@@ -84,7 +61,6 @@ export class FilesService {
 		}
 
 		const buffer = await this.storageService.downloadFile(file.filePath);
-
 		return {
 			buffer,
 			fileName: file.fileName,
@@ -93,17 +69,7 @@ export class FilesService {
 	}
 
 	async deleteFile(orderId: OrderId, fileId: number) {
-		const file = await this.drizzle.db.query.orderFiles.findFirst({
-			where: {
-				fileId,
-				orderId,
-			},
-			columns: {
-				fileId: true,
-				filePath: true,
-			},
-		});
-
+		const file = await findFileForDelete(this.drizzle.db, orderId, fileId);
 		if (!file) {
 			throw new NotFoundException(
 				`File ${fileId} not found for order ${orderId}`,
@@ -111,11 +77,6 @@ export class FilesService {
 		}
 
 		await this.storageService.deleteFile(file.filePath);
-
-		await this.drizzle.db
-			.delete(orderFiles)
-			.where(
-				and(eq(orderFiles.fileId, fileId), eq(orderFiles.orderId, orderId)),
-			);
+		await removeFile(this.drizzle.db, orderId, fileId);
 	}
 }

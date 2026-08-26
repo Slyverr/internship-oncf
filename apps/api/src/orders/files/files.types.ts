@@ -1,8 +1,10 @@
 import { orderFiles } from "drizzle/schema";
-import { InferSelectModel } from "drizzle-orm";
+import { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import type { FilesService } from "./files.service";
 
 export type OrderFile = InferSelectModel<typeof orderFiles>;
+
+export type OrderFileInsert = InferInsertModel<typeof orderFiles>;
 
 export type OrderFileId = OrderFile["fileId"];
 
