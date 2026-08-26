@@ -379,6 +379,8 @@ export interface OrderDetailDto {
   createdByUser: OrderDetailDtoCreatedByUser;
 }
 
+export interface Object { [key: string]: unknown }
+
 export type OrderListDtoOrderStatus = {
   id: number;
   name: string;
@@ -423,8 +425,6 @@ export interface OrderListDto {
   good: OrderListDtoGood;
   createdByUser: OrderListDtoCreatedByUser;
 }
-
-export interface Object { [key: string]: unknown }
 
 export interface EligibleOrderForProgramDto {
   id: number;
@@ -1167,6 +1167,50 @@ export interface UpdateProfileDto {
   /** @maxLength 100 */
   lastName?: string;
 }
+
+export type OrdersControllerFindAllParams = {
+goodsId?: number;
+customerId?: number;
+status?: OrdersControllerFindAllStatus;
+movementTypeId?: number;
+startDate?: string;
+endDate?: string;
+/**
+ * @minimum 1
+ */
+page?: Object;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+limit?: Object;
+search?: string;
+sortBy?: string;
+sortOrder?: OrdersControllerFindAllSortOrder;
+};
+
+export type OrdersControllerFindAllStatus = typeof OrdersControllerFindAllStatus[keyof typeof OrdersControllerFindAllStatus];
+
+
+export const OrdersControllerFindAllStatus = {
+  DRAFT: 'DRAFT',
+  SUBMITTED: 'SUBMITTED',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+  IN_PROGRESS: 'IN_PROGRESS',
+  PARTIALLY_EXECUTED: 'PARTIALLY_EXECUTED',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED',
+  SENT_TO_DTM: 'SENT_TO_DTM',
+} as const;
+
+export type OrdersControllerFindAllSortOrder = typeof OrdersControllerFindAllSortOrder[keyof typeof OrdersControllerFindAllSortOrder];
+
+
+export const OrdersControllerFindAllSortOrder = {
+  asc: 'asc',
+  desc: 'desc',
+} as const;
 
 export type OrdersControllerFindEligibleForProgramsParams = {
 search?: string;

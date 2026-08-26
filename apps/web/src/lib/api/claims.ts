@@ -416,7 +416,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-export const getClaimsControllerAddCommentMutationOptions = <TError = unknown,
+export const getClaimsControllerAddCommentMutationOptions = <TError = void,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerAddComment>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof claimsControllerAddComment>>, TError,{id: number}, TContext> => {
 
@@ -445,9 +445,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type ClaimsControllerAddCommentMutationResult = NonNullable<Awaited<ReturnType<typeof claimsControllerAddComment>>>
 
-    export type ClaimsControllerAddCommentMutationError = unknown
+    export type ClaimsControllerAddCommentMutationError = void
 
-    export const useClaimsControllerAddComment = <TError = unknown,
+    export const useClaimsControllerAddComment = <TError = void,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerAddComment>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof claimsControllerAddComment>>,
@@ -479,7 +479,7 @@ export const getClaimsControllerGetCommentsQueryKey = (id: number,) => {
     }
 
 
-export const getClaimsControllerGetCommentsQueryOptions = <TData = Awaited<ReturnType<typeof claimsControllerGetComments>>, TError = unknown>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerGetComments>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getClaimsControllerGetCommentsQueryOptions = <TData = Awaited<ReturnType<typeof claimsControllerGetComments>>, TError = void>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerGetComments>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -498,10 +498,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ClaimsControllerGetCommentsQueryResult = NonNullable<Awaited<ReturnType<typeof claimsControllerGetComments>>>
-export type ClaimsControllerGetCommentsQueryError = unknown
+export type ClaimsControllerGetCommentsQueryError = void
 
 
-export function useClaimsControllerGetComments<TData = Awaited<ReturnType<typeof claimsControllerGetComments>>, TError = unknown>(
+export function useClaimsControllerGetComments<TData = Awaited<ReturnType<typeof claimsControllerGetComments>>, TError = void>(
  id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerGetComments>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof claimsControllerGetComments>>,
@@ -511,7 +511,7 @@ export function useClaimsControllerGetComments<TData = Awaited<ReturnType<typeof
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useClaimsControllerGetComments<TData = Awaited<ReturnType<typeof claimsControllerGetComments>>, TError = unknown>(
+export function useClaimsControllerGetComments<TData = Awaited<ReturnType<typeof claimsControllerGetComments>>, TError = void>(
  id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerGetComments>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof claimsControllerGetComments>>,
@@ -521,12 +521,12 @@ export function useClaimsControllerGetComments<TData = Awaited<ReturnType<typeof
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useClaimsControllerGetComments<TData = Awaited<ReturnType<typeof claimsControllerGetComments>>, TError = unknown>(
+export function useClaimsControllerGetComments<TData = Awaited<ReturnType<typeof claimsControllerGetComments>>, TError = void>(
  id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerGetComments>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useClaimsControllerGetComments<TData = Awaited<ReturnType<typeof claimsControllerGetComments>>, TError = unknown>(
+export function useClaimsControllerGetComments<TData = Awaited<ReturnType<typeof claimsControllerGetComments>>, TError = void>(
  id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof claimsControllerGetComments>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
