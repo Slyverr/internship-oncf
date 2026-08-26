@@ -7,6 +7,7 @@ import {
 } from "@/database/drizzle.types";
 import { withDbErrorHandling } from "@/database/drizzle.util";
 import type { ClaimId, ClaimInsert, ClaimUpdate } from "./claims.types";
+import { ListClaimQueryDto } from "./requests/list-claim.dto";
 
 type ClaimsColumns = QueryColumns<"claims">;
 type ClaimsRelations = QueryRelations<"claims">;
@@ -62,11 +63,89 @@ export async function createClaim(db: DrizzleDb, values: ClaimInsert) {
 	return created;
 }
 
-export async function findClaims(db: DrizzleDb, where: object) {
+export async function findClaims(db: DrizzleDb, query: ListClaimQueryDto) {
+	const {
+		page = 1,
+		limit = 20,
+		search,
+		customerId,
+		userId: createdByUserId,
+		orderId,
+		operationId,
+		type,
+		status,
+		priority,
+		sortBy = "createdAt",
+		sortOrder = "desc",
+	} = query;
+
 	return db.query.claims.findMany({
-		where,
+		where: {
+			...(customerId !== undefined && { customerId }),
+			...(createdByUserId !== undefined && { createdByUserId }),
+			...(operationId !== undefined && { operationId }),
+			...(orderId !== undefined && { orderId }),
+
+			...(type && {
+				claimType: {
+					name: type,
+				},
+			}),
+
+			...(status && {
+				claimStatus: {
+					name: status,
+				},
+			}),
+
+			...(priority && { priority }),
+
+			...(search && {
+				OR: [
+					{
+						description: {
+							ilike: `%${search}%`,
+						},
+					},
+					{
+						resolution: {
+							ilike: `%${search}%`,
+						},
+					},
+					{
+						customer: {
+							companyName: {
+								ilike: `%${search}%`,
+							},
+						},
+					},
+					{
+						claimStatus: {
+							name: {
+								ilike: `%${search}%`,
+							},
+						},
+					},
+					{
+						claimType: {
+							name: {
+								ilike: `%${search}%`,
+							},
+						},
+					},
+				],
+			}),
+		},
+
 		columns: claimListColumns,
 		with: claimListRelations,
+
+		orderBy: {
+			[sortBy]: sortOrder,
+		},
+
+		limit,
+		offset: (page - 1) * limit,
 	});
 }
 

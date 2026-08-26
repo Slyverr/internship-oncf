@@ -26,6 +26,7 @@ import {
 } from "./claims.query";
 import type { ClaimId } from "./claims.types";
 import { CreateClaimDto } from "./requests/create-claim.dto";
+import { ListClaimQueryDto } from "./requests/list-claim.dto";
 import { UpdateClaimDto } from "./requests/update-claim.dto";
 
 @Injectable()
@@ -34,16 +35,20 @@ export class ClaimsService {
 
 	async create(dto: CreateClaimDto, user: AuthUser) {
 		const created = await createClaim(this.drizzle.db, toCreate(dto, user));
-
 		return this.findOne(created.id);
 	}
 
-	async findAll(user: AuthUser) {
-		const where = !hasOnePermission(user, Permission.CLAIMS_READ)
-			? { createdByUserId: user.id }
-			: {};
+	async findAll(user: AuthUser, query: ListClaimQueryDto) {
+		const canManageOther = hasOnePermission(
+			user,
+			Permission.CLAIMS_MANAGE_OTHER,
+		);
 
-		return findClaims(this.drizzle.db, where);
+		if (!canManageOther && query.userId !== user.id) {
+			query.userId = user.id;
+		}
+
+		return findClaims(this.drizzle.db, query);
 	}
 
 	async findOne(id: ClaimId) {

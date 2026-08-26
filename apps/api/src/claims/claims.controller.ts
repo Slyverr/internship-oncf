@@ -9,6 +9,7 @@ import {
 	Param,
 	Patch,
 	Post,
+	Query,
 	Request,
 	UseGuards,
 } from "@nestjs/common";
@@ -20,6 +21,7 @@ import type { ClaimId } from "./claims.types";
 import { ClaimOwnershipGuard } from "./guards/claim-ownership.guard";
 import { ClaimIdPipe } from "./pipes/claim-id.pipe";
 import { CreateClaimDto } from "./requests/create-claim.dto";
+import { ListClaimQueryDto } from "./requests/list-claim.dto";
 import { UpdateClaimDto } from "./requests/update-claim.dto";
 import { ClaimCommentDto } from "./responses/claim-comment.dto";
 import { ClaimDeleteDto } from "./responses/claim-delete.dto";
@@ -70,8 +72,11 @@ export class ClaimsController {
 	@Get()
 	@RequireAny(Permission.CLAIMS_READ)
 	@ClaimListResponse()
-	async findAll(@Request() req: AuthRequest) {
-		return this.claimsService.findAll(req.user);
+	async findAll(
+		@Request() req: AuthRequest,
+		@Query() query: ListClaimQueryDto,
+	) {
+		return this.claimsService.findAll(req.user, query);
 	}
 
 	@Get(":id")
