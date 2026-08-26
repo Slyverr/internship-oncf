@@ -1,17 +1,16 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { trains, trainTracking, wagonTracking } from "drizzle/schema";
-import { eq } from "drizzle-orm";
 import { DrizzleService } from "@/database/drizzle.service";
-import { withDbErrorHandling } from "@/database/drizzle.util";
 import { UpdateTrainPositionDto } from "./requests/update-train-position.dto";
 import { UpdateWagonPositionDto } from "./requests/update-wagon-position.dto";
 import {
-	trackOrderColumns,
-	trackOrderRelations,
-	trackTrainColumns,
-	trackTrainRelations,
-	trackWagonColumns,
-	trackWagonRelations,
+	createTrainTracking,
+	createWagonTracking,
+	findTrackedOrder,
+	findTrackedTrain,
+	findTrackedWagon,
+	findTrainExists,
+	findWagonExists,
+	updateTrainStatus,
 } from "./tracking.query";
 import type { TrainId, WagonId } from "./tracking.types";
 
@@ -20,12 +19,7 @@ export class TrackingService {
 	constructor(private readonly drizzle: DrizzleService) {}
 
 	async trackWagon(wagonNumber: string) {
-		const wagon = await this.drizzle.db.query.wagons.findFirst({
-			where: { wagonNumber },
-			columns: trackWagonColumns,
-			with: trackWagonRelations,
-		});
-
+		const wagon = await findTrackedWagon(this.drizzle.db, wagonNumber);
 		if (!wagon) {
 			throw new NotFoundException(`Wagon ${wagonNumber} not found`);
 		}
@@ -34,12 +28,7 @@ export class TrackingService {
 	}
 
 	async trackTrain(trainNumber: string) {
-		const train = await this.drizzle.db.query.trains.findFirst({
-			where: { trainNumber },
-			columns: trackTrainColumns,
-			with: trackTrainRelations,
-		});
-
+		const train = await findTrackedTrain(this.drizzle.db, trainNumber);
 		if (!train) {
 			throw new NotFoundException(`Train ${trainNumber} not found`);
 		}
@@ -48,44 +37,25 @@ export class TrackingService {
 	}
 
 	async trackOrder(orderId: number) {
-		return this.drizzle.db.query.orderWagons.findMany({
-			where: { orderId },
-			columns: trackOrderColumns,
-			with: trackOrderRelations,
-		});
+		return findTrackedOrder(this.drizzle.db, orderId);
 	}
 
 	async updateWagonPosition(id: WagonId, dto: UpdateWagonPositionDto) {
-		const wagon = await this.drizzle.db.query.wagons.findFirst({
-			where: { id },
-			columns: { id: true },
-		});
-
+		const wagon = await findWagonExists(this.drizzle.db, id);
 		if (!wagon) {
 			throw new NotFoundException(`Wagon ${id} not found`);
 		}
 
-		const values = {
+		return createWagonTracking(this.drizzle.db, {
 			wagonId: id,
 			latitude: String(dto.latitude),
 			longitude: String(dto.longitude),
 			status: dto.status ?? "IN_TRANSIT",
-		};
-
-		const [position] = await withDbErrorHandling(
-			() => this.drizzle.db.insert(wagonTracking).values(values).returning(),
-			values,
-		);
-
-		return position;
+		});
 	}
 
 	async updateTrainPosition(id: TrainId, dto: UpdateTrainPositionDto) {
-		const train = await this.drizzle.db.query.trains.findFirst({
-			where: { id },
-			columns: { id: true },
-		});
-
+		const train = await findTrainExists(this.drizzle.db, id);
 		if (!train) {
 			throw new NotFoundException(`Train ${id} not found`);
 		}
@@ -98,17 +68,8 @@ export class TrackingService {
 		};
 
 		return this.drizzle.db.transaction(async (tx) => {
-			const [position] = await withDbErrorHandling(
-				() => tx.insert(trainTracking).values(values).returning(),
-				values,
-			);
-
-			await tx
-				.update(trains)
-				.set({
-					status: values.status,
-				})
-				.where(eq(trains.id, id));
+			const position = await createTrainTracking(tx, values);
+			await updateTrainStatus(tx, id, values.status);
 
 			return position;
 		});

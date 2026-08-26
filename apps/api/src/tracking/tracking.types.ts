@@ -1,9 +1,12 @@
-import { trains, wagons } from "drizzle/schema";
-import { InferSelectModel } from "drizzle-orm";
+import { trains, trainTracking, wagons, wagonTracking } from "drizzle/schema";
+import { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import type { TrackingService } from "./tracking.service";
 
 export type Wagon = InferSelectModel<typeof wagons>;
 export type Train = InferSelectModel<typeof trains>;
+
+export type WagonTrackingInsert = InferInsertModel<typeof wagonTracking>;
+export type TrainTrackingInsert = InferInsertModel<typeof trainTracking>;
 
 export type WagonId = Wagon["id"];
 export type TrainId = Train["id"];
