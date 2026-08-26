@@ -2,6 +2,8 @@
 
 import { Permission, ProgramStatus } from "@ecommand/shared";
 import { useQueryClient } from "@tanstack/react-query";
+import { EllipsisVerticalIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
 	AlertDialog,
@@ -14,28 +16,39 @@ import {
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { ProgramDetailDto } from "@/lib/api/generated.schemas";
 import {
 	getProgramsControllerFindOneQueryKey,
 	useProgramsControllerApprove,
 	useProgramsControllerCancel,
 	useProgramsControllerConfirm,
+	useProgramsControllerRemove,
 	useProgramsControllerSendToDtm,
 	useProgramsControllerSubmit,
 } from "@/lib/api/programs";
 import { useAuth } from "@/providers/auth-provider";
+import { ConfirmDialog } from "../common/confirm-dialog";
 
 export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 	const { hasPermission } = useAuth();
 	const queryClient = useQueryClient();
+	const router = useRouter();
 
 	const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
 	const submitMutation = useProgramsControllerSubmit();
 	const approveMutation = useProgramsControllerApprove();
 	const confirmMutation = useProgramsControllerConfirm();
 	const sendToDtmMutation = useProgramsControllerSendToDtm();
 	const cancelMutation = useProgramsControllerCancel();
+	const removeMutation = useProgramsControllerRemove();
 
 	const updateProgramCache = (updatedProgram: ProgramDetailDto) => {
 		queryClient.setQueryData(
@@ -51,7 +64,8 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 		approveMutation.isPending ||
 		confirmMutation.isPending ||
 		sendToDtmMutation.isPending ||
-		cancelMutation.isPending;
+		cancelMutation.isPending ||
+		removeMutation.isPending;
 
 	const handleCancel = () => {
 		cancelMutation.mutate(
@@ -60,6 +74,18 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 				onSuccess: (updatedProgram) => {
 					updateProgramCache(updatedProgram);
 					setCancelDialogOpen(false);
+				},
+			},
+		);
+	};
+
+	const handleDelete = () => {
+		removeMutation.mutate(
+			{ id: program.id },
+			{
+				onSuccess: () => {
+					setDeleteDialogOpen(false);
+					router.push("/dashboard/programs");
 				},
 			},
 		);
@@ -142,6 +168,40 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 							Cancel
 						</Button>
 					)}
+
+				{(hasPermission(Permission.PROGRAMS_UPDATE) ||
+					hasPermission(Permission.PROGRAMS_DELETE)) && (
+					<DropdownMenu>
+						<DropdownMenuTrigger
+							render={<Button variant="ghost" size="icon" />}
+							disabled={isPending}
+						>
+							<EllipsisVerticalIcon />
+							<span className="sr-only">More actions</span>
+						</DropdownMenuTrigger>
+
+						<DropdownMenuContent align="end">
+							{hasPermission(Permission.PROGRAMS_UPDATE) && (
+								<DropdownMenuItem
+									onClick={() =>
+										router.push(`/dashboard/programs/${program.id}/edit`)
+									}
+								>
+									Edit
+								</DropdownMenuItem>
+							)}
+
+							{hasPermission(Permission.PROGRAMS_DELETE) && (
+								<DropdownMenuItem
+									className="text-destructive"
+									onClick={() => setDeleteDialogOpen(true)}
+								>
+									Delete
+								</DropdownMenuItem>
+							)}
+						</DropdownMenuContent>
+					</DropdownMenu>
+				)}
 			</div>
 
 			<AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
@@ -164,6 +224,17 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>
+
+			<ConfirmDialog
+				open={deleteDialogOpen}
+				onOpenChange={setDeleteDialogOpen}
+				title="Delete program?"
+				description="This will permanently delete this program. This action cannot be undone."
+				confirmLabel="Delete"
+				variant="destructive"
+				disabled={isPending}
+				onConfirm={handleDelete}
+			/>
 		</>
 	);
 }

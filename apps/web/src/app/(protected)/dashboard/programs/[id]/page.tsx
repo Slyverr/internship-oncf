@@ -15,7 +15,7 @@ export default async function Page({ params }: PageProps) {
 			<Breadcrumbs
 				items={[
 					{ label: "Programs", href: "/dashboard/programs" },
-					{ label: `#${id}` },
+					{ label: program.programNumber ?? `#${program.id}` },
 				]}
 			/>
 
