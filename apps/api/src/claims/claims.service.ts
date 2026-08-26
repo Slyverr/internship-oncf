@@ -5,22 +5,26 @@ import {
 	Injectable,
 	NotFoundException,
 } from "@nestjs/common";
-import { claimComments, claimStatusHistory, claims } from "drizzle/schema";
-import { and, eq, type SQL } from "drizzle-orm";
+import { claims } from "drizzle/schema";
+import { and, eq } from "drizzle-orm";
 import { AuthUser } from "@/auth/auth.types";
 import { hasOnePermission } from "@/auth/auth.utils";
 import { DrizzleService } from "@/database/drizzle.service";
-import { DrizzleDb } from "@/database/drizzle.types";
-import { withDbErrorHandling } from "@/database/drizzle.util";
 import { CLAIM_STATUSES } from "@/database/reference-data";
 import { CLAIM_STATUS_BY_ID, CLAIM_TRANSITION } from "./claims.constants";
 import { toCreate, toUpdate } from "./claims.mapper";
 import {
-	claimDetailRelations,
-	claimListColumns,
-	claimListRelations,
+	addClaimComment,
+	createClaim,
+	deleteClaim,
+	findClaim,
+	findClaimComments,
+	findClaimForOwnership,
+	findClaimStatus,
+	findClaims,
+	updateClaim,
 } from "./claims.query";
-import type { ClaimId, ClaimUpdate } from "./claims.types";
+import type { ClaimId } from "./claims.types";
 import { CreateClaimDto } from "./requests/create-claim.dto";
 import { UpdateClaimDto } from "./requests/update-claim.dto";
 
@@ -29,16 +33,7 @@ export class ClaimsService {
 	constructor(private readonly drizzle: DrizzleService) {}
 
 	async create(dto: CreateClaimDto, user: AuthUser) {
-		const values = toCreate(dto, user);
-
-		const [created] = await withDbErrorHandling(
-			() =>
-				this.drizzle.db
-					.insert(claims)
-					.values(values)
-					.returning({ id: claims.id }),
-			values,
-		);
+		const created = await createClaim(this.drizzle.db, toCreate(dto, user));
 
 		return this.findOne(created.id);
 	}
@@ -48,33 +43,19 @@ export class ClaimsService {
 			? { createdByUserId: user.id }
 			: {};
 
-		return this.drizzle.db.query.claims.findMany({
-			where,
-			columns: claimListColumns,
-			with: claimListRelations,
-		});
+		return findClaims(this.drizzle.db, where);
 	}
 
 	async findOne(id: ClaimId) {
-		const claim = await this.drizzle.db.query.claims.findFirst({
-			where: { id },
-			with: claimDetailRelations,
-		});
-
-		return this.ensure(claim, id);
+		return this.ensure(await findClaim(this.drizzle.db, id), id);
 	}
 
 	async findOneForOwnership(id: ClaimId) {
-		const claim = await this.drizzle.db.query.claims.findFirst({
-			where: { id },
-			columns: { createdByUserId: true },
-		});
-
-		return this.ensure(claim, id);
+		return this.ensure(await findClaimForOwnership(this.drizzle.db, id), id);
 	}
 
 	async update(id: ClaimId, dto: UpdateClaimDto, user: AuthUser) {
-		await this.persistUpdate(this.drizzle.db, id, toUpdate(dto, user), {
+		await this.persistUpdate(id, toUpdate(dto, user), {
 			history: {
 				userId: user.id,
 			},
@@ -84,36 +65,16 @@ export class ClaimsService {
 	}
 
 	async remove(id: ClaimId) {
-		const [deleted] = await this.drizzle.db
-			.delete(claims)
-			.where(eq(claims.id, id))
-			.returning({ id: claims.id });
-
-		if (!deleted) {
-			throw new NotFoundException(`Claim ${id} not found`);
-		}
-
-		return deleted;
+		const deleted = await deleteClaim(this.drizzle.db, id);
+		return this.ensure(deleted, id);
 	}
 
 	async addComment(claimId: ClaimId, content: string, userId: number) {
-		const [comment] = await withDbErrorHandling(
-			() =>
-				this.drizzle.db
-					.insert(claimComments)
-					.values({ claimId, authorUserId: userId, comment: content })
-					.returning(),
-			{ claimId, content },
-		);
-
-		return comment;
+		return addClaimComment(this.drizzle.db, claimId, content, userId);
 	}
 
 	async getComments(claimId: ClaimId) {
-		return this.drizzle.db.query.claimComments.findMany({
-			where: { claimId },
-			orderBy: (comments, { asc }) => [asc(comments.createdAt)],
-		});
+		return findClaimComments(this.drizzle.db, claimId);
 	}
 
 	async startProgress(claimId: ClaimId, user: AuthUser) {
@@ -130,14 +91,17 @@ export class ClaimsService {
 
 	async resolve(claimId: ClaimId, user: AuthUser, resolution?: string) {
 		const claim = await this.findOne(claimId);
-
 		if (!resolution && !claim.resolution) {
 			throw new ConflictException("Resolution required to resolve claim");
 		}
 
-		return this.transition(claimId, user.id, ClaimStatus.RESOLVED, undefined, {
-			...(resolution ? { resolution } : {}),
-		});
+		return this.transition(
+			claimId,
+			user.id,
+			ClaimStatus.RESOLVED,
+			undefined,
+			resolution ? { resolution } : {},
+		);
 	}
 
 	async close(claimId: ClaimId, user: AuthUser) {
@@ -153,7 +117,6 @@ export class ClaimsService {
 
 	async sendToDtm(claimId: ClaimId, user: AuthUser) {
 		const claim = await this.findOne(claimId);
-
 		if (claim.statusId !== CLAIM_STATUSES[ClaimStatus.RESOLVED].id) {
 			throw new ConflictException("Only resolved claims can be sent to DTM");
 		}
@@ -161,49 +124,15 @@ export class ClaimsService {
 		return this.transition(claimId, user.id, ClaimStatus.SENT_TO_DTM);
 	}
 
-	private ensure<T>(value: T | undefined, id: ClaimId) {
-		if (!value) {
-			throw new NotFoundException(`Claim ${id} not found`);
-		}
-
-		return value;
-	}
-
 	private async persistUpdate(
-		db: DrizzleDb,
-		claimId: ClaimId,
-		values: ClaimUpdate,
-		options?: {
-			where?: SQL;
-			history?: {
-				userId: number;
-				comment?: string;
-			};
-		},
+		id: ClaimId,
+		values: Parameters<typeof updateClaim>[2],
+		options?: Parameters<typeof updateClaim>[3],
 	) {
-		const [updated] = await withDbErrorHandling(
-			() =>
-				db
-					.update(claims)
-					.set(values)
-					.where(options?.where ?? eq(claims.id, claimId))
-					.returning({ id: claims.id }),
-			values,
-		);
+		const updated = await updateClaim(this.drizzle.db, id, values, options);
 
 		if (!updated) {
-			throw new ConflictException(
-				`Claim ${claimId} was modified or does not exist`,
-			);
-		}
-
-		if (values.statusId !== undefined && options?.history) {
-			await db.insert(claimStatusHistory).values({
-				claimId,
-				statusId: values.statusId,
-				changedByUserId: options.history.userId,
-				comment: options.history.comment ?? null,
-			});
+			throw new ConflictException(`Claim ${id} was modified or does not exist`);
 		}
 
 		return updated;
@@ -214,18 +143,14 @@ export class ClaimsService {
 		userId: number,
 		toStatus: ClaimStatus,
 		comment?: string,
-		extraValues: Partial<ClaimUpdate> = {},
+		extraValues: Record<string, unknown> = {},
 	) {
-		const { statusId: fromStatusId } = this.ensure(
-			await this.drizzle.db.query.claims.findFirst({
-				where: { id: claimId },
-				columns: { statusId: true },
-			}),
+		const claim = this.ensure(
+			await findClaimStatus(this.drizzle.db, claimId),
 			claimId,
 		);
 
-		const fromStatus = CLAIM_STATUS_BY_ID[fromStatusId];
-
+		const fromStatus = CLAIM_STATUS_BY_ID[claim.statusId];
 		if (!fromStatus) {
 			throw new BadRequestException(`Invalid status for claim ${claimId}`);
 		}
@@ -235,33 +160,35 @@ export class ClaimsService {
 		}
 
 		const allowed = CLAIM_TRANSITION[fromStatus] ?? [];
-
 		if (!allowed.includes(toStatus)) {
 			throw new ConflictException(
 				`Cannot transition from ${fromStatus} to ${toStatus}`,
 			);
 		}
 
-		const toStatusId = CLAIM_STATUSES[toStatus].id;
-
-		await this.drizzle.db.transaction(async (tx) => {
-			await this.persistUpdate(
-				tx,
-				claimId,
-				{
-					...extraValues,
-					statusId: toStatusId,
+		await this.persistUpdate(
+			claimId,
+			{
+				...extraValues,
+				statusId: CLAIM_STATUSES[toStatus].id,
+			},
+			{
+				where: and(eq(claims.id, claimId), eq(claims.statusId, claim.statusId)),
+				history: {
+					userId,
+					comment,
 				},
-				{
-					where: and(eq(claims.id, claimId), eq(claims.statusId, fromStatusId)),
-					history: {
-						userId,
-						comment,
-					},
-				},
-			);
-		});
+			},
+		);
 
 		return this.findOne(claimId);
+	}
+
+	private ensure<T>(value: T | undefined, id: ClaimId) {
+		if (!value) {
+			throw new NotFoundException(`Claim ${id} not found`);
+		}
+
+		return value;
 	}
 }
