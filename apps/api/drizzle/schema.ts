@@ -13,6 +13,7 @@ import {
 	text,
 	timestamp,
 	unique,
+	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
 
@@ -23,7 +24,7 @@ import {
 export const roles = pgTable(
 	"roles",
 	{
-		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
+		id: uuid("id").primaryKey(),
 		name: varchar("name", { length: 100 }).notNull(),
 		description: varchar("description", { length: 500 }),
 		createdAt: timestamp("created_at", { mode: "string" })
@@ -44,7 +45,7 @@ export const roles = pgTable(
 export const permissions = pgTable(
 	"permissions",
 	{
-		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
+		id: uuid("id").primaryKey(),
 		name: varchar("name", { length: 100 }).notNull(),
 		description: varchar("description", { length: 500 }),
 		createdAt: timestamp("created_at", { mode: "string" })
@@ -61,8 +62,8 @@ export const permissions = pgTable(
 export const rolePermissions = pgTable(
 	"role_permissions",
 	{
-		roleId: bigint("role_id", { mode: "number" }).notNull(),
-		permissionId: bigint("permission_id", { mode: "number" }).notNull(),
+		roleId: uuid("role_id").notNull(),
+		permissionId: uuid("permission_id").notNull(),
 		createdAt: timestamp("created_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
 			.notNull(),
@@ -139,7 +140,7 @@ export const centers = pgTable(
 export const customerTypes = pgTable(
 	"customer_types",
 	{
-		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
+		id: uuid("id").primaryKey(),
 		name: varchar("name", { length: 100 }).notNull(),
 		createdAt: timestamp("created_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
@@ -162,7 +163,7 @@ export const customers = pgTable(
 		city: varchar("city", { length: 100 }),
 		phone: varchar("phone", { length: 20 }),
 		email: varchar("email", { length: 100 }),
-		typeId: bigint("type_id", { mode: "number" }),
+		typeId: uuid("type_id"),
 		createdAt: timestamp("created_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
 			.notNull(),
@@ -196,7 +197,7 @@ export const users = pgTable(
 		firstName: varchar("first_name", { length: 100 }).notNull(),
 		employeeId: varchar("employee_id", { length: 50 }),
 		type: varchar("type", { length: 20 }),
-		roleId: bigint("role_id", { mode: "number" }).notNull(),
+		roleId: uuid("role_id").notNull(),
 		customerId: bigint("customer_id", { mode: "number" }),
 		agencyId: bigint("agency_id", { mode: "number" }),
 		failedLoginAttempts: integer("failed_login_attempts").default(0),
@@ -394,7 +395,7 @@ export const stations = pgTable(
 export const goodsTypes = pgTable(
 	"goods_types",
 	{
-		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
+		id: uuid("id").primaryKey(),
 		name: varchar("name", { length: 100 }).notNull(),
 		createdAt: timestamp("created_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
@@ -412,7 +413,7 @@ export const goods = pgTable(
 	{
 		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
 		name: varchar("name", { length: 200 }).notNull(),
-		goodsTypeId: bigint("goods_type_id", { mode: "number" }).notNull(),
+		goodsTypeId: uuid("goods_type_id").notNull(),
 		goodsCode: varchar("goods_code", { length: 50 }).notNull(),
 		createdAt: timestamp("created_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
@@ -441,7 +442,7 @@ export const goods = pgTable(
 export const units = pgTable(
 	"units",
 	{
-		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
+		id: uuid("id").primaryKey(),
 		name: varchar("name", { length: 50 }).notNull(),
 		createdAt: timestamp("created_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
@@ -457,7 +458,7 @@ export const units = pgTable(
 export const attributes = pgTable(
 	"attributes",
 	{
-		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
+		id: uuid("id").primaryKey(),
 		name: varchar("name", { length: 100 }).notNull(),
 		dataType: varchar("data_type", { length: 50 }).notNull(),
 		createdAt: timestamp("created_at", { mode: "string" })
@@ -480,8 +481,8 @@ export const parametrization = pgTable(
 	"parametrization",
 	{
 		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
-		goodsTypeId: bigint("goods_type_id", { mode: "number" }).notNull(),
-		attributeId: bigint("attribute_id", { mode: "number" }).notNull(),
+		goodsTypeId: uuid("goods_type_id").notNull(),
+		attributeId: uuid("attribute_id").notNull(),
 		isRequired: boolean("is_required").default(false).notNull(),
 		createdAt: timestamp("created_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
@@ -622,7 +623,7 @@ export const sidings = pgTable(
 export const accessoryOperations = pgTable(
 	"accessory_operations",
 	{
-		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
+		id: uuid("id").primaryKey(),
 		name: varchar("name", { length: 200 }).notNull(),
 		createdAt: timestamp("created_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
@@ -638,7 +639,7 @@ export const accessoryOperations = pgTable(
 export const rejectionReasons = pgTable(
 	"rejection_reasons",
 	{
-		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
+		id: uuid("id").primaryKey(),
 		name: varchar("name", { length: 300 }).notNull(),
 		createdAt: timestamp("created_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
@@ -654,7 +655,7 @@ export const rejectionReasons = pgTable(
 export const movementTypes = pgTable(
 	"movement_types",
 	{
-		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
+		id: uuid("id").primaryKey(),
 		name: varchar("name", { length: 50 }).notNull(),
 		description: varchar("description", { length: 200 }),
 		createdAt: timestamp("created_at", { mode: "string" })
@@ -671,7 +672,7 @@ export const movementTypes = pgTable(
 export const pickupLocationTypes = pgTable(
 	"pickup_location_types",
 	{
-		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
+		id: uuid("id").primaryKey(),
 		name: varchar("name", { length: 50 }).notNull(),
 		description: varchar("description", { length: 200 }),
 		createdAt: timestamp("created_at", { mode: "string" })
@@ -688,7 +689,7 @@ export const pickupLocationTypes = pgTable(
 export const dispatchTypes = pgTable(
 	"dispatch_types",
 	{
-		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
+		id: uuid("id").primaryKey(),
 		name: varchar("name", { length: 50 }).notNull(),
 		description: varchar("description", { length: 200 }),
 		createdAt: timestamp("created_at", { mode: "string" })
@@ -816,7 +817,7 @@ export const shippingCompanies = pgTable(
 export const orderStatus = pgTable(
 	"order_status",
 	{
-		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
+		id: uuid("id").primaryKey(),
 		name: varchar("name", { length: 100 }).notNull(),
 		createdAt: timestamp("created_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
@@ -832,7 +833,7 @@ export const orderStatus = pgTable(
 export const programStatus = pgTable(
 	"program_status",
 	{
-		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
+		id: uuid("id").primaryKey(),
 		name: varchar("name", { length: 100 }).notNull(),
 		description: varchar("description", { length: 200 }),
 		createdAt: timestamp("created_at", { mode: "string" })
@@ -853,10 +854,10 @@ export const orders = pgTable(
 		goodsId: bigint("goods_id", { mode: "number" }).notNull(),
 		customerId: bigint("customer_id", { mode: "number" }).notNull(),
 		createdByUserId: bigint("created_by_user_id", { mode: "number" }).notNull(),
-		statusId: bigint("status_id", { mode: "number" }).notNull(),
+		statusId: uuid("status_id").notNull(),
 		supervisor: varchar("supervisor", { length: 200 }),
 		orderNumber: varchar("order_number", { length: 50 }).notNull(),
-		movementTypeId: bigint("movement_type_id", { mode: "number" }),
+		movementTypeId: uuid("movement_type_id"),
 		parentOrderId: bigint("parent_order_id", { mode: "number" }),
 		quantityDemanded: numeric("quantity_demanded", {
 			precision: 18,
@@ -866,18 +867,16 @@ export const orders = pgTable(
 			precision: 18,
 			scale: 3,
 		}).default("0"),
-		unitId: bigint("unit_id", { mode: "number" }).notNull(),
+		unitId: uuid("unit_id").notNull(),
 		departureStationId: bigint("departure_station_id", { mode: "number" }),
 		debtorCustomerId: bigint("debtor_customer_id", { mode: "number" }),
-		pickupLocationTypeId: bigint("pickup_location_type_id", { mode: "number" }),
-		dispatchTypeId: bigint("dispatch_type_id", { mode: "number" }),
+		pickupLocationTypeId: uuid("pickup_location_type_id"),
+		dispatchTypeId: uuid("dispatch_type_id"),
 		destinationCustomerId: bigint("destination_customer_id", {
 			mode: "number",
 		}),
 		arrivalStationId: bigint("arrival_station_id", { mode: "number" }),
-		deliveryLocationTypeId: bigint("delivery_location_type_id", {
-			mode: "number",
-		}),
+		deliveryLocationTypeId: uuid("delivery_location_type_id"),
 		pickupPortId: bigint("pickup_port_id", { mode: "number" }),
 		pickupBerthId: bigint("pickup_berth_id", { mode: "number" }),
 		pickupSidingId: bigint("pickup_siding_id", { mode: "number" }),
@@ -1042,7 +1041,7 @@ export const orderAttributes = pgTable(
 	{
 		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
 		orderId: bigint("order_id", { mode: "number" }).notNull(),
-		attributeId: bigint("attribute_id", { mode: "number" }).notNull(),
+		attributeId: uuid("attribute_id").notNull(),
 		value: text("value"),
 		createdAt: timestamp("created_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
@@ -1073,13 +1072,13 @@ export const orderStatusHistory = pgTable(
 	{
 		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
 		orderId: bigint("order_id", { mode: "number" }).notNull(),
-		statusId: bigint("status_id", { mode: "number" }).notNull(),
+		statusId: uuid("status_id").notNull(),
 		changedById: bigint("changed_by_id", { mode: "number" }).notNull(),
 		changedAt: timestamp("changed_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
 			.notNull(),
 		comment: text("comment"),
-		rejectionReasonId: bigint("rejection_reason_id", { mode: "number" }),
+		rejectionReasonId: uuid("rejection_reason_id"),
 	},
 	(table) => [
 		foreignKey({
@@ -1114,7 +1113,7 @@ export const orderAccessoryOperations = pgTable(
 	{
 		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
 		orderId: bigint("order_id", { mode: "number" }).notNull(),
-		operationId: bigint("operation_id", { mode: "number" }).notNull(),
+		operationId: uuid("operation_id").notNull(),
 		status: varchar("status", { length: 50 }),
 		createdAt: timestamp("created_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
@@ -1146,7 +1145,7 @@ export const forecastPrograms = pgTable(
 		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
 		programNumber: varchar("program_number", { length: 30 }).notNull(),
 		orderId: bigint("order_id", { mode: "number" }).notNull(),
-		statusId: bigint("status_id", { mode: "number" }).notNull(),
+		statusId: uuid("status_id").notNull(),
 		plannedDate: timestamp("planned_date", { mode: "string" }).notNull(),
 		quantityPlanned: numeric("quantity_planned", {
 			precision: 18,
@@ -1213,8 +1212,8 @@ export const forecastProgramHistory = pgTable(
 		eventType: varchar("event_type", { length: 50 }).notNull(),
 		oldQuantity: numeric("old_quantity", { precision: 18, scale: 3 }),
 		newQuantity: numeric("new_quantity", { precision: 18, scale: 3 }),
-		oldStatusId: bigint("old_status_id", { mode: "number" }),
-		newStatusId: bigint("new_status_id", { mode: "number" }),
+		oldStatusId: uuid("old_status_id"),
+		newStatusId: uuid("new_status_id"),
 		oldPlannedDate: timestamp("old_planned_date", { mode: "string" }),
 		newPlannedDate: timestamp("new_planned_date", { mode: "string" }),
 		quantityRealized: numeric("quantity_realized", { precision: 18, scale: 3 }),
@@ -1413,7 +1412,7 @@ export const orderDateModifications = pgTable(
 export const claimTypes = pgTable(
 	"claim_types",
 	{
-		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
+		id: uuid("id").primaryKey(),
 		name: varchar("name", { length: 100 }).notNull(),
 		createdAt: timestamp("created_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
@@ -1429,7 +1428,7 @@ export const claimTypes = pgTable(
 export const claimStatus = pgTable(
 	"claim_status",
 	{
-		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
+		id: uuid("id").primaryKey(),
 		name: varchar("name", { length: 100 }).notNull(),
 		createdAt: timestamp("created_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
@@ -1449,9 +1448,9 @@ export const claims = pgTable(
 		customerId: bigint("customer_id", { mode: "number" }).notNull(),
 		createdByUserId: bigint("created_by_user_id", { mode: "number" }).notNull(),
 		orderId: bigint("order_id", { mode: "number" }),
-		operationId: bigint("operation_id", { mode: "number" }),
-		typeId: bigint("type_id", { mode: "number" }).notNull(),
-		statusId: bigint("status_id", { mode: "number" }).notNull(),
+		operationId: uuid("operation_id"),
+		typeId: uuid("type_id").notNull(),
+		statusId: uuid("status_id").notNull(),
 		priority: varchar("priority", { length: 20 }),
 		description: text("description").notNull(),
 		resolution: varchar("resolution", { length: 1000 }),
@@ -1534,7 +1533,7 @@ export const claimStatusHistory = pgTable(
 	{
 		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
 		claimId: bigint("claim_id", { mode: "number" }).notNull(),
-		statusId: bigint("status_id", { mode: "number" }).notNull(),
+		statusId: uuid("status_id").notNull(),
 		changedByUserId: bigint("changed_by_user_id", { mode: "number" }).notNull(),
 		changedAt: timestamp("changed_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
@@ -1937,7 +1936,7 @@ export const programConvoi = pgTable(
 export const notificationTypes = pgTable(
 	"notification_types",
 	{
-		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
+		id: uuid("id").primaryKey(),
 		name: varchar("name", { length: 100 }).notNull(),
 		description: varchar("description", { length: 500 }),
 		createdAt: timestamp("created_at", { mode: "string" })
@@ -1955,7 +1954,7 @@ export const notificationTypes = pgTable(
 export const notificationChannels = pgTable(
 	"notification_channels",
 	{
-		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
+		id: uuid("id").primaryKey(),
 		name: varchar("name", { length: 50 }).notNull(),
 		createdAt: timestamp("created_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
@@ -1974,8 +1973,8 @@ export const notifications = pgTable(
 	{
 		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
 		recipientUserId: bigint("recipient_user_id", { mode: "number" }).notNull(),
-		typeId: bigint("type_id", { mode: "number" }).notNull(),
-		channelId: bigint("channel_id", { mode: "number" }).notNull(),
+		typeId: uuid("type_id").notNull(),
+		channelId: uuid("channel_id").notNull(),
 		title: varchar("title", { length: 200 }).notNull(),
 		message: text("message").notNull(),
 		relatedEntityType: varchar("related_entity_type", { length: 50 }),
@@ -2039,7 +2038,7 @@ export const notifications = pgTable(
 export const dtmRequestTypes = pgTable(
 	"dtm_request_types",
 	{
-		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
+		id: uuid("id").primaryKey(),
 		name: varchar("name", { length: 100 }).notNull(),
 		description: varchar("description", { length: 500 }),
 		createdAt: timestamp("created_at", { mode: "string" })
@@ -2058,7 +2057,7 @@ export const dtmIntegrationLog = pgTable(
 	"dtm_integration_log",
 	{
 		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
-		requestTypeId: bigint("request_type_id", { mode: "number" }).notNull(),
+		requestTypeId: uuid("request_type_id").notNull(),
 		requestPayload: text("request_payload"),
 		responsePayload: text("response_payload"),
 		status: varchar("status", { length: 20 }).notNull(),

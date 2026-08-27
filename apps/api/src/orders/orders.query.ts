@@ -309,7 +309,7 @@ export async function recordOrderStatus(
 	db: DrizzleDb,
 	data: {
 		orderId: OrderId;
-		statusId: number;
+		statusId: string;
 		userId: UserId;
 		comment?: string;
 	},

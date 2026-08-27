@@ -6,10 +6,10 @@ type _Assertion = Assert<Equals<NotificationListDto, NotificationList>>;
 export class NotificationListDto implements NotificationList {
 	id: number;
 	createdAt: string;
-	typeId: number;
+	typeId: string;
 	recipientUserId: number;
 	status: string;
-	channelId: number;
+	channelId: string;
 	title: string;
 	message: string;
 	relatedEntityType: string | null;
@@ -17,6 +17,6 @@ export class NotificationListDto implements NotificationList {
 	sentAt: string | null;
 	readAt: string | null;
 	retryCount: number | null;
-	notificationType: { id: number; name: string } | null;
-	notificationChannel: { id: number; name: string } | null;
+	notificationType: { id: string; name: string } | null;
+	notificationChannel: { id: string; name: string } | null;
 }

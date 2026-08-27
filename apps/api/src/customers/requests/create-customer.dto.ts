@@ -1,9 +1,9 @@
 import {
 	IsBoolean,
 	IsEmail,
-	IsInt,
 	IsOptional,
 	IsString,
+	IsUUID,
 	MaxLength,
 } from "class-validator";
 
@@ -33,8 +33,8 @@ export class CreateCustomerDto {
 	email?: string;
 
 	@IsOptional()
-	@IsInt()
-	typeId?: number;
+	@IsUUID()
+	typeId?: string;
 
 	@IsOptional()
 	@IsString()

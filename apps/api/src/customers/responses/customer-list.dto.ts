@@ -13,6 +13,6 @@ export class CustomerListDto implements CustomerList {
 	city: string | null;
 	phone: string | null;
 	email: string | null;
-	typeId: number | null;
+	typeId: string | null;
 	customerCode: string | null;
 }

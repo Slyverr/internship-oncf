@@ -8,20 +8,20 @@ export class ClaimListDto implements ClaimList {
 	description: string;
 	createdAt: string;
 	updatedAt: string;
-	typeId: number;
+	typeId: string;
 	customerId: number;
 	createdByUserId: number;
-	statusId: number;
+	statusId: string;
 	orderId: number | null;
-	operationId: number | null;
+	operationId: string | null;
 	priority: string | null;
 	resolution: string | null;
 	closedByUserId: number | null;
 	closedAt: string | null;
-	claimStatus: { id: number; name: string } | null;
+	claimStatus: { id: string; name: string } | null;
 	customer: { id: number; companyName: string } | null;
 	createdByUser: { id: number; lastName: string; firstName: string } | null;
 	order: { id: number; orderNumber: string } | null;
-	accessoryOperation: { id: number; name: string } | null;
-	claimType: { id: number; name: string } | null;
+	accessoryOperation: { id: string; name: string } | null;
+	claimType: { id: string; name: string } | null;
 }

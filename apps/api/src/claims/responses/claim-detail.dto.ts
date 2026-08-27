@@ -8,9 +8,9 @@ export class ClaimDetailDto implements ClaimDetail {
 	customerId: number;
 	createdByUserId: number;
 	orderId: number | null;
-	operationId: number | null;
-	typeId: number;
-	statusId: number;
+	operationId: string | null;
+	typeId: string;
+	statusId: string;
 	priority: string | null;
 	description: string;
 	resolution: string | null;
@@ -18,7 +18,7 @@ export class ClaimDetailDto implements ClaimDetail {
 	updatedAt: string;
 	closedByUserId: number | null;
 	closedAt: string | null;
-	claimStatus: { id: number; name: string } | null;
+	claimStatus: { id: string; name: string } | null;
 	claimComments: {
 		id: number;
 		createdAt: string;
@@ -29,7 +29,7 @@ export class ClaimDetailDto implements ClaimDetail {
 	customer: { id: number; companyName: string } | null;
 	claimStatusHistories: {
 		id: number;
-		statusId: number;
+		statusId: string;
 		changedAt: string;
 		comment: string | null;
 		changedByUserId: number;
@@ -37,7 +37,7 @@ export class ClaimDetailDto implements ClaimDetail {
 	}[];
 	createdByUser: { id: number; lastName: string; firstName: string } | null;
 	order: { id: number; orderNumber: string } | null;
-	accessoryOperation: { id: number; name: string } | null;
-	claimType: { id: number; name: string } | null;
+	accessoryOperation: { id: string; name: string } | null;
+	claimType: { id: string; name: string } | null;
 	closedByUser: { id: number; lastName: string; firstName: string } | null;
 }

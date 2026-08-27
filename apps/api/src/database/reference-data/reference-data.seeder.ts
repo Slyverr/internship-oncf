@@ -21,7 +21,7 @@ import {
 	roles,
 	units,
 } from "drizzle/schema";
-import { inArray } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import {
 	ACCESSORY_OPERATIONS,
@@ -49,50 +49,83 @@ import {
 
 export type DatabaseClient = NodePgDatabase<typeof relations>;
 
+const referenceTables = [
+	{ table: roles, data: ROLES, key: roles.name },
+	{ table: permissions, data: PERMISSIONS, key: permissions.name },
+	{ table: customerTypes, data: CUSTOMER_TYPES, key: customerTypes.name },
+	{ table: goodsTypes, data: GOODS_TYPES, key: goodsTypes.name },
+	{ table: attributes, data: ATTRIBUTES, key: attributes.name },
+	{ table: orderStatus, data: ORDER_STATUSES, key: orderStatus.name },
+	{ table: programStatus, data: PROGRAM_STATUSES, key: programStatus.name },
+	{ table: claimTypes, data: CLAIM_TYPES, key: claimTypes.name },
+	{ table: claimStatus, data: CLAIM_STATUSES, key: claimStatus.name },
+	{ table: movementTypes, data: MOVEMENT_TYPES, key: movementTypes.name },
+	{
+		table: pickupLocationTypes,
+		data: PICKUP_LOCATION_TYPES,
+		key: pickupLocationTypes.name,
+	},
+	{ table: dispatchTypes, data: DISPATCH_TYPES, key: dispatchTypes.name },
+	{
+		table: rejectionReasons,
+		data: REJECTION_REASONS,
+		key: rejectionReasons.name,
+	},
+	{
+		table: notificationTypes,
+		data: NOTIFICATION_TYPES,
+		key: notificationTypes.name,
+	},
+	{
+		table: notificationChannels,
+		data: NOTIFICATION_CHANNELS,
+		key: notificationChannels.name,
+	},
+	{
+		table: dtmRequestTypes,
+		data: DTM_REQUEST_TYPES,
+		key: dtmRequestTypes.name,
+	},
+	{
+		table: accessoryOperations,
+		data: ACCESSORY_OPERATIONS,
+		key: accessoryOperations.name,
+	},
+	{ table: units, data: UNITS, key: units.name },
+] as const;
+
 export async function seedReferenceData(db: DatabaseClient) {
 	await db.transaction(async (tx) => {
-		await seedSimpleTables(tx);
+		await seedReferenceTables(tx);
 		await deactivateLegacyUnits(tx);
 		await seedRolePermissions(tx);
 		await seedParametrization(tx);
 	});
 }
 
-async function seedSimpleTables(tx: DatabaseClient) {
-	const tables = [
-		{ table: roles, data: ROLES },
-		{ table: permissions, data: PERMISSIONS },
-		{ table: customerTypes, data: CUSTOMER_TYPES },
-		{ table: goodsTypes, data: GOODS_TYPES },
-		{ table: attributes, data: ATTRIBUTES },
-		{ table: orderStatus, data: ORDER_STATUSES },
-		{ table: programStatus, data: PROGRAM_STATUSES },
-		{ table: claimTypes, data: CLAIM_TYPES },
-		{ table: claimStatus, data: CLAIM_STATUSES },
-		{ table: movementTypes, data: MOVEMENT_TYPES },
-		{ table: pickupLocationTypes, data: PICKUP_LOCATION_TYPES },
-		{ table: dispatchTypes, data: DISPATCH_TYPES },
-		{ table: rejectionReasons, data: REJECTION_REASONS },
-		{ table: notificationTypes, data: NOTIFICATION_TYPES },
-		{ table: notificationChannels, data: NOTIFICATION_CHANNELS },
-		{ table: dtmRequestTypes, data: DTM_REQUEST_TYPES },
-		{ table: accessoryOperations, data: ACCESSORY_OPERATIONS },
-		{ table: units, data: UNITS },
-	];
-
-	for (const { table, data } of tables) {
+async function seedReferenceTables(tx: DatabaseClient) {
+	for (const { table, data, key } of referenceTables) {
 		for (const item of Object.values(data)) {
-			const values = { ...item, isActive: true };
-			await tx.insert(table).values(values).onConflictDoUpdate({
-				target: table.id,
-				set: values,
-			});
+			await tx
+				.insert(table)
+				.values({
+					...item,
+					isActive: true,
+				})
+				.onConflictDoUpdate({
+					target: key,
+					set: {
+						...item,
+						isActive: true,
+					},
+				});
 		}
 	}
 }
 
 async function deactivateLegacyUnits(tx: DatabaseClient) {
-	if (LEGACY_UNITS.length === 0) return;
+	if (!LEGACY_UNITS.length) return;
+
 	await tx
 		.update(units)
 		.set({ isActive: false })
@@ -100,42 +133,58 @@ async function deactivateLegacyUnits(tx: DatabaseClient) {
 }
 
 async function seedRolePermissions(tx: DatabaseClient) {
-	for (const [role, perms] of Object.entries(ROLE_PERMISSIONS)) {
-		const roleId = ROLES[role as keyof typeof ROLES].id;
-		const permissionIds =
-			perms === "ALL"
-				? Object.values(PERMISSIONS).map((p) => p.id)
-				: perms.map((p) => PERMISSIONS[p].id);
+	for (const [roleName, permissionsList] of Object.entries(ROLE_PERMISSIONS)) {
+		const roleId = ROLES[roleName].id;
 
-		for (const permissionId of permissionIds) {
-			await tx
-				.insert(rolePermissions)
-				.values({ roleId, permissionId })
-				.onConflictDoNothing();
-		}
+		await tx.delete(rolePermissions).where(eq(rolePermissions.roleId, roleId));
+
+		const permissionIds =
+			permissionsList === "ALL"
+				? Object.values(PERMISSIONS).map(({ id }) => id)
+				: permissionsList.map((permission) => PERMISSIONS[permission].id);
+
+		if (!permissionIds.length) continue;
+
+		await tx.insert(rolePermissions).values(
+			permissionIds.map((permissionId) => ({
+				roleId,
+				permissionId,
+			})),
+		);
 	}
 }
 
 async function seedParametrization(tx: DatabaseClient) {
-	const attrIdByName = new Map(ATTRIBUTES.map((a) => [a.name, a.id]));
+	const goodsTypeIds = new Map(
+		Object.values(GOODS_TYPES).map(({ id, name }) => [name, id]),
+	);
 
-	for (const [goodsTypeName, requiredAttrs] of Object.entries(
+	const attributeIds = new Map(
+		Object.values(ATTRIBUTES).map(({ id, name }) => [name, id]),
+	);
+
+	for (const [goodsType, requiredAttributes] of Object.entries(
 		PARAMETRIZATION,
 	)) {
-		const goodsTypeId =
-			GOODS_TYPES[goodsTypeName as keyof typeof GOODS_TYPES]?.id;
+		const goodsTypeId = goodsTypeIds.get(goodsType);
 		if (!goodsTypeId) continue;
 
-		for (const { attributeName, isRequired } of requiredAttrs) {
-			const attributeId = attrIdByName.get(attributeName);
+		for (const { attributeName, isRequired } of requiredAttributes) {
+			const attributeId = attributeIds.get(attributeName);
 			if (!attributeId) continue;
 
 			await tx
 				.insert(parametrization)
-				.values({ goodsTypeId, attributeId, isRequired })
+				.values({
+					goodsTypeId,
+					attributeId,
+					isRequired,
+				})
 				.onConflictDoUpdate({
 					target: [parametrization.goodsTypeId, parametrization.attributeId],
-					set: { isRequired },
+					set: {
+						isRequired,
+					},
 				});
 		}
 	}

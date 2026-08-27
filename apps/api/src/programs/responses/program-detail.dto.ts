@@ -7,7 +7,7 @@ export class ProgramDetailDto implements ProgramDetail {
 	id: number;
 	programNumber: string;
 	orderId: number;
-	statusId: number;
+	statusId: string;
 	plannedDate: string;
 	quantityPlanned: string;
 	quantityRealized: string | null;
@@ -19,7 +19,7 @@ export class ProgramDetailDto implements ProgramDetail {
 	updatedAt: string;
 	sentToDtmAt: string | null;
 	dtmStatus: string | null;
-	programStatus: { id: number; name: string } | null;
+	programStatus: { id: string; name: string } | null;
 	orderWagons: {
 		id: number;
 		orderId: number;
@@ -38,8 +38,8 @@ export class ProgramDetailDto implements ProgramDetail {
 		eventType: string;
 		oldQuantity: string | null;
 		newQuantity: string | null;
-		oldStatusId: number | null;
-		newStatusId: number | null;
+		oldStatusId: string | null;
+		newStatusId: string | null;
 		oldPlannedDate: string | null;
 		newPlannedDate: string | null;
 		completionRate: string | null;

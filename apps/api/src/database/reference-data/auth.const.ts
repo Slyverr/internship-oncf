@@ -1,324 +1,105 @@
 import { Permission, Role } from "@ecommand/shared";
+import {
+	createGroupedReferenceMap,
+	createReferenceMap,
+} from "./reference-data.utils";
 
-export const ROLES: Record<
-	Role,
-	{ id: number; name: Role; description: string }
-> = {
-	[Role.ADMIN]: {
-		id: 1,
-		name: Role.ADMIN,
-		description: "Full system access with all permissions",
-	},
-	[Role.CLIENT_REPRESENTATIVE]: {
-		id: 2,
-		name: Role.CLIENT_REPRESENTATIVE,
-		description:
-			"Client-facing representative with order and claims management",
-	},
-	[Role.AGENT_COMMERCIAL]: {
-		id: 3,
-		name: Role.AGENT_COMMERCIAL,
-		description:
-			"Commercial agent with full order lifecycle and customer management",
-	},
-};
+export const ROLES = createReferenceMap("roles", {
+	[Role.ADMIN]: "Full system access with all permissions",
+	[Role.CLIENT_REPRESENTATIVE]:
+		"Client-facing representative with order and claims management",
+	[Role.AGENT_COMMERCIAL]:
+		"Commercial agent with full order lifecycle and customer management",
+});
 
-export const PERMISSIONS: Record<
-	Permission,
-	{ id: number; name: Permission; description: string }
-> = {
-	// Users: 1-100
-	[Permission.USERS_CREATE]: {
-		id: 1,
-		name: Permission.USERS_CREATE,
-		description: "Create new user accounts",
+export const PERMISSIONS = createGroupedReferenceMap("permissions", [
+	{
+		[Permission.USERS_CREATE]: "Create new user accounts",
+		[Permission.USERS_READ]: "View user account details and lists",
+		[Permission.USERS_UPDATE]: "Update existing user account information",
+		[Permission.USERS_DELETE]: "Delete user accounts from the system",
+		[Permission.USERS_MANAGE]: "Manage user operations",
+		[Permission.USERS_MANAGE_OTHER]: "Manage users belonging to other accounts",
 	},
-	[Permission.USERS_READ]: {
-		id: 2,
-		name: Permission.USERS_READ,
-		description: "View user account details and lists",
+	{
+		[Permission.ORDERS_CREATE]: "Create new orders",
+		[Permission.ORDERS_READ]: "View order details and lists",
+		[Permission.ORDERS_UPDATE]: "Modify existing order information",
+		[Permission.ORDERS_DELETE]: "Delete orders from the system",
+		[Permission.ORDERS_MANAGE]: "Manage all order operations",
+		[Permission.ORDERS_MANAGE_OTHER]: "Manage orders belonging to other users",
+		[Permission.ORDERS_MANAGE_OWNERSHIP]:
+			"Change order ownership and assignment",
+		[Permission.ORDERS_STATUS_UPDATE]:
+			"Update order status according to workflow rules",
+		[Permission.ORDERS_APPROVE]: "Approve orders",
+		[Permission.ORDERS_REJECT]: "Reject orders",
+		[Permission.ORDERS_EXECUTE]: "Execute orders",
+		[Permission.ORDERS_SEND]: "Send orders for processing",
 	},
-	[Permission.USERS_UPDATE]: {
-		id: 3,
-		name: Permission.USERS_UPDATE,
-		description: "Update existing user account information",
+	{
+		[Permission.CUSTOMERS_CREATE]: "Create new customer profiles",
+		[Permission.CUSTOMERS_READ]: "View customer profiles and history",
+		[Permission.CUSTOMERS_UPDATE]: "Update customer profile information",
+		[Permission.CUSTOMERS_DELETE]: "Delete customer profiles from the system",
+		[Permission.CUSTOMERS_MANAGE]: "Manage customer operations",
+		[Permission.CUSTOMERS_MANAGE_OTHER]:
+			"Manage customers belonging to other users",
 	},
-	[Permission.USERS_DELETE]: {
-		id: 4,
-		name: Permission.USERS_DELETE,
-		description: "Delete user accounts from the system",
+	{
+		[Permission.CLAIMS_CREATE]: "Create new claims or disputes",
+		[Permission.CLAIMS_READ]: "View claim details and lists",
+		[Permission.CLAIMS_UPDATE]: "Update claim information",
+		[Permission.CLAIMS_CLOSE]: "Close resolved claims",
+		[Permission.CLAIMS_DELETE]: "Delete claims from the system",
+		[Permission.CLAIMS_MANAGE]: "Manage all claims",
+		[Permission.CLAIMS_MANAGE_OTHER]: "Manage claims belonging to other users",
+		[Permission.CLAIMS_STATUS_UPDATE]:
+			"Update claim status according to workflow rules",
 	},
-	[Permission.USERS_MANAGE]: {
-		id: 5,
-		name: Permission.USERS_MANAGE,
-		description: "Manage user operations",
+	{
+		[Permission.TRACKING_READ]: "View tracking information and shipment status",
+		[Permission.TRACKING_UPDATE]:
+			"Update tracking information and shipment details",
+		[Permission.TRACKING_MANAGE]: "Manage tracking operations",
 	},
-	[Permission.USERS_MANAGE_OTHER]: {
-		id: 6,
-		name: Permission.USERS_MANAGE_OTHER,
-		description: "Manage users belonging to other accounts",
+	{
+		[Permission.REPORTS_READ]: "View reports and analytics data",
+		[Permission.REPORTS_EXPORT]:
+			"Export reports to various formats (PDF, Excel, CSV)",
 	},
-
-	// Orders: 101-200
-	[Permission.ORDERS_CREATE]: {
-		id: 101,
-		name: Permission.ORDERS_CREATE,
-		description: "Create new orders",
+	{
+		[Permission.ROLES_MANAGE]: "Manage roles and their assigned permissions",
+		[Permission.PERMISSIONS_MANAGE]: "Manage permissions and their definitions",
 	},
-	[Permission.ORDERS_READ]: {
-		id: 102,
-		name: Permission.ORDERS_READ,
-		description: "View order details and lists",
+	{
+		[Permission.LOGS_READ]: "View system audit logs and activity history",
 	},
-	[Permission.ORDERS_UPDATE]: {
-		id: 103,
-		name: Permission.ORDERS_UPDATE,
-		description: "Modify existing order information",
+	{
+		[Permission.PROFILE_UPDATE]: "Update user profile and account preferences",
 	},
-	[Permission.ORDERS_DELETE]: {
-		id: 104,
-		name: Permission.ORDERS_DELETE,
-		description: "Delete orders from the system",
+	{
+		[Permission.ARCHIVAL_MANAGE]:
+			"Manage data archival, retention, and purging policies",
+		[Permission.ARCHIVAL_READ]: "View archived data and historical records",
 	},
-	[Permission.ORDERS_MANAGE]: {
-		id: 105,
-		name: Permission.ORDERS_MANAGE,
-		description: "Manage all order operations",
+	{
+		[Permission.PROGRAMS_CREATE]: "Create new programs",
+		[Permission.PROGRAMS_READ]: "View program details and lists",
+		[Permission.PROGRAMS_UPDATE]: "Update program information",
+		[Permission.PROGRAMS_DELETE]: "Delete programs",
+		[Permission.PROGRAMS_MANAGE]: "Manage program operations",
+		[Permission.PROGRAMS_MANAGE_OTHER]:
+			"Manage programs belonging to other users",
+		[Permission.PROGRAMS_STATUS_UPDATE]:
+			"Update program status according to workflow rules",
+		[Permission.PROGRAMS_APPROVE]: "Approve programs",
+		[Permission.PROGRAMS_SEND]: "Send programs for processing",
+		[Permission.PROGRAMS_EXECUTE]: "Execute programs",
+		[Permission.PROGRAMS_MANAGE_OWNERSHIP]:
+			"Change program ownership and assignment",
 	},
-	[Permission.ORDERS_MANAGE_OTHER]: {
-		id: 106,
-		name: Permission.ORDERS_MANAGE_OTHER,
-		description: "Manage orders belonging to other users",
-	},
-	[Permission.ORDERS_MANAGE_OWNERSHIP]: {
-		id: 107,
-		name: Permission.ORDERS_MANAGE_OWNERSHIP,
-		description: "Change order ownership and assignment",
-	},
-	[Permission.ORDERS_STATUS_UPDATE]: {
-		id: 108,
-		name: Permission.ORDERS_STATUS_UPDATE,
-		description: "Update order status according to workflow rules",
-	},
-	[Permission.ORDERS_APPROVE]: {
-		id: 109,
-		name: Permission.ORDERS_APPROVE,
-		description: "Approve orders",
-	},
-	[Permission.ORDERS_REJECT]: {
-		id: 110,
-		name: Permission.ORDERS_REJECT,
-		description: "Reject orders",
-	},
-	[Permission.ORDERS_EXECUTE]: {
-		id: 111,
-		name: Permission.ORDERS_EXECUTE,
-		description: "Execute orders",
-	},
-	[Permission.ORDERS_SEND]: {
-		id: 112,
-		name: Permission.ORDERS_SEND,
-		description: "Send orders for processing",
-	},
-
-	// Customers: 201-300
-	[Permission.CUSTOMERS_CREATE]: {
-		id: 201,
-		name: Permission.CUSTOMERS_CREATE,
-		description: "Create new customer profiles",
-	},
-	[Permission.CUSTOMERS_READ]: {
-		id: 202,
-		name: Permission.CUSTOMERS_READ,
-		description: "View customer profiles and history",
-	},
-	[Permission.CUSTOMERS_UPDATE]: {
-		id: 203,
-		name: Permission.CUSTOMERS_UPDATE,
-		description: "Update customer profile information",
-	},
-	[Permission.CUSTOMERS_DELETE]: {
-		id: 204,
-		name: Permission.CUSTOMERS_DELETE,
-		description: "Delete customer profiles from the system",
-	},
-	[Permission.CUSTOMERS_MANAGE]: {
-		id: 205,
-		name: Permission.CUSTOMERS_MANAGE,
-		description: "Manage customer operations",
-	},
-	[Permission.CUSTOMERS_MANAGE_OTHER]: {
-		id: 206,
-		name: Permission.CUSTOMERS_MANAGE_OTHER,
-		description: "Manage customers belonging to other users",
-	},
-
-	// Claims: 301-400
-	[Permission.CLAIMS_CREATE]: {
-		id: 301,
-		name: Permission.CLAIMS_CREATE,
-		description: "Create new claims or disputes",
-	},
-	[Permission.CLAIMS_READ]: {
-		id: 302,
-		name: Permission.CLAIMS_READ,
-		description: "View claim details and lists",
-	},
-	[Permission.CLAIMS_UPDATE]: {
-		id: 303,
-		name: Permission.CLAIMS_UPDATE,
-		description: "Update claim information",
-	},
-	[Permission.CLAIMS_CLOSE]: {
-		id: 304,
-		name: Permission.CLAIMS_CLOSE,
-		description: "Close resolved claims",
-	},
-	[Permission.CLAIMS_DELETE]: {
-		id: 305,
-		name: Permission.CLAIMS_DELETE,
-		description: "Delete claims from the system",
-	},
-	[Permission.CLAIMS_MANAGE]: {
-		id: 306,
-		name: Permission.CLAIMS_MANAGE,
-		description: "Manage all claims",
-	},
-	[Permission.CLAIMS_MANAGE_OTHER]: {
-		id: 307,
-		name: Permission.CLAIMS_MANAGE_OTHER,
-		description: "Manage claims belonging to other users",
-	},
-	[Permission.CLAIMS_STATUS_UPDATE]: {
-		id: 308,
-		name: Permission.CLAIMS_STATUS_UPDATE,
-		description: "Update claim status according to workflow rules",
-	},
-
-	// Tracking: 401-500
-	[Permission.TRACKING_READ]: {
-		id: 401,
-		name: Permission.TRACKING_READ,
-		description: "View tracking information and shipment status",
-	},
-	[Permission.TRACKING_UPDATE]: {
-		id: 402,
-		name: Permission.TRACKING_UPDATE,
-		description: "Update tracking information and shipment details",
-	},
-	[Permission.TRACKING_MANAGE]: {
-		id: 403,
-		name: Permission.TRACKING_MANAGE,
-		description: "Manage tracking operations",
-	},
-
-	// Reports: 501-600
-	[Permission.REPORTS_READ]: {
-		id: 501,
-		name: Permission.REPORTS_READ,
-		description: "View reports and analytics data",
-	},
-	[Permission.REPORTS_EXPORT]: {
-		id: 502,
-		name: Permission.REPORTS_EXPORT,
-		description: "Export reports to various formats (PDF, Excel, CSV)",
-	},
-
-	// System: 601-700
-	[Permission.ROLES_MANAGE]: {
-		id: 601,
-		name: Permission.ROLES_MANAGE,
-		description: "Manage roles and their assigned permissions",
-	},
-	[Permission.PERMISSIONS_MANAGE]: {
-		id: 602,
-		name: Permission.PERMISSIONS_MANAGE,
-		description: "Manage permissions and their definitions",
-	},
-
-	// Audit: 701-800
-	[Permission.LOGS_READ]: {
-		id: 701,
-		name: Permission.LOGS_READ,
-		description: "View system audit logs and activity history",
-	},
-
-	// Profile: 801-900
-	[Permission.PROFILE_UPDATE]: {
-		id: 801,
-		name: Permission.PROFILE_UPDATE,
-		description: "Update user profile and account preferences",
-	},
-
-	// Archival: 901-1000
-	[Permission.ARCHIVAL_MANAGE]: {
-		id: 901,
-		name: Permission.ARCHIVAL_MANAGE,
-		description: "Manage data archival, retention, and purging policies",
-	},
-	[Permission.ARCHIVAL_READ]: {
-		id: 902,
-		name: Permission.ARCHIVAL_READ,
-		description: "View archived data and historical records",
-	},
-
-	// Programs: 1001-1100
-	[Permission.PROGRAMS_CREATE]: {
-		id: 1001,
-		name: Permission.PROGRAMS_CREATE,
-		description: "Create new programs",
-	},
-	[Permission.PROGRAMS_READ]: {
-		id: 1002,
-		name: Permission.PROGRAMS_READ,
-		description: "View program details and lists",
-	},
-	[Permission.PROGRAMS_UPDATE]: {
-		id: 1003,
-		name: Permission.PROGRAMS_UPDATE,
-		description: "Update program information",
-	},
-	[Permission.PROGRAMS_DELETE]: {
-		id: 1004,
-		name: Permission.PROGRAMS_DELETE,
-		description: "Delete programs",
-	},
-	[Permission.PROGRAMS_MANAGE]: {
-		id: 1005,
-		name: Permission.PROGRAMS_MANAGE,
-		description: "Manage program operations",
-	},
-	[Permission.PROGRAMS_MANAGE_OTHER]: {
-		id: 1006,
-		name: Permission.PROGRAMS_MANAGE_OTHER,
-		description: "Manage programs belonging to other users",
-	},
-	[Permission.PROGRAMS_STATUS_UPDATE]: {
-		id: 1007,
-		name: Permission.PROGRAMS_STATUS_UPDATE,
-		description: "Update program status according to workflow rules",
-	},
-	[Permission.PROGRAMS_APPROVE]: {
-		id: 1008,
-		name: Permission.PROGRAMS_APPROVE,
-		description: "Approve programs",
-	},
-	[Permission.PROGRAMS_SEND]: {
-		id: 1009,
-		name: Permission.PROGRAMS_SEND,
-		description: "Send programs for processing",
-	},
-	[Permission.PROGRAMS_EXECUTE]: {
-		id: 1010,
-		name: Permission.PROGRAMS_EXECUTE,
-		description: "Execute programs",
-	},
-	[Permission.PROGRAMS_MANAGE_OWNERSHIP]: {
-		id: 1011,
-		name: Permission.PROGRAMS_MANAGE_OWNERSHIP,
-		description: "Change program ownership and assignment",
-	},
-};
+]);
 
 export const ROLE_PERMISSIONS: Record<Role, Permission[] | "ALL"> = {
 	[Role.ADMIN]: "ALL",
@@ -328,14 +109,10 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[] | "ALL"> = {
 		Permission.ORDERS_READ,
 		Permission.ORDERS_UPDATE,
 		Permission.ORDERS_DELETE,
-
 		Permission.CLAIMS_CREATE,
 		Permission.CLAIMS_READ,
-
 		Permission.REPORTS_READ,
-
 		Permission.PROFILE_UPDATE,
-
 		Permission.PROGRAMS_READ,
 	],
 
@@ -360,9 +137,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[] | "ALL"> = {
 		Permission.CLAIMS_CLOSE,
 
 		Permission.TRACKING_READ,
-
 		Permission.REPORTS_READ,
-
 		Permission.PROFILE_UPDATE,
 
 		Permission.PROGRAMS_CREATE,

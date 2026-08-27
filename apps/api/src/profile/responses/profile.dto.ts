@@ -12,7 +12,7 @@ export class ProfileDto implements Profile {
 	permissions: string[];
 	employeeId: string | null;
 	type: string | null;
-	roleId: number;
+	roleId: string;
 	customerId: number | null;
 	agencyId: number | null;
 	createdAt: string;

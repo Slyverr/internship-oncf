@@ -8,6 +8,7 @@ import {
 	IsNumberString,
 	IsOptional,
 	IsString,
+	IsUUID,
 	MaxLength,
 } from "class-validator";
 
@@ -31,9 +32,8 @@ export class CreateOrderDto {
 	supervisor?: string;
 
 	@IsOptional()
-	@IsInt()
-	@Type(() => Number)
-	movementTypeId?: number;
+	@IsUUID()
+	movementTypeId?: string;
 
 	@IsOptional()
 	@IsInt()
@@ -48,9 +48,8 @@ export class CreateOrderDto {
 	@IsNumberString()
 	quantityAchieved?: string;
 
-	@IsInt()
-	@Type(() => Number)
-	unitId: number;
+	@IsUUID()
+	unitId: string;
 
 	@IsOptional()
 	@IsInt()
@@ -63,14 +62,12 @@ export class CreateOrderDto {
 	debtorCustomerId?: number;
 
 	@IsOptional()
-	@IsInt()
-	@Type(() => Number)
-	pickupLocationTypeId?: number;
+	@IsUUID()
+	pickupLocationTypeId?: string;
 
 	@IsOptional()
-	@IsInt()
-	@Type(() => Number)
-	dispatchTypeId?: number;
+	@IsUUID()
+	dispatchTypeId?: string;
 
 	@IsOptional()
 	@IsInt()
@@ -83,9 +80,8 @@ export class CreateOrderDto {
 	arrivalStationId?: number;
 
 	@IsOptional()
-	@IsInt()
-	@Type(() => Number)
-	deliveryLocationTypeId?: number;
+	@IsUUID()
+	deliveryLocationTypeId?: string;
 
 	@IsOptional()
 	@IsInt()

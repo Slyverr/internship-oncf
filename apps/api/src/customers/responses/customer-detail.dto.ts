@@ -10,7 +10,7 @@ export class CustomerDetailDto implements CustomerDetail {
 	city: string | null;
 	phone: string | null;
 	email: string | null;
-	typeId: number | null;
+	typeId: string | null;
 	createdAt: string;
 	updatedAt: string;
 	isActive: boolean;

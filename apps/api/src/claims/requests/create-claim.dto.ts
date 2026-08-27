@@ -6,6 +6,7 @@ import {
 	IsNotEmpty,
 	IsOptional,
 	IsString,
+	IsUUID,
 	MaxLength,
 } from "class-validator";
 
@@ -26,9 +27,8 @@ export class CreateClaimDto {
 	orderId?: number;
 
 	@IsOptional()
-	@IsInt()
-	@Type(() => Number)
-	operationId?: number;
+	@IsUUID()
+	operationId?: string;
 
 	@Transform(({ value }) => value?.toUpperCase())
 	@IsEnum(ClaimType)
