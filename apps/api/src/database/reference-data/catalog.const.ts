@@ -5,22 +5,27 @@ import {
 	Unit,
 } from "@ecommand/shared";
 import {
-	createEnumReferenceMap,
 	createReferenceId,
+	createReferenceMap,
+	enumReferenceMapper,
 } from "./reference-data.utils";
 
-export const CUSTOMER_TYPES = createEnumReferenceMap(
-	"customer_types",
+export const CUSTOMER_TYPES = createReferenceMap(
 	CustomerType,
+	enumReferenceMapper("customer_types"),
 );
 
-export const ACCESSORY_OPERATIONS = createEnumReferenceMap(
-	"accessory_operations",
+export const ACCESSORY_OPERATIONS = createReferenceMap(
 	AccessoryOperation,
+	enumReferenceMapper("accessory_operations"),
 );
 
-export const GOODS_TYPES = createEnumReferenceMap("goods_types", GoodsType);
-export const UNITS = createEnumReferenceMap("units", Unit);
+export const GOODS_TYPES = createReferenceMap(
+	GoodsType,
+	enumReferenceMapper("goods_types"),
+);
+
+export const UNITS = createReferenceMap(Unit, enumReferenceMapper("units"));
 
 export const ATTRIBUTE_NAMES = [
 	"Cereal type",
