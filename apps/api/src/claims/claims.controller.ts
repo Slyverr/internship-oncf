@@ -124,7 +124,7 @@ export class ClaimsController {
 
 	@Post(":id/start-progress")
 	@HttpCode(HttpStatus.OK)
-	@RequireAny(Permission.CLAIMS_UPDATE)
+	@RequireAny(Permission.CLAIMS_ACTION_START_PROGRESS)
 	@ClaimDetailResponse()
 	async startProgress(
 		@ClaimIdParam() id: ClaimId,
@@ -135,7 +135,7 @@ export class ClaimsController {
 
 	@Post(":id/await-info")
 	@HttpCode(HttpStatus.OK)
-	@RequireAny(Permission.CLAIMS_UPDATE)
+	@RequireAny(Permission.CLAIMS_ACTION_AWAIT_INFO)
 	@ClaimDetailResponse()
 	async awaitInfo(@ClaimIdParam() id: ClaimId, @Request() req: AuthRequest) {
 		return this.claimsService.awaitInfo(id, req.user);
@@ -143,7 +143,7 @@ export class ClaimsController {
 
 	@Post(":id/start-treatment")
 	@HttpCode(HttpStatus.OK)
-	@RequireAny(Permission.CLAIMS_UPDATE)
+	@RequireAny(Permission.CLAIMS_ACTION_START_TREATMENT)
 	@ClaimDetailResponse()
 	async startTreatment(
 		@ClaimIdParam() id: ClaimId,
@@ -154,7 +154,7 @@ export class ClaimsController {
 
 	@Post(":id/resolve")
 	@HttpCode(HttpStatus.OK)
-	@RequireAny(Permission.CLAIMS_UPDATE)
+	@RequireAny(Permission.CLAIMS_ACTION_RESOLVE)
 	@ClaimDetailResponse()
 	async resolve(
 		@ClaimIdParam() id: ClaimId,
@@ -166,7 +166,7 @@ export class ClaimsController {
 
 	@Post(":id/close")
 	@HttpCode(HttpStatus.OK)
-	@RequireAny(Permission.CLAIMS_CLOSE)
+	@RequireAny(Permission.CLAIMS_ACTION_CLOSE)
 	@ClaimDetailResponse()
 	async close(@ClaimIdParam() id: ClaimId, @Request() req: AuthRequest) {
 		return this.claimsService.close(id, req.user);
@@ -174,7 +174,7 @@ export class ClaimsController {
 
 	@Post(":id/reject")
 	@HttpCode(HttpStatus.OK)
-	@RequireAny(Permission.CLAIMS_UPDATE)
+	@RequireAny(Permission.CLAIMS_ACTION_REJECT)
 	@ClaimDetailResponse()
 	async reject(@ClaimIdParam() id: ClaimId, @Request() req: AuthRequest) {
 		return this.claimsService.reject(id, req.user);
@@ -182,7 +182,7 @@ export class ClaimsController {
 
 	@Post(":id/send-to-dtm")
 	@HttpCode(HttpStatus.OK)
-	@RequireAny(Permission.CLAIMS_UPDATE)
+	@RequireAny(Permission.CLAIMS_ACTION_SEND_TO_DTM)
 	@ClaimDetailResponse()
 	async sendToDtm(@ClaimIdParam() id: ClaimId, @Request() req: AuthRequest) {
 		return this.claimsService.sendToDtm(id, req.user);

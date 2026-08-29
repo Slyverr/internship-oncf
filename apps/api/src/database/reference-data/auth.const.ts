@@ -21,24 +21,18 @@ type PermissionDefinition = {
 	parent?: Permission;
 };
 
-const PERMISSION_DEFINITIONS: Partial<
-	Record<Permission, PermissionDefinition>
-> = {
+const PERMISSION_DEFINITIONS: Record<Permission, PermissionDefinition> = {
 	[Permission.USERS_CREATE]: {
 		description: "Create new user accounts",
-		parent: Permission.USERS_MANAGE,
 	},
 	[Permission.USERS_READ]: {
 		description: "View user account details and lists",
-		parent: Permission.USERS_MANAGE,
 	},
 	[Permission.USERS_UPDATE]: {
 		description: "Update existing user account information",
-		parent: Permission.USERS_MANAGE,
 	},
 	[Permission.USERS_DELETE]: {
 		description: "Delete user accounts from the system",
-		parent: Permission.USERS_MANAGE,
 	},
 	[Permission.USERS_MANAGE]: {
 		description: "Manage user operations",
@@ -49,22 +43,18 @@ const PERMISSION_DEFINITIONS: Partial<
 
 	[Permission.ORDERS_CREATE]: {
 		description: "Create new orders",
-		parent: Permission.ORDERS_MANAGE,
 	},
 	[Permission.ORDERS_READ]: {
 		description: "View order details and lists",
-		parent: Permission.ORDERS_MANAGE,
 	},
 	[Permission.ORDERS_UPDATE]: {
 		description: "Modify existing order information",
-		parent: Permission.ORDERS_MANAGE,
 	},
 	[Permission.ORDERS_DELETE]: {
 		description: "Delete orders from the system",
-		parent: Permission.ORDERS_MANAGE,
 	},
 	[Permission.ORDERS_MANAGE]: {
-		description: "Manage all order operations",
+		description: "Manage order properties and settings",
 	},
 	[Permission.ORDERS_MANAGE_OTHER]: {
 		description: "Manage orders belonging to other users",
@@ -73,98 +63,180 @@ const PERMISSION_DEFINITIONS: Partial<
 		description: "Change order ownership and assignment",
 		parent: Permission.ORDERS_MANAGE,
 	},
-	[Permission.ORDERS_STATUS_UPDATE]: {
-		description: "Update order status according to workflow rules",
+	[Permission.ORDERS_MANAGE_STATUS]: {
+		description: "Change order status",
 		parent: Permission.ORDERS_MANAGE,
 	},
-	[Permission.ORDERS_APPROVE]: {
+	[Permission.ORDERS_ACTION]: {
+		description: "Perform order actions",
+	},
+	[Permission.ORDERS_ACTION_SUBMIT]: {
+		description: "Submit orders for processing",
+		parent: Permission.ORDERS_ACTION,
+	},
+	[Permission.ORDERS_ACTION_APPROVE]: {
 		description: "Approve orders",
-		parent: Permission.ORDERS_MANAGE,
+		parent: Permission.ORDERS_ACTION,
 	},
-	[Permission.ORDERS_REJECT]: {
+	[Permission.ORDERS_ACTION_REJECT]: {
 		description: "Reject orders",
-		parent: Permission.ORDERS_MANAGE,
+		parent: Permission.ORDERS_ACTION,
 	},
-	[Permission.ORDERS_EXECUTE]: {
-		description: "Execute orders",
-		parent: Permission.ORDERS_MANAGE,
+	[Permission.ORDERS_ACTION_CANCEL]: {
+		description: "Cancel orders",
+		parent: Permission.ORDERS_ACTION,
 	},
-	[Permission.ORDERS_SEND]: {
-		description: "Send orders for processing",
-		parent: Permission.ORDERS_MANAGE,
+	[Permission.ORDERS_ACTION_SEND_TO_DTM]: {
+		description: "Send orders to DTM for processing",
+		parent: Permission.ORDERS_ACTION,
 	},
 
 	[Permission.CUSTOMERS_CREATE]: {
 		description: "Create new customer profiles",
-		parent: Permission.CUSTOMERS_MANAGE,
 	},
 	[Permission.CUSTOMERS_READ]: {
 		description: "View customer profiles and history",
-		parent: Permission.CUSTOMERS_MANAGE,
 	},
 	[Permission.CUSTOMERS_UPDATE]: {
 		description: "Update customer profile information",
-		parent: Permission.CUSTOMERS_MANAGE,
 	},
 	[Permission.CUSTOMERS_DELETE]: {
 		description: "Delete customer profiles from the system",
-		parent: Permission.CUSTOMERS_MANAGE,
 	},
 	[Permission.CUSTOMERS_MANAGE]: {
-		description: "Manage customer operations",
+		description: "Manage customer properties and settings",
 	},
 	[Permission.CUSTOMERS_MANAGE_OTHER]: {
 		description: "Manage customers belonging to other users",
 	},
 
+	[Permission.PROGRAMS_CREATE]: {
+		description: "Create new programs",
+	},
+	[Permission.PROGRAMS_READ]: {
+		description: "View program details and lists",
+	},
+	[Permission.PROGRAMS_UPDATE]: {
+		description: "Update program information",
+	},
+	[Permission.PROGRAMS_DELETE]: {
+		description: "Delete programs",
+	},
+	[Permission.PROGRAMS_MANAGE]: {
+		description: "Manage program properties and settings",
+	},
+	[Permission.PROGRAMS_MANAGE_OTHER]: {
+		description: "Manage programs belonging to other users",
+	},
+	[Permission.PROGRAMS_MANAGE_OWNERSHIP]: {
+		description: "Change program ownership and assignment",
+		parent: Permission.PROGRAMS_MANAGE,
+	},
+	[Permission.PROGRAMS_MANAGE_STATUS]: {
+		description: "Change program status",
+		parent: Permission.PROGRAMS_MANAGE,
+	},
+	[Permission.PROGRAMS_ACTION]: {
+		description: "Perform program actions",
+	},
+	[Permission.PROGRAMS_ACTION_SUBMIT]: {
+		description: "Submit programs for processing",
+		parent: Permission.PROGRAMS_ACTION,
+	},
+	[Permission.PROGRAMS_ACTION_APPROVE]: {
+		description: "Approve programs",
+		parent: Permission.PROGRAMS_ACTION,
+	},
+	[Permission.PROGRAMS_ACTION_CONFIRM]: {
+		description: "Confirm programs",
+		parent: Permission.PROGRAMS_ACTION,
+	},
+	[Permission.PROGRAMS_ACTION_CANCEL]: {
+		description: "Cancel programs",
+		parent: Permission.PROGRAMS_ACTION,
+	},
+	[Permission.PROGRAMS_ACTION_SEND]: {
+		description: "Send programs to DTM for processing",
+		parent: Permission.PROGRAMS_ACTION,
+	},
+	[Permission.PROGRAMS_ACTION_EXECUTE]: {
+		description: "Record program execution",
+		parent: Permission.PROGRAMS_ACTION,
+	},
+
 	[Permission.CLAIMS_CREATE]: {
 		description: "Create new claims or disputes",
-		parent: Permission.CLAIMS_MANAGE,
 	},
 	[Permission.CLAIMS_READ]: {
 		description: "View claim details and lists",
-		parent: Permission.CLAIMS_MANAGE,
 	},
 	[Permission.CLAIMS_UPDATE]: {
 		description: "Update claim information",
-		parent: Permission.CLAIMS_MANAGE,
 	},
 	[Permission.CLAIMS_DELETE]: {
 		description: "Delete claims from the system",
-		parent: Permission.CLAIMS_MANAGE,
 	},
 	[Permission.CLAIMS_MANAGE]: {
-		description: "Manage all claims",
+		description: "Manage claim properties and settings",
 	},
 	[Permission.CLAIMS_MANAGE_OTHER]: {
 		description: "Manage claims belonging to other users",
 	},
-	[Permission.CLAIMS_STATUS_UPDATE]: {
-		description: "Update claim status according to workflow rules",
+	[Permission.CLAIMS_MANAGE_STATUS]: {
+		description: "Change claim status",
 		parent: Permission.CLAIMS_MANAGE,
 	},
-	[Permission.CLAIMS_CLOSE]: {
+	[Permission.CLAIMS_ACTION]: {
+		description: "Perform claim actions",
+	},
+	[Permission.CLAIMS_ACTION_START_PROGRESS]: {
+		description: "Start claim progress",
+		parent: Permission.CLAIMS_ACTION,
+	},
+	[Permission.CLAIMS_ACTION_AWAIT_INFO]: {
+		description: "Put a claim into an awaiting-information state",
+		parent: Permission.CLAIMS_ACTION,
+	},
+	[Permission.CLAIMS_ACTION_START_TREATMENT]: {
+		description: "Start claim treatment",
+		parent: Permission.CLAIMS_ACTION,
+	},
+	[Permission.CLAIMS_ACTION_RESOLVE]: {
+		description: "Resolve a claim",
+		parent: Permission.CLAIMS_ACTION,
+	},
+	[Permission.CLAIMS_ACTION_REJECT]: {
+		description: "Reject a claim",
+		parent: Permission.CLAIMS_ACTION,
+	},
+	[Permission.CLAIMS_ACTION_SEND_TO_DTM]: {
+		description: "Send a claim to DTM for processing",
+		parent: Permission.CLAIMS_ACTION,
+	},
+	[Permission.CLAIMS_ACTION_CLOSE]: {
 		description: "Close resolved claims",
-		parent: Permission.CLAIMS_MANAGE,
+		parent: Permission.CLAIMS_ACTION,
 	},
 
 	[Permission.TRACKING_READ]: {
 		description: "View tracking information and shipment status",
-		parent: Permission.TRACKING_MANAGE,
 	},
 	[Permission.TRACKING_UPDATE]: {
 		description: "Update tracking information and shipment details",
-		parent: Permission.TRACKING_MANAGE,
 	},
 	[Permission.TRACKING_MANAGE]: {
-		description: "Manage tracking operations",
+		description: "Manage tracking properties and settings",
 	},
 
 	[Permission.REPORTS_READ]: {
 		description: "View reports and analytics data",
 	},
-	[Permission.REPORTS_EXPORT]: {
+	[Permission.REPORTS_ACTION]: {
+		description: "Perform report actions",
+	},
+	[Permission.REPORTS_ACTION_EXPORT]: {
 		description: "Export reports to various formats (PDF, Excel, CSV)",
+		parent: Permission.REPORTS_ACTION,
 	},
 
 	[Permission.ROLES_MANAGE]: {
@@ -182,55 +254,11 @@ const PERMISSION_DEFINITIONS: Partial<
 		description: "Update user profile and account preferences",
 	},
 
-	[Permission.ARCHIVAL_MANAGE]: {
-		description: "Manage data archival, retention, and purging policies",
-	},
 	[Permission.ARCHIVAL_READ]: {
 		description: "View archived data and historical records",
-		parent: Permission.ARCHIVAL_MANAGE,
 	},
-
-	[Permission.PROGRAMS_CREATE]: {
-		description: "Create new programs",
-		parent: Permission.PROGRAMS_MANAGE,
-	},
-	[Permission.PROGRAMS_READ]: {
-		description: "View program details and lists",
-		parent: Permission.PROGRAMS_MANAGE,
-	},
-	[Permission.PROGRAMS_UPDATE]: {
-		description: "Update program information",
-		parent: Permission.PROGRAMS_MANAGE,
-	},
-	[Permission.PROGRAMS_DELETE]: {
-		description: "Delete programs",
-		parent: Permission.PROGRAMS_MANAGE,
-	},
-	[Permission.PROGRAMS_MANAGE]: {
-		description: "Manage program operations",
-	},
-	[Permission.PROGRAMS_MANAGE_OTHER]: {
-		description: "Manage programs belonging to other users",
-	},
-	[Permission.PROGRAMS_STATUS_UPDATE]: {
-		description: "Update program status according to workflow rules",
-		parent: Permission.PROGRAMS_MANAGE,
-	},
-	[Permission.PROGRAMS_APPROVE]: {
-		description: "Approve programs",
-		parent: Permission.PROGRAMS_MANAGE,
-	},
-	[Permission.PROGRAMS_SEND]: {
-		description: "Send programs for processing",
-		parent: Permission.PROGRAMS_MANAGE,
-	},
-	[Permission.PROGRAMS_EXECUTE]: {
-		description: "Execute programs",
-		parent: Permission.PROGRAMS_MANAGE,
-	},
-	[Permission.PROGRAMS_MANAGE_OWNERSHIP]: {
-		description: "Change program ownership and assignment",
-		parent: Permission.PROGRAMS_MANAGE,
+	[Permission.ARCHIVAL_MANAGE]: {
+		description: "Manage data archival, retention, and purging policies",
 	},
 };
 
@@ -259,6 +287,7 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[] | "ALL"> = {
 		Permission.ORDERS_READ,
 		Permission.ORDERS_UPDATE,
 		Permission.ORDERS_DELETE,
+		Permission.ORDERS_ACTION_SUBMIT,
 
 		Permission.CLAIMS_CREATE,
 		Permission.CLAIMS_READ,
@@ -273,12 +302,11 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[] | "ALL"> = {
 		Permission.ORDERS_CREATE,
 		Permission.ORDERS_READ,
 		Permission.ORDERS_UPDATE,
-		Permission.ORDERS_STATUS_UPDATE,
-		Permission.ORDERS_APPROVE,
-		Permission.ORDERS_REJECT,
-		Permission.ORDERS_SEND,
-		Permission.ORDERS_EXECUTE,
+		Permission.ORDERS_DELETE,
 		Permission.ORDERS_MANAGE_OTHER,
+		Permission.ORDERS_MANAGE_STATUS,
+		Permission.ORDERS_MANAGE_OWNERSHIP,
+		Permission.ORDERS_ACTION,
 
 		Permission.CUSTOMERS_READ,
 		Permission.CUSTOMERS_UPDATE,
@@ -286,8 +314,8 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[] | "ALL"> = {
 		Permission.CLAIMS_CREATE,
 		Permission.CLAIMS_READ,
 		Permission.CLAIMS_UPDATE,
-		Permission.CLAIMS_STATUS_UPDATE,
-		Permission.CLAIMS_CLOSE,
+		Permission.CLAIMS_MANAGE_STATUS,
+		Permission.CLAIMS_ACTION,
 
 		Permission.TRACKING_READ,
 
@@ -297,9 +325,8 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[] | "ALL"> = {
 		Permission.PROGRAMS_CREATE,
 		Permission.PROGRAMS_READ,
 		Permission.PROGRAMS_UPDATE,
-		Permission.PROGRAMS_STATUS_UPDATE,
-		Permission.PROGRAMS_APPROVE,
-		Permission.PROGRAMS_SEND,
-		Permission.PROGRAMS_EXECUTE,
+		Permission.PROGRAMS_MANAGE_STATUS,
+		Permission.PROGRAMS_MANAGE_OWNERSHIP,
+		Permission.PROGRAMS_ACTION,
 	],
 };

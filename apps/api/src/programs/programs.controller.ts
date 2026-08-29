@@ -82,7 +82,7 @@ export class ProgramsController {
 
 	@Post(":id/submit")
 	@HttpCode(HttpStatus.OK)
-	@RequireAny(Permission.PROGRAMS_APPROVE)
+	@RequireAny(Permission.PROGRAMS_ACTION_SUBMIT)
 	@ProgramDetailResponse()
 	async submit(@ProgramIdParam() id: ProgramId, @Request() req: AuthRequest) {
 		return this.programsService.submit(id, req.user);
@@ -90,7 +90,7 @@ export class ProgramsController {
 
 	@Post(":id/approve")
 	@HttpCode(HttpStatus.OK)
-	@RequireAny(Permission.PROGRAMS_APPROVE)
+	@RequireAny(Permission.PROGRAMS_ACTION_APPROVE)
 	@ProgramDetailResponse()
 	async approve(@ProgramIdParam() id: ProgramId, @Request() req: AuthRequest) {
 		return this.programsService.approve(id, req.user);
@@ -98,7 +98,7 @@ export class ProgramsController {
 
 	@Post(":id/confirm")
 	@HttpCode(HttpStatus.OK)
-	@RequireAny(Permission.PROGRAMS_APPROVE)
+	@RequireAny(Permission.PROGRAMS_ACTION_CONFIRM)
 	@ProgramDetailResponse()
 	async confirm(@ProgramIdParam() id: ProgramId, @Request() req: AuthRequest) {
 		return this.programsService.confirm(id, req.user);
@@ -106,7 +106,7 @@ export class ProgramsController {
 
 	@Post(":id/send")
 	@HttpCode(HttpStatus.OK)
-	@RequireAny(Permission.PROGRAMS_SEND)
+	@RequireAny(Permission.PROGRAMS_ACTION_SEND)
 	@ProgramDetailResponse()
 	async sendToDtm(
 		@ProgramIdParam() id: ProgramId,
@@ -117,7 +117,7 @@ export class ProgramsController {
 
 	@Post(":id/cancel")
 	@HttpCode(HttpStatus.OK)
-	@RequireAny(Permission.PROGRAMS_UPDATE)
+	@RequireAny(Permission.PROGRAMS_ACTION_CANCEL)
 	@ProgramDetailResponse()
 	async cancel(@ProgramIdParam() id: ProgramId, @Request() req: AuthRequest) {
 		return this.programsService.cancel(id, req.user);

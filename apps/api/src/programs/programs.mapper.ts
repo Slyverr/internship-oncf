@@ -20,7 +20,7 @@ export const toCreate = (
 		throw new ForbiddenException("Cannot assign programs to other users");
 	}
 
-	const status = hasOnePermission(user, Permission.PROGRAMS_STATUS_UPDATE)
+	const status = hasOnePermission(user, Permission.PROGRAMS_MANAGE_STATUS)
 		? (dto.status ?? ProgramStatus.DRAFT)
 		: ProgramStatus.DRAFT;
 
@@ -46,7 +46,7 @@ export const toUpdate = (
 
 	let statusId: ProgramUpdate["statusId"];
 	if (dto.status !== undefined) {
-		if (!hasOnePermission(user, Permission.PROGRAMS_STATUS_UPDATE)) {
+		if (!hasOnePermission(user, Permission.PROGRAMS_MANAGE_STATUS)) {
 			throw new ForbiddenException("Cannot change program status");
 		}
 

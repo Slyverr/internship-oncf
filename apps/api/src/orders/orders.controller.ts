@@ -81,8 +81,7 @@ export class OrdersController {
 	@RequireAny(Permission.ORDERS_READ)
 	@EligibleOrderForProgramsResponse()
 	async findEligibleForPrograms(
-		@Request()
-		req: AuthRequest,
+		@Request() req: AuthRequest,
 		@Query() query: ListQueryDto,
 	) {
 		return this.ordersService.findEligibleForPrograms(req.user, query);
@@ -108,7 +107,7 @@ export class OrdersController {
 
 	@Post(":id/submit")
 	@HttpCode(HttpStatus.OK)
-	@RequireAny(Permission.ORDERS_UPDATE)
+	@RequireAny(Permission.ORDERS_ACTION_SUBMIT)
 	@OrderDetailResponse()
 	async submit(@OrderIdParam() id: OrderId, @Request() req: AuthRequest) {
 		return this.ordersService.submit(id, req.user);
@@ -116,7 +115,7 @@ export class OrdersController {
 
 	@Post(":id/approve")
 	@HttpCode(HttpStatus.OK)
-	@RequireAny(Permission.ORDERS_APPROVE)
+	@RequireAny(Permission.ORDERS_ACTION_APPROVE)
 	@OrderDetailResponse()
 	async approve(@OrderIdParam() id: OrderId, @Request() req: AuthRequest) {
 		return this.ordersService.approve(id, req.user);
@@ -124,7 +123,7 @@ export class OrdersController {
 
 	@Post(":id/reject")
 	@HttpCode(HttpStatus.OK)
-	@RequireAny(Permission.ORDERS_REJECT)
+	@RequireAny(Permission.ORDERS_ACTION_REJECT)
 	@OrderDetailResponse()
 	async reject(
 		@OrderIdParam() id: OrderId,
@@ -136,7 +135,7 @@ export class OrdersController {
 
 	@Post(":id/cancel")
 	@HttpCode(HttpStatus.OK)
-	@RequireAny(Permission.ORDERS_UPDATE)
+	@RequireAny(Permission.ORDERS_ACTION_CANCEL)
 	@OrderDetailResponse()
 	async cancel(@OrderIdParam() id: OrderId, @Request() req: AuthRequest) {
 		return this.ordersService.cancel(id, req.user);
@@ -144,7 +143,7 @@ export class OrdersController {
 
 	@Post(":id/send-to-dtm")
 	@HttpCode(HttpStatus.OK)
-	@RequireAny(Permission.ORDERS_EXECUTE)
+	@RequireAny(Permission.ORDERS_ACTION_SEND_TO_DTM)
 	@OrderDetailResponse()
 	async sendToDtm(@OrderIdParam() id: OrderId, @Request() req: AuthRequest) {
 		return this.ordersService.sendToDtm(id, req.user);

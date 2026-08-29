@@ -22,7 +22,7 @@ export const toCreate = (dto: CreateOrderDto, user: AuthUser): OrderInsert => {
 
 	const canManageStatus = hasOnePermission(
 		user,
-		Permission.ORDERS_STATUS_UPDATE,
+		Permission.ORDERS_MANAGE_STATUS,
 	);
 
 	const targetStatus = canManageStatus
@@ -43,7 +43,7 @@ export const toCreate = (dto: CreateOrderDto, user: AuthUser): OrderInsert => {
 export const toUpdate = (dto: UpdateOrderDto, user: AuthUser): OrderUpdate => {
 	let statusId: OrderUpdate["statusId"];
 	if (dto.status !== undefined) {
-		if (!hasOnePermission(user, Permission.ORDERS_STATUS_UPDATE)) {
+		if (!hasOnePermission(user, Permission.ORDERS_MANAGE_STATUS)) {
 			throw new ForbiddenException("Cannot change order status");
 		}
 
