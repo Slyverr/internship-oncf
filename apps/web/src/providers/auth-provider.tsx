@@ -1,6 +1,11 @@
 "use client";
 
-import { Permission } from "@ecommand/shared";
+import {
+	hasAllPermissions,
+	hasAnyPermission,
+	hasOnePermission,
+	Permission,
+} from "@ecommand/shared";
 import { createContext, ReactNode, useContext } from "react";
 import { ProfileDto } from "@/lib/api/generated.schemas";
 
@@ -20,18 +25,18 @@ export function AuthProvider({
 	user: ProfileDto;
 	children: ReactNode;
 }) {
-	const permissions = new Set(user.permissions);
+	const permissions = new Set(user.permissions as Permission[]);
 
 	const value: AuthContextType = {
 		user,
 
-		hasPermission: (permission) => permissions.has(permission),
+		hasPermission: (permission) => hasOnePermission(permissions, permission),
 
 		hasAnyPermission: (...permissionsToCheck) =>
-			permissionsToCheck.some((permission) => permissions.has(permission)),
+			hasAnyPermission(permissions, ...permissionsToCheck),
 
 		hasAllPermissions: (...permissionsToCheck) =>
-			permissionsToCheck.every((permission) => permissions.has(permission)),
+			hasAllPermissions(permissions, ...permissionsToCheck),
 	};
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
