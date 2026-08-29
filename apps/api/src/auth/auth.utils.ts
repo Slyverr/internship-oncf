@@ -1,22 +1,14 @@
-import { Permission } from "@ecommand/shared";
-import { PERMISSION_PARENTS } from "@/database/reference-data";
+import {
+	Permission,
+	hasOnePermission as sharedHasOnePermission,
+} from "@ecommand/shared";
 import { AuthUser } from "./auth.types";
 
 export function hasOnePermission(
 	user: AuthUser,
 	permission: Permission,
 ): boolean {
-	let current: Permission | undefined = permission;
-
-	while (current) {
-		if (user.permissions.has(current)) {
-			return true;
-		}
-
-		current = PERMISSION_PARENTS[current];
-	}
-
-	return false;
+	return sharedHasOnePermission(user.permissions, permission);
 }
 
 export function hasAllPermissions(
