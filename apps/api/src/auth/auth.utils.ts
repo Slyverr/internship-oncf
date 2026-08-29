@@ -24,6 +24,3 @@ export function hasAnyPermission(
 ): boolean {
 	return permissions.some((p) => hasOnePermission(user, p));
 }
-
-/** @deprecated Use hasOnePermission instead */
-export const hasPermission = hasOnePermission;
