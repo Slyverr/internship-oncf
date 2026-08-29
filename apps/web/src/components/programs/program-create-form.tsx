@@ -97,7 +97,7 @@ export function ProgramCreateForm(): JSX.Element {
 	const mutation = useProgramsControllerCreate();
 
 	const canManageOther = hasPermission(Permission.PROGRAMS_MANAGE_OTHER);
-	const canManageStatus = hasPermission(Permission.PROGRAMS_STATUS_UPDATE);
+	const canManageStatus = hasPermission(Permission.PROGRAMS_MANAGE_STATUS);
 
 	const defaultValues: CreateProgramFormValues = {
 		orderId: 0,

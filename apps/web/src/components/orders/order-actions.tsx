@@ -114,7 +114,7 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 						</Button>
 					)}
 
-				{hasPermission(Permission.ORDERS_APPROVE) &&
+				{hasPermission(Permission.ORDERS_ACTION_APPROVE) &&
 					status === OrderStatus.SUBMITTED && (
 						<Button
 							variant="secondary"
@@ -130,7 +130,7 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 						</Button>
 					)}
 
-				{hasPermission(Permission.ORDERS_REJECT) &&
+				{hasPermission(Permission.ORDERS_ACTION_REJECT) &&
 					status === OrderStatus.SUBMITTED && (
 						<Button
 							variant="destructive"
@@ -141,7 +141,7 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 						</Button>
 					)}
 
-				{hasPermission(Permission.ORDERS_EXECUTE) &&
+				{hasPermission(Permission.ORDERS_ACTION_SEND_TO_DTM) &&
 					status === OrderStatus.APPROVED && (
 						<Button
 							variant="outline"

@@ -109,7 +109,7 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 						</Button>
 					)}
 
-				{hasPermission(Permission.PROGRAMS_APPROVE) &&
+				{hasPermission(Permission.PROGRAMS_ACTION_APPROVE) &&
 					(status === ProgramStatus.PENDING_APPROVAL ||
 						status === ProgramStatus.DRAFT) && (
 						<Button
@@ -126,7 +126,7 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 						</Button>
 					)}
 
-				{hasPermission(Permission.PROGRAMS_EXECUTE) &&
+				{hasPermission(Permission.PROGRAMS_ACTION_EXECUTE) &&
 					status === ProgramStatus.APPROVED && (
 						<Button
 							variant="outline"

@@ -91,7 +91,7 @@ export function OrderCreateForm(): JSX.Element {
 	const mutation = useOrdersControllerCreate();
 
 	const canManageOther = hasPermission(Permission.ORDERS_MANAGE_OTHER);
-	const canManageStatus = hasPermission(Permission.ORDERS_STATUS_UPDATE);
+	const canManageStatus = hasPermission(Permission.ORDERS_MANAGE_STATUS);
 
 	const defaultValues: CreateOrderFormValues = {
 		customerId: user?.customerId ?? 0,
