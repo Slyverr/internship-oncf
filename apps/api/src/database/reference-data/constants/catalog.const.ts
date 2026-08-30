@@ -1,12 +1,17 @@
 import {
 	AccessoryOperation,
+	ATTRIBUTE_DEFINITIONS,
+	Attribute,
 	CustomerType,
+	DEFAULT_PARAMETRIZATION,
 	GoodsType,
+	LEGACY_UNITS,
 	Unit,
 } from "@ecommand/shared";
 import {
 	createReferenceId,
 	createReferenceMap,
+	defaultReferenceMapper,
 	enumReferenceMapper,
 } from "../reference-data.utils";
 
@@ -15,6 +20,8 @@ export const CUSTOMER_TYPES_SCOPE = "customer_types";
 export const GOODS_TYPES_SCOPE = "goods_types";
 export const ATTRIBUTES_SCOPE = "attributes";
 export const UNITS_SCOPE = "units";
+
+export { LEGACY_UNITS };
 
 export const CUSTOMER_TYPES = createReferenceMap(
 	CustomerType,
@@ -33,87 +40,29 @@ export const GOODS_TYPES = createReferenceMap(
 
 export const UNITS = createReferenceMap(Unit, enumReferenceMapper(UNITS_SCOPE));
 
-export const ATTRIBUTE_NAMES = [
-	"Cereal type",
-	"Weight",
-	"Container type",
-	"Origin port",
-	"Destination port",
-	"Booking number",
-	"Shipping company",
-	"Vessel",
-	"Importer",
-	"Cargo",
-	"Berthing date",
-	"TC 20 ft",
-	"TC 20 count",
-	"TC 40 ft",
-	"TC 40 count",
-	"Vessel name",
-	"Expeditor customer code",
-] as const;
+export const ATTRIBUTES = createReferenceMap(
+	ATTRIBUTE_DEFINITIONS,
+	(name, dataType) => ({
+		...defaultReferenceMapper(ATTRIBUTES_SCOPE)(name, undefined),
+		dataType,
+	}),
+);
 
-export type AttributeName = (typeof ATTRIBUTE_NAMES)[number];
+const GOODS_TYPE_KEY_BY_VALUE = Object.fromEntries(
+	Object.entries(GoodsType).map(([key, value]) => [value, key]),
+) as Record<GoodsType, string>;
 
-export const ATTRIBUTES = ATTRIBUTE_NAMES.map((name) => ({
-	id: createReferenceId(ATTRIBUTES_SCOPE, name),
-	name,
-	dataType: name.includes("date")
-		? "date"
-		: name.includes("count")
-			? "number"
-			: name.includes("ft")
-				? "boolean"
-				: name === "Weight"
-					? "decimal"
-					: "string",
-})) satisfies {
-	id: string;
-	name: AttributeName;
-	dataType: "date" | "number" | "boolean" | "decimal" | "string";
-}[];
+export const PARAMETRIZATION_MAP = createReferenceMap(
+	DEFAULT_PARAMETRIZATION,
+	(goodsTypeValue, attributeKeys) => {
+		const goodsTypeKey = GOODS_TYPE_KEY_BY_VALUE[goodsTypeValue as GoodsType];
 
-const requiredAttributes = (...attributes: AttributeName[]) =>
-	attributes.map((attributeName) => ({
-		attributeName,
-		isRequired: true,
-	}));
+		return attributeKeys.map((attrKey: Attribute) => ({
+			goodsTypeId: createReferenceId(GOODS_TYPES_SCOPE, goodsTypeKey),
+			attributeId: createReferenceId(ATTRIBUTES_SCOPE, attrKey),
+			isRequired: true,
+		}));
+	},
+);
 
-export const PARAMETRIZATION = {
-	[GoodsType.CEREALS]: requiredAttributes(
-		"Cereal type",
-		"Cargo",
-		"Berthing date",
-		"Importer",
-		"Vessel",
-		"Vessel name",
-		"Expeditor customer code",
-	),
-
-	[GoodsType.CONTAINERS_TC]: requiredAttributes(
-		"Container type",
-		"Origin port",
-		"Destination port",
-	),
-
-	[GoodsType.PHOSPHATE]: [],
-	[GoodsType.HYDROCARBONS]: [],
-	[GoodsType.ORES]: [],
-	[GoodsType.CHEMICALS]: [],
-	[GoodsType.BUILDING_MATERIALS]: [],
-	[GoodsType.AGRICULTURAL_PRODUCTS]: [],
-	[GoodsType.OTHER]: [],
-} satisfies Record<
-	GoodsType,
-	{ attributeName: AttributeName; isRequired: boolean }[]
->;
-
-export const LEGACY_UNITS = [
-	"Tonne",
-	"Kilogramme",
-	"Wagon",
-	"Conteneur",
-	"Palette",
-	"Mètre cube",
-	"Litre",
-] as const;
+export const PARAMETRIZATION = Object.values(PARAMETRIZATION_MAP).flat();

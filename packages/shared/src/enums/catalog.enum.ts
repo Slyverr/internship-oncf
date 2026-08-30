@@ -31,3 +31,23 @@ export enum AccessoryOperation {
 	WAGON_PUSH = "Wagon push",
 	SCANNING = "Scanning",
 }
+
+export enum Attribute {
+	CEREAL_TYPE = "Cereal type",
+	WEIGHT = "Weight",
+	CONTAINER_TYPE = "Container type",
+	ORIGIN_PORT = "Origin port",
+	DESTINATION_PORT = "Destination port",
+	BOOKING_NUMBER = "Booking number",
+	SHIPPING_COMPANY = "Shipping company",
+	VESSEL = "Vessel",
+	IMPORTER = "Importer",
+	CARGO = "Cargo",
+	BERTHING_DATE = "Berthing date",
+	TC_20_FT = "TC 20 ft",
+	TC_20_COUNT = "TC 20 count",
+	TC_40_FT = "TC 40 ft",
+	TC_40_COUNT = "TC 40 count",
+	VESSEL_NAME = "Vessel name",
+	EXPEDITOR_CUSTOMER_CODE = "Expeditor customer code",
+}

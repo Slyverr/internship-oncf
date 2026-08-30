@@ -142,37 +142,15 @@ async function seedRolePermissions(tx: DatabaseClient) {
 }
 
 async function seedParametrization(tx: DatabaseClient) {
-	const goodsTypeIds = new Map(
-		Object.values(GOODS_TYPES).map(({ id, name }) => [name, id]),
-	);
+	if (!PARAMETRIZATION.length) return;
 
-	const attributeIds = new Map(
-		Object.values(ATTRIBUTES).map(({ id, name }) => [name, id]),
-	);
-
-	for (const [goodsType, requiredAttributes] of Object.entries(
-		PARAMETRIZATION,
-	)) {
-		const goodsTypeId = goodsTypeIds.get(goodsType);
-		if (!goodsTypeId) continue;
-
-		for (const { attributeName, isRequired } of requiredAttributes) {
-			const attributeId = attributeIds.get(attributeName);
-			if (!attributeId) continue;
-
-			await tx
-				.insert(parametrization)
-				.values({
-					goodsTypeId,
-					attributeId,
-					isRequired,
-				})
-				.onConflictDoUpdate({
-					target: [parametrization.goodsTypeId, parametrization.attributeId],
-					set: {
-						isRequired,
-					},
-				});
-		}
-	}
+	await tx
+		.insert(parametrization)
+		.values(PARAMETRIZATION)
+		.onConflictDoUpdate({
+			target: [parametrization.goodsTypeId, parametrization.attributeId],
+			set: {
+				isRequired: true,
+			},
+		});
 }
