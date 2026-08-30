@@ -1,45 +1,70 @@
 "use client";
 
-import { Unit } from "@ecommand/shared";
 import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
+	Combobox,
+	ComboboxContent,
+	ComboboxEmpty,
+	ComboboxInput,
+	ComboboxItem,
+	ComboboxList,
+} from "@/components/ui/combobox";
+import { useCatalogControllerFindUnits } from "@/lib/api/catalog";
+import { UnitDto } from "@/lib/api/generated.schemas";
+
+export type Unit = Pick<UnitDto, "id" | "name">;
 
 interface UnitSelectProps {
-	value?: number;
-	onChange: (value: number) => void;
+	units?: Unit[];
+	disabled?: boolean;
+	placeholder?: string;
+
+	value?: Unit["id"];
+	onChange: (value: Unit["id"]) => void;
 }
 
-export function UnitSelect({ value, onChange }: UnitSelectProps) {
-	const units = Object.values(Unit).map((name, index) => ({
-		id: index + 1,
-		name,
-	}));
+export function UnitSelect({
+	units: providedUnits,
+	disabled,
+	value,
+	onChange,
+	placeholder = "Select unit",
+}: UnitSelectProps) {
+	const { data: fetchedUnits, isLoading } = useCatalogControllerFindUnits({
+		query: {
+			enabled: !providedUnits,
+		},
+	});
 
-	const selectedUnit = units.find((unit) => unit.id === value);
+	const units = providedUnits ?? fetchedUnits ?? [];
+	const selected = units.find((unit) => unit.id === value);
 
 	return (
-		<Select
-			value={value?.toString()}
-			onValueChange={(value) => onChange(Number(value))}
+		<Combobox
+			items={units}
+			disabled={disabled || (isLoading && !providedUnits)}
+			value={selected ?? null}
+			onValueChange={(unit) => unit && onChange(unit.id)}
+			itemToStringLabel={(unit) => unit.name}
+			itemToStringValue={(unit) => unit.id}
 		>
-			<SelectTrigger className="w-full">
-				<SelectValue>
-					{selectedUnit ? selectedUnit.name : "Select unit"}
-				</SelectValue>
-			</SelectTrigger>
+			<ComboboxInput
+				placeholder={
+					isLoading && !providedUnits ? "Loading units..." : placeholder
+				}
+				aria-label="Select unit"
+			/>
 
-			<SelectContent>
-				{units.map((unit) => (
-					<SelectItem key={unit.id} value={unit.id.toString()}>
-						{unit.name}
-					</SelectItem>
-				))}
-			</SelectContent>
-		</Select>
+			<ComboboxContent>
+				<ComboboxEmpty>No units found.</ComboboxEmpty>
+
+				<ComboboxList>
+					{(unit) => (
+						<ComboboxItem key={unit.id} value={unit}>
+							{unit.name}
+						</ComboboxItem>
+					)}
+				</ComboboxList>
+			</ComboboxContent>
+		</Combobox>
 	);
 }
