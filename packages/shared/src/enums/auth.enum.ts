@@ -66,6 +66,14 @@ export enum Permission {
 	CLAIMS_ACTION_SEND_TO_DTM = "claims:action:send-to-dtm",
 	CLAIMS_ACTION_CLOSE = "claims:action:close",
 
+	CATALOG_READ = "catalog:read",
+	CATALOG_MANAGE = "catalog:manage",
+	CATALOG_MANAGE_UNITS = "catalog:manage:units",
+	CATALOG_MANAGE_GOODS = "catalog:manage:goods",
+	CATALOG_MANAGE_GOODS_TYPES = "catalog:manage:goods-types",
+	CATALOG_MANAGE_ACCESSORY_OPERATIONS = "catalog:manage:accessory-operations",
+	CATALOG_MANAGE_REJECTION_REASONS = "catalog:manage:rejection-reasons",
+
 	TRACKING_READ = "tracking:read",
 	TRACKING_UPDATE = "tracking:update",
 	TRACKING_MANAGE = "tracking:manage",

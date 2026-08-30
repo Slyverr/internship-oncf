@@ -203,6 +203,33 @@ export const PERMISSION_DEFINITIONS: Record<Permission, PermissionDefinition> =
 			parent: Permission.CLAIMS_ACTION,
 		},
 
+		[Permission.CATALOG_READ]: {
+			description: "View catalog items",
+		},
+		[Permission.CATALOG_MANAGE]: {
+			description: "Manage catalog data",
+		},
+		[Permission.CATALOG_MANAGE_UNITS]: {
+			description: "Manage measurement units",
+			parent: Permission.CATALOG_MANAGE,
+		},
+		[Permission.CATALOG_MANAGE_GOODS]: {
+			description: "Manage specific goods",
+			parent: Permission.CATALOG_MANAGE,
+		},
+		[Permission.CATALOG_MANAGE_GOODS_TYPES]: {
+			description: "Manage goods categories",
+			parent: Permission.CATALOG_MANAGE,
+		},
+		[Permission.CATALOG_MANAGE_ACCESSORY_OPERATIONS]: {
+			description: "Manage accessory operations",
+			parent: Permission.CATALOG_MANAGE,
+		},
+		[Permission.CATALOG_MANAGE_REJECTION_REASONS]: {
+			description: "Manage rejection reasons",
+			parent: Permission.CATALOG_MANAGE,
+		},
+
 		[Permission.TRACKING_READ]: {
 			description: "View tracking information and shipment status",
 		},
