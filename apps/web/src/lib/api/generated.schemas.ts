@@ -14,7 +14,7 @@ export interface UserListDto {
   employeeId: string | null;
   /** @nullable */
   type: string | null;
-  roleId: number;
+  roleId: string;
   /** @nullable */
   customerId: number | null;
   /** @nullable */
@@ -35,7 +35,7 @@ export interface UserDetailDto {
   employeeId: string | null;
   /** @nullable */
   type: string | null;
-  roleId: number;
+  roleId: string;
   /** @nullable */
   customerId: number | null;
   /** @nullable */
@@ -52,8 +52,8 @@ export type CreateUserDtoRole = typeof CreateUserDtoRole[keyof typeof CreateUser
 
 export const CreateUserDtoRole = {
   ADMIN: 'ADMIN',
-  CLIENT_REPRESENTATIVE: 'CLIENT_REPRESENTATIVE',
   AGENT_COMMERCIAL: 'AGENT_COMMERCIAL',
+  CLIENT_REPRESENTATIVE: 'CLIENT_REPRESENTATIVE',
 } as const;
 
 /**
@@ -94,8 +94,8 @@ export type UpdateUserDtoRole = typeof UpdateUserDtoRole[keyof typeof UpdateUser
 
 export const UpdateUserDtoRole = {
   ADMIN: 'ADMIN',
-  CLIENT_REPRESENTATIVE: 'CLIENT_REPRESENTATIVE',
   AGENT_COMMERCIAL: 'AGENT_COMMERCIAL',
+  CLIENT_REPRESENTATIVE: 'CLIENT_REPRESENTATIVE',
 } as const;
 
 /**
@@ -178,18 +178,18 @@ export interface CreateOrderDto {
   status?: CreateOrderDtoStatus;
   /** @maxLength 200 */
   supervisor?: string;
-  movementTypeId?: number;
+  movementTypeId?: string;
   parentOrderId?: number;
   quantityDemanded: string;
   quantityAchieved?: string;
-  unitId: number;
+  unitId: string;
   departureStationId?: number;
   debtorCustomerId?: number;
-  pickupLocationTypeId?: number;
-  dispatchTypeId?: number;
+  pickupLocationTypeId?: string;
+  dispatchTypeId?: string;
   destinationCustomerId?: number;
   arrivalStationId?: number;
-  deliveryLocationTypeId?: number;
+  deliveryLocationTypeId?: string;
   pickupPortId?: number;
   pickupBerthId?: number;
   pickupSidingId?: number;
@@ -203,14 +203,14 @@ export interface CreateOrderDto {
 }
 
 export type OrderDetailDtoOrderStatus = {
-  id: number;
+  id: string;
   name: string;
 };
 
 export type OrderDetailDtoForecastProgramsItem = {
   id: number;
   createdByUserId: number;
-  statusId: number;
+  statusId: string;
   createdAt: string;
   updatedAt: string;
   orderId: number;
@@ -263,15 +263,15 @@ export type OrderDetailDtoClaimsItem = {
   id: number;
   customerId: number;
   createdByUserId: number;
-  statusId: number;
+  statusId: string;
   createdAt: string;
   updatedAt: string;
-  typeId: number;
+  typeId: string;
   description: string;
   /** @nullable */
   orderId: number | null;
   /** @nullable */
-  operationId: number | null;
+  operationId: string | null;
   /** @nullable */
   priority: string | null;
   /** @nullable */
@@ -293,14 +293,14 @@ export type OrderDetailDtoCustomer = {
 
 export type OrderDetailDtoOrderStatusHistoriesItem = {
   id: number;
-  statusId: number;
+  statusId: string;
   orderId: number;
   changedById: number;
   changedAt: string;
   /** @nullable */
   comment: string | null;
   /** @nullable */
-  rejectionReasonId: number | null;
+  rejectionReasonId: string | null;
 };
 
 export type OrderDetailDtoGood = {
@@ -319,32 +319,32 @@ export interface OrderDetailDto {
   goodsId: number;
   customerId: number;
   createdByUserId: number;
-  statusId: number;
+  statusId: string;
   /** @nullable */
   supervisor: string | null;
   orderNumber: string;
   /** @nullable */
-  movementTypeId: number | null;
+  movementTypeId: string | null;
   /** @nullable */
   parentOrderId: number | null;
   quantityDemanded: string;
   /** @nullable */
   quantityAchieved: string | null;
-  unitId: number;
+  unitId: string;
   /** @nullable */
   departureStationId: number | null;
   /** @nullable */
   debtorCustomerId: number | null;
   /** @nullable */
-  pickupLocationTypeId: number | null;
+  pickupLocationTypeId: string | null;
   /** @nullable */
-  dispatchTypeId: number | null;
+  dispatchTypeId: string | null;
   /** @nullable */
   destinationCustomerId: number | null;
   /** @nullable */
   arrivalStationId: number | null;
   /** @nullable */
-  deliveryLocationTypeId: number | null;
+  deliveryLocationTypeId: string | null;
   /** @nullable */
   pickupPortId: number | null;
   /** @nullable */
@@ -381,7 +381,7 @@ export interface OrderDetailDto {
 export interface Object { [key: string]: unknown }
 
 export type OrderListDtoOrderStatus = {
-  id: number;
+  id: string;
   name: string;
 };
 
@@ -451,18 +451,18 @@ export interface UpdateOrderDto {
   status?: UpdateOrderDtoStatus;
   /** @maxLength 200 */
   supervisor?: string;
-  movementTypeId?: number;
+  movementTypeId?: string;
   parentOrderId?: number;
   quantityDemanded?: string;
   quantityAchieved?: string;
-  unitId?: number;
+  unitId?: string;
   departureStationId?: number;
   debtorCustomerId?: number;
-  pickupLocationTypeId?: number;
-  dispatchTypeId?: number;
+  pickupLocationTypeId?: string;
+  dispatchTypeId?: string;
   destinationCustomerId?: number;
   arrivalStationId?: number;
-  deliveryLocationTypeId?: number;
+  deliveryLocationTypeId?: string;
   pickupPortId?: number;
   pickupBerthId?: number;
   pickupSidingId?: number;
@@ -531,7 +531,7 @@ export interface CreateProgramDto {
 }
 
 export type ProgramDetailDtoProgramStatus = {
-  id: number;
+  id: string;
   name: string;
 };
 
@@ -563,9 +563,9 @@ export type ProgramDetailDtoForecastProgramHistoriesItem = {
   /** @nullable */
   newQuantity: string | null;
   /** @nullable */
-  oldStatusId: number | null;
+  oldStatusId: string | null;
   /** @nullable */
-  newStatusId: number | null;
+  newStatusId: string | null;
   /** @nullable */
   oldPlannedDate: string | null;
   /** @nullable */
@@ -627,7 +627,7 @@ export interface ProgramDetailDto {
   id: number;
   programNumber: string;
   orderId: number;
-  statusId: number;
+  statusId: string;
   plannedDate: string;
   quantityPlanned: string;
   /** @nullable */
@@ -655,7 +655,7 @@ export interface ProgramDetailDto {
 }
 
 export type ProgramListDtoProgramStatus = {
-  id: number;
+  id: string;
   name: string;
 };
 
@@ -728,7 +728,7 @@ export interface CustomerListDto {
   /** @nullable */
   email: string | null;
   /** @nullable */
-  typeId: number | null;
+  typeId: string | null;
   /** @nullable */
   customerCode: string | null;
 }
@@ -745,7 +745,7 @@ export interface CustomerDetailDto {
   /** @nullable */
   email: string | null;
   /** @nullable */
-  typeId: number | null;
+  typeId: string | null;
   createdAt: string;
   updatedAt: string;
   isActive: boolean;
@@ -764,7 +764,7 @@ export interface CreateCustomerDto {
   phone?: string;
   /** @maxLength 100 */
   email?: string;
-  typeId?: number;
+  typeId?: string;
   /** @maxLength 50 */
   customerCode?: string;
   isActive?: boolean;
@@ -781,7 +781,7 @@ export interface UpdateCustomerDto {
   phone?: string;
   /** @maxLength 100 */
   email?: string;
-  typeId?: number;
+  typeId?: string;
   /** @maxLength 50 */
   customerCode?: string;
   isActive?: boolean;
@@ -833,7 +833,7 @@ export interface CreateClaimDto {
   customerId: number;
   userId?: number;
   orderId?: number;
-  operationId?: number;
+  operationId?: string;
   type: CreateClaimDtoType;
   status?: CreateClaimDtoStatus;
   priority?: CreateClaimDtoPriority;
@@ -843,7 +843,7 @@ export interface CreateClaimDto {
 }
 
 export type ClaimDetailDtoClaimStatus = {
-  id: number;
+  id: string;
   name: string;
 };
 
@@ -862,7 +862,7 @@ export type ClaimDetailDtoCustomer = {
 
 export type ClaimDetailDtoClaimStatusHistoriesItem = {
   id: number;
-  statusId: number;
+  statusId: string;
   changedAt: string;
   /** @nullable */
   comment: string | null;
@@ -882,12 +882,12 @@ export type ClaimDetailDtoOrder = {
 };
 
 export type ClaimDetailDtoAccessoryOperation = {
-  id: number;
+  id: string;
   name: string;
 };
 
 export type ClaimDetailDtoClaimType = {
-  id: number;
+  id: string;
   name: string;
 };
 
@@ -904,9 +904,9 @@ export interface ClaimDetailDto {
   /** @nullable */
   orderId: number | null;
   /** @nullable */
-  operationId: number | null;
-  typeId: number;
-  statusId: number;
+  operationId: string | null;
+  typeId: string;
+  statusId: string;
   /** @nullable */
   priority: string | null;
   description: string;
@@ -930,7 +930,7 @@ export interface ClaimDetailDto {
 }
 
 export type ClaimListDtoClaimStatus = {
-  id: number;
+  id: string;
   name: string;
 };
 
@@ -951,12 +951,12 @@ export type ClaimListDtoOrder = {
 };
 
 export type ClaimListDtoAccessoryOperation = {
-  id: number;
+  id: string;
   name: string;
 };
 
 export type ClaimListDtoClaimType = {
-  id: number;
+  id: string;
   name: string;
 };
 
@@ -965,14 +965,14 @@ export interface ClaimListDto {
   description: string;
   createdAt: string;
   updatedAt: string;
-  typeId: number;
+  typeId: string;
   customerId: number;
   createdByUserId: number;
-  statusId: number;
+  statusId: string;
   /** @nullable */
   orderId: number | null;
   /** @nullable */
-  operationId: number | null;
+  operationId: string | null;
   /** @nullable */
   priority: string | null;
   /** @nullable */
@@ -1031,7 +1031,7 @@ export interface UpdateClaimDto {
   customerId?: number;
   userId?: number;
   orderId?: number;
-  operationId?: number;
+  operationId?: string;
   type?: UpdateClaimDtoType;
   status?: UpdateClaimDtoStatus;
   priority?: UpdateClaimDtoPriority;
@@ -1053,22 +1053,22 @@ export interface ClaimCommentDto {
 }
 
 export type NotificationListDtoNotificationType = {
-  id: number;
+  id: string;
   name: string;
 };
 
 export type NotificationListDtoNotificationChannel = {
-  id: number;
+  id: string;
   name: string;
 };
 
 export interface NotificationListDto {
   id: number;
   createdAt: string;
-  typeId: number;
+  typeId: string;
   recipientUserId: number;
   status: string;
-  channelId: number;
+  channelId: string;
   title: string;
   message: string;
   /** @nullable */
@@ -1096,20 +1096,20 @@ export type NotificationDetailDtoRecipientUser = {
 };
 
 export type NotificationDetailDtoNotificationType = {
-  id: number;
+  id: string;
   name: string;
 };
 
 export type NotificationDetailDtoNotificationChannel = {
-  id: number;
+  id: string;
   name: string;
 };
 
 export interface NotificationDetailDto {
   id: number;
   recipientUserId: number;
-  typeId: number;
-  channelId: number;
+  typeId: string;
+  channelId: string;
   title: string;
   message: string;
   /** @nullable */
@@ -1142,7 +1142,7 @@ export interface ProfileDto {
   employeeId: string | null;
   /** @nullable */
   type: string | null;
-  roleId: number;
+  roleId: string;
   /** @nullable */
   customerId: number | null;
   /** @nullable */
@@ -1161,11 +1161,71 @@ export interface UpdateProfileDto {
   lastName?: string;
 }
 
+export interface UnitDto {
+  id: string;
+  name: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface CreateUnitDto {
+  name: string;
+}
+
+export interface GoodsTypeDto {
+  id: string;
+  name: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface CreateGoodsTypeDto {
+  name: string;
+}
+
+export interface GoodDto {
+  id: number;
+  name: string;
+  createdAt: string;
+  isActive: boolean;
+  goodsTypeId: string;
+  goodsCode: string;
+  updatedAt: string;
+}
+
+export interface CreateGoodDto {
+  name: string;
+  goodsCode: string;
+  goodsTypeId: string;
+}
+
+export interface AccessoryOperationDto {
+  id: string;
+  name: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface CreateAccessoryOperationDto {
+  name: string;
+}
+
+export interface RejectionReasonDto {
+  id: string;
+  name: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface CreateRejectionReasonDto {
+  name: string;
+}
+
 export type OrdersControllerFindAllParams = {
 goodsId?: number;
 customerId?: number;
 status?: OrdersControllerFindAllStatus;
-movementTypeId?: number;
+movementTypeId?: string;
 startDate?: string;
 endDate?: string;
 /**
@@ -1270,7 +1330,7 @@ export const ProgramsControllerFindAllSortOrder = {
 } as const;
 
 export type CustomersControllerFindAllParams = {
-typeId?: number;
+typeId?: string;
 isActive?: boolean;
 /**
  * @minimum 1
@@ -1298,7 +1358,7 @@ export type ClaimsControllerFindAllParams = {
 customerId?: number;
 userId?: number;
 orderId?: number;
-operationId?: number;
+operationId?: string;
 type?: ClaimsControllerFindAllType;
 status?: ClaimsControllerFindAllStatus;
 priority?: ClaimsControllerFindAllPriority;
