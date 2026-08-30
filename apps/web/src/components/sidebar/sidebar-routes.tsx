@@ -1,7 +1,7 @@
 import {
 	BadgeAlertIcon,
+	Building2Icon,
 	CalendarIcon,
-	FileWarningIcon,
 	HomeIcon,
 	PackageIcon,
 } from "lucide-react";
@@ -29,6 +29,12 @@ export const sidebarRoutes = [
 		title: "Claims",
 		url: "/dashboard/claims",
 		icon: BadgeAlertIcon,
+		exact: false,
+	},
+	{
+		title: "Customers",
+		url: "/dashboard/customers",
+		icon: Building2Icon,
 		exact: false,
 	},
 ];
