@@ -21,7 +21,7 @@ import {
 	roles,
 	units,
 } from "drizzle/schema";
-import { eq, inArray } from "drizzle-orm";
+import { inArray } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import {
 	ACCESSORY_OPERATIONS,
@@ -133,25 +133,12 @@ async function deactivateLegacyUnits(tx: DatabaseClient) {
 }
 
 async function seedRolePermissions(tx: DatabaseClient) {
-	for (const [roleName, permissionsList] of Object.entries(ROLE_PERMISSIONS)) {
-		const roleId = ROLES[roleName].id;
+	if (!ROLE_PERMISSIONS.length) return;
 
-		await tx.delete(rolePermissions).where(eq(rolePermissions.roleId, roleId));
-
-		const permissionIds =
-			permissionsList === "ALL"
-				? Object.values(PERMISSIONS).map(({ id }) => id)
-				: permissionsList.map((permission) => PERMISSIONS[permission].id);
-
-		if (!permissionIds.length) continue;
-
-		await tx.insert(rolePermissions).values(
-			permissionIds.map((permissionId) => ({
-				roleId,
-				permissionId,
-			})),
-		);
-	}
+	await tx
+		.insert(rolePermissions)
+		.values(ROLE_PERMISSIONS)
+		.onConflictDoNothing();
 }
 
 async function seedParametrization(tx: DatabaseClient) {
