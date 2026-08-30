@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { AppController } from "./app.controller";
 import { AuthModule } from "./auth/auth.module";
+import { CatalogModule } from "./catalog/catalog.module";
 import { ClaimsModule } from "./claims/claims.module";
 import { CustomersModule } from "./customers/customers.module";
 import { DrizzleModule } from "./database/drizzle.module";
@@ -23,6 +24,7 @@ import { UsersModule } from "./users/users.module";
 		ClaimsModule,
 		NotificationsModule,
 		ProfileModule,
+		CatalogModule,
 	],
 	controllers: [AppController],
 })
