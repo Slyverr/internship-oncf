@@ -73,6 +73,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 		rejectMutation.mutate(
 			{
 				id: claim.id,
+				data: { rejectionReason },
 			},
 			{
 				onSuccess: (updatedClaim) => {
@@ -88,6 +89,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 		resolveMutation.mutate(
 			{
 				id: claim.id,
+				data: { resolution: resolutionText },
 			},
 			{
 				onSuccess: (updatedClaim) => {
