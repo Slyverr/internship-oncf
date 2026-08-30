@@ -4,6 +4,7 @@ import {
 	CalendarIcon,
 	HomeIcon,
 	PackageIcon,
+	UsersIcon,
 } from "lucide-react";
 
 export const sidebarRoutes = [
@@ -35,6 +36,12 @@ export const sidebarRoutes = [
 		title: "Customers",
 		url: "/dashboard/customers",
 		icon: Building2Icon,
+		exact: false,
+	},
+	{
+		title: "Users",
+		url: "/dashboard/users",
+		icon: UsersIcon,
 		exact: false,
 	},
 ];
