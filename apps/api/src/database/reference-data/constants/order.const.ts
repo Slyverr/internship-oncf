@@ -9,11 +9,17 @@ import {
 	createReferenceMap,
 	defaultReferenceMapper,
 	enumReferenceMapper,
-} from "./reference-data.utils";
+} from "../reference-data.utils";
+
+export const ORDER_STATUSES_SCOPE = "order_statuses";
+export const PROGRAM_STATUSES_SCOPE = "program_statuses";
+export const MOVEMENT_TYPES_SCOPE = "movement_types";
+export const PICKUP_LOCATION_TYPES_SCOPE = "pickup_location_types";
+export const DISPATCH_TYPES_SCOPE = "dispatch_types";
 
 export const ORDER_STATUSES = createReferenceMap(
 	OrderStatus,
-	enumReferenceMapper("order_statuses"),
+	enumReferenceMapper(ORDER_STATUSES_SCOPE),
 );
 
 export const PROGRAM_STATUSES = createReferenceMap(
@@ -28,7 +34,7 @@ export const PROGRAM_STATUSES = createReferenceMap(
 		[ProgramStatus.COMPLETED]: "Successfully completed and finalized",
 		[ProgramStatus.CANCELLED]: "Cancelled before or during execution",
 	},
-	defaultReferenceMapper("program_statuses"),
+	defaultReferenceMapper(PROGRAM_STATUSES_SCOPE),
 );
 
 export const MOVEMENT_TYPES = createReferenceMap(
@@ -38,7 +44,7 @@ export const MOVEMENT_TYPES = createReferenceMap(
 		[MovementType.EMPTY]: "Empty container or vehicle movement",
 		[MovementType.FULL_TRAIN]: "Full train load movement",
 	},
-	defaultReferenceMapper("movement_types"),
+	defaultReferenceMapper(MOVEMENT_TYPES_SCOPE),
 );
 
 export const PICKUP_LOCATION_TYPES = createReferenceMap(
@@ -47,7 +53,7 @@ export const PICKUP_LOCATION_TYPES = createReferenceMap(
 		[PickupLocationType.DOMICILE]:
 			"Customer's physical address or warehouse location",
 	},
-	defaultReferenceMapper("pickup_location_types"),
+	defaultReferenceMapper(PICKUP_LOCATION_TYPES_SCOPE),
 );
 
 export const DISPATCH_TYPES = createReferenceMap(
@@ -55,5 +61,5 @@ export const DISPATCH_TYPES = createReferenceMap(
 		[DispatchType.PORT_DUE]: "Port fees due at destination port",
 		[DispatchType.PORT_PAID]: "Port fees already paid at origin port",
 	},
-	defaultReferenceMapper("dispatch_types"),
+	defaultReferenceMapper(DISPATCH_TYPES_SCOPE),
 );

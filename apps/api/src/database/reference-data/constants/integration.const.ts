@@ -2,7 +2,9 @@ import { DtmRequestType } from "@ecommand/shared";
 import {
 	createReferenceMap,
 	defaultReferenceMapper,
-} from "./reference-data.utils";
+} from "../reference-data.utils";
+
+export const DTM_REQUEST_TYPES_SCOPE = "dtm_request_types";
 
 export const DTM_REQUEST_TYPES = createReferenceMap(
 	{
@@ -15,5 +17,5 @@ export const DTM_REQUEST_TYPES = createReferenceMap(
 		[DtmRequestType.GET_WAGONS]: "Retrieve wagon list from DTM",
 		[DtmRequestType.SYNC_DATA]: "Synchronize data with DTM",
 	},
-	defaultReferenceMapper("dtm_request_types"),
+	defaultReferenceMapper(DTM_REQUEST_TYPES_SCOPE),
 );

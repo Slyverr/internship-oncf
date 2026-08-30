@@ -3,7 +3,10 @@ import {
 	createReferenceId,
 	createReferenceMap,
 	defaultReferenceMapper,
-} from "./reference-data.utils";
+} from "../reference-data.utils";
+
+export const ROLES_SCOPE = "roles";
+export const PERMISSIONS_SCOPE = "permissions";
 
 export const ROLES = createReferenceMap(
 	{
@@ -13,16 +16,16 @@ export const ROLES = createReferenceMap(
 		[Role.AGENT_COMMERCIAL]:
 			"Commercial agent with full order lifecycle and customer management",
 	},
-	defaultReferenceMapper("roles"),
+	defaultReferenceMapper(ROLES_SCOPE),
 );
 
 export const PERMISSIONS = createReferenceMap(
 	PERMISSION_DEFINITIONS,
 	(name, { description, parent }) => ({
-		id: createReferenceId("permissions", name),
+		id: createReferenceId(PERMISSIONS_SCOPE, name),
 		name,
 		description,
-		parentId: parent ? createReferenceId("permissions", parent) : undefined,
+		parentId: parent ? createReferenceId(PERMISSIONS_SCOPE, parent) : undefined,
 	}),
 );
 

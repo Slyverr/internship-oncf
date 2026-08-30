@@ -8,24 +8,30 @@ import {
 	createReferenceId,
 	createReferenceMap,
 	enumReferenceMapper,
-} from "./reference-data.utils";
+} from "../reference-data.utils";
+
+export const ACCESSORY_OPERATIONS_SCOPE = "accessory_operations";
+export const CUSTOMER_TYPES_SCOPE = "customer_types";
+export const GOODS_TYPES_SCOPE = "goods_types";
+export const ATTRIBUTES_SCOPE = "attributes";
+export const UNITS_SCOPE = "units";
 
 export const CUSTOMER_TYPES = createReferenceMap(
 	CustomerType,
-	enumReferenceMapper("customer_types"),
+	enumReferenceMapper(CUSTOMER_TYPES_SCOPE),
 );
 
 export const ACCESSORY_OPERATIONS = createReferenceMap(
 	AccessoryOperation,
-	enumReferenceMapper("accessory_operations"),
+	enumReferenceMapper(ACCESSORY_OPERATIONS_SCOPE),
 );
 
 export const GOODS_TYPES = createReferenceMap(
 	GoodsType,
-	enumReferenceMapper("goods_types"),
+	enumReferenceMapper(GOODS_TYPES_SCOPE),
 );
 
-export const UNITS = createReferenceMap(Unit, enumReferenceMapper("units"));
+export const UNITS = createReferenceMap(Unit, enumReferenceMapper(UNITS_SCOPE));
 
 export const ATTRIBUTE_NAMES = [
 	"Cereal type",
@@ -50,7 +56,7 @@ export const ATTRIBUTE_NAMES = [
 export type AttributeName = (typeof ATTRIBUTE_NAMES)[number];
 
 export const ATTRIBUTES = ATTRIBUTE_NAMES.map((name) => ({
-	id: createReferenceId("attributes", name),
+	id: createReferenceId(ATTRIBUTES_SCOPE, name),
 	name,
 	dataType: name.includes("date")
 		? "date"

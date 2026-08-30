@@ -2,14 +2,17 @@ import { NotificationChannel, NotificationType } from "@ecommand/shared";
 import {
 	createReferenceMap,
 	enumReferenceMapper,
-} from "./reference-data.utils";
+} from "../reference-data.utils";
+
+export const NOTIFICATION_TYPES_SCOPE = "notification_types";
+export const NOTIFICATION_CHANNELS_SCOPE = "notification_channels";
 
 export const NOTIFICATION_TYPES = createReferenceMap(
 	NotificationType,
-	enumReferenceMapper("notification_types"),
+	enumReferenceMapper(NOTIFICATION_TYPES_SCOPE),
 );
 
 export const NOTIFICATION_CHANNELS = createReferenceMap(
 	NotificationChannel,
-	enumReferenceMapper("notification_channels"),
+	enumReferenceMapper(NOTIFICATION_CHANNELS_SCOPE),
 );
