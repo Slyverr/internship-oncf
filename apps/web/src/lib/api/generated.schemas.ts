@@ -5,6 +5,11 @@
  * ONCF freight order management
  * OpenAPI spec version: 1.0
  */
+export type UserListDtoRole = {
+  id: string;
+  name: string;
+};
+
 export interface UserListDto {
   id: number;
   email: string;
@@ -15,6 +20,7 @@ export interface UserListDto {
   /** @nullable */
   type: string | null;
   roleId: string;
+  role: UserListDtoRole;
   /** @nullable */
   customerId: number | null;
   /** @nullable */
@@ -26,6 +32,11 @@ export interface UserListDto {
   lastLogin: string | null;
 }
 
+export type UserDetailDtoRole = {
+  id: string;
+  name: string;
+};
+
 export interface UserDetailDto {
   id: number;
   email: string;
@@ -36,6 +47,7 @@ export interface UserDetailDto {
   /** @nullable */
   type: string | null;
   roleId: string;
+  role: UserDetailDtoRole;
   /** @nullable */
   customerId: number | null;
   /** @nullable */
@@ -1044,12 +1056,27 @@ export interface ClaimDeleteDto {
   id: number;
 }
 
+export interface CreateClaimCommentDto {
+  /** @maxLength 2000 */
+  content: string;
+}
+
 export interface ClaimCommentDto {
   id: number;
   claimId: number;
   authorUserId: number;
   comment: string;
   createdAt: string;
+}
+
+export interface ResolveClaimDto {
+  /** @maxLength 1000 */
+  resolution: string;
+}
+
+export interface RejectClaimDto {
+  /** @maxLength 1000 */
+  rejectionReason: string;
 }
 
 export type NotificationListDtoNotificationType = {

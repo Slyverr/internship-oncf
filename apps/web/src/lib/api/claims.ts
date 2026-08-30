@@ -30,7 +30,10 @@ import type {
   ClaimDetailDto,
   ClaimListDto,
   ClaimsControllerFindAllParams,
+  CreateClaimCommentDto,
   CreateClaimDto,
+  RejectClaimDto,
+  ResolveClaimDto,
   UpdateClaimDto
 } from './generated.schemas';
 
@@ -405,12 +408,15 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     }
     export const claimsControllerAddComment = (
     id: number,
+    createClaimCommentDto: CreateClaimCommentDto,
  options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
 ) => {
 
 
       return customFetch<ClaimCommentDto | void>(
-      {url: `/claims/${id}/comments`, method: 'POST', signal
+      {url: `/claims/${id}/comments`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createClaimCommentDto, signal
     },
       options);
     }
@@ -419,8 +425,8 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 export const getClaimsControllerAddCommentMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerAddComment>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof claimsControllerAddComment>>, TError,{id: number}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerAddComment>>, TError,{id: number;data: CreateClaimCommentDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof claimsControllerAddComment>>, TError,{id: number;data: CreateClaimCommentDto}, TContext> => {
 
 const mutationKey = ['claimsControllerAddComment'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -432,10 +438,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof claimsControllerAddComment>>, {id: number}> = (props) => {
-          const {id} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof claimsControllerAddComment>>, {id: number;data: CreateClaimCommentDto}> = (props) => {
+          const {id,data} = props ?? {};
 
-          return  claimsControllerAddComment(id,requestOptions)
+          return  claimsControllerAddComment(id,data,requestOptions)
         }
 
 
@@ -446,15 +452,15 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type ClaimsControllerAddCommentMutationResult = NonNullable<Awaited<ReturnType<typeof claimsControllerAddComment>>>
-
+    export type ClaimsControllerAddCommentMutationBody = CreateClaimCommentDto
     export type ClaimsControllerAddCommentMutationError = void
 
     export const useClaimsControllerAddComment = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerAddComment>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerAddComment>>, TError,{id: number;data: CreateClaimCommentDto}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof claimsControllerAddComment>>,
         TError,
-        {id: number},
+        {id: number;data: CreateClaimCommentDto},
         TContext
       > => {
       return useMutation(getClaimsControllerAddCommentMutationOptions(options), queryClient);
@@ -715,12 +721,15 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     }
     export const claimsControllerResolve = (
     id: number,
+    resolveClaimDto: ResolveClaimDto,
  options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
 ) => {
 
 
       return customFetch<ClaimDetailDto>(
-      {url: `/claims/${id}/resolve`, method: 'POST', signal
+      {url: `/claims/${id}/resolve`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: resolveClaimDto, signal
     },
       options);
     }
@@ -729,8 +738,8 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 export const getClaimsControllerResolveMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerResolve>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof claimsControllerResolve>>, TError,{id: number}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerResolve>>, TError,{id: number;data: ResolveClaimDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof claimsControllerResolve>>, TError,{id: number;data: ResolveClaimDto}, TContext> => {
 
 const mutationKey = ['claimsControllerResolve'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -742,10 +751,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof claimsControllerResolve>>, {id: number}> = (props) => {
-          const {id} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof claimsControllerResolve>>, {id: number;data: ResolveClaimDto}> = (props) => {
+          const {id,data} = props ?? {};
 
-          return  claimsControllerResolve(id,requestOptions)
+          return  claimsControllerResolve(id,data,requestOptions)
         }
 
 
@@ -756,15 +765,15 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type ClaimsControllerResolveMutationResult = NonNullable<Awaited<ReturnType<typeof claimsControllerResolve>>>
-
+    export type ClaimsControllerResolveMutationBody = ResolveClaimDto
     export type ClaimsControllerResolveMutationError = void
 
     export const useClaimsControllerResolve = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerResolve>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerResolve>>, TError,{id: number;data: ResolveClaimDto}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof claimsControllerResolve>>,
         TError,
-        {id: number},
+        {id: number;data: ResolveClaimDto},
         TContext
       > => {
       return useMutation(getClaimsControllerResolveMutationOptions(options), queryClient);
@@ -827,12 +836,15 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     }
     export const claimsControllerReject = (
     id: number,
+    rejectClaimDto: RejectClaimDto,
  options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
 ) => {
 
 
       return customFetch<ClaimDetailDto>(
-      {url: `/claims/${id}/reject`, method: 'POST', signal
+      {url: `/claims/${id}/reject`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: rejectClaimDto, signal
     },
       options);
     }
@@ -841,8 +853,8 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 export const getClaimsControllerRejectMutationOptions = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerReject>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof claimsControllerReject>>, TError,{id: number}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerReject>>, TError,{id: number;data: RejectClaimDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof claimsControllerReject>>, TError,{id: number;data: RejectClaimDto}, TContext> => {
 
 const mutationKey = ['claimsControllerReject'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -854,10 +866,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof claimsControllerReject>>, {id: number}> = (props) => {
-          const {id} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof claimsControllerReject>>, {id: number;data: RejectClaimDto}> = (props) => {
+          const {id,data} = props ?? {};
 
-          return  claimsControllerReject(id,requestOptions)
+          return  claimsControllerReject(id,data,requestOptions)
         }
 
 
@@ -868,15 +880,15 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type ClaimsControllerRejectMutationResult = NonNullable<Awaited<ReturnType<typeof claimsControllerReject>>>
-
+    export type ClaimsControllerRejectMutationBody = RejectClaimDto
     export type ClaimsControllerRejectMutationError = void
 
     export const useClaimsControllerReject = <TError = void,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerReject>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimsControllerReject>>, TError,{id: number;data: RejectClaimDto}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof claimsControllerReject>>,
         TError,
-        {id: number},
+        {id: number;data: RejectClaimDto},
         TContext
       > => {
       return useMutation(getClaimsControllerRejectMutationOptions(options), queryClient);
