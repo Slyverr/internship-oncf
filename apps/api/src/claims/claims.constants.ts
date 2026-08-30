@@ -6,12 +6,17 @@ export const CLAIM_TRANSITION: Record<ClaimStatus, ClaimStatus[]> = {
 	[ClaimStatus.IN_PROGRESS]: [
 		ClaimStatus.AWAITING_INFO,
 		ClaimStatus.IN_TREATMENT,
+		ClaimStatus.SENT_TO_DTM,
 	],
 	[ClaimStatus.AWAITING_INFO]: [
 		ClaimStatus.IN_PROGRESS,
 		ClaimStatus.IN_TREATMENT,
 	],
-	[ClaimStatus.IN_TREATMENT]: [ClaimStatus.RESOLVED, ClaimStatus.REJECTED],
+	[ClaimStatus.IN_TREATMENT]: [
+		ClaimStatus.RESOLVED,
+		ClaimStatus.REJECTED,
+		ClaimStatus.SENT_TO_DTM,
+	],
 	[ClaimStatus.RESOLVED]: [ClaimStatus.CLOSED, ClaimStatus.SENT_TO_DTM],
 	[ClaimStatus.CLOSED]: [],
 	[ClaimStatus.REJECTED]: [],

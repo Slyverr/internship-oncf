@@ -44,8 +44,13 @@ export class ClaimsService {
 			Permission.CLAIMS_MANAGE_OTHER,
 		);
 
-		if (!canManageOther && query.userId !== user.id) {
-			query.userId = user.id;
+		if (!canManageOther) {
+			if (query.userId !== user.id) {
+				query.userId = user.id;
+			}
+			if (user.customerId && !query.customerId) {
+				query.customerId = user.customerId;
+			}
 		}
 
 		return findClaims(this.drizzle.db, query);
@@ -104,7 +109,7 @@ export class ClaimsService {
 			claimId,
 			user.id,
 			ClaimStatus.RESOLVED,
-			undefined,
+			resolution,
 			resolution ? { resolution } : {},
 		);
 	}
@@ -116,16 +121,16 @@ export class ClaimsService {
 		});
 	}
 
-	async reject(claimId: ClaimId, user: AuthUser) {
-		return this.transition(claimId, user.id, ClaimStatus.REJECTED);
+	async reject(claimId: ClaimId, user: AuthUser, rejectionReason?: string) {
+		return this.transition(
+			claimId,
+			user.id,
+			ClaimStatus.REJECTED,
+			rejectionReason,
+		);
 	}
 
 	async sendToDtm(claimId: ClaimId, user: AuthUser) {
-		const claim = await this.findOne(claimId);
-		if (claim.statusId !== CLAIM_STATUSES[ClaimStatus.RESOLVED].id) {
-			throw new ConflictException("Only resolved claims can be sent to DTM");
-		}
-
 		return this.transition(claimId, user.id, ClaimStatus.SENT_TO_DTM);
 	}
 

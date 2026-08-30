@@ -9,11 +9,14 @@ import { UpdateClaimDto } from "./requests/update-claim.dto";
 
 export const toCreate = (dto: CreateClaimDto, user: AuthUser): ClaimInsert => {
 	const userId = dto.userId ?? user.id;
-	if (userId !== user.id && !hasAnyPermission(user, Permission.CLAIMS_MANAGE)) {
+	if (
+		userId !== user.id &&
+		!hasAnyPermission(user, Permission.CLAIMS_MANAGE_OTHER)
+	) {
 		throw new ForbiddenException("Cannot assign claims to other users");
 	}
 
-	const status = hasAnyPermission(user, Permission.CLAIMS_UPDATE)
+	const status = hasAnyPermission(user, Permission.CLAIMS_MANAGE_STATUS)
 		? (dto.status ?? ClaimStatus.NEW)
 		: ClaimStatus.NEW;
 
@@ -29,7 +32,7 @@ export const toUpdate = (dto: UpdateClaimDto, user: AuthUser): ClaimUpdate => {
 	const result: ClaimUpdate = { ...dto };
 
 	if (dto.userId !== undefined && dto.userId !== user.id) {
-		if (!hasAnyPermission(user, Permission.CLAIMS_MANAGE)) {
+		if (!hasAnyPermission(user, Permission.CLAIMS_MANAGE_OTHER)) {
 			throw new ForbiddenException("Cannot reassign claims to other users");
 		}
 		result.createdByUserId = dto.userId;
@@ -43,7 +46,7 @@ export const toUpdate = (dto: UpdateClaimDto, user: AuthUser): ClaimUpdate => {
 	}
 
 	if (dto.status !== undefined) {
-		if (!hasAnyPermission(user, Permission.CLAIMS_UPDATE)) {
+		if (!hasAnyPermission(user, Permission.CLAIMS_MANAGE_STATUS)) {
 			throw new ForbiddenException("Cannot change claim status");
 		}
 		result.statusId = CLAIM_STATUSES[dto.status].id;

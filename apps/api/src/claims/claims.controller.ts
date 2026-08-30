@@ -21,7 +21,10 @@ import type { ClaimId } from "./claims.types";
 import { ClaimOwnershipGuard } from "./guards/claim-ownership.guard";
 import { ClaimIdPipe } from "./pipes/claim-id.pipe";
 import { CreateClaimDto } from "./requests/create-claim.dto";
+import { CreateClaimCommentDto } from "./requests/create-claim-comment.dto";
 import { ListClaimQueryDto } from "./requests/list-claim.dto";
+import { RejectClaimDto } from "./requests/reject-claim.dto";
+import { ResolveClaimDto } from "./requests/resolve-claim.dto";
 import { UpdateClaimDto } from "./requests/update-claim.dto";
 import { ClaimCommentDto } from "./responses/claim-comment.dto";
 import { ClaimDeleteDto } from "./responses/claim-delete.dto";
@@ -109,10 +112,10 @@ export class ClaimsController {
 	@ClaimCommentResponse()
 	async addComment(
 		@ClaimIdParam() id: ClaimId,
-		@Body("content") content: string,
+		@Body() dto: CreateClaimCommentDto,
 		@Request() req: AuthRequest,
 	) {
-		return this.claimsService.addComment(id, content, req.user.id);
+		return this.claimsService.addComment(id, dto.content, req.user.id);
 	}
 
 	@Get(":id/comments")
@@ -158,10 +161,10 @@ export class ClaimsController {
 	@ClaimDetailResponse()
 	async resolve(
 		@ClaimIdParam() id: ClaimId,
-		@Body("resolution") resolution: string,
+		@Body() dto: ResolveClaimDto,
 		@Request() req: AuthRequest,
 	) {
-		return this.claimsService.resolve(id, req.user, resolution);
+		return this.claimsService.resolve(id, req.user, dto.resolution);
 	}
 
 	@Post(":id/close")
@@ -176,8 +179,12 @@ export class ClaimsController {
 	@HttpCode(HttpStatus.OK)
 	@RequireAny(Permission.CLAIMS_ACTION_REJECT)
 	@ClaimDetailResponse()
-	async reject(@ClaimIdParam() id: ClaimId, @Request() req: AuthRequest) {
-		return this.claimsService.reject(id, req.user);
+	async reject(
+		@ClaimIdParam() id: ClaimId,
+		@Body() dto: RejectClaimDto,
+		@Request() req: AuthRequest,
+	) {
+		return this.claimsService.reject(id, req.user, dto.rejectionReason);
 	}
 
 	@Post(":id/send-to-dtm")
