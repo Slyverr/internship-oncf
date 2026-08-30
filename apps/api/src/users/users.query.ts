@@ -27,6 +27,15 @@ const userListColumns = {
 	updatedAt: true,
 } satisfies UsersColumns;
 
+const userListRelations = {
+	role: {
+		columns: {
+			id: true,
+			name: true,
+		},
+	},
+} satisfies UsersRelations;
+
 const userAuthColumns = {
 	id: true,
 	email: true,
@@ -59,6 +68,7 @@ const userAuthRelations = {
 export async function findUsers(db: DrizzleDb) {
 	return db.query.users.findMany({
 		columns: userListColumns,
+		with: userListRelations,
 	});
 }
 
@@ -66,6 +76,7 @@ export async function findUser(db: DrizzleDb, id: UserId) {
 	return db.query.users.findFirst({
 		where: { id },
 		columns: userListColumns,
+		with: userListRelations,
 	});
 }
 

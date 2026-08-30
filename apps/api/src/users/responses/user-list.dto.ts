@@ -11,6 +11,7 @@ export class UserListDto implements UserList {
 	employeeId: string | null;
 	type: string | null;
 	roleId: string;
+	role: { id: string; name: string } | null;
 	customerId: number | null;
 	agencyId: number | null;
 	createdAt: string;
