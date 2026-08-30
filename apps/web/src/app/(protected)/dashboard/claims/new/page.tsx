@@ -1,5 +1,5 @@
+import { ClaimCreateForm } from "@/components/claims/claim-create-form";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
-import { UnderConstruction } from "@/components/under-construction";
 import { claimsBreadcrumbs } from "../breadcrumbs";
 
 export default function Page() {
@@ -7,7 +7,7 @@ export default function Page() {
 		<>
 			<Breadcrumbs items={claimsBreadcrumbs.create()} />
 
-			<UnderConstruction />
+			<ClaimCreateForm />
 		</>
 	);
 }

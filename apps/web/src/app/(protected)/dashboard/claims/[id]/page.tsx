@@ -1,5 +1,5 @@
+import { ClaimDetailsClient } from "@/components/claims/claim-details-client";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
-import { UnderConstruction } from "@/components/under-construction";
 import { claimsControllerFindOne } from "@/lib/api/claims";
 import { claimsBreadcrumbs } from "../breadcrumbs";
 
@@ -15,7 +15,7 @@ export default async function Page({ params }: PageProps) {
 		<>
 			<Breadcrumbs items={claimsBreadcrumbs.detail(id, `#${claim.id}`)} />
 
-			<UnderConstruction />
+			<ClaimDetailsClient claim={claim} />
 		</>
 	);
 }
