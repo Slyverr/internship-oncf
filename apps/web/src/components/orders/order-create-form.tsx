@@ -29,7 +29,7 @@ import { OrderStatusSelect } from "./order-status-select";
 const createOrderSchema = z.object({
 	customerId: z.number().int().positive("Customer is required"),
 	goodsId: z.number().int().positive("Goods selection is required"),
-	unitId: z.number().int().positive("Unit selection is required"),
+	unitId: z.uuid("Unit selection is required"),
 	quantityDemanded: z
 		.string()
 		.trim()
@@ -96,7 +96,7 @@ export function OrderCreateForm(): JSX.Element {
 	const defaultValues: CreateOrderFormValues = {
 		customerId: user?.customerId ?? 0,
 		goodsId: 0,
-		unitId: 0,
+		unitId: "",
 		quantityDemanded: "",
 		status: canManageStatus ? OrderStatus.DRAFT : undefined,
 		supervisor: "",
@@ -238,9 +238,7 @@ export function OrderCreateForm(): JSX.Element {
 										}
 									>
 										<UnitSelect
-											value={
-												field.state.value > 0 ? field.state.value : undefined
-											}
+											value={field.state.value}
 											onChange={(value) => field.handleChange(value)}
 										/>
 									</div>
