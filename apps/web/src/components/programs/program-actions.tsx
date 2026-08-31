@@ -94,7 +94,8 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 	return (
 		<>
 			<div className="flex flex-wrap items-center gap-4">
-				{hasPermission(Permission.PROGRAMS_UPDATE) &&
+				{/* Submit: DRAFT → PENDING_APPROVAL */}
+				{hasPermission(Permission.PROGRAMS_ACTION_SUBMIT) &&
 					status === ProgramStatus.DRAFT && (
 						<Button
 							disabled={isPending}
@@ -105,13 +106,13 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 								)
 							}
 						>
-							Submit Program
+							{submitMutation.isPending ? "Submitting..." : "Submit Program"}
 						</Button>
 					)}
 
+				{/* Approve: PENDING_APPROVAL → APPROVED */}
 				{hasPermission(Permission.PROGRAMS_ACTION_APPROVE) &&
-					(status === ProgramStatus.PENDING_APPROVAL ||
-						status === ProgramStatus.DRAFT) && (
+					status === ProgramStatus.PENDING_APPROVAL && (
 						<Button
 							variant="secondary"
 							disabled={isPending}
@@ -122,12 +123,30 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 								)
 							}
 						>
-							Approve
+							{approveMutation.isPending ? "Approving..." : "Approve"}
 						</Button>
 					)}
 
-				{hasPermission(Permission.PROGRAMS_ACTION_EXECUTE) &&
+				{/* Confirm: APPROVED → CONFIRMED */}
+				{hasPermission(Permission.PROGRAMS_ACTION_CONFIRM) &&
 					status === ProgramStatus.APPROVED && (
+						<Button
+							variant="outline"
+							disabled={isPending}
+							onClick={() =>
+								confirmMutation.mutate(
+									{ id: program.id },
+									{ onSuccess: updateProgramCache },
+								)
+							}
+						>
+							{confirmMutation.isPending ? "Confirming..." : "Confirm"}
+						</Button>
+					)}
+
+				{/* Send to DTM: CONFIRMED → SENT_TO_DTM */}
+				{hasPermission(Permission.PROGRAMS_ACTION_SEND) &&
+					status === ProgramStatus.CONFIRMED && (
 						<Button
 							variant="outline"
 							disabled={isPending}
@@ -138,37 +157,25 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 								)
 							}
 						>
-							Send to DTM
+							{sendToDtmMutation.isPending ? "Sending..." : "Send to DTM"}
 						</Button>
 					)}
 
-				{hasPermission(Permission.PROGRAMS_UPDATE) &&
-					status === ProgramStatus.SENT_TO_DTM && (
-						<Button
-							disabled={isPending}
-							onClick={() =>
-								confirmMutation.mutate(
-									{ id: program.id },
-									{ onSuccess: updateProgramCache },
-								)
-							}
-						>
-							Confirm
-						</Button>
-					)}
-
-				{hasPermission(Permission.PROGRAMS_UPDATE) &&
-					status !== ProgramStatus.COMPLETED &&
-					status !== ProgramStatus.CANCELLED && (
+				{/* Cancel: DRAFT, PENDING_APPROVAL, or APPROVED → CANCELLED */}
+				{hasPermission(Permission.PROGRAMS_ACTION_CANCEL) &&
+					(status === ProgramStatus.DRAFT ||
+						status === ProgramStatus.PENDING_APPROVAL ||
+						status === ProgramStatus.APPROVED) && (
 						<Button
 							variant="destructive"
 							disabled={isPending}
 							onClick={() => setCancelDialogOpen(true)}
 						>
-							Cancel
+							{cancelMutation.isPending ? "Cancelling..." : "Cancel"}
 						</Button>
 					)}
 
+				{/* More actions dropdown */}
 				{(hasPermission(Permission.PROGRAMS_UPDATE) ||
 					hasPermission(Permission.PROGRAMS_DELETE)) && (
 					<DropdownMenu>
@@ -191,25 +198,29 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 								</DropdownMenuItem>
 							)}
 
-							{hasPermission(Permission.PROGRAMS_DELETE) && (
-								<DropdownMenuItem
-									className="text-destructive"
-									onClick={() => setDeleteDialogOpen(true)}
-								>
-									Delete
-								</DropdownMenuItem>
-							)}
+							{/* Delete only allowed for DRAFT */}
+							{hasPermission(Permission.PROGRAMS_DELETE) &&
+								status === ProgramStatus.DRAFT && (
+									<DropdownMenuItem
+										className="text-destructive"
+										onClick={() => setDeleteDialogOpen(true)}
+									>
+										Delete
+									</DropdownMenuItem>
+								)}
 						</DropdownMenuContent>
 					</DropdownMenu>
 				)}
 			</div>
 
+			{/* Cancel Dialog */}
 			<AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>Cancel program</AlertDialogTitle>
 						<AlertDialogDescription>
-							Are you sure you want to cancel this program?
+							Are you sure you want to cancel this program? This action cannot
+							be undone.
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 
@@ -218,13 +229,18 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 							Keep Program
 						</AlertDialogCancel>
 
-						<AlertDialogAction disabled={isPending} onClick={handleCancel}>
+						<AlertDialogAction
+							disabled={isPending}
+							onClick={handleCancel}
+							className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+						>
 							Cancel Program
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>
 
+			{/* Delete Confirmation */}
 			<ConfirmDialog
 				open={deleteDialogOpen}
 				onOpenChange={setDeleteDialogOpen}
