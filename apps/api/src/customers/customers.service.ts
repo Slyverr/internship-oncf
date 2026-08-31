@@ -1,12 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { DrizzleService } from "@/database/drizzle.service";
-import { toCreate, toUpdate } from "./customers.mapper";
-import {
-	createCustomer,
-	findCustomer,
-	findCustomers,
-	updateCustomer,
-} from "./customers.query";
+import { CustomersMapper } from "./customers.mapper";
+import { CustomersQuery } from "./customers.query";
 import type { CustomerId } from "./customers.types";
 import { CreateCustomerDto } from "./requests/create-customer.dto";
 import { ListCustomerQueryDto } from "./requests/list-customer.dto";
@@ -14,31 +8,36 @@ import { UpdateCustomerDto } from "./requests/update-customer.dto";
 
 @Injectable()
 export class CustomersService {
-	constructor(private readonly drizzle: DrizzleService) {}
+	constructor(
+		private readonly customersQuery: CustomersQuery,
+		private readonly customersMapper: CustomersMapper,
+	) {}
 
 	async findAll(query: ListCustomerQueryDto) {
-		return findCustomers(this.drizzle.db, query);
+		return this.customersQuery.findCustomers(query);
 	}
 
 	async findOne(id: CustomerId) {
-		return this.ensure(await findCustomer(this.drizzle.db, id), id);
+		const customer = await this.customersQuery.findCustomer(id);
+		return this.ensure(customer, id);
 	}
 
 	async create(dto: CreateCustomerDto) {
-		const created = await createCustomer(this.drizzle.db, toCreate(dto));
+		const values = this.customersMapper.toCreate(dto);
+		const created = await this.customersQuery.createCustomer(values);
 		return this.findOne(created.id);
 	}
 
 	async update(id: CustomerId, dto: UpdateCustomerDto) {
-		await updateCustomer(this.drizzle.db, id, toUpdate(dto));
+		const values = this.customersMapper.toUpdate(dto);
+		await this.customersQuery.updateCustomer(id, values);
 		return this.findOne(id);
 	}
 
 	async deactivate(id: CustomerId) {
-		const customer = await updateCustomer(this.drizzle.db, id, {
+		const customer = await this.customersQuery.updateCustomer(id, {
 			isActive: false,
 		});
-
 		return this.ensure(customer, id);
 	}
 
@@ -46,7 +45,6 @@ export class CustomersService {
 		if (!customer) {
 			throw new NotFoundException(`Customer ${id} not found`);
 		}
-
 		return customer;
 	}
 }

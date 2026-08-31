@@ -1,16 +1,20 @@
+import { Injectable } from "@nestjs/common";
 import { CustomerInsert, CustomerUpdate } from "./customers.types";
 import { CreateCustomerDto } from "./requests/create-customer.dto";
 import { UpdateCustomerDto } from "./requests/update-customer.dto";
 
-export const toCreate = (dto: CreateCustomerDto): CustomerInsert => {
-	return {
-		...dto,
-		isActive: dto.isActive ?? true,
-	};
-};
+@Injectable()
+export class CustomersMapper {
+	toCreate(dto: CreateCustomerDto): CustomerInsert {
+		return {
+			...dto,
+			isActive: dto.isActive ?? true,
+		};
+	}
 
-export const toUpdate = (dto: UpdateCustomerDto): CustomerUpdate => {
-	return {
-		...dto,
-	};
-};
+	toUpdate(dto: UpdateCustomerDto): CustomerUpdate {
+		return {
+			...dto,
+		};
+	}
+}
