@@ -1,10 +1,8 @@
+import { Injectable } from "@nestjs/common";
 import { users } from "drizzle/schema";
 import { eq } from "drizzle-orm";
-import {
-	DrizzleDb,
-	QueryColumns,
-	QueryRelations,
-} from "@/database/drizzle.types";
+import { DrizzleService } from "@/database/drizzle.service";
+import { QueryColumns, QueryRelations } from "@/database/drizzle.types";
 import { withDbErrorHandling } from "@/database/drizzle.util";
 import type { UserEmail, UserId, UserInsert, UserUpdate } from "./users.types";
 
@@ -65,82 +63,83 @@ const userAuthRelations = {
 	},
 } satisfies UsersRelations;
 
-export async function findUsers(db: DrizzleDb) {
-	return db.query.users.findMany({
-		columns: userListColumns,
-		with: userListRelations,
-	});
-}
+@Injectable()
+export class UsersQuery {
+	constructor(private readonly drizzle: DrizzleService) {}
 
-export async function findUser(db: DrizzleDb, id: UserId) {
-	return db.query.users.findFirst({
-		where: { id },
-		columns: userListColumns,
-		with: userListRelations,
-	});
-}
+	async findUsers() {
+		return this.drizzle.db.query.users.findMany({
+			columns: userListColumns,
+			with: userListRelations,
+		});
+	}
 
-export async function findUserByEmail(db: DrizzleDb, email: UserEmail) {
-	return db.query.users.findFirst({
-		where: { email },
-	});
-}
+	async findUser(id: UserId) {
+		return this.drizzle.db.query.users.findFirst({
+			where: { id },
+			columns: userListColumns,
+			with: userListRelations,
+		});
+	}
 
-export async function findUserForAuth(db: DrizzleDb, id: UserId) {
-	return db.query.users.findFirst({
-		where: { id },
-		columns: userAuthColumns,
-		with: userAuthRelations,
-	});
-}
+	async findUserByEmail(email: UserEmail) {
+		return this.drizzle.db.query.users.findFirst({
+			where: { email },
+		});
+	}
 
-export async function createUser(db: DrizzleDb, values: UserInsert) {
-	const [created] = await withDbErrorHandling(
-		() =>
-			db.insert(users).values(values).returning({
-				id: users.id,
-			}),
-		values,
-	);
+	async findUserForAuth(id: UserId) {
+		return this.drizzle.db.query.users.findFirst({
+			where: { id },
+			columns: userAuthColumns,
+			with: userAuthRelations,
+		});
+	}
 
-	return created;
-}
+	async createUser(values: UserInsert) {
+		const [created] = await withDbErrorHandling(
+			() =>
+				this.drizzle.db.insert(users).values(values).returning({
+					id: users.id,
+				}),
+			values,
+		);
+		return created;
+	}
 
-export async function updateUser(
-	db: DrizzleDb,
-	id: UserId,
-	values: UserUpdate,
-) {
-	const [updated] = await withDbErrorHandling(
-		() =>
-			db.update(users).set(values).where(eq(users.id, id)).returning({
-				id: users.id,
-			}),
-		values,
-	);
+	async updateUser(id: UserId, values: UserUpdate) {
+		const [updated] = await withDbErrorHandling(
+			() =>
+				this.drizzle.db
+					.update(users)
+					.set(values)
+					.where(eq(users.id, id))
+					.returning({
+						id: users.id,
+					}),
+			values,
+		);
+		return updated;
+	}
 
-	return updated;
-}
+	async deleteUser(id: UserId) {
+		const [deleted] = await withDbErrorHandling(
+			() =>
+				this.drizzle.db.delete(users).where(eq(users.id, id)).returning({
+					id: users.id,
+				}),
+			{ id },
+		);
+		return deleted;
+	}
 
-export async function deleteUser(db: DrizzleDb, id: UserId) {
-	const [deleted] = await withDbErrorHandling(
-		() =>
-			db.delete(users).where(eq(users.id, id)).returning({
-				id: users.id,
-			}),
-		{ id },
-	);
-
-	return deleted;
-}
-
-export async function findUserExists(db: DrizzleDb, id: UserId) {
-	const user = await db.query.users.findFirst({
-		where: { id },
-		columns: {
-			id: true,
-		},
-	});
-
-	return !!user;
+	async findUserExists(id: UserId) {
+		const user = await this.drizzle.db.query.users.findFirst({
+			where: { id },
+			columns: {
+				id: true,
+			},
+		});
+		return !!user;
+	}
 }
