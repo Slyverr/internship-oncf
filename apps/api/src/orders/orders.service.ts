@@ -8,21 +8,10 @@ import { orders } from "drizzle/schema";
 import { and, eq } from "drizzle-orm";
 import { AuthUser } from "@/auth/auth.types";
 import { ListQueryDto } from "@/common/requests/list-query.dto";
-import { DrizzleService } from "@/database/drizzle.service";
 import { ORDER_STATUSES } from "@/database/reference-data";
 import { ORDER_STATUS_BY_ID, ORDER_TRANSITION } from "./orders.constants";
-import { toCreate, toUpdate } from "./orders.mapper";
-import {
-	createOrder,
-	deleteOrder,
-	findEligibleOrdersForPrograms,
-	findOrder,
-	findOrderForAccess,
-	findOrderForOwnership,
-	findOrderStatus,
-	findOrders,
-	updateOrder,
-} from "./orders.query";
+import { OrdersMapper } from "./orders.mapper";
+import { OrdersQuery } from "./orders.query";
 import type { OrderId } from "./orders.types";
 import { CreateOrderDto } from "./requests/create-order.dto";
 import { OrderListQueryDto } from "./requests/order-list-query.dto";
@@ -30,43 +19,47 @@ import { UpdateOrderDto } from "./requests/update-order.dto";
 
 @Injectable()
 export class OrdersService {
-	constructor(private readonly drizzle: DrizzleService) {}
+	constructor(
+		private readonly ordersQuery: OrdersQuery,
+		private readonly ordersMapper: OrdersMapper,
+	) {}
 
 	async create(dto: CreateOrderDto, user: AuthUser) {
-		const created = await createOrder(this.drizzle.db, toCreate(dto, user));
+		const values = this.ordersMapper.toCreate(dto, user);
+		const created = await this.ordersQuery.createOrder(values);
 		return this.findOne(created.id);
 	}
 
 	async findAll(user: AuthUser, query: OrderListQueryDto) {
-		return findOrders(this.drizzle.db, user, query);
+		return this.ordersQuery.findOrders(user, query);
 	}
 
 	async findEligibleForPrograms(user: AuthUser, query: ListQueryDto) {
-		return findEligibleOrdersForPrograms(this.drizzle.db, user, query);
+		return this.ordersQuery.findEligibleOrdersForPrograms(user, query);
 	}
 
 	async findOne(id: OrderId) {
-		const order = await findOrder(this.drizzle.db, id);
+		const order = await this.ordersQuery.findOrder(id);
 		return this.ensure(order, id);
 	}
 
 	async findOneForOwnership(id: OrderId) {
-		const order = await findOrderForOwnership(this.drizzle.db, id);
+		const order = await this.ordersQuery.findOrderForOwnership(id);
 		return this.ensure(order, id);
 	}
 
 	async findOneForAccess(id: OrderId) {
-		const order = await findOrderForAccess(this.drizzle.db, id);
+		const order = await this.ordersQuery.findOrderForAccess(id);
 		return this.ensure(order, id);
 	}
 
 	async update(id: OrderId, dto: UpdateOrderDto, user: AuthUser) {
-		await updateOrder(this.drizzle.db, id, toUpdate(dto, user), {
+		const values = this.ordersMapper.toUpdate(dto, user);
+		await this.ordersQuery.updateOrder(id, values, {
 			history: {
 				userId: user.id,
 			},
 		});
-
 		return this.findOne(id);
 	}
 
@@ -91,7 +84,7 @@ export class OrdersService {
 	}
 
 	async remove(id: OrderId) {
-		const deleted = await deleteOrder(this.drizzle.db, id);
+		const deleted = await this.ordersQuery.deleteOrder(id);
 		return this.ensure(deleted, id);
 	}
 
@@ -101,7 +94,7 @@ export class OrdersService {
 		toStatus: OrderStatus,
 		comment?: string,
 	) {
-		const order = this.ensure(await findOrderStatus(this.drizzle.db, id), id);
+		const order = this.ensure(await this.ordersQuery.findOrderStatus(id), id);
 
 		const fromStatus = ORDER_STATUS_BY_ID[order.statusId];
 		if (!fromStatus) {
@@ -118,8 +111,7 @@ export class OrdersService {
 		}
 
 		const statusId = ORDER_STATUSES[toStatus].id;
-		await updateOrder(
-			this.drizzle.db,
+		await this.ordersQuery.updateOrder(
 			id,
 			{ statusId },
 			{
@@ -134,7 +126,7 @@ export class OrdersService {
 		return this.findOne(id);
 	}
 
-	private ensure<T>(value: T | undefined, id: OrderId) {
+	private ensure<T>(value: T | undefined, id: OrderId): T {
 		if (!value) {
 			throw new NotFoundException(`Order ${id} not found`);
 		}
