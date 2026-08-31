@@ -6,12 +6,10 @@ import {
 } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import bcrypt from "bcryptjs";
-import { passwordResetTokens, userSessions, users } from "drizzle/schema";
-import { eq } from "drizzle-orm";
-import { DrizzleService } from "@/database/drizzle.service";
 import { EmailService } from "@/email/email.service";
 import { UsersService } from "@/users/users.service";
 import { User } from "@/users/users.types";
+import { AuthQuery } from "./auth.query";
 import { AuthUser } from "./auth.types";
 import { ChangePasswordDto } from "./requests/change-password.dto";
 
@@ -25,7 +23,7 @@ export class AuthService {
 	constructor(
 		private readonly usersService: UsersService,
 		private readonly emailService: EmailService,
-		private readonly drizzle: DrizzleService,
+		private readonly authQuery: AuthQuery,
 		private readonly jwtService: JwtService,
 	) {}
 
@@ -61,11 +59,11 @@ export class AuthService {
 			exp: number;
 		};
 
-		await this.drizzle.db.insert(userSessions).values({
-			userId: user.id,
-			sessionToken: sessionId,
-			expiredAt: new Date(payload.exp * 1000).toISOString(),
-		});
+		await this.authQuery.createSession(
+			user.id,
+			sessionId,
+			new Date(payload.exp * 1000).toISOString(),
+		);
 
 		return {
 			access_token: accessToken,
@@ -73,12 +71,7 @@ export class AuthService {
 	}
 
 	async validateSession(userId: number, sessionId: string): Promise<AuthUser> {
-		const session = await this.drizzle.db.query.userSessions.findFirst({
-			where: {
-				sessionToken: sessionId,
-				userId,
-			},
-		});
+		const session = await this.authQuery.findSession(sessionId, userId);
 
 		if (
 			!session ||
@@ -106,12 +99,7 @@ export class AuthService {
 	}
 
 	async logout(user: AuthUser) {
-		await this.drizzle.db
-			.update(userSessions)
-			.set({
-				logoutAt: new Date().toISOString(),
-			})
-			.where(eq(userSessions.sessionToken, user.sessionId));
+		await this.authQuery.logoutSession(user.sessionId);
 	}
 
 	async changePassword(id: number, dto: ChangePasswordDto) {
@@ -123,27 +111,12 @@ export class AuthService {
 
 		const password = await bcrypt.hash(dto.newPassword, 10);
 
-		await this.drizzle.db
-			.update(users)
-			.set({ password })
-			.where(eq(users.id, id));
-
-		await this.drizzle.db
-			.update(userSessions)
-			.set({
-				logoutAt: new Date().toISOString(),
-			})
-			.where(eq(userSessions.userId, id));
+		await this.authQuery.updateUserPassword(id, password);
+		await this.authQuery.revokeAllUserSessions(id);
 	}
 
 	async forgotPassword(email: string, redirectUrl: string) {
-		const user = await this.drizzle.db.query.users.findFirst({
-			where: { email },
-			columns: {
-				id: true,
-				email: true,
-			},
-		});
+		const user = await this.authQuery.findUserByEmail(email);
 
 		if (!user) {
 			return;
@@ -151,15 +124,13 @@ export class AuthService {
 
 		const token = crypto.randomUUID();
 		const expiresAt = new Date();
-
 		expiresAt.setHours(expiresAt.getHours() + 1);
 
-		await this.drizzle.db.insert(passwordResetTokens).values({
-			userId: user.id,
+		await this.authQuery.createPasswordResetToken(
+			user.id,
 			token,
-			expiresAt: expiresAt.toISOString(),
-			used: false,
-		});
+			expiresAt.toISOString(),
+		);
 
 		await this.emailService.sendResetPasswordEmail(
 			user.email,
@@ -168,13 +139,7 @@ export class AuthService {
 	}
 
 	async resetPassword(token: string, newPassword: string) {
-		const resetToken =
-			await this.drizzle.db.query.passwordResetTokens.findFirst({
-				where: {
-					token,
-					used: false,
-				},
-			});
+		const resetToken = await this.authQuery.findValidResetToken(token);
 
 		if (!resetToken) {
 			throw new BadRequestException("Invalid or expired token");
@@ -186,21 +151,8 @@ export class AuthService {
 
 		const password = await bcrypt.hash(newPassword, 10);
 
-		await this.drizzle.db
-			.update(users)
-			.set({ password })
-			.where(eq(users.id, resetToken.userId));
-
-		await this.drizzle.db
-			.update(passwordResetTokens)
-			.set({ used: true })
-			.where(eq(passwordResetTokens.id, resetToken.id));
-
-		await this.drizzle.db
-			.update(userSessions)
-			.set({
-				logoutAt: new Date().toISOString(),
-			})
-			.where(eq(userSessions.userId, resetToken.userId));
+		await this.authQuery.updateUserPassword(resetToken.userId, password);
+		await this.authQuery.markResetTokenAsUsed(resetToken.id);
+		await this.authQuery.revokeAllUserSessions(resetToken.userId);
 	}
 }

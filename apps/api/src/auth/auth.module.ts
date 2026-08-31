@@ -6,6 +6,7 @@ import { PassportModule } from "@nestjs/passport";
 import { EmailModule } from "@/email/email.module";
 import { UsersModule } from "@/users/users.module";
 import { AuthController } from "./auth.controller";
+import { AuthQuery } from "./auth.query";
 import { AuthService } from "./auth.service";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 import { PermissionsGuard } from "./guards/permissions.guard";
@@ -31,6 +32,7 @@ import { LocalStrategy } from "./strategy/local.strategy";
 	controllers: [AuthController],
 	providers: [
 		AuthService,
+		AuthQuery,
 		LocalStrategy,
 		JwtStrategy,
 		{
