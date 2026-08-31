@@ -6,11 +6,17 @@ import {
 	hasOnePermission,
 	Permission,
 } from "@ecommand/shared";
-import { createContext, ReactNode, useContext } from "react";
+import { createContext, ReactNode, useContext, useState } from "react";
 import { ProfileDto } from "@/lib/api/generated.schemas";
 
-interface AuthContextType {
-	user: ProfileDto;
+export interface AuthProviderProps {
+	profile: ProfileDto;
+	children: ReactNode;
+}
+
+export interface AuthContextType {
+	profile: ProfileDto;
+	setProfile: (profile: ProfileDto) => void;
 	hasPermission: (permission: Permission) => boolean;
 	hasAnyPermission: (...permissions: Permission[]) => boolean;
 	hasAllPermissions: (...permissions: Permission[]) => boolean;
@@ -19,22 +25,19 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({
-	user,
+	profile: initialProfile,
 	children,
-}: {
-	user: ProfileDto;
-	children: ReactNode;
-}) {
-	const permissions = new Set(user.permissions as Permission[]);
+}: AuthProviderProps) {
+	const [profile, setProfile] = useState(initialProfile);
+
+	const permissions = new Set(profile.permissions as Permission[]);
 
 	const value: AuthContextType = {
-		user,
-
+		profile,
+		setProfile,
 		hasPermission: (permission) => hasOnePermission(permissions, permission),
-
 		hasAnyPermission: (...permissionsToCheck) =>
 			hasAnyPermission(permissions, ...permissionsToCheck),
-
 		hasAllPermissions: (...permissionsToCheck) =>
 			hasAllPermissions(permissions, ...permissionsToCheck),
 	};
@@ -44,10 +47,8 @@ export function AuthProvider({
 
 export function useAuth() {
 	const context = useContext(AuthContext);
-
 	if (!context) {
 		throw new Error("useAuth must be used within AuthProvider");
 	}
-
 	return context;
 }

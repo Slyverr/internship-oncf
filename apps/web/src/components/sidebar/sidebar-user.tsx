@@ -26,7 +26,7 @@ import { useAuth } from "@/providers/auth-provider";
 
 export function SidebarUser() {
 	const {
-		user: { firstName, lastName, role },
+		profile: { firstName, lastName, role },
 	} = useAuth();
 
 	const name = `${firstName} ${lastName}`;

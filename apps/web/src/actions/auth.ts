@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import { profileControllerGetCurrent } from "@/lib/api/profile";
 
-export const getCurrentUser = cache(async () => {
+export const getCurrentProfile = cache(async () => {
 	try {
 		return await profileControllerGetCurrent();
 	} catch (_) {

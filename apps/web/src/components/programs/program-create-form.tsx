@@ -93,7 +93,7 @@ function FieldHeader({
 
 export function ProgramCreateForm(): JSX.Element {
 	const router = useRouter();
-	const { user, hasPermission } = useAuth();
+	const { profile, hasPermission } = useAuth();
 	const mutation = useProgramsControllerCreate();
 
 	const canManageOther = hasPermission(Permission.PROGRAMS_MANAGE_OTHER);
@@ -101,7 +101,7 @@ export function ProgramCreateForm(): JSX.Element {
 
 	const defaultValues: CreateProgramFormValues = {
 		orderId: 0,
-		userId: canManageOther ? undefined : user?.id,
+		userId: canManageOther ? undefined : profile?.id,
 		status: canManageStatus ? ProgramStatus.DRAFT : undefined,
 		plannedDate: "",
 		quantityPlanned: "",

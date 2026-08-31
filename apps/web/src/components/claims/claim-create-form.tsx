@@ -102,14 +102,14 @@ function FieldHeader({
 
 export function ClaimCreateForm(): JSX.Element {
 	const router = useRouter();
-	const { user, hasPermission } = useAuth();
+	const { profile, hasPermission } = useAuth();
 	const mutation = useClaimsControllerCreate();
 
 	const canManageOther = hasPermission(Permission.CLAIMS_MANAGE_OTHER);
 	const canManageStatus = hasPermission(Permission.CLAIMS_MANAGE_STATUS);
 
 	const defaultValues: CreateClaimFormValues = {
-		customerId: user?.customerId ?? 0,
+		customerId: profile?.customerId ?? 0,
 		type: ClaimType.OTHER,
 		orderId: undefined,
 		operationId: "",

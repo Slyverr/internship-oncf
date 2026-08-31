@@ -87,14 +87,14 @@ function FieldHeader({
 
 export function OrderCreateForm(): JSX.Element {
 	const router = useRouter();
-	const { user, hasPermission } = useAuth();
+	const { profile, hasPermission } = useAuth();
 	const mutation = useOrdersControllerCreate();
 
 	const canManageOther = hasPermission(Permission.ORDERS_MANAGE_OTHER);
 	const canManageStatus = hasPermission(Permission.ORDERS_MANAGE_STATUS);
 
 	const defaultValues: CreateOrderFormValues = {
-		customerId: user?.customerId ?? 0,
+		customerId: profile?.customerId ?? 0,
 		goodsId: 0,
 		unitId: "",
 		quantityDemanded: "",
