@@ -1,6 +1,7 @@
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { OrderDetailsClient } from "@/components/orders/order-details-client";
 import { ordersControllerFindOne } from "@/lib/api/orders";
+import { ordersBreadcrumbs } from "../breadcrumbs";
 
 interface PageProps {
 	params: Promise<{ id: string }>;
@@ -13,10 +14,10 @@ export default async function Page({ params }: PageProps) {
 	return (
 		<>
 			<Breadcrumbs
-				items={[
-					{ label: "Orders", href: "/dashboard/orders" },
-					{ label: order.orderNumber ?? `#${order.id}` },
-				]}
+				items={ordersBreadcrumbs.detail(
+					id,
+					order.orderNumber ?? `#${order.id}`,
+				)}
 			/>
 
 			<OrderDetailsClient order={order} />

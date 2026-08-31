@@ -1,6 +1,7 @@
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { UnderConstruction } from "@/components/under-construction";
 import { ordersControllerFindOne } from "@/lib/api/orders";
+import { ordersBreadcrumbs } from "../../breadcrumbs";
 
 interface PageProps {
 	params: Promise<{ id: string }>;
@@ -13,14 +14,7 @@ export default async function Page({ params }: PageProps) {
 	return (
 		<>
 			<Breadcrumbs
-				items={[
-					{ label: "Orders", href: "/dashboard/orders" },
-					{
-						label: order.orderNumber,
-						href: `/dashboard/orders/${order.id}`,
-					},
-					{ label: "Edit" },
-				]}
+				items={ordersBreadcrumbs.edit(id, order.orderNumber ?? `#${order.id}`)}
 			/>
 
 			<UnderConstruction />

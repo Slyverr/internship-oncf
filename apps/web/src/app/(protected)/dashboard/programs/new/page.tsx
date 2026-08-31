@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { ProgramCreateForm } from "@/components/programs/program-create-form";
+import { programsBreadcrumbs } from "../breadcrumbs";
 
 export const metadata: Metadata = {
 	title: "New Program",
@@ -10,12 +11,7 @@ export const metadata: Metadata = {
 export default function Page() {
 	return (
 		<>
-			<Breadcrumbs
-				items={[
-					{ label: "Programs", href: "/dashboard/programs" },
-					{ label: "New Program", href: "/dashboard/programs/new" },
-				]}
-			/>
+			<Breadcrumbs items={programsBreadcrumbs.create()} />
 
 			<ProgramCreateForm />
 		</>

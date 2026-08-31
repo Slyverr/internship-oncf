@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/common/page-header";
 import { ProgramsTable } from "@/components/programs/programs-table";
 import { buttonVariants } from "@/components/ui/button";
 import { programsControllerFindAll } from "@/lib/api/programs";
+import { programsBreadcrumbs } from "./breadcrumbs";
 
 export const metadata: Metadata = {
 	title: "Programs",
@@ -17,9 +18,7 @@ export default async function Page() {
 
 	return (
 		<>
-			<Breadcrumbs
-				items={[{ label: "Programs", href: "/dashboard/programs" }]}
-			/>
+			<Breadcrumbs items={programsBreadcrumbs.home()} />
 
 			<PageHeader
 				title="Programs"
