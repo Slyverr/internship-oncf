@@ -1,3 +1,4 @@
+import { Injectable } from "@nestjs/common";
 import {
 	ACCESSORY_OPERATIONS_SCOPE,
 	GOODS_TYPES_SCOPE,
@@ -20,34 +21,45 @@ import {
 	CreateUnitDto,
 } from "./requests/create-catalog.dto";
 
-export const toCreateUnit = (dto: CreateUnitDto): UnitInsert => ({
-	id: createReferenceId(UNITS_SCOPE, dto.name),
-	name: dto.name,
-});
+@Injectable()
+export class CatalogMapper {
+	toCreateUnit(dto: CreateUnitDto): UnitInsert {
+		return {
+			id: createReferenceId(UNITS_SCOPE, dto.name),
+			name: dto.name,
+		};
+	}
 
-export const toCreateGoodsType = (
-	dto: CreateGoodsTypeDto,
-): GoodsTypeInsert => ({
-	id: createReferenceId(GOODS_TYPES_SCOPE, dto.name),
-	name: dto.name,
-});
+	toCreateGoodsType(dto: CreateGoodsTypeDto): GoodsTypeInsert {
+		return {
+			id: createReferenceId(GOODS_TYPES_SCOPE, dto.name),
+			name: dto.name,
+		};
+	}
 
-export const toCreateGood = (dto: CreateGoodDto): GoodInsert => ({
-	name: dto.name,
-	goodsCode: dto.goodsCode,
-	goodsTypeId: dto.goodsTypeId,
-});
+	toCreateGood(dto: CreateGoodDto): GoodInsert {
+		return {
+			name: dto.name,
+			goodsCode: dto.goodsCode,
+			goodsTypeId: dto.goodsTypeId,
+		};
+	}
 
-export const toCreateAccessoryOperation = (
-	dto: CreateAccessoryOperationDto,
-): AccessoryOperationInsert => ({
-	id: createReferenceId(ACCESSORY_OPERATIONS_SCOPE, dto.name),
-	name: dto.name,
-});
+	toCreateAccessoryOperation(
+		dto: CreateAccessoryOperationDto,
+	): AccessoryOperationInsert {
+		return {
+			id: createReferenceId(ACCESSORY_OPERATIONS_SCOPE, dto.name),
+			name: dto.name,
+		};
+	}
 
-export const toCreateRejectionReason = (
-	dto: CreateRejectionReasonDto,
-): RejectionReasonInsert => ({
-	id: createReferenceId(REJECTION_REASONS_SCOPE, dto.name),
-	name: dto.name,
-});
+	toCreateRejectionReason(
+		dto: CreateRejectionReasonDto,
+	): RejectionReasonInsert {
+		return {
+			id: createReferenceId(REJECTION_REASONS_SCOPE, dto.name),
+			name: dto.name,
+		};
+	}
+}

@@ -1,24 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { DrizzleService } from "@/database/drizzle.service";
-import {
-	toCreateAccessoryOperation,
-	toCreateGood,
-	toCreateGoodsType,
-	toCreateRejectionReason,
-	toCreateUnit,
-} from "./catalog.mapper";
-import {
-	createAccessoryOperation,
-	createGood,
-	createGoodsType,
-	createRejectionReason,
-	createUnit,
-	findAccessoryOperations,
-	findGoods,
-	findGoodsTypes,
-	findRejectionReasons,
-	findUnits,
-} from "./catalog.query";
+import { CatalogMapper } from "./catalog.mapper";
+import { CatalogQuery } from "./catalog.query";
 import {
 	CreateAccessoryOperationDto,
 	CreateGoodDto,
@@ -29,48 +11,53 @@ import {
 
 @Injectable()
 export class CatalogService {
-	constructor(private readonly drizzle: DrizzleService) {}
+	constructor(
+		private readonly catalogQuery: CatalogQuery,
+		private readonly catalogMapper: CatalogMapper,
+	) {}
 
 	async findAllUnits() {
-		return findUnits(this.drizzle.db);
+		return this.catalogQuery.findUnits();
 	}
 
 	async createUnit(dto: CreateUnitDto) {
-		return createUnit(this.drizzle.db, toCreateUnit(dto));
+		const values = this.catalogMapper.toCreateUnit(dto);
+		return this.catalogQuery.createUnit(values);
 	}
 
 	async findAllGoodsTypes() {
-		return findGoodsTypes(this.drizzle.db);
+		return this.catalogQuery.findGoodsTypes();
 	}
 
 	async createGoodsType(dto: CreateGoodsTypeDto) {
-		return createGoodsType(this.drizzle.db, toCreateGoodsType(dto));
+		const values = this.catalogMapper.toCreateGoodsType(dto);
+		return this.catalogQuery.createGoodsType(values);
 	}
 
 	async findAllGoods() {
-		return findGoods(this.drizzle.db);
+		return this.catalogQuery.findGoods();
 	}
 
 	async createGood(dto: CreateGoodDto) {
-		return createGood(this.drizzle.db, toCreateGood(dto));
+		const values = this.catalogMapper.toCreateGood(dto);
+		return this.catalogQuery.createGood(values);
 	}
 
 	async findAllAccessoryOperations() {
-		return findAccessoryOperations(this.drizzle.db);
+		return this.catalogQuery.findAccessoryOperations();
 	}
 
 	async createAccessoryOperation(dto: CreateAccessoryOperationDto) {
-		return createAccessoryOperation(
-			this.drizzle.db,
-			toCreateAccessoryOperation(dto),
-		);
+		const values = this.catalogMapper.toCreateAccessoryOperation(dto);
+		return this.catalogQuery.createAccessoryOperation(values);
 	}
 
 	async findAllRejectionReasons() {
-		return findRejectionReasons(this.drizzle.db);
+		return this.catalogQuery.findRejectionReasons();
 	}
 
 	async createRejectionReason(dto: CreateRejectionReasonDto) {
-		return createRejectionReason(this.drizzle.db, toCreateRejectionReason(dto));
+		const values = this.catalogMapper.toCreateRejectionReason(dto);
+		return this.catalogQuery.createRejectionReason(values);
 	}
 }

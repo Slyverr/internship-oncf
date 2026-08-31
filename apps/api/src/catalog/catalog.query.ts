@@ -1,3 +1,4 @@
+import { Injectable } from "@nestjs/common";
 import {
 	accessoryOperations,
 	goods,
@@ -5,7 +6,7 @@ import {
 	rejectionReasons,
 	units,
 } from "drizzle/schema";
-import { DrizzleDb } from "@/database/drizzle.types";
+import { DrizzleService } from "@/database/drizzle.service";
 import { withDbErrorHandling } from "@/database/drizzle.util";
 import {
 	AccessoryOperationInsert,
@@ -15,110 +16,88 @@ import {
 	UnitInsert,
 } from "./catalog.types";
 
-export async function findUnits(db: DrizzleDb) {
-	return db.query.units.findMany({
-		where: {
-			isActive: true,
-		},
-		orderBy: {
-			name: "asc",
-		},
-	});
-}
+@Injectable()
+export class CatalogQuery {
+	constructor(private readonly drizzle: DrizzleService) {}
 
-export async function createUnit(db: DrizzleDb, values: UnitInsert) {
-	const [created] = await withDbErrorHandling(
-		() => db.insert(units).values(values).returning(),
-		values,
-	);
-	return created;
-}
+	async findUnits() {
+		return this.drizzle.db.query.units.findMany({
+			where: { isActive: true },
+			orderBy: { name: "asc" },
+		});
+	}
 
-export async function findGoodsTypes(db: DrizzleDb) {
-	return db.query.goodsTypes.findMany({
-		where: {
-			isActive: true,
-		},
-		orderBy: {
-			name: "asc",
-		},
-	});
-}
+	async createUnit(values: UnitInsert) {
+		const [created] = await withDbErrorHandling(
+			() => this.drizzle.db.insert(units).values(values).returning(),
+			values,
+		);
+		return created;
+	}
 
-export async function createGoodsType(db: DrizzleDb, values: GoodsTypeInsert) {
-	const [created] = await withDbErrorHandling(
-		() => db.insert(goodsTypes).values(values).returning(),
-		values,
-	);
-	return created;
-}
+	async findGoodsTypes() {
+		return this.drizzle.db.query.goodsTypes.findMany({
+			where: { isActive: true },
+			orderBy: { name: "asc" },
+		});
+	}
 
-export async function findGoods(db: DrizzleDb) {
-	return db.query.goods.findMany({
-		where: {
-			isActive: true,
-		},
-		with: {
-			goodsType: {
-				columns: {
-					name: true,
+	async createGoodsType(values: GoodsTypeInsert) {
+		const [created] = await withDbErrorHandling(
+			() => this.drizzle.db.insert(goodsTypes).values(values).returning(),
+			values,
+		);
+		return created;
+	}
+
+	async findGoods() {
+		return this.drizzle.db.query.goods.findMany({
+			where: { isActive: true },
+			with: {
+				goodsType: {
+					columns: { name: true },
 				},
 			},
-		},
-		orderBy: {
-			name: "asc",
-		},
-	});
-}
+			orderBy: { name: "asc" },
+		});
+	}
 
-export async function createGood(db: DrizzleDb, values: GoodInsert) {
-	const [created] = await withDbErrorHandling(
-		() => db.insert(goods).values(values).returning(),
-		values,
-	);
-	return created;
-}
+	async createGood(values: GoodInsert) {
+		const [created] = await withDbErrorHandling(
+			() => this.drizzle.db.insert(goods).values(values).returning(),
+			values,
+		);
+		return created;
+	}
 
-export async function findAccessoryOperations(db: DrizzleDb) {
-	return db.query.accessoryOperations.findMany({
-		where: {
-			isActive: true,
-		},
-		orderBy: {
-			name: "asc",
-		},
-	});
-}
+	async findAccessoryOperations() {
+		return this.drizzle.db.query.accessoryOperations.findMany({
+			where: { isActive: true },
+			orderBy: { name: "asc" },
+		});
+	}
 
-export async function createAccessoryOperation(
-	db: DrizzleDb,
-	values: AccessoryOperationInsert,
-) {
-	const [created] = await withDbErrorHandling(
-		() => db.insert(accessoryOperations).values(values).returning(),
-		values,
-	);
-	return created;
-}
+	async createAccessoryOperation(values: AccessoryOperationInsert) {
+		const [created] = await withDbErrorHandling(
+			() =>
+				this.drizzle.db.insert(accessoryOperations).values(values).returning(),
+			values,
+		);
+		return created;
+	}
 
-export async function findRejectionReasons(db: DrizzleDb) {
-	return db.query.rejectionReasons.findMany({
-		where: {
-			isActive: true,
-		},
-		orderBy: {
-			name: "asc",
-		},
-	});
-}
+	async findRejectionReasons() {
+		return this.drizzle.db.query.rejectionReasons.findMany({
+			where: { isActive: true },
+			orderBy: { name: "asc" },
+		});
+	}
 
-export async function createRejectionReason(
-	db: DrizzleDb,
-	values: RejectionReasonInsert,
-) {
-	const [created] = await withDbErrorHandling(
-		() => db.insert(rejectionReasons).values(values).returning(),
-		values,
-	);
-	return created;
+	async createRejectionReason(values: RejectionReasonInsert) {
+		const [created] = await withDbErrorHandling(
+			() => this.drizzle.db.insert(rejectionReasons).values(values).returning(),
+			values,
+		);
+		return created;
+	}
 }
