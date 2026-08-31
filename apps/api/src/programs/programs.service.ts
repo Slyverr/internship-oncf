@@ -7,19 +7,10 @@ import {
 import { forecastPrograms } from "drizzle/schema";
 import { and, eq } from "drizzle-orm";
 import { AuthUser } from "@/auth/auth.types";
-import { DrizzleService } from "@/database/drizzle.service";
 import { PROGRAM_STATUSES } from "@/database/reference-data";
 import { PROGRAM_STATUS_BY_ID, PROGRAM_TRANSITION } from "./programs.constants";
-import { toCreate, toUpdate } from "./programs.mapper";
-import {
-	createProgram,
-	findProgram,
-	findProgramForOwnership,
-	findProgramStatus,
-	findPrograms,
-	removeProgram,
-	updateProgram,
-} from "./programs.query";
+import { ProgramsMapper } from "./programs.mapper";
+import { ProgramsQuery } from "./programs.query";
 import type { ProgramId } from "./programs.types";
 import { CreateProgramDto } from "./requests/create-program.dto";
 import { ListProgramQueryDto } from "./requests/list-program.dto";
@@ -27,28 +18,34 @@ import { UpdateProgramDto } from "./requests/update-program.dto";
 
 @Injectable()
 export class ProgramsService {
-	constructor(private readonly drizzle: DrizzleService) {}
+	constructor(
+		private readonly programsQuery: ProgramsQuery,
+		private readonly programsMapper: ProgramsMapper,
+	) {}
 
 	async create(dto: CreateProgramDto, user: AuthUser) {
-		const created = await createProgram(this.drizzle.db, toCreate(dto, user));
+		const values = this.programsMapper.toCreate(dto, user);
+		const created = await this.programsQuery.createProgram(values);
 		return this.findOne(created.id);
 	}
 
 	async findAll(user: AuthUser, query: ListProgramQueryDto) {
-		return findPrograms(this.drizzle.db, user, query);
+		return this.programsQuery.findPrograms(user, query);
 	}
 
 	async findOne(id: ProgramId) {
-		return this.ensure(await findProgram(this.drizzle.db, id), id);
+		const program = await this.programsQuery.findProgram(id);
+		return this.ensure(program, id);
 	}
 
 	async findOneForOwnership(id: ProgramId) {
-		return this.ensure(await findProgramForOwnership(this.drizzle.db, id), id);
+		const program = await this.programsQuery.findProgramForOwnership(id);
+		return this.ensure(program, id);
 	}
 
 	async update(id: ProgramId, dto: UpdateProgramDto, user: AuthUser) {
-		await updateProgram(this.drizzle.db, id, toUpdate(dto, user));
-
+		const values = this.programsMapper.toUpdate(dto, user);
+		await this.programsQuery.updateProgram(id, values);
 		return this.findOne(id);
 	}
 
@@ -73,15 +70,14 @@ export class ProgramsService {
 	}
 
 	async remove(id: ProgramId) {
-		const deleted = await removeProgram(this.drizzle.db, id);
+		const deleted = await this.programsQuery.removeProgram(id);
 		return this.ensure(deleted, id);
 	}
 
-	private ensure<T>(program: T | undefined, id: ProgramId) {
+	private ensure<T>(program: T | undefined, id: ProgramId): T {
 		if (!program) {
 			throw new NotFoundException(`Program ${id} not found`);
 		}
-
 		return program;
 	}
 
@@ -91,7 +87,7 @@ export class ProgramsService {
 		toStatus: ProgramStatus,
 	) {
 		const program = this.ensure(
-			await findProgramStatus(this.drizzle.db, id),
+			await this.programsQuery.findProgramStatus(id),
 			id,
 		);
 
@@ -109,8 +105,7 @@ export class ProgramsService {
 			);
 		}
 
-		await updateProgram(
-			this.drizzle.db,
+		await this.programsQuery.updateProgram(
 			id,
 			{
 				statusId: PROGRAM_STATUSES[toStatus].id,
