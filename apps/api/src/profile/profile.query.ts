@@ -1,10 +1,8 @@
+import { Injectable } from "@nestjs/common";
 import { users } from "drizzle/schema";
 import { eq } from "drizzle-orm";
-import {
-	DrizzleDb,
-	QueryColumns,
-	QueryRelations,
-} from "@/database/drizzle.types";
+import { DrizzleService } from "@/database/drizzle.service";
+import { QueryColumns, QueryRelations } from "@/database/drizzle.types";
 import { withDbErrorHandling } from "@/database/drizzle.util";
 import type { UserId, UserUpdate } from "@/users/users.types";
 
@@ -41,26 +39,30 @@ const profileRelations = {
 	},
 } satisfies UsersRelations;
 
-export async function findProfile(db: DrizzleDb, id: UserId) {
-	return db.query.users.findFirst({
-		where: { id },
-		columns: profileColumns,
-		with: profileRelations,
-	});
-}
+@Injectable()
+export class ProfileQuery {
+	constructor(private readonly drizzle: DrizzleService) {}
 
-export async function updateProfile(
-	db: DrizzleDb,
-	id: UserId,
-	values: UserUpdate,
-) {
-	const [updated] = await withDbErrorHandling(
-		() =>
-			db.update(users).set(values).where(eq(users.id, id)).returning({
-				id: users.id,
-			}),
-		values,
-	);
+	async findProfile(id: UserId) {
+		return this.drizzle.db.query.users.findFirst({
+			where: { id },
+			columns: profileColumns,
+			with: profileRelations,
+		});
+	}
 
-	return updated;
+	async updateProfile(id: UserId, values: UserUpdate) {
+		const [updated] = await withDbErrorHandling(
+			() =>
+				this.drizzle.db
+					.update(users)
+					.set(values)
+					.where(eq(users.id, id))
+					.returning({
+						id: users.id,
+					}),
+			values,
+		);
+		return updated;
+	}
 }
