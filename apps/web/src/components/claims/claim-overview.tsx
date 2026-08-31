@@ -1,5 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ClaimDetailDto } from "@/lib/api/generated.schemas";
+import { ClaimCommentForm } from "./claim-comment-form";
+import { ClaimComments } from "./claim-comments";
 
 export function ClaimOverview({ claim }: { claim: ClaimDetailDto }) {
 	const createdBy = claim.createdByUser
@@ -11,70 +13,85 @@ export function ClaimOverview({ claim }: { claim: ClaimDetailDto }) {
 		: "—";
 
 	return (
-		<div className="grid gap-4 md:grid-cols-2">
-			<Card>
-				<CardHeader>
-					<CardTitle>Claim Information</CardTitle>
-				</CardHeader>
+		<div className="space-y-6">
+			{/* Existing grid of cards */}
+			<div className="grid gap-4 md:grid-cols-2">
+				<Card>
+					<CardHeader>
+						<CardTitle>Claim Information</CardTitle>
+					</CardHeader>
 
-				<CardContent className="space-y-4">
-					<Detail label="Claim ID" value={`#${claim.id}`} />
-					<Detail label="Customer" value={claim.customer?.companyName ?? "—"} />
-					<Detail label="Type" value={claim.claimType?.name ?? "—"} />
-					<Detail label="Status" value={claim.claimStatus?.name ?? "—"} />
-					<Detail
-						label="Priority"
-						value={claim.priority ? claim.priority.toUpperCase() : "—"}
-					/>
-					<Detail label="Created By" value={createdBy} />
-					<Detail label="Created Date" value={formatDate(claim.createdAt)} />
-					<Detail label="Last Updated" value={formatDate(claim.updatedAt)} />
-				</CardContent>
-			</Card>
+					<CardContent className="space-y-4">
+						<Detail label="Claim ID" value={`#${claim.id}`} />
+						<Detail
+							label="Customer"
+							value={claim.customer?.companyName ?? "—"}
+						/>
+						<Detail label="Type" value={claim.claimType?.name ?? "—"} />
+						<Detail label="Status" value={claim.claimStatus?.name ?? "—"} />
+						<Detail
+							label="Priority"
+							value={claim.priority ? claim.priority.toUpperCase() : "—"}
+						/>
+						<Detail label="Created By" value={createdBy} />
+						<Detail label="Created Date" value={formatDate(claim.createdAt)} />
+						<Detail label="Last Updated" value={formatDate(claim.updatedAt)} />
+					</CardContent>
+				</Card>
 
-			<Card>
-				<CardHeader>
-					<CardTitle>Associations & Scope</CardTitle>
-				</CardHeader>
+				<Card>
+					<CardHeader>
+						<CardTitle>Associations & Scope</CardTitle>
+					</CardHeader>
 
-				<CardContent className="space-y-4">
-					<Detail
-						label="Associated Order"
-						value={claim.order ? `#${claim.order.orderNumber}` : "—"}
-					/>
-					<Detail
-						label="Accessory Operation"
-						value={claim.accessoryOperation?.name ?? "—"}
-					/>
-					<Detail label="Description" value={claim.description} />
-				</CardContent>
-			</Card>
+					<CardContent className="space-y-4">
+						<Detail
+							label="Associated Order"
+							value={claim.order ? `#${claim.order.orderNumber}` : "—"}
+						/>
+						<Detail
+							label="Accessory Operation"
+							value={claim.accessoryOperation?.name ?? "—"}
+						/>
+						<Detail label="Description" value={claim.description} />
+					</CardContent>
+				</Card>
 
-			<Card>
-				<CardHeader>
-					<CardTitle>Activity & Metrics</CardTitle>
-				</CardHeader>
+				<Card>
+					<CardHeader>
+						<CardTitle>Activity & Metrics</CardTitle>
+					</CardHeader>
 
-				<CardContent className="grid gap-4 sm:grid-cols-2">
-					<Metric label="Comments" value={claim.claimComments?.length ?? 0} />
-					<Metric
-						label="Status Changes"
-						value={claim.claimStatusHistories?.length ?? 0}
-					/>
-				</CardContent>
-			</Card>
+					<CardContent className="grid gap-4 sm:grid-cols-2">
+						<Metric label="Comments" value={claim.claimComments?.length ?? 0} />
+						<Metric
+							label="Status Changes"
+							value={claim.claimStatusHistories?.length ?? 0}
+						/>
+					</CardContent>
+				</Card>
 
-			<Card>
-				<CardHeader>
-					<CardTitle>Resolution & Closure</CardTitle>
-				</CardHeader>
+				<Card>
+					<CardHeader>
+						<CardTitle>Resolution & Closure</CardTitle>
+					</CardHeader>
 
-				<CardContent className="space-y-4">
-					<Detail label="Resolution Summary" value={claim.resolution ?? "—"} />
-					<Detail label="Closed By" value={closedBy} />
-					<Detail label="Closed Date" value={formatDate(claim.closedAt)} />
-				</CardContent>
-			</Card>
+					<CardContent className="space-y-4">
+						<Detail
+							label="Resolution Summary"
+							value={claim.resolution ?? "—"}
+						/>
+						<Detail label="Closed By" value={closedBy} />
+						<Detail label="Closed Date" value={formatDate(claim.closedAt)} />
+					</CardContent>
+				</Card>
+			</div>
+
+			{/* Comments section – spans full width */}
+			<div className="grid gap-6 md:grid-cols-2">
+				<ClaimComments claimId={claim.id} />
+				<ClaimCommentForm claimId={claim.id} />
+			</div>
 		</div>
 	);
 }
