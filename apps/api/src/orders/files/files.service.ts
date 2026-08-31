@@ -3,23 +3,16 @@ import {
 	Injectable,
 	NotFoundException,
 } from "@nestjs/common";
-import { DrizzleService } from "@/database/drizzle.service";
 import type { OrderId } from "@/orders/orders.types";
 import { StorageService } from "@/storage/storage.service";
 import type { MulterFile } from "@/storage/storage.types";
-import {
-	createFile,
-	findFileForDelete,
-	findFileForDownload,
-	findFiles,
-	removeFile,
-} from "./files.query";
+import { FilesQuery } from "./files.query";
 import { UploadFileDto } from "./requests/upload-file.dto";
 
 @Injectable()
 export class FilesService {
 	constructor(
-		private readonly drizzle: DrizzleService,
+		private readonly filesQuery: FilesQuery,
 		private readonly storageService: StorageService,
 	) {}
 
@@ -36,7 +29,7 @@ export class FilesService {
 		const filePath = `orders/${orderId}/${Date.now()}-${file.originalname}`;
 		await this.storageService.uploadFile(filePath, file);
 
-		return createFile(this.drizzle.db, {
+		return this.filesQuery.createFile({
 			orderId,
 			fileName: file.originalname,
 			fileType: file.mimetype,
@@ -49,11 +42,11 @@ export class FilesService {
 	}
 
 	async listFiles(orderId: OrderId) {
-		return findFiles(this.drizzle.db, orderId);
+		return this.filesQuery.findFiles(orderId);
 	}
 
 	async downloadFile(orderId: OrderId, fileId: number) {
-		const file = await findFileForDownload(this.drizzle.db, orderId, fileId);
+		const file = await this.filesQuery.findFileForDownload(orderId, fileId);
 		if (!file) {
 			throw new NotFoundException(
 				`File ${fileId} not found for order ${orderId}`,
@@ -69,7 +62,7 @@ export class FilesService {
 	}
 
 	async deleteFile(orderId: OrderId, fileId: number) {
-		const file = await findFileForDelete(this.drizzle.db, orderId, fileId);
+		const file = await this.filesQuery.findFileForDelete(orderId, fileId);
 		if (!file) {
 			throw new NotFoundException(
 				`File ${fileId} not found for order ${orderId}`,
@@ -77,6 +70,6 @@ export class FilesService {
 		}
 
 		await this.storageService.deleteFile(file.filePath);
-		await removeFile(this.drizzle.db, orderId, fileId);
+		await this.filesQuery.removeFile(orderId, fileId);
 	}
 }
