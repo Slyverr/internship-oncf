@@ -1,78 +1,73 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { AuthUser } from "@/auth/auth.types";
-import { DrizzleService } from "@/database/drizzle.service";
-import { toCreate } from "./notifications.mapper";
-import {
-	createNotification,
-	findNotification,
-	findNotificationForOwnership,
-	findNotifications,
-	findUnreadCount,
-	markNotificationAsFailed,
-	markNotificationAsSent,
-	updateAllNotificationsRead,
-	updateNotificationRead,
-} from "./notifications.query";
+import { NotificationsMapper } from "./notifications.mapper";
+import { NotificationsQuery } from "./notifications.query";
 import type { NotificationId } from "./notifications.types";
 import { CreateNotificationDto } from "./requests/create-notification.dto";
 
 @Injectable()
 export class NotificationsService {
-	constructor(private readonly drizzle: DrizzleService) {}
+	constructor(
+		private readonly notificationsQuery: NotificationsQuery,
+		private readonly notificationsMapper: NotificationsMapper,
+	) {}
 
 	async create(dto: CreateNotificationDto) {
-		const created = await createNotification(this.drizzle.db, toCreate(dto));
+		const values = this.notificationsMapper.toCreate(dto);
+		const created = await this.notificationsQuery.createNotification(values);
 		return this.findOne(created.id);
 	}
 
 	async findAll(user: AuthUser) {
-		return findNotifications(this.drizzle.db, user.id);
+		return this.notificationsQuery.findNotifications(user.id);
 	}
 
 	async findOne(id: NotificationId) {
-		return this.ensure(await findNotification(this.drizzle.db, id), id);
+		const notification = await this.notificationsQuery.findNotification(id);
+		return this.ensure(notification, id);
 	}
 
 	async findOneForOwnership(id: NotificationId) {
-		return this.ensure(
-			await findNotificationForOwnership(this.drizzle.db, id),
-			id,
-		);
+		const notification =
+			await this.notificationsQuery.findNotificationForOwnership(id);
+		return this.ensure(notification, id);
 	}
 
 	async getUnreadCount(userId: number) {
-		return findUnreadCount(this.drizzle.db, userId);
+		return this.notificationsQuery.findUnreadCount(userId);
 	}
 
 	async markAsRead(id: NotificationId, userId: number) {
-		const updated = await updateNotificationRead(this.drizzle.db, id, userId);
+		const updated = await this.notificationsQuery.updateNotificationRead(
+			id,
+			userId,
+		);
 		if (!updated) {
 			throw new NotFoundException(`Notification ${id} not found`);
 		}
-
 		return this.findOne(id);
 	}
 
 	async markAllAsRead(userId: number) {
-		const updated = await updateAllNotificationsRead(this.drizzle.db, userId);
+		const updated =
+			await this.notificationsQuery.updateAllNotificationsRead(userId);
 		return {
 			count: updated.length,
 		};
 	}
 
 	async markAsSent(id: NotificationId) {
-		return markNotificationAsSent(this.drizzle.db, id);
+		return this.notificationsQuery.markNotificationAsSent(id);
 	}
 
 	async markAsFailed(id: NotificationId, error: string) {
-		return markNotificationAsFailed(this.drizzle.db, id, error);
+		return this.notificationsQuery.markNotificationAsFailed(id, error);
 	}
 
-	private ensure<T>(notification: T | undefined, id: NotificationId) {
+	private ensure<T>(notification: T | undefined, id: NotificationId): T {
 		if (!notification) {
 			throw new NotFoundException(`Notification ${id} not found`);
 		}
-
 		return notification;
 	}
 }
