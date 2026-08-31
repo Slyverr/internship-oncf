@@ -1,10 +1,8 @@
+import { Injectable } from "@nestjs/common";
 import { claimComments, claimStatusHistory, claims } from "drizzle/schema";
 import { eq, type SQL } from "drizzle-orm";
-import {
-	DrizzleDb,
-	QueryColumns,
-	QueryRelations,
-} from "@/database/drizzle.types";
+import { DrizzleService } from "@/database/drizzle.service";
+import { QueryColumns, QueryRelations } from "@/database/drizzle.types";
 import { withDbErrorHandling } from "@/database/drizzle.util";
 import type { ClaimId, ClaimInsert, ClaimUpdate } from "./claims.types";
 import { ListClaimQueryDto } from "./requests/list-claim.dto";
@@ -51,201 +49,200 @@ const claimDetailRelations = {
 	claimComments: true,
 } satisfies ClaimsRelations;
 
-export async function createClaim(db: DrizzleDb, values: ClaimInsert) {
-	const [created] = await withDbErrorHandling(
-		() =>
-			db.insert(claims).values(values).returning({
-				id: claims.id,
-			}),
-		values,
-	);
+@Injectable()
+export class ClaimsQuery {
+	constructor(private readonly drizzle: DrizzleService) {}
 
-	return created;
-}
-
-export async function findClaims(db: DrizzleDb, query: ListClaimQueryDto) {
-	const {
-		page = 1,
-		limit = 20,
-		search,
-		customerId,
-		userId: createdByUserId,
-		orderId,
-		operationId,
-		type,
-		status,
-		priority,
-		sortBy = "createdAt",
-		sortOrder = "desc",
-	} = query;
-
-	return db.query.claims.findMany({
-		where: {
-			...(customerId !== undefined && { customerId }),
-			...(createdByUserId !== undefined && { createdByUserId }),
-			...(operationId !== undefined && { operationId }),
-			...(orderId !== undefined && { orderId }),
-
-			...(type && {
-				claimType: {
-					name: type,
-				},
-			}),
-
-			...(status && {
-				claimStatus: {
-					name: status,
-				},
-			}),
-
-			...(priority && { priority }),
-
-			...(search && {
-				OR: [
-					{
-						description: {
-							ilike: `%${search}%`,
-						},
-					},
-					{
-						resolution: {
-							ilike: `%${search}%`,
-						},
-					},
-					{
-						customer: {
-							companyName: {
-								ilike: `%${search}%`,
-							},
-						},
-					},
-					{
-						claimStatus: {
-							name: {
-								ilike: `%${search}%`,
-							},
-						},
-					},
-					{
-						claimType: {
-							name: {
-								ilike: `%${search}%`,
-							},
-						},
-					},
-				],
-			}),
-		},
-
-		columns: claimListColumns,
-		with: claimListRelations,
-
-		orderBy: {
-			[sortBy]: sortOrder,
-		},
-
-		limit,
-		offset: (page - 1) * limit,
-	});
-}
-
-export async function findClaim(db: DrizzleDb, id: ClaimId) {
-	return db.query.claims.findFirst({
-		where: { id },
-		with: claimDetailRelations,
-	});
-}
-
-export async function findClaimForOwnership(db: DrizzleDb, id: ClaimId) {
-	return db.query.claims.findFirst({
-		where: { id },
-		columns: {
-			createdByUserId: true,
-		},
-	});
-}
-
-export async function findClaimStatus(db: DrizzleDb, id: ClaimId) {
-	return db.query.claims.findFirst({
-		where: { id },
-		columns: {
-			statusId: true,
-		},
-	});
-}
-
-export async function updateClaim(
-	db: DrizzleDb,
-	id: ClaimId,
-	values: ClaimUpdate,
-	options?: {
-		where?: SQL;
-		history?: {
-			userId: number;
-			comment?: string;
-		};
-	},
-) {
-	const [updated] = await withDbErrorHandling(
-		() =>
-			db
-				.update(claims)
-				.set(values)
-				.where(options?.where ?? eq(claims.id, id))
-				.returning({
+	async createClaim(values: ClaimInsert) {
+		const [created] = await withDbErrorHandling(
+			() =>
+				this.drizzle.db.insert(claims).values(values).returning({
 					id: claims.id,
 				}),
-		values,
-	);
+			values,
+		);
+		return created;
+	}
 
-	if (updated && values.statusId !== undefined && options?.history) {
-		await db.insert(claimStatusHistory).values({
-			claimId: id,
-			statusId: values.statusId,
-			changedByUserId: options.history.userId,
-			comment: options.history.comment ?? null,
+	async findClaims(query: ListClaimQueryDto) {
+		const {
+			page = 1,
+			limit = 20,
+			search,
+			customerId,
+			userId: createdByUserId,
+			orderId,
+			operationId,
+			type,
+			status,
+			priority,
+			sortBy = "createdAt",
+			sortOrder = "desc",
+		} = query;
+
+		return this.drizzle.db.query.claims.findMany({
+			where: {
+				...(customerId !== undefined && { customerId }),
+				...(createdByUserId !== undefined && { createdByUserId }),
+				...(operationId !== undefined && { operationId }),
+				...(orderId !== undefined && { orderId }),
+
+				...(type && {
+					claimType: {
+						name: type,
+					},
+				}),
+
+				...(status && {
+					claimStatus: {
+						name: status,
+					},
+				}),
+
+				...(priority && { priority }),
+
+				...(search && {
+					OR: [
+						{
+							description: {
+								ilike: `%${search}%`,
+							},
+						},
+						{
+							resolution: {
+								ilike: `%${search}%`,
+							},
+						},
+						{
+							customer: {
+								companyName: {
+									ilike: `%${search}%`,
+								},
+							},
+						},
+						{
+							claimStatus: {
+								name: {
+									ilike: `%${search}%`,
+								},
+							},
+						},
+						{
+							claimType: {
+								name: {
+									ilike: `%${search}%`,
+								},
+							},
+						},
+					],
+				}),
+			},
+
+			columns: claimListColumns,
+			with: claimListRelations,
+
+			orderBy: {
+				[sortBy]: sortOrder,
+			},
+
+			limit,
+			offset: (page - 1) * limit,
 		});
 	}
 
-	return updated;
-}
+	async findClaim(id: ClaimId) {
+		return this.drizzle.db.query.claims.findFirst({
+			where: { id },
+			with: claimDetailRelations,
+		});
+	}
 
-export async function deleteClaim(db: DrizzleDb, id: ClaimId) {
-	const [deleted] = await db.delete(claims).where(eq(claims.id, id)).returning({
-		id: claims.id,
-	});
+	async findClaimForOwnership(id: ClaimId) {
+		return this.drizzle.db.query.claims.findFirst({
+			where: { id },
+			columns: {
+				createdByUserId: true,
+			},
+		});
+	}
 
-	return deleted;
-}
+	async findClaimStatus(id: ClaimId) {
+		return this.drizzle.db.query.claims.findFirst({
+			where: { id },
+			columns: {
+				statusId: true,
+			},
+		});
+	}
 
-export async function addClaimComment(
-	db: DrizzleDb,
-	claimId: ClaimId,
-	content: string,
-	userId: number,
-) {
-	const [comment] = await withDbErrorHandling(
-		() =>
-			db
-				.insert(claimComments)
-				.values({
-					claimId,
-					authorUserId: userId,
-					comment: content,
-				})
-				.returning(),
-		{
-			claimId,
-			content,
+	async updateClaim(
+		id: ClaimId,
+		values: ClaimUpdate,
+		options?: {
+			where?: SQL;
+			history?: {
+				userId: number;
+				comment?: string;
+			};
 		},
-	);
+	) {
+		const [updated] = await withDbErrorHandling(
+			() =>
+				this.drizzle.db
+					.update(claims)
+					.set(values)
+					.where(options?.where ?? eq(claims.id, id))
+					.returning({
+						id: claims.id,
+					}),
+			values,
+		);
 
-	return comment;
-}
+		if (updated && values.statusId !== undefined && options?.history) {
+			await this.drizzle.db.insert(claimStatusHistory).values({
+				claimId: id,
+				statusId: values.statusId,
+				changedByUserId: options.history.userId,
+				comment: options.history.comment ?? null,
+			});
+		}
 
-export async function findClaimComments(db: DrizzleDb, claimId: ClaimId) {
-	return db.query.claimComments.findMany({
-		where: { claimId },
-		orderBy: (comments, { asc }) => [asc(comments.createdAt)],
-	});
+		return updated;
+	}
+
+	async deleteClaim(id: ClaimId) {
+		const [deleted] = await this.drizzle.db
+			.delete(claims)
+			.where(eq(claims.id, id))
+			.returning({
+				id: claims.id,
+			});
+		return deleted;
+	}
+
+	async addClaimComment(claimId: ClaimId, content: string, userId: number) {
+		const [comment] = await withDbErrorHandling(
+			() =>
+				this.drizzle.db
+					.insert(claimComments)
+					.values({
+						claimId,
+						authorUserId: userId,
+						comment: content,
+					})
+					.returning(),
+			{
+				claimId,
+				content,
+			},
+		);
+		return comment;
+	}
+
+	async findClaimComments(claimId: ClaimId) {
+		return this.drizzle.db.query.claimComments.findMany({
+			where: { claimId },
+			orderBy: (comments, { asc }) => [asc(comments.createdAt)],
+		});
+	}
 }

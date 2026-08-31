@@ -9,21 +9,10 @@ import { claims } from "drizzle/schema";
 import { and, eq } from "drizzle-orm";
 import { AuthUser } from "@/auth/auth.types";
 import { hasOnePermission } from "@/auth/auth.utils";
-import { DrizzleService } from "@/database/drizzle.service";
 import { CLAIM_STATUSES } from "@/database/reference-data";
 import { CLAIM_STATUS_BY_ID, CLAIM_TRANSITION } from "./claims.constants";
-import { toCreate, toUpdate } from "./claims.mapper";
-import {
-	addClaimComment,
-	createClaim,
-	deleteClaim,
-	findClaim,
-	findClaimComments,
-	findClaimForOwnership,
-	findClaimStatus,
-	findClaims,
-	updateClaim,
-} from "./claims.query";
+import { ClaimsMapper } from "./claims.mapper";
+import { ClaimsQuery } from "./claims.query";
 import type { ClaimId } from "./claims.types";
 import { CreateClaimDto } from "./requests/create-claim.dto";
 import { ListClaimQueryDto } from "./requests/list-claim.dto";
@@ -31,10 +20,14 @@ import { UpdateClaimDto } from "./requests/update-claim.dto";
 
 @Injectable()
 export class ClaimsService {
-	constructor(private readonly drizzle: DrizzleService) {}
+	constructor(
+		private readonly claimsQuery: ClaimsQuery,
+		private readonly claimsMapper: ClaimsMapper,
+	) {}
 
 	async create(dto: CreateClaimDto, user: AuthUser) {
-		const created = await createClaim(this.drizzle.db, toCreate(dto, user));
+		const values = this.claimsMapper.toCreate(dto, user);
+		const created = await this.claimsQuery.createClaim(values);
 		return this.findOne(created.id);
 	}
 
@@ -53,38 +46,40 @@ export class ClaimsService {
 			}
 		}
 
-		return findClaims(this.drizzle.db, query);
+		return this.claimsQuery.findClaims(query);
 	}
 
 	async findOne(id: ClaimId) {
-		return this.ensure(await findClaim(this.drizzle.db, id), id);
+		const claim = await this.claimsQuery.findClaim(id);
+		return this.ensure(claim, id);
 	}
 
 	async findOneForOwnership(id: ClaimId) {
-		return this.ensure(await findClaimForOwnership(this.drizzle.db, id), id);
+		const claim = await this.claimsQuery.findClaimForOwnership(id);
+		return this.ensure(claim, id);
 	}
 
 	async update(id: ClaimId, dto: UpdateClaimDto, user: AuthUser) {
-		await this.persistUpdate(id, toUpdate(dto, user), {
+		const values = this.claimsMapper.toUpdate(dto, user);
+		await this.persistUpdate(id, values, {
 			history: {
 				userId: user.id,
 			},
 		});
-
 		return this.findOne(id);
 	}
 
 	async remove(id: ClaimId) {
-		const deleted = await deleteClaim(this.drizzle.db, id);
+		const deleted = await this.claimsQuery.deleteClaim(id);
 		return this.ensure(deleted, id);
 	}
 
 	async addComment(claimId: ClaimId, content: string, userId: number) {
-		return addClaimComment(this.drizzle.db, claimId, content, userId);
+		return this.claimsQuery.addClaimComment(claimId, content, userId);
 	}
 
 	async getComments(claimId: ClaimId) {
-		return findClaimComments(this.drizzle.db, claimId);
+		return this.claimsQuery.findClaimComments(claimId);
 	}
 
 	async startProgress(claimId: ClaimId, user: AuthUser) {
@@ -136,15 +131,13 @@ export class ClaimsService {
 
 	private async persistUpdate(
 		id: ClaimId,
-		values: Parameters<typeof updateClaim>[2],
-		options?: Parameters<typeof updateClaim>[3],
+		values: Parameters<ClaimsQuery["updateClaim"]>[1],
+		options?: Parameters<ClaimsQuery["updateClaim"]>[2],
 	) {
-		const updated = await updateClaim(this.drizzle.db, id, values, options);
-
+		const updated = await this.claimsQuery.updateClaim(id, values, options);
 		if (!updated) {
 			throw new ConflictException(`Claim ${id} was modified or does not exist`);
 		}
-
 		return updated;
 	}
 
@@ -156,7 +149,7 @@ export class ClaimsService {
 		extraValues: Record<string, unknown> = {},
 	) {
 		const claim = this.ensure(
-			await findClaimStatus(this.drizzle.db, claimId),
+			await this.claimsQuery.findClaimStatus(claimId),
 			claimId,
 		);
 
@@ -194,11 +187,10 @@ export class ClaimsService {
 		return this.findOne(claimId);
 	}
 
-	private ensure<T>(value: T | undefined, id: ClaimId) {
+	private ensure<T>(value: T | undefined, id: ClaimId): T {
 		if (!value) {
 			throw new NotFoundException(`Claim ${id} not found`);
 		}
-
 		return value;
 	}
 }
