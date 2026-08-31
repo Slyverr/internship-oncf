@@ -27,6 +27,7 @@ import type { OrderDetailDto } from "@/lib/api/generated.schemas";
 import {
 	getOrdersControllerFindOneQueryKey,
 	useOrdersControllerApprove,
+	useOrdersControllerCancel,
 	useOrdersControllerReject,
 	useOrdersControllerRemove,
 	useOrdersControllerSendToDtm,
@@ -47,6 +48,7 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 	const submitMutation = useOrdersControllerSubmit();
 	const approveMutation = useOrdersControllerApprove();
 	const rejectMutation = useOrdersControllerReject();
+	const cancelMutation = useOrdersControllerCancel();
 	const sendToDtmMutation = useOrdersControllerSendToDtm();
 	const removeMutation = useOrdersControllerRemove();
 
@@ -63,6 +65,7 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 		submitMutation.isPending ||
 		approveMutation.isPending ||
 		rejectMutation.isPending ||
+		cancelMutation.isPending ||
 		sendToDtmMutation.isPending ||
 		removeMutation.isPending;
 
@@ -99,7 +102,8 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 	return (
 		<>
 			<div className="flex flex-wrap items-center gap-4">
-				{hasPermission(Permission.ORDERS_UPDATE) &&
+				{/* Submit: DRAFT → SUBMITTED */}
+				{hasPermission(Permission.ORDERS_ACTION_SUBMIT) &&
 					status === OrderStatus.DRAFT && (
 						<Button
 							disabled={isPending}
@@ -110,10 +114,11 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 								)
 							}
 						>
-							Submit Order
+							{submitMutation.isPending ? "Submitting..." : "Submit Order"}
 						</Button>
 					)}
 
+				{/* Approve: SUBMITTED → APPROVED */}
 				{hasPermission(Permission.ORDERS_ACTION_APPROVE) &&
 					status === OrderStatus.SUBMITTED && (
 						<Button
@@ -126,10 +131,11 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 								)
 							}
 						>
-							Approve
+							{approveMutation.isPending ? "Approving..." : "Approve"}
 						</Button>
 					)}
 
+				{/* Reject: SUBMITTED → REJECTED */}
 				{hasPermission(Permission.ORDERS_ACTION_REJECT) &&
 					status === OrderStatus.SUBMITTED && (
 						<Button
@@ -141,6 +147,25 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 						</Button>
 					)}
 
+				{/* Cancel: DRAFT or SUBMITTED → CANCELLED */}
+				{hasPermission(Permission.ORDERS_ACTION_CANCEL) &&
+					(status === OrderStatus.DRAFT ||
+						status === OrderStatus.SUBMITTED) && (
+						<Button
+							variant="outline"
+							disabled={isPending}
+							onClick={() =>
+								cancelMutation.mutate(
+									{ id: order.id },
+									{ onSuccess: updateOrderCache },
+								)
+							}
+						>
+							{cancelMutation.isPending ? "Cancelling..." : "Cancel Order"}
+						</Button>
+					)}
+
+				{/* Send to DTM: APPROVED → SENT_TO_DTM */}
 				{hasPermission(Permission.ORDERS_ACTION_SEND_TO_DTM) &&
 					status === OrderStatus.APPROVED && (
 						<Button
@@ -153,10 +178,11 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 								)
 							}
 						>
-							Send to DTM
+							{sendToDtmMutation.isPending ? "Sending..." : "Send to DTM"}
 						</Button>
 					)}
 
+				{/* More actions dropdown */}
 				{(hasPermission(Permission.ORDERS_UPDATE) ||
 					hasPermission(Permission.ORDERS_DELETE)) && (
 					<DropdownMenu>
@@ -179,19 +205,22 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 								</DropdownMenuItem>
 							)}
 
-							{hasPermission(Permission.ORDERS_DELETE) && (
-								<DropdownMenuItem
-									className="text-destructive"
-									onClick={() => setDeleteDialogOpen(true)}
-								>
-									Delete
-								</DropdownMenuItem>
-							)}
+							{/* Delete only allowed for DRAFT */}
+							{hasPermission(Permission.ORDERS_DELETE) &&
+								status === OrderStatus.DRAFT && (
+									<DropdownMenuItem
+										className="text-destructive"
+										onClick={() => setDeleteDialogOpen(true)}
+									>
+										Delete
+									</DropdownMenuItem>
+								)}
 						</DropdownMenuContent>
 					</DropdownMenu>
 				)}
 			</div>
 
+			{/* Reject Dialog */}
 			<AlertDialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
 				<AlertDialogContent>
 					<AlertDialogHeader>
@@ -205,6 +234,7 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 						value={rejectionReason}
 						onChange={(event) => setRejectionReason(event.target.value)}
 						placeholder="Rejection reason"
+						className="min-h-25"
 					/>
 
 					<AlertDialogFooter>
@@ -214,12 +244,13 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 							disabled={isPending || !rejectionReason.trim()}
 							onClick={handleReject}
 						>
-							Reject
+							{rejectMutation.isPending ? "Rejecting..." : "Reject"}
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>
 			</AlertDialog>
 
+			{/* Delete Confirmation */}
 			<ConfirmDialog
 				open={deleteDialogOpen}
 				onOpenChange={setDeleteDialogOpen}
