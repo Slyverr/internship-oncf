@@ -1,26 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import { orderFiles } from "drizzle/schema";
-import { and, desc, eq } from "drizzle-orm";
+import { attachments, orderFiles } from "drizzle/schema";
+import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { DrizzleService } from "@/database/drizzle.service";
-import { QueryColumns } from "@/database/drizzle.types";
 import { withDbErrorHandling } from "@/database/drizzle.util";
 import type { OrderId } from "@/orders/orders.types";
-import { OrderFileInsert } from "./files.types";
-
-type OrderFilesColumns = QueryColumns<"orderFiles">;
-
-const fileColumns = {
-	fileId: true,
-	orderId: true,
-	fileName: true,
-	fileType: true,
-	fileSize: true,
-	filePath: true,
-	mimeType: true,
-	uploadedByUserId: true,
-	description: true,
-	uploadedAt: true,
-} satisfies OrderFilesColumns;
+import type { OrderFileInsert, OrderFileView } from "./files.types";
 
 @Injectable()
 export class FilesQuery {
@@ -34,47 +18,72 @@ export class FilesQuery {
 		return record;
 	}
 
-	async findFiles(orderId: OrderId) {
-		return this.drizzle.db.query.orderFiles.findMany({
-			where: { orderId },
-			columns: fileColumns,
-			orderBy: (files) => [desc(files.uploadedAt)],
-		});
+	async findFiles(orderId: OrderId): Promise<OrderFileView[]> {
+		return this.drizzle.db
+			.select({
+				id: orderFiles.id,
+				orderId: orderFiles.orderId,
+				fileName: orderFiles.fileName,
+				description: orderFiles.description,
+				fileSize: attachments.fileSize,
+				mimeType: attachments.mimeType,
+				uploadedByUserId: orderFiles.uploadedByUserId,
+				uploadedAt: orderFiles.uploadedAt,
+			})
+			.from(orderFiles)
+			.innerJoin(attachments, eq(orderFiles.attachmentId, attachments.id))
+			.where(and(eq(orderFiles.orderId, orderId), isNull(orderFiles.deletedAt)))
+			.orderBy(desc(orderFiles.uploadedAt));
 	}
 
 	async findFileForDownload(orderId: OrderId, fileId: number) {
-		return this.drizzle.db.query.orderFiles.findFirst({
-			where: {
-				fileId,
-				orderId,
-			},
-			columns: {
-				fileId: true,
-				fileName: true,
-				filePath: true,
-				mimeType: true,
-			},
-		});
+		const [row] = await this.drizzle.db
+			.select({
+				id: orderFiles.id,
+				attachmentId: orderFiles.attachmentId,
+				fileName: orderFiles.fileName,
+				mimeType: attachments.mimeType,
+			})
+			.from(orderFiles)
+			.innerJoin(attachments, eq(orderFiles.attachmentId, attachments.id))
+			.where(
+				and(
+					eq(orderFiles.id, fileId),
+					eq(orderFiles.orderId, orderId),
+					isNull(orderFiles.deletedAt),
+				),
+			)
+			.limit(1);
+
+		return row;
 	}
 
 	async findFileForDelete(orderId: OrderId, fileId: number) {
-		return this.drizzle.db.query.orderFiles.findFirst({
-			where: {
-				fileId,
-				orderId,
-			},
-			columns: {
-				fileId: true,
-				filePath: true,
-			},
-		});
+		const [row] = await this.drizzle.db
+			.select({ id: orderFiles.id })
+			.from(orderFiles)
+			.where(
+				and(
+					eq(orderFiles.id, fileId),
+					eq(orderFiles.orderId, orderId),
+					isNull(orderFiles.deletedAt),
+				),
+			)
+			.limit(1);
+
+		return row;
 	}
 
-	async removeFile(orderId: OrderId, fileId: number) {
-		return this.drizzle.db
-			.delete(orderFiles)
+	async softDelete(orderId: OrderId, fileId: number) {
+		await this.drizzle.db
+			.update(orderFiles)
+			.set({ deletedAt: sql`CURRENT_TIMESTAMP` })
 			.where(
-				and(eq(orderFiles.fileId, fileId), eq(orderFiles.orderId, orderId)),
+				and(
+					eq(orderFiles.id, fileId),
+					eq(orderFiles.orderId, orderId),
+					isNull(orderFiles.deletedAt),
+				),
 			);
 	}
 }

@@ -106,6 +106,10 @@ const claimFilesPart = defineRelationsPart(schema, (r) => ({
 			from: r.claimFiles.claimId,
 			to: r.claims.id,
 		}),
+		attachment: r.one.attachments({
+			from: r.claimFiles.attachmentId,
+			to: r.attachments.id,
+		}),
 		uploadedByUser: r.one.users({
 			from: r.claimFiles.uploadedByUserId,
 			to: r.users.id,

@@ -1,12 +1,11 @@
-export interface MulterFile {
-	fieldname: string;
-	originalname: string;
-	encoding: string;
+export interface UploadedFile {
+	originalName: string;
 	mimetype: string;
 	size: number;
 	buffer: Buffer;
-	stream?: NodeJS.ReadableStream;
-	destination?: string;
-	filename?: string;
-	path?: string;
+}
+
+export interface StoredFile {
+	hash: string;
+	path: string;
 }

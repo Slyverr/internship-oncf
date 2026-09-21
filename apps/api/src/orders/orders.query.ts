@@ -69,7 +69,25 @@ const orderDetailRelations = {
 	forecastPrograms: true,
 	orderStatusHistories: true,
 	orderExecutions: true,
-	orderFiles: true,
+	orderFiles: {
+		where: { deletedAt: { isNull: true } },
+		columns: {
+			id: true,
+			orderId: true,
+			fileName: true,
+			description: true,
+			uploadedByUserId: true,
+			uploadedAt: true,
+		},
+		with: {
+			attachment: {
+				columns: {
+					fileSize: true,
+					mimeType: true,
+				},
+			},
+		},
+	},
 } satisfies OrdersRelations;
 
 @Injectable()

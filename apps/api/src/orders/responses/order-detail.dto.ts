@@ -64,16 +64,13 @@ export class OrderDetailDto implements OrderDetail {
 		executedByUserId: number;
 	}[];
 	orderFiles: {
+		id: number;
 		description: string | null;
 		orderId: number;
-		fileId: number;
 		fileName: string;
-		fileType: string;
-		fileSize: number;
-		filePath: string;
-		mimeType: string | null;
 		uploadedByUserId: number;
 		uploadedAt: string;
+		attachment: { fileSize: number; mimeType: string } | null;
 	}[];
 	claims: {
 		id: number;

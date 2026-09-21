@@ -1,4 +1,5 @@
 import { archivalRelations } from "./relations/archival";
+import { attachmentsRelations } from "./relations/attachments";
 import { claimsRelations } from "./relations/claims";
 import { customersRelations } from "./relations/customers";
 import { forecastProgramsRelations } from "./relations/forecast-programs";
@@ -22,4 +23,5 @@ export const relations = {
 	...notificationsRelations,
 	...integrationRelations,
 	...archivalRelations,
+	...attachmentsRelations,
 };

@@ -1312,20 +1312,18 @@ export const orderExecutions = pgTable(
 export const orderFiles = pgTable(
 	"order_files",
 	{
-		fileId: bigserial("file_id", { mode: "number" }).primaryKey().notNull(),
+		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
 		orderId: bigint("order_id", { mode: "number" }).notNull(),
+		attachmentId: bigint("attachment_id", { mode: "number" }).notNull(),
 		fileName: varchar("file_name", { length: 255 }).notNull(),
-		fileType: varchar("file_type", { length: 50 }).notNull(),
-		fileSize: bigint("file_size", { mode: "number" }).notNull(),
-		filePath: varchar("file_path", { length: 500 }).notNull(),
-		mimeType: varchar("mime_type", { length: 100 }),
+		description: varchar("description", { length: 500 }),
 		uploadedByUserId: bigint("uploaded_by_user_id", {
 			mode: "number",
 		}).notNull(),
 		uploadedAt: timestamp("uploaded_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
 			.notNull(),
-		description: varchar("description", { length: 500 }),
+		deletedAt: timestamp("deleted_at", { mode: "string" }),
 	},
 	(table) => [
 		foreignKey({
@@ -1334,12 +1332,17 @@ export const orderFiles = pgTable(
 			name: "order_files_order_id_fkey",
 		}).onDelete("cascade"),
 		foreignKey({
+			columns: [table.attachmentId],
+			foreignColumns: [attachments.id],
+			name: "order_files_attachment_id_fkey",
+		}),
+		foreignKey({
 			columns: [table.uploadedByUserId],
 			foreignColumns: [users.id],
 			name: "order_files_uploaded_by_user_id_fkey",
 		}),
-		index("idx_order_files_order").on(table.orderId),
-		index("idx_order_files_type").on(table.fileType),
+		index("idx_order_files_order").on(table.orderId, table.deletedAt),
+		index("idx_order_files_attachment").on(table.attachmentId),
 		index("idx_order_files_uploaded").on(table.uploadedAt),
 	],
 );
@@ -1575,15 +1578,16 @@ export const claimFiles = pgTable(
 	{
 		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
 		claimId: bigint("claim_id", { mode: "number" }).notNull(),
-		filePath: varchar("file_path", { length: 500 }).notNull(),
+		attachmentId: bigint("attachment_id", { mode: "number" }).notNull(),
 		fileName: varchar("file_name", { length: 255 }).notNull(),
-		fileType: varchar("file_type", { length: 100 }),
+		description: varchar("description", { length: 500 }),
 		uploadedByUserId: bigint("uploaded_by_user_id", {
 			mode: "number",
 		}).notNull(),
 		uploadedAt: timestamp("uploaded_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
 			.notNull(),
+		deletedAt: timestamp("deleted_at", { mode: "string" }),
 	},
 	(table) => [
 		foreignKey({
@@ -1592,12 +1596,17 @@ export const claimFiles = pgTable(
 			name: "claim_files_claim_id_fkey",
 		}).onDelete("cascade"),
 		foreignKey({
+			columns: [table.attachmentId],
+			foreignColumns: [attachments.id],
+			name: "claim_files_attachment_id_fkey",
+		}),
+		foreignKey({
 			columns: [table.uploadedByUserId],
 			foreignColumns: [users.id],
 			name: "claim_files_uploaded_by_user_id_fkey",
 		}),
-		index("idx_claim_files_claim").on(table.claimId),
-		index("idx_claim_files_user").on(table.uploadedByUserId),
+		index("idx_claim_files_claim").on(table.claimId, table.deletedAt),
+		index("idx_claim_files_attachment").on(table.attachmentId),
 		index("idx_claim_files_uploaded").on(table.uploadedAt),
 	],
 );
@@ -2211,5 +2220,23 @@ export const archivalExecutionLog = pgTable(
 		index("idx_archival_log_status").on(table.executionStatus),
 		index("idx_archival_log_started").on(table.startedAt),
 		index("idx_archival_log_triggered").on(table.triggeredBy),
+	],
+);
+
+export const attachments = pgTable(
+	"attachments",
+	{
+		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
+		hash: varchar("hash", { length: 64 }).notNull(),
+		path: varchar("path", { length: 500 }).notNull(),
+		fileSize: bigint("file_size", { mode: "number" }).notNull(),
+		mimeType: varchar("mime_type", { length: 100 }).notNull(),
+		createdAt: timestamp("created_at", { mode: "string" })
+			.default(sql`CURRENT_TIMESTAMP`)
+			.notNull(),
+	},
+	(table) => [
+		unique("attachments_hash_key").on(table.hash),
+		index("idx_attachments_created").on(table.createdAt),
 	],
 );

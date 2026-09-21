@@ -1,75 +1,75 @@
-import {
-	BadRequestException,
-	Injectable,
-	NotFoundException,
-} from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { AttachmentsService } from "@/attachments/attachments.service";
 import type { OrderId } from "@/orders/orders.types";
-import { StorageService } from "@/storage/storage.service";
-import type { MulterFile } from "@/storage/storage.types";
+import type { UploadedFile } from "@/storage/storage.types";
 import { FilesQuery } from "./files.query";
+import type { OrderFileView } from "./files.types";
 import { UploadFileDto } from "./requests/upload-file.dto";
 
 @Injectable()
 export class FilesService {
 	constructor(
 		private readonly filesQuery: FilesQuery,
-		private readonly storageService: StorageService,
+		private readonly attachmentsService: AttachmentsService,
 	) {}
 
 	async uploadFile(
 		orderId: OrderId,
-		file: MulterFile,
+		file: UploadedFile,
 		dto: UploadFileDto,
 		userId: number,
-	) {
-		if (!file) {
-			throw new BadRequestException("No file provided");
-		}
+	): Promise<OrderFileView> {
+		const attachment = await this.attachmentsService.upsert(file);
 
-		const filePath = `orders/${orderId}/${Date.now()}-${file.originalname}`;
-		await this.storageService.uploadFile(filePath, file);
-
-		return this.filesQuery.createFile({
+		const link = await this.filesQuery.createFile({
 			orderId,
-			fileName: file.originalname,
-			fileType: file.mimetype,
-			fileSize: file.size,
-			filePath,
-			mimeType: file.mimetype,
-			uploadedByUserId: userId,
+			attachmentId: attachment.id,
+			fileName: file.originalName,
 			description: dto.description ?? null,
+			uploadedByUserId: userId,
 		});
+
+		return {
+			id: link.id,
+			orderId: link.orderId,
+			fileName: link.fileName,
+			description: link.description,
+			fileSize: attachment.fileSize,
+			mimeType: attachment.mimeType,
+			uploadedByUserId: link.uploadedByUserId,
+			uploadedAt: link.uploadedAt,
+		};
 	}
 
-	async listFiles(orderId: OrderId) {
+	async listFiles(orderId: OrderId): Promise<OrderFileView[]> {
 		return this.filesQuery.findFiles(orderId);
 	}
 
 	async downloadFile(orderId: OrderId, fileId: number) {
-		const file = await this.filesQuery.findFileForDownload(orderId, fileId);
-		if (!file) {
+		const link = await this.filesQuery.findFileForDownload(orderId, fileId);
+		if (!link) {
 			throw new NotFoundException(
 				`File ${fileId} not found for order ${orderId}`,
 			);
 		}
 
-		const buffer = await this.storageService.downloadFile(file.filePath);
+		const buffer = await this.attachmentsService.download(link.attachmentId);
+
 		return {
 			buffer,
-			fileName: file.fileName,
-			mimeType: file.mimeType ?? "application/octet-stream",
+			fileName: link.fileName,
+			mimeType: link.mimeType,
 		};
 	}
 
 	async deleteFile(orderId: OrderId, fileId: number) {
-		const file = await this.filesQuery.findFileForDelete(orderId, fileId);
-		if (!file) {
+		const link = await this.filesQuery.findFileForDelete(orderId, fileId);
+		if (!link) {
 			throw new NotFoundException(
 				`File ${fileId} not found for order ${orderId}`,
 			);
 		}
 
-		await this.storageService.deleteFile(file.filePath);
-		await this.filesQuery.removeFile(orderId, fileId);
+		await this.filesQuery.softDelete(orderId, fileId);
 	}
 }

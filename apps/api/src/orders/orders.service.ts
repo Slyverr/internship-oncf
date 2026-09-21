@@ -39,8 +39,7 @@ export class OrdersService {
 	}
 
 	async findOne(id: OrderId) {
-		const order = await this.ordersQuery.findOrder(id);
-		return this.ensure(order, id);
+		return this.ensure(await this.ordersQuery.findOrder(id), id);
 	}
 
 	async findOneForOwnership(id: OrderId) {

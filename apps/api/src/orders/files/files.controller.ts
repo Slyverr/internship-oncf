@@ -12,13 +12,16 @@ import {
 	Post,
 	Request,
 	Res,
-	UploadedFile,
 	UseGuards,
 	UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiConsumes, ApiUnprocessableEntityResponse } from "@nestjs/swagger";
 import type { Response } from "express";
+import {
+	ALLOWED_ATTACHMENT_MIME_TYPES,
+	MAX_ATTACHMENT_SIZE,
+} from "@/attachments/attachments.constants";
 import type { AuthRequest } from "@/auth/auth.types";
 import { RequireAny } from "@/auth/permissions.decorator";
 import { createCrudResponses } from "@/common/decorators/api-crud-responses.decorator";
@@ -26,7 +29,8 @@ import { MessageResponseDto } from "@/common/responses/message.dto";
 import { OrderOwnershipGuard } from "@/orders/guards/order-ownership.guard";
 import type { OrderId } from "@/orders/orders.types";
 import { OrderIdPipe } from "@/orders/pipes/order-id.pipe";
-import type { MulterFile } from "@/storage/storage.types";
+import { UploadedFileParam } from "@/storage/decorators/uploaded-file.decorator";
+import type { UploadedFile } from "@/storage/storage.types";
 import { FilesService } from "./files.service";
 import { FileIdPipe } from "./pipes/file-id.pipe";
 import { UploadFileDto } from "./requests/upload-file.dto";
@@ -34,8 +38,6 @@ import { FileDto } from "./responses/file.dto";
 
 const OrderIdParam = () => Param("id", OrderIdPipe);
 const FileIdParam = () => Param("fileId", FileIdPipe);
-
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 const {
 	list: FileListResponse,
@@ -61,21 +63,16 @@ export class FilesController {
 	@ApiUnprocessableEntityResponse()
 	async uploadFile(
 		@OrderIdParam() id: OrderId,
-		@UploadedFile(
+		@UploadedFileParam(
 			new ParseFilePipe({
 				validators: [
-					new MaxFileSizeValidator({
-						maxSize: MAX_FILE_SIZE,
-					}),
-					new FileTypeValidator({
-						fileType:
-							/^(image\/(jpeg|png|gif|webp)|application\/pdf|application\/msword|application\/vnd.openxmlformats-officedocument.wordprocessingml.document|text\/plain)$/,
-					}),
+					new MaxFileSizeValidator({ maxSize: MAX_ATTACHMENT_SIZE }),
+					new FileTypeValidator({ fileType: ALLOWED_ATTACHMENT_MIME_TYPES }),
 				],
 				errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
 			}),
 		)
-		file: MulterFile,
+		file: UploadedFile,
 		@Body() dto: UploadFileDto,
 		@Request() req: AuthRequest,
 	) {
@@ -113,8 +110,6 @@ export class FilesController {
 	async deleteFile(@OrderIdParam() id: OrderId, @FileIdParam() fileId: number) {
 		await this.filesService.deleteFile(id, fileId);
 
-		return {
-			message: "File deleted successfully",
-		};
+		return { message: "File deleted successfully" };
 	}
 }

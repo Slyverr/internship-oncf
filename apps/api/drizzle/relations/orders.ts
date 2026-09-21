@@ -211,6 +211,10 @@ const orderFilesPart = defineRelationsPart(schema, (r) => ({
 			from: r.orderFiles.orderId,
 			to: r.orders.id,
 		}),
+		attachment: r.one.attachments({
+			from: r.orderFiles.attachmentId,
+			to: r.attachments.id,
+		}),
 		uploadedByUser: r.one.users({
 			from: r.orderFiles.uploadedByUserId,
 			to: r.users.id,

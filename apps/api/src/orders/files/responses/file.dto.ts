@@ -1,18 +1,16 @@
 import { Assert, Equals } from "@/common/utils/type-assertions";
-import { ListFiles, UploadFile } from "../files.types";
+import type { ListFiles, UploadFile } from "../files.types";
 
 type _UploadAssertion = Assert<Equals<FileDto, UploadFile>>;
 type _ListAssertion = Assert<Equals<FileDto, ListFiles>>;
 
 export class FileDto implements UploadFile, ListFiles {
-	description: string | null;
+	id: number;
 	orderId: number;
-	fileId: number;
 	fileName: string;
-	fileType: string;
+	description: string | null;
 	fileSize: number;
-	filePath: string;
-	mimeType: string | null;
+	mimeType: string;
 	uploadedByUserId: number;
 	uploadedAt: string;
 }

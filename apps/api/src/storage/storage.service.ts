@@ -1,168 +1,125 @@
-import fs from "node:fs";
-import path from "node:path";
-import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { createHash } from "node:crypto";
+import type { Readable } from "node:stream";
+import {
+	Injectable,
+	InternalServerErrorException,
+	Logger,
+	NotFoundException,
+	OnModuleInit,
+} from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Client } from "minio";
-import type { MulterFile } from "./storage.types";
+import type { StoredFile, UploadedFile } from "./storage.types";
 
 @Injectable()
-export class StorageService {
+export class StorageService implements OnModuleInit {
 	private readonly logger = new Logger(StorageService.name);
-	private readonly storagePath: string;
+	private readonly client: Client;
 	private readonly bucket: string;
-	private minioClient: Client | null = null;
-	private useMinio: boolean;
 
 	constructor(private readonly configService: ConfigService) {
-		this.storagePath = this.configService.get("STORAGE_PATH") ?? "./uploads";
-		this.bucket = this.configService.get("MINIO_BUCKET") ?? "ecommand";
-		this.useMinio = Boolean(this.configService.get("MINIO_ENDPOINT"));
+		this.bucket = this.configService.getOrThrow<string>("MINIO_BUCKET");
 
-		if (this.useMinio) {
-			this.initMinio();
-		} else {
-			this.logger.warn("MinIO not configured, using local storage");
-		}
+		const port = Number(this.configService.getOrThrow("MINIO_PORT"));
+		const useSSL =
+			String(
+				this.configService.get("MINIO_USE_SSL") ?? "false",
+			).toLowerCase() === "true";
 
-		this.ensureStoragePath();
+		this.client = new Client({
+			endPoint: this.configService.getOrThrow<string>("MINIO_ENDPOINT"),
+			port,
+			accessKey: this.configService.getOrThrow<string>("MINIO_ACCESS_KEY"),
+			secretKey: this.configService.getOrThrow<string>("MINIO_SECRET_KEY"),
+			useSSL,
+		});
 	}
 
-	private initMinio() {
+	async onModuleInit(): Promise<void> {
+		await this.ensureBucket();
+	}
+
+	async upload(file: UploadedFile): Promise<StoredFile> {
+		const hash = createHash("sha256").update(file.buffer).digest("hex");
+		const path = `attachments/${hash.slice(0, 2)}/${hash.slice(2, 4)}/${hash}`;
+
 		try {
-			const useSSL = this.configService.get("MINIO_USE_SSL") === "true";
-
-			this.minioClient = new Client({
-				endPoint: this.configService.getOrThrow("MINIO_ENDPOINT"),
-				port: this.configService.get<number>("MINIO_PORT") ?? 9000,
-
-				accessKey: this.configService.getOrThrow("MINIO_ACCESS_KEY"),
-				secretKey: this.configService.getOrThrow("MINIO_SECRET_KEY"),
-				useSSL,
+			await this.client.putObject(this.bucket, path, file.buffer, file.size, {
+				"Content-Type": file.mimetype,
 			});
-
-			void this.ensureBucket();
 		} catch (error) {
-			this.disableMinio(`MinIO init failed: ${this.getErrorMessage(error)}`);
+			this.logger.error(`Upload failed for ${file.originalName}`, error);
+			throw new InternalServerErrorException("Failed to store file");
+		}
+
+		return { hash, path };
+	}
+
+	async download(path: string): Promise<Buffer> {
+		try {
+			const stream = await this.client.getObject(this.bucket, path);
+			return await this.streamToBuffer(stream);
+		} catch (error) {
+			if (this.isNotFound(error)) {
+				throw new NotFoundException(`File not found: ${path}`);
+			}
+			this.logger.error(`Download failed for ${path}`, error);
+			throw new InternalServerErrorException("Failed to retrieve file");
 		}
 	}
 
-	private async ensureBucket() {
-		if (!this.minioClient) return;
-
+	async presign(path: string, expirySeconds = 3600): Promise<string> {
 		try {
-			const exists = await this.minioClient.bucketExists(this.bucket);
-
-			if (!exists) {
-				await this.minioClient.makeBucket(this.bucket);
-				this.logger.log(`Bucket ${this.bucket} created`);
-			}
+			return await this.client.presignedGetObject(
+				this.bucket,
+				path,
+				expirySeconds,
+			);
 		} catch (error) {
-			this.disableMinio(
-				`Failed to initialize MinIO bucket: ${this.getErrorMessage(error)}`,
+			if (this.isNotFound(error)) {
+				throw new NotFoundException(`File not found: ${path}`);
+			}
+			this.logger.error(`Presign failed for ${path}`, error);
+			throw new InternalServerErrorException(
+				"Failed to generate download link",
 			);
 		}
 	}
 
-	private disableMinio(message: string) {
-		this.logger.warn(message);
-		this.useMinio = false;
-		this.minioClient = null;
-	}
-
-	private ensureStoragePath() {
-		if (!fs.existsSync(this.storagePath)) {
-			fs.mkdirSync(this.storagePath, { recursive: true });
+	async remove(path: string): Promise<void> {
+		try {
+			await this.client.removeObject(this.bucket, path);
+		} catch (error) {
+			if (this.isNotFound(error)) return;
+			this.logger.error(`Delete failed for ${path}`, error);
+			throw new InternalServerErrorException("Failed to delete file");
 		}
 	}
 
-	async uploadFile(
-		filePath: string,
-		file: MulterFile,
-	): Promise<{ filePath: string }> {
-		if (this.useMinio && this.minioClient) {
-			try {
-				await this.minioClient.putObject(
-					this.bucket,
-					filePath,
-					file.buffer,
-					file.size,
-					{
-						"Content-Type": file.mimetype,
-					},
-				);
-
-				this.logger.debug(`Uploaded to MinIO: ${filePath}`);
-
-				return { filePath };
-			} catch (error) {
-				this.disableMinio(
-					`MinIO upload failed: ${this.getErrorMessage(error)}, falling back to local`,
-				);
-			}
-		}
-
-		const fullPath = path.join(this.storagePath, filePath);
-		const directory = path.dirname(fullPath);
-
-		if (!fs.existsSync(directory)) {
-			fs.mkdirSync(directory, { recursive: true });
-		}
-
-		fs.writeFileSync(fullPath, file.buffer);
-		this.logger.debug(`Uploaded to local: ${fullPath}`);
-
-		return { filePath };
-	}
-
-	async downloadFile(filePath: string): Promise<Buffer> {
-		if (this.useMinio && this.minioClient) {
-			try {
-				const stream = await this.minioClient.getObject(this.bucket, filePath);
-
-				const chunks: Buffer[] = [];
-
-				return await new Promise<Buffer>((resolve, reject) => {
-					stream.on("data", (chunk: Buffer) => chunks.push(chunk));
-					stream.on("end", () => resolve(Buffer.concat(chunks)));
-					stream.on("error", reject);
-				});
-			} catch (error) {
-				this.disableMinio(
-					`MinIO download failed: ${this.getErrorMessage(error)}, falling back to local`,
-				);
-			}
-		}
-
-		const fullPath = path.join(this.storagePath, filePath);
-		if (!fs.existsSync(fullPath)) {
-			throw new NotFoundException(`File not found: ${filePath}`);
-		}
-
-		return fs.readFileSync(fullPath);
-	}
-
-	async deleteFile(filePath: string): Promise<void> {
-		if (this.useMinio && this.minioClient) {
-			try {
-				await this.minioClient.removeObject(this.bucket, filePath);
-				this.logger.debug(`Deleted from MinIO: ${filePath}`);
-
-				return;
-			} catch (error) {
-				this.disableMinio(
-					`MinIO delete failed: ${this.getErrorMessage(error)}, falling back to local`,
-				);
-			}
-		}
-
-		const fullPath = path.join(this.storagePath, filePath);
-		if (fs.existsSync(fullPath)) {
-			fs.unlinkSync(fullPath);
-			this.logger.debug(`Deleted from local: ${fullPath}`);
+	private async ensureBucket(): Promise<void> {
+		try {
+			const exists = await this.client.bucketExists(this.bucket);
+			if (exists) return;
+			await this.client.makeBucket(this.bucket);
+			this.logger.log(`Bucket "${this.bucket}" created`);
+		} catch (error) {
+			this.logger.error("Bucket initialization failed", error);
+			throw new InternalServerErrorException("Storage initialization failed");
 		}
 	}
 
-	private getErrorMessage(error: unknown): string {
-		return error instanceof Error ? error.message : String(error);
+	private streamToBuffer(stream: Readable): Promise<Buffer> {
+		return new Promise((resolve, reject) => {
+			const chunks: Buffer[] = [];
+			stream.on("data", (chunk: Buffer) => chunks.push(chunk));
+			stream.on("end", () => resolve(Buffer.concat(chunks)));
+			stream.on("error", reject);
+		});
+	}
+
+	private isNotFound(error: unknown): boolean {
+		if (typeof error !== "object" || error === null) return false;
+		const code = (error as { code?: unknown }).code;
+		return code === "NoSuchKey" || code === "NotFound";
 	}
 }

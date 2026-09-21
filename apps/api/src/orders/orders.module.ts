@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { StorageModule } from "@/storage/storage.module";
+import { AttachmentsModule } from "@/attachments/attachments.module";
 import { UsersModule } from "@/users/users.module";
 import { FilesController } from "./files/files.controller";
 import { FilesQuery } from "./files/files.query";
@@ -10,13 +10,12 @@ import { OrdersQuery } from "./orders.query";
 import { OrdersService } from "./orders.service";
 
 @Module({
-	imports: [UsersModule, StorageModule],
+	imports: [UsersModule, AttachmentsModule],
 	controllers: [OrdersController, FilesController],
 	providers: [
 		OrdersService,
 		OrdersQuery,
 		OrdersMapper,
-		FilesService,
 		FilesService,
 		FilesQuery,
 	],
