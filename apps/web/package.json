@@ -45,9 +45,9 @@
 		"babel-plugin-react-compiler": "1.0.0",
 		"concurrently": "^10.0.5",
 		"dotenv": "^17.4.2",
-		"orval": "^8.24.0",
+		"orval": "8.24.0",
 		"tailwindcss": "^4",
-		"typescript": "^5"
+		"typescript": "5.9.2"
 	},
 	"ignoreScripts": [
 		"sharp",
