@@ -256,19 +256,20 @@ export type OrderDetailDtoOrderExecutionsItem = {
   executedByUserId: number;
 };
 
+export type OrderDetailDtoOrderFilesItemAttachment = {
+  fileSize?: number;
+  mimeType?: string;
+};
+
 export type OrderDetailDtoOrderFilesItem = {
+  id: number;
   /** @nullable */
   description: string | null;
   orderId: number;
-  fileId: number;
   fileName: string;
-  fileType: string;
-  fileSize: number;
-  filePath: string;
-  /** @nullable */
-  mimeType: string | null;
   uploadedByUserId: number;
   uploadedAt: string;
+  attachment: OrderDetailDtoOrderFilesItemAttachment;
 };
 
 export type OrderDetailDtoClaimsItem = {
@@ -500,16 +501,13 @@ export interface UploadFileDto {
 }
 
 export interface FileDto {
+  id: number;
+  orderId: number;
+  fileName: string;
   /** @nullable */
   description: string | null;
-  orderId: number;
-  fileId: number;
-  fileName: string;
-  fileType: string;
   fileSize: number;
-  filePath: string;
-  /** @nullable */
-  mimeType: string | null;
+  mimeType: string;
   uploadedByUserId: number;
   uploadedAt: string;
 }
