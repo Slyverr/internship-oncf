@@ -1246,6 +1246,118 @@ export interface CreateRejectionReasonDto {
   name: string;
 }
 
+export type TrackWagonDtoWagonTrackingsItem = {
+  id: number;
+  wagonId: number;
+  /** @nullable */
+  latitude: string | null;
+  /** @nullable */
+  longitude: string | null;
+  /** @nullable */
+  status: string | null;
+  recordedAt: string;
+};
+
+export interface TrackWagonDto {
+  id: number;
+  /** @nullable */
+  externalId: string | null;
+  wagonNumber: string;
+  /** @nullable */
+  type: string | null;
+  /** @nullable */
+  capacity: string | null;
+  createdAt: string;
+  updatedAt: string;
+  isActive: boolean;
+  wagonTrackings: TrackWagonDtoWagonTrackingsItem[];
+}
+
+export type TrackTrainDtoTrainTrackingsItem = {
+  id: number;
+  trainId: number;
+  /** @nullable */
+  latitude: string | null;
+  /** @nullable */
+  longitude: string | null;
+  /** @nullable */
+  status: string | null;
+  recordedAt: string;
+};
+
+export interface TrackTrainDto {
+  id: number;
+  /** @nullable */
+  externalId: string | null;
+  trainNumber: string;
+  /** @nullable */
+  status: string | null;
+  createdAt: string;
+  updatedAt: string;
+  isActive: boolean;
+  trainTrackings: TrackTrainDtoTrainTrackingsItem[];
+}
+
+export type TrackOrderDtoWagonWagonTrackingsItem = {
+  id: number;
+  /** @nullable */
+  status: string | null;
+  wagonId: number;
+  /** @nullable */
+  latitude: string | null;
+  /** @nullable */
+  longitude: string | null;
+  recordedAt: string;
+};
+
+export type TrackOrderDtoWagon = {
+  id: number;
+  wagonNumber: string;
+  wagonTrackings?: TrackOrderDtoWagonWagonTrackingsItem[];
+};
+
+export interface TrackOrderDto {
+  orderId: number;
+  wagonId: number;
+  wagon: TrackOrderDtoWagon;
+}
+
+export interface UpdateWagonPositionDto {
+  latitude: number;
+  longitude: number;
+  status?: string;
+}
+
+export interface WagonPositionDto {
+  id: number;
+  wagonId: number;
+  /** @nullable */
+  latitude: string | null;
+  /** @nullable */
+  longitude: string | null;
+  /** @nullable */
+  status: string | null;
+  recordedAt: string;
+}
+
+export interface UpdateTrainPositionDto {
+  latitude: number;
+  longitude: number;
+  status?: string;
+}
+
+export interface TrainPositionDto {
+  id: number;
+  trainId: number;
+  /** @nullable */
+  latitude: string | null;
+  /** @nullable */
+  longitude: string | null;
+  /** @nullable */
+  status: string | null;
+  recordedAt: string;
+}
+
 export type OrdersControllerFindAllParams = {
 goodsId?: number;
 customerId?: number;

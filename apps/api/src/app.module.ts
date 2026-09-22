@@ -10,6 +10,7 @@ import { NotificationsModule } from "./notifications/notifications.module";
 import { OrdersModule } from "./orders/orders.module";
 import { ProfileModule } from "./profile/profile.module";
 import { ProgramsModule } from "./programs/programs.module";
+import { TrackingModule } from "./tracking/tracking.module";
 import { UsersModule } from "./users/users.module";
 
 @Module({
@@ -25,6 +26,7 @@ import { UsersModule } from "./users/users.module";
 		NotificationsModule,
 		ProfileModule,
 		CatalogModule,
+		TrackingModule,
 	],
 	controllers: [AppController],
 })
