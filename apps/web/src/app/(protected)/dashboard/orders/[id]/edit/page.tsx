@@ -1,5 +1,5 @@
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
-import { UnderConstruction } from "@/components/under-construction";
+import { OrderEditForm } from "@/components/orders/order-edit-form";
 import { ordersControllerFindOne } from "@/lib/api/orders";
 import { ordersBreadcrumbs } from "../../breadcrumbs";
 
@@ -17,7 +17,7 @@ export default async function Page({ params }: PageProps) {
 				items={ordersBreadcrumbs.edit(id, order.orderNumber ?? `#${order.id}`)}
 			/>
 
-			<UnderConstruction />
+			<OrderEditForm key={order.id} order={order} />
 		</>
 	);
 }

@@ -61,6 +61,12 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 
 	const status = order.orderStatus.name;
 
+	const canEdit =
+		status === OrderStatus.DRAFT && hasPermission(Permission.ORDERS_UPDATE);
+
+	const canDelete =
+		status === OrderStatus.DRAFT && hasPermission(Permission.ORDERS_DELETE);
+
 	const isPending =
 		submitMutation.isPending ||
 		approveMutation.isPending ||
@@ -182,9 +188,8 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 						</Button>
 					)}
 
-				{/* More actions dropdown */}
-				{(hasPermission(Permission.ORDERS_UPDATE) ||
-					hasPermission(Permission.ORDERS_DELETE)) && (
+				{/* Show the dropdown only when an action is available. */}
+				{(canEdit || canDelete) && (
 					<DropdownMenu>
 						<DropdownMenuTrigger
 							render={<Button variant="ghost" size="icon" />}
@@ -195,7 +200,7 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 						</DropdownMenuTrigger>
 
 						<DropdownMenuContent align="end">
-							{hasPermission(Permission.ORDERS_UPDATE) && (
+							{canEdit && (
 								<DropdownMenuItem
 									onClick={() =>
 										router.push(`/dashboard/orders/${order.id}/edit`)
@@ -205,16 +210,14 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 								</DropdownMenuItem>
 							)}
 
-							{/* Delete only allowed for DRAFT */}
-							{hasPermission(Permission.ORDERS_DELETE) &&
-								status === OrderStatus.DRAFT && (
-									<DropdownMenuItem
-										className="text-destructive"
-										onClick={() => setDeleteDialogOpen(true)}
-									>
-										Delete
-									</DropdownMenuItem>
-								)}
+							{canDelete && (
+								<DropdownMenuItem
+									className="text-destructive"
+									onClick={() => setDeleteDialogOpen(true)}
+								>
+									Delete
+								</DropdownMenuItem>
+							)}
 						</DropdownMenuContent>
 					</DropdownMenu>
 				)}
