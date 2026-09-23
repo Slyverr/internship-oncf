@@ -21,3 +21,5 @@ export const ORDER_TRANSITION: Record<OrderStatus, OrderStatus[]> = {
 export const ORDER_STATUS_BY_ID = Object.fromEntries(
 	Object.entries(ORDER_STATUSES).map(([name, value]) => [value.id, name]),
 ) as Record<number, OrderStatus>;
+
+export const ORDER_QUANTITY_PATTERN = /^\d+(\.\d{1,3})?$/;

@@ -1,15 +1,22 @@
-import { OrderStatus } from "@ecommand/shared";
+import { OrderStatus, Permission } from "@ecommand/shared";
 import {
+	BadRequestException,
 	ConflictException,
+	ForbiddenException,
 	Injectable,
 	NotFoundException,
 } from "@nestjs/common";
 import { orders } from "drizzle/schema";
 import { and, eq } from "drizzle-orm";
 import { AuthUser } from "@/auth/auth.types";
+import { hasOnePermission } from "@/auth/auth.utils";
 import { ListQueryDto } from "@/common/requests/list-query.dto";
 import { ORDER_STATUSES } from "@/database/reference-data";
-import { ORDER_STATUS_BY_ID, ORDER_TRANSITION } from "./orders.constants";
+import {
+	ORDER_QUANTITY_PATTERN,
+	ORDER_STATUS_BY_ID,
+	ORDER_TRANSITION,
+} from "./orders.constants";
 import { OrdersMapper } from "./orders.mapper";
 import { OrdersQuery } from "./orders.query";
 import type { OrderId } from "./orders.types";
@@ -53,12 +60,51 @@ export class OrdersService {
 	}
 
 	async update(id: OrderId, dto: UpdateOrderDto, user: AuthUser) {
+		const order = await this.findOne(id);
+
+		const editsDetails = Object.entries(dto).some(
+			([key, value]) => key !== "status" && value !== undefined,
+		);
+		const changesCustomer =
+			dto.customerId !== undefined && dto.customerId !== order.customerId;
+
+		if (editsDetails && order.orderStatus?.name !== OrderStatus.DRAFT) {
+			throw new ConflictException("Only draft orders can be edited");
+		}
+
+		if (
+			changesCustomer &&
+			!hasOnePermission(user, Permission.ORDERS_MANAGE_OWNERSHIP)
+		) {
+			throw new ForbiddenException("Cannot change order ownership");
+		}
+
+		const quantity = dto.quantityDemanded;
+		if (
+			quantity !== undefined &&
+			(!ORDER_QUANTITY_PATTERN.test(quantity) || Number(quantity) <= 0)
+		) {
+			throw new BadRequestException(
+				"Quantity must be positive with at most three decimal places",
+			);
+		}
+
+		const start = dto.startDate === undefined ? order.startDate : dto.startDate;
+		const end = dto.endDate === undefined ? order.endDate : dto.endDate;
+
+		if (start && end && new Date(start) > new Date(end)) {
+			throw new BadRequestException(
+				"The completion date must be on or after the start date",
+			);
+		}
+
 		const values = this.ordersMapper.toUpdate(dto, user);
+
 		await this.ordersQuery.updateOrder(id, values, {
-			history: {
-				userId: user.id,
-			},
+			where: and(eq(orders.id, id), eq(orders.statusId, order.statusId)),
+			history: { userId: user.id },
 		});
+
 		return this.findOne(id);
 	}
 
