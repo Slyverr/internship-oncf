@@ -10,6 +10,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, Permission[] | "ALL"> = {
 		Permission.ORDERS_DELETE,
 		Permission.ORDERS_ACTION_SUBMIT,
 
+		Permission.CATALOG_READ,
+
 		Permission.CLAIMS_CREATE,
 		Permission.CLAIMS_READ,
 
@@ -28,6 +30,8 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, Permission[] | "ALL"> = {
 		Permission.ORDERS_MANAGE_STATUS,
 		Permission.ORDERS_MANAGE_OWNERSHIP,
 		Permission.ORDERS_ACTION,
+
+		Permission.CATALOG_READ,
 
 		Permission.CUSTOMERS_READ,
 		Permission.CUSTOMERS_UPDATE,
