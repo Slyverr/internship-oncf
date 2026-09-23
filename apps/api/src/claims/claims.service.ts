@@ -74,8 +74,22 @@ export class ClaimsService {
 		return this.ensure(deleted, id);
 	}
 
-	async addComment(claimId: ClaimId, content: string, userId: number) {
-		return this.claimsQuery.addClaimComment(claimId, content, userId);
+	async addComment(claimId: ClaimId, content: string, user: AuthUser) {
+		const startsProgress = hasOnePermission(
+			user,
+			Permission.CLAIMS_ACTION_START_PROGRESS,
+		);
+
+		return this.claimsQuery.addClaimComment(claimId, content, user.id, {
+			...(startsProgress && {
+				statusTransition: {
+					fromStatusId: CLAIM_STATUSES[ClaimStatus.NEW].id,
+					toStatusId: CLAIM_STATUSES[ClaimStatus.IN_PROGRESS].id,
+					changedByUserId: user.id,
+					comment: "Claim moved to in progress after the first agent response.",
+				},
+			}),
+		});
 	}
 
 	async getComments(claimId: ClaimId) {

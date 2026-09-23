@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import {
+	getClaimsControllerFindOneQueryKey,
 	getClaimsControllerGetCommentsQueryKey,
 	useClaimsControllerAddComment,
 } from "@/lib/api/claims";
@@ -31,8 +32,11 @@ export function ClaimCommentForm({ claimId }: ClaimCommentFormProps) {
 			{
 				onSuccess: () => {
 					setContent("");
-					queryClient.invalidateQueries({
+					void queryClient.invalidateQueries({
 						queryKey: getClaimsControllerGetCommentsQueryKey(claimId),
+					});
+					void queryClient.invalidateQueries({
+						queryKey: getClaimsControllerFindOneQueryKey(claimId),
 					});
 				},
 			},

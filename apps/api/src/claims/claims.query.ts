@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { claimComments, claimStatusHistory, claims } from "drizzle/schema";
-import { eq, type SQL } from "drizzle-orm";
+import { and, eq, type SQL } from "drizzle-orm";
 import { DrizzleService } from "@/database/drizzle.service";
 import { QueryColumns, QueryRelations } from "@/database/drizzle.types";
 import { withDbErrorHandling } from "@/database/drizzle.util";
@@ -220,17 +220,57 @@ export class ClaimsQuery {
 		return deleted;
 	}
 
-	async addClaimComment(claimId: ClaimId, content: string, userId: number) {
+	async addClaimComment(
+		claimId: ClaimId,
+		content: string,
+		userId: number,
+		options?: {
+			statusTransition?: {
+				fromStatusId: string;
+				toStatusId: string;
+				changedByUserId: number;
+				comment: string;
+			};
+		},
+	) {
 		const [comment] = await withDbErrorHandling(
 			() =>
-				this.drizzle.db
-					.insert(claimComments)
-					.values({
-						claimId,
-						authorUserId: userId,
-						comment: content,
-					})
-					.returning(),
+				this.drizzle.db.transaction(async (tx) => {
+					const [createdComment] = await tx
+						.insert(claimComments)
+						.values({
+							claimId,
+							authorUserId: userId,
+							comment: content,
+						})
+						.returning();
+
+					if (options?.statusTransition) {
+						const { fromStatusId, toStatusId, changedByUserId, comment } =
+							options.statusTransition;
+						const [updatedClaim] = await tx
+							.update(claims)
+							.set({
+								statusId: toStatusId,
+								updatedAt: new Date().toISOString(),
+							})
+							.where(
+								and(eq(claims.id, claimId), eq(claims.statusId, fromStatusId)),
+							)
+							.returning({ id: claims.id });
+
+						if (updatedClaim) {
+							await tx.insert(claimStatusHistory).values({
+								claimId,
+								statusId: toStatusId,
+								changedByUserId,
+								comment,
+							});
+						}
+					}
+
+					return [createdComment];
+				}),
 			{
 				claimId,
 				content,

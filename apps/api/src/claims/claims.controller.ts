@@ -115,7 +115,7 @@ export class ClaimsController {
 		@Body() dto: CreateClaimCommentDto,
 		@Request() req: AuthRequest,
 	) {
-		return this.claimsService.addComment(id, dto.content, req.user.id);
+		return this.claimsService.addComment(id, dto.content, req.user);
 	}
 
 	@Get(":id/comments")
