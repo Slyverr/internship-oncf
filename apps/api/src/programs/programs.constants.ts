@@ -9,10 +9,10 @@ export const PROGRAM_TRANSITION: Record<ProgramStatus, ProgramStatus[]> = {
 
 	[ProgramStatus.PENDING_APPROVAL]: [
 		ProgramStatus.APPROVED,
-		ProgramStatus.CONFIRMED,
+		ProgramStatus.CANCELLED,
 	],
 
-	[ProgramStatus.APPROVED]: [ProgramStatus.SENT_TO_DTM],
+	[ProgramStatus.APPROVED]: [ProgramStatus.CONFIRMED, ProgramStatus.CANCELLED],
 
 	[ProgramStatus.SENT_TO_DTM]: [ProgramStatus.IN_PROGRESS],
 
@@ -21,7 +21,7 @@ export const PROGRAM_TRANSITION: Record<ProgramStatus, ProgramStatus[]> = {
 		ProgramStatus.CANCELLED,
 	],
 
-	[ProgramStatus.CONFIRMED]: [],
+	[ProgramStatus.CONFIRMED]: [ProgramStatus.SENT_TO_DTM],
 	[ProgramStatus.COMPLETED]: [],
 	[ProgramStatus.CANCELLED]: [],
 };
