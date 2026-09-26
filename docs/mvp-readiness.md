@@ -24,7 +24,7 @@ This status describes the current repository against the project SDF and report.
 ## Incomplete for a usable MVP
 
 - **Client signup:** the SDF requires customer code plus ICE validation. The current customer schema has no ICE field, and the source/ownership of ICE has not been decided. Keep signup blocked until that data source is confirmed.
-- **API client generation:** the live OpenAPI document currently emits empty property schemas for many response DTOs. A successful Orval run can replace useful web types with generic `unknown` objects; fix DTO metadata before accepting regenerated output.
+- **OpenAPI generation runtime:** the Bun development API returns empty properties for DTO schemas, but the production-style API started with real Node returns typed schemas. Current Node verification found 41 properties on `OrderDetailDto` and no generic `Object` references. Generate the client from the Node runtime documented in [development workflow](development.md#local-setup), then review the generated diff before accepting it. This is a developer workflow constraint, not a blocked user flow.
 
 ## External and production requirements
 
@@ -40,7 +40,7 @@ This status describes the current repository against the project SDF and report.
 1. Confirm the ICE source and ownership, then implement signup validation against that source.
 2. Review program and claim edit rules against the pilot workflows.
 3. Add reliable notification retries and staff assignment alerts after ownership rules are reviewed.
-4. Fix OpenAPI DTO metadata so API client regeneration is safe.
+4. Keep API client generation on the verified Node runtime and review generated types whenever the API contract changes.
 5. Confirm report metrics and export expectations with pilot users; the current PDF option uses the browser print dialog.
 6. Confirm whether DTM handoff is available for the pilot; otherwise expose its local/manual status honestly.
 7. Stabilize the schema, then define migrations and production operations.
