@@ -520,7 +520,7 @@ export function OrderCreateForm(): JSX.Element {
 					</Button>
 				) : (
 					<form.Subscribe>
-						{(state) => (
+						{(state: typeof form.state) => (
 							<Button
 								type="submit"
 								disabled={

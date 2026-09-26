@@ -236,7 +236,7 @@ export function CustomerEditForm({
 					Cancel
 				</Button>
 				<form.Subscribe>
-					{(state) => (
+					{(state: typeof form.state) => (
 						<Button
 							type="submit"
 							disabled={

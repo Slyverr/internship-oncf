@@ -301,7 +301,7 @@ export function UserCreateForm(): JSX.Element {
 					Cancel
 				</Button>
 				<form.Subscribe>
-					{(state) => (
+					{(state: typeof form.state) => (
 						<Button
 							type="submit"
 							disabled={
