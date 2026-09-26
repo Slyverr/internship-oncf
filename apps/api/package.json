@@ -13,6 +13,8 @@
 		"start:dev": "NODE_PATH=./node_modules nest start --watch",
 		"start:debug": "NODE_PATH=./node_modules nest start --debug --watch",
 		"start:prod": "node dist/main",
+		"db:push": "drizzle-kit push",
+		"db:studio": "drizzle-kit studio",
 		"seed:dev": "tsx ./drizzle/seed/seed-dev.ts",
 		"seed:ref": "tsx ./drizzle/seed/seed-ref.ts",
 		"seed": "tsx ./drizzle/seed/seed-ref.ts && tsx ./drizzle/seed/seed-dev.ts",
@@ -40,14 +42,14 @@
 		"drizzle-orm": "^1.0.0-rc.5-ab785fc",
 		"minio": "^8.0.7",
 		"nanoid": "^6.0.1",
+		"nodemailer": "^10.0.10",
 		"passport": "^0.7.0",
 		"passport-jwt": "^4.0.1",
 		"passport-local": "^1.0.0",
 		"pg": "^8.23.0",
 		"reflect-metadata": "^0.2.2",
 		"rxjs": "^7.8.2",
-		"uuid": "^14.0.2",
-		"nodemailer": "^10.0.10"
+		"uuid": "^14.0.2"
 	},
 	"devDependencies": {
 		"@nestjs/cli": "11.0.24",
@@ -56,6 +58,7 @@
 		"@types/express": "^5.0.6",
 		"@types/jest": "^30.0.0",
 		"@types/node": "^24.13.6",
+		"@types/nodemailer": "^8.0.2",
 		"@types/passport-jwt": "^4.0.1",
 		"@types/pg": "^8.23.1",
 		"@types/supertest": "^7.2.1",
@@ -68,7 +71,6 @@
 		"ts-node": "^10.9.2",
 		"tsconfig-paths": "^4.2.0",
 		"tsx": "^4.23.15",
-		"typescript": "5.9.2",
-		"@types/nodemailer": "^8.0.2"
+		"typescript": "5.9.2"
 	}
 }
