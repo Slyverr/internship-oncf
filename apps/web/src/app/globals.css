@@ -5,6 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+	--spacing-control: calc(var(--spacing) * 2);
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
 	--font-sans: var(--font-sans);
@@ -50,6 +51,14 @@
 
 @utility gap-compact {
 	gap: var(--spacing);
+}
+
+@utility p-control {
+	padding: var(--spacing-control);
+}
+
+@utility px-control {
+	padding-inline: var(--spacing-control);
 }
 
 @utility px-compact {
