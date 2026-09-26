@@ -279,9 +279,24 @@ export class ClaimsQuery {
 		return comment;
 	}
 
-	async findClaimComments(claimId: ClaimId) {
+	async findClaimComments(claimId: ClaimId, commentId?: number) {
 		return this.drizzle.db.query.claimComments.findMany({
-			where: { claimId },
+			where: { claimId, ...(commentId !== undefined && { id: commentId }) },
+			columns: {
+				id: true,
+				claimId: true,
+				authorUserId: true,
+				comment: true,
+				createdAt: true,
+			},
+			with: {
+				authorUser: {
+					columns: {
+						firstName: true,
+						lastName: true,
+					},
+				},
+			},
 			orderBy: (comments, { asc }) => [asc(comments.createdAt)],
 		});
 	}

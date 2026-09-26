@@ -1063,6 +1063,8 @@ export interface ClaimCommentDto {
   id: number;
   claimId: number;
   authorUserId: number;
+  /** Manually synced with the API DTO until OpenAPI type generation is fixed. */
+  authorName: string;
   comment: string;
   createdAt: string;
 }
@@ -1558,4 +1560,3 @@ export const ClaimsControllerFindAllSortOrder = {
   asc: 'asc',
   desc: 'desc',
 } as const;
-

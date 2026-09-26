@@ -80,20 +80,38 @@ export class ClaimsService {
 			Permission.CLAIMS_ACTION_START_PROGRESS,
 		);
 
-		return this.claimsQuery.addClaimComment(claimId, content, user.id, {
-			...(startsProgress && {
-				statusTransition: {
-					fromStatusId: CLAIM_STATUSES[ClaimStatus.NEW].id,
-					toStatusId: CLAIM_STATUSES[ClaimStatus.IN_PROGRESS].id,
-					changedByUserId: user.id,
-					comment: "Claim moved to in progress after the first agent response.",
-				},
-			}),
-		});
+		const comment = await this.claimsQuery.addClaimComment(
+			claimId,
+			content,
+			user.id,
+			{
+				...(startsProgress && {
+					statusTransition: {
+						fromStatusId: CLAIM_STATUSES[ClaimStatus.NEW].id,
+						toStatusId: CLAIM_STATUSES[ClaimStatus.IN_PROGRESS].id,
+						changedByUserId: user.id,
+						comment:
+							"Claim moved to in progress after the first agent response.",
+					},
+				}),
+			},
+		);
+		const [created] = await this.getComments(claimId, comment.id);
+		if (!created) throw new NotFoundException("Comment no longer exists");
+		return created;
 	}
 
-	async getComments(claimId: ClaimId) {
-		return this.claimsQuery.findClaimComments(claimId);
+	async getComments(claimId: ClaimId, commentId?: number) {
+		const comments = await this.claimsQuery.findClaimComments(
+			claimId,
+			commentId,
+		);
+		return comments.map(({ authorUser, ...comment }) => ({
+			...comment,
+			authorName: authorUser
+				? `${authorUser.firstName} ${authorUser.lastName}`
+				: "Former user",
+		}));
 	}
 
 	async startProgress(claimId: ClaimId, user: AuthUser) {

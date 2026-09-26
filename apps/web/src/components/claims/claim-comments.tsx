@@ -13,7 +13,7 @@ interface ClaimCommentsProps {
 }
 
 function CommentItem({ comment }: { comment: ClaimCommentDto }) {
-	const authorName = "User"; // TODO: Author name not available in DTO
+	const authorName = comment.authorName;
 	const initials = authorName
 		.split(" ")
 		.map((n) => n[0])
