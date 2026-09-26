@@ -6,6 +6,7 @@ import {
 	createSortedRowModel,
 	FlexRender,
 	rowSortingFeature,
+	sortFn_datetime,
 	tableFeatures,
 	useTable,
 } from "@tanstack/react-table";
@@ -89,6 +90,7 @@ const columns: ColumnDef<typeof features, ProgramListDto>[] = [
 			const value = info.getValue<string>();
 			return value ? new Date(value).toLocaleDateString() : "—";
 		},
+		sortFn: sortFn_datetime,
 		enableSorting: true,
 	},
 	{
