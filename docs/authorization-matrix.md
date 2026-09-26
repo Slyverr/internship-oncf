@@ -23,10 +23,10 @@ Admin receives every defined permission. Parent permissions imply descendants (f
 | Resource / action | API permission | Web surface | Additional scope |
 | --- | --- | --- | --- |
 | Orders list/detail | orders:read | Sidebar Orders; order list/detail | ID routes use OrderOwnershipGuard; manage-other bypasses the owner check. |
-| Orders create/edit/delete | orders:create/update/delete | Create form; order action menu | The web limits delete to draft orders. |
+| Orders create/edit/delete | orders:create/update/delete | Create form; order action menu | The API and web both restrict deletion to draft orders. |
 | Order lifecycle | orders:action:* | OrderActions | API state transitions are authoritative. |
 | Programs list/detail | programs:read | Sidebar Programs; list/detail | ID routes use ProgramOwnershipGuard; manage-other bypasses the owner check. |
-| Programs create/edit/delete | programs:create/update/delete | Create form; program action menu | The web limits delete to draft programs. |
+| Programs create/edit/delete | programs:create/update/delete | Create form; program action menu | The API and web both restrict deletion to draft programs. |
 | Program lifecycle | programs:action:* | ProgramActions | Valid path: draft → pending approval → approved → confirmed → sent to DTM → in progress. Cancellation is allowed before dispatch. |
 | Claims list/detail/comments | claims:read | Sidebar Claims; details and comments | ID routes use ClaimOwnershipGuard; list filters are constrained for users without manage-other. |
 | Claims create/edit/delete | claims:create/update/delete | Create form; claim action menu | Delete is admin-only by default. |
@@ -50,4 +50,5 @@ Admin receives every defined permission. Parent permissions imply descendants (f
 - apps/api/src/auth/guards/permissions.guard.spec.ts covers missing-user denial, any/all semantics, mixed metadata, and inherited permissions.
 - apps/api/src/auth/roles-permissions.spec.ts checks admin, commercial-agent, and client-representative grant boundaries.
 - apps/api/src/workflow-transitions.spec.ts locks down order, program, and claim transition graphs.
-- These tests do not replace endpoint integration tests for database scoping or every controller route. Expand coverage when changing those boundaries.
+- Claim mapper and service specs check customer-scope enforcement on create/list. Order and program service specs check draft-only deletion.
+- These tests do not replace endpoint integration tests for every database query and controller route. Expand coverage when changing those boundaries.
