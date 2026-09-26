@@ -66,7 +66,9 @@ export function createOwnershipGuard<TService, TId>(
 
 			const accessGranted = canAccess
 				? await canAccess(serviceInstance, id, user)
-				: (await resolveOwnerId!(serviceInstance, id)) === user.id;
+				: resolveOwnerId
+					? (await resolveOwnerId(serviceInstance, id)) === user.id
+					: false;
 
 			if (!accessGranted) {
 				throw new ForbiddenException(errorMessage);
