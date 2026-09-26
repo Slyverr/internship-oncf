@@ -98,7 +98,14 @@ export function GuidedFormActions({
 						{isPending || isSubmitting ? pendingLabel : submitLabel}
 					</Button>
 				) : (
-					<Button type="button" onClick={onContinue}>
+					<Button
+						type="button"
+						onClick={(event) => {
+							event.preventDefault();
+							event.stopPropagation();
+							onContinue();
+						}}
+					>
 						Continue
 						<ArrowRight />
 					</Button>
