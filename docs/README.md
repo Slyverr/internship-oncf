@@ -1,9 +1,9 @@
-# ECommand project documentation
+# Project documentation
 
-This folder contains maintained references for contributors and AI coding agents. Update the relevant page when architecture, setup, conventions, or MVP status changes.
+Use these documents as the maintained guide to the repository:
 
-- [Architecture](architecture.md) — stack, boundaries, and request/data flow.
-- [Development and conventions](development.md) — local workflow, naming, code style, and commits.
-- [MVP readiness](mvp-readiness.md) — what is implemented, incomplete, and still dependent on ONCF decisions.
+- [Architecture](architecture.md) — workspace structure, application boundaries, and current technical design.
+- [Development workflow and conventions](development.md) — local commands, naming, code style, UI form patterns, verification, and commits.
+- [MVP readiness](mvp-readiness.md) — implemented user flows, known gaps, and remaining work toward the MVP.
 
-Keep detailed implementation notes here when they help future work. Keep the root README focused on getting the project running.
+Keep this index updated when adding or removing maintained project documentation. Use English for maintained documentation and link to the most specific guide from `AGENTS.md` or the root README when contributors need it.

@@ -53,6 +53,15 @@ For local password-recovery testing, omit SMTP settings, submit the forgot-passw
 - Reuse existing UI components and query/mutation hooks. Keep API errors and validation feedback visible in forms.
 - Prefer small, reviewable changes that complete a whole user flow over broad refactors.
 
+## Web forms and interaction
+
+- Use `FormFieldHeader` from `apps/web/src/components/common/form-field-header.tsx` for labels that show required and inline error states. Normalize field errors with `getFormErrorMessage` from `apps/web/src/lib/form-utils.ts` instead of adding another local copy.
+- Keep short forms on one page. When a create flow has distinct groups of information, split it into guided steps with a clear current-step indicator, a way to go back without losing entered values, and validation before advancing or submitting.
+- Validate each step's required fields when the user advances; keep full-form validation on final submission. Optional fields should not block progress.
+- Use semantic buttons and announce validation feedback to assistive technology. Keep transitions subtle and respect `prefers-reduced-motion` through the shared styles.
+- Preserve permission-specific defaults and fields when splitting a form. A step must not expose fields the current user cannot manage.
+- Prefer shared components for repeated behavior, but keep step-specific business rules in the feature form. Do not turn unrelated forms into one highly configurable generic form.
+
 ## Database workflow
 
 The current database model needs design review and is expected to change. **Do not add migration files or select a migration framework yet:** recording the current model as migration history would make it harder to replace the weak or mismatched parts cleanly. First agree on the domain entities, ownership and lifecycle rules, constraints, and reference data; then stabilize the Drizzle schema and choose a migration approach before introducing data that must be preserved.
