@@ -63,6 +63,7 @@ export function GuidedFormActions({
 	pendingLabel,
 	isSubmitting,
 	isPending,
+	isSubmitDisabled = false,
 }: {
 	currentStep: number;
 	stepCount: number;
@@ -73,6 +74,7 @@ export function GuidedFormActions({
 	pendingLabel: string;
 	isSubmitting: boolean;
 	isPending: boolean;
+	isSubmitDisabled?: boolean;
 }) {
 	const isLastStep = currentStep === stepCount - 1;
 
@@ -89,7 +91,10 @@ export function GuidedFormActions({
 					</Button>
 				) : null}
 				{isLastStep ? (
-					<Button type="submit" disabled={isPending || isSubmitting}>
+					<Button
+						type="submit"
+						disabled={isPending || isSubmitting || isSubmitDisabled}
+					>
 						{isPending || isSubmitting ? pendingLabel : submitLabel}
 					</Button>
 				) : (

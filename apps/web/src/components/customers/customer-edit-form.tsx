@@ -288,6 +288,7 @@ export function CustomerEditForm({
 						pendingLabel="Saving..."
 						isSubmitting={state.isSubmitting}
 						isPending={mutation.isPending}
+						isSubmitDisabled={!state.canSubmit}
 					/>
 				)}
 			</form.Subscribe>

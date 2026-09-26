@@ -2,10 +2,13 @@
 
 import { useForm } from "@tanstack/react-form-nextjs";
 import { useRouter } from "next/navigation";
-import type { JSX } from "react";
+import { type JSX, useState } from "react";
 import { z } from "zod";
 import { FormFieldHeader } from "@/components/common/form-field-header";
-import { Button } from "@/components/ui/button";
+import {
+	GuidedFormActions,
+	GuidedFormProgress,
+} from "@/components/common/guided-form";
 import {
 	Card,
 	CardContent,
@@ -28,7 +31,11 @@ import {
 	type UserDetailDto,
 } from "@/lib/api/generated.schemas";
 import { useUsersControllerUpdate } from "@/lib/api/users";
-import { getFormErrorMessage } from "@/lib/form-utils";
+import {
+	getFormErrorMessage,
+	getFormStepErrors,
+	omitFormStepError,
+} from "@/lib/form-utils";
 
 const updateUserSchema = z.object({
 	email: z.string().email("Valid email is required").max(100).optional(),
@@ -51,9 +58,21 @@ const updateUserSchema = z.object({
 
 type UpdateUserFormValues = z.infer<typeof updateUserSchema>;
 
+const userAccessSchema = updateUserSchema.pick({
+	email: true,
+	role: true,
+	type: true,
+});
+const userEditSteps = [
+	{ title: "Access", description: "Email and role settings" },
+	{ title: "Profile", description: "Name and employee ID" },
+];
+
 export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 	const router = useRouter();
 	const mutation = useUsersControllerUpdate();
+	const [step, setStep] = useState(0);
+	const [stepErrors, setStepErrors] = useState<Record<string, string>>({});
 
 	const form = useForm({
 		defaultValues: {
@@ -97,26 +116,48 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 		},
 	});
 
+	function continueToProfile() {
+		const result = userAccessSchema.safeParse(form.state.values);
+		if (!result.success) {
+			setStepErrors(getFormStepErrors(result.error.issues));
+			return;
+		}
+
+		setStepErrors({});
+		setStep(1);
+	}
+
 	return (
 		<form
 			onSubmit={(e) => {
 				e.preventDefault();
 				e.stopPropagation();
+				if (step === 0) {
+					continueToProfile();
+					return;
+				}
 				form.handleSubmit();
 			}}
 			className="space-y-4"
 		>
-			<Card>
+			<GuidedFormProgress steps={userEditSteps} currentStep={step} />
+
+			<Card
+				hidden={step !== 0}
+				className={step === 0 ? "page-enter" : undefined}
+			>
 				<CardHeader>
-					<CardTitle>Account Details</CardTitle>
+					<CardTitle>Account Access</CardTitle>
 					<CardDescription>
-						Update email, name, and role attributes.
+						Update login email and access settings.
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="grid gap-4 md:grid-cols-2">
 					<form.Field name="email">
 						{(field) => {
-							const errorMsg = getFormErrorMessage(field.state.meta.errors[0]);
+							const errorMsg =
+								stepErrors.email ??
+								getFormErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="space-y-2">
 									<FormFieldHeader
@@ -129,7 +170,12 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 										id="email"
 										type="email"
 										value={field.state.value}
-										onChange={(e) => field.handleChange(e.target.value)}
+										onChange={(e) => {
+											field.handleChange(e.target.value);
+											setStepErrors((errors) =>
+												omitFormStepError(errors, "email"),
+											);
+										}}
 										className={
 											errorMsg
 												? "border-destructive focus-visible:ring-destructive/20"
@@ -170,6 +216,45 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 						)}
 					</form.Field>
 
+					<form.Field name="type">
+						{(field) => (
+							<div className="space-y-2">
+								<Label htmlFor="type">User Type</Label>
+								<Select
+									value={field.state.value}
+									onValueChange={(val) =>
+										field.handleChange(val as UpdateUserDtoType)
+									}
+								>
+									<SelectTrigger id="type">
+										<SelectValue placeholder="Select Type" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value={UpdateUserDtoType.internal}>
+											Internal
+										</SelectItem>
+										<SelectItem value={UpdateUserDtoType.external}>
+											External
+										</SelectItem>
+									</SelectContent>
+								</Select>
+							</div>
+						)}
+					</form.Field>
+				</CardContent>
+			</Card>
+
+			<Card
+				hidden={step !== 1}
+				className={step === 1 ? "page-enter" : undefined}
+			>
+				<CardHeader>
+					<CardTitle>Profile</CardTitle>
+					<CardDescription>
+						Update the user name and employee ID.
+					</CardDescription>
+				</CardHeader>
+				<CardContent className="grid gap-4 md:grid-cols-2">
 					<form.Field name="firstName">
 						{(field) => {
 							const errorMsg = getFormErrorMessage(field.state.meta.errors[0]);
@@ -222,32 +307,6 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 						}}
 					</form.Field>
 
-					<form.Field name="type">
-						{(field) => (
-							<div className="space-y-2">
-								<Label htmlFor="type">User Type</Label>
-								<Select
-									value={field.state.value}
-									onValueChange={(val) =>
-										field.handleChange(val as UpdateUserDtoType)
-									}
-								>
-									<SelectTrigger id="type">
-										<SelectValue placeholder="Select Type" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value={UpdateUserDtoType.internal}>
-											Internal
-										</SelectItem>
-										<SelectItem value={UpdateUserDtoType.external}>
-											External
-										</SelectItem>
-									</SelectContent>
-								</Select>
-							</div>
-						)}
-					</form.Field>
-
 					<form.Field name="employeeId">
 						{(field) => (
 							<div className="space-y-2">
@@ -263,25 +322,22 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 				</CardContent>
 			</Card>
 
-			<div className="flex justify-end gap-4">
-				<Button type="button" variant="outline" onClick={() => router.back()}>
-					Cancel
-				</Button>
-				<form.Subscribe>
-					{(state: typeof form.state) => (
-						<Button
-							type="submit"
-							disabled={
-								!state.canSubmit || mutation.isPending || state.isSubmitting
-							}
-						>
-							{mutation.isPending || state.isSubmitting
-								? "Saving..."
-								: "Save Changes"}
-						</Button>
-					)}
-				</form.Subscribe>
-			</div>
+			<form.Subscribe>
+				{(state: typeof form.state) => (
+					<GuidedFormActions
+						currentStep={step}
+						stepCount={userEditSteps.length}
+						onCancel={() => router.back()}
+						onPrevious={() => setStep(0)}
+						onContinue={continueToProfile}
+						submitLabel="Save Changes"
+						pendingLabel="Saving..."
+						isSubmitting={state.isSubmitting}
+						isPending={mutation.isPending}
+						isSubmitDisabled={!state.canSubmit}
+					/>
+				)}
+			</form.Subscribe>
 		</form>
 	);
 }
