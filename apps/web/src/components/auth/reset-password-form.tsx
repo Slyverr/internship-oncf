@@ -14,8 +14,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-	resetPasswordAction,
 	type ResetPasswordState,
+	resetPasswordAction,
 } from "./reset-password-action";
 
 export function ResetPasswordForm({ token }: { token: string }) {

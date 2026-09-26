@@ -10,8 +10,8 @@ import {
 	Query,
 } from "@nestjs/common";
 import { RequireAny } from "@/auth/permissions.decorator";
-import { ApiPathParam } from "@/common/decorators/api-path-param.decorator";
 import { createCrudResponses } from "@/common/decorators/api-crud-responses.decorator";
+import { ApiPathParam } from "@/common/decorators/api-path-param.decorator";
 import { CustomersService } from "./customers.service";
 import type { CustomerId } from "./customers.types";
 import { CreateCustomerDto } from "./requests/create-customer.dto";

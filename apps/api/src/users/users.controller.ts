@@ -10,9 +10,9 @@ import {
 	Request,
 } from "@nestjs/common";
 import type { AuthRequest } from "@/auth/auth.types";
-import { ApiPathParam } from "@/common/decorators/api-path-param.decorator";
 import { RequireAny } from "@/auth/permissions.decorator";
 import { createCrudResponses } from "@/common/decorators/api-crud-responses.decorator";
+import { ApiPathParam } from "@/common/decorators/api-path-param.decorator";
 import { CreateUserDto } from "./requests/create-user.dto";
 import { UpdateUserDto } from "./requests/update-user.dto";
 import { UserDeleteDto } from "./responses/user-delete.dto";

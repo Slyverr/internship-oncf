@@ -1,8 +1,4 @@
-import {
-	Param,
-	type PipeTransform,
-	type Type,
-} from "@nestjs/common";
+import { Param, type PipeTransform, type Type } from "@nestjs/common";
 import { ApiParam } from "@nestjs/swagger";
 
 export function ApiPathParam(

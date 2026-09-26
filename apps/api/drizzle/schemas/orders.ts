@@ -16,7 +16,17 @@ import {
 import { attachments } from "./attachments";
 import { agencies, customers } from "./customers";
 import { attributes, goods, units } from "./goods";
-import { accessoryOperations, berths, dispatchTypes, movementTypes, pickupLocationTypes, ports, rejectionReasons, sidings, stations } from "./reference-data";
+import {
+	accessoryOperations,
+	berths,
+	dispatchTypes,
+	movementTypes,
+	pickupLocationTypes,
+	ports,
+	rejectionReasons,
+	sidings,
+	stations,
+} from "./reference-data";
 import { users } from "./users";
 
 export const orderStatus = pgTable(
