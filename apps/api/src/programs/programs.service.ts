@@ -112,7 +112,7 @@ export class ProgramsService {
 			);
 		}
 
-		await this.programsQuery.updateProgram(
+		const updatedProgram = await this.programsQuery.updateProgram(
 			id,
 			{
 				statusId: PROGRAM_STATUSES[toStatus].id,
@@ -122,6 +122,11 @@ export class ProgramsService {
 				eq(forecastPrograms.statusId, program.statusId),
 			),
 		);
+		if (!updatedProgram) {
+			throw new ConflictException(
+				`Program ${id} was modified or does not exist`,
+			);
+		}
 
 		const updated = await this.findOne(id);
 		await this.notifications.notifyChange(
