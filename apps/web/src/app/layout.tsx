@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
+import Script from "next/script";
 import { cn } from "@/lib/utils";
 import "./globals.css";
 import { Providers } from "./providers";
@@ -32,6 +33,7 @@ export default function Layout({
 	return (
 		<html
 			lang="en"
+			suppressHydrationWarning
 			className={cn(
 				"h-full",
 				"antialiased",
@@ -42,6 +44,7 @@ export default function Layout({
 			)}
 		>
 			<body className="min-h-full flex flex-col">
+				<Script src="/theme-init.js" strategy="beforeInteractive" />
 				<Providers>{children}</Providers>
 			</body>
 		</html>

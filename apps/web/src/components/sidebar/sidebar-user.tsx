@@ -66,12 +66,16 @@ export function SidebarUser() {
 						align="end"
 						sideOffset={4}
 					>
-						<DropdownMenuItem render={<Link href="/profile" />}>
+						<DropdownMenuItem
+							render={<Link href="/dashboard/settings#account" />}
+						>
 							<UserIcon className="mr-2 size-4 text-muted-foreground" />
 							Profile
 						</DropdownMenuItem>
 
-						<DropdownMenuItem>
+						<DropdownMenuItem
+							render={<Link href="/dashboard/settings#appearance" />}
+						>
 							<SettingsIcon className="mr-2 size-4 text-muted-foreground" />
 							Settings
 						</DropdownMenuItem>

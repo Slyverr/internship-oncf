@@ -18,7 +18,7 @@ export default async function Layout({
 						<AppHeader />
 					</div>
 
-					<div className="space-y-8 p-4 print:p-0">{children}</div>
+					<div className="page-enter space-y-8 p-4 print:p-0">{children}</div>
 				</BreadcrumbProvider>
 			</SidebarInset>
 		</SidebarProvider>
