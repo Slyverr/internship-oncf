@@ -49,3 +49,5 @@ The current database design needs review and is expected to change, so migration
 - Useful root commands: `bun run typecheck`, `bun run build`, and `bun run format-and-lint`.
 - Run focused API tests with `bun run test -- <pattern>` from `apps/api`; check the package script before assuming a test runner or command applies elsewhere.
 - In your handoff, state what changed, what you verified, and any unresolved gaps. Do not describe a placeholder, status field, or endpoint as a completed external integration.
+
+For web layout or UI work, read [docs/design-system.md](docs/design-system.md) before editing screens. Treat it as the shared spec for spacing, type hierarchy, hit areas, responsive rules, sidebar states, notifications, motion, and visual review. Preserve current theme token values unless the user explicitly asks for a palette change.

@@ -66,6 +66,8 @@ Keep apps/web/src/components/ui focused on primitives used by current screens. A
 
 ## Web layout and visual system
 
+Follow the detailed [web design system](design-system.md) for page structure, type hierarchy, target sizes, responsive behavior, sidebar states, and notification interactions. The current theme values are the source of truth; do not change them as part of layout work.
+
 - Treat apps/web/src/app/globals.css as the source of truth for semantic color, radius, and motion tokens. Use role-based classes such as bg-background, bg-card, text-muted-foreground, and border-border; avoid one-off palette colors in feature components.
 - The orange accent is ONCF-inspired. Official material confirms the orange logo, but this repository has not verified an official complete digital palette or exact color values. Do not present custom shades as official ONCF values.
 - Keep light and dark variants low in chroma. Check foreground, muted text, borders, focus rings, selected states, and charts in both modes when changing a theme token.
