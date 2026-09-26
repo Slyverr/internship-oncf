@@ -2,10 +2,13 @@
 
 import { useForm } from "@tanstack/react-form-nextjs";
 import { useRouter } from "next/navigation";
-import type { JSX } from "react";
+import { type JSX, useState } from "react";
 import { z } from "zod";
 import { FormFieldHeader } from "@/components/common/form-field-header";
-import { Button } from "@/components/ui/button";
+import {
+	GuidedFormActions,
+	GuidedFormProgress,
+} from "@/components/common/guided-form";
 import {
 	Card,
 	CardContent,
@@ -17,7 +20,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCustomersControllerCreate } from "@/lib/api/customers";
 import type { CustomerDetailDto } from "@/lib/api/generated.schemas";
-import { getFormErrorMessage } from "@/lib/form-utils";
+import {
+	getFormErrorMessage,
+	getFormStepErrors,
+	omitFormStepError,
+} from "@/lib/form-utils";
 
 const createCustomerSchema = z.object({
 	companyName: z
@@ -39,9 +46,17 @@ const createCustomerSchema = z.object({
 
 type CreateCustomerFormValues = z.infer<typeof createCustomerSchema>;
 
+const customerIdentitySchema = createCustomerSchema.pick({ companyName: true });
+const customerSteps = [
+	{ title: "Company", description: "Identification details" },
+	{ title: "Contact", description: "Address and communication" },
+];
+
 export function CustomerCreateForm(): JSX.Element {
 	const router = useRouter();
 	const mutation = useCustomersControllerCreate();
+	const [step, setStep] = useState(0);
+	const [stepErrors, setStepErrors] = useState<Record<string, string>>({});
 
 	const form = useForm({
 		defaultValues: {
@@ -80,16 +95,36 @@ export function CustomerCreateForm(): JSX.Element {
 		},
 	});
 
+	function continueToContact() {
+		const result = customerIdentitySchema.safeParse(form.state.values);
+		if (!result.success) {
+			setStepErrors(getFormStepErrors(result.error.issues));
+			return;
+		}
+
+		setStepErrors({});
+		setStep(1);
+	}
+
 	return (
 		<form
 			onSubmit={(e) => {
 				e.preventDefault();
 				e.stopPropagation();
+				if (step === 0) {
+					continueToContact();
+					return;
+				}
 				form.handleSubmit();
 			}}
 			className="space-y-4"
 		>
-			<Card>
+			<GuidedFormProgress steps={customerSteps} currentStep={step} />
+
+			<Card
+				hidden={step !== 0}
+				className={step === 0 ? "page-enter" : undefined}
+			>
 				<CardHeader>
 					<CardTitle>Company Overview</CardTitle>
 					<CardDescription>
@@ -99,7 +134,9 @@ export function CustomerCreateForm(): JSX.Element {
 				<CardContent className="grid gap-4 md:grid-cols-2">
 					<form.Field name="companyName">
 						{(field) => {
-							const errorMsg = getFormErrorMessage(field.state.meta.errors[0]);
+							const errorMsg =
+								stepErrors.companyName ??
+								getFormErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="space-y-2">
 									<FormFieldHeader
@@ -112,7 +149,12 @@ export function CustomerCreateForm(): JSX.Element {
 										id="companyName"
 										placeholder="ACME Corp"
 										value={field.state.value}
-										onChange={(e) => field.handleChange(e.target.value)}
+										onChange={(e) => {
+											field.handleChange(e.target.value);
+											setStepErrors((errors) =>
+												omitFormStepError(errors, "companyName"),
+											);
+										}}
 										className={
 											errorMsg
 												? "border-destructive focus-visible:ring-destructive/20"
@@ -154,7 +196,10 @@ export function CustomerCreateForm(): JSX.Element {
 				</CardContent>
 			</Card>
 
-			<Card>
+			<Card
+				hidden={step !== 1}
+				className={step === 1 ? "page-enter" : undefined}
+			>
 				<CardHeader>
 					<CardTitle>Contact & Location</CardTitle>
 					<CardDescription>Address and communication channels.</CardDescription>
@@ -231,25 +276,21 @@ export function CustomerCreateForm(): JSX.Element {
 				</CardContent>
 			</Card>
 
-			<div className="flex justify-end gap-4">
-				<Button type="button" variant="outline" onClick={() => router.back()}>
-					Cancel
-				</Button>
-				<form.Subscribe>
-					{(state: typeof form.state) => (
-						<Button
-							type="submit"
-							disabled={
-								!state.canSubmit || mutation.isPending || state.isSubmitting
-							}
-						>
-							{mutation.isPending || state.isSubmitting
-								? "Creating..."
-								: "Create Customer"}
-						</Button>
-					)}
-				</form.Subscribe>
-			</div>
+			<form.Subscribe>
+				{(state: typeof form.state) => (
+					<GuidedFormActions
+						currentStep={step}
+						stepCount={customerSteps.length}
+						onCancel={() => router.back()}
+						onPrevious={() => setStep(0)}
+						onContinue={continueToContact}
+						submitLabel="Create Customer"
+						pendingLabel="Creating Customer..."
+						isSubmitting={state.isSubmitting}
+						isPending={mutation.isPending}
+					/>
+				)}
+			</form.Subscribe>
 		</form>
 	);
 }

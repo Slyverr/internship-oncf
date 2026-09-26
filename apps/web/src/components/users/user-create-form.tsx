@@ -2,10 +2,13 @@
 
 import { useForm } from "@tanstack/react-form-nextjs";
 import { useRouter } from "next/navigation";
-import type { JSX } from "react";
+import { type JSX, useState } from "react";
 import { z } from "zod";
 import { FormFieldHeader } from "@/components/common/form-field-header";
-import { Button } from "@/components/ui/button";
+import {
+	GuidedFormActions,
+	GuidedFormProgress,
+} from "@/components/common/guided-form";
 import {
 	Card,
 	CardContent,
@@ -28,7 +31,11 @@ import {
 	type UserDetailDto,
 } from "@/lib/api/generated.schemas";
 import { useUsersControllerCreate } from "@/lib/api/users";
-import { getFormErrorMessage } from "@/lib/form-utils";
+import {
+	getFormErrorMessage,
+	getFormStepErrors,
+	omitFormStepError,
+} from "@/lib/form-utils";
 
 const createUserSchema = z.object({
 	email: z.email("Valid email is required").max(100),
@@ -47,9 +54,20 @@ const createUserSchema = z.object({
 
 type CreateUserFormValues = z.infer<typeof createUserSchema>;
 
+const userCredentialsSchema = createUserSchema.pick({
+	email: true,
+	password: true,
+});
+const userSteps = [
+	{ title: "Credentials", description: "Email and password" },
+	{ title: "Profile", description: "Name and role" },
+];
+
 export function UserCreateForm(): JSX.Element {
 	const router = useRouter();
 	const mutation = useUsersControllerCreate();
+	const [step, setStep] = useState(0);
+	const [stepErrors, setStepErrors] = useState<Record<string, string>>({});
 
 	const form = useForm({
 		defaultValues: {
@@ -90,16 +108,36 @@ export function UserCreateForm(): JSX.Element {
 		},
 	});
 
+	function continueToProfile() {
+		const result = userCredentialsSchema.safeParse(form.state.values);
+		if (!result.success) {
+			setStepErrors(getFormStepErrors(result.error.issues));
+			return;
+		}
+
+		setStepErrors({});
+		setStep(1);
+	}
+
 	return (
 		<form
 			onSubmit={(e) => {
 				e.preventDefault();
 				e.stopPropagation();
+				if (step === 0) {
+					continueToProfile();
+					return;
+				}
 				form.handleSubmit();
 			}}
 			className="space-y-4"
 		>
-			<Card>
+			<GuidedFormProgress steps={userSteps} currentStep={step} />
+
+			<Card
+				hidden={step !== 0}
+				className={step === 0 ? "page-enter" : undefined}
+			>
 				<CardHeader>
 					<CardTitle>Account Credentials</CardTitle>
 					<CardDescription>Primary login email and password.</CardDescription>
@@ -107,7 +145,9 @@ export function UserCreateForm(): JSX.Element {
 				<CardContent className="grid gap-4 md:grid-cols-2">
 					<form.Field name="email">
 						{(field) => {
-							const errorMsg = getFormErrorMessage(field.state.meta.errors[0]);
+							const errorMsg =
+								stepErrors.email ??
+								getFormErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="space-y-2">
 									<FormFieldHeader
@@ -121,7 +161,12 @@ export function UserCreateForm(): JSX.Element {
 										type="email"
 										placeholder="user@oncf.ma"
 										value={field.state.value}
-										onChange={(e) => field.handleChange(e.target.value)}
+										onChange={(e) => {
+											field.handleChange(e.target.value);
+											setStepErrors((errors) =>
+												omitFormStepError(errors, "email"),
+											);
+										}}
 										className={
 											errorMsg
 												? "border-destructive focus-visible:ring-destructive/20"
@@ -135,7 +180,9 @@ export function UserCreateForm(): JSX.Element {
 
 					<form.Field name="password">
 						{(field) => {
-							const errorMsg = getFormErrorMessage(field.state.meta.errors[0]);
+							const errorMsg =
+								stepErrors.password ??
+								getFormErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="space-y-2">
 									<FormFieldHeader
@@ -149,7 +196,12 @@ export function UserCreateForm(): JSX.Element {
 										type="password"
 										placeholder="••••••••"
 										value={field.state.value}
-										onChange={(e) => field.handleChange(e.target.value)}
+										onChange={(e) => {
+											field.handleChange(e.target.value);
+											setStepErrors((errors) =>
+												omitFormStepError(errors, "password"),
+											);
+										}}
 										className={
 											errorMsg
 												? "border-destructive focus-visible:ring-destructive/20"
@@ -163,7 +215,10 @@ export function UserCreateForm(): JSX.Element {
 				</CardContent>
 			</Card>
 
-			<Card>
+			<Card
+				hidden={step !== 1}
+				className={step === 1 ? "page-enter" : undefined}
+			>
 				<CardHeader>
 					<CardTitle>Personal Information & Role</CardTitle>
 					<CardDescription>
@@ -186,7 +241,12 @@ export function UserCreateForm(): JSX.Element {
 										id="firstName"
 										placeholder="John"
 										value={field.state.value}
-										onChange={(e) => field.handleChange(e.target.value)}
+										onChange={(e) => {
+											field.handleChange(e.target.value);
+											setStepErrors((errors) =>
+												omitFormStepError(errors, "password"),
+											);
+										}}
 										className={
 											errorMsg
 												? "border-destructive focus-visible:ring-destructive/20"
@@ -296,25 +356,21 @@ export function UserCreateForm(): JSX.Element {
 				</CardContent>
 			</Card>
 
-			<div className="flex justify-end gap-4">
-				<Button type="button" variant="outline" onClick={() => router.back()}>
-					Cancel
-				</Button>
-				<form.Subscribe>
-					{(state: typeof form.state) => (
-						<Button
-							type="submit"
-							disabled={
-								!state.canSubmit || mutation.isPending || state.isSubmitting
-							}
-						>
-							{mutation.isPending || state.isSubmitting
-								? "Creating..."
-								: "Create User"}
-						</Button>
-					)}
-				</form.Subscribe>
-			</div>
+			<form.Subscribe>
+				{(state: typeof form.state) => (
+					<GuidedFormActions
+						currentStep={step}
+						stepCount={userSteps.length}
+						onCancel={() => router.back()}
+						onPrevious={() => setStep(0)}
+						onContinue={continueToProfile}
+						submitLabel="Create User"
+						pendingLabel="Creating User..."
+						isSubmitting={state.isSubmitting}
+						isPending={mutation.isPending}
+					/>
+				)}
+			</form.Subscribe>
 		</form>
 	);
 }

@@ -8,14 +8,17 @@ import {
 } from "@ecommand/shared";
 import { useForm } from "@tanstack/react-form-nextjs";
 import { useRouter } from "next/navigation";
-import type { JSX } from "react";
+import { type JSX, useState } from "react";
 import { z } from "zod";
 import { ClaimPrioritySelect } from "@/components/claims/claim-priority-select";
 import { ClaimStatusSelect } from "@/components/claims/claim-status-select";
 import { FormFieldHeader } from "@/components/common/form-field-header";
+import {
+	GuidedFormActions,
+	GuidedFormProgress,
+} from "@/components/common/guided-form";
 import { CustomerSelect } from "@/components/customers/customer-select";
 import { OrderSelect } from "@/components/orders/order-select";
-import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -35,7 +38,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { useClaimsControllerCreate } from "@/lib/api/claims";
 import type { ClaimDetailDto } from "@/lib/api/generated.schemas";
 import { useOrdersControllerFindAll } from "@/lib/api/orders";
-import { getFormErrorMessage } from "@/lib/form-utils";
+import {
+	getFormErrorMessage,
+	getFormStepErrors,
+	omitFormStepError,
+} from "@/lib/form-utils";
 import { useAuth } from "@/providers/auth-provider";
 
 export const createClaimSchema = z.object({
@@ -64,6 +71,16 @@ export const createClaimSchema = z.object({
 
 type CreateClaimFormValues = z.infer<typeof createClaimSchema>;
 
+const claimBasicsSchema = createClaimSchema.pick({
+	customerId: true,
+	type: true,
+});
+const claimSteps = [
+	{ title: "Claim", description: "Customer and issue type" },
+	{ title: "Association", description: "Link an order if relevant" },
+	{ title: "Description", description: "Explain the issue" },
+];
+
 export function ClaimCreateForm(): JSX.Element {
 	const router = useRouter();
 	const { profile, hasPermission } = useAuth();
@@ -71,6 +88,8 @@ export function ClaimCreateForm(): JSX.Element {
 
 	const canManageOther = hasPermission(Permission.CLAIMS_MANAGE_OTHER);
 	const canManageStatus = hasPermission(Permission.CLAIMS_MANAGE_STATUS);
+	const [step, setStep] = useState(0);
+	const [stepErrors, setStepErrors] = useState<Record<string, string>>({});
 
 	const defaultValues: CreateClaimFormValues = {
 		customerId: profile?.customerId ?? 0,
@@ -115,6 +134,17 @@ export function ClaimCreateForm(): JSX.Element {
 		},
 	});
 
+	function continueToAssociation() {
+		const result = claimBasicsSchema.safeParse(form.state.values);
+		if (!result.success) {
+			setStepErrors(getFormStepErrors(result.error.issues));
+			return;
+		}
+
+		setStepErrors({});
+		setStep(1);
+	}
+
 	const { data: orders = [], isLoading: ordersIsLoading } =
 		useOrdersControllerFindAll({});
 
@@ -123,11 +153,24 @@ export function ClaimCreateForm(): JSX.Element {
 			onSubmit={(event) => {
 				event.preventDefault();
 				event.stopPropagation();
+				if (step === 0) {
+					continueToAssociation();
+					return;
+				}
+				if (step === 1) {
+					setStep(2);
+					return;
+				}
 				form.handleSubmit();
 			}}
 			className="space-y-4"
 		>
-			<Card>
+			<GuidedFormProgress steps={claimSteps} currentStep={step} />
+
+			<Card
+				hidden={step !== 0}
+				className={step === 0 ? "page-enter" : undefined}
+			>
 				<CardHeader>
 					<CardTitle>Claim Information</CardTitle>
 					<CardDescription>
@@ -140,7 +183,7 @@ export function ClaimCreateForm(): JSX.Element {
 						<form.Field name="customerId">
 							{(field) => {
 								const errorMsg = getFormErrorMessage(
-									field.state.meta.errors[0],
+									stepErrors.customerId ?? field.state.meta.errors[0],
 								);
 								return (
 									<div className="space-y-2">
@@ -161,7 +204,12 @@ export function ClaimCreateForm(): JSX.Element {
 												value={
 													field.state.value > 0 ? field.state.value : undefined
 												}
-												onChange={(value) => field.handleChange(value)}
+												onChange={(value) => {
+													field.handleChange(value);
+													setStepErrors((errors) =>
+														omitFormStepError(errors, "customerId"),
+													);
+												}}
 											/>
 										</div>
 									</div>
@@ -172,7 +220,9 @@ export function ClaimCreateForm(): JSX.Element {
 
 					<form.Field name="type">
 						{(field) => {
-							const errorMsg = getFormErrorMessage(field.state.meta.errors[0]);
+							const errorMsg =
+								stepErrors.type ??
+								getFormErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="space-y-2">
 									<FormFieldHeader
@@ -183,9 +233,12 @@ export function ClaimCreateForm(): JSX.Element {
 									/>
 									<Select
 										value={field.state.value}
-										onValueChange={(val) =>
-											field.handleChange(val as ClaimType)
-										}
+										onValueChange={(val) => {
+											field.handleChange(val as ClaimType);
+											setStepErrors((errors) =>
+												omitFormStepError(errors, "type"),
+											);
+										}}
 									>
 										<SelectTrigger className="w-full">
 											<SelectValue placeholder="Select claim type" />
@@ -247,7 +300,10 @@ export function ClaimCreateForm(): JSX.Element {
 				</CardContent>
 			</Card>
 
-			<Card>
+			<Card
+				hidden={step !== 1}
+				className={step === 1 ? "page-enter" : undefined}
+			>
 				<CardHeader>
 					<CardTitle>Associations & Scope</CardTitle>
 					<CardDescription>
@@ -272,7 +328,10 @@ export function ClaimCreateForm(): JSX.Element {
 				</CardContent>
 			</Card>
 
-			<Card>
+			<Card
+				hidden={step !== 2}
+				className={step === 2 ? "page-enter" : undefined}
+			>
 				<CardHeader>
 					<CardTitle>Issue Description & Resolution</CardTitle>
 					<CardDescription>
@@ -328,26 +387,21 @@ export function ClaimCreateForm(): JSX.Element {
 				</CardContent>
 			</Card>
 
-			<div className="flex justify-end gap-4">
-				<Button type="button" variant="outline" onClick={() => router.back()}>
-					Cancel
-				</Button>
-
-				<form.Subscribe>
-					{(state: typeof form.state) => (
-						<Button
-							type="submit"
-							disabled={
-								!state.canSubmit || mutation.isPending || state.isSubmitting
-							}
-						>
-							{mutation.isPending || state.isSubmitting
-								? "Creating Claim..."
-								: "Create Claim"}
-						</Button>
-					)}
-				</form.Subscribe>
-			</div>
+			<form.Subscribe>
+				{(state: typeof form.state) => (
+					<GuidedFormActions
+						currentStep={step}
+						stepCount={claimSteps.length}
+						onCancel={() => router.back()}
+						onPrevious={() => setStep((current) => Math.max(current - 1, 0))}
+						onContinue={step === 0 ? continueToAssociation : () => setStep(2)}
+						submitLabel="Create Claim"
+						pendingLabel="Creating Claim..."
+						isSubmitting={state.isSubmitting}
+						isPending={mutation.isPending}
+					/>
+				)}
+			</form.Subscribe>
 		</form>
 	);
 }

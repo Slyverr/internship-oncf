@@ -3,11 +3,14 @@
 import { Permission, ProgramStatus } from "@ecommand/shared";
 import { useForm } from "@tanstack/react-form-nextjs";
 import { useRouter } from "next/navigation";
-import type { JSX } from "react";
+import { type JSX, useState } from "react";
 import { z } from "zod";
 import { FormFieldHeader } from "@/components/common/form-field-header";
+import {
+	GuidedFormActions,
+	GuidedFormProgress,
+} from "@/components/common/guided-form";
 import { OrderSelect } from "@/components/orders/order-select";
-import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -22,7 +25,11 @@ import type { ProgramDetailDto } from "@/lib/api/generated.schemas";
 import { useOrdersControllerFindEligibleForPrograms } from "@/lib/api/orders";
 import { useProgramsControllerCreate } from "@/lib/api/programs";
 import { useUsersControllerFindAll } from "@/lib/api/users";
-import { getFormErrorMessage } from "@/lib/form-utils";
+import {
+	getFormErrorMessage,
+	getFormStepErrors,
+	omitFormStepError,
+} from "@/lib/form-utils";
 import { useAuth } from "@/providers/auth-provider";
 import { ProgramStatusSelect } from "./program-status-select";
 
@@ -54,6 +61,16 @@ const createProgramSchema = z.object({
 
 type CreateProgramFormValues = z.infer<typeof createProgramSchema>;
 
+const programPlanningSchema = createProgramSchema.pick({
+	orderId: true,
+	plannedDate: true,
+	quantityPlanned: true,
+});
+const programSteps = [
+	{ title: "Plan", description: "Order and planned quantity" },
+	{ title: "Execution", description: "Initial progress details" },
+];
+
 export function ProgramCreateForm(): JSX.Element {
 	const router = useRouter();
 	const { profile, hasPermission } = useAuth();
@@ -61,6 +78,8 @@ export function ProgramCreateForm(): JSX.Element {
 
 	const canManageOther = hasPermission(Permission.PROGRAMS_MANAGE_OTHER);
 	const canManageStatus = hasPermission(Permission.PROGRAMS_MANAGE_STATUS);
+	const [step, setStep] = useState(0);
+	const [stepErrors, setStepErrors] = useState<Record<string, string>>({});
 
 	const defaultValues: CreateProgramFormValues = {
 		orderId: 0,
@@ -103,6 +122,17 @@ export function ProgramCreateForm(): JSX.Element {
 		},
 	});
 
+	function continueToExecution() {
+		const result = programPlanningSchema.safeParse(form.state.values);
+		if (!result.success) {
+			setStepErrors(getFormStepErrors(result.error.issues));
+			return;
+		}
+
+		setStepErrors({});
+		setStep(1);
+	}
+
 	const { data: orders = [], isLoading: ordersIsLoading } =
 		useOrdersControllerFindEligibleForPrograms({});
 
@@ -114,11 +144,20 @@ export function ProgramCreateForm(): JSX.Element {
 			onSubmit={(event) => {
 				event.preventDefault();
 				event.stopPropagation();
+				if (step === 0) {
+					continueToExecution();
+					return;
+				}
 				form.handleSubmit();
 			}}
 			className="space-y-4"
 		>
-			<Card>
+			<GuidedFormProgress steps={programSteps} currentStep={step} />
+
+			<Card
+				hidden={step !== 0}
+				className={step === 0 ? "page-enter" : undefined}
+			>
 				<CardHeader>
 					<CardTitle>Program Information</CardTitle>
 					<CardDescription>
@@ -130,7 +169,9 @@ export function ProgramCreateForm(): JSX.Element {
 				<CardContent className="grid gap-4 md:grid-cols-2">
 					<form.Field name="orderId">
 						{(field) => {
-							const errorMsg = getFormErrorMessage(field.state.meta.errors[0]);
+							const errorMsg =
+								stepErrors.orderId ??
+								getFormErrorMessage(field.state.meta.errors[0]);
 
 							return (
 								<div className="space-y-2">
@@ -152,7 +193,12 @@ export function ProgramCreateForm(): JSX.Element {
 											value={
 												field.state.value > 0 ? field.state.value : undefined
 											}
-											onChange={(value) => field.handleChange(value)}
+											onChange={(value) => {
+												field.handleChange(value);
+												setStepErrors((errors) =>
+													omitFormStepError(errors, "orderId"),
+												);
+											}}
 											isLoading={ordersIsLoading}
 										/>
 									</div>
@@ -229,7 +275,9 @@ export function ProgramCreateForm(): JSX.Element {
 
 					<form.Field name="plannedDate">
 						{(field) => {
-							const errorMsg = getFormErrorMessage(field.state.meta.errors[0]);
+							const errorMsg =
+								stepErrors.plannedDate ??
+								getFormErrorMessage(field.state.meta.errors[0]);
 
 							return (
 								<div className="space-y-2">
@@ -248,7 +296,12 @@ export function ProgramCreateForm(): JSX.Element {
 												: ""
 										}
 										value={field.state.value}
-										onChange={(event) => field.handleChange(event.target.value)}
+										onChange={(event) => {
+											field.handleChange(event.target.value);
+											setStepErrors((errors) =>
+												omitFormStepError(errors, "plannedDate"),
+											);
+										}}
 									/>
 								</div>
 							);
@@ -257,7 +310,9 @@ export function ProgramCreateForm(): JSX.Element {
 
 					<form.Field name="quantityPlanned">
 						{(field) => {
-							const errorMsg = getFormErrorMessage(field.state.meta.errors[0]);
+							const errorMsg =
+								stepErrors.quantityPlanned ??
+								getFormErrorMessage(field.state.meta.errors[0]);
 
 							return (
 								<div className="space-y-2">
@@ -276,7 +331,12 @@ export function ProgramCreateForm(): JSX.Element {
 												: ""
 										}
 										value={field.state.value}
-										onChange={(event) => field.handleChange(event.target.value)}
+										onChange={(event) => {
+											field.handleChange(event.target.value);
+											setStepErrors((errors) =>
+												omitFormStepError(errors, "quantityPlanned"),
+											);
+										}}
 									/>
 								</div>
 							);
@@ -285,7 +345,10 @@ export function ProgramCreateForm(): JSX.Element {
 				</CardContent>
 			</Card>
 
-			<Card>
+			<Card
+				hidden={step !== 1}
+				className={step === 1 ? "page-enter" : undefined}
+			>
 				<CardHeader>
 					<CardTitle>Execution</CardTitle>
 					<CardDescription>
@@ -337,26 +400,21 @@ export function ProgramCreateForm(): JSX.Element {
 				</CardContent>
 			</Card>
 
-			<div className="flex justify-end gap-4">
-				<Button type="button" variant="outline" onClick={() => router.back()}>
-					Cancel
-				</Button>
-
-				<form.Subscribe>
-					{(state: typeof form.state) => (
-						<Button
-							type="submit"
-							disabled={
-								!state.canSubmit || mutation.isPending || state.isSubmitting
-							}
-						>
-							{mutation.isPending || state.isSubmitting
-								? "Creating Program..."
-								: "Create Program"}
-						</Button>
-					)}
-				</form.Subscribe>
-			</div>
+			<form.Subscribe>
+				{(state: typeof form.state) => (
+					<GuidedFormActions
+						currentStep={step}
+						stepCount={programSteps.length}
+						onCancel={() => router.back()}
+						onPrevious={() => setStep(0)}
+						onContinue={continueToExecution}
+						submitLabel="Create Program"
+						pendingLabel="Creating Program..."
+						isSubmitting={state.isSubmitting}
+						isPending={mutation.isPending}
+					/>
+				)}
+			</form.Subscribe>
 		</form>
 	);
 }

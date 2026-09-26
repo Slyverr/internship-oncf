@@ -2,14 +2,16 @@
 
 import { OrderStatus, Permission } from "@ecommand/shared";
 import { useForm } from "@tanstack/react-form-nextjs";
-import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type JSX, useState } from "react";
 import { z } from "zod";
 import { FormFieldHeader } from "@/components/common/form-field-header";
+import {
+	GuidedFormActions,
+	GuidedFormProgress,
+} from "@/components/common/guided-form";
 import { CustomerSelect } from "@/components/customers/customer-select";
 import { GoodSelect } from "@/components/goods/good-select";
-import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -47,6 +49,11 @@ const createOrderSchema = z.object({
 	startDate: z.string().optional(),
 	endDate: z.string().optional(),
 });
+
+const orderSteps = [
+	{ title: "Order details", description: "Customer and goods" },
+	{ title: "Schedule", description: "Dates and instructions" },
+];
 
 type CreateOrderFormValues = z.infer<typeof createOrderSchema>;
 
@@ -159,43 +166,7 @@ export function OrderCreateForm(): JSX.Element {
 			}}
 			className="space-y-4"
 		>
-			<ol
-				aria-label="Order creation steps"
-				className="grid max-w-3xl grid-cols-2 gap-3"
-			>
-				{[
-					{ title: "Order details", description: "Customer and goods" },
-					{ title: "Schedule", description: "Dates and instructions" },
-				].map((item, index) => (
-					<li
-						key={item.title}
-						aria-current={step === index ? "step" : undefined}
-						className={`flex items-center gap-3 rounded-lg border p-3 transition-colors ${
-							step === index
-								? "border-primary bg-primary/5"
-								: step > index
-									? "border-primary/30 bg-muted/40"
-									: "border-border"
-						}`}
-					>
-						<span
-							className={`flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${
-								step >= index
-									? "bg-primary text-primary-foreground"
-									: "bg-muted text-muted-foreground"
-							}`}
-						>
-							{step > index ? "✓" : index + 1}
-						</span>
-						<span className="grid gap-0.5">
-							<span className="text-sm font-medium">{item.title}</span>
-							<span className="text-xs text-muted-foreground">
-								{item.description}
-							</span>
-						</span>
-					</li>
-				))}
-			</ol>
+			<GuidedFormProgress steps={orderSteps} currentStep={step} />
 
 			<section
 				key={step}
@@ -501,40 +472,21 @@ export function OrderCreateForm(): JSX.Element {
 				)}
 			</section>
 
-			<div className="flex flex-wrap items-center justify-between gap-3">
-				{step === 0 ? (
-					<Button type="button" variant="outline" onClick={() => router.back()}>
-						Cancel
-					</Button>
-				) : (
-					<Button type="button" variant="outline" onClick={() => setStep(0)}>
-						<ArrowLeftIcon />
-						Back
-					</Button>
+			<form.Subscribe>
+				{(state: typeof form.state) => (
+					<GuidedFormActions
+						currentStep={step}
+						stepCount={orderSteps.length}
+						onCancel={() => router.back()}
+						onPrevious={() => setStep(0)}
+						onContinue={continueToSchedule}
+						submitLabel="Create Order"
+						pendingLabel="Creating Order..."
+						isSubmitting={state.isSubmitting}
+						isPending={mutation.isPending}
+					/>
 				)}
-
-				{step === 0 ? (
-					<Button type="button" onClick={continueToSchedule}>
-						Continue
-						<ArrowRightIcon />
-					</Button>
-				) : (
-					<form.Subscribe>
-						{(state: typeof form.state) => (
-							<Button
-								type="submit"
-								disabled={
-									!state.canSubmit || mutation.isPending || state.isSubmitting
-								}
-							>
-								{mutation.isPending || state.isSubmitting
-									? "Creating Order..."
-									: "Create Order"}
-							</Button>
-						)}
-					</form.Subscribe>
-				)}
-			</div>
+			</form.Subscribe>
 		</form>
 	);
 }
