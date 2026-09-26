@@ -10,7 +10,7 @@ async function bootstrap() {
 	app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
 	const config = new DocumentBuilder()
-		.setTitle("ONCF Ecommand API")
+		.setTitle("ONCF ECommand API")
 		.setDescription("ONCF freight order management")
 		.setVersion("1.0")
 		.addBearerAuth()

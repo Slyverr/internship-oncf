@@ -18,8 +18,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
 	title: {
-		default: "ONCF Ecommand",
-		template: "%s | ONCF Ecommand",
+		default: "ONCF ECommand",
+		template: "%s | ONCF ECommand",
 	},
 	description: "",
 };
