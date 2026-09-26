@@ -81,6 +81,10 @@
 	padding-right: var(--spacing);
 }
 
+@utility py-control {
+	padding-block: var(--spacing-control);
+}
+
 @utility py-compact {
 	padding-block: var(--spacing);
 }
