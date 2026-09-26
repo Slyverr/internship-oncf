@@ -199,6 +199,7 @@ export function NotificationLink() {
 						<div className="border-t border-border p-3">
 							<Button
 								variant="ghost"
+								nativeButton={false}
 								className="min-h-11 w-full"
 								render={
 									<Link
