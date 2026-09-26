@@ -5,8 +5,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
+import {
+	GuidedFormActions,
+	GuidedFormProgress,
+} from "@/components/common/guided-form";
 import { GoodSelect } from "@/components/goods/good-select";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +27,10 @@ import {
 import { useAuth } from "@/providers/auth-provider";
 
 const ORDER_QUANTITY_PATTERN = /^\d+(\.\d{1,3})?$/;
+const orderEditSteps = [
+	{ title: "Order details", description: "Goods, unit, and quantity" },
+	{ title: "Schedule", description: "Dates and handling details" },
+];
 
 export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 	const router = useRouter();
@@ -32,6 +39,7 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 	const mutation = useOrdersControllerUpdate();
 
 	const [error, setError] = useState("");
+	const [step, setStep] = useState(0);
 	const [values, setValues] = useState({
 		goodsId: order.goodsId,
 		unitId: order.unitId,
@@ -62,15 +70,8 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 		setError("");
 	}
 
-	async function submit(event: FormEvent<HTMLFormElement>) {
-		event.preventDefault();
-
-		if (mutation.isPending || !hasChanges) return;
-
-		setError("");
-
+	function validateOrderDetails() {
 		const quantity = values.quantityDemanded.trim();
-
 		if (
 			!values.goodsId ||
 			!values.unitId ||
@@ -80,8 +81,32 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 			setError(
 				"Select goods and a unit, and enter a positive quantity with at most three decimal places.",
 			);
+			return false;
+		}
+
+		setError("");
+		return true;
+	}
+
+	function continueToSchedule() {
+		if (validateOrderDetails()) setStep(1);
+	}
+
+	async function submit(event: FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+
+		if (mutation.isPending) return;
+		if (step === 0) {
+			continueToSchedule();
 			return;
 		}
+		if (!hasChanges) return;
+
+		setError("");
+
+		const quantity = values.quantityDemanded.trim();
+
+		if (!validateOrderDetails()) return;
 
 		if (
 			!values.orderDate ||
@@ -171,16 +196,19 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 
 	return (
 		<form onSubmit={submit} className="space-y-4">
+			<GuidedFormProgress steps={orderEditSteps} currentStep={step} />
+
 			<Card>
 				<CardHeader>
 					<CardTitle>Edit {order.orderNumber}</CardTitle>
 					<p>{order.customer.companyName}</p>
 				</CardHeader>
 
-				<CardContent>
+				<CardContent className="space-y-4">
 					<fieldset
-						disabled={mutation.isPending}
-						className="grid gap-4 md:grid-cols-2"
+						disabled={mutation.isPending || step !== 0}
+						hidden={step !== 0}
+						className={`grid gap-4 md:grid-cols-2 ${step === 0 ? "page-enter" : ""}`}
 					>
 						<div className="space-y-2">
 							<Label>Goods / Commodity</Label>
@@ -210,7 +238,13 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 								}
 							/>
 						</div>
+					</fieldset>
 
+					<fieldset
+						disabled={mutation.isPending || step !== 1}
+						hidden={step !== 1}
+						className={`grid gap-4 md:grid-cols-2 ${step === 1 ? "page-enter" : ""}`}
+					>
 						<div className="space-y-2">
 							<Label htmlFor="supervisor">Supervisor</Label>
 							<Input
@@ -263,20 +297,18 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 				</p>
 			)}
 
-			<div className="flex justify-end gap-4">
-				<Button
-					type="button"
-					variant="outline"
-					disabled={mutation.isPending}
-					onClick={() => router.push(`/dashboard/orders/${order.id}`)}
-				>
-					Back to Order
-				</Button>
-
-				<Button type="submit" disabled={mutation.isPending || !hasChanges}>
-					{mutation.isPending ? "Saving..." : "Save Changes"}
-				</Button>
-			</div>
+			<GuidedFormActions
+				currentStep={step}
+				stepCount={orderEditSteps.length}
+				onCancel={() => router.push(`/dashboard/orders/${order.id}`)}
+				onPrevious={() => setStep(0)}
+				onContinue={continueToSchedule}
+				submitLabel="Save Changes"
+				pendingLabel="Saving..."
+				isSubmitting={false}
+				isPending={mutation.isPending}
+				isSubmitDisabled={!hasChanges}
+			/>
 		</form>
 	);
 }
