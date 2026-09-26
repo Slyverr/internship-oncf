@@ -3,6 +3,7 @@ import {
 	BadgeAlertIcon,
 	Building2Icon,
 	CalendarIcon,
+	ChartNoAxesCombinedIcon,
 	HomeIcon,
 	PackageIcon,
 	UsersIcon,
@@ -28,6 +29,13 @@ export const sidebarRoutes = [
 		icon: CalendarIcon,
 		exact: false,
 		permission: Permission.PROGRAMS_READ,
+	},
+	{
+		title: "Reports",
+		url: "/dashboard/reports",
+		icon: ChartNoAxesCombinedIcon,
+		exact: false,
+		permission: Permission.REPORTS_READ,
 	},
 	{
 		title: "Claims",

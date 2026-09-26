@@ -8,15 +8,17 @@ export default async function Layout({
 }: Readonly<{ children: React.ReactNode }>) {
 	return (
 		<SidebarProvider>
-			<AppSidebar />
+			<AppSidebar className="print:hidden" />
 
 			<SidebarInset>
 				<BreadcrumbProvider
 					prefix={[{ label: "Dashboard", href: "/dashboard" }]}
 				>
-					<AppHeader />
+					<div className="print:hidden">
+						<AppHeader />
+					</div>
 
-					<div className="space-y-8 p-4">{children}</div>
+					<div className="space-y-8 p-4 print:p-0">{children}</div>
 				</BreadcrumbProvider>
 			</SidebarInset>
 		</SidebarProvider>
