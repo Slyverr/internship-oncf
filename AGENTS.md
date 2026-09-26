@@ -39,7 +39,7 @@ The current database design needs review and is expected to change, so migration
 ## Commit conventions
 
 - Make one logical change per commit. Keep feature, bug fix, refactor, dependency, and documentation changes separate when they can be reviewed independently.
-- Use Conventional Commit types and a short scope: `feat(auth): add password reset`, `fix(orders): enforce draft-only edits`, `docs(api): describe local setup`.
+- Match the existing history: use app/domain scopes such as `feat(web/orders): add draft editing`, `fix(api/orders): validate draft updates`, and `refactor(api/auth): extract database queries`. Use `shared/auth`, `api/drizzle`, or `config/turbo` for those areas. Use an app-only scope for changes across features in one app, and omit the scope for repository-wide changes such as `docs: document project setup`.
 - Use an imperative, lowercase subject with no trailing period. Valid types include `feat`, `fix`, `refactor`, `chore`, and `docs`.
 - Do not commit secrets, local `.env` files, generated local mail, uploads, or database data.
 

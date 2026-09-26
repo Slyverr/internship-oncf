@@ -62,7 +62,7 @@ For disposable local development only, Drizzle `db:push` can synchronize the cur
 ## Commit conventions
 
 - One logical change per commit; split unrelated features, fixes, docs, and dependency changes.
-- Use Conventional Commit format with a concise scope: `feat(orders): add order filters`, `fix(auth): reject expired reset links`, `docs(api): explain local setup`.
+- Follow the existing commit history with app/domain scopes: `feat(web/orders): add order filters`, `fix(api/auth): reject expired reset links`, `refactor(api/drizzle): revise schema relations`, and `fix(shared/auth): update permissions`. Use an app-only scope when several features are involved; omit the scope for repository-wide work, for example `docs: explain local setup`.
 - Use imperative, lowercase subjects without a trailing period.
 - Common types: `feat`, `fix`, `refactor`, `chore`, and `docs`.
 - Do not commit environment secrets, local mail messages, uploaded files, or database files.
