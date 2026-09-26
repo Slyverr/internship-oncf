@@ -43,7 +43,7 @@ export class ClaimsService {
 			if (query.userId !== user.id) {
 				query.userId = user.id;
 			}
-			if (user.customerId && !query.customerId) {
+			if (user.customerId !== null) {
 				query.customerId = user.customerId;
 			}
 		}

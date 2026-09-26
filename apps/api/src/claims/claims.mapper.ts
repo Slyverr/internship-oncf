@@ -12,6 +12,14 @@ export class ClaimsMapper {
 	toCreate(dto: CreateClaimDto, user: AuthUser): ClaimInsert {
 		const userId = dto.userId ?? user.id;
 		if (
+			user.customerId !== null &&
+			user.customerId !== dto.customerId &&
+			!hasAnyPermission(user, Permission.CLAIMS_MANAGE_OTHER)
+		) {
+			throw new ForbiddenException("Cannot create claims for other customers");
+		}
+
+		if (
 			userId !== user.id &&
 			!hasAnyPermission(user, Permission.CLAIMS_MANAGE_OTHER)
 		) {
