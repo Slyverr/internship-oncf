@@ -35,13 +35,13 @@ const themeOptions: {
 	{
 		value: "light",
 		label: "Light",
-		description: "Bright, clear surfaces",
+		description: "Soft warm-neutral surfaces",
 		Icon: SunIcon,
 	},
 	{
 		value: "dark",
 		label: "Dark",
-		description: "Warm charcoal surfaces with softer orange accents",
+		description: "Low-glare charcoal surfaces with muted orange accents",
 		Icon: MoonIcon,
 	},
 ];
