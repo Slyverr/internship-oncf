@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ProgramDetailDto } from "@/lib/api/generated.schemas";
+import { formatDisplayDate } from "@/lib/date-utils";
 
 export function ProgramOverview({ program }: { program: ProgramDetailDto }) {
 	return (
@@ -23,9 +24,12 @@ export function ProgramOverview({ program }: { program: ProgramDetailDto }) {
 					/>
 					<Detail
 						label="Planned Date"
-						value={formatDate(program.plannedDate)}
+						value={formatDisplayDate(program.plannedDate)}
 					/>
-					<Detail label="Realized At" value={formatDate(program.realizedAt)} />
+					<Detail
+						label="Realized At"
+						value={formatDisplayDate(program.realizedAt)}
+					/>
 					<Detail
 						label="Realized By"
 						value={
@@ -59,7 +63,10 @@ export function ProgramOverview({ program }: { program: ProgramDetailDto }) {
 
 				<CardContent className="space-y-4">
 					<Detail label="DTM Status" value={program.dtmStatus ?? "—"} />
-					<Detail label="Sent to DTM" value={formatDate(program.sentToDtmAt)} />
+					<Detail
+						label="Sent to DTM"
+						value={formatDisplayDate(program.sentToDtmAt)}
+					/>
 				</CardContent>
 			</Card>
 
@@ -77,8 +84,14 @@ export function ProgramOverview({ program }: { program: ProgramDetailDto }) {
 						label="Created By"
 						value={`${program.createdByUser.firstName} ${program.createdByUser.lastName}`}
 					/>
-					<Detail label="Created" value={formatDate(program.createdAt)} />
-					<Detail label="Updated" value={formatDate(program.updatedAt)} />
+					<Detail
+						label="Created"
+						value={formatDisplayDate(program.createdAt)}
+					/>
+					<Detail
+						label="Updated"
+						value={formatDisplayDate(program.updatedAt)}
+					/>
 				</CardContent>
 			</Card>
 		</div>
@@ -101,8 +114,4 @@ function Metric({ label, value }: { label: string; value: number }) {
 			<p className="text-2xl font-semibold">{value}</p>
 		</div>
 	);
-}
-
-function formatDate(date?: string | null) {
-	return date ? new Date(date).toLocaleDateString() : "—";
 }

@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { CustomerDetailDto } from "@/lib/api/generated.schemas";
+import { formatDisplayDate } from "@/lib/date-utils";
 
 export function CustomerOverview({
 	customer,
@@ -40,8 +41,14 @@ export function CustomerOverview({
 					<CardTitle>Metadata</CardTitle>
 				</CardHeader>
 				<CardContent className="grid gap-4 sm:grid-cols-2">
-					<Metric label="Created Date" value={formatDate(customer.createdAt)} />
-					<Metric label="Last Updated" value={formatDate(customer.updatedAt)} />
+					<Metric
+						label="Created Date"
+						value={formatDisplayDate(customer.createdAt)}
+					/>
+					<Metric
+						label="Last Updated"
+						value={formatDisplayDate(customer.updatedAt)}
+					/>
 				</CardContent>
 			</Card>
 		</div>
@@ -64,8 +71,4 @@ function Metric({ label, value }: { label: string; value: string }) {
 			<p className="text-base font-semibold">{value}</p>
 		</div>
 	);
-}
-
-function formatDate(date?: string | null) {
-	return date ? new Date(date).toLocaleDateString() : "—";
 }

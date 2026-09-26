@@ -19,6 +19,7 @@ import {
 	getProgramsControllerFindOneQueryKey,
 	useProgramsControllerUpdate,
 } from "@/lib/api/programs";
+import { toDateInputValue } from "@/lib/date-utils";
 import { getFormErrorMessage } from "@/lib/form-utils";
 
 const QUANTITY_PATTERN = /^\d+(\.\d{1,3})?$/;
@@ -27,7 +28,7 @@ export function ProgramEditForm({ program }: { program: ProgramDetailDto }) {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const mutation = useProgramsControllerUpdate();
-	const initialPlannedDate = program.plannedDate.slice(0, 10);
+	const initialPlannedDate = toDateInputValue(program.plannedDate);
 	const [plannedDate, setPlannedDate] = useState(initialPlannedDate);
 	const [quantityPlanned, setQuantityPlanned] = useState(
 		program.quantityPlanned,

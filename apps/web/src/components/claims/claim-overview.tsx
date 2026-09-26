@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ClaimDetailDto } from "@/lib/api/generated.schemas";
+import { formatDisplayDate } from "@/lib/date-utils";
 import { ClaimCommentForm } from "./claim-comment-form";
 import { ClaimComments } from "./claim-comments";
 
@@ -34,8 +35,14 @@ export function ClaimOverview({ claim }: { claim: ClaimDetailDto }) {
 							value={claim.priority ? claim.priority.toUpperCase() : "—"}
 						/>
 						<Detail label="Created By" value={createdBy} />
-						<Detail label="Created Date" value={formatDate(claim.createdAt)} />
-						<Detail label="Last Updated" value={formatDate(claim.updatedAt)} />
+						<Detail
+							label="Created Date"
+							value={formatDisplayDate(claim.createdAt)}
+						/>
+						<Detail
+							label="Last Updated"
+							value={formatDisplayDate(claim.updatedAt)}
+						/>
 					</CardContent>
 				</Card>
 
@@ -82,7 +89,10 @@ export function ClaimOverview({ claim }: { claim: ClaimDetailDto }) {
 							value={claim.resolution ?? "—"}
 						/>
 						<Detail label="Closed By" value={closedBy} />
-						<Detail label="Closed Date" value={formatDate(claim.closedAt)} />
+						<Detail
+							label="Closed Date"
+							value={formatDisplayDate(claim.closedAt)}
+						/>
 					</CardContent>
 				</Card>
 			</div>
@@ -112,8 +122,4 @@ function Metric({ label, value }: { label: string; value: number }) {
 			<p className="text-2xl font-semibold">{value}</p>
 		</div>
 	);
-}
-
-function formatDate(date?: string | null) {
-	return date ? new Date(date).toLocaleDateString() : "—";
 }

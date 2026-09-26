@@ -34,6 +34,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { ProgramListDto } from "@/lib/api/generated.schemas";
+import { formatDisplayDate } from "@/lib/date-utils";
 
 interface ProgramsTableProps {
 	data: ProgramListDto[];
@@ -89,7 +90,7 @@ const columns: ColumnDef<typeof features, ProgramListDto>[] = [
 		header: "Planned Date",
 		cell: (info) => {
 			const value = info.getValue<string>();
-			return value ? new Date(value).toLocaleDateString() : "—";
+			return formatDisplayDate(value);
 		},
 		sortFn: "datetime",
 		enableSorting: true,

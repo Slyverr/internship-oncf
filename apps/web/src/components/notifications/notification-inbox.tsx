@@ -12,6 +12,7 @@ import {
 	useNotificationsControllerMarkAllAsRead,
 	useNotificationsControllerMarkAsRead,
 } from "@/lib/api/notifications";
+import { formatDisplayDateTime } from "@/lib/date-utils";
 
 function entityLink(notification: NotificationListDto) {
 	const routes: Record<string, string> = {
@@ -124,7 +125,7 @@ export function NotificationInbox() {
 													className="text-xs text-muted-foreground"
 													dateTime={item.createdAt}
 												>
-													{new Date(item.createdAt).toLocaleString()}
+													{formatDisplayDateTime(item.createdAt)}
 												</time>
 											</div>
 											{!item.readAt && (

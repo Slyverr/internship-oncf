@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/table";
 import { useDebounce } from "@/hooks/use-debounce";
 import { ClaimListDto } from "@/lib/api/generated.schemas";
+import { formatDisplayDate } from "@/lib/date-utils";
 
 interface ClaimsTableProps {
 	data: ClaimListDto[];
@@ -97,7 +98,7 @@ const columns: ColumnDef<typeof features, ClaimListDto>[] = [
 		header: "Created At",
 		cell: (info) => {
 			const value = info.getValue<string>();
-			return value ? new Date(value).toLocaleDateString() : "—";
+			return formatDisplayDate(value);
 		},
 	},
 ];

@@ -24,6 +24,7 @@ import {
 	getOrdersControllerFindOneQueryKey,
 	useOrdersControllerUpdate,
 } from "@/lib/api/orders";
+import { toDateInputValue } from "@/lib/date-utils";
 import { useAuth } from "@/providers/auth-provider";
 
 const ORDER_QUANTITY_PATTERN = /^\d+(\.\d{1,3})?$/;
@@ -46,9 +47,9 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 		quantityDemanded: order.quantityDemanded,
 		supervisor: order.supervisor ?? "",
 		remarks: order.remarks ?? "",
-		orderDate: order.orderDate.slice(0, 10),
-		startDate: order.startDate?.slice(0, 10) ?? "",
-		endDate: order.endDate?.slice(0, 10) ?? "",
+		orderDate: toDateInputValue(order.orderDate),
+		startDate: toDateInputValue(order.startDate),
+		endDate: toDateInputValue(order.endDate),
 	});
 	const [savedValues, setSavedValues] = useState(values);
 

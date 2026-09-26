@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { UserDetailDto } from "@/lib/api/generated.schemas";
+import { formatDisplayDateTime } from "@/lib/date-utils";
 
 export function UserOverview({ user }: { user: UserDetailDto }) {
 	return (
@@ -53,9 +54,18 @@ export function UserOverview({ user }: { user: UserDetailDto }) {
 					<CardTitle>Activity Timestamps</CardTitle>
 				</CardHeader>
 				<CardContent className="grid gap-4 sm:grid-cols-3">
-					<Metric label="Last Login" value={formatDate(user.lastLogin)} />
-					<Metric label="Created Date" value={formatDate(user.createdAt)} />
-					<Metric label="Last Updated" value={formatDate(user.updatedAt)} />
+					<Metric
+						label="Last Login"
+						value={formatDisplayDateTime(user.lastLogin)}
+					/>
+					<Metric
+						label="Created Date"
+						value={formatDisplayDateTime(user.createdAt)}
+					/>
+					<Metric
+						label="Last Updated"
+						value={formatDisplayDateTime(user.updatedAt)}
+					/>
 				</CardContent>
 			</Card>
 		</div>
@@ -78,8 +88,4 @@ function Metric({ label, value }: { label: string; value: string }) {
 			<p className="text-base font-semibold">{value}</p>
 		</div>
 	);
-}
-
-function formatDate(date?: string | null) {
-	return date ? new Date(date).toLocaleString() : "—";
 }

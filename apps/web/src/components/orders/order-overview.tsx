@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { OrderDetailDto } from "@/lib/api/generated.schemas";
+import { formatDisplayDate } from "@/lib/date-utils";
 import { OrderAttachments } from "./order-attachments";
 
 export function OrderOverview({ order }: { order: OrderDetailDto }) {
@@ -34,9 +35,15 @@ export function OrderOverview({ order }: { order: OrderDetailDto }) {
 							}
 						/>
 
-						<Detail label="Order Date" value={formatDate(order.orderDate)} />
+						<Detail
+							label="Order Date"
+							value={formatDisplayDate(order.orderDate)}
+						/>
 
-						<Detail label="Created" value={formatDate(order.createdAt)} />
+						<Detail
+							label="Created"
+							value={formatDisplayDate(order.createdAt)}
+						/>
 					</CardContent>
 				</Card>
 
@@ -95,11 +102,17 @@ export function OrderOverview({ order }: { order: OrderDetailDto }) {
 					</CardHeader>
 
 					<CardContent className="flex flex-col gap-4">
-						<Detail label="Start Date" value={formatDate(order.startDate)} />
+						<Detail
+							label="Start Date"
+							value={formatDisplayDate(order.startDate)}
+						/>
 
-						<Detail label="End Date" value={formatDate(order.endDate)} />
+						<Detail label="End Date" value={formatDisplayDate(order.endDate)} />
 
-						<Detail label="Updated" value={formatDate(order.updatedAt)} />
+						<Detail
+							label="Updated"
+							value={formatDisplayDate(order.updatedAt)}
+						/>
 					</CardContent>
 				</Card>
 			</div>
@@ -107,14 +120,6 @@ export function OrderOverview({ order }: { order: OrderDetailDto }) {
 			<OrderAttachments orderId={order.id} />
 		</div>
 	);
-}
-
-function formatDate(value: string | null) {
-	if (!value) {
-		return "—";
-	}
-
-	return new Date(value).toLocaleDateString();
 }
 
 function Detail({ label, value }: { label: string; value: string }) {

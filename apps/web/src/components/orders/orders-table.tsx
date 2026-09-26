@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/table";
 import { useDebounce } from "@/hooks/use-debounce";
 import { OrderListDto } from "@/lib/api/generated.schemas";
+import { formatDisplayDate } from "@/lib/date-utils";
 
 interface OrdersTableProps {
 	data: OrderListDto[];
@@ -83,7 +84,7 @@ const columns: ColumnDef<typeof features, OrderListDto>[] = [
 		cell: (info) => {
 			const value = info.getValue<string | null>();
 
-			return value ? new Date(value).toLocaleDateString() : "—";
+			return formatDisplayDate(value);
 		},
 	},
 ];
