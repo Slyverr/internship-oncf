@@ -16,14 +16,14 @@ export function FormFieldHeader({
 	error,
 }: FormFieldHeaderProps) {
 	return (
-		<div className="flex items-center justify-between gap-2">
+		<div className="flex items-center justify-between gap-4">
 			<Label htmlFor={htmlFor} className={error ? "text-destructive" : ""}>
 				{label} {required ? "*" : ""}
 			</Label>
 			{error ? (
 				<span
 					role="alert"
-					className="inline-flex items-center gap-1 text-xs font-medium text-destructive"
+					className="inline-flex items-center gap-compact text-xs font-medium text-destructive"
 				>
 					<AlertCircle className="h-3.5 w-3.5 shrink-0" />
 					{error}
