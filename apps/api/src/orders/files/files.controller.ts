@@ -7,7 +7,6 @@ import {
 	Get,
 	HttpStatus,
 	MaxFileSizeValidator,
-	Param,
 	ParseFilePipe,
 	Post,
 	Request,
@@ -24,6 +23,7 @@ import {
 } from "@/attachments/attachments.constants";
 import type { AuthRequest } from "@/auth/auth.types";
 import { RequireAny } from "@/auth/permissions.decorator";
+import { ApiPathParam } from "@/common/decorators/api-path-param.decorator";
 import { createCrudResponses } from "@/common/decorators/api-crud-responses.decorator";
 import { MessageResponseDto } from "@/common/responses/message.dto";
 import { OrderOwnershipGuard } from "@/orders/guards/order-ownership.guard";
@@ -36,8 +36,8 @@ import { FileIdPipe } from "./pipes/file-id.pipe";
 import { UploadFileDto } from "./requests/upload-file.dto";
 import { FileDto } from "./responses/file.dto";
 
-const OrderIdParam = () => Param("id", OrderIdPipe);
-const FileIdParam = () => Param("fileId", FileIdPipe);
+const OrderIdParam = () => ApiPathParam("id", OrderIdPipe);
+const FileIdParam = () => ApiPathParam("fileId", FileIdPipe);
 
 const {
 	list: FileListResponse,

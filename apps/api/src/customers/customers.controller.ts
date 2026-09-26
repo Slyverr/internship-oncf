@@ -4,13 +4,13 @@ import {
 	Controller,
 	Delete,
 	Get,
-	Param,
 	ParseIntPipe,
 	Post,
 	Put,
 	Query,
 } from "@nestjs/common";
 import { RequireAny } from "@/auth/permissions.decorator";
+import { ApiPathParam } from "@/common/decorators/api-path-param.decorator";
 import { createCrudResponses } from "@/common/decorators/api-crud-responses.decorator";
 import { CustomersService } from "./customers.service";
 import type { CustomerId } from "./customers.types";
@@ -21,7 +21,7 @@ import { CustomerDeleteDto } from "./responses/customer-delete.dto";
 import { CustomerDetailDto } from "./responses/customer-detail.dto";
 import { CustomerListDto } from "./responses/customer-list.dto";
 
-const CustomerIdParam = () => Param("id", ParseIntPipe);
+const CustomerIdParam = () => ApiPathParam("id", ParseIntPipe);
 
 const {
 	list: CustomerListResponse,

@@ -4,13 +4,13 @@ import {
 	Controller,
 	Delete,
 	Get,
-	Param,
 	ParseIntPipe,
 	Post,
 	Put,
 	Request,
 } from "@nestjs/common";
 import type { AuthRequest } from "@/auth/auth.types";
+import { ApiPathParam } from "@/common/decorators/api-path-param.decorator";
 import { RequireAny } from "@/auth/permissions.decorator";
 import { createCrudResponses } from "@/common/decorators/api-crud-responses.decorator";
 import { CreateUserDto } from "./requests/create-user.dto";
@@ -21,7 +21,7 @@ import { UserListDto } from "./responses/user-list.dto";
 import { UsersService } from "./users.service";
 import type { UserId } from "./users.types";
 
-const UserIdParam = () => Param("id", ParseIntPipe);
+const UserIdParam = () => ApiPathParam("id", ParseIntPipe);
 
 const {
 	list: UserListResponse,

@@ -6,7 +6,6 @@ import {
 	Get,
 	HttpCode,
 	HttpStatus,
-	Param,
 	Patch,
 	Post,
 	Query,
@@ -14,6 +13,7 @@ import {
 	UseGuards,
 } from "@nestjs/common";
 import type { AuthRequest } from "@/auth/auth.types";
+import { ApiPathParam } from "@/common/decorators/api-path-param.decorator";
 import { RequireAny } from "@/auth/permissions.decorator";
 import { createCrudResponses } from "@/common/decorators/api-crud-responses.decorator";
 import { ListQueryDto } from "@/common/requests/list-query.dto";
@@ -30,7 +30,7 @@ import { OrderDeleteDto } from "./responses/order-delete.dto";
 import { OrderDetailDto } from "./responses/order-detail.dto";
 import { OrderListDto } from "./responses/order-list.dto";
 
-const OrderIdParam = () => Param("id", OrderIdPipe);
+const OrderIdParam = () => ApiPathParam("id", OrderIdPipe);
 
 const {
 	list: OrderListResponse,

@@ -1,6 +1,7 @@
 import { Permission } from "@ecommand/shared";
 import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
 import { RequireAny } from "@/auth/permissions.decorator";
+import { ApiPathParam } from "@/common/decorators/api-path-param.decorator";
 import { createCrudResponses } from "@/common/decorators/api-crud-responses.decorator";
 import { OrderOwnershipGuard } from "@/orders/guards/order-ownership.guard";
 import type { OrderId } from "@/orders/orders.types";
@@ -17,7 +18,7 @@ import { WagonPositionDto } from "./responses/wagon-position.dto";
 import { TrackingService } from "./tracking.service";
 import type { TrainId, WagonId } from "./tracking.types";
 
-const OrderIdParam = () => Param("id", OrderIdPipe);
+const OrderIdParam = () => ApiPathParam("id", OrderIdPipe);
 
 const { detail: TrackWagonResponse } = createCrudResponses({
 	detail: TrackWagonDto,
@@ -74,7 +75,7 @@ export class TrackingController {
 	@RequireAny(Permission.TRACKING_UPDATE)
 	@WagonPositionResponse()
 	async updateWagonPosition(
-		@Param("id", WagonIdPipe) id: WagonId,
+		@ApiPathParam("id", WagonIdPipe) id: WagonId,
 		@Body() dto: UpdateWagonPositionDto,
 	) {
 		return this.trackingService.updateWagonPosition(id, dto);
@@ -84,7 +85,7 @@ export class TrackingController {
 	@RequireAny(Permission.TRACKING_UPDATE)
 	@TrainPositionResponse()
 	async updateTrainPosition(
-		@Param("id", TrainIdPipe) id: TrainId,
+		@ApiPathParam("id", TrainIdPipe) id: TrainId,
 		@Body() dto: UpdateTrainPositionDto,
 	) {
 		return this.trackingService.updateTrainPosition(id, dto);

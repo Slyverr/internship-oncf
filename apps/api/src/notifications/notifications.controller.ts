@@ -1,13 +1,13 @@
 import {
 	Controller,
 	Get,
-	Param,
 	Patch,
 	Request,
 	UseGuards,
 } from "@nestjs/common";
 import { ApiOkResponse, ApiUnauthorizedResponse } from "@nestjs/swagger";
 import type { AuthRequest } from "@/auth/auth.types";
+import { ApiPathParam } from "@/common/decorators/api-path-param.decorator";
 import { createCrudResponses } from "@/common/decorators/api-crud-responses.decorator";
 import { MessageResponseDto } from "@/common/responses/message.dto";
 import { NotificationOwnershipGuard } from "./guards/notification-ownership.guard";
@@ -18,7 +18,7 @@ import { NotificationDetailDto } from "./responses/notification-detail.dto";
 import { NotificationListDto } from "./responses/notification-list.dto";
 import { NotificationUnreadCountDto } from "./responses/notification-unread-count.dto";
 
-const NotificationIdParam = () => Param("id", NotificationIdPipe);
+const NotificationIdParam = () => ApiPathParam("id", NotificationIdPipe);
 
 const { list: NotificationListResponse, detail: NotificationDetailResponse } =
 	createCrudResponses({

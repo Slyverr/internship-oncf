@@ -6,7 +6,6 @@ import {
 	Get,
 	HttpCode,
 	HttpStatus,
-	Param,
 	Patch,
 	Post,
 	Query,
@@ -14,6 +13,7 @@ import {
 	UseGuards,
 } from "@nestjs/common";
 import type { AuthRequest } from "@/auth/auth.types";
+import { ApiPathParam } from "@/common/decorators/api-path-param.decorator";
 import { RequireAny } from "@/auth/permissions.decorator";
 import { createCrudResponses } from "@/common/decorators/api-crud-responses.decorator";
 import { ClaimsService } from "./claims.service";
@@ -31,7 +31,7 @@ import { ClaimDeleteDto } from "./responses/claim-delete.dto";
 import { ClaimDetailDto } from "./responses/claim-detail.dto";
 import { ClaimListDto } from "./responses/claim-list.dto";
 
-const ClaimIdParam = () => Param("id", ClaimIdPipe);
+const ClaimIdParam = () => ApiPathParam("id", ClaimIdPipe);
 
 const {
 	list: ClaimListResponse,
