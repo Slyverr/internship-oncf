@@ -64,6 +64,16 @@ For local password-recovery testing, omit SMTP settings, submit the forgot-passw
 
 Keep apps/web/src/components/ui focused on primitives used by current screens. Add a primitive from the configured shadcn registry when a feature needs it instead of keeping the full unused catalog checked in.
 
+## Web layout and visual system
+
+- Treat apps/web/src/app/globals.css as the source of truth for semantic color, radius, and motion tokens. Use role-based classes such as bg-background, bg-card, text-muted-foreground, and border-border; avoid one-off palette colors in feature components.
+- The orange accent is ONCF-inspired. Official material confirms the orange logo, but this repository has not verified an official complete digital palette or exact color values. Do not present custom shades as official ONCF values.
+- Keep light and dark variants low in chroma. Check foreground, muted text, borders, focus rings, selected states, and charts in both modes when changing a theme token.
+- Build layouts mobile first. Page titles should be visibly stronger than descriptions; labels should be quieter than values. Let long values wrap and controls wrap or stack instead of overflowing.
+- Use spacing utility suffixes on the 0, 4, 8, 12, 16... scale for padding, gaps, and other spacing. Prefer container padding and grid/flex gaps over individual margins. Avoid arbitrary numeric CSS values; add or reuse a named theme token when the design needs a value outside the spacing scale.
+- Keep animation brief and optional. Use shared motion styles and respect prefers-reduced-motion.
+
+Older components may still use legacy spacing values; update them as part of a screen-level layout change rather than mass-replacing classes without checking the resulting density and responsive behavior.
 ## Database workflow
 
 The current database model needs design review and is expected to change. **Do not add migration files or select a migration framework yet:** recording the current model as migration history would make it harder to replace the weak or mismatched parts cleanly. First agree on the domain entities, ownership and lifecycle rules, constraints, and reference data; then stabilize the Drizzle schema and choose a migration approach before introducing data that must be preserved.

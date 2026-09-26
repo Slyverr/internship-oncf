@@ -30,6 +30,7 @@ The current stack is Bun workspaces and Turborepo, NestJS 11, Next.js 16, React 
 - Read secrets and runtime configuration through `@nestjs/config` or the web app's environment configuration. Never commit real credentials.
 - Keep web API types generated from the NestJS OpenAPI contract. Update API DTOs first, then regenerate with `bun run generate:api` from `apps/web` when the API OpenAPI endpoint is running. Do not hand-edit generated client output unless generation is unavailable and the change is explicitly temporary.
 - Prefer existing dependencies and components. For new dependencies, prefer maintained open-source options and keep the addition small.
+- Follow the web layout and visual system in docs/development.md#web-layout-and-visual-system: use semantic theme tokens, mobile-first layouts, and the defined spacing scale.
 - Add or update focused tests for changed business behavior when appropriate. Run the relevant typecheck/build and tests when asked to verify or when needed to substantiate a completion claim.
 
 ## Database and migrations
