@@ -18,7 +18,7 @@ interface OrderStatusSelectProps {
 export function OrderStatusSelect({ value, onChange }: OrderStatusSelectProps) {
 	return (
 		<Select
-			value={value}
+			value={value ?? null}
 			onValueChange={(value) => onChange(value as OrderStatus)}
 		>
 			<SelectTrigger className="w-full">

@@ -21,7 +21,7 @@ export function CustomerSelect({ value, onChange }: CustomerSelectProps) {
 
 	return (
 		<Select
-			value={value?.toString()}
+			value={value?.toString() ?? null}
 			onValueChange={(value) => onChange(Number(value))}
 			disabled={isLoading}
 		>

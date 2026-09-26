@@ -29,7 +29,7 @@ export function GoodSelect({ value, onChange }: GoodSelectProps) {
 	return (
 		<div className="space-y-2">
 			<Select
-				value={selectedGood?.id.toString()}
+				value={selectedGood?.id.toString() ?? null}
 				onValueChange={(selectedId) => onChange(Number(selectedId))}
 				disabled={isLoading || isError || goods.length === 0}
 			>
