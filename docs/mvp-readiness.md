@@ -10,6 +10,8 @@ This status describes the current repository against the project SDF and report.
 - User and customer CRUD APIs and screens.
 - Password recovery/reset UI and API. SMTP delivery is available when configured; local development uses git-ignored `.eml` messages otherwise.
 - Permission-aware dashboard with recent orders, forecast programs, and claims for sections the signed-in user can read.
+- Personal settings for browser-local theme selection (system, light, and dark), profile updates, and password changes. The interface uses an ONCF-inspired orange and warm-neutral palette; no official full hex palette was located.
+- Guided multi-step flows for longer create forms and selected edit forms, with step validation, back navigation, preserved values, subtle motion, and reduced-motion support.
 - Claim details and forecast program details can be edited from their existing edit routes. Workflow status remains controlled through transition actions.
 - Order create/list/detail/edit, status workflow, access rules/history, attachment endpoints, and web UI.
 - Forecast program create/list/detail and lifecycle transitions, plus its API update endpoint.
