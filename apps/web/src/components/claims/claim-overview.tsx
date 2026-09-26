@@ -1,3 +1,4 @@
+import { RecordDetail, RecordMetric } from "@/components/common/record-summary";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ClaimDetailDto } from "@/lib/api/generated.schemas";
 import { formatDisplayDate } from "@/lib/date-utils";
@@ -23,23 +24,26 @@ export function ClaimOverview({ claim }: { claim: ClaimDetailDto }) {
 					</CardHeader>
 
 					<CardContent className="space-y-4">
-						<Detail label="Claim ID" value={`#${claim.id}`} />
-						<Detail
+						<RecordDetail label="Claim ID" value={`#${claim.id}`} />
+						<RecordDetail
 							label="Customer"
 							value={claim.customer?.companyName ?? "—"}
 						/>
-						<Detail label="Type" value={claim.claimType?.name ?? "—"} />
-						<Detail label="Status" value={claim.claimStatus?.name ?? "—"} />
-						<Detail
+						<RecordDetail label="Type" value={claim.claimType?.name ?? "—"} />
+						<RecordDetail
+							label="Status"
+							value={claim.claimStatus?.name ?? "—"}
+						/>
+						<RecordDetail
 							label="Priority"
 							value={claim.priority ? claim.priority.toUpperCase() : "—"}
 						/>
-						<Detail label="Created By" value={createdBy} />
-						<Detail
+						<RecordDetail label="Created By" value={createdBy} />
+						<RecordDetail
 							label="Created Date"
 							value={formatDisplayDate(claim.createdAt)}
 						/>
-						<Detail
+						<RecordDetail
 							label="Last Updated"
 							value={formatDisplayDate(claim.updatedAt)}
 						/>
@@ -52,15 +56,15 @@ export function ClaimOverview({ claim }: { claim: ClaimDetailDto }) {
 					</CardHeader>
 
 					<CardContent className="space-y-4">
-						<Detail
+						<RecordDetail
 							label="Associated Order"
 							value={claim.order ? `#${claim.order.orderNumber}` : "—"}
 						/>
-						<Detail
+						<RecordDetail
 							label="Accessory Operation"
 							value={claim.accessoryOperation?.name ?? "—"}
 						/>
-						<Detail label="Description" value={claim.description} />
+						<RecordDetail label="Description" value={claim.description} />
 					</CardContent>
 				</Card>
 
@@ -70,8 +74,11 @@ export function ClaimOverview({ claim }: { claim: ClaimDetailDto }) {
 					</CardHeader>
 
 					<CardContent className="grid gap-4 sm:grid-cols-2">
-						<Metric label="Comments" value={claim.claimComments?.length ?? 0} />
-						<Metric
+						<RecordMetric
+							label="Comments"
+							value={claim.claimComments?.length ?? 0}
+						/>
+						<RecordMetric
 							label="Status Changes"
 							value={claim.claimStatusHistories?.length ?? 0}
 						/>
@@ -84,12 +91,12 @@ export function ClaimOverview({ claim }: { claim: ClaimDetailDto }) {
 					</CardHeader>
 
 					<CardContent className="space-y-4">
-						<Detail
+						<RecordDetail
 							label="Resolution Summary"
 							value={claim.resolution ?? "—"}
 						/>
-						<Detail label="Closed By" value={closedBy} />
-						<Detail
+						<RecordDetail label="Closed By" value={closedBy} />
+						<RecordDetail
 							label="Closed Date"
 							value={formatDisplayDate(claim.closedAt)}
 						/>
@@ -102,26 +109,6 @@ export function ClaimOverview({ claim }: { claim: ClaimDetailDto }) {
 				<ClaimComments claimId={claim.id} />
 				<ClaimCommentForm claimId={claim.id} />
 			</div>
-		</div>
-	);
-}
-
-function Detail({ label, value }: { label: string; value: string }) {
-	return (
-		<div className="grid min-w-0 gap-2 sm:grid-cols-2 sm:items-baseline">
-			<span className="text-xs text-muted-foreground sm:text-sm">{label}</span>
-			<span className="break-words text-sm font-medium sm:text-right sm:text-base">
-				{value}
-			</span>
-		</div>
-	);
-}
-
-function Metric({ label, value }: { label: string; value: number }) {
-	return (
-		<div className="space-y-1">
-			<p className="text-xs text-muted-foreground sm:text-sm">{label}</p>
-			<p className="text-2xl font-semibold">{value}</p>
 		</div>
 	);
 }

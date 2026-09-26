@@ -1,3 +1,4 @@
+import { RecordDetail, RecordMetric } from "@/components/common/record-summary";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { UserDetailDto } from "@/lib/api/generated.schemas";
@@ -11,10 +12,10 @@ export function UserOverview({ user }: { user: UserDetailDto }) {
 					<CardTitle>Personal Information</CardTitle>
 				</CardHeader>
 				<CardContent className="space-y-4">
-					<Detail label="First Name" value={user.firstName} />
-					<Detail label="Last Name" value={user.lastName} />
-					<Detail label="Email" value={user.email} />
-					<Detail label="Employee ID" value={user.employeeId ?? "—"} />
+					<RecordDetail label="First Name" value={user.firstName} />
+					<RecordDetail label="Last Name" value={user.lastName} />
+					<RecordDetail label="Email" value={user.email} />
+					<RecordDetail label="Employee ID" value={user.employeeId ?? "—"} />
 				</CardContent>
 			</Card>
 
@@ -29,12 +30,12 @@ export function UserOverview({ user }: { user: UserDetailDto }) {
 							{user.role.name}
 						</Badge>
 					</div>
-					<Detail label="Account Type" value={user.type ?? "—"} />
-					<Detail
+					<RecordDetail label="Account Type" value={user.type ?? "—"} />
+					<RecordDetail
 						label="Customer ID"
 						value={user.customerId ? String(user.customerId) : "—"}
 					/>
-					<Detail
+					<RecordDetail
 						label="Agency ID"
 						value={user.agencyId ? String(user.agencyId) : "—"}
 					/>
@@ -54,40 +55,20 @@ export function UserOverview({ user }: { user: UserDetailDto }) {
 					<CardTitle>Activity Timestamps</CardTitle>
 				</CardHeader>
 				<CardContent className="grid gap-4 sm:grid-cols-3">
-					<Metric
+					<RecordMetric
 						label="Last Login"
 						value={formatDisplayDateTime(user.lastLogin)}
 					/>
-					<Metric
+					<RecordMetric
 						label="Created Date"
 						value={formatDisplayDateTime(user.createdAt)}
 					/>
-					<Metric
+					<RecordMetric
 						label="Last Updated"
 						value={formatDisplayDateTime(user.updatedAt)}
 					/>
 				</CardContent>
 			</Card>
-		</div>
-	);
-}
-
-function Detail({ label, value }: { label: string; value: string }) {
-	return (
-		<div className="flex items-start justify-between gap-4">
-			<span className="text-xs text-muted-foreground sm:text-sm">{label}</span>
-			<span className="break-words text-sm font-medium sm:text-right sm:text-base">
-				{value}
-			</span>
-		</div>
-	);
-}
-
-function Metric({ label, value }: { label: string; value: string }) {
-	return (
-		<div className="space-y-1">
-			<p className="text-xs text-muted-foreground sm:text-sm">{label}</p>
-			<p className="text-base font-semibold">{value}</p>
 		</div>
 	);
 }

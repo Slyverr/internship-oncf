@@ -1,3 +1,4 @@
+import { RecordDetail, RecordMetric } from "@/components/common/record-summary";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { OrderDetailDto } from "@/lib/api/generated.schemas";
 import { formatDisplayDate } from "@/lib/date-utils";
@@ -13,20 +14,23 @@ export function OrderOverview({ order }: { order: OrderDetailDto }) {
 					</CardHeader>
 
 					<CardContent className="flex flex-col gap-4">
-						<Detail label="Order Number" value={order.orderNumber ?? "—"} />
+						<RecordDetail
+							label="Order Number"
+							value={order.orderNumber ?? "—"}
+						/>
 
-						<Detail label="Customer" value={order.customer.companyName} />
+						<RecordDetail label="Customer" value={order.customer.companyName} />
 
-						<Detail label="Status" value={order.orderStatus.name} />
+						<RecordDetail label="Status" value={order.orderStatus.name} />
 
-						<Detail label="Supervisor" value={order.supervisor ?? "—"} />
+						<RecordDetail label="Supervisor" value={order.supervisor ?? "—"} />
 
-						<Detail
+						<RecordDetail
 							label="Quantity Demanded"
 							value={`${order.quantityDemanded} ${order.unit.name}`}
 						/>
 
-						<Detail
+						<RecordDetail
 							label="Quantity Achieved"
 							value={
 								order.quantityAchieved
@@ -35,12 +39,12 @@ export function OrderOverview({ order }: { order: OrderDetailDto }) {
 							}
 						/>
 
-						<Detail
+						<RecordDetail
 							label="Order Date"
 							value={formatDisplayDate(order.orderDate)}
 						/>
 
-						<Detail
+						<RecordDetail
 							label="Created"
 							value={formatDisplayDate(order.createdAt)}
 						/>
@@ -53,29 +57,29 @@ export function OrderOverview({ order }: { order: OrderDetailDto }) {
 					</CardHeader>
 
 					<CardContent className="flex flex-col gap-4">
-						<Detail label="Good" value={order.good.name} />
+						<RecordDetail label="Good" value={order.good.name} />
 
-						<Detail
+						<RecordDetail
 							label="Departure Station"
 							value={order.departureStationId?.toString() ?? "—"}
 						/>
 
-						<Detail
+						<RecordDetail
 							label="Arrival Station"
 							value={order.arrivalStationId?.toString() ?? "—"}
 						/>
 
-						<Detail
+						<RecordDetail
 							label="Pickup Port"
 							value={order.pickupPortId?.toString() ?? "—"}
 						/>
 
-						<Detail
+						<RecordDetail
 							label="Delivery Port"
 							value={order.deliveryPortId?.toString() ?? "—"}
 						/>
 
-						<Detail label="Remarks" value={order.remarks ?? "—"} />
+						<RecordDetail label="Remarks" value={order.remarks ?? "—"} />
 					</CardContent>
 				</Card>
 
@@ -85,14 +89,17 @@ export function OrderOverview({ order }: { order: OrderDetailDto }) {
 					</CardHeader>
 
 					<CardContent className="grid gap-4 sm:grid-cols-2">
-						<Metric
+						<RecordMetric
 							label="Forecast Programs"
 							value={order.forecastPrograms.length}
 						/>
 
-						<Metric label="Executions" value={order.orderExecutions.length} />
+						<RecordMetric
+							label="Executions"
+							value={order.orderExecutions.length}
+						/>
 
-						<Metric label="Claims" value={order.claims.length} />
+						<RecordMetric label="Claims" value={order.claims.length} />
 					</CardContent>
 				</Card>
 
@@ -102,14 +109,17 @@ export function OrderOverview({ order }: { order: OrderDetailDto }) {
 					</CardHeader>
 
 					<CardContent className="flex flex-col gap-4">
-						<Detail
+						<RecordDetail
 							label="Start Date"
 							value={formatDisplayDate(order.startDate)}
 						/>
 
-						<Detail label="End Date" value={formatDisplayDate(order.endDate)} />
+						<RecordDetail
+							label="End Date"
+							value={formatDisplayDate(order.endDate)}
+						/>
 
-						<Detail
+						<RecordDetail
 							label="Updated"
 							value={formatDisplayDate(order.updatedAt)}
 						/>
@@ -118,24 +128,6 @@ export function OrderOverview({ order }: { order: OrderDetailDto }) {
 			</div>
 
 			<OrderAttachments orderId={order.id} />
-		</div>
-	);
-}
-
-function Detail({ label, value }: { label: string; value: string }) {
-	return (
-		<div className="grid min-w-0 gap-2 sm:grid-cols-2 sm:items-baseline">
-			<p className="text-xs text-muted-foreground sm:text-sm">{label}</p>
-			<p className="text-right text-sm font-medium">{value}</p>
-		</div>
-	);
-}
-
-function Metric({ label, value }: { label: string; value: number }) {
-	return (
-		<div className="flex flex-col gap-4 rounded-md bg-muted p-4">
-			<p className="text-xs text-muted-foreground">{label}</p>
-			<p className="text-xl font-semibold">{value}</p>
 		</div>
 	);
 }

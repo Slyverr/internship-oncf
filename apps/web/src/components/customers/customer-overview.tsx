@@ -1,3 +1,4 @@
+import { RecordDetail, RecordMetric } from "@/components/common/record-summary";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { CustomerDetailDto } from "@/lib/api/generated.schemas";
 import { formatDisplayDate } from "@/lib/date-utils";
@@ -14,10 +15,13 @@ export function CustomerOverview({
 					<CardTitle>Company Details</CardTitle>
 				</CardHeader>
 				<CardContent className="space-y-4">
-					<Detail label="Company Name" value={customer.companyName} />
-					<Detail label="Customer Code" value={customer.customerCode ?? "—"} />
-					<Detail label="Type ID" value={customer.typeId ?? "—"} />
-					<Detail
+					<RecordDetail label="Company Name" value={customer.companyName} />
+					<RecordDetail
+						label="Customer Code"
+						value={customer.customerCode ?? "—"}
+					/>
+					<RecordDetail label="Type ID" value={customer.typeId ?? "—"} />
+					<RecordDetail
 						label="Account Active"
 						value={customer.isActive ? "Yes" : "No"}
 					/>
@@ -29,10 +33,10 @@ export function CustomerOverview({
 					<CardTitle>Contact Information</CardTitle>
 				</CardHeader>
 				<CardContent className="space-y-4">
-					<Detail label="Email" value={customer.email ?? "—"} />
-					<Detail label="Phone" value={customer.phone ?? "—"} />
-					<Detail label="Address" value={customer.address ?? "—"} />
-					<Detail label="City" value={customer.city ?? "—"} />
+					<RecordDetail label="Email" value={customer.email ?? "—"} />
+					<RecordDetail label="Phone" value={customer.phone ?? "—"} />
+					<RecordDetail label="Address" value={customer.address ?? "—"} />
+					<RecordDetail label="City" value={customer.city ?? "—"} />
 				</CardContent>
 			</Card>
 
@@ -41,36 +45,16 @@ export function CustomerOverview({
 					<CardTitle>Metadata</CardTitle>
 				</CardHeader>
 				<CardContent className="grid gap-4 sm:grid-cols-2">
-					<Metric
+					<RecordMetric
 						label="Created Date"
 						value={formatDisplayDate(customer.createdAt)}
 					/>
-					<Metric
+					<RecordMetric
 						label="Last Updated"
 						value={formatDisplayDate(customer.updatedAt)}
 					/>
 				</CardContent>
 			</Card>
-		</div>
-	);
-}
-
-function Detail({ label, value }: { label: string; value: string }) {
-	return (
-		<div className="grid min-w-0 gap-2 sm:grid-cols-2 sm:items-baseline">
-			<span className="text-xs text-muted-foreground sm:text-sm">{label}</span>
-			<span className="break-words text-sm font-medium sm:text-right sm:text-base">
-				{value}
-			</span>
-		</div>
-	);
-}
-
-function Metric({ label, value }: { label: string; value: string }) {
-	return (
-		<div className="space-y-1">
-			<p className="text-xs text-muted-foreground sm:text-sm">{label}</p>
-			<p className="text-base font-semibold">{value}</p>
 		</div>
 	);
 }

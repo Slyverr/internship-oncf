@@ -1,3 +1,4 @@
+import { RecordDetail, RecordMetric } from "@/components/common/record-summary";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ProgramDetailDto } from "@/lib/api/generated.schemas";
 import { formatDisplayDate } from "@/lib/date-utils";
@@ -11,26 +12,29 @@ export function ProgramOverview({ program }: { program: ProgramDetailDto }) {
 				</CardHeader>
 
 				<CardContent className="space-y-4">
-					<Detail label="Program Number" value={program.programNumber} />
-					<Detail
+					<RecordDetail label="Program Number" value={program.programNumber} />
+					<RecordDetail
 						label="Order Number"
 						value={program.order.orderNumber ?? "—"}
 					/>
-					<Detail label="Status" value={program.programStatus.name} />
-					<Detail label="Quantity Planned" value={program.quantityPlanned} />
-					<Detail
+					<RecordDetail label="Status" value={program.programStatus.name} />
+					<RecordDetail
+						label="Quantity Planned"
+						value={program.quantityPlanned}
+					/>
+					<RecordDetail
 						label="Quantity Realized"
 						value={program.quantityRealized ?? "—"}
 					/>
-					<Detail
+					<RecordDetail
 						label="Planned Date"
 						value={formatDisplayDate(program.plannedDate)}
 					/>
-					<Detail
+					<RecordDetail
 						label="Realized At"
 						value={formatDisplayDate(program.realizedAt)}
 					/>
-					<Detail
+					<RecordDetail
 						label="Realized By"
 						value={
 							program.realizedByUser
@@ -47,9 +51,9 @@ export function ProgramOverview({ program }: { program: ProgramDetailDto }) {
 				</CardHeader>
 
 				<CardContent className="grid gap-4 sm:grid-cols-2">
-					<Metric label="Wagons" value={program.orderWagons.length} />
-					<Metric label="Convoys" value={program.programConvois.length} />
-					<Metric
+					<RecordMetric label="Wagons" value={program.orderWagons.length} />
+					<RecordMetric label="Convoys" value={program.programConvois.length} />
+					<RecordMetric
 						label="History Events"
 						value={program.forecastProgramHistories.length}
 					/>
@@ -62,8 +66,8 @@ export function ProgramOverview({ program }: { program: ProgramDetailDto }) {
 				</CardHeader>
 
 				<CardContent className="space-y-4">
-					<Detail label="DTM Status" value={program.dtmStatus ?? "—"} />
-					<Detail
+					<RecordDetail label="DTM Status" value={program.dtmStatus ?? "—"} />
+					<RecordDetail
 						label="Sent to DTM"
 						value={formatDisplayDate(program.sentToDtmAt)}
 					/>
@@ -76,44 +80,24 @@ export function ProgramOverview({ program }: { program: ProgramDetailDto }) {
 				</CardHeader>
 
 				<CardContent className="space-y-4">
-					<Detail
+					<RecordDetail
 						label="Deviation Reason"
 						value={program.deviationReason ?? "—"}
 					/>
-					<Detail
+					<RecordDetail
 						label="Created By"
 						value={`${program.createdByUser.firstName} ${program.createdByUser.lastName}`}
 					/>
-					<Detail
+					<RecordDetail
 						label="Created"
 						value={formatDisplayDate(program.createdAt)}
 					/>
-					<Detail
+					<RecordDetail
 						label="Updated"
 						value={formatDisplayDate(program.updatedAt)}
 					/>
 				</CardContent>
 			</Card>
-		</div>
-	);
-}
-
-function Detail({ label, value }: { label: string; value: string }) {
-	return (
-		<div className="grid min-w-0 gap-2 sm:grid-cols-2 sm:items-baseline">
-			<span className="text-xs text-muted-foreground sm:text-sm">{label}</span>
-			<span className="break-words text-sm font-medium sm:text-right sm:text-base">
-				{value}
-			</span>
-		</div>
-	);
-}
-
-function Metric({ label, value }: { label: string; value: number }) {
-	return (
-		<div className="space-y-1">
-			<p className="text-xs text-muted-foreground sm:text-sm">{label}</p>
-			<p className="text-2xl font-semibold">{value}</p>
 		</div>
 	);
 }
