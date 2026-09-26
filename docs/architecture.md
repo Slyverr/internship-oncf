@@ -49,3 +49,5 @@ The web API client is generated from the NestJS OpenAPI JSON endpoint with Orval
 - Attachments use the storage service and configured object-storage backend.
 - Password reset uses SMTP when `SMTP_HOST` and `SMTP_FROM` are configured. Without complete provider settings, development messages are saved as `.eml` files in the local mailbox path.
 - DTM/status fields currently represent local workflow state. They do not prove that a remote ONCF system accepted a request.
+
+- In-app notifications are stored as delivered immediately. Workflow services notify owners of changes made by another user; the inbox and unread badge use the authenticated recipient. Notification failures are logged independently of the saved workflow.

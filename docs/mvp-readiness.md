@@ -14,16 +14,19 @@ This status describes the current repository against the project SDF and report.
 - Order create/list/detail/edit, status workflow, access rules/history, attachment endpoints, and web UI.
 - Forecast program create/list/detail and lifecycle transitions, plus its API update endpoint.
 - Claim create/list/detail, lifecycle transitions, comments, and first-agent-response transition to in-progress.
+- In-app notification inbox, unread badge, and read actions. Workflow transitions and claim replies notify the record owner when another user acts; self-actions are quiet.
+- Claim comments include the author’s display name in list and creation responses.
 - Tracking API structures exist; the SDF treats full tracking as a separate lot.
 
 ## Incomplete for a usable MVP
 
 - **Client signup:** the SDF requires customer code plus ICE validation. The current customer schema has no ICE field, and the source/ownership of ICE has not been decided. Keep signup blocked until that data source is confirmed.
-- **Notifications:** list/read/unread-count APIs exist, but workflow transitions do not create notifications and the web app has no inbox/badge. The mapper currently creates notifications as `PENDING`, while unread counts include only `SENT` rows.
 - **Reporting:** no reporting API or web screen is implemented.
 - **API client generation:** the live OpenAPI document currently emits empty property schemas for many response DTOs. A successful Orval run can replace useful web types with generic `unknown` objects; fix DTO metadata before accepting regenerated output.
 
 ## External and production requirements
+
+- **Notification reliability:** current workflow notifications are best effort after the state change is saved. Delivery failures are logged; there is no durable retry queue yet. Staff assignment alerts and external email/SMS/push delivery are not implemented.
 
 - **DTM/GSCWF:** “Send to DTM” currently records local status. A real handoff needs ONCF endpoint details, authentication, payload contract, and retry/error expectations.
 - **Email provider:** SMTP configuration exists, but a real provider must be configured and exercised before relying on delivery.
@@ -33,9 +36,9 @@ This status describes the current repository against the project SDF and report.
 ## Recommended order
 
 1. Confirm the ICE source and ownership, then implement signup validation against that source.
-2. Complete program and claim editing screens and replace the dashboard placeholder with useful work queues.
-3. Wire in-app notifications to order/program/claim workflows, fix the `PENDING` versus `SENT` behavior, and add a minimal inbox/unread indicator.
-4. Include author names in the comments response and render them in the claim thread.
+2. Review program and claim edit rules against the pilot workflows.
+3. Add reliable notification retries and staff assignment alerts after ownership rules are reviewed.
+4. Fix OpenAPI DTO metadata so API client regeneration is safe.
 5. Implement basic reports required for the pilot.
 6. Confirm whether DTM handoff is available for the pilot; otherwise expose its local/manual status honestly.
 7. Stabilize the schema, then define migrations and production operations.
