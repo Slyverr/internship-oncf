@@ -1,5 +1,5 @@
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
-import { UnderConstruction } from "@/components/under-construction";
+import { ProgramEditForm } from "@/components/programs/program-edit-form";
 import { programsControllerFindOne } from "@/lib/api/programs";
 import { programsBreadcrumbs } from "../../breadcrumbs";
 
@@ -20,7 +20,7 @@ export default async function Page({ params }: PageProps) {
 				)}
 			/>
 
-			<UnderConstruction />
+			<ProgramEditForm program={program} />
 		</>
 	);
 }
