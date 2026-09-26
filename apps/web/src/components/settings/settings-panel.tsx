@@ -110,22 +110,22 @@ export function SettingsPanel() {
 		<div className="grid max-w-5xl gap-6">
 			<nav
 				aria-label="Settings sections"
-				className="flex gap-2 overflow-x-auto pb-4"
+				className="flex gap-4 overflow-x-auto pb-4"
 			>
 				<a
-					className="shrink-0 rounded-md border px-4 py-2 text-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+					className="shrink-0 rounded-md border px-4 py-4 text-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 					href="#appearance"
 				>
 					Appearance
 				</a>
 				<a
-					className="shrink-0 rounded-md border px-4 py-2 text-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+					className="shrink-0 rounded-md border px-4 py-4 text-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 					href="#account"
 				>
 					Account details
 				</a>
 				<a
-					className="shrink-0 rounded-md border px-4 py-2 text-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+					className="shrink-0 rounded-md border px-4 py-4 text-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 					href="#security"
 				>
 					Security
@@ -148,20 +148,20 @@ export function SettingsPanel() {
 								setTheme(value);
 							}
 						}}
-						className="grid gap-3 sm:grid-cols-3"
+						className="grid gap-4 sm:grid-cols-3"
 					>
 						{themeOptions.map(({ value, label, description, Icon }) => (
 							<Label
 								key={value}
 								htmlFor={`theme-${value}`}
-								className="flex min-h-24 cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors hover:bg-muted/60 has-[[data-checked]]:border-primary has-[[data-checked]]:bg-primary/5"
+								className="flex min-h-24 cursor-pointer items-start gap-4 rounded-lg border p-4 transition-colors hover:bg-muted/60 has-[[data-checked]]:border-primary has-[[data-checked]]:bg-primary/5"
 							>
 								<RadioGroupItem id={`theme-${value}`} value={value} />
 								<Icon
-									className="mt-0.5 size-4 text-primary"
+									className="size-4 self-center text-primary"
 									aria-hidden="true"
 								/>
-								<span className="grid gap-1">
+								<span className="grid gap-4">
 									<span className="font-medium">{label}</span>
 									<span className="text-xs text-muted-foreground">
 										{description}
@@ -170,7 +170,7 @@ export function SettingsPanel() {
 							</Label>
 						))}
 					</RadioGroup>
-					<div className="mt-5 flex items-center gap-2 text-xs text-muted-foreground">
+					<div className="pt-4 flex items-center gap-4 text-xs text-muted-foreground">
 						<span className="size-3 rounded-full bg-primary" />
 						<span className="size-3 rounded-full bg-accent" />
 						<span>ONCF-inspired orange with softer neutral surfaces</span>
@@ -187,7 +187,7 @@ export function SettingsPanel() {
 				</CardHeader>
 				<CardContent>
 					<form onSubmit={saveProfile} className="grid gap-4 sm:grid-cols-2">
-						<div className="grid gap-2">
+						<div className="grid gap-4">
 							<Label htmlFor="settings-first-name">First name</Label>
 							<Input
 								id="settings-first-name"
@@ -197,7 +197,7 @@ export function SettingsPanel() {
 								onChange={(event) => setFirstName(event.target.value)}
 							/>
 						</div>
-						<div className="grid gap-2">
+						<div className="grid gap-4">
 							<Label htmlFor="settings-last-name">Last name</Label>
 							<Input
 								id="settings-last-name"
@@ -207,7 +207,7 @@ export function SettingsPanel() {
 								onChange={(event) => setLastName(event.target.value)}
 							/>
 						</div>
-						<div className="grid gap-2 sm:col-span-2">
+						<div className="grid gap-4 sm:col-span-2">
 							<Label htmlFor="settings-email">Email address</Label>
 							<Input
 								id="settings-email"
@@ -218,7 +218,7 @@ export function SettingsPanel() {
 								onChange={(event) => setEmail(event.target.value)}
 							/>
 						</div>
-						<div className="flex flex-wrap items-center gap-3 sm:col-span-2">
+						<div className="flex flex-wrap items-center gap-4 sm:col-span-2">
 							<Button type="submit" disabled={profileMutation.isPending}>
 								{profileMutation.isPending ? "Saving..." : "Save profile"}
 							</Button>
@@ -246,7 +246,7 @@ export function SettingsPanel() {
 				</CardHeader>
 				<CardContent>
 					<form onSubmit={changePassword} className="grid max-w-xl gap-4">
-						<div className="grid gap-2">
+						<div className="grid gap-4">
 							<Label htmlFor="current-password">Current password</Label>
 							<Input
 								id="current-password"
@@ -257,7 +257,7 @@ export function SettingsPanel() {
 								onChange={(event) => setCurrentPassword(event.target.value)}
 							/>
 						</div>
-						<div className="grid gap-2">
+						<div className="grid gap-4">
 							<Label htmlFor="new-password">New password</Label>
 							<Input
 								id="new-password"
@@ -269,7 +269,7 @@ export function SettingsPanel() {
 								onChange={(event) => setNewPassword(event.target.value)}
 							/>
 						</div>
-						<div className="flex flex-wrap items-center gap-3">
+						<div className="flex flex-wrap items-center gap-4">
 							<Button
 								type="submit"
 								variant="outline"
