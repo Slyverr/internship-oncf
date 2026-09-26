@@ -1,9 +1,11 @@
+import { NotificationChannel } from "@ecommand/shared";
 import { Injectable } from "@nestjs/common";
 import { notifications } from "drizzle/schema";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { DrizzleService } from "@/database/drizzle.service";
 import { QueryColumns, QueryRelations } from "@/database/drizzle.types";
 import { withDbErrorHandling } from "@/database/drizzle.util";
+import { NOTIFICATION_CHANNELS } from "@/database/reference-data";
 import type { NotificationId, NotificationInsert } from "./notifications.types";
 
 type NotificationsColumns = QueryColumns<"notifications">;
@@ -75,6 +77,8 @@ export class NotificationsQuery {
 		return this.drizzle.db.query.notifications.findMany({
 			where: {
 				recipientUserId: userId,
+				channelId: NOTIFICATION_CHANNELS[NotificationChannel.IN_APP].id,
+				status: "SENT",
 			},
 			columns: notificationListColumns,
 			with: notificationListRelations,
@@ -110,6 +114,10 @@ export class NotificationsQuery {
 					eq(notifications.recipientUserId, userId),
 					isNull(notifications.readAt),
 					eq(notifications.status, "SENT"),
+					eq(
+						notifications.channelId,
+						NOTIFICATION_CHANNELS[NotificationChannel.IN_APP].id,
+					),
 				),
 			);
 		return result[0]?.count ?? 0;
@@ -151,6 +159,10 @@ export class NotificationsQuery {
 					eq(notifications.recipientUserId, userId),
 					isNull(notifications.readAt),
 					eq(notifications.status, "SENT"),
+					eq(
+						notifications.channelId,
+						NOTIFICATION_CHANNELS[NotificationChannel.IN_APP].id,
+					),
 				),
 			)
 			.returning({

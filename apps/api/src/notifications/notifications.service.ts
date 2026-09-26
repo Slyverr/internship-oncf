@@ -1,4 +1,5 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { NotificationChannel, NotificationType } from "@ecommand/shared";
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { AuthUser } from "@/auth/auth.types";
 import { NotificationsMapper } from "./notifications.mapper";
 import { NotificationsQuery } from "./notifications.query";
@@ -7,6 +8,7 @@ import { CreateNotificationDto } from "./requests/create-notification.dto";
 
 @Injectable()
 export class NotificationsService {
+	private readonly logger = new Logger(NotificationsService.name);
 	constructor(
 		private readonly notificationsQuery: NotificationsQuery,
 		private readonly notificationsMapper: NotificationsMapper,
@@ -34,7 +36,9 @@ export class NotificationsService {
 	}
 
 	async getUnreadCount(userId: number) {
-		return this.notificationsQuery.findUnreadCount(userId);
+		return {
+			count: Number(await this.notificationsQuery.findUnreadCount(userId)),
+		};
 	}
 
 	async markAsRead(id: NotificationId, userId: number) {
@@ -53,6 +57,7 @@ export class NotificationsService {
 			await this.notificationsQuery.updateAllNotificationsRead(userId);
 		return {
 			count: updated.length,
+			message: "Notifications marked as read",
 		};
 	}
 
@@ -62,6 +67,38 @@ export class NotificationsService {
 
 	async markAsFailed(id: NotificationId, error: string) {
 		return this.notificationsQuery.markNotificationAsFailed(id, error);
+	}
+
+	/** Notification failure must not report a successfully saved workflow as failed. */
+	async notifyChange(
+		ownerId: number,
+		actorId: number,
+		entity: "orders" | "programs" | "claims",
+		entityId: number,
+		message: string,
+	) {
+		if (ownerId === actorId) return;
+		const types = {
+			orders: NotificationType.ORDER_STATUS_CHANGE,
+			programs: NotificationType.PROGRAM_PREVISIONNEL,
+			claims: NotificationType.CLAIM_UPDATED,
+		};
+		try {
+			await this.create({
+				userId: ownerId,
+				type: types[entity],
+				channel: NotificationChannel.IN_APP,
+				title: `${entity === "orders" ? "Order" : entity === "programs" ? "Program" : "Claim"} updated`,
+				message,
+				relatedEntityType: entity,
+				relatedEntityId: entityId,
+			});
+		} catch (error) {
+			this.logger.error(
+				`Could not notify user ${ownerId} about ${entity}/${entityId}`,
+				error instanceof Error ? error.stack : String(error),
+			);
+		}
 	}
 
 	private ensure<T>(notification: T | undefined, id: NotificationId): T {

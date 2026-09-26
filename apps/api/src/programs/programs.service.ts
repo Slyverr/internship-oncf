@@ -8,6 +8,7 @@ import { forecastPrograms } from "drizzle/schema";
 import { and, eq } from "drizzle-orm";
 import { AuthUser } from "@/auth/auth.types";
 import { PROGRAM_STATUSES } from "@/database/reference-data";
+import { NotificationsService } from "@/notifications/notifications.service";
 import { PROGRAM_STATUS_BY_ID, PROGRAM_TRANSITION } from "./programs.constants";
 import { ProgramsMapper } from "./programs.mapper";
 import { ProgramsQuery } from "./programs.query";
@@ -19,6 +20,7 @@ import { UpdateProgramDto } from "./requests/update-program.dto";
 @Injectable()
 export class ProgramsService {
 	constructor(
+		private readonly notifications: NotificationsService,
 		private readonly programsQuery: ProgramsQuery,
 		private readonly programsMapper: ProgramsMapper,
 	) {}
@@ -116,6 +118,14 @@ export class ProgramsService {
 			),
 		);
 
-		return this.findOne(id);
+		const updated = await this.findOne(id);
+		await this.notifications.notifyChange(
+			updated.createdByUserId,
+			user.id,
+			"programs",
+			id,
+			`Program #${id} is now ${toStatus.toLowerCase().replaceAll("_", " ")}.`,
+		);
+		return updated;
 	}
 }

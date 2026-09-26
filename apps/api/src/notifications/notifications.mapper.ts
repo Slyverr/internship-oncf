@@ -1,3 +1,4 @@
+import { NotificationChannel } from "@ecommand/shared";
 import { Injectable } from "@nestjs/common";
 import {
 	NOTIFICATION_CHANNELS,
@@ -17,7 +18,11 @@ export class NotificationsMapper {
 			message: dto.message,
 			relatedEntityType: dto.relatedEntityType,
 			relatedEntityId: dto.relatedEntityId,
-			status: "PENDING",
+			status: dto.channel === NotificationChannel.IN_APP ? "SENT" : "PENDING",
+			sentAt:
+				dto.channel === NotificationChannel.IN_APP
+					? new Date().toISOString()
+					: null,
 		};
 	}
 }

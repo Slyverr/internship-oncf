@@ -10,6 +10,7 @@ import { and, eq } from "drizzle-orm";
 import { AuthUser } from "@/auth/auth.types";
 import { hasOnePermission } from "@/auth/auth.utils";
 import { CLAIM_STATUSES } from "@/database/reference-data";
+import { NotificationsService } from "@/notifications/notifications.service";
 import { CLAIM_STATUS_BY_ID, CLAIM_TRANSITION } from "./claims.constants";
 import { ClaimsMapper } from "./claims.mapper";
 import { ClaimsQuery } from "./claims.query";
@@ -21,6 +22,7 @@ import { UpdateClaimDto } from "./requests/update-claim.dto";
 @Injectable()
 export class ClaimsService {
 	constructor(
+		private readonly notifications: NotificationsService,
 		private readonly claimsQuery: ClaimsQuery,
 		private readonly claimsMapper: ClaimsMapper,
 	) {}
@@ -98,6 +100,14 @@ export class ClaimsService {
 		);
 		const [created] = await this.getComments(claimId, comment.id);
 		if (!created) throw new NotFoundException("Comment no longer exists");
+		const claim = await this.findOneForOwnership(claimId);
+		await this.notifications.notifyChange(
+			claim.createdByUserId,
+			user.id,
+			"claims",
+			claimId,
+			`A new comment was added to claim #${claimId}.`,
+		);
 		return created;
 	}
 
@@ -216,7 +226,15 @@ export class ClaimsService {
 			},
 		);
 
-		return this.findOne(claimId);
+		const updated = await this.findOne(claimId);
+		await this.notifications.notifyChange(
+			updated.createdByUserId,
+			userId,
+			"claims",
+			claimId,
+			`Claim #${claimId} is now ${toStatus.toLowerCase().replaceAll("_", " ")}.`,
+		);
+		return updated;
 	}
 
 	private ensure<T>(value: T | undefined, id: ClaimId): T {

@@ -12,6 +12,7 @@ import { AuthUser } from "@/auth/auth.types";
 import { hasOnePermission } from "@/auth/auth.utils";
 import { ListQueryDto } from "@/common/requests/list-query.dto";
 import { ORDER_STATUSES } from "@/database/reference-data";
+import { NotificationsService } from "@/notifications/notifications.service";
 import {
 	ORDER_QUANTITY_PATTERN,
 	ORDER_STATUS_BY_ID,
@@ -27,6 +28,7 @@ import { UpdateOrderDto } from "./requests/update-order.dto";
 @Injectable()
 export class OrdersService {
 	constructor(
+		private readonly notifications: NotificationsService,
 		private readonly ordersQuery: OrdersQuery,
 		private readonly ordersMapper: OrdersMapper,
 	) {}
@@ -168,7 +170,15 @@ export class OrdersService {
 			},
 		);
 
-		return this.findOne(id);
+		const updated = await this.findOne(id);
+		await this.notifications.notifyChange(
+			updated.createdByUserId,
+			user.id,
+			"orders",
+			id,
+			`Order #${id} is now ${toStatus.toLowerCase().replaceAll("_", " ")}.`,
+		);
+		return updated;
 	}
 
 	private ensure<T>(value: T | undefined, id: OrderId): T {

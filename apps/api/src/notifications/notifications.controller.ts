@@ -1,14 +1,8 @@
-import {
-	Controller,
-	Get,
-	Patch,
-	Request,
-	UseGuards,
-} from "@nestjs/common";
+import { Controller, Get, Patch, Request, UseGuards } from "@nestjs/common";
 import { ApiOkResponse, ApiUnauthorizedResponse } from "@nestjs/swagger";
 import type { AuthRequest } from "@/auth/auth.types";
-import { ApiPathParam } from "@/common/decorators/api-path-param.decorator";
 import { createCrudResponses } from "@/common/decorators/api-crud-responses.decorator";
+import { ApiPathParam } from "@/common/decorators/api-path-param.decorator";
 import { MessageResponseDto } from "@/common/responses/message.dto";
 import { NotificationOwnershipGuard } from "./guards/notification-ownership.guard";
 import { NotificationsService } from "./notifications.service";
