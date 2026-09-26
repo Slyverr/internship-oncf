@@ -4,6 +4,7 @@ Use these documents as the maintained guide to the repository:
 
 - [Architecture](architecture.md) — workspace structure, application boundaries, and current technical design.
 - [Development workflow and conventions](development.md) — local commands, naming, code style, UI form patterns, verification, and commits.
+- [Web design system](design-system.md) — spacing, typography, responsive layouts, shell behavior, and interaction details.
 - [MVP readiness](mvp-readiness.md) — implemented user flows, known gaps, and remaining work toward the MVP.
 - [Authorization matrix](authorization-matrix.md) — role grants, API permissions, ownership scope, and web visibility.
 
