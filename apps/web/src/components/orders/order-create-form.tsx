@@ -2,9 +2,9 @@
 
 import { OrderStatus, Permission } from "@ecommand/shared";
 import { useForm } from "@tanstack/react-form-nextjs";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import type { JSX } from "react";
+import { type JSX, useState } from "react";
 import { z } from "zod";
 
 import { CustomerSelect } from "@/components/customers/customer-select";
@@ -49,6 +49,18 @@ const createOrderSchema = z.object({
 
 type CreateOrderFormValues = z.infer<typeof createOrderSchema>;
 
+const orderBasicsSchema = createOrderSchema.pick({
+	goodsId: true,
+	unitId: true,
+	quantityDemanded: true,
+});
+const managedOrderBasicsSchema = createOrderSchema.pick({
+	customerId: true,
+	goodsId: true,
+	unitId: true,
+	quantityDemanded: true,
+});
+
 function getErrorMessage(error: unknown): string | undefined {
 	if (!error) return undefined;
 	if (typeof error === "string") return error;
@@ -76,7 +88,10 @@ function FieldHeader({
 				{label} {required ? "*" : ""}
 			</Label>
 			{error ? (
-				<span className="inline-flex items-center gap-1 text-xs font-medium text-destructive">
+				<span
+					role="alert"
+					className="inline-flex items-center gap-1 text-xs font-medium text-destructive"
+				>
 					<AlertCircle className="h-3.5 w-3.5 shrink-0" />
 					{error}
 				</span>
@@ -92,6 +107,37 @@ export function OrderCreateForm(): JSX.Element {
 
 	const canManageOther = hasPermission(Permission.ORDERS_MANAGE_OTHER);
 	const canManageStatus = hasPermission(Permission.ORDERS_MANAGE_STATUS);
+	const [step, setStep] = useState(0);
+	const [stepErrors, setStepErrors] = useState<Record<string, string>>({});
+
+	function clearStepError(fieldName: string) {
+		setStepErrors((errors) => {
+			if (!errors[fieldName]) return errors;
+			const { [fieldName]: _removed, ...remaining } = errors;
+			return remaining;
+		});
+	}
+
+	function continueToSchedule() {
+		const schema = canManageOther
+			? managedOrderBasicsSchema
+			: orderBasicsSchema;
+		const result = schema.safeParse(form.state.values);
+		if (!result.success) {
+			setStepErrors(
+				Object.fromEntries(
+					result.error.issues.map((issue) => [
+						String(issue.path[0]),
+						issue.message,
+					]),
+				),
+			);
+			return;
+		}
+
+		setStepErrors({});
+		setStep(1);
+	}
 
 	const defaultValues: CreateOrderFormValues = {
 		customerId: profile?.customerId ?? 0,
@@ -143,280 +189,389 @@ export function OrderCreateForm(): JSX.Element {
 			onSubmit={(event) => {
 				event.preventDefault();
 				event.stopPropagation();
+				if (step === 0) {
+					continueToSchedule();
+					return;
+				}
 				form.handleSubmit();
 			}}
 			className="space-y-4"
 		>
-			<Card>
-				<CardHeader>
-					<CardTitle>Order Information</CardTitle>
-					<CardDescription>
-						Specify the client, commodity details, and requested execution
-						volume.
-					</CardDescription>
-				</CardHeader>
-
-				<CardContent className="grid gap-4 md:grid-cols-2">
-					{canManageOther && (
-						<form.Field name="customerId">
-							{(field) => {
-								const errorMsg = getErrorMessage(field.state.meta.errors[0]);
-								return (
-									<div className="space-y-2">
-										<FieldHeader
-											htmlFor="customerId"
-											label="Customer Company"
-											required
-											error={errorMsg}
-										/>
-										<div
-											className={
-												errorMsg
-													? "[&>button]:border-destructive [&>button]:focus:ring-destructive/20"
-													: ""
-											}
-										>
-											<CustomerSelect
-												value={
-													field.state.value > 0 ? field.state.value : undefined
-												}
-												onChange={(value) => field.handleChange(value)}
-											/>
-										</div>
-									</div>
-								);
-							}}
-						</form.Field>
-					)}
-
-					<form.Field name="goodsId">
-						{(field) => {
-							const errorMsg = getErrorMessage(field.state.meta.errors[0]);
-							return (
-								<div className="space-y-2">
-									<FieldHeader
-										htmlFor="goodsId"
-										label="Goods / Commodity"
-										required
-										error={errorMsg}
-									/>
-									<div
-										className={
-											errorMsg
-												? "[&>button]:border-destructive [&>button]:focus:ring-destructive/20"
-												: ""
-										}
-									>
-										<GoodSelect
-											value={
-												field.state.value > 0 ? field.state.value : undefined
-											}
-											onChange={(value) => field.handleChange(value)}
-										/>
-									</div>
-								</div>
-							);
-						}}
-					</form.Field>
-
-					<form.Field name="unitId">
-						{(field) => {
-							const errorMsg = getErrorMessage(field.state.meta.errors[0]);
-							return (
-								<div className="space-y-2">
-									<FieldHeader
-										htmlFor="unitId"
-										label="Unit of Measurement"
-										required
-										error={errorMsg}
-									/>
-									<div
-										className={
-											errorMsg
-												? "[&>button]:border-destructive [&>button]:focus:ring-destructive/20"
-												: ""
-										}
-									>
-										<UnitSelect
-											value={field.state.value}
-											onChange={(value) => field.handleChange(value)}
-										/>
-									</div>
-								</div>
-							);
-						}}
-					</form.Field>
-
-					<form.Field name="quantityDemanded">
-						{(field) => {
-							const errorMsg = getErrorMessage(field.state.meta.errors[0]);
-							return (
-								<div className="space-y-2">
-									<FieldHeader
-										htmlFor="quantityDemanded"
-										label="Quantity Demanded"
-										required
-										error={errorMsg}
-									/>
-									<Input
-										id="quantityDemanded"
-										placeholder="e.g. 500"
-										className={
-											errorMsg
-												? "border-destructive focus-visible:ring-destructive/20"
-												: ""
-										}
-										value={field.state.value}
-										onChange={(event) => field.handleChange(event.target.value)}
-									/>
-								</div>
-							);
-						}}
-					</form.Field>
-
-					<form.Field name="supervisor">
-						{(field) => (
-							<div className="space-y-2">
-								<Label htmlFor="supervisor">Supervisor Name</Label>
-								<Input
-									id="supervisor"
-									placeholder="Name of supervisor"
-									value={field.state.value ?? ""}
-									onChange={(event) => field.handleChange(event.target.value)}
-								/>
-							</div>
-						)}
-					</form.Field>
-
-					{canManageStatus && (
-						<form.Field name="status">
-							{(field) => {
-								const errorMsg = getErrorMessage(field.state.meta.errors[0]);
-								return (
-									<div className="space-y-2">
-										<FieldHeader
-											htmlFor="status"
-											label="Initial Status Override"
-											error={errorMsg}
-										/>
-										<div
-											className={
-												errorMsg
-													? "[&>button]:border-destructive [&>button]:focus:ring-destructive/20"
-													: ""
-											}
-										>
-											<OrderStatusSelect
-												value={field.state.value}
-												onChange={(value) => field.handleChange(value)}
-											/>
-										</div>
-									</div>
-								);
-							}}
-						</form.Field>
-					)}
-				</CardContent>
-			</Card>
-
-			<Card>
-				<CardHeader>
-					<CardTitle>Schedule & Timelines</CardTitle>
-					<CardDescription>
-						Operational milestones: set the formal order logging date along with
-						planned start and end targets.
-					</CardDescription>
-				</CardHeader>
-
-				<CardContent className="grid gap-4 md:grid-cols-3">
-					<form.Field name="orderDate">
-						{(field) => (
-							<div className="space-y-2">
-								<Label htmlFor="orderDate">Order Date</Label>
-								<Input
-									id="orderDate"
-									type="date"
-									value={field.state.value ?? ""}
-									onChange={(event) => field.handleChange(event.target.value)}
-								/>
-							</div>
-						)}
-					</form.Field>
-
-					<form.Field name="startDate">
-						{(field) => (
-							<div className="space-y-2">
-								<Label htmlFor="startDate">Planned Transport Start</Label>
-								<Input
-									id="startDate"
-									type="date"
-									value={field.state.value ?? ""}
-									onChange={(event) => field.handleChange(event.target.value)}
-								/>
-							</div>
-						)}
-					</form.Field>
-
-					<form.Field name="endDate">
-						{(field) => (
-							<div className="space-y-2">
-								<Label htmlFor="endDate">Planned Completion Target</Label>
-								<Input
-									id="endDate"
-									type="date"
-									value={field.state.value ?? ""}
-									onChange={(event) => field.handleChange(event.target.value)}
-								/>
-							</div>
-						)}
-					</form.Field>
-				</CardContent>
-			</Card>
-
-			<Card>
-				<CardHeader>
-					<CardTitle>Additional Information</CardTitle>
-					<CardDescription>
-						Attach optional handling instructions or station-level notes.
-					</CardDescription>
-				</CardHeader>
-
-				<CardContent>
-					<form.Field name="remarks">
-						{(field) => (
-							<div className="space-y-2">
-								<Label htmlFor="remarks">Remarks & Operational Notes</Label>
-								<Textarea
-									id="remarks"
-									placeholder="Enter any additional instructions or remarks..."
-									value={field.state.value ?? ""}
-									onChange={(event) => field.handleChange(event.target.value)}
-								/>
-							</div>
-						)}
-					</form.Field>
-				</CardContent>
-			</Card>
-
-			<div className="flex justify-end gap-4">
-				<Button type="button" variant="outline" onClick={() => router.back()}>
-					Cancel
-				</Button>
-
-				<form.Subscribe
-					selector={(state) => [state.canSubmit, state.isSubmitting]}
-				>
-					{([canSubmit, isSubmitting]: [boolean, boolean]) => (
-						<Button
-							type="submit"
-							disabled={!canSubmit || mutation.isPending || isSubmitting}
+			<ol
+				aria-label="Order creation steps"
+				className="grid max-w-3xl grid-cols-2 gap-3"
+			>
+				{[
+					{ title: "Order details", description: "Customer and goods" },
+					{ title: "Schedule", description: "Dates and instructions" },
+				].map((item, index) => (
+					<li
+						key={item.title}
+						aria-current={step === index ? "step" : undefined}
+						className={`flex items-center gap-3 rounded-lg border p-3 transition-colors ${
+							step === index
+								? "border-primary bg-primary/5"
+								: step > index
+									? "border-primary/30 bg-muted/40"
+									: "border-border"
+						}`}
+					>
+						<span
+							className={`flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${
+								step >= index
+									? "bg-primary text-primary-foreground"
+									: "bg-muted text-muted-foreground"
+							}`}
 						>
-							{mutation.isPending || isSubmitting
-								? "Creating Order..."
-								: "Create Order"}
-						</Button>
-					)}
-				</form.Subscribe>
+							{step > index ? "✓" : index + 1}
+						</span>
+						<span className="grid gap-0.5">
+							<span className="text-sm font-medium">{item.title}</span>
+							<span className="text-xs text-muted-foreground">
+								{item.description}
+							</span>
+						</span>
+					</li>
+				))}
+			</ol>
+
+			<section
+				key={step}
+				aria-labelledby={
+					step === 0 ? "order-details-title" : "order-schedule-title"
+				}
+				className="page-enter grid max-w-5xl gap-4"
+			>
+				{step === 0 && (
+					<Card>
+						<CardHeader>
+							<CardTitle id="order-details-title">Order details</CardTitle>
+							<CardDescription>
+								Choose who the order is for, what is being transported, and the
+								requested quantity.
+							</CardDescription>
+						</CardHeader>
+
+						<CardContent className="grid gap-4 md:grid-cols-2">
+							{canManageOther && (
+								<form.Field name="customerId">
+									{(field) => {
+										const errorMsg =
+											stepErrors.customerId ??
+											getErrorMessage(field.state.meta.errors[0]);
+										return (
+											<div className="space-y-2">
+												<FieldHeader
+													htmlFor="customerId"
+													label="Customer Company"
+													required
+													error={errorMsg}
+												/>
+												<div
+													className={
+														errorMsg
+															? "[&>button]:border-destructive [&>button]:focus:ring-destructive/20"
+															: ""
+													}
+												>
+													<CustomerSelect
+														value={
+															field.state.value > 0
+																? field.state.value
+																: undefined
+														}
+														onChange={(value) => {
+															field.handleChange(value);
+															clearStepError("customerId");
+														}}
+													/>
+												</div>
+											</div>
+										);
+									}}
+								</form.Field>
+							)}
+
+							<form.Field name="goodsId">
+								{(field) => {
+									const errorMsg =
+										stepErrors.goodsId ??
+										getErrorMessage(field.state.meta.errors[0]);
+									return (
+										<div className="space-y-2">
+											<FieldHeader
+												htmlFor="goodsId"
+												label="Goods / Commodity"
+												required
+												error={errorMsg}
+											/>
+											<div
+												className={
+													errorMsg
+														? "[&>button]:border-destructive [&>button]:focus:ring-destructive/20"
+														: ""
+												}
+											>
+												<GoodSelect
+													value={
+														field.state.value > 0
+															? field.state.value
+															: undefined
+													}
+													onChange={(value) => {
+														field.handleChange(value);
+														clearStepError("goodsId");
+													}}
+												/>
+											</div>
+										</div>
+									);
+								}}
+							</form.Field>
+
+							<form.Field name="unitId">
+								{(field) => {
+									const errorMsg =
+										stepErrors.unitId ??
+										getErrorMessage(field.state.meta.errors[0]);
+									return (
+										<div className="space-y-2">
+											<FieldHeader
+												htmlFor="unitId"
+												label="Unit of Measurement"
+												required
+												error={errorMsg}
+											/>
+											<div
+												className={
+													errorMsg
+														? "[&>button]:border-destructive [&>button]:focus:ring-destructive/20"
+														: ""
+												}
+											>
+												<UnitSelect
+													value={field.state.value}
+													onChange={(value) => {
+														field.handleChange(value);
+														clearStepError("unitId");
+													}}
+												/>
+											</div>
+										</div>
+									);
+								}}
+							</form.Field>
+
+							<form.Field name="quantityDemanded">
+								{(field) => {
+									const errorMsg =
+										stepErrors.quantityDemanded ??
+										getErrorMessage(field.state.meta.errors[0]);
+									return (
+										<div className="space-y-2">
+											<FieldHeader
+												htmlFor="quantityDemanded"
+												label="Quantity Demanded"
+												required
+												error={errorMsg}
+											/>
+											<Input
+												id="quantityDemanded"
+												placeholder="e.g. 500"
+												className={
+													errorMsg
+														? "border-destructive focus-visible:ring-destructive/20"
+														: ""
+												}
+												value={field.state.value}
+												onChange={(event) => {
+													field.handleChange(event.target.value);
+													clearStepError("quantityDemanded");
+												}}
+											/>
+										</div>
+									);
+								}}
+							</form.Field>
+						</CardContent>
+					</Card>
+				)}
+
+				{step === 1 && (
+					<>
+						<Card>
+							<CardHeader>
+								<CardTitle id="order-schedule-title">
+									Schedule and handling
+								</CardTitle>
+								<CardDescription>
+									Add optional dates and operational details. You can leave
+									fields blank and update them later.
+								</CardDescription>
+							</CardHeader>
+
+							<CardContent className="grid gap-4 md:grid-cols-2">
+								<form.Field name="supervisor">
+									{(field) => (
+										<div className="space-y-2">
+											<Label htmlFor="supervisor">Supervisor Name</Label>
+											<Input
+												id="supervisor"
+												placeholder="Name of supervisor"
+												value={field.state.value ?? ""}
+												onChange={(event) =>
+													field.handleChange(event.target.value)
+												}
+											/>
+										</div>
+									)}
+								</form.Field>
+
+								{canManageStatus && (
+									<form.Field name="status">
+										{(field) => {
+											const errorMsg = getErrorMessage(
+												field.state.meta.errors[0],
+											);
+											return (
+												<div className="space-y-2">
+													<FieldHeader
+														htmlFor="status"
+														label="Initial Status Override"
+														error={errorMsg}
+													/>
+													<div
+														className={
+															errorMsg
+																? "[&>button]:border-destructive [&>button]:focus:ring-destructive/20"
+																: ""
+														}
+													>
+														<OrderStatusSelect
+															value={field.state.value}
+															onChange={(value) => field.handleChange(value)}
+														/>
+													</div>
+												</div>
+											);
+										}}
+									</form.Field>
+								)}
+								<form.Field name="orderDate">
+									{(field) => (
+										<div className="space-y-2">
+											<Label htmlFor="orderDate">Order Date</Label>
+											<Input
+												id="orderDate"
+												type="date"
+												value={field.state.value ?? ""}
+												onChange={(event) =>
+													field.handleChange(event.target.value)
+												}
+											/>
+										</div>
+									)}
+								</form.Field>
+
+								<form.Field name="startDate">
+									{(field) => (
+										<div className="space-y-2">
+											<Label htmlFor="startDate">Planned Transport Start</Label>
+											<Input
+												id="startDate"
+												type="date"
+												value={field.state.value ?? ""}
+												onChange={(event) =>
+													field.handleChange(event.target.value)
+												}
+											/>
+										</div>
+									)}
+								</form.Field>
+
+								<form.Field name="endDate">
+									{(field) => (
+										<div className="space-y-2">
+											<Label htmlFor="endDate">Planned Completion Target</Label>
+											<Input
+												id="endDate"
+												type="date"
+												value={field.state.value ?? ""}
+												onChange={(event) =>
+													field.handleChange(event.target.value)
+												}
+											/>
+										</div>
+									)}
+								</form.Field>
+							</CardContent>
+						</Card>
+
+						<Card>
+							<CardHeader>
+								<CardTitle>Additional Information</CardTitle>
+								<CardDescription>
+									Attach optional handling instructions or station-level notes.
+								</CardDescription>
+							</CardHeader>
+
+							<CardContent>
+								<form.Field name="remarks">
+									{(field) => (
+										<div className="space-y-2">
+											<Label htmlFor="remarks">
+												Remarks & Operational Notes
+											</Label>
+											<Textarea
+												id="remarks"
+												placeholder="Enter any additional instructions or remarks..."
+												value={field.state.value ?? ""}
+												onChange={(event) =>
+													field.handleChange(event.target.value)
+												}
+											/>
+										</div>
+									)}
+								</form.Field>
+							</CardContent>
+						</Card>
+					</>
+				)}
+			</section>
+
+			<div className="flex flex-wrap items-center justify-between gap-3">
+				{step === 0 ? (
+					<Button type="button" variant="outline" onClick={() => router.back()}>
+						Cancel
+					</Button>
+				) : (
+					<Button type="button" variant="outline" onClick={() => setStep(0)}>
+						<ArrowLeftIcon />
+						Back
+					</Button>
+				)}
+
+				{step === 0 ? (
+					<Button type="button" onClick={continueToSchedule}>
+						Continue
+						<ArrowRightIcon />
+					</Button>
+				) : (
+					<form.Subscribe>
+						{(state) => (
+							<Button
+								type="submit"
+								disabled={
+									!state.canSubmit || mutation.isPending || state.isSubmitting
+								}
+							>
+								{mutation.isPending || state.isSubmitting
+									? "Creating Order..."
+									: "Create Order"}
+							</Button>
+						)}
+					</form.Subscribe>
+				)}
 			</div>
 		</form>
 	);
