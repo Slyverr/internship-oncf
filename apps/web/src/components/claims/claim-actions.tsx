@@ -25,11 +25,14 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import {
 	getClaimsControllerFindOneQueryKey,
+	useClaimsControllerAwaitInfo,
 	useClaimsControllerClose,
 	useClaimsControllerReject,
 	useClaimsControllerRemove,
 	useClaimsControllerResolve,
+	useClaimsControllerSendToDtm,
 	useClaimsControllerStartProgress,
+	useClaimsControllerStartTreatment,
 } from "@/lib/api/claims";
 import type { ClaimDetailDto } from "@/lib/api/generated.schemas";
 import { useAuth } from "@/providers/auth-provider";
@@ -48,6 +51,9 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 	const [resolutionText, setResolutionText] = useState("");
 
 	const startProgressMutation = useClaimsControllerStartProgress();
+	const awaitInfoMutation = useClaimsControllerAwaitInfo();
+	const startTreatmentMutation = useClaimsControllerStartTreatment();
+	const sendToDtmMutation = useClaimsControllerSendToDtm();
 	const resolveMutation = useClaimsControllerResolve();
 	const closeMutation = useClaimsControllerClose();
 	const rejectMutation = useClaimsControllerReject();
@@ -64,6 +70,9 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 
 	const isPending =
 		startProgressMutation.isPending ||
+		awaitInfoMutation.isPending ||
+		startTreatmentMutation.isPending ||
+		sendToDtmMutation.isPending ||
 		resolveMutation.isPending ||
 		closeMutation.isPending ||
 		rejectMutation.isPending ||
@@ -117,7 +126,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 		<>
 			<div className="flex flex-wrap items-center gap-4">
 				{/* Start Progress: NEW -> IN_PROGRESS */}
-				{hasPermission(Permission.CLAIMS_MANAGE_OTHER) &&
+				{hasPermission(Permission.CLAIMS_ACTION_START_PROGRESS) &&
 					status === ClaimStatus.NEW && (
 						<Button
 							disabled={isPending}
@@ -132,11 +141,44 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 						</Button>
 					)}
 
-				{/* Resolve: IN_PROGRESS / AWAITING_INFO -> RESOLVED */}
-				{hasPermission(Permission.CLAIMS_MANAGE_OTHER) &&
+				{/* Await information: IN_PROGRESS -> AWAITING_INFO */}
+				{hasPermission(Permission.CLAIMS_ACTION_AWAIT_INFO) &&
+					status === ClaimStatus.IN_PROGRESS && (
+						<Button
+							disabled={isPending}
+							variant="outline"
+							onClick={() =>
+								awaitInfoMutation.mutate(
+									{ id: claim.id },
+									{ onSuccess: updateClaimCache },
+								)
+							}
+						>
+							Await Information
+						</Button>
+					)}
+
+				{/* Start treatment: IN_PROGRESS / AWAITING_INFO -> IN_TREATMENT */}
+				{hasPermission(Permission.CLAIMS_ACTION_START_TREATMENT) &&
 					(status === ClaimStatus.IN_PROGRESS ||
-						status === ClaimStatus.IN_TREATMENT ||
 						status === ClaimStatus.AWAITING_INFO) && (
+						<Button
+							disabled={isPending}
+							variant="secondary"
+							onClick={() =>
+								startTreatmentMutation.mutate(
+									{ id: claim.id },
+									{ onSuccess: updateClaimCache },
+								)
+							}
+						>
+							Start Treatment
+						</Button>
+					)}
+
+				{/* Resolve: IN_TREATMENT -> RESOLVED */}
+				{hasPermission(Permission.CLAIMS_ACTION_RESOLVE) &&
+					status === ClaimStatus.IN_TREATMENT && (
 						<Button
 							variant="secondary"
 							disabled={isPending}
@@ -147,7 +189,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 					)}
 
 				{/* Close: RESOLVED -> CLOSED */}
-				{hasPermission(Permission.CLAIMS_MANAGE_OTHER) &&
+				{hasPermission(Permission.CLAIMS_ACTION_CLOSE) &&
 					status === ClaimStatus.RESOLVED && (
 						<Button
 							variant="outline"
@@ -163,8 +205,8 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 						</Button>
 					)}
 
-				{/* Reject: NEW / IN_PROGRESS -> REJECTED */}
-				{hasPermission(Permission.CLAIMS_MANAGE_OTHER) &&
+				{/* Reject: allowed by the backend transition rules */}
+				{hasPermission(Permission.CLAIMS_ACTION_REJECT) &&
 					status !== ClaimStatus.CLOSED &&
 					status !== ClaimStatus.REJECTED && (
 						<Button
@@ -173,6 +215,24 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 							onClick={() => setRejectDialogOpen(true)}
 						>
 							Reject
+						</Button>
+					)}
+
+				{hasPermission(Permission.CLAIMS_ACTION_SEND_TO_DTM) &&
+					(status === ClaimStatus.IN_PROGRESS ||
+						status === ClaimStatus.IN_TREATMENT ||
+						status === ClaimStatus.RESOLVED) && (
+						<Button
+							disabled={isPending}
+							variant="outline"
+							onClick={() =>
+								sendToDtmMutation.mutate(
+									{ id: claim.id },
+									{ onSuccess: updateClaimCache },
+								)
+							}
+						>
+							Send to DTM
 						</Button>
 					)}
 
