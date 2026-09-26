@@ -1,24 +1,77 @@
-import { Test, TestingModule } from "@nestjs/testing";
+import { NotFoundException } from "@nestjs/common";
 import { CustomersMapper } from "./customers.mapper";
 import { CustomersQuery } from "./customers.query";
 import { CustomersService } from "./customers.service";
+import type { CustomerId } from "./customers.types";
 
 describe("CustomersService", () => {
-	let service: CustomersService;
+	const query = {
+		findCustomers: jest.fn(),
+		findCustomer: jest.fn(),
+		createCustomer: jest.fn(),
+		updateCustomer: jest.fn(),
+	};
+	const mapper = {
+		toCreate: jest.fn(),
+		toUpdate: jest.fn(),
+	};
+	const service = new CustomersService(
+		query as unknown as CustomersQuery,
+		mapper as unknown as CustomersMapper,
+	);
+	const id = 8 as CustomerId;
+	const customer = { id, companyName: "Example Ltd" };
 
-	beforeEach(async () => {
-		const module: TestingModule = await Test.createTestingModule({
-			providers: [
-				CustomersService,
-				{ provide: CustomersQuery, useValue: {} },
-				{ provide: CustomersMapper, useValue: {} },
-			],
-		}).compile();
-
-		service = module.get<CustomersService>(CustomersService);
+	beforeEach(() => {
+		for (const mock of Object.values(query)) mock.mockReset();
+		for (const mock of Object.values(mapper)) mock.mockReset();
 	});
 
-	it("should be defined", () => {
-		expect(service).toBeDefined();
+	it("passes list filters to the query", async () => {
+		const filters = { search: "example" } as never;
+		query.findCustomers.mockResolvedValue([customer]);
+		await expect(service.findAll(filters)).resolves.toEqual([customer]);
+		expect(query.findCustomers).toHaveBeenCalledWith(filters);
+	});
+
+	it("returns a customer and reports a missing record", async () => {
+		query.findCustomer.mockResolvedValue(customer);
+		await expect(service.findOne(id)).resolves.toBe(customer);
+		query.findCustomer.mockResolvedValue(undefined);
+		await expect(service.findOne(id)).rejects.toBeInstanceOf(NotFoundException);
+	});
+
+	it("maps and persists a new customer, then returns its detail", async () => {
+		const dto = { companyName: "Example Ltd" } as never;
+		const values = { companyName: "Example Ltd" };
+		mapper.toCreate.mockReturnValue(values);
+		query.createCustomer.mockResolvedValue({ id });
+		query.findCustomer.mockResolvedValue(customer);
+		await expect(service.create(dto)).resolves.toBe(customer);
+		expect(mapper.toCreate).toHaveBeenCalledWith(dto);
+		expect(query.createCustomer).toHaveBeenCalledWith(values);
+	});
+
+	it("maps updates and returns the updated customer", async () => {
+		const dto = { companyName: "New Name" } as never;
+		const values = { companyName: "New Name" };
+		mapper.toUpdate.mockReturnValue(values);
+		query.updateCustomer.mockResolvedValue({ id });
+		query.findCustomer.mockResolvedValue(customer);
+		await expect(service.update(id, dto)).resolves.toBe(customer);
+		expect(mapper.toUpdate).toHaveBeenCalledWith(dto);
+		expect(query.updateCustomer).toHaveBeenCalledWith(id, values);
+	});
+
+	it("deactivates an existing customer and reports a missing record", async () => {
+		query.updateCustomer.mockResolvedValue({ ...customer, isActive: false });
+		await expect(service.deactivate(id)).resolves.toMatchObject({
+			isActive: false,
+		});
+		expect(query.updateCustomer).toHaveBeenCalledWith(id, { isActive: false });
+		query.updateCustomer.mockResolvedValue(undefined);
+		await expect(service.deactivate(id)).rejects.toBeInstanceOf(
+			NotFoundException,
+		);
 	});
 });
