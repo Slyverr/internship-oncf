@@ -177,7 +177,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 					)}
 
 				{/* Dropdown Menu for Edit and Delete */}
-				{(hasPermission(Permission.CLAIMS_MANAGE_OTHER) ||
+				{(hasPermission(Permission.CLAIMS_UPDATE) ||
 					hasPermission(Permission.CLAIMS_DELETE)) && (
 					<DropdownMenu>
 						<DropdownMenuTrigger
@@ -189,7 +189,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 						</DropdownMenuTrigger>
 
 						<DropdownMenuContent align="end">
-							{hasPermission(Permission.CLAIMS_MANAGE_OTHER) && (
+							{hasPermission(Permission.CLAIMS_UPDATE) && (
 								<DropdownMenuItem
 									onClick={() =>
 										router.push(`/dashboard/claims/${claim.id}/edit`)

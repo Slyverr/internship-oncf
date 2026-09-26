@@ -1,5 +1,5 @@
+import { ClaimEditForm } from "@/components/claims/claim-edit-form";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
-import { UnderConstruction } from "@/components/under-construction";
 import { claimsControllerFindOne } from "@/lib/api/claims";
 import { claimsBreadcrumbs } from "../../breadcrumbs";
 
@@ -15,7 +15,7 @@ export default async function Page({ params }: PageProps) {
 		<>
 			<Breadcrumbs items={claimsBreadcrumbs.edit(id, `#${claim.id}`)} />
 
-			<UnderConstruction />
+			<ClaimEditForm claim={claim} />
 		</>
 	);
 }
