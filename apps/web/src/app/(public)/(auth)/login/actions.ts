@@ -1,5 +1,6 @@
 "use server";
 
+import { isAxiosError } from "axios";
 import { cookies } from "next/headers";
 import { authControllerLogin } from "@/lib/api/auth";
 
@@ -17,7 +18,7 @@ export type LoginState = {
 };
 
 export async function loginAction(
-	prevState: LoginState | null,
+	_prevState: LoginState | null,
 	formData: FormData,
 ): Promise<LoginState> {
 	const username = formData.get("username") as string;
@@ -72,14 +73,15 @@ export async function loginAction(
 			success: true,
 			data: { username, remember },
 		};
-	} catch (error: any) {
+	} catch (error: unknown) {
 		let formError = "Network error. Please check your connection.";
+		const status = isAxiosError(error) ? error.response?.status : undefined;
 
-		if (error.response?.status === 401) {
+		if (status === 401) {
 			formError = "Invalid email or password";
-		} else if (error.response?.status === 429) {
+		} else if (status === 429) {
 			formError = "Too many attempts. Please try again later";
-		} else if (error.response?.status >= 500) {
+		} else if (status !== undefined && status >= 500) {
 			formError = "Server error. Please try again later";
 		}
 
