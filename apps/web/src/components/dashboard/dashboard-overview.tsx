@@ -3,6 +3,7 @@
 import { Permission } from "@ecommand/shared";
 import { ArrowRightIcon, ClipboardListIcon, PackageIcon } from "lucide-react";
 import Link from "next/link";
+import { PageHeader } from "@/components/common/page-header";
 import { Badge } from "@/components/ui/badge";
 import {
 	Card,
@@ -45,14 +46,14 @@ function RecentSection({
 	return (
 		<Card>
 			<CardHeader>
-				<div className="flex items-start justify-between gap-4">
-					<div className="space-y-1">
+				<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+					<div className="grid gap-compact">
 						<CardTitle>{title}</CardTitle>
 						<CardDescription>{description}</CardDescription>
 					</div>
 					<Link
 						href={href}
-						className="inline-flex shrink-0 items-center gap-1 text-sm text-primary hover:underline"
+						className="inline-flex shrink-0 items-center gap-compact text-sm text-primary hover:underline"
 						aria-label={`View all ${title.toLowerCase()}`}
 					>
 						View all <ArrowRightIcon className="size-4" />
@@ -74,9 +75,9 @@ function RecentSection({
 							<li key={item.id}>
 								<Link
 									href={item.href}
-									className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0 hover:text-primary"
+									className="flex items-center justify-between gap-4 py-4 first:pt-0 last:pb-0 hover:text-primary"
 								>
-									<span className="min-w-0 space-y-1">
+									<span className="grid min-w-0 gap-compact">
 										<span className="block truncate font-medium">
 											{item.title}
 										</span>
@@ -84,7 +85,7 @@ function RecentSection({
 											{item.description}
 										</span>
 									</span>
-									<span className="flex shrink-0 flex-col items-end gap-1">
+									<span className="flex shrink-0 flex-col items-end gap-compact">
 										{item.status && (
 											<Badge variant="outline" className="capitalize">
 												{item.status.toLowerCase().replaceAll("_", " ")}
@@ -186,21 +187,17 @@ export function DashboardOverview() {
 	].filter(Boolean);
 
 	return (
-		<section className="space-y-6">
-			<div className="space-y-2">
-				<h1 className="text-2xl font-semibold tracking-tight">
-					Welcome back, {profile.firstName}
-				</h1>
-				<p className="text-sm text-muted-foreground">
-					Here is a snapshot of recent activity in ECommand.
-				</p>
-			</div>
+		<section className="grid gap-8">
+			<PageHeader
+				title={"Welcome back, " + profile.firstName}
+				description="Here is a snapshot of recent activity in ECommand."
+			/>
 
 			{sections.length > 0 ? (
 				<div className="grid gap-4 xl:grid-cols-2">{sections}</div>
 			) : (
 				<Card>
-					<CardContent className="flex items-center gap-3 py-6">
+					<CardContent className="flex items-center gap-4 py-8">
 						<ClipboardListIcon className="size-5 text-muted-foreground" />
 						<p className="text-sm text-muted-foreground">
 							Your account does not have access to order, program, or claim
@@ -210,7 +207,7 @@ export function DashboardOverview() {
 				</Card>
 			)}
 
-			<div className="flex items-center gap-2 text-sm text-muted-foreground">
+			<div className="flex items-center gap-compact text-sm text-muted-foreground">
 				<PackageIcon className="size-4" />
 				Showing up to five latest records for each section.
 			</div>
