@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useAuthControllerChangePassword } from "@/lib/api/auth";
 import { useProfileControllerUpdate } from "@/lib/api/profile";
+import { getFormErrorMessage } from "@/lib/form-utils";
 import { type ThemeMode, useAppearance } from "@/providers/appearance-provider";
 import { useAuth } from "@/providers/auth-provider";
 
@@ -44,12 +45,6 @@ const themeOptions: {
 		Icon: MoonIcon,
 	},
 ];
-
-function errorMessage(error: unknown) {
-	return error instanceof Error
-		? error.message
-		: "Something went wrong. Try again.";
-}
 
 export function SettingsPanel() {
 	const { profile, setProfile } = useAuth();
@@ -83,7 +78,10 @@ export function SettingsPanel() {
 					setProfile(updatedProfile);
 					setProfileMessage("Your profile has been updated.");
 				},
-				onError: (error) => setProfileError(errorMessage(error)),
+				onError: (error) =>
+					setProfileError(
+						getFormErrorMessage(error) ?? "Something went wrong. Try again.",
+					),
 			},
 		);
 	}
@@ -100,7 +98,10 @@ export function SettingsPanel() {
 					setNewPassword("");
 					setPasswordMessage("Your password has been changed.");
 				},
-				onError: (error) => setPasswordError(errorMessage(error)),
+				onError: (error) =>
+					setPasswordError(
+						getFormErrorMessage(error) ?? "Something went wrong. Try again.",
+					),
 			},
 		);
 	}
