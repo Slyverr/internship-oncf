@@ -108,7 +108,30 @@ export function SettingsPanel() {
 
 	return (
 		<div className="grid max-w-5xl gap-6">
-			<Card id="appearance">
+			<nav
+				aria-label="Settings sections"
+				className="flex gap-2 overflow-x-auto pb-4"
+			>
+				<a
+					className="shrink-0 rounded-md border px-4 py-2 text-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+					href="#appearance"
+				>
+					Appearance
+				</a>
+				<a
+					className="shrink-0 rounded-md border px-4 py-2 text-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+					href="#account"
+				>
+					Account details
+				</a>
+				<a
+					className="shrink-0 rounded-md border px-4 py-2 text-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+					href="#security"
+				>
+					Security
+				</a>
+			</nav>
+			<Card id="appearance" className="scroll-mt-8">
 				<CardHeader>
 					<CardTitle>Appearance</CardTitle>
 					<CardDescription>
@@ -149,13 +172,13 @@ export function SettingsPanel() {
 					</RadioGroup>
 					<div className="mt-5 flex items-center gap-2 text-xs text-muted-foreground">
 						<span className="size-3 rounded-full bg-primary" />
-						<span className="size-3 rounded-full bg-orange-500" />
-						<span>ONCF orange with warm neutral surfaces</span>
+						<span className="size-3 rounded-full bg-accent" />
+						<span>ONCF-inspired orange with softer neutral surfaces</span>
 					</div>
 				</CardContent>
 			</Card>
 
-			<Card id="account">
+			<Card id="account" className="scroll-mt-8">
 				<CardHeader>
 					<CardTitle>Account details</CardTitle>
 					<CardDescription>
@@ -214,7 +237,7 @@ export function SettingsPanel() {
 				</CardContent>
 			</Card>
 
-			<Card id="security">
+			<Card id="security" className="scroll-mt-8">
 				<CardHeader>
 					<CardTitle>Security</CardTitle>
 					<CardDescription>
