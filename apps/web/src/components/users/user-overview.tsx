@@ -25,7 +25,7 @@ export function UserOverview({ user }: { user: UserDetailDto }) {
 					<div className="flex items-start justify-between gap-4">
 						<span className="text-sm text-muted-foreground">Role</span>
 						<Badge variant="outline" className="uppercase font-mono text-xs">
-							asdhasd{user.role.name}
+							{user.role.name}
 						</Badge>
 					</div>
 					<Detail label="Account Type" value={user.type ?? "—"} />
