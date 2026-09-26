@@ -1,3 +1,5 @@
+// biome-ignore-all lint/a11y/useSemanticElements: Field wrappers use group semantics without adding fieldset legend semantics.
+
 "use client";
 
 import { cva, type VariantProps } from "class-variance-authority";
@@ -190,19 +192,22 @@ function FieldError({
 		}
 
 		const uniqueErrors = [
-			...new Map(errors.map((error) => [error?.message, error])).values(),
+			...new Set(
+				errors
+					.map((error) => error?.message)
+					.filter((message): message is string => Boolean(message)),
+			),
 		];
 
-		if (uniqueErrors?.length == 1) {
-			return uniqueErrors[0]?.message;
+		if (uniqueErrors.length === 1) {
+			return uniqueErrors[0];
 		}
 
 		return (
 			<ul className="ml-4 flex list-disc flex-col gap-1">
-				{uniqueErrors.map(
-					(error, index) =>
-						error?.message && <li key={index}>{error.message}</li>,
-				)}
+				{uniqueErrors.map((message) => (
+					<li key={message}>{message}</li>
+				))}
 			</ul>
 		);
 	}, [children, errors]);

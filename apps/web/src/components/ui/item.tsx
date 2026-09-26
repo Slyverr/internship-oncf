@@ -1,3 +1,5 @@
+// biome-ignore-all lint/a11y/useSemanticElements: Item groups allow arbitrary composed children and cannot require list-item elements.
+
 import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
 import { cva, type VariantProps } from "class-variance-authority";

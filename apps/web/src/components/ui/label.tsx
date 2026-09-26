@@ -1,3 +1,5 @@
+// biome-ignore-all lint/a11y/noLabelWithoutControl: This generic label primitive forwards association props supplied by each use site.
+
 "use client";
 
 import * as React from "react";

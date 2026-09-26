@@ -1,3 +1,5 @@
+// biome-ignore-all lint/a11y/useSemanticElements: Carousel slides use the ARIA group pattern, which is not a form fieldset.
+
 "use client";
 
 import useEmblaCarousel, {

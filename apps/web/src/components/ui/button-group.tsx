@@ -1,3 +1,5 @@
+// biome-ignore-all lint/a11y/useSemanticElements: Button groups use ARIA grouping without adding form-field semantics.
+
 import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
 import { cva, type VariantProps } from "class-variance-authority";
