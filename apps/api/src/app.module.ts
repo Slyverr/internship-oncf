@@ -9,6 +9,7 @@ import { NotificationsModule } from "@/notifications/notifications.module";
 import { OrdersModule } from "@/orders/orders.module";
 import { ProfileModule } from "@/profile/profile.module";
 import { ProgramsModule } from "@/programs/programs.module";
+import { ReportsModule } from "@/reports/reports.module";
 import { TrackingModule } from "@/tracking/tracking.module";
 import { UsersModule } from "@/users/users.module";
 import { AppController } from "./app.controller";
@@ -24,6 +25,7 @@ import { AppController } from "./app.controller";
 		CustomersModule,
 		ClaimsModule,
 		NotificationsModule,
+		ReportsModule,
 		ProfileModule,
 		CatalogModule,
 		TrackingModule,
