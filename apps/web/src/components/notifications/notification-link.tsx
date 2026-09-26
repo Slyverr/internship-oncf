@@ -12,12 +12,12 @@ export function NotificationLink() {
 	return (
 		<Link
 			href="/dashboard/notifications"
-			className="relative ml-auto inline-flex items-center gap-2 rounded-md p-2 hover:bg-muted"
+			className="relative ml-auto inline-flex items-center gap-compact rounded-md p-4 hover:bg-muted"
 			aria-label={`Notifications${count ? `, ${count} unread` : ""}`}
 		>
 			<BellIcon className="size-5" />
 			{count > 0 && (
-				<span className="rounded-full bg-primary px-1.5 text-xs text-primary-foreground">
+				<span className="rounded-full bg-primary px-compact text-xs text-primary-foreground">
 					{count > 99 ? "99+" : count}
 				</span>
 			)}

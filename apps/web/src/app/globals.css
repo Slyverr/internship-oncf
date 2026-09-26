@@ -52,6 +52,10 @@
 	gap: var(--spacing);
 }
 
+@utility px-compact {
+	padding-inline: var(--spacing);
+}
+
 :root {
 	--background: oklch(0.955 0.014 75);
 	--foreground: oklch(0.27 0.018 55);

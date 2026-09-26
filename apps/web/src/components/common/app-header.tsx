@@ -24,21 +24,29 @@ export function AppHeader() {
 
 			{breadcrumbs.length > 0 && (
 				<>
-					<div className="flex h-2/5">
+					<div className="flex h-8">
 						<Separator orientation="vertical" />
 					</div>
 
-					<Breadcrumb>
-						<BreadcrumbList>
+					<Breadcrumb className="min-w-0 flex-1 overflow-hidden">
+						<BreadcrumbList className="min-w-0 flex-nowrap overflow-hidden">
 							{breadcrumbs.map((breadcrumb, index) => {
 								const isLast = index === breadcrumbs.length - 1;
 								const key = `${breadcrumb.href ?? "current"}-${breadcrumb.label}`;
 
 								return (
 									<Fragment key={key}>
-										<BreadcrumbItem>
+										<BreadcrumbItem
+											className={
+												index < breadcrumbs.length - 1
+													? "hidden sm:inline-flex"
+													: "min-w-0"
+											}
+										>
 											{isLast || !breadcrumb.href ? (
-												<BreadcrumbPage>{breadcrumb.label}</BreadcrumbPage>
+												<BreadcrumbPage className="block max-w-64 truncate">
+													{breadcrumb.label}
+												</BreadcrumbPage>
 											) : (
 												<BreadcrumbLink
 													render={<Link href={breadcrumb.href} />}
@@ -48,7 +56,9 @@ export function AppHeader() {
 											)}
 										</BreadcrumbItem>
 
-										{!isLast && <BreadcrumbSeparator />}
+										{!isLast && (
+											<BreadcrumbSeparator className="hidden sm:block" />
+										)}
 									</Fragment>
 								);
 							})}

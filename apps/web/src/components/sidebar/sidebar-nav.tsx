@@ -36,7 +36,7 @@ export function SidebarNav() {
 							render={<Link href={route.url} />}
 							isActive={isActive}
 							tooltip={route.title}
-							className={`group/button relative w-full py-6 px-4 rounded-none transition-colors ${
+							className={`group/button relative w-full px-4 py-4 rounded-none transition-colors ${
 								isActive
 									? "bg-sidebar-primary/10 font-semibold dark:bg-sidebar-primary/20"
 									: "text-sidebar-foreground/70 hover:bg-sidebar-accent"
