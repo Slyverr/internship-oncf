@@ -81,6 +81,10 @@
 	padding-right: var(--spacing);
 }
 
+@utility py-compact {
+	padding-block: var(--spacing);
+}
+
 @utility px-compact {
 	padding-inline: var(--spacing);
 }
