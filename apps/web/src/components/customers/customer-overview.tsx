@@ -57,9 +57,11 @@ export function CustomerOverview({
 
 function Detail({ label, value }: { label: string; value: string }) {
 	return (
-		<div className="flex items-start justify-between gap-4">
-			<span className="text-sm text-muted-foreground">{label}</span>
-			<span className="text-right text-sm font-medium">{value}</span>
+		<div className="grid min-w-0 gap-2 sm:grid-cols-2 sm:items-baseline">
+			<span className="text-xs text-muted-foreground sm:text-sm">{label}</span>
+			<span className="break-words text-sm font-medium sm:text-right sm:text-base">
+				{value}
+			</span>
 		</div>
 	);
 }
@@ -67,7 +69,7 @@ function Detail({ label, value }: { label: string; value: string }) {
 function Metric({ label, value }: { label: string; value: string }) {
 	return (
 		<div className="space-y-1">
-			<p className="text-sm text-muted-foreground">{label}</p>
+			<p className="text-xs text-muted-foreground sm:text-sm">{label}</p>
 			<p className="text-base font-semibold">{value}</p>
 		</div>
 	);

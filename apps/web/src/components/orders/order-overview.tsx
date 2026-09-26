@@ -124,8 +124,8 @@ export function OrderOverview({ order }: { order: OrderDetailDto }) {
 
 function Detail({ label, value }: { label: string; value: string }) {
 	return (
-		<div className="flex items-center justify-between gap-4">
-			<p className="text-sm text-muted-foreground">{label}</p>
+		<div className="grid min-w-0 gap-2 sm:grid-cols-2 sm:items-baseline">
+			<p className="text-xs text-muted-foreground sm:text-sm">{label}</p>
 			<p className="text-right text-sm font-medium">{value}</p>
 		</div>
 	);
