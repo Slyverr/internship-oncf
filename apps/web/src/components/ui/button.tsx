@@ -21,16 +21,16 @@ const buttonVariants = cva(
 			},
 			size: {
 				default:
-					"h-9 gap-control px-control in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-control has-data-[icon=inline-start]:pl-control",
+					"h-11 gap-control px-control in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-control has-data-[icon=inline-start]:pl-control",
 				xs: "h-6 gap-compact rounded-[min(var(--radius-md),8px)] px-control text-xs in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-compact has-data-[icon=inline-start]:pl-compact [&_svg:not([class*='size-'])]:size-3",
-				sm: "h-8 gap-compact rounded-[min(var(--radius-md),10px)] px-control in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-compact has-data-[icon=inline-start]:pl-compact",
-				lg: "h-10 gap-control px-control has-data-[icon=inline-end]:pr-control has-data-[icon=inline-start]:pl-control",
-				icon: "size-9",
+				sm: "h-10 gap-compact rounded-[min(var(--radius-md),10px)] px-control in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-compact has-data-[icon=inline-start]:pl-compact",
+				lg: "h-12 gap-control px-control has-data-[icon=inline-end]:pr-control has-data-[icon=inline-start]:pl-control",
+				icon: "size-11",
 				"icon-xs":
 					"size-6 rounded-[min(var(--radius-md),8px)] in-data-[slot=button-group]:rounded-md [&_svg:not([class*='size-'])]:size-3",
 				"icon-sm":
-					"size-8 rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-md",
-				"icon-lg": "size-10",
+					"size-10 rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-md",
+				"icon-lg": "size-12",
 			},
 		},
 		defaultVariants: {

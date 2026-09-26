@@ -37,6 +37,7 @@ export function SidebarUser() {
 			<SidebarMenuItem>
 				<DropdownMenu>
 					<DropdownMenuTrigger
+						aria-label={`Account menu for ${name}`}
 						render={
 							<SidebarMenuButton
 								size="lg"

@@ -18,13 +18,13 @@ Use the current role-based tokens: background, foreground, card, muted, muted-fo
 
 ### Spacing
 
-Use multiples of 4px. Prefer padding and parent gap over individual margins.
+Use multiples of 4px. Prefer padding and parent gap over individual margins. Token names are aliases, not utility suffixes: for example, p-control is 8px while p-4 is 16px.
 
 | Token intent | Value | Use |
 | --- | ---: | --- |
-| micro | 4px | icon-to-label or tightly grouped metadata only |
-| compact | 8px | small control internals and dense menu item internals |
-| control | 12px | standard button/input horizontal inset where needed |
+| compact (gap-compact) | 4px | icon-to-label or tightly grouped metadata only |
+| control (p-control, gap-control) | 8px | standard control inset and navigation item content |
+| inset | 12px | use only when a component needs a between-step inset |
 | inline | 16px | related controls, row content, and card inner gap |
 | section | 24px | separation between content groups |
 | page | 32px | desktop page section separation |
@@ -105,7 +105,7 @@ Keep the desktop header at a consistent 64px height. Align the sidebar toggle, b
 ### Notifications
 
 - Clicking the bell opens an anchored dropdown/popup beside the bell; it does not navigate away.
-- On desktop, target a panel around 360px wide and at most 70vh tall. On mobile, use the available viewport width with 16px side gutters and keep it within the screen.
+- On desktop, target a panel around 360px wide and keep the whole panel at most 70vh tall. On mobile, use the available viewport width with 16px side gutters and keep it within the screen.
 - The panel has a heading, unread count, scrollable recent list, and a footer link to the full notification history. The full history page remains available for search/filtering and older items.
 - Each notification shows a concise title, secondary context, and relative time with title/subtitle hierarchy. Unread state is clear through more than color alone. Rows have at least a 56px hit area; row actions have a 44px target.
 - Mark-one-read and mark-all-read actions give immediate feedback and maintain focus. Clicking a notification opens its relevant destination when one exists; expose the full-history link for notifications without a destination.

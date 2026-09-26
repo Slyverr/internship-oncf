@@ -36,11 +36,11 @@ export function SidebarNav() {
 							render={<Link href={route.url} />}
 							isActive={isActive}
 							tooltip={route.title}
-							className={`group/button relative w-full px-4 py-4 rounded-none transition-colors ${
+							className={`group/button relative w-full px-4 py-2 rounded-none transition-colors ${
 								isActive
 									? "bg-sidebar-primary/10 font-semibold dark:bg-sidebar-primary/20"
 									: "text-sidebar-foreground/70 hover:bg-sidebar-accent"
-							} group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:rounded-md`}
+							} group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:rounded-md`}
 						>
 							{isActive && (
 								<span className="absolute left-0 inset-y-0 w-1 rounded-r-sm bg-sidebar-primary transition-all duration-200 group-data-[collapsible=icon]:hidden" />
