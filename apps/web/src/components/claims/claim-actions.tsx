@@ -207,8 +207,9 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 
 				{/* Reject: allowed by the backend transition rules */}
 				{hasPermission(Permission.CLAIMS_ACTION_REJECT) &&
-					status !== ClaimStatus.CLOSED &&
-					status !== ClaimStatus.REJECTED && (
+					(status === ClaimStatus.NEW ||
+						status === ClaimStatus.IN_PROGRESS ||
+						status === ClaimStatus.IN_TREATMENT) && (
 						<Button
 							variant="destructive"
 							disabled={isPending}
