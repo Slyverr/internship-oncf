@@ -28,7 +28,7 @@ Web API client generation runs from `apps/web` with the API OpenAPI endpoint ava
 bun run generate:api
 ```
 
-**Known limitation:** the current Nest OpenAPI document emits empty property schemas for many response DTOs. Orval can exit successfully while generating unsafe `{ [key: string]: unknown }` client types. Keep the committed client until the DTO metadata is fixed; inspect generated types and run `bun run typecheck` before accepting client regeneration.
+**OpenAPI generation:** use a real Node.js runtime for client generation. Bun’s Node compatibility runtime can load duplicate DTO constructors and omit their generated Swagger properties. The root bun run dev API may therefore expose empty DTO schemas even though nest build emits metadata. After building, start the production API from apps/api by setting NODE_PATH=./node_modules and TS_NODE_PROJECT=./tsconfig.runtime.json, then running node -r tsconfig-paths/register dist/src/main. Confirm key schemas such as OrderDetailDto have properties before running Orval. Keep the committed client in place until the generated diff and web typecheck are reviewed.
 
 For local password-recovery testing, omit SMTP settings, submit the forgot-password form for a seeded account, and open the newest `.eml` file under `apps/api/.local-mailbox` (or the configured `LOCAL_MAILBOX_PATH`). With an SMTP provider, configure `SMTP_HOST` and `SMTP_FROM`; configure `SMTP_USER` and `SMTP_PASSWORD` together when authentication is required.
 

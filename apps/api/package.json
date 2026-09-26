@@ -12,7 +12,7 @@
 		"start": "NODE_PATH=./node_modules nest start",
 		"start:dev": "NODE_PATH=./node_modules nest start --watch",
 		"start:debug": "NODE_PATH=./node_modules nest start --debug --watch",
-		"start:prod": "node dist/main",
+		"start:prod": "NODE_PATH=./node_modules TS_NODE_PROJECT=./tsconfig.runtime.json node -r tsconfig-paths/register dist/src/main",
 		"db:push": "drizzle-kit push",
 		"db:studio": "drizzle-kit studio",
 		"seed:dev": "tsx ./drizzle/seed/seed-dev.ts",
