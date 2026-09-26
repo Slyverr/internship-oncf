@@ -8,6 +8,7 @@ const config: Config = {
 		"^.+\\.(t|j)s$": "ts-jest",
 	},
 	moduleNameMapper: {
+		"^@/(.*)$": "<rootDir>/src/$1",
 		"^src/(.*)$": "<rootDir>/src/$1",
 		"^drizzle/(.*)$": "<rootDir>/drizzle/$1",
 	},
