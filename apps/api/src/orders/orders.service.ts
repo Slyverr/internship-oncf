@@ -131,6 +131,11 @@ export class OrdersService {
 	}
 
 	async remove(id: OrderId) {
+		const order = await this.findOne(id);
+		if (order.orderStatus?.name !== OrderStatus.DRAFT) {
+			throw new ConflictException("Only draft orders can be deleted");
+		}
+
 		const deleted = await this.ordersQuery.deleteOrder(id);
 		return this.ensure(deleted, id);
 	}

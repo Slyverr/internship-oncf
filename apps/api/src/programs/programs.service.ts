@@ -72,6 +72,11 @@ export class ProgramsService {
 	}
 
 	async remove(id: ProgramId) {
+		const program = await this.findOne(id);
+		if (program.programStatus?.name !== ProgramStatus.DRAFT) {
+			throw new ConflictException("Only draft programs can be deleted");
+		}
+
 		const deleted = await this.programsQuery.removeProgram(id);
 		return this.ensure(deleted, id);
 	}
