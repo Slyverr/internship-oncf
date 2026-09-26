@@ -53,12 +53,32 @@
 	gap: var(--spacing);
 }
 
+@utility gap-control {
+	gap: var(--spacing-control);
+}
+
 @utility p-control {
 	padding: var(--spacing-control);
 }
 
 @utility px-control {
 	padding-inline: var(--spacing-control);
+}
+
+@utility pl-control {
+	padding-left: var(--spacing-control);
+}
+
+@utility pr-control {
+	padding-right: var(--spacing-control);
+}
+
+@utility pl-compact {
+	padding-left: var(--spacing);
+}
+
+@utility pr-compact {
+	padding-right: var(--spacing);
 }
 
 @utility px-compact {
