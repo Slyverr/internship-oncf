@@ -2,7 +2,7 @@
 
 ## Local setup
 
-Follow the root [README](../README.md) for installation, Compose services, environment files, schema push, seeding, and startup. Use the sample environment files as templates and keep real `.env` files out of Git.
+Follow the root [README](../README.md) for installation, Compose services, environment files, schema push, seeding, and startup. The root [bunfig.toml](../bunfig.toml) selects Bun's hoisted workspace linker; install from the repository root and keep that linker setting so Next.js can resolve packages through the workspace root node_modules. Use the sample environment files as templates and keep real `.env` files out of Git.
 
 Useful root commands:
 
@@ -61,6 +61,8 @@ For local password-recovery testing, omit SMTP settings, submit the forgot-passw
 - Use semantic buttons and announce validation feedback to assistive technology. Keep transitions subtle and respect `prefers-reduced-motion` through the shared styles.
 - Preserve permission-specific defaults and fields when splitting a form. A step must not expose fields the current user cannot manage.
 - Prefer shared components for repeated behavior, but keep step-specific business rules in the feature form. Do not turn unrelated forms into one highly configurable generic form.
+
+Keep apps/web/src/components/ui focused on primitives used by current screens. Add a primitive from the configured shadcn registry when a feature needs it instead of keeping the full unused catalog checked in.
 
 ## Database workflow
 
