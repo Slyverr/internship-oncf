@@ -14,45 +14,84 @@ export function GuidedFormProgress({
 	steps: GuidedFormStep[];
 	currentStep: number;
 }) {
+	const current = steps[currentStep];
+	const progress =
+		steps.length > 0 ? ((currentStep + 1) / steps.length) * 100 : 0;
+
 	return (
-		<ol
-			aria-label="Form steps"
-			className="grid max-w-3xl gap-3 sm:grid-flow-col sm:auto-cols-fr"
-		>
-			{steps.map((step, index) => (
-				<li
-					key={step.title}
-					aria-current={currentStep === index ? "step" : undefined}
-					className={`flex items-center gap-3 rounded-lg border p-3 transition-colors ${
-						currentStep === index
-							? "border-primary bg-primary/5"
-							: currentStep > index
-								? "border-primary/30 bg-muted/40"
-								: "border-border"
-					}`}
+		<div className="grid gap-4">
+			<p className="sr-only" aria-live="polite" aria-atomic="true">
+				Step {currentStep + 1} of {steps.length}: {current?.title}
+			</p>
+			<div className="grid gap-4 sm:hidden">
+				<div className="flex items-baseline justify-between gap-4">
+					<p className="text-sm text-muted-foreground">
+						Step {currentStep + 1} of {steps.length}
+					</p>
+					<p className="text-sm font-medium">{current?.title}</p>
+				</div>
+				<div
+					role="progressbar"
+					aria-label="Form progress"
+					aria-valuemin={0}
+					aria-valuemax={steps.length}
+					aria-valuenow={currentStep + 1}
+					aria-valuetext={
+						"Step " +
+						(currentStep + 1) +
+						" of " +
+						steps.length +
+						": " +
+						current?.title
+					}
+					className="h-2 overflow-hidden rounded-full bg-muted"
 				>
 					<span
-						aria-hidden="true"
-						className={`flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${
-							currentStep >= index
-								? "bg-primary text-primary-foreground"
-								: "bg-muted text-muted-foreground"
-						}`}
+						className="block h-full rounded-full bg-primary transition-[width] duration-300 motion-reduce:transition-none"
+						style={{ width: progress + "%" }}
+					/>
+				</div>
+			</div>
+			<ol
+				aria-label="Form steps"
+				className="hidden max-w-3xl gap-4 sm:grid sm:grid-flow-col sm:auto-cols-fr"
+			>
+				{steps.map((step, index) => (
+					<li
+						key={step.title}
+						aria-current={currentStep === index ? "step" : undefined}
+						className={
+							"flex items-center gap-4 rounded-lg border p-4 transition-colors " +
+							(currentStep === index
+								? "border-primary bg-primary/5"
+								: currentStep > index
+									? "border-primary/30 bg-muted/40"
+									: "border-border")
+						}
 					>
-						{currentStep > index ? <Check className="size-4" /> : index + 1}
-					</span>
-					<span className="grid gap-0.5">
-						<span className="text-sm font-medium">{step.title}</span>
-						<span className="text-xs text-muted-foreground">
-							{step.description}
+						<span
+							aria-hidden="true"
+							className={
+								"flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold " +
+								(currentStep >= index
+									? "bg-primary text-primary-foreground"
+									: "bg-muted text-muted-foreground")
+							}
+						>
+							{currentStep > index ? <Check className="size-4" /> : index + 1}
 						</span>
-					</span>
-				</li>
-			))}
-		</ol>
+						<span className="grid gap-0">
+							<span className="text-sm font-medium">{step.title}</span>
+							<span className="text-xs text-muted-foreground">
+								{step.description}
+							</span>
+						</span>
+					</li>
+				))}
+			</ol>
+		</div>
 	);
 }
-
 export function GuidedFormActions({
 	currentStep,
 	stepCount,
@@ -79,11 +118,11 @@ export function GuidedFormActions({
 	const isLastStep = currentStep === stepCount - 1;
 
 	return (
-		<div className="flex flex-wrap items-center justify-between gap-3">
+		<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 			<Button type="button" variant="outline" onClick={onCancel}>
 				Cancel
 			</Button>
-			<div className="flex items-center gap-2">
+			<div className="flex w-full justify-end gap-4 sm:w-auto">
 				{currentStep > 0 ? (
 					<Button type="button" variant="outline" onClick={onPrevious}>
 						<ArrowLeft />
