@@ -40,7 +40,7 @@ const themeOptions: {
 	{
 		value: "dark",
 		label: "Dark",
-		description: "Soft blue-gray surfaces",
+		description: "Warm charcoal surfaces with softer orange accents",
 		Icon: MoonIcon,
 	},
 ];
@@ -149,7 +149,7 @@ export function SettingsPanel() {
 					<div className="mt-5 flex items-center gap-2 text-xs text-muted-foreground">
 						<span className="size-3 rounded-full bg-primary" />
 						<span className="size-3 rounded-full bg-orange-500" />
-						<span>Rail-inspired blue with warm signal accents</span>
+						<span>ONCF orange with warm neutral surfaces</span>
 					</div>
 				</CardContent>
 			</Card>
