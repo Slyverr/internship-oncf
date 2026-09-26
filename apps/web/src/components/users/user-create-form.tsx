@@ -368,6 +368,7 @@ export function UserCreateForm(): JSX.Element {
 						pendingLabel="Creating User..."
 						isSubmitting={state.isSubmitting}
 						isPending={mutation.isPending}
+						isSubmitDisabled={!state.canSubmit}
 					/>
 				)}
 			</form.Subscribe>

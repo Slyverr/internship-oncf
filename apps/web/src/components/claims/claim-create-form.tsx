@@ -399,6 +399,7 @@ export function ClaimCreateForm(): JSX.Element {
 						pendingLabel="Creating Claim..."
 						isSubmitting={state.isSubmitting}
 						isPending={mutation.isPending}
+						isSubmitDisabled={!state.canSubmit}
 					/>
 				)}
 			</form.Subscribe>

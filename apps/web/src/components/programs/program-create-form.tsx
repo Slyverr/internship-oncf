@@ -412,6 +412,7 @@ export function ProgramCreateForm(): JSX.Element {
 						pendingLabel="Creating Program..."
 						isSubmitting={state.isSubmitting}
 						isPending={mutation.isPending}
+						isSubmitDisabled={!state.canSubmit}
 					/>
 				)}
 			</form.Subscribe>

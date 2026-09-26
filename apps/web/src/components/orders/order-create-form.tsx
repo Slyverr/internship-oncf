@@ -484,6 +484,7 @@ export function OrderCreateForm(): JSX.Element {
 						pendingLabel="Creating Order..."
 						isSubmitting={state.isSubmitting}
 						isPending={mutation.isPending}
+						isSubmitDisabled={!state.canSubmit}
 					/>
 				)}
 			</form.Subscribe>
