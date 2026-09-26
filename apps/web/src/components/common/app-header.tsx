@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Fragment } from "react";
+import { NotificationLink } from "@/components/notifications/notification-link";
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -55,6 +56,7 @@ export function AppHeader() {
 					</Breadcrumb>
 				</>
 			)}
+			<NotificationLink />
 		</header>
 	);
 }
