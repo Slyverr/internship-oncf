@@ -43,6 +43,7 @@ interface ProgramsTableProps {
 const features = tableFeatures({
 	rowSortingFeature,
 	sortedRowModel: createSortedRowModel(),
+	sortFns: { datetime: sortFn_datetime },
 });
 
 const columns: ColumnDef<typeof features, ProgramListDto>[] = [
@@ -90,7 +91,7 @@ const columns: ColumnDef<typeof features, ProgramListDto>[] = [
 			const value = info.getValue<string>();
 			return value ? new Date(value).toLocaleDateString() : "—";
 		},
-		sortFn: sortFn_datetime,
+		sortFn: "datetime",
 		enableSorting: true,
 	},
 	{
