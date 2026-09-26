@@ -274,7 +274,7 @@ export function CustomerCreateForm(): JSX.Element {
 				<form.Subscribe
 					selector={(state) => [state.canSubmit, state.isSubmitting]}
 				>
-					{([canSubmit, isSubmitting]) => (
+					{([canSubmit, isSubmitting]: [boolean, boolean]) => (
 						<Button
 							type="submit"
 							disabled={!canSubmit || mutation.isPending || isSubmitting}
