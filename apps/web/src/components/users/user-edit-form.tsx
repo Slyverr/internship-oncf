@@ -303,15 +303,15 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 				<Button type="button" variant="outline" onClick={() => router.back()}>
 					Cancel
 				</Button>
-				<form.Subscribe
-					selector={(state) => [state.canSubmit, state.isSubmitting]}
-				>
-					{([canSubmit, isSubmitting]: [boolean, boolean]) => (
+				<form.Subscribe>
+					{(state) => (
 						<Button
 							type="submit"
-							disabled={!canSubmit || mutation.isPending || isSubmitting}
+							disabled={
+								!state.canSubmit || mutation.isPending || state.isSubmitting
+							}
 						>
-							{mutation.isPending || isSubmitting
+							{mutation.isPending || state.isSubmitting
 								? "Saving..."
 								: "Save Changes"}
 						</Button>

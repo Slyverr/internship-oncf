@@ -365,15 +365,15 @@ export function ClaimCreateForm(): JSX.Element {
 					Cancel
 				</Button>
 
-				<form.Subscribe
-					selector={(state) => [state.canSubmit, state.isSubmitting]}
-				>
-					{([canSubmit, isSubmitting]: [boolean, boolean]) => (
+				<form.Subscribe>
+					{(state) => (
 						<Button
 							type="submit"
-							disabled={!canSubmit || mutation.isPending || isSubmitting}
+							disabled={
+								!state.canSubmit || mutation.isPending || state.isSubmitting
+							}
 						>
-							{mutation.isPending || isSubmitting
+							{mutation.isPending || state.isSubmitting
 								? "Creating Claim..."
 								: "Create Claim"}
 						</Button>
