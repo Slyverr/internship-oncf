@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { UnderConstruction } from "@/components/under-construction";
+import { ForgotPasswordForm } from "@/components/auth/forgot-password-form";
 
 export const metadata: Metadata = {
 	title: "Forgot Password",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-	return <UnderConstruction />;
+	return <ForgotPasswordForm />;
 }

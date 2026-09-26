@@ -4,6 +4,7 @@ import {
 	Injectable,
 	UnauthorizedException,
 } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import bcrypt from "bcryptjs";
 import { EmailService } from "@/email/email.service";
@@ -25,6 +26,7 @@ export class AuthService {
 		private readonly emailService: EmailService,
 		private readonly authQuery: AuthQuery,
 		private readonly jwtService: JwtService,
+		private readonly config: ConfigService,
 	) {}
 
 	async validateUser(email: string, password: string) {
@@ -115,14 +117,14 @@ export class AuthService {
 		await this.authQuery.revokeAllUserSessions(id);
 	}
 
-	async forgotPassword(email: string, redirectUrl: string) {
+	async forgotPassword(email: string) {
 		const user = await this.authQuery.findUserByEmail(email);
 
 		if (!user) {
 			return;
 		}
 
-		const token = crypto.randomUUID();
+		const token = crypto.randomBytes(32).toString("base64url");
 		const expiresAt = new Date();
 		expiresAt.setHours(expiresAt.getHours() + 1);
 
@@ -134,7 +136,7 @@ export class AuthService {
 
 		await this.emailService.sendResetPasswordEmail(
 			user.email,
-			`${redirectUrl}?token=${token}`,
+			`${this.config.get("WEB_APP_URL", "http://localhost:3000")}/reset-password?token=${encodeURIComponent(token)}`,
 		);
 	}
 
