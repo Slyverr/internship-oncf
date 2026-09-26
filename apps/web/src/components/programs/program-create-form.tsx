@@ -2,11 +2,10 @@
 
 import { Permission, ProgramStatus } from "@ecommand/shared";
 import { useForm } from "@tanstack/react-form-nextjs";
-import { AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { JSX } from "react";
 import { z } from "zod";
-
+import { FormFieldHeader } from "@/components/common/form-field-header";
 import { OrderSelect } from "@/components/orders/order-select";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +22,7 @@ import type { ProgramDetailDto } from "@/lib/api/generated.schemas";
 import { useOrdersControllerFindEligibleForPrograms } from "@/lib/api/orders";
 import { useProgramsControllerCreate } from "@/lib/api/programs";
 import { useUsersControllerFindAll } from "@/lib/api/users";
+import { getFormErrorMessage } from "@/lib/form-utils";
 import { useAuth } from "@/providers/auth-provider";
 import { ProgramStatusSelect } from "./program-status-select";
 
@@ -53,43 +53,6 @@ const createProgramSchema = z.object({
 });
 
 type CreateProgramFormValues = z.infer<typeof createProgramSchema>;
-
-function getErrorMessage(error: unknown): string | undefined {
-	if (!error) return undefined;
-	if (typeof error === "string") return error;
-	if (typeof error === "object" && "message" in error) {
-		const message = (error as { message?: unknown }).message;
-		if (typeof message === "string") return message;
-	}
-	return String(error);
-}
-
-function FieldHeader({
-	htmlFor,
-	label,
-	required,
-	error,
-}: {
-	htmlFor: string;
-	label: string;
-	required?: boolean;
-	error?: string;
-}): JSX.Element {
-	return (
-		<div className="flex items-center justify-between gap-2">
-			<Label htmlFor={htmlFor} className={error ? "text-destructive" : ""}>
-				{label} {required ? "*" : ""}
-			</Label>
-
-			{error ? (
-				<span className="inline-flex items-center gap-1 text-xs font-medium text-destructive">
-					<AlertCircle className="h-3.5 w-3.5 shrink-0" />
-					{error}
-				</span>
-			) : null}
-		</div>
-	);
-}
 
 export function ProgramCreateForm(): JSX.Element {
 	const router = useRouter();
@@ -167,11 +130,11 @@ export function ProgramCreateForm(): JSX.Element {
 				<CardContent className="grid gap-4 md:grid-cols-2">
 					<form.Field name="orderId">
 						{(field) => {
-							const errorMsg = getErrorMessage(field.state.meta.errors[0]);
+							const errorMsg = getFormErrorMessage(field.state.meta.errors[0]);
 
 							return (
 								<div className="space-y-2">
-									<FieldHeader
+									<FormFieldHeader
 										htmlFor="orderId"
 										label="Order"
 										required
@@ -201,11 +164,13 @@ export function ProgramCreateForm(): JSX.Element {
 					{canManageOther && (
 						<form.Field name="userId">
 							{(field) => {
-								const errorMsg = getErrorMessage(field.state.meta.errors[0]);
+								const errorMsg = getFormErrorMessage(
+									field.state.meta.errors[0],
+								);
 
 								return (
 									<div className="space-y-2">
-										<FieldHeader
+										<FormFieldHeader
 											htmlFor="userId"
 											label="Responsible User"
 											error={errorMsg}
@@ -233,11 +198,13 @@ export function ProgramCreateForm(): JSX.Element {
 					{canManageStatus && (
 						<form.Field name="status">
 							{(field) => {
-								const errorMsg = getErrorMessage(field.state.meta.errors[0]);
+								const errorMsg = getFormErrorMessage(
+									field.state.meta.errors[0],
+								);
 
 								return (
 									<div className="space-y-2">
-										<FieldHeader
+										<FormFieldHeader
 											htmlFor="status"
 											label="Initial Status Override"
 											error={errorMsg}
@@ -262,11 +229,11 @@ export function ProgramCreateForm(): JSX.Element {
 
 					<form.Field name="plannedDate">
 						{(field) => {
-							const errorMsg = getErrorMessage(field.state.meta.errors[0]);
+							const errorMsg = getFormErrorMessage(field.state.meta.errors[0]);
 
 							return (
 								<div className="space-y-2">
-									<FieldHeader
+									<FormFieldHeader
 										htmlFor="plannedDate"
 										label="Planned Date"
 										required
@@ -290,11 +257,11 @@ export function ProgramCreateForm(): JSX.Element {
 
 					<form.Field name="quantityPlanned">
 						{(field) => {
-							const errorMsg = getErrorMessage(field.state.meta.errors[0]);
+							const errorMsg = getFormErrorMessage(field.state.meta.errors[0]);
 
 							return (
 								<div className="space-y-2">
-									<FieldHeader
+									<FormFieldHeader
 										htmlFor="quantityPlanned"
 										label="Quantity Planned"
 										required
@@ -329,11 +296,11 @@ export function ProgramCreateForm(): JSX.Element {
 				<CardContent className="grid gap-4 md:grid-cols-2">
 					<form.Field name="quantityRealized">
 						{(field) => {
-							const errorMsg = getErrorMessage(field.state.meta.errors[0]);
+							const errorMsg = getFormErrorMessage(field.state.meta.errors[0]);
 
 							return (
 								<div className="space-y-2">
-									<FieldHeader
+									<FormFieldHeader
 										htmlFor="quantityRealized"
 										label="Quantity Realized"
 										error={errorMsg}

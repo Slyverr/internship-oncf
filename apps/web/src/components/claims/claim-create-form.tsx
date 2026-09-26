@@ -7,13 +7,12 @@ import {
 	Permission,
 } from "@ecommand/shared";
 import { useForm } from "@tanstack/react-form-nextjs";
-import { AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { JSX } from "react";
 import { z } from "zod";
-
 import { ClaimPrioritySelect } from "@/components/claims/claim-priority-select";
 import { ClaimStatusSelect } from "@/components/claims/claim-status-select";
+import { FormFieldHeader } from "@/components/common/form-field-header";
 import { CustomerSelect } from "@/components/customers/customer-select";
 import { OrderSelect } from "@/components/orders/order-select";
 import { Button } from "@/components/ui/button";
@@ -36,6 +35,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useClaimsControllerCreate } from "@/lib/api/claims";
 import type { ClaimDetailDto } from "@/lib/api/generated.schemas";
 import { useOrdersControllerFindAll } from "@/lib/api/orders";
+import { getFormErrorMessage } from "@/lib/form-utils";
 import { useAuth } from "@/providers/auth-provider";
 
 export const createClaimSchema = z.object({
@@ -63,42 +63,6 @@ export const createClaimSchema = z.object({
 });
 
 type CreateClaimFormValues = z.infer<typeof createClaimSchema>;
-
-function getErrorMessage(error: unknown): string | undefined {
-	if (!error) return undefined;
-	if (typeof error === "string") return error;
-	if (typeof error === "object" && error !== null && "message" in error) {
-		const message = (error as { message?: unknown }).message;
-		if (typeof message === "string") return message;
-	}
-	return String(error);
-}
-
-function FieldHeader({
-	htmlFor,
-	label,
-	required,
-	error,
-}: {
-	htmlFor: string;
-	label: string;
-	required?: boolean;
-	error?: string;
-}): JSX.Element {
-	return (
-		<div className="flex items-center justify-between gap-2">
-			<Label htmlFor={htmlFor} className={error ? "text-destructive" : ""}>
-				{label} {required ? "*" : ""}
-			</Label>
-			{error ? (
-				<span className="inline-flex items-center gap-1 text-xs font-medium text-destructive">
-					<AlertCircle className="h-3.5 w-3.5 shrink-0" />
-					{error}
-				</span>
-			) : null}
-		</div>
-	);
-}
 
 export function ClaimCreateForm(): JSX.Element {
 	const router = useRouter();
@@ -175,10 +139,12 @@ export function ClaimCreateForm(): JSX.Element {
 					{canManageOther && (
 						<form.Field name="customerId">
 							{(field) => {
-								const errorMsg = getErrorMessage(field.state.meta.errors[0]);
+								const errorMsg = getFormErrorMessage(
+									field.state.meta.errors[0],
+								);
 								return (
 									<div className="space-y-2">
-										<FieldHeader
+										<FormFieldHeader
 											htmlFor="customerId"
 											label="Customer Company"
 											required
@@ -206,10 +172,10 @@ export function ClaimCreateForm(): JSX.Element {
 
 					<form.Field name="type">
 						{(field) => {
-							const errorMsg = getErrorMessage(field.state.meta.errors[0]);
+							const errorMsg = getFormErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="space-y-2">
-									<FieldHeader
+									<FormFieldHeader
 										htmlFor="type"
 										label="Claim Type"
 										required
@@ -239,10 +205,10 @@ export function ClaimCreateForm(): JSX.Element {
 
 					<form.Field name="priority">
 						{(field) => {
-							const errorMsg = getErrorMessage(field.state.meta.errors[0]);
+							const errorMsg = getFormErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="space-y-2">
-									<FieldHeader
+									<FormFieldHeader
 										htmlFor="priority"
 										label="Priority"
 										error={errorMsg}
@@ -259,10 +225,12 @@ export function ClaimCreateForm(): JSX.Element {
 					{canManageStatus && (
 						<form.Field name="status">
 							{(field) => {
-								const errorMsg = getErrorMessage(field.state.meta.errors[0]);
+								const errorMsg = getFormErrorMessage(
+									field.state.meta.errors[0],
+								);
 								return (
 									<div className="space-y-2">
-										<FieldHeader
+										<FormFieldHeader
 											htmlFor="status"
 											label="Initial Status Override"
 											error={errorMsg}
@@ -315,10 +283,10 @@ export function ClaimCreateForm(): JSX.Element {
 				<CardContent className="space-y-4">
 					<form.Field name="description">
 						{(field) => {
-							const errorMsg = getErrorMessage(field.state.meta.errors[0]);
+							const errorMsg = getFormErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="space-y-2">
-									<FieldHeader
+									<FormFieldHeader
 										htmlFor="description"
 										label="Claim Description"
 										required

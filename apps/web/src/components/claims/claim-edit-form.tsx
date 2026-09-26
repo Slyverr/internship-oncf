@@ -2,7 +2,6 @@
 
 import { ClaimPriority, ClaimType, Permission } from "@ecommand/shared";
 import { useQueryClient } from "@tanstack/react-query";
-import { isAxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { ClaimPrioritySelect } from "@/components/claims/claim-priority-select";
@@ -29,16 +28,8 @@ import {
 	useClaimsControllerUpdate,
 } from "@/lib/api/claims";
 import type { ClaimDetailDto } from "@/lib/api/generated.schemas";
+import { getFormErrorMessage } from "@/lib/form-utils";
 import { useAuth } from "@/providers/auth-provider";
-
-function getErrorMessage(error: unknown) {
-	if (isAxiosError(error)) {
-		const message: unknown = error.response?.data?.message;
-		if (typeof message === "string") return message;
-		if (Array.isArray(message)) return message.join(". ");
-	}
-	return "Please check the values and try again.";
-}
 
 export function ClaimEditForm({ claim }: { claim: ClaimDetailDto }) {
 	const router = useRouter();
@@ -101,7 +92,7 @@ export function ClaimEditForm({ claim }: { claim: ClaimDetailDto }) {
 			toast.add({
 				type: "error",
 				title: "Could not save claim",
-				description: getErrorMessage(error),
+				description: getFormErrorMessage(error),
 			});
 		}
 	}

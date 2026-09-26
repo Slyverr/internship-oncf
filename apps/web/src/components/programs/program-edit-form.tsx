@@ -1,7 +1,6 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { isAxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -20,17 +19,9 @@ import {
 	getProgramsControllerFindOneQueryKey,
 	useProgramsControllerUpdate,
 } from "@/lib/api/programs";
+import { getFormErrorMessage } from "@/lib/form-utils";
 
 const QUANTITY_PATTERN = /^\d+(\.\d{1,3})?$/;
-
-function getErrorMessage(error: unknown) {
-	if (isAxiosError(error)) {
-		const message: unknown = error.response?.data?.message;
-		if (typeof message === "string") return message;
-		if (Array.isArray(message)) return message.join(". ");
-	}
-	return "Please check the values and try again.";
-}
 
 export function ProgramEditForm({ program }: { program: ProgramDetailDto }) {
 	const router = useRouter();
@@ -85,7 +76,7 @@ export function ProgramEditForm({ program }: { program: ProgramDetailDto }) {
 			toast.add({
 				type: "error",
 				title: "Could not save program",
-				description: getErrorMessage(error),
+				description: getFormErrorMessage(error),
 			});
 		}
 	}

@@ -2,11 +2,11 @@
 
 import { OrderStatus, Permission } from "@ecommand/shared";
 import { useForm } from "@tanstack/react-form-nextjs";
-import { AlertCircle, ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
+import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { type JSX, useState } from "react";
 import { z } from "zod";
-
+import { FormFieldHeader } from "@/components/common/form-field-header";
 import { CustomerSelect } from "@/components/customers/customer-select";
 import { GoodSelect } from "@/components/goods/good-select";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { UnitSelect } from "@/components/units/unit-select";
 import type { OrderDetailDto } from "@/lib/api/generated.schemas";
 import { useOrdersControllerCreate } from "@/lib/api/orders";
+import { getFormErrorMessage } from "@/lib/form-utils";
 import { useAuth } from "@/providers/auth-provider";
 import { OrderStatusSelect } from "./order-status-select";
 
@@ -60,45 +61,6 @@ const managedOrderBasicsSchema = createOrderSchema.pick({
 	unitId: true,
 	quantityDemanded: true,
 });
-
-function getErrorMessage(error: unknown): string | undefined {
-	if (!error) return undefined;
-	if (typeof error === "string") return error;
-	if (typeof error === "object" && "message" in error) {
-		const message = (error as { message?: unknown }).message;
-		if (typeof message === "string") return message;
-	}
-	return String(error);
-}
-
-function FieldHeader({
-	htmlFor,
-	label,
-	required,
-	error,
-}: {
-	htmlFor: string;
-	label: string;
-	required?: boolean;
-	error?: string;
-}): JSX.Element {
-	return (
-		<div className="flex items-center justify-between gap-2">
-			<Label htmlFor={htmlFor} className={error ? "text-destructive" : ""}>
-				{label} {required ? "*" : ""}
-			</Label>
-			{error ? (
-				<span
-					role="alert"
-					className="inline-flex items-center gap-1 text-xs font-medium text-destructive"
-				>
-					<AlertCircle className="h-3.5 w-3.5 shrink-0" />
-					{error}
-				</span>
-			) : null}
-		</div>
-	);
-}
 
 export function OrderCreateForm(): JSX.Element {
 	const router = useRouter();
@@ -258,10 +220,10 @@ export function OrderCreateForm(): JSX.Element {
 									{(field) => {
 										const errorMsg =
 											stepErrors.customerId ??
-											getErrorMessage(field.state.meta.errors[0]);
+											getFormErrorMessage(field.state.meta.errors[0]);
 										return (
 											<div className="space-y-2">
-												<FieldHeader
+												<FormFieldHeader
 													htmlFor="customerId"
 													label="Customer Company"
 													required
@@ -296,10 +258,10 @@ export function OrderCreateForm(): JSX.Element {
 								{(field) => {
 									const errorMsg =
 										stepErrors.goodsId ??
-										getErrorMessage(field.state.meta.errors[0]);
+										getFormErrorMessage(field.state.meta.errors[0]);
 									return (
 										<div className="space-y-2">
-											<FieldHeader
+											<FormFieldHeader
 												htmlFor="goodsId"
 												label="Goods / Commodity"
 												required
@@ -333,10 +295,10 @@ export function OrderCreateForm(): JSX.Element {
 								{(field) => {
 									const errorMsg =
 										stepErrors.unitId ??
-										getErrorMessage(field.state.meta.errors[0]);
+										getFormErrorMessage(field.state.meta.errors[0]);
 									return (
 										<div className="space-y-2">
-											<FieldHeader
+											<FormFieldHeader
 												htmlFor="unitId"
 												label="Unit of Measurement"
 												required
@@ -366,10 +328,10 @@ export function OrderCreateForm(): JSX.Element {
 								{(field) => {
 									const errorMsg =
 										stepErrors.quantityDemanded ??
-										getErrorMessage(field.state.meta.errors[0]);
+										getFormErrorMessage(field.state.meta.errors[0]);
 									return (
 										<div className="space-y-2">
-											<FieldHeader
+											<FormFieldHeader
 												htmlFor="quantityDemanded"
 												label="Quantity Demanded"
 												required
@@ -430,12 +392,12 @@ export function OrderCreateForm(): JSX.Element {
 								{canManageStatus && (
 									<form.Field name="status">
 										{(field) => {
-											const errorMsg = getErrorMessage(
+											const errorMsg = getFormErrorMessage(
 												field.state.meta.errors[0],
 											);
 											return (
 												<div className="space-y-2">
-													<FieldHeader
+													<FormFieldHeader
 														htmlFor="status"
 														label="Initial Status Override"
 														error={errorMsg}

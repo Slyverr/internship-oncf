@@ -1,11 +1,10 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form-nextjs";
-import { AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type { JSX } from "react";
 import { z } from "zod";
-
+import { FormFieldHeader } from "@/components/common/form-field-header";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -18,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCustomersControllerUpdate } from "@/lib/api/customers";
 import type { CustomerDetailDto } from "@/lib/api/generated.schemas";
+import { getFormErrorMessage } from "@/lib/form-utils";
 
 const updateCustomerSchema = z.object({
 	companyName: z
@@ -38,42 +38,6 @@ const updateCustomerSchema = z.object({
 });
 
 type UpdateCustomerFormValues = z.infer<typeof updateCustomerSchema>;
-
-function getErrorMessage(error: unknown): string | undefined {
-	if (!error) return undefined;
-	if (typeof error === "string") return error;
-	if (typeof error === "object" && "message" in error) {
-		const message = (error as { message?: unknown }).message;
-		if (typeof message === "string") return message;
-	}
-	return String(error);
-}
-
-function FieldHeader({
-	htmlFor,
-	label,
-	required,
-	error,
-}: {
-	htmlFor: string;
-	label: string;
-	required?: boolean;
-	error?: string;
-}): JSX.Element {
-	return (
-		<div className="flex items-center justify-between gap-2">
-			<Label htmlFor={htmlFor} className={error ? "text-destructive" : ""}>
-				{label} {required ? "*" : ""}
-			</Label>
-			{error && (
-				<span className="inline-flex items-center gap-1 text-xs font-medium text-destructive">
-					<AlertCircle className="h-3.5 w-3.5 shrink-0" />
-					{error}
-				</span>
-			)}
-		</div>
-	);
-}
 
 export function CustomerEditForm({
 	customer,
@@ -140,10 +104,10 @@ export function CustomerEditForm({
 				<CardContent className="grid gap-4 md:grid-cols-2">
 					<form.Field name="companyName">
 						{(field) => {
-							const errorMsg = getErrorMessage(field.state.meta.errors[0]);
+							const errorMsg = getFormErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="space-y-2">
-									<FieldHeader
+									<FormFieldHeader
 										htmlFor="companyName"
 										label="Company Name"
 										required
@@ -202,10 +166,10 @@ export function CustomerEditForm({
 				<CardContent className="grid gap-4 md:grid-cols-2">
 					<form.Field name="email">
 						{(field) => {
-							const errorMsg = getErrorMessage(field.state.meta.errors[0]);
+							const errorMsg = getFormErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="space-y-2">
-									<FieldHeader
+									<FormFieldHeader
 										htmlFor="email"
 										label="Email Address"
 										error={errorMsg}
