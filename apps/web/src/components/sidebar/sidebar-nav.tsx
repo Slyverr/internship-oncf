@@ -8,14 +8,19 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useAuth } from "@/providers/auth-provider";
 import { sidebarRoutes } from "./sidebar-routes";
 
 export function SidebarNav() {
 	const pathname = usePathname();
+	const { hasPermission } = useAuth();
+	const visibleRoutes = sidebarRoutes.filter(
+		(route) => !route.permission || hasPermission(route.permission),
+	);
 
 	return (
 		<SidebarMenu className="py-4">
-			{sidebarRoutes.map((route) => {
+			{visibleRoutes.map((route) => {
 				const isActive = route.exact
 					? pathname === route.url
 					: pathname === route.url || pathname?.startsWith(`${route.url}/`);

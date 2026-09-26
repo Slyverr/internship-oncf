@@ -178,6 +178,10 @@ export class OrdersQuery {
 			},
 			columns: orderListColumns,
 			with: orderBaseRelations,
+			orderBy: {
+				createdAt: "desc",
+				id: "desc",
+			},
 			limit,
 			offset: (page - 1) * limit,
 		});
