@@ -2,7 +2,7 @@
 
 import { useForm } from "@tanstack/react-form-nextjs";
 import { useRouter } from "next/navigation";
-import { type JSX, useState } from "react";
+import { type JSX } from "react";
 import { FormFieldHeader } from "@/components/common/form-field-header";
 import {
 	GuidedFormActions,
@@ -17,13 +17,10 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useGuidedFormState } from "@/hooks/use-guided-form-state";
 import { useCustomersControllerCreate } from "@/lib/api/customers";
 import type { CustomerDetailDto } from "@/lib/api/generated.schemas";
-import {
-	getFormErrorMessage,
-	getFormStepErrors,
-	omitFormStepError,
-} from "@/lib/form-utils";
+import { getFormErrorMessage } from "@/lib/form-utils";
 import {
 	type CustomerFormValues,
 	customerFormSchema,
@@ -34,8 +31,8 @@ import {
 export function CustomerCreateForm(): JSX.Element {
 	const router = useRouter();
 	const mutation = useCustomersControllerCreate();
-	const [step, setStep] = useState(0);
-	const [stepErrors, setStepErrors] = useState<Record<string, string>>({});
+	const { step, setStep, stepErrors, advanceIfValid, clearFieldError } =
+		useGuidedFormState();
 
 	const form = useForm({
 		defaultValues: {
@@ -76,13 +73,7 @@ export function CustomerCreateForm(): JSX.Element {
 
 	function continueToContact() {
 		const result = customerIdentitySchema.safeParse(form.state.values);
-		if (!result.success) {
-			setStepErrors(getFormStepErrors(result.error.issues));
-			return;
-		}
-
-		setStepErrors({});
-		setStep(1);
+		advanceIfValid(result);
 	}
 
 	return (
@@ -130,9 +121,7 @@ export function CustomerCreateForm(): JSX.Element {
 										value={field.state.value}
 										onChange={(e) => {
 											field.handleChange(e.target.value);
-											setStepErrors((errors) =>
-												omitFormStepError(errors, "companyName"),
-											);
+											clearFieldError("companyName");
 										}}
 										className={
 											errorMsg

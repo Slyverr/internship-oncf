@@ -3,7 +3,7 @@
 import { OrderStatus, Permission } from "@ecommand/shared";
 import { useForm } from "@tanstack/react-form-nextjs";
 import { useRouter } from "next/navigation";
-import { type JSX, useState } from "react";
+import { type JSX } from "react";
 import { z } from "zod";
 import { FormFieldHeader } from "@/components/common/form-field-header";
 import {
@@ -23,13 +23,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { UnitSelect } from "@/components/units/unit-select";
+import { useGuidedFormState } from "@/hooks/use-guided-form-state";
 import type { OrderDetailDto } from "@/lib/api/generated.schemas";
 import { useOrdersControllerCreate } from "@/lib/api/orders";
-import {
-	getFormErrorMessage,
-	getFormStepErrors,
-	omitFormStepError,
-} from "@/lib/form-utils";
+import { getFormErrorMessage } from "@/lib/form-utils";
 import { useAuth } from "@/providers/auth-provider";
 import { OrderStatusSelect } from "./order-status-select";
 
@@ -80,25 +77,15 @@ export function OrderCreateForm(): JSX.Element {
 
 	const canManageOther = hasPermission(Permission.ORDERS_MANAGE_OTHER);
 	const canManageStatus = hasPermission(Permission.ORDERS_MANAGE_STATUS);
-	const [step, setStep] = useState(0);
-	const [stepErrors, setStepErrors] = useState<Record<string, string>>({});
-
-	function clearStepError(fieldName: string) {
-		setStepErrors((errors) => omitFormStepError(errors, fieldName));
-	}
+	const { step, setStep, stepErrors, advanceIfValid, clearFieldError } =
+		useGuidedFormState();
 
 	function continueToSchedule() {
 		const schema = canManageOther
 			? managedOrderBasicsSchema
 			: orderBasicsSchema;
 		const result = schema.safeParse(form.state.values);
-		if (!result.success) {
-			setStepErrors(getFormStepErrors(result.error.issues));
-			return;
-		}
-
-		setStepErrors({});
-		setStep(1);
+		advanceIfValid(result);
 	}
 
 	const defaultValues: CreateOrderFormValues = {
@@ -208,7 +195,7 @@ export function OrderCreateForm(): JSX.Element {
 														}
 														onChange={(value) => {
 															field.handleChange(value);
-															clearStepError("customerId");
+															clearFieldError("customerId");
 														}}
 													/>
 												</div>
@@ -246,7 +233,7 @@ export function OrderCreateForm(): JSX.Element {
 													}
 													onChange={(value) => {
 														field.handleChange(value);
-														clearStepError("goodsId");
+														clearFieldError("goodsId");
 													}}
 												/>
 											</div>
@@ -279,7 +266,7 @@ export function OrderCreateForm(): JSX.Element {
 													value={field.state.value}
 													onChange={(value) => {
 														field.handleChange(value);
-														clearStepError("unitId");
+														clearFieldError("unitId");
 													}}
 												/>
 											</div>
@@ -312,7 +299,7 @@ export function OrderCreateForm(): JSX.Element {
 												value={field.state.value}
 												onChange={(event) => {
 													field.handleChange(event.target.value);
-													clearStepError("quantityDemanded");
+													clearFieldError("quantityDemanded");
 												}}
 											/>
 										</div>

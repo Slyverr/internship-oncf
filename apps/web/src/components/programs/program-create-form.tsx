@@ -3,7 +3,7 @@
 import { Permission, ProgramStatus } from "@ecommand/shared";
 import { useForm } from "@tanstack/react-form-nextjs";
 import { useRouter } from "next/navigation";
-import { type JSX, useState } from "react";
+import { type JSX } from "react";
 import { z } from "zod";
 import { FormFieldHeader } from "@/components/common/form-field-header";
 import {
@@ -21,15 +21,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UserSelect } from "@/components/users/user-select";
+import { useGuidedFormState } from "@/hooks/use-guided-form-state";
 import type { ProgramDetailDto } from "@/lib/api/generated.schemas";
 import { useOrdersControllerFindEligibleForPrograms } from "@/lib/api/orders";
 import { useProgramsControllerCreate } from "@/lib/api/programs";
 import { useUsersControllerFindAll } from "@/lib/api/users";
-import {
-	getFormErrorMessage,
-	getFormStepErrors,
-	omitFormStepError,
-} from "@/lib/form-utils";
+import { getFormErrorMessage } from "@/lib/form-utils";
 import { useAuth } from "@/providers/auth-provider";
 import { ProgramStatusSelect } from "./program-status-select";
 
@@ -78,8 +75,8 @@ export function ProgramCreateForm(): JSX.Element {
 
 	const canManageOther = hasPermission(Permission.PROGRAMS_MANAGE_OTHER);
 	const canManageStatus = hasPermission(Permission.PROGRAMS_MANAGE_STATUS);
-	const [step, setStep] = useState(0);
-	const [stepErrors, setStepErrors] = useState<Record<string, string>>({});
+	const { step, setStep, stepErrors, advanceIfValid, clearFieldError } =
+		useGuidedFormState();
 
 	const defaultValues: CreateProgramFormValues = {
 		orderId: 0,
@@ -124,13 +121,7 @@ export function ProgramCreateForm(): JSX.Element {
 
 	function continueToExecution() {
 		const result = programPlanningSchema.safeParse(form.state.values);
-		if (!result.success) {
-			setStepErrors(getFormStepErrors(result.error.issues));
-			return;
-		}
-
-		setStepErrors({});
-		setStep(1);
+		advanceIfValid(result);
 	}
 
 	const { data: orders = [], isLoading: ordersIsLoading } =
@@ -195,9 +186,7 @@ export function ProgramCreateForm(): JSX.Element {
 											}
 											onChange={(value) => {
 												field.handleChange(value);
-												setStepErrors((errors) =>
-													omitFormStepError(errors, "orderId"),
-												);
+												clearFieldError("orderId");
 											}}
 											isLoading={ordersIsLoading}
 										/>
@@ -298,9 +287,7 @@ export function ProgramCreateForm(): JSX.Element {
 										value={field.state.value}
 										onChange={(event) => {
 											field.handleChange(event.target.value);
-											setStepErrors((errors) =>
-												omitFormStepError(errors, "plannedDate"),
-											);
+											clearFieldError("plannedDate");
 										}}
 									/>
 								</div>
@@ -333,9 +320,7 @@ export function ProgramCreateForm(): JSX.Element {
 										value={field.state.value}
 										onChange={(event) => {
 											field.handleChange(event.target.value);
-											setStepErrors((errors) =>
-												omitFormStepError(errors, "quantityPlanned"),
-											);
+											clearFieldError("quantityPlanned");
 										}}
 									/>
 								</div>

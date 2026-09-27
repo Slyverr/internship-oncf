@@ -2,7 +2,7 @@
 
 import { useForm } from "@tanstack/react-form-nextjs";
 import { useRouter } from "next/navigation";
-import { type JSX, useState } from "react";
+import { type JSX } from "react";
 import { z } from "zod";
 import { FormFieldHeader } from "@/components/common/form-field-header";
 import {
@@ -25,17 +25,14 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { useGuidedFormState } from "@/hooks/use-guided-form-state";
 import {
 	UpdateUserDtoRole,
 	UpdateUserDtoType,
 	type UserDetailDto,
 } from "@/lib/api/generated.schemas";
 import { useUsersControllerUpdate } from "@/lib/api/users";
-import {
-	getFormErrorMessage,
-	getFormStepErrors,
-	omitFormStepError,
-} from "@/lib/form-utils";
+import { getFormErrorMessage } from "@/lib/form-utils";
 
 const updateUserSchema = z.object({
 	email: z.string().email("Valid email is required").max(100).optional(),
@@ -71,8 +68,8 @@ const userEditSteps = [
 export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 	const router = useRouter();
 	const mutation = useUsersControllerUpdate();
-	const [step, setStep] = useState(0);
-	const [stepErrors, setStepErrors] = useState<Record<string, string>>({});
+	const { step, setStep, stepErrors, advanceIfValid, clearFieldError } =
+		useGuidedFormState();
 
 	const form = useForm({
 		defaultValues: {
@@ -118,13 +115,7 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 
 	function continueToProfile() {
 		const result = userAccessSchema.safeParse(form.state.values);
-		if (!result.success) {
-			setStepErrors(getFormStepErrors(result.error.issues));
-			return;
-		}
-
-		setStepErrors({});
-		setStep(1);
+		advanceIfValid(result);
 	}
 
 	return (
@@ -172,9 +163,7 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 										value={field.state.value}
 										onChange={(e) => {
 											field.handleChange(e.target.value);
-											setStepErrors((errors) =>
-												omitFormStepError(errors, "email"),
-											);
+											clearFieldError("email");
 										}}
 										className={
 											errorMsg

@@ -8,7 +8,7 @@ import {
 } from "@ecommand/shared";
 import { useForm } from "@tanstack/react-form-nextjs";
 import { useRouter } from "next/navigation";
-import { type JSX, useState } from "react";
+import { type JSX } from "react";
 import { z } from "zod";
 import { ClaimPrioritySelect } from "@/components/claims/claim-priority-select";
 import { ClaimStatusSelect } from "@/components/claims/claim-status-select";
@@ -35,14 +35,11 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useGuidedFormState } from "@/hooks/use-guided-form-state";
 import { useClaimsControllerCreate } from "@/lib/api/claims";
 import type { ClaimDetailDto } from "@/lib/api/generated.schemas";
 import { useOrdersControllerFindAll } from "@/lib/api/orders";
-import {
-	getFormErrorMessage,
-	getFormStepErrors,
-	omitFormStepError,
-} from "@/lib/form-utils";
+import { getFormErrorMessage } from "@/lib/form-utils";
 import { useAuth } from "@/providers/auth-provider";
 
 export const createClaimSchema = z.object({
@@ -88,8 +85,8 @@ export function ClaimCreateForm(): JSX.Element {
 
 	const canManageOther = hasPermission(Permission.CLAIMS_MANAGE_OTHER);
 	const canManageStatus = hasPermission(Permission.CLAIMS_MANAGE_STATUS);
-	const [step, setStep] = useState(0);
-	const [stepErrors, setStepErrors] = useState<Record<string, string>>({});
+	const { step, setStep, stepErrors, advanceIfValid, clearFieldError } =
+		useGuidedFormState();
 
 	const defaultValues: CreateClaimFormValues = {
 		customerId: profile?.customerId ?? 0,
@@ -136,13 +133,7 @@ export function ClaimCreateForm(): JSX.Element {
 
 	function continueToAssociation() {
 		const result = claimBasicsSchema.safeParse(form.state.values);
-		if (!result.success) {
-			setStepErrors(getFormStepErrors(result.error.issues));
-			return;
-		}
-
-		setStepErrors({});
-		setStep(1);
+		advanceIfValid(result);
 	}
 
 	const { data: orders = [], isLoading: ordersIsLoading } =
@@ -206,9 +197,7 @@ export function ClaimCreateForm(): JSX.Element {
 												}
 												onChange={(value) => {
 													field.handleChange(value);
-													setStepErrors((errors) =>
-														omitFormStepError(errors, "customerId"),
-													);
+													clearFieldError("customerId");
 												}}
 											/>
 										</div>
@@ -235,9 +224,7 @@ export function ClaimCreateForm(): JSX.Element {
 										value={field.state.value}
 										onValueChange={(val) => {
 											field.handleChange(val as ClaimType);
-											setStepErrors((errors) =>
-												omitFormStepError(errors, "type"),
-											);
+											clearFieldError("type");
 										}}
 									>
 										<SelectTrigger className="w-full">
