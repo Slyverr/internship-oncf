@@ -50,6 +50,15 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
 
 	return (
 		<div data-slot="table-container" className="w-full min-w-0">
+			{hasHorizontalOverflow && canScrollFurther && (
+				<div
+					id={hintId}
+					className="flex items-center gap-control border-b px-control py-control text-xs text-muted-foreground"
+				>
+					<span aria-hidden="true">↔</span>
+					<span>Scroll to see the remaining columns</span>
+				</div>
+			)}
 			<section
 				ref={scrollAreaRef}
 				aria-label="Scrollable table content"
@@ -67,15 +76,6 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
 					{...props}
 				/>
 			</section>
-			{hasHorizontalOverflow && canScrollFurther && (
-				<div
-					id={hintId}
-					className="flex items-center gap-2 border-t px-4 py-2 text-xs text-muted-foreground md:hidden"
-				>
-					<span aria-hidden="true">↔</span>
-					<span>Scroll to see the remaining columns</span>
-				</div>
-			)}
 		</div>
 	);
 }
@@ -144,7 +144,7 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
 		<td
 			data-slot="table-cell"
 			className={cn(
-				"px-4 py-4 align-middle text-sm leading-5 whitespace-nowrap [&:has([role=checkbox])]:pr-0",
+				"px-4 py-control align-middle text-sm leading-5 whitespace-nowrap [&:has([role=checkbox])]:pr-0",
 				className,
 			)}
 			{...props}

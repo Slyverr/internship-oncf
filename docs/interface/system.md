@@ -59,10 +59,10 @@ Use the same semantic roles in all themes. Cards should separate from the canvas
 
 ## 4. Cards, tables, and data
 
-- Cards use one consistent radius, quiet outline, and 16px interior spacing on mobile / 24px from the `sm` breakpoint upward. The 44px control size and 16px table cell insets do not shrink on mobile.
-- Tables use 14px text, aligned values, a restrained header style, and at least 16px horizontal and vertical cell insets on desktop. Keep row actions and links within their own hit areas.
+- Cards use one consistent radius, quiet outline, and 16px interior spacing on mobile / 24px from the `sm` breakpoint upward. The 44px control size and 16px horizontal table cell insets do not shrink on mobile.
+- Tables use 14px text, aligned values, a restrained header style, 16px horizontal cell insets, and the shared 8px vertical control inset. Keep row actions and links within their own 44px hit areas.
 - On narrow screens, let wide tables scroll inside their own container; do not compress important values until they collide. Ensure the scroll area can be reached by keyboard and communicates its purpose.
-- When a table overflows on a phone, show a quiet “Scroll to see the remaining columns” hint below it while more columns remain. Hide the hint at the end of the scroll area and expose it to the scroll region through `aria-describedby` while it is visible.
+- When a table overflows, show a quiet “Scroll to see the remaining columns” hint above it while more columns remain, including at tablet widths where the workspace is narrowed by the sidebar. Hide the hint at the end of the scroll area and expose it to the scroll region through `aria-describedby` while it is visible.
 - Use one label/value pattern in record details: muted 13px label, stronger 14–16px value, 8px separation, and wrapping for long values.
 - A standard table row is at least 56px tall; a row with a title and supporting line is at least 64px. Give each cell its own inset and keep related values aligned by column. Use tabular numerals for comparable dates and quantities.
 - Keep long values readable. Truncate only when the same record has a clear detail destination or the full value is available to assistive technology. On phones, preserve table column meaning inside the horizontal scroll area rather than squeezing text together.
