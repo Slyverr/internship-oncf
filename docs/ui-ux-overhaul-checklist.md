@@ -13,7 +13,7 @@ This is the running review list for the application-wide usability and visual ov
 | 5 | Settings controls | Review dialog title area, fixed size, option density, touch targets, save state, close, tabs, and profile/security actions. | In progress |
 | 6 | Sidebar alignment | Compare expanded and collapsed logo, nav, and account alignment; keep header/footer padding and navigation centers consistent. | Complete |
 | 7 | Sidebar motion | Add restrained, reduced-motion-aware transitions for collapse/expand and content state changes; verify no abrupt layout shift. | In progress |
-| 8 | Dashboard content | Replace the sparse three-panel impression with useful role- and permission-aware metrics, trends, and prioritized next actions based on available data. | In progress |
+| 8 | Dashboard content | Replace the sparse three-panel impression with useful role- and permission-aware metrics, trends, and prioritized next actions based on available data. Surface eligible order-to-program actions without bypassing server rules. | In progress |
 | 9 | Workspace width consistency | Compare dashboard and all inner routes under both shell layouts at laptop through 4K widths. Use one shared content-width rule per shell and prevent unexplained route-specific centering. | Complete |
 | 10 | Table density | Review header, row, cell padding, wrapping, and phone overflow. Add a user-controlled density preference only if the responsive behavior still benefits from it. | To review |
 | 11 | Appearance options | Keep themes, fonts, text scale, motion, and layouts extensible and understandable. Review whether a bounded text-scale control is more useful than only three presets; retain sensible defaults and database sync. | To review |
@@ -47,6 +47,7 @@ Review both light and dark appearances, and both workspace layouts where the rou
 - Fresh settings captures at 1440×900, 390×844, and 320×640 show a fixed 768px desktop dialog and an internally scrolling phone panel with no page-level horizontal overflow. The desktop title strip was tightened by one 4px spacing step; mobile title space was already compact.
 - Auth form content now uses the shared 180ms page-entry fade and 4px rise; the existing system and user reduced-motion rules disable it.
 - Public auth pages expose the same five theme choices as settings and save the choice to the existing local preference before sign-in.
+- The dashboard now surfaces up to four orders returned by the server's eligible-for-programs endpoint when the user can read orders and create programs. Each link carries the selected order into the existing validated creation flow; empty recent orders/claims offer create actions only when permitted. Fresh dashboard checks at 320, 390, 768, 1024, 1280, 1440, 2560, and 3840px show no page-level horizontal overflow; the selected-order form control contains the order from the dashboard link.
 
 ## Working rules
 

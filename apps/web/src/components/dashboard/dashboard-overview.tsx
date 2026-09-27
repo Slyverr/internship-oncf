@@ -10,17 +10,21 @@ import {
 import Link from "next/link";
 import { PageHeader } from "@/components/common/page-header";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
 	CardDescription,
+	CardFooter,
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
 import { getDashboardQuickActions } from "@/lib/action-visibility";
 import { useClaimsControllerFindAll } from "@/lib/api/claims";
-import { useOrdersControllerFindAll } from "@/lib/api/orders";
+import {
+	useOrdersControllerFindAll,
+	useOrdersControllerFindEligibleForPrograms,
+} from "@/lib/api/orders";
 import { useProgramsControllerFindAll } from "@/lib/api/programs";
 import { useAuth } from "@/providers/auth-provider";
 
@@ -37,6 +41,8 @@ interface RecentSectionProps {
 	title: string;
 	description: string;
 	href: string;
+	emptyMessage: string;
+	emptyAction?: { label: string; href: string };
 	items: DashboardItem[];
 	isLoading: boolean;
 	isError: boolean;
@@ -46,6 +52,8 @@ function RecentSection({
 	title,
 	description,
 	href,
+	emptyMessage,
+	emptyAction,
 	items,
 	isLoading,
 	isError,
@@ -53,14 +61,14 @@ function RecentSection({
 	return (
 		<Card>
 			<CardHeader>
-				<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-					<div className="grid min-w-0 gap-compact">
+				<div className="flex flex-wrap items-center justify-between gap-control">
+					<div className="grid min-w-0 flex-1 gap-compact">
 						<CardTitle>{title}</CardTitle>
 						<CardDescription>{description}</CardDescription>
 					</div>
 					<Link
 						href={href}
-						className="inline-flex shrink-0 items-center gap-compact text-sm text-primary hover:underline"
+						className="inline-flex min-h-11 shrink-0 items-center gap-compact text-sm text-primary hover:underline"
 						aria-label={`View all ${title.toLowerCase()}`}
 					>
 						View all <ArrowRightIcon className="size-4" />
@@ -75,7 +83,18 @@ function RecentSection({
 						Could not load this list. Open the section to try again.
 					</p>
 				) : items.length === 0 ? (
-					<p className="text-sm text-muted-foreground">No records yet.</p>
+					<div className="grid gap-control">
+						<p className="text-sm text-muted-foreground">{emptyMessage}</p>
+						{emptyAction && (
+							<Link
+								href={emptyAction.href}
+								className="inline-flex min-h-11 items-center gap-compact text-sm text-primary hover:underline"
+							>
+								{emptyAction.label}
+								<ArrowRightIcon aria-hidden="true" className="size-4" />
+							</Link>
+						)}
+					</div>
 				) : (
 					<ul className="divide-y">
 						{items.map((item) => (
@@ -117,12 +136,90 @@ function RecentSection({
 	);
 }
 
+function ReadyOrdersSection({
+	orders,
+	isLoading,
+	isError,
+	onRetry,
+}: {
+	orders: { id: number; orderNumber: string }[];
+	isLoading: boolean;
+	isError: boolean;
+	onRetry: () => void;
+}) {
+	if (!isLoading && !isError && orders.length === 0) return null;
+
+	return (
+		<Card size="sm">
+			<CardHeader>
+				<div className="grid min-w-0 gap-compact">
+					<CardTitle>Orders ready for a program</CardTitle>
+					<CardDescription>
+						Continue directly from an order that is eligible for planning.
+					</CardDescription>
+				</div>
+			</CardHeader>
+			<CardContent>
+				{isLoading ? (
+					<p className="text-sm text-muted-foreground">
+						Checking eligible orders…
+					</p>
+				) : isError ? (
+					<div className="flex flex-wrap items-center justify-between gap-control">
+						<p className="text-sm text-destructive">
+							Could not check which orders are ready.
+						</p>
+						<Button type="button" variant="outline" onClick={onRetry}>
+							Try again
+						</Button>
+					</div>
+				) : (
+					<div
+						className={`grid gap-control ${orders.length > 1 ? "@2xl/workspace:grid-cols-2" : "grid-cols-1"}`}
+					>
+						{orders.slice(0, 4).map((order) => (
+							<Link
+								key={order.id}
+								href={`/dashboard/programs/new?orderId=${order.id}&search=${encodeURIComponent(order.orderNumber)}`}
+								aria-label={`Create a program for order ${order.orderNumber}`}
+								className="flex min-h-11 min-w-0 items-center justify-between gap-control rounded-md border px-control py-compact text-sm transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+							>
+								<span className="min-w-0 truncate font-medium">
+									{order.orderNumber}
+								</span>
+								<span className="flex shrink-0 items-center gap-compact text-muted-foreground">
+									<Badge variant="outline">Eligible</Badge>
+									<ArrowRightIcon aria-hidden="true" className="size-4" />
+								</span>
+							</Link>
+						))}
+					</div>
+				)}
+			</CardContent>
+			{!isLoading && !isError && orders.length > 0 && (
+				<CardFooter className="border-t">
+					<Link
+						href="/dashboard/programs/new"
+						className="inline-flex min-h-11 items-center gap-compact text-sm text-primary hover:underline"
+					>
+						Browse eligible orders
+						<ArrowRightIcon aria-hidden="true" className="size-4" />
+					</Link>
+				</CardFooter>
+			)}
+		</Card>
+	);
+}
+
 export function DashboardOverview() {
 	const { profile, hasPermission } = useAuth();
 	const quickActions = getDashboardQuickActions(hasPermission);
 	const canReadOrders = hasPermission(Permission.ORDERS_READ);
+	const canCreateOrders = hasPermission(Permission.ORDERS_CREATE);
+	const canCreatePrograms = hasPermission(Permission.PROGRAMS_CREATE);
 	const canReadPrograms = hasPermission(Permission.PROGRAMS_READ);
 	const canReadClaims = hasPermission(Permission.CLAIMS_READ);
+	const canCreateClaims = hasPermission(Permission.CLAIMS_CREATE);
 	const recentSectionCount =
 		Number(canReadOrders) + Number(canReadPrograms) + Number(canReadClaims);
 	const recentGridColumns =
@@ -135,6 +232,14 @@ export function DashboardOverview() {
 	const ordersQuery = useOrdersControllerFindAll(
 		{ sortBy: "createdAt", sortOrder: "desc" },
 		{ query: { enabled: canReadOrders } },
+	);
+	const readyOrdersQuery = useOrdersControllerFindEligibleForPrograms(
+		{ limit: 20 },
+		{
+			query: {
+				enabled: canReadOrders && canCreatePrograms,
+			},
+		},
 	);
 	const programsQuery = useProgramsControllerFindAll(
 		{ sortBy: "createdAt", sortOrder: "desc" },
@@ -152,6 +257,13 @@ export function DashboardOverview() {
 				title="Recent orders"
 				description="Latest customer orders."
 				href="/dashboard/orders"
+				emptyMessage="No recent orders to show."
+				{...(canCreateOrders && {
+					emptyAction: {
+						label: "Create an order",
+						href: "/dashboard/orders/new",
+					},
+				})}
 				isLoading={ordersQuery.isLoading}
 				isError={ordersQuery.isError}
 				items={(ordersQuery.data ?? []).slice(0, 5).map((order) => ({
@@ -170,6 +282,11 @@ export function DashboardOverview() {
 				title="Recent programs"
 				description="Latest forecast programs."
 				href="/dashboard/programs"
+				emptyMessage={
+					canReadOrders && canCreatePrograms
+						? "No recent forecast programs. Eligible orders appear above when they are ready."
+						: "No recent forecast programs to show."
+				}
 				isLoading={programsQuery.isLoading}
 				isError={programsQuery.isError}
 				items={(programsQuery.data ?? []).slice(0, 5).map((program) => ({
@@ -188,6 +305,13 @@ export function DashboardOverview() {
 				title="Recent claims"
 				description="Latest customer claims."
 				href="/dashboard/claims"
+				emptyMessage="No recent claims to show."
+				{...(canCreateClaims && {
+					emptyAction: {
+						label: "Create a claim",
+						href: "/dashboard/claims/new",
+					},
+				})}
 				isLoading={claimsQuery.isLoading}
 				isError={claimsQuery.isError}
 				items={(claimsQuery.data ?? []).slice(0, 5).map((claim) => ({
@@ -221,6 +345,15 @@ export function DashboardOverview() {
 					</Link>
 				))}
 			</PageHeader>
+
+			{canReadOrders && canCreatePrograms && (
+				<ReadyOrdersSection
+					orders={readyOrdersQuery.data ?? []}
+					isLoading={readyOrdersQuery.isLoading}
+					isError={readyOrdersQuery.isError}
+					onRetry={() => void readyOrdersQuery.refetch()}
+				/>
+			)}
 
 			{sections.length > 0 ? (
 				<div className={`grid gap-4 ${recentGridColumns}`}>{sections}</div>
