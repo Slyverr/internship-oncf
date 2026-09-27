@@ -41,7 +41,7 @@ export function SidebarUser() {
 						render={
 							<SidebarMenuButton
 								size="lg"
-								className="h-12 data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+								className="h-12 hover:bg-sidebar-accent/30 group-data-[collapsible=icon]:hover:bg-transparent group-data-[collapsible=icon]:hover:text-sidebar-primary data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
 							/>
 						}
 					>

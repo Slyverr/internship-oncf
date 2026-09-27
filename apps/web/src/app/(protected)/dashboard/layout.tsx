@@ -18,7 +18,9 @@ export default async function Layout({
 						<AppHeader />
 					</div>
 
-					<div className="page-enter space-y-8 p-4 print:p-0">{children}</div>
+					<div className="page-enter mx-auto grid w-full max-w-screen-2xl gap-6 p-4 sm:p-6 print:p-0">
+						{children}
+					</div>
 				</BreadcrumbProvider>
 			</SidebarInset>
 		</SidebarProvider>

@@ -73,6 +73,10 @@
 	padding-inline: var(--spacing-control);
 }
 
+@utility px-field {
+	padding-inline: calc(var(--spacing) * 3);
+}
+
 @utility pl-control {
 	padding-left: var(--spacing-control);
 }

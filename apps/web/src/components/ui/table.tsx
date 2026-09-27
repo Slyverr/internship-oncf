@@ -6,16 +6,19 @@ import { cn } from "@/lib/utils";
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
 	return (
-		<div
+		<section
 			data-slot="table-container"
-			className="relative w-full overflow-x-auto"
+			aria-label="Scrollable table content"
+			// biome-ignore lint/a11y/noNoninteractiveTabindex: the scroll region needs keyboard focus when its table overflows
+			tabIndex={0}
+			className="relative w-full overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
 		>
 			<table
 				data-slot="table"
 				className={cn("w-full caption-bottom text-sm", className)}
 				{...props}
 			/>
-		</div>
+		</section>
 	);
 }
 
@@ -57,7 +60,7 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
 		<tr
 			data-slot="table-row"
 			className={cn(
-				"border-b transition-colors hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted",
+				"border-b transition-colors hover:bg-muted/30 has-aria-expanded:bg-muted/30 data-[state=selected]:bg-muted",
 				className,
 			)}
 			{...props}
