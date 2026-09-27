@@ -8,6 +8,7 @@ import {
 	GuidedFormActions,
 	GuidedFormProgress,
 } from "@/components/common/guided-form";
+import { PageHeader } from "@/components/common/page-header";
 import {
 	Card,
 	CardContent,
@@ -96,8 +97,12 @@ export function CustomerCreateForm(): JSX.Element {
 				}
 				form.handleSubmit();
 			}}
-			className="space-y-4"
+			className="max-w-5xl space-y-4"
 		>
+			<PageHeader
+				title="New customer"
+				description="Create a customer profile with its identifiers and contact details."
+			/>
 			<GuidedFormProgress steps={customerFormSteps} currentStep={step} />
 
 			<Card

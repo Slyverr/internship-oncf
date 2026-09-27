@@ -9,6 +9,7 @@ import {
 	GuidedFormActions,
 	GuidedFormProgress,
 } from "@/components/common/guided-form";
+import { PageHeader } from "@/components/common/page-header";
 import { CustomerSelect } from "@/components/customers/customer-select";
 import {
 	Card,
@@ -155,8 +156,12 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 				}
 				form.handleSubmit();
 			}}
-			className="space-y-4"
+			className="max-w-5xl space-y-4"
 		>
+			<PageHeader
+				title="Edit user"
+				description="Update account access and profile information."
+			/>
 			<GuidedFormProgress steps={userEditSteps} currentStep={step} />
 
 			<Card

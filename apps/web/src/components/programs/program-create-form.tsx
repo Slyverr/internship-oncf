@@ -10,6 +10,7 @@ import {
 	GuidedFormActions,
 	GuidedFormProgress,
 } from "@/components/common/guided-form";
+import { PageHeader } from "@/components/common/page-header";
 import { OrderSelect } from "@/components/orders/order-select";
 import {
 	Card,
@@ -189,8 +190,12 @@ export function ProgramCreateForm({
 				}
 				form.handleSubmit();
 			}}
-			className="space-y-4"
+			className="max-w-5xl space-y-4"
 		>
+			<PageHeader
+				title="New program"
+				description="Plan the work for an eligible order, then record its execution."
+			/>
 			<GuidedFormProgress steps={programSteps} currentStep={step} />
 
 			<Card

@@ -8,6 +8,7 @@ import {
 	GuidedFormActions,
 	GuidedFormProgress,
 } from "@/components/common/guided-form";
+import { PageHeader } from "@/components/common/page-header";
 import {
 	Card,
 	CardContent,
@@ -101,8 +102,12 @@ export function CustomerEditForm({
 				}
 				form.handleSubmit();
 			}}
-			className="space-y-4"
+			className="max-w-5xl space-y-4"
 		>
+			<PageHeader
+				title="Edit customer"
+				description="Update company, contact, and location information."
+			/>
 			<GuidedFormProgress steps={customerFormSteps} currentStep={step} />
 
 			<Card

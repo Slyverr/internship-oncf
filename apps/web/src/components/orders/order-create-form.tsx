@@ -10,6 +10,7 @@ import {
 	GuidedFormActions,
 	GuidedFormProgress,
 } from "@/components/common/guided-form";
+import { PageHeader } from "@/components/common/page-header";
 import { CustomerSelect } from "@/components/customers/customer-select";
 import { GoodSelect } from "@/components/goods/good-select";
 import {
@@ -151,8 +152,12 @@ export function OrderCreateForm(): JSX.Element {
 				}
 				form.handleSubmit();
 			}}
-			className="space-y-4"
+			className="max-w-5xl space-y-4"
 		>
+			<PageHeader
+				title="New order"
+				description="Enter the customer, goods, quantity, and schedule for this order."
+			/>
 			<GuidedFormProgress steps={orderSteps} currentStep={step} />
 
 			<section

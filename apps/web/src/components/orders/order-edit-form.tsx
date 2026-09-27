@@ -8,6 +8,7 @@ import {
 	GuidedFormActions,
 	GuidedFormProgress,
 } from "@/components/common/guided-form";
+import { PageHeader } from "@/components/common/page-header";
 import { GoodSelect } from "@/components/goods/good-select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -188,12 +189,16 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 	}
 
 	return (
-		<form onSubmit={submit} className="space-y-4">
+		<form onSubmit={submit} className="max-w-5xl space-y-4">
+			<PageHeader
+				title={`Edit ${order.orderNumber}`}
+				description="Update this order’s details and schedule."
+			/>
 			<GuidedFormProgress steps={orderEditSteps} currentStep={step} />
 
 			<Card>
 				<CardHeader>
-					<CardTitle>Edit {order.orderNumber}</CardTitle>
+					<CardTitle>Order details</CardTitle>
 					<p>{order.customer.companyName}</p>
 				</CardHeader>
 

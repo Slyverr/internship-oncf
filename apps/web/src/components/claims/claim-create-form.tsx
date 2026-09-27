@@ -17,6 +17,7 @@ import {
 	GuidedFormActions,
 	GuidedFormProgress,
 } from "@/components/common/guided-form";
+import { PageHeader } from "@/components/common/page-header";
 import { CustomerSelect } from "@/components/customers/customer-select";
 import { OrderSelect } from "@/components/orders/order-select";
 import {
@@ -166,8 +167,12 @@ export function ClaimCreateForm(): JSX.Element {
 				}
 				form.handleSubmit();
 			}}
-			className="space-y-4"
+			className="max-w-5xl space-y-4"
 		>
+			<PageHeader
+				title="New claim"
+				description="Record the issue, link affected records, and describe the requested resolution."
+			/>
 			<GuidedFormProgress steps={claimSteps} currentStep={step} />
 
 			<Card
