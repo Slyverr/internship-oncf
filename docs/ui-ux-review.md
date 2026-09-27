@@ -2,7 +2,7 @@
 
 ## Review evidence
 
-This is a source-based review, not a screenshot review. The web and API endpoints respond locally, but this execution environment has no browser automation tool or installed browser binary, so I could not capture or inspect rendered screenshots. Findings marked source-confirmed come from the current route and component code; spacing, clipping, contrast, image quality, and hover appearance still need visual confirmation. Do not treat this document as claiming those checks passed.
+This is primarily a source-based review, not a full screenshot review. I inspected the ONCF raster asset directly, but this execution environment has no browser automation tool or installed browser binary, so I could not capture rendered route screenshots. Findings marked source-confirmed come from the current route and component code; page composition, clipping, contrast, and responsive behavior still need browser confirmation. Do not treat this document as claiming those checks passed. The shared interface rules are recorded in [design-system.md](./design-system.md).
 
 The review covers all user-facing route families:
 
@@ -17,8 +17,11 @@ The review covers all user-facing route families:
 
 - Shared semantic color and surface tokens exist for light and dark modes. They are intentionally unchanged in this pass, following the request to keep the current palette.
 - The shared TableCell used 8px padding on all sides and the header was 40px high. That is too tight for the documented table-row spacing and conflicts with the request for visible cell insets. Shared table cells now use 16px padding and the header uses a 48px height.
+- The ONCF asset is a square transparent PNG with a horizontal wordmark. Rendering it in a square image box preserved excess transparent space and made the mark appear too small. The sidebar now crops the source to its horizontal mark proportions inside the existing tile; the logo still needs a browser screenshot check at expanded and collapsed widths.
 - The shared record summary uses a clear small-label/value hierarchy, but several page-specific rows and cards still need a visual pass for wrapping, alignment, and dense values.
-- Ghost buttons and sidebar rows used fully opaque muted/accent hover fills. Their hover fills are now softer, and button transitions are limited to color instead of animating every property. The 44px icon targets remain intact for touch and accessibility.
+- The shared page wrapper used 32px between every route's top-level sections and a fixed 16px gutter at all widths. It now uses 24px section rhythm, 16px mobile gutters, and 24px tablet/desktop gutters within a 1536px reading width.
+- Ghost buttons and sidebar rows used fully opaque muted/accent hover fills. Their hover fills are now softer; collapsed sidebar items keep the full 44px target but no longer paint the entire icon button on hover. Button transitions are limited to color instead of animating every property.
+- Inputs and textareas now use 12px horizontal padding from the 4px grid. Scrollable tables can receive keyboard focus and expose a named region; table row hover is subdued.
 
 **Self-critique**
 
@@ -41,7 +44,7 @@ The action is implemented from current API rules, but role/status combinations n
 **Source-confirmed findings**
 
 - Dashboard list/detail/form pages share common table, record-summary, page-header, and guided-form primitives. Changes to these primitives have broad impact, so the complete route family must be checked after shared style edits.
-- The 30 dashboard route files cover the core operational pages; public authentication routes are separate. A source-reference scan found no clearly orphaned web modules. Dependency-name scanning produced framework/runtime false positives, so no dependencies were removed without stronger evidence.
+- The 24 dashboard route files cover the core operational pages; four public authentication routes are separate. A source-reference scan found no clearly orphaned web modules. Dependency-name scanning produced framework/runtime false positives, so no dependencies were removed without stronger evidence.
 - Existing reduced-motion handling is present. It should be retained for every new transition.
 
 **Self-critique**
@@ -52,9 +55,12 @@ Shared primitives reduce drift but do not make all page content consistent. Copy
 
 ### Done in this pass; needs visual confirmation
 
-- [x] Soften ghost and sidebar hover fills without reducing 44px interaction targets or changing palette tokens.
+- [x] Soften ghost and sidebar hover fills without reducing 44px interaction targets or changing palette tokens; collapsed icon hover no longer fills the full target.
 - [x] Limit shared button transitions to color properties.
 - [x] Increase shared table cell insets and header height.
+- [x] Set a responsive shared page gutter and 24px route-section rhythm.
+- [x] Align input/textarea horizontal padding to the 4px spacing grid; make table scroll regions keyboard reachable.
+- [x] Crop the ONCF horizontal wordmark to its content proportions in the sidebar tile.
 - [x] Add a permission- and status-aware Create program action to eligible order details and carry the selected order into the guided create flow.
 
 ### Next visual review

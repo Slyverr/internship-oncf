@@ -1,123 +1,126 @@
-# Web design system
+# ECommand interface design system
 
-This document defines how current ECommand screens should be laid out and how shared interaction details should behave. Apply it screen by screen. Preserve the existing semantic color tokens in apps/web/src/app/globals.css unless a separate, explicitly requested theme review is approved.
+This document is the shared UI contract for the Next.js application. Apply it to new screens and when revisiting existing ones. The goal is a calm, readable operations workspace where the next useful action is clear.
 
-## Design goals
+## 1. Layout and page rhythm
 
-- Make the next action obvious and easy to hit.
-- Give information a clear reading order: page title, supporting description, section heading, row title, then secondary detail.
-- Use consistent alignment and spacing so related screens feel like one product.
-- Let layouts reflow at narrow widths instead of shrinking controls or text until they feel cramped.
-- Keep keyboard use, focus visibility, reduced motion, and touch use as normal states of the interface.
+- Use a 4px base spacing unit. Choose spacing values from 4, 8, 12, 16, 24, and 32px; use 0 when no inset is needed. Prefer padding for component interiors and reserve margin for intentional relationships between separate blocks. Avoid one-off measurements and unexplained spacing classes.
+- Standard spacing aliases in this repo: 4px `gap-compact`, 8px `gap-control` / `px-control`, and 12px `px-field`. Larger layout gaps use the 4px-grid utilities (`gap-4`=16px, `gap-6`=24px, `gap-8`=32px). Choose by the resolved pixel value, not by a class name that looks familiar. Prefer named aliases for control insets and parent `gap` for layout rhythm.
+- Use `p-control` / `px-control` for an 8px control inset and `px-field` for the 12px field inset. Use 16px (`p-4`) for mobile page gutters and 24px (`p-6`) for wider page gutters. Every new spacing choice should be deliberate and on the 4px grid.
+- Dashboard content uses 16px gutters on small screens and 24px from tablet width upward, with a 1536px maximum content width. Keep page sections 24px apart. Keep related controls 8–16px apart and related sections inside a card 16–24px apart.
+- Keep content width readable on ultrawide displays. Tables can use the available width, but text-heavy descriptions should have a readable maximum line length.
+- Stack page headings and primary actions on narrow screens. Actions should wrap cleanly and remain easy to tap; do not shrink targets to gain density.
+- Use responsive grids that start as one column. Introduce two columns only when each field/card has enough room to remain readable.
 
-## Tokens and primitives
+### Page composition and breakpoints
 
-### Color
+1. A page header pairs a clear title, a short supporting description, and the primary page action.
+2. The next block groups related work under a visible section/card title. Avoid nested cards unless a second visual boundary is needed to separate a distinct task.
+3. Below 640px, stack heading and actions, make form actions full width when it improves reach, and collapse multi-column cards/forms to one column. At tablet width, use two columns only when both remain readable.
+4. Long values wrap. Buttons may wrap or stack; controls and type do not get smaller to fit. A 320px screen may scroll horizontally only inside a data-table region.
+5. Form/detail text fields use a readable maximum width instead of stretching across ultrawide monitors. Data tables may use the remaining page width.
 
-Use the current role-based tokens: background, foreground, card, muted, muted-foreground, border, primary, destructive, and their existing dark variants. Surface layers are named by role: `surface-canvas` is the page, `surface-raised` is cards and popovers, and `surface-navigation` is the sidebar. Light mode keeps a near-white canvas, warm raised surfaces, and a slightly deeper warm navigation surface. Dark mode keeps the current low-glare charcoal canvas, lighter cards, and darker navigation surface. Components should not introduce one-off palette values.
+## 2. Type hierarchy
 
-### Spacing
+| Purpose | Treatment |
+| --- | --- |
+| Page title | 24px on small screens, 30px on larger screens; semibold, tight leading |
+| Page description | 14px / 24px line height, muted; keep clearly subordinate to the title |
+| Card/section title | 16px, semibold |
+| Body and table values | 14px with comfortable line height |
+| Form labels and metadata | 13–14px, medium for labels, muted for supporting values |
+| Secondary descriptions | 14px, muted, with 4–8px separation from their title |
 
-Use multiples of 4px. Prefer padding and parent gap over individual margins. Token names are aliases, not utility suffixes: for example, p-control is 8px while p-4 is 16px.
+Do not make a title and its subtitle the same size or weight. Use tabular numerals for quantities and dates that users compare.
 
-| Token intent | Value | Use |
-| --- | ---: | --- |
-| compact (gap-compact) | 4px | icon-to-label or tightly grouped metadata only |
-| control (p-control, gap-control) | 8px | standard control inset and navigation item content |
-| inset | 12px | use only when a component needs a between-step inset |
-| inline | 16px | related controls, row content, and card inner gap |
-| section | 24px | separation between content groups |
-| page | 32px | desktop page section separation |
-| page-wide | 40px | major desktop page breathing room when the content calls for it |
+## 3. Surfaces and color roles
 
-On small screens, page gutters are 16px; at medium widths use 24px; at wide widths use 32px. Narrow gutters do not mean tighter content gaps. A layout must not use a smaller font, padding, or control height as a substitute for reflow.
+Keep the current palette tokens until a palette change is requested. Use the existing semantic roles consistently:
 
-### Type hierarchy
+- `background` / `surface-canvas`: application canvas.
+- `sidebar` / `surface-navigation`: persistent navigation surface.
+- `card` / `surface-raised`: grouped content and data surfaces.
+- `popover`: menus and transient overlays above the page.
+- `primary`: the main action and restrained active-state cue.
+- `muted` and `muted-foreground`: secondary surfaces and supporting information.
+- `border`: grouping and control boundaries; prefer this over additional shadows.
 
-Use the existing typeface and semantic foreground tokens. Keep hierarchy consistent:
+Use the same semantic roles in light and dark modes. Cards should separate from the canvas through the existing surface token and a quiet border/ring, not a bright white fill or heavy shadow. Hover is a small feedback cue, not a large decorative block. Focus indicators must remain visible and stronger than hover.
 
-| Element | Desktop | Small screens | Weight |
-| --- | --- | --- | --- |
-| Page title | 28px / 36px | 24px / 32px | semibold |
-| Page description | 16px / 24px | 14px / 20px | regular, muted |
-| Section title | 18px / 28px | 16px / 24px | semibold |
-| Row/card title | 16px / 24px | 16px / 24px | medium or semibold |
-| Body/value | 14px / 20px | 14px / 20px | regular |
-| Supporting metadata | 13px / 20px | 13px / 20px | regular, muted |
-| Label | 14px / 20px | 14px / 20px | medium |
+## 4. Cards, tables, and data
 
-Do not give a title and subtitle the same visual weight. Keep supporting copy readable; do not push it below 13px for ordinary interface content. Use the text-meta utility for 13px / 20px supporting metadata.
+- Cards use one consistent radius, quiet outline, and 16px interior spacing on mobile / 24px from the `sm` breakpoint upward. The 44px control size and 16px table cell insets do not shrink on mobile.
+- Tables use 14px text, aligned values, a restrained header style, and at least 16px horizontal and vertical cell insets on desktop. Keep row actions and links within their own hit areas.
+- On narrow screens, let wide tables scroll inside their own container; do not compress important values until they collide. Ensure the scroll area can be reached by keyboard and communicates its purpose.
+- Use one label/value pattern in record details: muted 13px label, stronger 14–16px value, 8px separation, and wrapping for long values.
+- A standard table row is at least 56px tall; a row with a title and supporting line is at least 64px. Give each cell its own inset and keep related values aligned by column. Use tabular numerals for comparable dates and quantities.
+- Keep long values readable. Truncate only when the same record has a clear detail destination or the full value is available to assistive technology. On phones, preserve table column meaning inside the horizontal scroll area rather than squeezing text together.
+- Empty, loading, error, and success states should occupy the same content region and provide the next useful action when one exists.
 
-### Controls, hit areas, and focus
+### Row and list patterns
 
-- Standard buttons, icon buttons, inputs, selects, and actionable list rows should provide a 44px minimum hit area. A 40px minimum is acceptable only for secondary controls inside a clearly bounded dense menu or table toolbar.
-- Primary actions use at least 12px horizontal and 8px vertical internal padding. Secondary actions should retain a similarly comfortable target.
-- Icon glyphs are usually 16px or 20px; the clickable button is larger than the glyph.
-- Show the existing focus ring on keyboard focus. Never remove an outline without an equally visible replacement.
-- Avoid hover-only instructions or actions. Tooltips supplement accessible names; they do not replace them.
+- Keep a standard data row at least 56px high; use 64px or more when the row contains a title and supporting text.
+- Separate row title and subtitle by 4px. Keep the title at 14–16px and the subtitle at 13–14px, muted. Do not truncate unless a detail destination or accessible full value is available.
+- Keep row actions in a trailing aligned area with 44px targets. Do not make a tiny text string the only clickable area when the whole row is intended to navigate.
+- At narrow widths, let metadata wrap under the title and move secondary actions to another line or a menu instead of compressing the main value.
 
-### Surfaces and shape
+## 5. Forms and controls
 
-Use the existing semantic border, radius, and shadow tokens. Keep related content in one card when it forms one task or information group. Avoid nesting cards without a clear boundary need. Use separators for divisions within one surface; use whitespace before adding another border.
+- Inputs, selects, buttons, and menu items retain a 44px minimum interaction height where practical.
+- Standard primary and secondary actions keep at least 12px horizontal and 8px vertical padding. Icon glyphs are generally 16px or 20px inside a larger hit area.
+- Keep the keyboard focus ring visible and distinct from hover. Give icon-only controls an accessible name; a tooltip supplements that name but does not replace it.
+- Keep form label-to-control spacing at 8px. Keep related fields 16px apart. Error text sits directly below the field and uses the destructive semantic color.
+- Put labels above controls and helper/error copy directly below them. Pair fields only when both columns remain readable; stack them below tablet width. Textareas should show enough lines to communicate that they accept longer text.
+- Guided forms state the current step, the information needed at that step, and the next action. Back, Cancel, and submit placement must stay consistent between entity forms.
+- Validate the active step before advancing, retain entered values when moving backward, and validate the whole form on final submission. Focus the first invalid control after an error; do not rely on color alone to identify it.
+- Prevent duplicate submission while saving and preserve the user's context when Cancel returns to a previous record.
+- Keep loading and pending feedback in the button or the form region being changed so the action does not appear to vanish or shift position.
 
-## Page structure and responsive rules
+## 6. Navigation and feedback
 
-### Standard page frame
+- Expanded sidebar hover may tint the full navigation row softly. In collapsed mode, keep the 44px target but make hover feedback local and subtle around the icon.
+- Keep logo and profile controls centered with the same top/bottom breathing room in both sidebar states.
+- Notifications open next to their trigger as a bounded popover. The full inbox remains a separate destination for reviewing older items.
+- Transitions should be short and limited to the property that changes. Respect `prefers-reduced-motion`.
 
-1. A page header pairs one clear title with a short description and the primary page action.
-2. Below it, content is grouped into sections with explicit headings or clear card titles.
-3. The page uses a consistent 16/24/32px responsive gutter and a readable maximum content width. Forms and detail views should not stretch text fields across unnecessarily wide monitors.
-4. Section spacing is 24px on mobile and 32px on desktop; card padding is 16px on mobile and 24px on desktop.
-5. Long values wrap. Buttons may wrap or stack. No page may require horizontal scrolling at 320px except a data table with an explicit, usable scroll region.
+### Application shell measurements
 
-At widths below 640px, stack page actions beneath the title, make form actions full width when this improves reach, and collapse multi-column card grids to one column. At tablet widths, use two columns only when each column remains readable. At desktop, use available width without making content feel sparse or stretched.
-
-### Rows and lists
-
-- Use a minimum 56px row height for standard data rows and 64px for rows with title plus supporting text.
-- Give title and supporting text a 4px vertical gap; truncate only when a deliberate detail route or accessible full value is available.
-- Keep action buttons in a separate aligned trailing area with a 44px target. Do not make tiny text itself the only click target when the row is actionable.
-- On narrow screens, allow metadata to wrap below the title and move secondary actions to a menu or next line rather than compressing the title column.
-
-### Forms and guided flows
-
-- Keep labels above controls and help/error text immediately below the associated control.
-- Inputs and selects use at least 44px height; textareas preserve enough visible lines to suggest their purpose.
-- Keep field groups 24px apart and paired fields in a responsive grid that stacks below tablet width.
-- Multi-step flows show current step, completed steps, and the next/back actions in a stable footer area. Back preserves entered values. Advancing validates only the active step; final submit validates the complete form.
-- Errors are shown beside the field and announced accessibly. Invalid submission moves focus to the first invalid field or a summary that links to fields.
-
-## Application shell
-
-### Header
-
-Keep the desktop header at a consistent 64px height. Align the sidebar toggle, breadcrumb, and trailing actions vertically. At mobile width, preserve a 44px target for the menu trigger and notification trigger; breadcrumb text may truncate without pushing actions offscreen.
-
-### Sidebar
-
-- Expanded width: 256px. Collapsed icon rail: 64px so the 32px brand and account marks keep the same 16px side inset as the expanded sidebar. Mobile opens a sheet with a comfortable 288px target width, bounded by the viewport.
-- Expanded menu rows are at least 44px high with a 16px icon and readable 14px label. Group labels are distinct from menu rows and may hide when collapsed.
-- In collapsed mode, center each 32px logo/avatar inside the 64px rail with a 16px side inset and retain 8px top and bottom padding. Navigation icons remain centered in 44px hit areas. Collapsed menu buttons have no internal horizontal padding that displaces or clips the icon. Keep the row itself at least 44px high.
-- The brand mark keeps its full aspect ratio and never clips. The account avatar stays centered; account name and secondary text hide in the rail. Provide a tooltip or accessible name for each collapsed navigation control and the account control.
-- Use active styling and a focus ring to distinguish current and focused items; do not rely on color alone.
-- Keep footer content anchored at the bottom while navigation scrolls independently. On mobile, close the sheet after a navigation choice.
+- The header is 64px high. The mobile sidebar sheet is 288px wide, bounded by the viewport; the expanded desktop sidebar is 256px.
+- The collapsed desktop rail is 64px wide. Keep logo and avatar marks at 32px and center them in 44px controls, with 16px top and bottom padding around the header/footer groups. Keep icon targets at 44px.
+- In the collapsed rail, center every logo/avatar/menu icon. Remove internal horizontal button padding only where it would displace the icon; retain the full button target and the rail's outer breathing room.
+- Keep the brand art inside its tile without stretching the logo to a square. If an asset includes transparent canvas, size/crop it by its visible content proportions and preserve the complete wordmark where there is room.
+- Expanded navigation hover may tint its full 44px row using a low-opacity accent. Collapsed hover changes the icon/foreground gently without filling the whole target. Focus uses the visible ring and remains distinct from hover.
+- Keep the footer anchored below the independently scrollable navigation. Group labels have a distinct treatment and may hide when collapsed. The collapsed logo, each nav icon, and the profile control need accessible names/tooltips; account name and role may hide in the rail.
+- On mobile, open navigation in a sheet bounded by the viewport and close it after a route is selected.
 
 ### Notifications
 
-- Clicking the bell opens an anchored dropdown/popup beside the bell; it does not navigate away.
-- On desktop, target a panel around 360px wide and keep the whole panel at most 70vh tall. On mobile, use the available viewport width with 16px side gutters and keep it within the screen.
-- The panel has a heading, unread count, scrollable recent list, and a footer link to the full notification history. The full history page remains available for search/filtering and older items.
-- Each notification shows a concise title, secondary context, and relative time with title/subtitle hierarchy. Unread state is clear through more than color alone. Rows have at least a 56px hit area; row actions have a 44px target.
-- Mark-one-read and mark-all-read actions give immediate feedback and maintain focus. Clicking a notification opens its relevant destination when one exists; expose the full-history link for notifications without a destination.
-- The popup closes on Escape, outside click, or selection; keyboard users can reach the bell, move through the menu, and return focus to the bell when closing.
-- The bell remains a button with an accessible name and unread count. Its badge must not cover the icon or reduce the hit area.
+- The bell stays a 44px button in the top bar. Clicking opens an anchored popover; it does not navigate.
+- On desktop the panel is 360px wide and at most 70vh high. On phones it uses the viewport width minus 32px and remains inside the screen.
+- The panel has a heading and unread count, a scrollable recent list, and a link to the full inbox. A row has a concise title, secondary context, and time; unread state has a visible non-color cue.
+- Mark-one-read and mark-all-read actions update the view immediately. Escape, outside click, or item selection closes the panel. Keyboard focus can reach its controls and returns to the bell after closing.
+- Selecting a notification opens its related record when a destination exists. Notifications without a destination still expose their full message in the panel or inbox.
+- The bell has an accessible name and unread count. Keep its badge clear of the icon and do not let it reduce the 44px hit area.
+- Keep the full Notifications route for older items and inbox actions; the popover is for a quick check.
 
-## Motion and feedback
+## 7. Task flow
 
-Use short 120–200ms transitions. The global reduced-motion rule shortens CSS animations and transitions and disables smooth scrolling; do not rely on that rule instead of checking screen-reader and interaction behavior. Do not animate layout in a way that moves a target beneath a pointer or keyboard focus. Loading, empty, success, and error states should occupy a stable place so content does not jump unexpectedly.
+Place a next action next to the record that makes it relevant. Only offer it when the current role, record status, ownership, and related-record state permit the action. Reuse the same eligibility rules as the server-backed selector and revalidate the record when the destination form loads.
 
-## Review checklist
+Current example: an order detail can link directly to program creation when the signed-in user can create programs, can access that order's creation scope, the order is in an eligible state, and it has no program yet.
 
-Before marking a screen change complete, inspect these viewport widths: 320, 375, 640, 768, 1024, and 1440px. Check light and dark mode without changing palette values, keyboard focus, touch target size, long user-provided text, loading/empty/error states, and the expanded/collapsed/mobile sidebar where applicable. For the notification trigger, check open/close behavior, focus return, unread actions, and the full-history route.
+When implementing any shortcut, map actor permission, ownership scope, resource status, and related-resource state. Keep the button hidden when any prerequisite fails; then recheck eligibility on the destination page so a stale link cannot silently select an unavailable record.
 
-When a visual browser is unavailable, say so explicitly and verify layout classes, typecheck/build, and relevant interactions through code-level or HTTP checks. Do not claim a visual inspection that was not performed.
+## 8. Review checklist
+
+For each route family, inspect light and dark modes at 320px, 375px, 390px, 640px, 768px, 1024px, and 1440px. Check title/subtitle hierarchy, 4px-grid spacing, clipping and wrapping, table scroll, control target size, empty/loading/error/success states, hover/focus distinction, action visibility by role, and the route back to the originating task.
+
+Review the public login/signup/forgot/reset routes; dashboard overview; each order, program, claim, customer, and user list/detail/create/edit route; reports; settings; notifications; and the shared shell in both expanded and collapsed states. For each guided form, inspect every step, field error, submit-pending state, and cancel/back route. For the sidebar, check logo/avatar centering and padding. For the bell and account menu, capture both closed and open states. Source inspection, HTTP status, and successful builds do not replace screenshot review.
+
+If browser capture is unavailable, state that limitation. Continue with route inventory, source inspection, tests, typecheck, production build, and local HTTP checks, but mark screenshot-dependent findings as unverified instead of inferring visual quality.
+
+## Motion and stable feedback
+
+- Use short 120–200ms transitions and animate only the property that changes. Do not move a control under the pointer or keyboard focus.
+- Respect `prefers-reduced-motion`; reduced-motion handling is part of the shared contract and must be preserved when introducing animation.
+- Loading, empty, success, and error states should occupy a stable content region so the page does not jump unexpectedly. Keep messages and actions in the region associated with the operation.
