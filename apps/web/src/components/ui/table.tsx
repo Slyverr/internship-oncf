@@ -5,20 +5,78 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
+	const scrollAreaRef = React.useRef<HTMLDivElement>(null);
+	const tableRef = React.useRef<HTMLTableElement>(null);
+	const hintId = React.useId();
+	const [hasHorizontalOverflow, setHasHorizontalOverflow] =
+		React.useState(false);
+	const [canScrollFurther, setCanScrollFurther] = React.useState(false);
+
+	React.useEffect(() => {
+		const scrollArea = scrollAreaRef.current;
+		const table = tableRef.current;
+
+		if (!scrollArea || !table) {
+			return;
+		}
+
+		const updateScrollHint = () => {
+			const hasOverflow = table.scrollWidth > scrollArea.clientWidth + 1;
+			const canScrollRight =
+				hasOverflow &&
+				scrollArea.scrollLeft <
+					scrollArea.scrollWidth - scrollArea.clientWidth - 1;
+
+			setHasHorizontalOverflow((current) =>
+				current === hasOverflow ? current : hasOverflow,
+			);
+			setCanScrollFurther((current) =>
+				current === canScrollRight ? current : canScrollRight,
+			);
+		};
+
+		updateScrollHint();
+
+		const resizeObserver = new ResizeObserver(updateScrollHint);
+		resizeObserver.observe(scrollArea);
+		resizeObserver.observe(table);
+		scrollArea.addEventListener("scroll", updateScrollHint, { passive: true });
+
+		return () => {
+			resizeObserver.disconnect();
+			scrollArea.removeEventListener("scroll", updateScrollHint);
+		};
+	}, []);
+
 	return (
-		<section
-			data-slot="table-container"
-			aria-label="Scrollable table content"
-			// biome-ignore lint/a11y/noNoninteractiveTabindex: the scroll region needs keyboard focus when its table overflows
-			tabIndex={0}
-			className="relative w-full overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-		>
-			<table
-				data-slot="table"
-				className={cn("w-full caption-bottom text-sm", className)}
-				{...props}
-			/>
-		</section>
+		<div data-slot="table-container" className="w-full min-w-0">
+			<section
+				ref={scrollAreaRef}
+				aria-label="Scrollable table content"
+				aria-describedby={
+					hasHorizontalOverflow && canScrollFurther ? hintId : undefined
+				}
+				// biome-ignore lint/a11y/noNoninteractiveTabindex: the scroll region needs keyboard focus when its table overflows
+				tabIndex={0}
+				className="w-full min-w-0 overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+			>
+				<table
+					ref={tableRef}
+					data-slot="table"
+					className={cn("w-full caption-bottom text-sm", className)}
+					{...props}
+				/>
+			</section>
+			{hasHorizontalOverflow && canScrollFurther && (
+				<div
+					id={hintId}
+					className="flex items-center gap-2 border-t px-4 py-2 text-xs text-muted-foreground md:hidden"
+				>
+					<span aria-hidden="true">↔</span>
+					<span>Scroll to see the remaining columns</span>
+				</div>
+			)}
+		</div>
 	);
 }
 
