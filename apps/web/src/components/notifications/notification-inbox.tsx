@@ -1,6 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
+import { BellIcon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -96,11 +97,22 @@ export function NotificationInbox() {
 				</Button>
 			</div>
 			{visible.length === 0 ? (
-				<p className="py-8 text-muted-foreground">
-					{unreadOnly
-						? "You have no unread notifications."
-						: "No notifications yet."}
-				</p>
+				<div
+					role="status"
+					className="flex min-h-40 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-card px-4 py-8 text-center"
+				>
+					<span className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
+						<BellIcon className="size-5" aria-hidden="true" />
+					</span>
+					<p className="text-sm font-medium">
+						{unreadOnly ? "You’re all caught up." : "No notifications yet."}
+					</p>
+					<p className="text-sm text-muted-foreground">
+						{unreadOnly
+							? "There are no unread updates to review."
+							: "Updates about your orders, programs, and claims will appear here."}
+					</p>
+				</div>
 			) : (
 				<ul className="space-y-3">
 					{visible.map((item) => {

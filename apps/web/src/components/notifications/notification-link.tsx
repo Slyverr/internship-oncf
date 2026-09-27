@@ -196,11 +196,11 @@ export function NotificationLink() {
 								</ul>
 							)}
 						</div>
-						<div className="border-t border-border p-2">
+						<div className="border-t border-border p-0">
 							<Button
 								variant="ghost"
 								nativeButton={false}
-								className="min-h-11 w-full"
+								className="min-h-11 w-full focus-visible:ring-offset-0"
 								render={
 									<Link
 										href="/dashboard/notifications"
