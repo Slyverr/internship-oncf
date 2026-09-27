@@ -56,14 +56,14 @@ export function SettingsDialog() {
 			>
 				<DialogHeader className="border-b px-4 py-3 pr-16">
 					<DialogTitle className="text-base">Settings</DialogTitle>
-					<DialogDescription>
+					<DialogDescription className="sr-only sm:not-sr-only">
 						Personalize your workspace and manage your account.
 					</DialogDescription>
 				</DialogHeader>
 				<div className="grid min-h-0 min-w-0 grid-cols-1 lg:grid-cols-[15rem_minmax(0,1fr)]">
 					<nav
 						aria-label="Settings sections"
-						className="flex min-w-0 gap-control overflow-x-auto border-b p-4 lg:flex-col lg:overflow-visible lg:border-r lg:border-b-0"
+						className="flex min-w-0 gap-control overflow-x-auto border-b px-3 py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex-col lg:overflow-visible lg:border-r lg:border-b-0 lg:p-4"
 					>
 						{sections.map(({ id, label, icon: Icon }) => (
 							<button

@@ -71,6 +71,7 @@ Use the same semantic roles in all themes. Cards should separate from the canvas
 - Use the shared `DialogContent` primitive so overlay, focus behavior, close control, motion, and surface styles stay consistent. Choose a named size so repeated dialogs keep a stable footprint; `size="wide"` is a 1120px-wide, 768px-high workspace size, capped by 16px viewport insets on shorter screens.
 - Keep a dialog title and short description visible while its body changes or scrolls. Dialogs should have one independently scrollable content area; add `min-h-0` to grid/flex children that need to shrink inside a bounded dialog.
 - Keep close and primary-action targets at least 44px. On phones, leave 16px around the dialog, prevent horizontal overflow, and keep section navigation reachable before the scrolling body.
+- In appearance settings, use a two-column theme grid when each option has room to wrap its label (the `xs` breakpoint is 384px); narrower viewports use one column to prevent clipped theme names. Use compact radio chips for text preferences. Keep the three settings sections in a horizontally reachable, scrollbar-free mobile tab row and preserve the dialog's fixed outer size.
 - Do not place a Card inside a dialog pane just to repeat the outer dialog surface. Use the shared Card only when it separates a genuinely distinct task or data group.
 
 ### Row and list patterns

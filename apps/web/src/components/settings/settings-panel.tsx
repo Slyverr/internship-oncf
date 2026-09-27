@@ -133,6 +133,7 @@ function PreferenceChoices<Value extends string>({
 	compact?: boolean;
 }) {
 	const id = label.toLowerCase().replaceAll(" ", "-");
+	const inlineChoices = compact && !renderPreview;
 
 	return (
 		<fieldset className="grid gap-control">
@@ -144,18 +145,26 @@ function PreferenceChoices<Value extends string>({
 					const option = options.find((item) => item.value === nextValue);
 					if (option) onChange(option.value);
 				}}
-				className={`grid gap-control ${columns}`}
+				className={
+					inlineChoices
+						? "flex flex-wrap gap-control"
+						: `grid gap-control ${columns}`
+				}
 			>
 				{options.map((option) => (
 					<Label
 						key={option.value}
 						htmlFor={`${id}-${option.value}`}
-						className={`flex cursor-pointer items-center gap-control rounded-lg border px-field py-control transition-colors hover:bg-muted/60 has-[[data-checked]]:border-primary has-[[data-checked]]:bg-primary/5 ${compact ? "min-h-12" : "min-h-14"}`}
+						className={`flex cursor-pointer items-center ${compact && renderPreview ? "gap-compact" : "gap-control"} rounded-lg border px-field py-control transition-colors hover:bg-muted/60 has-[[data-checked]]:border-primary has-[[data-checked]]:bg-primary/5 ${inlineChoices ? "min-h-11 rounded-md px-3" : compact ? "min-h-12" : "min-h-14"}`}
 					>
 						<RadioGroupItem id={`${id}-${option.value}`} value={option.value} />
 						{renderPreview?.(option.value)}
 						<span className="grid min-w-0 flex-1 gap-compact">
-							<span className="text-sm font-medium">{option.label}</span>
+							<span
+								className={`${renderPreview ? "text-xs sm:text-sm" : "text-sm"} font-medium`}
+							>
+								{option.label}
+							</span>
 							<span
 								className={
 									compact ? "sr-only" : "text-xs text-muted-foreground"
@@ -198,7 +207,7 @@ function ThemePreview({ theme }: { theme: ThemeMode }) {
 	return (
 		<span
 			aria-hidden="true"
-			className={`grid h-8 w-12 shrink-0 overflow-hidden rounded-md border border-border ${theme === "system" ? "grid-cols-2" : "grid-cols-1"}`}
+			className={`grid h-8 w-8 shrink-0 overflow-hidden rounded-md border border-border sm:w-12 ${theme === "system" ? "grid-cols-2" : "grid-cols-1"}`}
 		>
 			{previews.map((previewTheme) => (
 				<ThemeSurface key={previewTheme} theme={previewTheme} />
@@ -341,13 +350,14 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 							Set up colors, text, and motion for a comfortable workspace.
 						</CardDescription>
 					</CardHeader>
-					<CardContent className="grid gap-6">
+					<CardContent className="grid gap-4">
 						<PreferenceChoices
 							label="Workspace layout"
 							value={preferences.workspaceLayout}
 							options={workspaceLayoutOptions}
 							onChange={setWorkspaceLayout}
-							columns="grid-cols-1 sm:grid-cols-2"
+							columns="grid-cols-2"
+							compact
 						/>
 						<PreferenceChoices
 							label="Color theme"
@@ -355,7 +365,7 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 							options={themeOptions}
 							onChange={setTheme}
 							renderPreview={(theme) => <ThemePreview theme={theme} />}
-							columns="grid-cols-1 sm:grid-cols-2 xl:grid-cols-3"
+							columns="grid-cols-1 xs:grid-cols-2 xl:grid-cols-3"
 							compact
 						/>
 						<PreferenceChoices
