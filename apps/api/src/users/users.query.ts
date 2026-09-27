@@ -1,6 +1,7 @@
+import { RegistrationStatus } from "@ecommand/shared";
 import { Injectable } from "@nestjs/common";
 import { users } from "drizzle/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { DrizzleService } from "@/database/drizzle.service";
 import { QueryColumns, QueryRelations } from "@/database/drizzle.types";
 import { withDbErrorHandling } from "@/database/drizzle.util";
@@ -17,6 +18,7 @@ const userListColumns = {
 	employeeId: true,
 	type: true,
 	roleId: true,
+	registrationStatus: true,
 	customerId: true,
 	agencyId: true,
 	isActive: true,
@@ -39,6 +41,7 @@ const userAuthColumns = {
 	email: true,
 	password: true,
 	isActive: true,
+	registrationStatus: true,
 	customerId: true,
 	agencyId: true,
 } satisfies UsersColumns;
@@ -88,6 +91,14 @@ export class UsersQuery {
 		});
 	}
 
+	async findUserEmailExists(email: UserEmail) {
+		const user = await this.drizzle.db.query.users.findFirst({
+			where: { email: { ilike: email } },
+			columns: { id: true },
+		});
+		return !!user;
+	}
+
 	async findUserForAuth(id: UserId) {
 		return this.drizzle.db.query.users.findFirst({
 			where: { id },
@@ -118,6 +129,33 @@ export class UsersQuery {
 						id: users.id,
 					}),
 			values,
+		);
+		return updated;
+	}
+
+	async reviewRegistration(
+		id: UserId,
+		roleId: string,
+		status: RegistrationStatus.APPROVED | RegistrationStatus.REJECTED,
+	) {
+		const [updated] = await withDbErrorHandling(
+			() =>
+				this.drizzle.db
+					.update(users)
+					.set({
+						registrationStatus: status,
+						isActive: status === RegistrationStatus.APPROVED,
+						updatedAt: new Date().toISOString(),
+					})
+					.where(
+						and(
+							eq(users.id, id),
+							eq(users.roleId, roleId),
+							eq(users.registrationStatus, RegistrationStatus.PENDING),
+						),
+					)
+					.returning({ id: users.id }),
+			{ id, roleId, status },
 		);
 		return updated;
 	}

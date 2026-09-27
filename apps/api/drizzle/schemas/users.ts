@@ -4,6 +4,7 @@ import type {
 	AppearanceTextSize,
 	AppearanceTheme,
 } from "@ecommand/shared";
+import { RegistrationStatus } from "@ecommand/shared";
 import { sql } from "drizzle-orm";
 import {
 	bigint,
@@ -106,6 +107,10 @@ export const users = pgTable(
 		employeeId: varchar("employee_id", { length: 50 }),
 		type: varchar("type", { length: 20 }),
 		roleId: uuid("role_id").notNull(),
+		registrationStatus: varchar("registration_status", { length: 20 })
+			.$type<RegistrationStatus>()
+			.default(RegistrationStatus.APPROVED)
+			.notNull(),
 		customerId: bigint("customer_id", { mode: "number" }),
 		agencyId: bigint("agency_id", { mode: "number" }),
 		failedLoginAttempts: integer("failed_login_attempts").default(0),
@@ -141,6 +146,10 @@ export const users = pgTable(
 		check(
 			"users_type_check",
 			sql`(${table.type})::text = ANY (ARRAY['internal'::text, 'external'::text])`,
+		),
+		check(
+			"users_registration_status_check",
+			sql`${table.registrationStatus} IN ('PENDING', 'APPROVED', 'REJECTED')`,
 		),
 		index("idx_users_email").on(table.email),
 		index("idx_users_employee").on(table.employeeId),

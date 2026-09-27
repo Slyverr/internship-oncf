@@ -7,8 +7,10 @@ import { Public } from "./public.decorator";
 import { ChangePasswordDto } from "./requests/change-password.dto";
 import { ForgotPasswordDto } from "./requests/forgot-password.dto";
 import { LoginDto } from "./requests/login.dto";
+import { RegisterClientDto } from "./requests/register-client.dto";
 import { ResetPasswordDto } from "./requests/reset-password.dto";
 import { LoginDetailDto } from "./responses/login-detail.dto";
+import { RegistrationSubmittedDto } from "./responses/registration-submitted.dto";
 
 @Controller("auth")
 export class AuthController {
@@ -21,6 +23,13 @@ export class AuthController {
 	@ApiUnauthorizedResponse()
 	async login(@Request() req: LocalAuthRequest, @Body() _dto: LoginDto) {
 		return this.authService.login(req.user);
+	}
+
+	@Public()
+	@Post("register")
+	@ApiOkResponse({ type: RegistrationSubmittedDto })
+	async register(@Body() dto: RegisterClientDto) {
+		return this.authService.register(dto);
 	}
 
 	@Post("change-password")

@@ -9,6 +9,14 @@ export type UserUpdate = Partial<UserInsert>;
 export type UserId = User["id"];
 export type UserEmail = User["email"];
 
+export interface ClientRegistrationInput {
+	email: string;
+	password: string;
+	firstName: string;
+	lastName: string;
+	customerId: number;
+}
+
 export type UserList = Awaited<ReturnType<UsersService["findAll"]>>[number];
 
 export type UserDetail = NonNullable<

@@ -1,9 +1,11 @@
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
+import { IS_PUBLIC_KEY } from "./public.decorator";
 
 describe("AuthController", () => {
 	const authService = {
 		login: jest.fn(),
+		register: jest.fn(),
 		changePassword: jest.fn(),
 		logout: jest.fn(),
 		forgotPassword: jest.fn(),
@@ -19,6 +21,25 @@ describe("AuthController", () => {
 		const user = { id: 8 } as never;
 		await controller.login({ user }, {} as never);
 		expect(authService.login).toHaveBeenCalledWith(user);
+	});
+
+	it("exposes registration publicly and delegates the submitted customer details", async () => {
+		const dto = {
+			email: "client@example.test",
+			customerCode: "CLI009",
+			ice: "123456789012345",
+		} as never;
+		authService.register.mockResolvedValue({
+			message: "Registration submitted for admin review.",
+		});
+
+		expect(
+			Reflect.getMetadata(IS_PUBLIC_KEY, AuthController.prototype.register),
+		).toBe(true);
+		await expect(controller.register(dto)).resolves.toEqual({
+			message: "Registration submitted for admin review.",
+		});
+		expect(authService.register).toHaveBeenCalledWith(dto);
 	});
 
 	it("changes the authenticated user password and returns a success message", async () => {

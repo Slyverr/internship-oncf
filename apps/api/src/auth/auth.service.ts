@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { RegistrationStatus } from "@ecommand/shared";
 import {
 	BadRequestException,
 	Injectable,
@@ -7,12 +8,14 @@ import {
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import bcrypt from "bcryptjs";
+import { CustomersService } from "@/customers/customers.service";
 import { EmailService } from "@/email/email.service";
 import { UsersService } from "@/users/users.service";
 import { User } from "@/users/users.types";
 import { AuthQuery } from "./auth.query";
 import { AuthUser } from "./auth.types";
 import { ChangePasswordDto } from "./requests/change-password.dto";
+import { RegisterClientDto } from "./requests/register-client.dto";
 
 export interface JwtPayload {
 	sub: number;
@@ -27,11 +30,16 @@ export class AuthService {
 		private readonly authQuery: AuthQuery,
 		private readonly jwtService: JwtService,
 		private readonly config: ConfigService,
+		private readonly customersService: CustomersService,
 	) {}
 
 	async validateUser(email: string, password: string) {
 		const user = await this.usersService.findOneByEmail(email);
-		if (!user.isActive) return null;
+		if (
+			!user.isActive ||
+			user.registrationStatus !== RegistrationStatus.APPROVED
+		)
+			return null;
 
 		if (
 			user.accountLockedUntil &&
@@ -47,6 +55,27 @@ export class AuthService {
 
 		const { password: _, ...safeUser } = user;
 		return safeUser;
+	}
+
+	async register(dto: RegisterClientDto) {
+		const customer =
+			await this.customersService.findActiveCustomerForRegistration(
+				dto.customerCode,
+				dto.ice,
+			);
+		if (!customer) {
+			throw new BadRequestException(
+				"Customer code and ICE could not be verified. Check the values or contact your account administrator.",
+			);
+		}
+
+		return this.usersService.registerClient({
+			email: dto.email,
+			password: dto.password,
+			firstName: dto.firstName,
+			lastName: dto.lastName,
+			customerId: customer.id,
+		});
 	}
 
 	async login(user: Omit<User, "password">) {
@@ -85,7 +114,10 @@ export class AuthService {
 
 		const user = await this.usersService.findOneForAuth(userId);
 
-		if (!user.isActive) {
+		if (
+			!user.isActive ||
+			user.registrationStatus !== RegistrationStatus.APPROVED
+		) {
 			throw new UnauthorizedException();
 		}
 

@@ -1,8 +1,9 @@
-import { Permission, Role } from "@ecommand/shared";
+import { Permission, RegistrationStatus, Role } from "@ecommand/shared";
 import { BadRequestException, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import bcrypt from "bcryptjs";
+import { CustomersService } from "@/customers/customers.service";
 import { EmailService } from "@/email/email.service";
 import { UsersService } from "@/users/users.service";
 import { AuthQuery } from "./auth.query";
@@ -10,14 +11,24 @@ import { AuthService } from "./auth.service";
 
 describe("AuthService", () => {
 	let service: AuthService;
-	let users: { findOneByEmail: jest.Mock; findOneForAuth: jest.Mock };
+	let users: {
+		findOneByEmail: jest.Mock;
+		findOneForAuth: jest.Mock;
+		registerClient: jest.Mock;
+	};
 	let query: Record<string, jest.Mock>;
 	let email: { sendResetPasswordEmail: jest.Mock };
 	let jwt: { signAsync: jest.Mock; decode: jest.Mock };
 	let config: { get: jest.Mock };
+	let customers: { findActiveCustomerForRegistration: jest.Mock };
 
 	beforeEach(() => {
-		users = { findOneByEmail: jest.fn(), findOneForAuth: jest.fn() };
+		users = {
+			findOneByEmail: jest.fn(),
+			findOneForAuth: jest.fn(),
+			registerClient: jest.fn(),
+		};
+		customers = { findActiveCustomerForRegistration: jest.fn() };
 		query = {
 			createSession: jest.fn(),
 			findSession: jest.fn(),
@@ -41,6 +52,7 @@ describe("AuthService", () => {
 			query as unknown as AuthQuery,
 			jwt as unknown as JwtService,
 			config as unknown as ConfigService,
+			customers as unknown as CustomersService,
 		);
 	});
 
@@ -51,6 +63,7 @@ describe("AuthService", () => {
 		).toBeNull();
 		users.findOneByEmail.mockResolvedValue({
 			isActive: true,
+			registrationStatus: RegistrationStatus.APPROVED,
 			accountLockedUntil: new Date(Date.now() + 60_000).toISOString(),
 		});
 		expect(
@@ -65,6 +78,7 @@ describe("AuthService", () => {
 			email: "agent@example.test",
 			password,
 			isActive: true,
+			registrationStatus: RegistrationStatus.APPROVED,
 		});
 		expect(
 			await service.validateUser("agent@example.test", "wrong password"),
@@ -75,6 +89,62 @@ describe("AuthService", () => {
 		);
 		expect(result).toMatchObject({ id: 7, email: "agent@example.test" });
 		expect(result).not.toHaveProperty("password");
+	});
+
+	it("rejects pending or rejected accounts even if they are active", async () => {
+		for (const registrationStatus of [
+			RegistrationStatus.PENDING,
+			RegistrationStatus.REJECTED,
+		]) {
+			users.findOneByEmail.mockResolvedValue({
+				isActive: true,
+				registrationStatus,
+			});
+			expect(
+				await service.validateUser("client@example.test", "password"),
+			).toBeNull();
+		}
+	});
+
+	it("verifies customer code and ICE before submitting registration", async () => {
+		customers.findActiveCustomerForRegistration.mockResolvedValue({ id: 31 });
+		users.registerClient.mockResolvedValue({
+			message: "Registration submitted for admin review.",
+		});
+		const dto = {
+			email: "client@example.test",
+			password: "StrongPass1!",
+			firstName: "Sam",
+			lastName: "Example",
+			customerCode: "CLI009",
+			ice: "123456789012345",
+		} as never;
+
+		await expect(service.register(dto)).resolves.toEqual({
+			message: "Registration submitted for admin review.",
+		});
+		expect(customers.findActiveCustomerForRegistration).toHaveBeenCalledWith(
+			"CLI009",
+			"123456789012345",
+		);
+		expect(users.registerClient).toHaveBeenCalledWith({
+			email: "client@example.test",
+			password: "StrongPass1!",
+			firstName: "Sam",
+			lastName: "Example",
+			customerId: 31,
+		});
+	});
+
+	it("does not create an account when customer identifiers do not match", async () => {
+		customers.findActiveCustomerForRegistration.mockResolvedValue(undefined);
+		await expect(
+			service.register({
+				customerCode: "CLI009",
+				ice: "000000000000000",
+			} as never),
+		).rejects.toBeInstanceOf(BadRequestException);
+		expect(users.registerClient).not.toHaveBeenCalled();
 	});
 
 	it("creates a persisted session when logging in", async () => {
@@ -134,6 +204,7 @@ describe("AuthService", () => {
 			id: 7,
 			email: "agent@example.test",
 			isActive: true,
+			registrationStatus: RegistrationStatus.APPROVED,
 			role: Role.AGENT_COMMERCIAL,
 			permissions: [Permission.ORDERS_READ],
 			customerId: null,
@@ -148,6 +219,20 @@ describe("AuthService", () => {
 			agencyId: 4,
 		});
 		expect(result.permissions).toEqual(new Set([Permission.ORDERS_READ]));
+	});
+
+	it("rejects a pending user session even if an account was accidentally activated", async () => {
+		query.findSession.mockResolvedValue({
+			logoutAt: null,
+			expiredAt: new Date(Date.now() + 60_000).toISOString(),
+		});
+		users.findOneForAuth.mockResolvedValue({
+			isActive: true,
+			registrationStatus: RegistrationStatus.PENDING,
+		});
+		await expect(
+			service.validateSession(7, "session-id"),
+		).rejects.toBeInstanceOf(UnauthorizedException);
 	});
 
 	it("revokes every session after a successful password change", async () => {

@@ -1,4 +1,4 @@
-import { Permission } from "@ecommand/shared";
+import { Permission, RegistrationStatus } from "@ecommand/shared";
 import { PERMISSIONS_ANY_KEY } from "@/auth/permissions.decorator";
 import { UsersController } from "./users.controller";
 import type { UsersService } from "./users.service";
@@ -36,6 +36,13 @@ const endpoints = [
 		permission: Permission.USERS_DELETE,
 		method: "deactivate",
 		args: [42],
+	},
+	{
+		action: "reviewRegistration",
+		permission: Permission.USERS_UPDATE,
+		method: "reviewRegistration",
+		args: [42, { status: RegistrationStatus.APPROVED }],
+		serviceArgs: [42, RegistrationStatus.APPROVED],
 	},
 ] as const;
 

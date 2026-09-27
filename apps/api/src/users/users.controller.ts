@@ -14,6 +14,7 @@ import { createCrudResponses } from "@/common/decorators/api-crud-responses.deco
 import { ApiPathParam } from "@/common/decorators/api-path-param.decorator";
 import { UserIdPipe } from "./pipes/user-id.pipe";
 import { CreateUserDto } from "./requests/create-user.dto";
+import { ReviewUserRegistrationDto } from "./requests/review-user-registration.dto";
 import { UpdateUserDto } from "./requests/update-user.dto";
 import { UserDeleteDto } from "./responses/user-delete.dto";
 import { UserDetailDto } from "./responses/user-detail.dto";
@@ -68,6 +69,16 @@ export class UsersController {
 		@Request() req: AuthRequest,
 	) {
 		return this.usersService.update(id, dto, req.user);
+	}
+
+	@Put(":id/registration-status")
+	@RequireAny(Permission.USERS_UPDATE)
+	@UserDetailResponse()
+	async reviewRegistration(
+		@UserIdParam() id: UserId,
+		@Body() dto: ReviewUserRegistrationDto,
+	) {
+		return this.usersService.reviewRegistration(id, dto.status);
 	}
 
 	@Delete(":id")

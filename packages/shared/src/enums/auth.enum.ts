@@ -4,6 +4,12 @@ export enum Role {
 	CLIENT_REPRESENTATIVE = "CLIENT_REPRESENTATIVE",
 }
 
+export enum RegistrationStatus {
+	PENDING = "PENDING",
+	APPROVED = "APPROVED",
+	REJECTED = "REJECTED",
+}
+
 export enum Permission {
 	USERS_CREATE = "users:create",
 	USERS_READ = "users:read",

@@ -1,5 +1,9 @@
-import { Permission, Role } from "@ecommand/shared";
-import { BadRequestException, NotFoundException } from "@nestjs/common";
+import { Permission, RegistrationStatus, Role } from "@ecommand/shared";
+import {
+	BadRequestException,
+	ConflictException,
+	NotFoundException,
+} from "@nestjs/common";
 import type { AuthUser } from "@/auth/auth.types";
 import { UsersMapper } from "./users.mapper";
 import { UsersQuery } from "./users.query";
@@ -27,13 +31,16 @@ describe("UsersService", () => {
 			findUsers: jest.fn(),
 			findUser: jest.fn(),
 			findUserByEmail: jest.fn(),
+			findUserEmailExists: jest.fn(),
 			findUserForAuth: jest.fn(),
 			createUser: jest.fn(),
 			updateUser: jest.fn(),
+			reviewRegistration: jest.fn(),
 			findUserExists: jest.fn(),
 		} as unknown as jest.Mocked<UsersQuery>;
 		mapper = {
 			toCreate: jest.fn(),
+			toRegistration: jest.fn(),
 			toUpdate: jest.fn(),
 		} as unknown as jest.Mocked<UsersMapper>;
 		service = new UsersService(query, mapper);
@@ -77,6 +84,7 @@ describe("UsersService", () => {
 			email: user.email,
 			password: "hash",
 			isActive: true,
+			registrationStatus: RegistrationStatus.APPROVED,
 			customerId: null,
 			agencyId: null,
 			role: {
@@ -93,6 +101,7 @@ describe("UsersService", () => {
 			email: user.email,
 			password: "hash",
 			isActive: true,
+			registrationStatus: RegistrationStatus.APPROVED,
 			customerId: null,
 			agencyId: null,
 			role: Role.ADMIN,
@@ -143,6 +152,105 @@ describe("UsersService", () => {
 			),
 		);
 		expect(mapper.toCreate).not.toHaveBeenCalled();
+	});
+
+	it("creates a pending external client account using a normalized email", async () => {
+		query.findUserEmailExists.mockResolvedValue(false);
+		mapper.toRegistration.mockResolvedValue({
+			email: "client@example.test",
+			registrationStatus: RegistrationStatus.PENDING,
+			isActive: false,
+		} as never);
+		query.createUser.mockResolvedValue({ id: 24 } as never);
+
+		await expect(
+			service.registerClient({
+				email: " Client@Example.Test ",
+				password: "StrongPass1!",
+				firstName: " Sam ",
+				lastName: " Example ",
+				customerId: 9,
+			}),
+		).resolves.toEqual({ message: "Registration submitted for admin review." });
+		expect(query.findUserEmailExists).toHaveBeenCalledWith(
+			"client@example.test",
+		);
+		expect(mapper.toRegistration).toHaveBeenCalledWith({
+			email: "client@example.test",
+			password: "StrongPass1!",
+			firstName: "Sam",
+			lastName: "Example",
+			customerId: 9,
+		});
+		expect(query.createUser).toHaveBeenCalledWith(
+			expect.objectContaining({
+				registrationStatus: RegistrationStatus.PENDING,
+				isActive: false,
+			}),
+		);
+	});
+
+	it("rejects an email that is already registered", async () => {
+		query.findUserEmailExists.mockResolvedValue(true);
+		await expect(
+			service.registerClient({
+				email: "client@example.test",
+				password: "StrongPass1!",
+				firstName: "Sam",
+				lastName: "Example",
+				customerId: 9,
+			}),
+		).rejects.toBeInstanceOf(ConflictException);
+		expect(mapper.toRegistration).not.toHaveBeenCalled();
+		expect(query.createUser).not.toHaveBeenCalled();
+	});
+
+	it.each([
+		[RegistrationStatus.APPROVED, Role.CLIENT_REPRESENTATIVE],
+		[RegistrationStatus.PENDING, Role.AGENT_COMMERCIAL],
+	])(
+		"rejects review when the account is not a pending client representative",
+		async (registrationStatus, roleName) => {
+			query.findUser.mockResolvedValue({
+				id: 24,
+				registrationStatus,
+				roleId: "role-id",
+				role: { name: roleName },
+			} as never);
+			await expect(
+				service.reviewRegistration(24, RegistrationStatus.APPROVED),
+			).rejects.toBeInstanceOf(ConflictException);
+			expect(query.reviewRegistration).not.toHaveBeenCalled();
+		},
+	);
+
+	it.each([
+		[RegistrationStatus.APPROVED, true],
+		[RegistrationStatus.REJECTED, false],
+	] as const)("reviews a pending client as %s", async (status, isActive) => {
+		const pending = {
+			id: 24,
+			registrationStatus: RegistrationStatus.PENDING,
+			roleId: "client-role-id",
+			role: { name: Role.CLIENT_REPRESENTATIVE },
+		};
+		const reviewed = {
+			...pending,
+			registrationStatus: status,
+			isActive,
+		};
+		query.findUser.mockResolvedValueOnce(pending as never);
+		query.reviewRegistration.mockResolvedValue({ id: 24 } as never);
+		query.findUser.mockResolvedValueOnce(reviewed as never);
+
+		await expect(service.reviewRegistration(24, status)).resolves.toEqual(
+			reviewed,
+		);
+		expect(query.reviewRegistration).toHaveBeenCalledWith(
+			24,
+			"client-role-id",
+			status,
+		);
 	});
 
 	it("maps updates and returns the updated user", async () => {

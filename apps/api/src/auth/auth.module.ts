@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { APP_GUARD } from "@nestjs/core";
 import { JwtModule } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
+import { CustomersModule } from "@/customers/customers.module";
 import { EmailModule } from "@/email/email.module";
 import { UsersModule } from "@/users/users.module";
 import { AuthController } from "./auth.controller";
@@ -16,6 +17,7 @@ import { LocalStrategy } from "./strategy/local.strategy";
 @Module({
 	imports: [
 		UsersModule,
+		CustomersModule,
 		EmailModule,
 		PassportModule,
 		JwtModule.registerAsync({
