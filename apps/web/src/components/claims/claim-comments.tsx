@@ -1,12 +1,12 @@
 "use client";
 
-import { formatDistanceToNow } from "date-fns";
 import { MessageCircleIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useClaimsControllerGetComments } from "@/lib/api/claims";
 import type { ClaimCommentDto } from "@/lib/api/generated.schemas";
+import { formatRelativeTime } from "@/lib/date-utils";
 
 interface ClaimCommentsProps {
 	claimId: number;
@@ -32,11 +32,12 @@ function CommentItem({ comment }: { comment: ClaimCommentDto }) {
 			<div className="flex-1 space-y-1">
 				<div className="flex items-center gap-2">
 					<span className="text-sm font-medium">{authorName}</span>
-					<span className="text-xs text-muted-foreground">
-						{formatDistanceToNow(new Date(comment.createdAt), {
-							addSuffix: true,
-						})}
-					</span>
+					<time
+						dateTime={comment.createdAt}
+						className="text-xs text-muted-foreground"
+					>
+						{formatRelativeTime(comment.createdAt)}
+					</time>
 				</div>
 				<p className="text-sm">{comment.comment}</p>
 			</div>

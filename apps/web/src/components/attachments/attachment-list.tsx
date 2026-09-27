@@ -1,6 +1,5 @@
 "use client";
 
-import { formatDistanceToNow } from "date-fns";
 import {
 	DownloadIcon,
 	FileIcon,
@@ -22,6 +21,7 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { FileDto } from "@/lib/api/generated.schemas";
+import { formatRelativeTime } from "@/lib/date-utils";
 import { formatFileSize } from "@/lib/format-file-size";
 
 interface AttachmentListProps {
@@ -99,11 +99,9 @@ function AttachmentItem({
 					<div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
 						<span>{formatFileSize(file.fileSize)}</span>
 
-						<span>
-							{formatDistanceToNow(new Date(file.uploadedAt), {
-								addSuffix: true,
-							})}
-						</span>
+						<time dateTime={file.uploadedAt}>
+							{formatRelativeTime(file.uploadedAt)}
+						</time>
 					</div>
 
 					{file.description && (
