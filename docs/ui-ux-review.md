@@ -76,6 +76,7 @@ Shared primitives reduce drift but do not make all page content consistent. The 
 - [x] Align input/textarea horizontal padding to the 4px spacing grid; make table scroll regions keyboard reachable.
 - [x] Crop the ONCF horizontal wordmark to its content proportions in the sidebar tile.
 - [x] Add a permission- and status-aware Create program action to eligible order details and carry the selected order into the guided create flow.
+- [x] Put Create order and Create claim shortcuts beside the dashboard greeting when the signed-in user has the matching create permission; keep program creation contextual to eligible order details.
 - [x] Focus the first invalid guided-form control after validation and keep custom selector IDs aligned with field names.
 - [x] Hide customer/user/program overflow triggers when the current role and record state provide no menu action; cover default roles and program status in frontend checks.
 - [x] Require a customer assignment for client representatives in user management and the API; align order, program, and report reads with the existing customer ownership relation; assign the development client fixture to a seeded customer.

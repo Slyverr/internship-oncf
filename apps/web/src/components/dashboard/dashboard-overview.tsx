@@ -1,10 +1,16 @@
 "use client";
 
 import { Permission } from "@ecommand/shared";
-import { ArrowRightIcon, ClipboardListIcon, PackageIcon } from "lucide-react";
+import {
+	ArrowRightIcon,
+	ClipboardListIcon,
+	PackageIcon,
+	PlusIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { PageHeader } from "@/components/common/page-header";
 import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -12,6 +18,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { getDashboardQuickActions } from "@/lib/action-visibility";
 import { useClaimsControllerFindAll } from "@/lib/api/claims";
 import { useOrdersControllerFindAll } from "@/lib/api/orders";
 import { useProgramsControllerFindAll } from "@/lib/api/programs";
@@ -112,6 +119,7 @@ function RecentSection({
 
 export function DashboardOverview() {
 	const { profile, hasPermission } = useAuth();
+	const quickActions = getDashboardQuickActions(hasPermission);
 	const canReadOrders = hasPermission(Permission.ORDERS_READ);
 	const canReadPrograms = hasPermission(Permission.PROGRAMS_READ);
 	const canReadClaims = hasPermission(Permission.CLAIMS_READ);
@@ -191,7 +199,20 @@ export function DashboardOverview() {
 			<PageHeader
 				title={`Welcome back, ${profile.firstName}`}
 				description="Here is a snapshot of recent activity in ECommand."
-			/>
+			>
+				{quickActions.map((action, index) => (
+					<Link
+						key={action.type}
+						className={buttonVariants({
+							variant: index === 0 ? "default" : "outline",
+						})}
+						href={action.href}
+					>
+						<PlusIcon aria-hidden="true" />
+						{action.label}
+					</Link>
+				))}
+			</PageHeader>
 
 			{sections.length > 0 ? (
 				<div className="grid gap-4 xl:grid-cols-2">{sections}</div>

@@ -23,13 +23,13 @@ Admin receives every defined permission. Parent permissions imply descendants (f
 | Resource / action | API permission | Web surface | Additional scope |
 | --- | --- | --- | --- |
 | Orders list/detail/files | orders:read | Sidebar Orders; order list/detail and attachments | Lists, reports, ID routes, and files agree: manage-other sees cross-customer records; otherwise a linked customer is the exclusive scope, falling back to creator-only when no customer is linked. |
-| Orders create/edit/delete | orders:create/update/delete | Create form; order action menu | The API and web both restrict deletion to draft orders. |
+| Orders create/edit/delete | orders:create/update/delete | Dashboard quick action; create form; order action menu | The dashboard action is permission-filtered; the API and web both restrict deletion to draft orders. |
 | Order lifecycle | orders:action:* | OrderActions | API state transitions are authoritative. |
 | Programs list/detail | programs:read | Sidebar Programs; list/detail | Lists and ID routes use the assigned customer's order relation when a customer is linked, or creator scope when no customer is linked; `PROGRAMS_MANAGE_OTHER` bypasses the scope. |
 | Programs create/edit/delete | programs:create/update/delete | Create form; program action menu | The API and web both restrict deletion to draft programs. |
 | Program lifecycle | programs:action:* | ProgramActions | Valid path: draft → pending approval → approved → confirmed → sent to DTM → in progress. Cancellation is allowed before dispatch. |
 | Claims list/detail/comments | claims:read | Sidebar Claims; details and comments | ID routes use ClaimOwnershipGuard; list filters are constrained for users without manage-other. |
-| Claims create/edit/delete | claims:create/update/delete | Create form; claim action menu | Delete is admin-only by default. |
+| Claims create/edit/delete | claims:create/update/delete | Dashboard quick action; create form; claim action menu | The dashboard action is permission-filtered; delete is admin-only by default. |
 | Claim lifecycle | claims:action:* | ClaimActions | Buttons use specific action permissions and supported current states. |
 | Customers | customers:read/create/update/delete | Sidebar Customers; forms and action menu | Commercial agents read/update; create/deactivate are admin-only. |
 | Public client signup | Public `/auth/register` | `/signup` registration form | Submitted customer code and ICE must match an active local customer; new account is inactive and pending admin review. |

@@ -74,6 +74,7 @@ Use the same semantic roles in all themes. Cards should separate from the canvas
 - Keep form label-to-control spacing at 8px. Keep related fields 16px apart. Error text sits directly below the field and uses the destructive semantic color.
 - Put labels above controls and helper/error copy directly below them. Pair fields only when both columns remain readable; stack them below tablet width. Textareas should show enough lines to communicate that they accept longer text.
 - Guided forms state the current step, the information needed at that step, and the next action. Back, Cancel, and submit placement must stay consistent between entity forms.
+- Use one shared horizontal stepper for guided forms: numbered 32px circles, a thin connector behind them, completed steps with a check, and each short step title directly below its circle. Emphasize the current number and title with the primary token; keep upcoming steps quiet. Announce the current step and total in a polite live region. Do not make the indicator look like separate cards or shrink labels to fit; allow titles to wrap on narrow screens.
 - Validate the active step before advancing, retain entered values when moving backward, and validate the whole form on final submission. Focus the first invalid control after an error; do not rely on color alone to identify it.
 - Prevent duplicate submission while saving and preserve the user's context when Cancel returns to a previous record.
 - Keep loading and pending feedback in the button or the form region being changed so the action does not appear to vanish or shift position.
@@ -111,6 +112,8 @@ Use the same semantic roles in all themes. Cards should separate from the canvas
 Place a next action next to the record that makes it relevant. Only offer it when the current role, record status, ownership, and related-record state permit the action. Reuse the same eligibility rules as the server-backed selector and revalidate the record when the destination form loads.
 
 Current example: an order detail can link directly to program creation when the signed-in user can create programs, can access that order's creation scope, the order is in an eligible state, and it has no program yet.
+
+The dashboard may show compact Create order and Create claim actions beside its welcome heading, filtered by the user's effective create permissions. Keep program creation contextual to an eligible order so users do not start a program without a valid order.
 
 When implementing any shortcut, map actor permission, ownership scope, resource status, and related-resource state. Keep the button hidden when any prerequisite fails; then recheck eligibility on the destination page so a stale link cannot silently select an unavailable record. Do not render an overflow trigger unless at least one action inside it is available for this user and record state.
 

@@ -11,6 +11,7 @@ import {
 import {
 	canDeleteProgram,
 	canReviewRegistration,
+	getDashboardQuickActions,
 	hasAvailableActions,
 } from "../src/lib/action-visibility";
 import { canCreateProgramForOrder } from "../src/lib/program-creation-eligibility";
@@ -48,6 +49,44 @@ function roleHasPermission(role: Role, permission: Permission): boolean {
 		permissions === "ALL" || hasOnePermission(new Set(permissions), permission)
 	);
 }
+
+for (const role of [
+	Role.ADMIN,
+	Role.AGENT_COMMERCIAL,
+	Role.CLIENT_REPRESENTATIVE,
+]) {
+	assert.deepEqual(
+		getDashboardQuickActions((permission) =>
+			roleHasPermission(role, permission),
+		),
+		[
+			{
+				type: "order",
+				label: "Create order",
+				href: "/dashboard/orders/new",
+			},
+			{
+				type: "claim",
+				label: "Create claim",
+				href: "/dashboard/claims/new",
+			},
+		],
+		`${role} gets quick actions for workflows granted by its default permissions`,
+	);
+}
+assert.deepEqual(
+	getDashboardQuickActions(
+		(permission) => permission === Permission.CLAIMS_CREATE,
+	),
+	[
+		{
+			type: "claim",
+			label: "Create claim",
+			href: "/dashboard/claims/new",
+		},
+	],
+	"the dashboard hides quick actions when their create permission is absent",
+);
 
 const agentCanEditCustomer = roleHasPermission(
 	Role.AGENT_COMMERCIAL,
