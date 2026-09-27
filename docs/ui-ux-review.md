@@ -1,5 +1,16 @@
 # UI/UX review and work list
 
+> **Screenshot freshness:** The screenshot bundle described below is historical. It predates later shell and shared UI changes and must not be used to sign off the current interface. No fresh screenshots were captured during the source review on 2026-09-27 because this workbench has no controllable browser session or installed browser binary. Current visual findings remain unverified until captures are regenerated from the running application.
+
+## Current shell source review — 2026-09-27
+
+This is a source-level check of the current sidebar and centered-header layouts, not a rendered visual review.
+
+- **Sidebar:** the collapsed rail defines 44px menu controls and 16px vertical padding for its header and footer groups. Logo and account controls use the shared centered menu-button behavior. The workspace switches to a mobile navigation sheet below the desktop breakpoint. Their actual alignment, clipping, hover, and focus appearance still need fresh screenshots.
+- **Centered header:** the header is sticky, its surface is capped at the same 1536px width as its content, and it uses square upper corners with 16px lower corner radii. At widths below 1024px, brand/actions and navigation occupy two rows; below 768px the icon row can scroll horizontally. The rendered balance, breadcrumb spacing, and keyboard/touch overflow behavior still need browser review.
+- **Shared content:** sidebar workspace content can use up to 2400px while centered-header content uses 1536px. Both keep 16px small-screen and 24px wider-screen page gutters in the shell.
+- The local preview responds on port 3000 (`/login` 200; protected dashboard and settings routes redirect to sign-in without an authenticated browser session). HTTP responses do not verify visual layout.
+
 ## Review evidence
 
 This review combines source inspection with a live browser screenshot pass. On 2026-09-27, I captured all 24 protected route paths and the four public authentication routes in light and dark themes at 390px and 1440px. The protected routes used the existing signed-in admin test session; public routes used an isolated browser context with no cookies. I also captured all five table pages and five create forms at 320px and 768px in both themes. Long mobile details and Settings were captured full-page, and I separately inspected the collapsed sidebar, its hover tooltip, the account menu, and the notifications popover. The Next.js development overlay was removed from captures so it would not obscure application controls. Screenshots and manifests are included in the review artifact generated for this session. No business records were changed. The shared interface rules are recorded in [design-system.md](./design-system.md).
@@ -90,13 +101,14 @@ Shared primitives reduce drift but do not make all page content consistent. The 
 - [x] Add an application-level error recovery screen with a retry action and a safe sign-in route; keep the error details out of user-facing copy.
 - [x] Hide customer/user/program overflow triggers when the current role and record state provide no menu action; cover default roles and program status in frontend checks.
 - [x] Require a customer assignment for client representatives in user management and the API; align order, program, and report reads with the existing customer ownership relation; assign the development client fixture to a seeded customer.
-- [x] Capture all protected and public route paths in light/dark at 390px and 1440px after loading settles; inspect the route contact sheets for page-level overflow and rendering errors.
-- [x] Capture all table pages and create forms in light/dark at 320px and 768px; constrain the shared dashboard grid and add a conditional mobile table-scroll hint after the screenshots exposed clipping.
-- [x] Capture full-page mobile Settings and representative order/program/claim/customer/user detail pages; inspect collapsed sidebar spacing, the small tooltip, account menu, and notification popover.
-- [x] Keep the existing palette and confirm the warm light surfaces and charcoal dark surfaces remain consistent across the route set.
+- [x] Historical capture pass: protected/public routes in light/dark at 390px and 1440px; these screenshots predate later UI changes and do not verify the current rendering.
+- [x] Historical capture pass: table pages and create forms in light/dark at 320px and 768px; the captured run exposed clipping that was fixed, but must be repeated against the current UI.
+- [x] Historical capture pass: full-page mobile Settings and representative details, collapsed sidebar, tooltip, account menu, and notification popover; recapture current states before visual sign-off.
+- [x] Historical palette check: warm light and charcoal dark roles were compared in the old route set; recapture after current shared UI changes.
 
 ### Next visual review
 
+- [ ] Recapture both current shell layouts at 320px, 375px, 390px, 640px, 768px, 1024px, 1440px, 1920px, 2560px, and 3840px in all four concrete themes; include sidebar expanded/collapsed, centered navigation overflow, settings sections, breadcrumbs, keyboard focus, and touch states. Do not reuse the historical screenshot bundle as current evidence.
 - [ ] Capture every remaining guided-form step, open select/menu/dialog state, and full-page section in both themes; current captures include the initial create steps, second edit steps for orders/customers/users, and validation states for user and claim creation.
 - [ ] Review route-specific copy, alignment, wrapping, shadow use, success/error states, and action placement below the fold; the first-viewport route pass and representative full-page details are complete.
 - [x] Verify the approved, unprogrammed order shortcut for admin and commercial-agent accounts; confirm the client representative can read the order but cannot see the action.
