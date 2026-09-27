@@ -316,7 +316,7 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 					<GuidedFormActions
 						currentStep={step}
 						stepCount={userEditSteps.length}
-						onCancel={() => router.back()}
+						onCancel={() => router.push("/dashboard/users/" + user.id)}
 						onPrevious={() => setStep(0)}
 						onContinue={continueToProfile}
 						submitLabel="Save Changes"

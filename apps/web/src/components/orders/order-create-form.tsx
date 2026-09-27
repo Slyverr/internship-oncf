@@ -457,7 +457,7 @@ export function OrderCreateForm(): JSX.Element {
 					<GuidedFormActions
 						currentStep={step}
 						stepCount={orderSteps.length}
-						onCancel={() => router.back()}
+						onCancel={() => router.push("/dashboard/orders")}
 						onPrevious={() => setStep(0)}
 						onContinue={continueToSchedule}
 						submitLabel="Create Order"

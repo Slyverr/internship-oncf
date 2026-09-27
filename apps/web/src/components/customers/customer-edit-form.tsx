@@ -249,7 +249,7 @@ export function CustomerEditForm({
 					<GuidedFormActions
 						currentStep={step}
 						stepCount={customerFormSteps.length}
-						onCancel={() => router.back()}
+						onCancel={() => router.push("/dashboard/customers/" + customer.id)}
 						onPrevious={() => setStep(0)}
 						onContinue={continueToContact}
 						submitLabel="Save Changes"

@@ -346,7 +346,7 @@ export function UserCreateForm(): JSX.Element {
 					<GuidedFormActions
 						currentStep={step}
 						stepCount={userSteps.length}
-						onCancel={() => router.back()}
+						onCancel={() => router.push("/dashboard/users")}
 						onPrevious={() => setStep(0)}
 						onContinue={continueToProfile}
 						submitLabel="Create User"

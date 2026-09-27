@@ -249,7 +249,7 @@ export function CustomerCreateForm(): JSX.Element {
 					<GuidedFormActions
 						currentStep={step}
 						stepCount={customerFormSteps.length}
-						onCancel={() => router.back()}
+						onCancel={() => router.push("/dashboard/customers")}
 						onPrevious={() => setStep(0)}
 						onContinue={continueToContact}
 						submitLabel="Create Customer"

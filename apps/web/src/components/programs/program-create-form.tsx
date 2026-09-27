@@ -390,7 +390,7 @@ export function ProgramCreateForm(): JSX.Element {
 					<GuidedFormActions
 						currentStep={step}
 						stepCount={programSteps.length}
-						onCancel={() => router.back()}
+						onCancel={() => router.push("/dashboard/programs")}
 						onPrevious={() => setStep(0)}
 						onContinue={continueToExecution}
 						submitLabel="Create Program"

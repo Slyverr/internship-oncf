@@ -379,7 +379,7 @@ export function ClaimCreateForm(): JSX.Element {
 					<GuidedFormActions
 						currentStep={step}
 						stepCount={claimSteps.length}
-						onCancel={() => router.back()}
+						onCancel={() => router.push("/dashboard/claims")}
 						onPrevious={() => setStep((current) => Math.max(current - 1, 0))}
 						onContinue={step === 0 ? continueToAssociation : () => setStep(2)}
 						submitLabel="Create Claim"
