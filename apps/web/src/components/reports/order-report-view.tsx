@@ -46,6 +46,7 @@ function Breakdown({ title, rows }: { title: string; rows: ReportCount[] }) {
 export function OrderReportView() {
 	const { hasPermission } = useAuth();
 	const canRead = hasPermission(Permission.REPORTS_READ);
+	const canExport = hasPermission(Permission.REPORTS_ACTION_EXPORT);
 	const [from, setFrom] = useState("");
 	const [to, setTo] = useState("");
 	const [period, setPeriod] = useState({ from: "", to: "" });
@@ -68,14 +69,16 @@ export function OrderReportView() {
 				title="Order reports"
 				description="Order counts by status, customer, product, and month."
 			>
-				<Button
-					className="print:hidden"
-					variant="outline"
-					disabled={!report.data}
-					onClick={() => window.print()}
-				>
-					<PrinterIcon /> Print / save PDF
-				</Button>
+				{canExport && (
+					<Button
+						className="print:hidden"
+						variant="outline"
+						disabled={!report.data}
+						onClick={() => window.print()}
+					>
+						<PrinterIcon /> Print / save PDF
+					</Button>
+				)}
 			</PageHeader>
 			<form
 				className="flex flex-wrap items-end gap-3 print:hidden"

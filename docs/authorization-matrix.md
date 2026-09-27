@@ -35,7 +35,7 @@ Admin receives every defined permission. Parent permissions imply descendants (f
 | Users | users:read/create/update/delete | Sidebar Users; forms and action menu | Admin-only by default. |
 | Catalog | catalog:read/manage:* | Order and claim selectors; catalog API | Admin manages catalog; both operational roles read it. |
 | Tracking | tracking:read/update | Tracking API surfaces | Commercial agents read; admin reads and updates. |
-| Reports | reports:read; reports:action:export | Sidebar Reports and order report | Default non-admin roles read reports; admin can export. |
+| Reports | reports:read; reports:action:export | Sidebar Reports and order report | All default roles can view reports; only roles with reports:action:export see the browser print / save PDF control. The report API endpoint remains read-only. |
 | Profile and notifications | profile:update; authenticated ownership routes | Settings/profile and notifications | Notifications are scoped to the authenticated user. |
 
 ## Enforcement notes
