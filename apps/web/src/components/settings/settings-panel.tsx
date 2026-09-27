@@ -56,6 +56,7 @@ export function SettingsPanel() {
 	const [email, setEmail] = useState(profile.email);
 	const [currentPassword, setCurrentPassword] = useState("");
 	const [newPassword, setNewPassword] = useState("");
+	const [confirmNewPassword, setConfirmNewPassword] = useState("");
 	const [profileMessage, setProfileMessage] = useState("");
 	const [passwordMessage, setPasswordMessage] = useState("");
 	const [profileError, setProfileError] = useState("");
@@ -90,12 +91,17 @@ export function SettingsPanel() {
 		event.preventDefault();
 		setPasswordMessage("");
 		setPasswordError("");
+		if (newPassword !== confirmNewPassword) {
+			setPasswordError("New passwords do not match.");
+			return;
+		}
 		passwordMutation.mutate(
 			{ data: { currentPassword, newPassword } },
 			{
 				onSuccess: () => {
 					setCurrentPassword("");
 					setNewPassword("");
+					setConfirmNewPassword("");
 					setPasswordMessage("Your password has been changed.");
 				},
 				onError: (error) =>
@@ -259,11 +265,23 @@ export function SettingsPanel() {
 							<Input
 								id="new-password"
 								type="password"
+								aria-describedby="new-password-help"
 								autoComplete="new-password"
 								minLength={8}
 								value={newPassword}
 								required
 								onChange={(event) => setNewPassword(event.target.value)}
+							/>
+						</div>
+						<div className="grid gap-control">
+							<Label htmlFor="confirm-new-password">Confirm new password</Label>
+							<Input
+								id="confirm-new-password"
+								type="password"
+								autoComplete="new-password"
+								value={confirmNewPassword}
+								required
+								onChange={(event) => setConfirmNewPassword(event.target.value)}
 							/>
 						</div>
 						<div className="flex flex-wrap items-center gap-4">
