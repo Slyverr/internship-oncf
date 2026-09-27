@@ -122,7 +122,7 @@ export function NotificationInbox() {
 													{item.title}
 												</h2>
 												<time
-													className="text-xs text-muted-foreground"
+													className="text-meta text-muted-foreground"
 													dateTime={item.createdAt}
 												>
 													{formatDisplayDateTime(item.createdAt)}

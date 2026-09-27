@@ -48,7 +48,7 @@ export function GuidedFormProgress({
 				>
 					<span
 						className="block h-full rounded-full bg-primary transition-[width] duration-300 motion-reduce:transition-none"
-						style={{ width: progress + "%" }}
+						style={{ width: `${progress}%` }}
 					/>
 				</div>
 			</div>
@@ -82,7 +82,7 @@ export function GuidedFormProgress({
 						</span>
 						<span className="grid gap-0">
 							<span className="text-sm font-medium">{step.title}</span>
-							<span className="text-xs text-muted-foreground">
+							<span className="text-meta text-muted-foreground">
 								{step.description}
 							</span>
 						</span>

@@ -96,7 +96,7 @@ function AttachmentItem({
 				<div className="flex min-w-0 flex-1 flex-col gap-4">
 					<p className="truncate text-sm font-medium">{file.fileName}</p>
 
-					<div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+					<div className="flex flex-wrap items-center gap-4 text-meta text-muted-foreground">
 						<span>{formatFileSize(file.fileSize)}</span>
 
 						<time dateTime={file.uploadedAt}>
@@ -105,7 +105,7 @@ function AttachmentItem({
 					</div>
 
 					{file.description && (
-						<p className="truncate text-xs text-muted-foreground">
+						<p className="truncate text-meta text-muted-foreground">
 							{file.description}
 						</p>
 					)}

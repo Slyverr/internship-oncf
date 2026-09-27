@@ -136,7 +136,7 @@ export function AttachmentUploadDialog({
 								<div className="min-w-0 flex-1">
 									<p className="truncate text-sm font-medium">{file.name}</p>
 
-									<p className="text-xs text-muted-foreground">
+									<p className="text-meta text-muted-foreground">
 										{formatFileSize(file.size)}
 									</p>
 								</div>

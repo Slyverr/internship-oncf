@@ -23,7 +23,7 @@ export function FormFieldHeader({
 			{error ? (
 				<span
 					role="alert"
-					className="inline-flex items-center gap-compact text-xs font-medium text-destructive"
+					className="inline-flex items-center gap-compact text-meta font-medium text-destructive"
 				>
 					<AlertCircle className="h-3.5 w-3.5 shrink-0" />
 					{error}

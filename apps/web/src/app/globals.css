@@ -57,6 +57,11 @@
 	gap: var(--spacing-control);
 }
 
+@utility text-meta {
+	font-size: 0.8125rem;
+	line-height: 1.25rem;
+}
+
 @utility p-control {
 	padding: var(--spacing-control);
 }

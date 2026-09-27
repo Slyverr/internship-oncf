@@ -145,11 +145,11 @@ export function NotificationLink() {
 													<span className="block truncate text-sm font-semibold leading-5">
 														{item.title}
 													</span>
-													<span className="mt-1 line-clamp-2 block text-[13px] leading-5 text-muted-foreground">
+													<span className="mt-1 line-clamp-2 block text-meta text-muted-foreground">
 														{item.message}
 													</span>
 													<time
-														className="mt-1 block text-xs leading-4 text-muted-foreground"
+														className="mt-1 block text-meta text-muted-foreground"
 														dateTime={item.createdAt}
 													>
 														{formatDisplayDateTime(item.createdAt)}

@@ -46,7 +46,7 @@ Use the existing typeface and semantic foreground tokens. Keep hierarchy consist
 | Supporting metadata | 13px / 20px | 13px / 20px | regular, muted |
 | Label | 14px / 20px | 14px / 20px | medium |
 
-Do not give a title and subtitle the same visual weight. Keep supporting copy readable; do not push it below 13px for ordinary interface content.
+Do not give a title and subtitle the same visual weight. Keep supporting copy readable; do not push it below 13px for ordinary interface content. Use the text-meta utility for 13px / 20px supporting metadata.
 
 ### Controls, hit areas, and focus
 

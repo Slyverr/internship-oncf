@@ -31,7 +31,7 @@ export function SidebarLogo() {
 						<span className="truncate font-bold tracking-tight text-sidebar-foreground">
 							ONCF
 						</span>
-						<span className="truncate text-xs font-medium text-muted-foreground">
+						<span className="truncate text-meta font-medium text-muted-foreground">
 							Freight Portal
 						</span>
 					</div>

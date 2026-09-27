@@ -54,7 +54,7 @@ export function SidebarUser() {
 
 						<div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
 							<span className="truncate font-medium">{name}</span>
-							<span className="truncate text-xs text-muted-foreground">
+							<span className="truncate text-meta text-muted-foreground">
 								{role}
 							</span>
 						</div>

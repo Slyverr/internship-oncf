@@ -93,7 +93,7 @@ function RecentSection({
 										)}
 										<time
 											dateTime={item.date}
-											className="text-xs text-muted-foreground"
+											className="text-meta text-muted-foreground"
 										>
 											{new Intl.DateTimeFormat(undefined, {
 												dateStyle: "medium",
@@ -189,7 +189,7 @@ export function DashboardOverview() {
 	return (
 		<section className="grid gap-8">
 			<PageHeader
-				title={"Welcome back, " + profile.firstName}
+				title={`Welcome back, ${profile.firstName}`}
 				description="Here is a snapshot of recent activity in ECommand."
 			/>
 

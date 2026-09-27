@@ -34,7 +34,7 @@ function CommentItem({ comment }: { comment: ClaimCommentDto }) {
 					<span className="text-sm font-medium">{authorName}</span>
 					<time
 						dateTime={comment.createdAt}
-						className="text-xs text-muted-foreground"
+						className="text-meta text-muted-foreground"
 					>
 						{formatRelativeTime(comment.createdAt)}
 					</time>
