@@ -114,7 +114,7 @@ Keep the desktop header at a consistent 64px height. Align the sidebar toggle, b
 
 ## Motion and feedback
 
-Use the shared motion tokens for short 120–200ms transitions. Respect prefers-reduced-motion. Do not animate layout in a way that moves a target beneath a pointer or keyboard focus. Loading, empty, success, and error states should occupy a stable place so content does not jump unexpectedly.
+Use short 120–200ms transitions. The global reduced-motion rule shortens CSS animations and transitions and disables smooth scrolling; do not rely on that rule instead of checking screen-reader and interaction behavior. Do not animate layout in a way that moves a target beneath a pointer or keyboard focus. Loading, empty, success, and error states should occupy a stable place so content does not jump unexpectedly.
 
 ## Review checklist
 
