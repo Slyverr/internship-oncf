@@ -16,79 +16,64 @@ export function GuidedFormProgress({
 }) {
 	const current = steps[currentStep];
 	const progress =
-		steps.length > 0 ? ((currentStep + 1) / steps.length) * 100 : 0;
+		steps.length > 1 ? (currentStep / (steps.length - 1)) * 100 : 0;
 
 	return (
-		<div className="grid gap-4">
+		<div className="grid gap-3">
 			<p className="sr-only" aria-live="polite" aria-atomic="true">
 				Step {currentStep + 1} of {steps.length}: {current?.title}
 			</p>
-			<div className="grid gap-4 sm:hidden">
-				<div className="flex items-baseline justify-between gap-4">
-					<p className="text-sm text-muted-foreground">
-						Step {currentStep + 1} of {steps.length}
-					</p>
-					<p className="text-sm font-medium">{current?.title}</p>
-				</div>
+			<div className="relative">
 				<div
-					role="progressbar"
-					aria-label="Form progress"
-					aria-valuemin={0}
-					aria-valuemax={steps.length}
-					aria-valuenow={currentStep + 1}
-					aria-valuetext={
-						"Step " +
-						(currentStep + 1) +
-						" of " +
-						steps.length +
-						": " +
-						current?.title
-					}
-					className="h-2 overflow-hidden rounded-full bg-muted"
+					aria-hidden="true"
+					className="absolute top-4 h-0.5 bg-muted"
+					style={{
+						left: `${50 / steps.length}%`,
+						right: `${50 / steps.length}%`,
+					}}
 				>
 					<span
-						className="block h-full rounded-full bg-primary transition-[width] duration-200 motion-reduce:transition-none"
+						className="block h-full bg-primary transition-[width] duration-200 motion-reduce:transition-none"
 						style={{ width: `${progress}%` }}
 					/>
 				</div>
-			</div>
-			<ol
-				aria-label="Form steps"
-				className="hidden max-w-3xl gap-4 sm:grid sm:grid-flow-col sm:auto-cols-fr"
-			>
-				{steps.map((step, index) => (
-					<li
-						key={step.title}
-						aria-current={currentStep === index ? "step" : undefined}
-						className={
-							"flex items-center gap-4 rounded-lg border p-4 transition-colors " +
-							(currentStep === index
-								? "border-primary bg-primary/5"
-								: currentStep > index
-									? "border-primary/30 bg-muted/40"
-									: "border-border")
-						}
-					>
-						<span
-							aria-hidden="true"
-							className={
-								"flex size-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold " +
-								(currentStep >= index
-									? "bg-primary text-primary-foreground"
-									: "bg-muted text-muted-foreground")
-							}
+				<ol
+					aria-label="Form steps"
+					className="relative flex w-full items-start justify-between"
+				>
+					{steps.map((step, index) => (
+						<li
+							key={step.title}
+							aria-current={currentStep === index ? "step" : undefined}
+							className="z-0 flex min-w-0 flex-1 flex-col items-center gap-2 text-center"
 						>
-							{currentStep > index ? <Check className="size-4" /> : index + 1}
-						</span>
-						<span className="grid gap-0">
-							<span className="text-sm font-medium">{step.title}</span>
-							<span className="text-meta text-muted-foreground">
-								{step.description}
+							<span
+								aria-hidden="true"
+								className={
+									"flex size-8 shrink-0 items-center justify-center rounded-full border-2 text-sm font-semibold transition-colors " +
+									(currentStep === index
+										? "border-primary bg-primary text-primary-foreground"
+										: currentStep > index
+											? "border-primary bg-card text-primary"
+											: "border-border bg-card text-muted-foreground")
+								}
+							>
+								{currentStep > index ? <Check className="size-4" /> : index + 1}
 							</span>
-						</span>
-					</li>
-				))}
-			</ol>
+							<span
+								className={
+									"max-w-full text-xs leading-4 sm:text-sm " +
+									(currentStep === index
+										? "font-semibold text-foreground"
+										: "text-muted-foreground")
+								}
+							>
+								{step.title}
+							</span>
+						</li>
+					))}
+				</ol>
+			</div>
 		</div>
 	);
 }
