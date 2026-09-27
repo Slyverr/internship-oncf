@@ -1,3 +1,4 @@
+import { RegistrationStatus } from "@ecommand/shared";
 import { PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
@@ -9,6 +10,9 @@ import { usersBreadcrumbs } from "./breadcrumbs";
 
 export default async function Page() {
 	const users = await usersControllerFindAll();
+	const pendingRegistrations = users.filter(
+		(user) => user.registrationStatus === RegistrationStatus.PENDING,
+	).length;
 
 	return (
 		<>
@@ -16,7 +20,11 @@ export default async function Page() {
 
 			<PageHeader
 				title="Users"
-				description="Manage operational accounts, roles, and user permissions."
+				description={
+					pendingRegistrations > 0
+						? `${pendingRegistrations} client access ${pendingRegistrations === 1 ? "request is" : "requests are"} awaiting review.`
+						: "Manage operational accounts, roles, and user permissions."
+				}
 			>
 				<Link className={buttonVariants()} href="/dashboard/users/new">
 					<PlusIcon />

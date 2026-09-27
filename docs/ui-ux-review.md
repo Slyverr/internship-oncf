@@ -90,8 +90,16 @@ Shared primitives reduce drift but do not make all page content consistent. The 
 - [ ] Compare form labels/help/errors, page titles/subtitles, record rows, and action bars against the design-system type and spacing scale.
 - [x] Keep color tokens fixed and visually compare light/dark surface hierarchy across captured routes.
 - [ ] Add repeatable screenshot or visual-regression coverage to the repository; this pass used the live Chrome debugging session and generated a review bundle, not a checked-in browser test runner.
-- [ ] Decide whether public signup is part of this MVP; `/signup` currently renders the shared Under Construction view and there is no public registration API route.
+- [ ] Visually review the updated login and signup layouts, then exercise a pending signup through both administrator approval and rejection at mobile and desktop widths.
 
 ## Current review limits
 
-The screenshot pass verified rendered route screens and responsive width behavior, but it does not replace keyboard/screen-reader testing or a complete interaction-state matrix. A final-submit validation bug discovered during the form pass was fixed and verified in live user and claim flows; its screenshots are included in the review artifact. The dev database lacks an eligible unprogrammed order, and some seeded/local detail content is sparse. Add that fixture before accepting the order-to-program workflow visually; do not alter user-created local records just to produce a screenshot. Public signup remains an Under Construction page with no registration API route.
+The screenshot pass verified rendered route screens and responsive width behavior, but it does not replace keyboard/screen-reader testing or a complete interaction-state matrix. A final-submit validation bug discovered during the form pass was fixed and verified in live user and claim flows; its screenshots are included in the review artifact. The dev database lacks an eligible unprogrammed order, and some seeded/local detail content is sparse. Add that fixture before accepting the order-to-program workflow visually; do not alter user-created local records just to produce a screenshot. The public-route captures predate the authentication updates below.
+
+## Authentication follow-up — 2026-09-27
+
+- `/signup` now contains the client-registration form. It validates customer code and ICE against a locally maintained active customer record, submits a pending client-representative account, and explains that administrator approval is required before sign-in.
+- The login page uses a compact, centered layout. The web API client and Next.js proxy both default to `http://localhost:8000` when `BACKEND_API_URL` is unset, so local sign-in works without a provider-specific environment variable.
+- The live HTTP check returned 200 for `/login` and `/signup`; a valid test login through the Next.js proxy returned 201, and an invalid password returned 401.
+- These auth changes were made after the screenshot bundle above. Browser screenshot automation is unavailable in the current workbench, so the updated login/signup appearance still needs visual confirmation at mobile and desktop widths. The older public-route captures show the earlier UI and should not be used to sign off the new screens.
+- Administrator review now appears in the user list and user detail for pending registrations. The page describes the customer-code/ICE match, and only users with `users:update` can approve or reject. The live screenshot pass for this new pending state remains outstanding because the preview data has no pending signup fixture.

@@ -5,13 +5,41 @@ import {
 	OrderStatus,
 	Permission,
 	ProgramStatus,
+	RegistrationStatus,
 	Role,
 } from "@ecommand/shared";
 import {
 	canDeleteProgram,
+	canReviewRegistration,
 	hasAvailableActions,
 } from "../src/lib/action-visibility";
 import { canCreateProgramForOrder } from "../src/lib/program-creation-eligibility";
+
+assert.equal(
+	canReviewRegistration(RegistrationStatus.PENDING, true, true),
+	true,
+	"administrators with user-update permission can review pending registrations",
+);
+assert.equal(
+	canReviewRegistration(RegistrationStatus.PENDING, false, true),
+	false,
+	"users without user-update permission cannot review registrations",
+);
+assert.equal(
+	canReviewRegistration(RegistrationStatus.APPROVED, true, true),
+	false,
+	"approved registrations cannot be reviewed again",
+);
+assert.equal(
+	canReviewRegistration(RegistrationStatus.REJECTED, true, true),
+	false,
+	"rejected registrations cannot be reviewed again",
+);
+assert.equal(
+	canReviewRegistration(RegistrationStatus.PENDING, true, false),
+	false,
+	"only client-representative registrations can be reviewed",
+);
 
 function roleHasPermission(role: Role, permission: Permission): boolean {
 	const permissions = DEFAULT_ROLE_PERMISSIONS[role];

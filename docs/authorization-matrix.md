@@ -6,7 +6,7 @@ This guide maps default roles to API permissions, ownership rules, and web surfa
 
 | Capability | Admin | Commercial agent | Client representative |
 | --- | :---: | :---: | :---: |
-| User administration | All user actions | — | — |
+| User administration and registration review | All user actions, including approving/rejecting client signup | — | — |
 | Orders | All actions and records | Operational actions and cross-customer records | Create/read/update/delete drafts and submit; reads use the assigned customer when present, otherwise own-created records |
 | Programs | All actions and records | Create/read/update; status, ownership, and lifecycle actions | Read programs linked to orders for the assigned customer; no create/update/delete/workflow actions |
 | Claims | All actions and records | Create/read/update; status and lifecycle actions | Create/read own claims |
@@ -32,7 +32,8 @@ Admin receives every defined permission. Parent permissions imply descendants (f
 | Claims create/edit/delete | claims:create/update/delete | Create form; claim action menu | Delete is admin-only by default. |
 | Claim lifecycle | claims:action:* | ClaimActions | Buttons use specific action permissions and supported current states. |
 | Customers | customers:read/create/update/delete | Sidebar Customers; forms and action menu | Commercial agents read/update; create/deactivate are admin-only. |
-| Users | users:read/create/update/delete | Sidebar Users; forms and action menu | Admin-only by default. |
+| Public client signup | Public `/auth/register` | `/signup` registration form | Submitted customer code and ICE must match an active local customer; new account is inactive and pending admin review. |
+| Users and registration review | users:read/create/update/delete | Sidebar Users; forms, request status, approve/reject actions | Admin-only by default. Only pending client-representative requests can be reviewed; pending and rejected accounts cannot sign in. |
 | Catalog | catalog:read/manage:* | Order and claim selectors; catalog API | Admin manages catalog; both operational roles read it. |
 | Tracking | tracking:read/update | Tracking API surfaces | Commercial agents read; admin reads and updates. |
 | Reports | reports:read; reports:action:export | Sidebar Reports and order report | Report scope matches order list/access scope. Only roles with reports:action:export see the browser print / save PDF control; the report API endpoint remains read-only. |

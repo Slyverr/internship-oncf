@@ -1,6 +1,6 @@
 "use client";
 
-import { Permission } from "@ecommand/shared";
+import { Permission, Role } from "@ecommand/shared";
 import { useQueryClient } from "@tanstack/react-query";
 import { EllipsisVerticalIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -14,11 +14,19 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { hasAvailableActions } from "@/lib/action-visibility";
-import type { UserDetailDto } from "@/lib/api/generated.schemas";
 import {
+	canReviewRegistration,
+	hasAvailableActions,
+} from "@/lib/action-visibility";
+import {
+	ReviewUserRegistrationDtoStatus,
+	type UserDetailDto,
+} from "@/lib/api/generated.schemas";
+import {
+	getUsersControllerFindAllQueryKey,
 	getUsersControllerFindOneQueryKey,
 	useUsersControllerDeactivate,
+	useUsersControllerReviewRegistration,
 } from "@/lib/api/users";
 import { useAuth } from "@/providers/auth-provider";
 
@@ -28,7 +36,9 @@ export function UserActions({ user }: { user: UserDetailDto }) {
 	const router = useRouter();
 
 	const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
+	const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
 	const deactivateMutation = useUsersControllerDeactivate();
+	const reviewMutation = useUsersControllerReviewRegistration();
 
 	const handleDeactivate = () => {
 		deactivateMutation.mutate(
@@ -47,12 +57,59 @@ export function UserActions({ user }: { user: UserDetailDto }) {
 
 	const canUpdate = hasPermission(Permission.USERS_UPDATE);
 	const canDeactivate = hasPermission(Permission.USERS_DELETE);
+	const canReview = canReviewRegistration(
+		user.registrationStatus,
+		canUpdate,
+		user.role.name === Role.CLIENT_REPRESENTATIVE,
+	);
+
+	const reviewRegistration = (
+		status:
+			| typeof ReviewUserRegistrationDtoStatus.APPROVED
+			| typeof ReviewUserRegistrationDtoStatus.REJECTED,
+	) => {
+		reviewMutation.mutate(
+			{ id: user.id, data: { status } },
+			{
+				onSuccess: (updatedUser) => {
+					setRejectDialogOpen(false);
+					queryClient.setQueryData(
+						getUsersControllerFindOneQueryKey(user.id),
+						updatedUser,
+					);
+					queryClient.invalidateQueries({
+						queryKey: getUsersControllerFindAllQueryKey(),
+					});
+				},
+			},
+		);
+	};
 
 	if (!hasAvailableActions(canUpdate, canDeactivate)) return null;
 
 	return (
 		<>
-			<div className="flex flex-wrap items-center gap-4">
+			<div className="flex flex-wrap items-center gap-2">
+				{canReview && (
+					<>
+						<Button
+							onClick={() =>
+								reviewRegistration(ReviewUserRegistrationDtoStatus.APPROVED)
+							}
+							disabled={reviewMutation.isPending}
+						>
+							Approve access
+						</Button>
+						<Button
+							variant="outline"
+							onClick={() => setRejectDialogOpen(true)}
+							disabled={reviewMutation.isPending}
+						>
+							Reject request
+						</Button>
+					</>
+				)}
+
 				{canUpdate && (
 					<Button
 						variant="outline"
@@ -85,6 +142,19 @@ export function UserActions({ user }: { user: UserDetailDto }) {
 					</DropdownMenu>
 				)}
 			</div>
+
+			<ConfirmDialog
+				open={rejectDialogOpen}
+				onOpenChange={setRejectDialogOpen}
+				title="Reject client access request?"
+				description={`Rejecting ${user.firstName} ${user.lastName}'s request keeps this account inactive. This decision cannot be changed from the request screen.`}
+				confirmLabel="Reject request"
+				variant="destructive"
+				disabled={reviewMutation.isPending}
+				onConfirm={() =>
+					reviewRegistration(ReviewUserRegistrationDtoStatus.REJECTED)
+				}
+			/>
 
 			<ConfirmDialog
 				open={deactivateDialogOpen}

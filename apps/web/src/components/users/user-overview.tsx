@@ -1,3 +1,4 @@
+import { RegistrationStatus } from "@ecommand/shared";
 import { RecordDetail, RecordMetric } from "@/components/common/record-summary";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,6 +48,32 @@ export function UserOverview({ user }: { user: UserDetailDto }) {
 							{user.isActive ? "Yes" : "No"}
 						</Badge>
 					</div>
+					<div className="flex items-start justify-between gap-4">
+						<span className="text-sm text-muted-foreground">
+							Registration Status
+						</span>
+						<Badge
+							variant={
+								user.registrationStatus === RegistrationStatus.PENDING
+									? "outline"
+									: user.registrationStatus === RegistrationStatus.REJECTED
+										? "secondary"
+										: "default"
+							}
+						>
+							{user.registrationStatus === RegistrationStatus.PENDING
+								? "Awaiting review"
+								: user.registrationStatus === RegistrationStatus.REJECTED
+									? "Rejected"
+									: "Approved"}
+						</Badge>
+					</div>
+					{user.registrationStatus === RegistrationStatus.PENDING && (
+						<p className="text-sm text-muted-foreground">
+							The customer code and ICE matched an active customer record. This
+							account stays inactive until an administrator approves it.
+						</p>
+					)}
 				</CardContent>
 			</Card>
 

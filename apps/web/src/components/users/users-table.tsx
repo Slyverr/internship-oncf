@@ -1,5 +1,6 @@
 "use client";
 
+import { RegistrationStatus } from "@ecommand/shared";
 import type { ColumnDef } from "@tanstack/react-table";
 import { FlexRender, tableFeatures, useTable } from "@tanstack/react-table";
 import {
@@ -72,7 +73,16 @@ const columns: ColumnDef<typeof features, UserListDto>[] = [
 		accessorKey: "isActive",
 		header: "Status",
 		cell: (info) => {
-			const active = info.getValue<boolean>();
+			const user = info.row.original;
+			if (user.registrationStatus === RegistrationStatus.PENDING) {
+				return <Badge variant="outline">Awaiting review</Badge>;
+			}
+
+			if (user.registrationStatus === RegistrationStatus.REJECTED) {
+				return <Badge variant="secondary">Request rejected</Badge>;
+			}
+
+			const active = user.isActive;
 			return (
 				<Badge variant={active ? "default" : "secondary"}>
 					{active ? "Active" : "Inactive"}
