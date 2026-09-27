@@ -24,6 +24,14 @@ The review covers all user-facing route families:
 - Other dashboard pages: reports, notifications, settings.
 - Shared shell: responsive header, expanded/collapsed sidebar, account menu, notification popover, dialogs, tables, form controls, loading and empty states.
 
+## Fresh auth and settings visual pass — 2026-09-27
+
+- Public login and signup were rendered in a clean browser session at 320, 390, 768, 1440, 2560, and 3840px. Every route stayed within the viewport. The form width remains 448px on desktop; the branded shell remains 1152px wide, and phone forms stay centered without clipping.
+- Signup’s second step was exercised with valid temporary input. The browser blocked an empty first step; after entering the required company details, Continue reached sign-in details. Back retained all four company values. Valid password and confirmation feedback appeared. The registration request was not submitted.
+- Login was visually reviewed at 390px and 1440px in Warm light, Charcoal dark, Monochrome light, and Monochrome dark. The surfaces and ONCF mark remain legible across all four.
+- The in-app Settings dialog was captured at 320, 390, 768, 1440, 2560, and 3840px. It remains 1120×768px on desktop and fits within the viewport on phones; the Appearance panel scrolls internally at 320px, while Profile and Security stay reachable in the section navigation. No horizontal overflow appeared.
+- This pass validates the dialog layout and login/signup rendering only. Theme selection persistence, profile-save feedback, security submission states, reset-password pages, centered-header mode, and dark/monochrome Settings captures still need direct interaction and visual review.
+
 ## Assessment round 1: visual hierarchy and reading comfort
 
 **Source-confirmed findings**

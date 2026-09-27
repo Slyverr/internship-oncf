@@ -23,6 +23,9 @@ This is the running review list for the application-wide usability and visual ov
 | 15 | Full route and state audit | Capture all routes and meaningful loading, empty, error, success, permission, and dialog states. Review every form control for clear labels, useful examples/placeholders, hints, autocomplete/input modes, and validation feedback; record findings and assess the work in three passes before closing the overhaul. | In progress |
 | 16 | Documentation organization | Group docs into clear topic folders, use one-word Markdown filenames when they stay clear, and keep contributor links current. | Complete |
 
+- Fresh auth captures at 320, 390, 768, 1440, 2560, and 3840px show centered forms and no horizontal overflow. The signup step transition was checked with temporary values: required fields gate Continue, Back preserves company fields, and password/confirmation feedback updates. No registration request was sent.
+- Fresh Settings dialog captures at the same widths show a stable 1120×768 desktop footprint and internal scrolling on a 320px phone, with no horizontal overflow. Profile and Security tabs remain available. Theme persistence, profile/security save states, reset-password routes, and Settings in dark/monochrome modes remain open.
+
 ## Screenshot coverage
 
 Review both light and dark appearances, and both workspace layouts where the route is protected. Use at least these viewport widths: 320, 390, 768, 1024, 1440, 2560, and 3840px. Check page edges, readable content width, horizontal overflow, focus targets, text wrapping, and whether key actions stay reachable. Keep captures local to the review session unless a durable visual artifact is needed.
