@@ -2,7 +2,7 @@
 
 import { Permission } from "@ecommand/shared";
 import { useQuery } from "@tanstack/react-query";
-import { PrinterIcon } from "lucide-react";
+import { LoaderCircleIcon, PrinterIcon, RefreshCwIcon } from "lucide-react";
 import { useState } from "react";
 import { PageHeader } from "@/components/common/page-header";
 import { Button } from "@/components/ui/button";
@@ -115,11 +115,41 @@ export function OrderReportView() {
 				)}
 			</form>
 			{report.isPending ? (
-				<p>Loading report…</p>
+				<div
+					role="status"
+					className="flex min-h-16 items-center gap-3 rounded-lg border border-border bg-card p-4"
+				>
+					<LoaderCircleIcon
+						aria-hidden="true"
+						className="size-4 animate-spin motion-reduce:animate-none"
+					/>
+					<p>Loading report…</p>
+				</div>
 			) : report.isError ? (
-				<p className="text-destructive" role="alert">
-					Could not load the report. Try again.
-				</p>
+				<div
+					role="alert"
+					aria-busy={report.isFetching}
+					className="flex min-h-16 flex-col items-start justify-between gap-4 rounded-lg border border-destructive/30 bg-destructive/10 p-4 sm:flex-row sm:items-center"
+				>
+					<p className="text-sm text-destructive">
+						Could not load the report. Check your connection and retry.
+					</p>
+					<Button
+						variant="outline"
+						disabled={report.isFetching}
+						onClick={() => void report.refetch()}
+					>
+						{report.isFetching ? (
+							<LoaderCircleIcon
+								aria-hidden="true"
+								className="animate-spin motion-reduce:animate-none"
+							/>
+						) : (
+							<RefreshCwIcon aria-hidden="true" />
+						)}
+						{report.isFetching ? "Retrying…" : "Retry report"}
+					</Button>
+				</div>
 			) : (
 				<>
 					<p className="text-sm text-muted-foreground">
