@@ -51,7 +51,7 @@ export function SidebarNav() {
 							/>
 
 							<span
-								className={`transition-colors group-data-[collapsible=icon]:hidden ${textColor}`}
+								className={`min-w-0 max-w-48 overflow-hidden whitespace-nowrap transition-[max-width,opacity,color] duration-200 ease-linear motion-reduce:transition-none group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:max-w-0 group-data-[collapsible=icon]:opacity-0 ${textColor}`}
 							>
 								{route.title}
 							</span>

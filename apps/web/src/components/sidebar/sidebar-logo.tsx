@@ -27,7 +27,7 @@ export function SidebarLogo() {
 						/>
 					</div>
 
-					<div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
+					<div className="grid min-w-0 max-w-40 flex-1 overflow-hidden text-left text-sm leading-tight transition-[max-width,opacity] duration-200 ease-linear motion-reduce:transition-none group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:max-w-0 group-data-[collapsible=icon]:opacity-0">
 						<span className="truncate font-bold tracking-tight text-sidebar-foreground">
 							ONCF
 						</span>
