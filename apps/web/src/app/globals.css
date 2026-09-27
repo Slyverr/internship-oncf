@@ -81,6 +81,14 @@
 	gap: var(--spacing-control);
 }
 
+@utility workspace-form {
+	@apply mx-auto grid w-full max-w-5xl gap-4;
+
+	@container workspace (min-width: 80rem) {
+		max-width: 80rem;
+	}
+}
+
 @utility oncf-dialog-surface {
 	@apply fixed top-1/2 left-1/2 z-50 grid -translate-x-1/2 -translate-y-1/2 gap-6 rounded-xl bg-popover p-6 text-popover-foreground ring-1 ring-foreground/10;
 }

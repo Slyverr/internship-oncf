@@ -156,7 +156,7 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 				}
 				form.handleSubmit();
 			}}
-			className="max-w-5xl space-y-4"
+			className="workspace-form"
 		>
 			<PageHeader
 				title="Edit user"

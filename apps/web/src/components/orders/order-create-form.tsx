@@ -152,7 +152,7 @@ export function OrderCreateForm(): JSX.Element {
 				}
 				form.handleSubmit();
 			}}
-			className="mx-auto w-full max-w-5xl space-y-4 @7xl/workspace:max-w-7xl"
+			className="workspace-form"
 		>
 			<PageHeader
 				title="New order"

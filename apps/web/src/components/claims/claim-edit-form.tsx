@@ -103,7 +103,7 @@ export function ClaimEditForm({ claim }: { claim: ClaimDetailDto }) {
 	}
 
 	return (
-		<form onSubmit={submit} className="space-y-4">
+		<form onSubmit={submit} className="workspace-form">
 			<Card>
 				<CardHeader>
 					<CardTitle>Edit claim #{claim.id}</CardTitle>

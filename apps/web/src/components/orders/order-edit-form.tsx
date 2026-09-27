@@ -189,7 +189,7 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 	}
 
 	return (
-		<form onSubmit={submit} className="max-w-5xl space-y-4">
+		<form onSubmit={submit} className="workspace-form">
 			<PageHeader
 				title={`Edit ${order.orderNumber}`}
 				description="Update this order’s details and schedule."
