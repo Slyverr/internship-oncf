@@ -1,5 +1,6 @@
 import {
 	STRONG_PASSWORD_HINT,
+	STRONG_PASSWORD_MAX_LENGTH,
 	STRONG_PASSWORD_PATTERN,
 } from "@ecommand/shared";
 import { Transform } from "class-transformer";
@@ -21,7 +22,7 @@ export class RegisterClientDto {
 
 	@IsString()
 	@Matches(STRONG_PASSWORD_PATTERN, { message: STRONG_PASSWORD_HINT })
-	@MaxLength(255)
+	@MaxLength(STRONG_PASSWORD_MAX_LENGTH)
 	password: string;
 
 	@Transform(({ value }) => (typeof value === "string" ? value.trim() : value))

@@ -1,6 +1,11 @@
 "use client";
 
-import { isStrongPassword, STRONG_PASSWORD_HINT } from "@ecommand/shared";
+import {
+	isStrongPassword,
+	STRONG_PASSWORD_HINT,
+	STRONG_PASSWORD_MAX_LENGTH,
+	STRONG_PASSWORD_REQUIREMENTS,
+} from "@ecommand/shared";
 import Link from "next/link";
 import { type FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -21,6 +26,15 @@ export function ClientRegistrationForm() {
 	const [password, setPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
 	const [formError, setFormError] = useState("");
+	const missingPasswordRequirements = STRONG_PASSWORD_REQUIREMENTS.filter(
+		(requirement) => !requirement.isMet(password),
+	).map((requirement) => requirement.label);
+	const passwordStatus =
+		password.length === 0
+			? STRONG_PASSWORD_HINT
+			: missingPasswordRequirements.length === 0
+				? "Password meets the requirements."
+				: `Add ${missingPasswordRequirements.join(", ")}.`;
 
 	function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -166,17 +180,11 @@ export function ClientRegistrationForm() {
 									value={password}
 									type="password"
 									autoComplete="new-password"
-									aria-describedby="registration-password-help"
+									aria-describedby="registration-password-checks"
 									required
-									maxLength={255}
+									maxLength={STRONG_PASSWORD_MAX_LENGTH}
 									onChange={(event) => setPassword(event.target.value)}
 								/>
-								<p
-									id="registration-password-help"
-									className="text-meta text-muted-foreground"
-								>
-									{STRONG_PASSWORD_HINT}
-								</p>
 							</div>
 							<div className="grid gap-control">
 								<Label htmlFor="registration-password-confirmation">
@@ -187,11 +195,30 @@ export function ClientRegistrationForm() {
 									value={confirmPassword}
 									type="password"
 									autoComplete="new-password"
+									aria-describedby="registration-confirmation-status"
 									required
-									maxLength={255}
+									maxLength={STRONG_PASSWORD_MAX_LENGTH}
 									onChange={(event) => setConfirmPassword(event.target.value)}
 								/>
+								<p
+									id="registration-confirmation-status"
+									role="status"
+									className={`text-meta ${confirmPassword.length === 0 || confirmPassword === password ? "text-muted-foreground" : "text-destructive"}`}
+								>
+									{confirmPassword.length === 0
+										? null
+										: confirmPassword === password
+											? "Passwords match."
+											: "Passwords do not match."}
+								</p>
 							</div>
+							<p
+								id="registration-password-status"
+								aria-live="polite"
+								className="text-meta text-muted-foreground sm:col-span-2"
+							>
+								{passwordStatus}
+							</p>
 						</>
 					)}
 				</div>

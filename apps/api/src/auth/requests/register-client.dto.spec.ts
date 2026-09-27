@@ -27,6 +27,12 @@ describe("RegisterClientDto", () => {
 		{ ice: "12345678901234" },
 		{ ice: "12345678901234A" },
 		{ password: "weakpass" },
+		{ password: "Aa1!" },
+		{ password: "AA1!AAAA" },
+		{ password: "aa1!aaaa" },
+		{ password: "Aa!!aaaa" },
+		{ password: "Aa11aaaa" },
+		{ password: `Aa1!${"a".repeat(252)}` },
 		{ email: "invalid" },
 	])("rejects invalid registration data: %o", async (overrides) => {
 		const dto = plainToInstance(RegisterClientDto, {
