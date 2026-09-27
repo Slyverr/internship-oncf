@@ -50,7 +50,7 @@ export function SettingsDialog() {
 
 	return (
 		<Dialog open onOpenChange={(open) => !open && router.back()}>
-			<DialogContent className="grid max-h-[min(90dvh,56rem)] w-[calc(100%-2rem)] max-w-6xl grid-rows-[auto_minmax(0,1fr)] gap-0 overflow-hidden p-0">
+			<DialogContent className="grid max-h-[calc(100svh-2rem)] w-[calc(100%-2rem)] max-w-[70rem] grid-rows-[auto_minmax(0,1fr)] gap-0 overflow-hidden p-0">
 				<DialogHeader className="border-b p-6 pr-16">
 					<DialogTitle className="text-lg">Settings</DialogTitle>
 					<DialogDescription>
