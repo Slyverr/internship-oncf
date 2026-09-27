@@ -118,7 +118,7 @@ function AttachmentItem({
 						type="button"
 						variant="ghost"
 						size="icon"
-						className="size-8"
+						className="size-11"
 						disabled={isDownloading}
 						onClick={handleDownload}
 					>
@@ -131,7 +131,7 @@ function AttachmentItem({
 							type="button"
 							variant="ghost"
 							size="icon"
-							className="size-8 text-destructive hover:text-destructive"
+							className="size-11 text-destructive hover:text-destructive"
 							disabled={isDeleting}
 							onClick={() => setDeleteDialogOpen(true)}
 						>

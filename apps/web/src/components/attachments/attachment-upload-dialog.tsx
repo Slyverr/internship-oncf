@@ -145,7 +145,7 @@ export function AttachmentUploadDialog({
 									type="button"
 									variant="ghost"
 									size="icon"
-									className="size-8 shrink-0"
+									className="size-11 shrink-0"
 									disabled={isUploading}
 									onClick={clearFile}
 								>
