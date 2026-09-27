@@ -25,7 +25,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { UnitSelect } from "@/components/units/unit-select";
 import type { OrderDetailDto } from "@/lib/api/generated.schemas";
 import { useOrdersControllerCreate } from "@/lib/api/orders";
-import { getFormErrorMessage } from "@/lib/form-utils";
+import {
+	getFormErrorMessage,
+	getFormStepErrors,
+	omitFormStepError,
+} from "@/lib/form-utils";
 import { useAuth } from "@/providers/auth-provider";
 import { OrderStatusSelect } from "./order-status-select";
 
@@ -80,11 +84,7 @@ export function OrderCreateForm(): JSX.Element {
 	const [stepErrors, setStepErrors] = useState<Record<string, string>>({});
 
 	function clearStepError(fieldName: string) {
-		setStepErrors((errors) => {
-			if (!errors[fieldName]) return errors;
-			const { [fieldName]: _removed, ...remaining } = errors;
-			return remaining;
-		});
+		setStepErrors((errors) => omitFormStepError(errors, fieldName));
 	}
 
 	function continueToSchedule() {
@@ -93,14 +93,7 @@ export function OrderCreateForm(): JSX.Element {
 			: orderBasicsSchema;
 		const result = schema.safeParse(form.state.values);
 		if (!result.success) {
-			setStepErrors(
-				Object.fromEntries(
-					result.error.issues.map((issue) => [
-						String(issue.path[0]),
-						issue.message,
-					]),
-				),
-			);
+			setStepErrors(getFormStepErrors(result.error.issues));
 			return;
 		}
 
