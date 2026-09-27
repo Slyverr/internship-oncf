@@ -19,7 +19,7 @@ This is the running review list for the application-wide usability and visual ov
 | 11 | Appearance options | Keep themes, fonts, text scale, motion, and layouts extensible and understandable. Review whether a bounded text-scale control is more useful than only three presets; retain sensible defaults and database sync. | To review |
 | 12 | Notifications | Review trigger, panel size, spacing, typography, empty/loading states, action reachability, and dismissal behavior on touch and desktop. Keep keyboard access; do not make hover the only way to open it. | In progress |
 | 13 | Sidebar inset details | Recheck collapsed-state padding and the relationship between logo, navigation, profile, and shell breadcrumbs after alignment changes. | Complete |
-| 14 | Shared visual styles | Inventory repeated card, control, field, table, and dialog classes. Extract stable patterns into named utilities or shared components where that improves consistency without hiding feature-specific behavior. | In progress |
+| 14 | Shared visual styles | Inventory repeated card, control, field, table, and dialog classes. Extract stable patterns into named utilities or shared components where that improves consistency without hiding feature-specific behavior. | Complete |
 | 15 | Full route and state audit | Capture all routes and meaningful loading, empty, error, success, permission, and dialog states. Review every form control for clear labels, useful examples/placeholders, hints, autocomplete/input modes, and validation feedback; record findings and assess the work in three passes before closing the overhaul. | In progress |
 | 16 | Documentation organization | After shared component style utilities (#14) are complete, group docs into clear topic folders and use one-word Markdown filenames when they stay clear. | Queued after #14 |
 
@@ -48,6 +48,7 @@ Review both light and dark appearances, and both workspace layouts where the rou
 - Auth form content now uses the shared 180ms page-entry fade and 4px rise; the existing system and user reduced-motion rules disable it.
 - Public auth pages expose the same five theme choices as settings and save the choice to the existing local preference before sign-in.
 - The dashboard now surfaces up to four orders returned by the server's eligible-for-programs endpoint when the user can read orders and create programs. Each link carries the selected order into the existing validated creation flow; empty recent orders/claims offer create actions only when permitted. Fresh dashboard checks at 320, 390, 768, 1024, 1280, 1440, 2560, and 3840px show no page-level horizontal overflow; the selected-order form control contains the order from the dashboard link.
+- Repeated field spacing and the shared popup surface now use `oncf-field` and `oncf-dialog-surface`. The audit confirmed that Button, Card, Table, Menu, and Dialog defaults already belong in their shared UI primitives; feature-specific styles remain local.
 
 ## Working rules
 

@@ -81,6 +81,10 @@
 	gap: var(--spacing-control);
 }
 
+@utility oncf-dialog-surface {
+	@apply fixed top-1/2 left-1/2 z-50 grid -translate-x-1/2 -translate-y-1/2 gap-6 rounded-xl bg-popover p-6 text-popover-foreground ring-1 ring-foreground/10;
+}
+
 @utility text-meta {
 	font-size: calc(0.8125rem * var(--type-scale, 1));
 	line-height: calc(1.25rem * var(--type-scale, 1));
