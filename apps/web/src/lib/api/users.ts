@@ -26,6 +26,7 @@ import type {
 
 import type {
   CreateUserDto,
+  ReviewUserRegistrationDto,
   UpdateUserDto,
   UserDeleteDto,
   UserDetailDto,
@@ -399,4 +400,63 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getUsersControllerDeactivateMutationOptions(options), queryClient);
+    }
+    export const usersControllerReviewRegistration = (
+    id: number,
+    reviewUserRegistrationDto: ReviewUserRegistrationDto,
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<UserDetailDto>(
+      {url: `/users/${id}/registration-status`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: reviewUserRegistrationDto, signal
+    },
+      options);
+    }
+
+
+
+
+export const getUsersControllerReviewRegistrationMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerReviewRegistration>>, TError,{id: number;data: ReviewUserRegistrationDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof usersControllerReviewRegistration>>, TError,{id: number;data: ReviewUserRegistrationDto}, TContext> => {
+
+const mutationKey = ['usersControllerReviewRegistration'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof usersControllerReviewRegistration>>, {id: number;data: ReviewUserRegistrationDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  usersControllerReviewRegistration(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UsersControllerReviewRegistrationMutationResult = NonNullable<Awaited<ReturnType<typeof usersControllerReviewRegistration>>>
+    export type UsersControllerReviewRegistrationMutationBody = ReviewUserRegistrationDto
+    export type UsersControllerReviewRegistrationMutationError = void
+
+    export const useUsersControllerReviewRegistration = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerReviewRegistration>>, TError,{id: number;data: ReviewUserRegistrationDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof usersControllerReviewRegistration>>,
+        TError,
+        {id: number;data: ReviewUserRegistrationDto},
+        TContext
+      > => {
+      return useMutation(getUsersControllerReviewRegistrationMutationOptions(options), queryClient);
     }

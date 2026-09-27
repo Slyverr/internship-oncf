@@ -5,12 +5,22 @@
  * ONCF freight order management
  * OpenAPI spec version: 1.0
  */
+export type RegistrationStatus = typeof RegistrationStatus[keyof typeof RegistrationStatus];
+
+
+export const RegistrationStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+} as const;
+
 export type UserListDtoRole = {
   id: string;
   name: string;
 };
 
 export interface UserListDto {
+  registrationStatus: RegistrationStatus;
   id: number;
   email: string;
   lastName: string;
@@ -38,6 +48,7 @@ export type UserDetailDtoRole = {
 };
 
 export interface UserDetailDto {
+  registrationStatus: RegistrationStatus;
   id: number;
   email: string;
   lastName: string;
@@ -140,6 +151,18 @@ export interface UpdateUserDto {
   isActive?: boolean;
 }
 
+export type ReviewUserRegistrationDtoStatus = typeof ReviewUserRegistrationDtoStatus[keyof typeof ReviewUserRegistrationDtoStatus];
+
+
+export const ReviewUserRegistrationDtoStatus = {
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+} as const;
+
+export interface ReviewUserRegistrationDto {
+  status: ReviewUserRegistrationDtoStatus;
+}
+
 export interface UserDeleteDto {
   id: number;
 }
@@ -154,6 +177,34 @@ export interface LoginDetailDto {
   access_token: string;
 }
 
+export interface RegisterClientDto {
+  /** @maxLength 100 */
+  email: string;
+  /** @maxLength 255 */
+  password: string;
+  /**
+     * @minLength 1
+     * @maxLength 100
+     */
+  firstName: string;
+  /**
+     * @minLength 1
+     * @maxLength 100
+     */
+  lastName: string;
+  /**
+     * @minLength 1
+     * @maxLength 50
+     */
+  customerCode: string;
+  /** @pattern ^\d{15}$ */
+  ice: string;
+}
+
+export interface RegistrationSubmittedDto {
+  message: string;
+}
+
 export interface ChangePasswordDto {
   currentPassword: string;
   newPassword: string;
@@ -166,6 +217,92 @@ export interface ForgotPasswordDto {
 export interface ResetPasswordDto {
   token: string;
   newPassword: string;
+}
+
+export interface CustomerListDto {
+  id: number;
+  createdAt: string;
+  isActive: boolean;
+  updatedAt: string;
+  companyName: string;
+  /** @nullable */
+  address: string | null;
+  /** @nullable */
+  city: string | null;
+  /** @nullable */
+  phone: string | null;
+  /** @nullable */
+  email: string | null;
+  /** @nullable */
+  typeId: string | null;
+  /** @nullable */
+  customerCode: string | null;
+  /** @nullable */
+  ice: string | null;
+}
+
+export interface CustomerDetailDto {
+  id: number;
+  companyName: string;
+  /** @nullable */
+  address: string | null;
+  /** @nullable */
+  city: string | null;
+  /** @nullable */
+  phone: string | null;
+  /** @nullable */
+  email: string | null;
+  /** @nullable */
+  typeId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  isActive: boolean;
+  /** @nullable */
+  customerCode: string | null;
+  /** @nullable */
+  ice: string | null;
+}
+
+export interface CreateCustomerDto {
+  /** @maxLength 300 */
+  companyName: string;
+  /** @maxLength 500 */
+  address?: string;
+  /** @maxLength 100 */
+  city?: string;
+  /** @maxLength 20 */
+  phone?: string;
+  /** @maxLength 100 */
+  email?: string;
+  typeId?: string;
+  /** @maxLength 50 */
+  customerCode?: string;
+  /** @pattern ^\d{15}$ */
+  ice?: string;
+  isActive?: boolean;
+}
+
+export interface UpdateCustomerDto {
+  /** @maxLength 300 */
+  companyName?: string;
+  /** @maxLength 500 */
+  address?: string;
+  /** @maxLength 100 */
+  city?: string;
+  /** @maxLength 20 */
+  phone?: string;
+  /** @maxLength 100 */
+  email?: string;
+  typeId?: string;
+  /** @maxLength 50 */
+  customerCode?: string;
+  /** @pattern ^\d{15}$ */
+  ice?: string;
+  isActive?: boolean;
+}
+
+export interface CustomerDeleteDto {
+  id: number;
 }
 
 export type CreateOrderDtoStatus = typeof CreateOrderDtoStatus[keyof typeof CreateOrderDtoStatus];
@@ -799,84 +936,6 @@ export interface ProgramDeleteDto {
   id: number;
 }
 
-export interface CustomerListDto {
-  id: number;
-  createdAt: string;
-  isActive: boolean;
-  updatedAt: string;
-  companyName: string;
-  /** @nullable */
-  address: string | null;
-  /** @nullable */
-  city: string | null;
-  /** @nullable */
-  phone: string | null;
-  /** @nullable */
-  email: string | null;
-  /** @nullable */
-  typeId: string | null;
-  /** @nullable */
-  customerCode: string | null;
-}
-
-export interface CustomerDetailDto {
-  id: number;
-  companyName: string;
-  /** @nullable */
-  address: string | null;
-  /** @nullable */
-  city: string | null;
-  /** @nullable */
-  phone: string | null;
-  /** @nullable */
-  email: string | null;
-  /** @nullable */
-  typeId: string | null;
-  createdAt: string;
-  updatedAt: string;
-  isActive: boolean;
-  /** @nullable */
-  customerCode: string | null;
-}
-
-export interface CreateCustomerDto {
-  /** @maxLength 300 */
-  companyName: string;
-  /** @maxLength 500 */
-  address?: string;
-  /** @maxLength 100 */
-  city?: string;
-  /** @maxLength 20 */
-  phone?: string;
-  /** @maxLength 100 */
-  email?: string;
-  typeId?: string;
-  /** @maxLength 50 */
-  customerCode?: string;
-  isActive?: boolean;
-}
-
-export interface UpdateCustomerDto {
-  /** @maxLength 300 */
-  companyName?: string;
-  /** @maxLength 500 */
-  address?: string;
-  /** @maxLength 100 */
-  city?: string;
-  /** @maxLength 20 */
-  phone?: string;
-  /** @maxLength 100 */
-  email?: string;
-  typeId?: string;
-  /** @maxLength 50 */
-  customerCode?: string;
-  isActive?: boolean;
-}
-
-export interface CustomerDeleteDto {
-  id: number;
-}
-
 export type CreateClaimDtoType = typeof CreateClaimDtoType[keyof typeof CreateClaimDtoType];
 
 
@@ -1461,6 +1520,31 @@ export interface TrainPositionDto {
   recordedAt: string;
 }
 
+export type CustomersControllerFindAllParams = {
+/**
+ * @minimum 1
+ */
+page?: number;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+limit?: number;
+typeId?: string;
+isActive?: boolean;
+search?: string;
+sortBy?: string;
+sortOrder?: CustomersControllerFindAllSortOrder;
+};
+
+export type CustomersControllerFindAllSortOrder = typeof CustomersControllerFindAllSortOrder[keyof typeof CustomersControllerFindAllSortOrder];
+
+
+export const CustomersControllerFindAllSortOrder = {
+  asc: 'asc',
+  desc: 'desc',
+} as const;
+
 export type OrdersControllerFindAllParams = {
 /**
  * @minimum 1
@@ -1565,31 +1649,6 @@ export type ProgramsControllerFindAllSortOrder = typeof ProgramsControllerFindAl
 
 
 export const ProgramsControllerFindAllSortOrder = {
-  asc: 'asc',
-  desc: 'desc',
-} as const;
-
-export type CustomersControllerFindAllParams = {
-/**
- * @minimum 1
- */
-page?: number;
-/**
- * @minimum 1
- * @maximum 100
- */
-limit?: number;
-typeId?: string;
-isActive?: boolean;
-search?: string;
-sortBy?: string;
-sortOrder?: CustomersControllerFindAllSortOrder;
-};
-
-export type CustomersControllerFindAllSortOrder = typeof CustomersControllerFindAllSortOrder[keyof typeof CustomersControllerFindAllSortOrder];
-
-
-export const CustomersControllerFindAllSortOrder = {
   asc: 'asc',
   desc: 'desc',
 } as const;

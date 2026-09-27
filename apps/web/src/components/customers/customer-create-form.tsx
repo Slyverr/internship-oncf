@@ -44,6 +44,7 @@ export function CustomerCreateForm(): JSX.Element {
 		defaultValues: {
 			companyName: "",
 			customerCode: "",
+			ice: "",
 			address: "",
 			city: "",
 			phone: "",
@@ -62,6 +63,7 @@ export function CustomerCreateForm(): JSX.Element {
 						...(value.customerCode?.trim()
 							? { customerCode: value.customerCode.trim() }
 							: {}),
+						...(value.ice?.trim() ? { ice: value.ice.trim() } : {}),
 						...(value.address?.trim() ? { address: value.address.trim() } : {}),
 						...(value.city?.trim() ? { city: value.city.trim() } : {}),
 						...(value.phone?.trim() ? { phone: value.phone.trim() } : {}),
@@ -105,7 +107,7 @@ export function CustomerCreateForm(): JSX.Element {
 				<CardHeader>
 					<CardTitle>Company Overview</CardTitle>
 					<CardDescription>
-						Primary identification details of the enterprise.
+						Primary identifiers used by customers when requesting an account.
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="grid gap-4 md:grid-cols-2">
@@ -151,6 +153,26 @@ export function CustomerCreateForm(): JSX.Element {
 									value={field.state.value ?? ""}
 									onChange={(e) => field.handleChange(e.target.value)}
 								/>
+							</div>
+						)}
+					</form.Field>
+
+					<form.Field name="ice">
+						{(field) => (
+							<div className="grid gap-control">
+								<Label htmlFor="customer-ice">ICE</Label>
+								<Input
+									id="customer-ice"
+									inputMode="numeric"
+									maxLength={15}
+									pattern="[0-9]{15}"
+									placeholder="15 digits"
+									value={field.state.value ?? ""}
+									onChange={(event) => field.handleChange(event.target.value)}
+								/>
+								<p className="text-meta text-muted-foreground">
+									Required to verify customer account requests.
+								</p>
 							</div>
 						)}
 					</form.Field>

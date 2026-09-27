@@ -48,6 +48,7 @@ export function CustomerEditForm({
 		defaultValues: {
 			companyName: customer.companyName,
 			customerCode: customer.customerCode ?? "",
+			ice: customer.ice ?? "",
 			address: customer.address ?? "",
 			city: customer.city ?? "",
 			phone: customer.phone ?? "",
@@ -67,6 +68,7 @@ export function CustomerEditForm({
 						...(value.customerCode?.trim()
 							? { customerCode: value.customerCode.trim() }
 							: {}),
+						...(value.ice?.trim() ? { ice: value.ice.trim() } : {}),
 						...(value.address?.trim() ? { address: value.address.trim() } : {}),
 						...(value.city?.trim() ? { city: value.city.trim() } : {}),
 						...(value.phone?.trim() ? { phone: value.phone.trim() } : {}),
@@ -110,7 +112,7 @@ export function CustomerEditForm({
 				<CardHeader>
 					<CardTitle>Company Overview</CardTitle>
 					<CardDescription>
-						Update primary corporate identifiers.
+						Update identifiers used to verify customer account requests.
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="grid gap-4 md:grid-cols-2">
@@ -154,6 +156,26 @@ export function CustomerEditForm({
 									value={field.state.value ?? ""}
 									onChange={(e) => field.handleChange(e.target.value)}
 								/>
+							</div>
+						)}
+					</form.Field>
+
+					<form.Field name="ice">
+						{(field) => (
+							<div className="grid gap-control">
+								<Label htmlFor="customer-ice">ICE</Label>
+								<Input
+									id="customer-ice"
+									inputMode="numeric"
+									maxLength={15}
+									pattern="[0-9]{15}"
+									placeholder="15 digits"
+									value={field.state.value ?? ""}
+									onChange={(event) => field.handleChange(event.target.value)}
+								/>
+								<p className="text-meta text-muted-foreground">
+									Required to verify customer account requests.
+								</p>
 							</div>
 						)}
 					</form.Field>

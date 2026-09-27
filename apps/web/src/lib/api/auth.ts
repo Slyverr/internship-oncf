@@ -20,6 +20,8 @@ import type {
   ForgotPasswordDto,
   LoginDetailDto,
   LoginDto,
+  RegisterClientDto,
+  RegistrationSubmittedDto,
   ResetPasswordDto
 } from './generated.schemas';
 
@@ -88,6 +90,64 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getAuthControllerLoginMutationOptions(options), queryClient);
+    }
+    export const authControllerRegister = (
+    registerClientDto: RegisterClientDto,
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<RegistrationSubmittedDto>(
+      {url: `/auth/register`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: registerClientDto, signal
+    },
+      options);
+    }
+
+
+
+
+export const getAuthControllerRegisterMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerRegister>>, TError,{data: RegisterClientDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof authControllerRegister>>, TError,{data: RegisterClientDto}, TContext> => {
+
+const mutationKey = ['authControllerRegister'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof authControllerRegister>>, {data: RegisterClientDto}> = (props) => {
+          const {data} = props ?? {};
+
+          return  authControllerRegister(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AuthControllerRegisterMutationResult = NonNullable<Awaited<ReturnType<typeof authControllerRegister>>>
+    export type AuthControllerRegisterMutationBody = RegisterClientDto
+    export type AuthControllerRegisterMutationError = unknown
+
+    export const useAuthControllerRegister = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof authControllerRegister>>, TError,{data: RegisterClientDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof authControllerRegister>>,
+        TError,
+        {data: RegisterClientDto},
+        TContext
+      > => {
+      return useMutation(getAuthControllerRegisterMutationOptions(options), queryClient);
     }
     export const authControllerChangePassword = (
     changePasswordDto: ChangePasswordDto,

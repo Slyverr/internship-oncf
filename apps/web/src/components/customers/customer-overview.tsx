@@ -20,6 +20,7 @@ export function CustomerOverview({
 						label="Customer Code"
 						value={customer.customerCode ?? "—"}
 					/>
+					<RecordDetail label="ICE" value={customer.ice ?? "—"} />
 					<RecordDetail label="Type ID" value={customer.typeId ?? "—"} />
 					<RecordDetail
 						label="Account Active"

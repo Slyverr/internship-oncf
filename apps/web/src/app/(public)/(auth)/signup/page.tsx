@@ -1,11 +1,11 @@
 import { Metadata } from "next";
-import { UnderConstruction } from "@/components/under-construction";
+import { ClientRegistrationForm } from "@/components/auth/client-registration-form";
 
 export const metadata: Metadata = {
 	title: "Sign Up",
-	description: "",
+	description: "Request access to ECommand using your company details.",
 };
 
 export default function Page() {
-	return <UnderConstruction />;
+	return <ClientRegistrationForm />;
 }
