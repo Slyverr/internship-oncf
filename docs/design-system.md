@@ -7,7 +7,7 @@ This document is the shared UI contract for the Next.js application. Apply it to
 - Use a 4px base spacing unit. Choose spacing values from 4, 8, 12, 16, 24, and 32px; use 0 when no inset is needed. Prefer padding for component interiors and reserve margin for intentional relationships between separate blocks. Avoid one-off measurements and unexplained spacing classes.
 - Standard spacing aliases in this repo: 4px `gap-compact`, 8px `gap-control` / `px-control`, and 12px `px-field`. Larger layout gaps use the 4px-grid utilities (`gap-4`=16px, `gap-6`=24px, `gap-8`=32px). Choose by the resolved pixel value, not by a class name that looks familiar. Prefer named aliases for control insets and parent `gap` for layout rhythm.
 - Use `p-control` / `px-control` for an 8px control inset and `px-field` for the 12px field inset. Use 16px (`p-4`) for mobile page gutters and 24px (`p-6`) for wider page gutters. Every new spacing choice should be deliberate and on the 4px grid.
-- Dashboard content uses 16px gutters on small screens and 24px from tablet width upward, with a 1536px maximum content width. Keep page sections 24px apart. Keep related controls 8–16px apart and related sections inside a card 16–24px apart.
+- Dashboard content uses 16px gutters on small screens and 24px from tablet width upward, with a 2400px maximum content width for large 2K/4K displays. Keep page sections 24px apart. Keep related controls 8–16px apart and related sections inside a card 16–24px apart.
 - The dashboard content grid has one shrinkable column (`minmax(0, 1fr)`) so wide child content cannot expand the page past the viewport. Give grid/flex children that contain wide data `min-w-0`; constrain overflow to the specific table region.
 - Keep content width readable on ultrawide displays. Tables can use the available width, but text-heavy descriptions should have a readable maximum line length.
 - Stack page headings and primary actions on narrow screens. Actions should wrap cleanly and remain easy to tap; do not shrink targets to gain density.
@@ -36,7 +36,7 @@ Do not make a title and its subtitle the same size or weight. Use tabular numera
 
 ## 3. Surfaces and color roles
 
-Keep the current palette tokens until a palette change is requested. Use the existing semantic roles consistently:
+Keep the existing warm light and charcoal dark palettes as the default themes. Appearance choices may also include monochrome light and monochrome dark themes. Keep these theme values separate behind the same semantic roles so components never branch on a theme name:
 
 - `background` / `surface-canvas`: application canvas.
 - `sidebar` / `surface-navigation`: persistent navigation surface.
@@ -46,7 +46,7 @@ Keep the current palette tokens until a palette change is requested. Use the exi
 - `muted` and `muted-foreground`: secondary surfaces and supporting information.
 - `border`: grouping and control boundaries; prefer this over additional shadows.
 
-Use the same semantic roles in light and dark modes. Cards should separate from the canvas through the existing surface token and a quiet border/ring, not a bright white fill or heavy shadow. Hover is a small feedback cue, not a large decorative block. Focus indicators must remain visible and stronger than hover.
+Use the same semantic roles in all themes. Cards should separate from the canvas through the raised-surface token and a quiet border/ring, not an unexpectedly bright fill or heavy shadow. Hover is a small feedback cue, not a large decorative block. Focus indicators must remain visible and stronger than hover.
 
 ## 4. Cards, tables, and data
 
@@ -121,6 +121,22 @@ For each route family, inspect light and dark modes at 320px, 375px, 390px, 640p
 Review the public login/signup/forgot/reset routes; dashboard overview; each order, program, claim, customer, and user list/detail/create/edit route; reports; settings; notifications; and the shared shell in both expanded and collapsed states. For each guided form, inspect every step, field error, submit-pending state, and cancel/back route. For the sidebar, check logo/avatar centering and padding. For the bell and account menu, capture both closed and open states. Source inspection, HTTP status, and successful builds do not replace screenshot review.
 
 If browser capture is unavailable, state that limitation. Continue with route inventory, source inspection, tests, typecheck, production build, and local HTTP checks, but mark screenshot-dependent findings as unverified instead of inferring visual quality.
+
+## 9. Appearance preferences and settings
+
+- Provide five theme choices: System, Warm light, Charcoal dark, Monochrome light, and Monochrome dark. System follows the device preference. The existing warm/charcoal token values remain the defaults.
+- Offer readable font choices (Inter, Geist, and the device system font) and three text sizes (Small, Default, Large). Change type scale without shrinking 44px hit areas or removing spacing; ensure labels, table values, dialogs, and long forms still wrap cleanly.
+- Offer a reduced-motion override in addition to respecting the device's reduced-motion setting. New motion must retain the existing 120–200ms limit and must not be required to understand state.
+- Store signed-in appearance preferences per user on the server so choices follow the account across devices. Use browser storage only as a fast initial display and local fallback when the API is unavailable. Do not key behavior off `NODE_ENV`.
+- Settings open as a bounded dialog from the account menu. On desktop, use a fixed-width section navigation rail and a separately scrollable content pane; on phones, show a horizontally scrollable section selector above the pane. Keep title, close action, and current section clear while content scrolls.
+- Keep Appearance, Profile, and Security as the settings sections. Profile in the account menu opens the Profile section directly; Settings opens Appearance. Each section has a stable deep link, and closing returns to the page the user came from. A direct visit to the settings URL remains usable without requiring prior navigation.
+- Target a dialog width of at most 1120px and a height of at most `100svh - 32px`. On small screens, use the available viewport with 16px outer spacing; do not let the close button overlap content or place nested scroll regions beside one another.
+
+### Visual review rounds
+
+1. **Structure and hierarchy:** check page title/subtitle scale, group boundaries, whitespace, first useful action, and whether content order follows the real task.
+2. **Interaction and flow:** check control size, clear next/back actions, feedback and validation, role visibility, keyboard/focus behavior, and whether users can complete common work without repeated route switching.
+3. **Responsive polish and resilience:** check 320px through 3840px, all four concrete themes, text-size/font choices, long labels, empty/error/pending states, motion settings, and clipping/overflow. Record screenshot evidence after each meaningful shared-component change.
 
 ## Motion and stable feedback
 
