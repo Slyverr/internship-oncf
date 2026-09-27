@@ -2,7 +2,7 @@
 
 import { isStrongPassword, STRONG_PASSWORD_HINT } from "@ecommand/shared";
 import { MonitorIcon, MoonIcon, SunIcon } from "lucide-react";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -62,6 +62,22 @@ export function SettingsPanel() {
 	const [passwordMessage, setPasswordMessage] = useState("");
 	const [profileError, setProfileError] = useState("");
 	const [passwordError, setPasswordError] = useState("");
+
+	const profileIsDirty =
+		firstName.trim() !== profile.firstName ||
+		lastName.trim() !== profile.lastName ||
+		email.trim() !== profile.email;
+
+	useEffect(() => {
+		setFirstName(profile.firstName);
+		setLastName(profile.lastName);
+		setEmail(profile.email);
+	}, [profile.firstName, profile.lastName, profile.email]);
+
+	function clearProfileFeedback() {
+		setProfileMessage("");
+		setProfileError("");
+	}
 
 	function saveProfile(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -202,7 +218,10 @@ export function SettingsPanel() {
 								value={firstName}
 								autoComplete="given-name"
 								required
-								onChange={(event) => setFirstName(event.target.value)}
+								onChange={(event) => {
+									setFirstName(event.target.value);
+									clearProfileFeedback();
+								}}
 							/>
 						</div>
 						<div className="grid gap-control">
@@ -212,7 +231,10 @@ export function SettingsPanel() {
 								value={lastName}
 								autoComplete="family-name"
 								required
-								onChange={(event) => setLastName(event.target.value)}
+								onChange={(event) => {
+									setLastName(event.target.value);
+									clearProfileFeedback();
+								}}
 							/>
 						</div>
 						<div className="grid gap-control sm:col-span-2">
@@ -223,12 +245,32 @@ export function SettingsPanel() {
 								value={email}
 								autoComplete="email"
 								required
-								onChange={(event) => setEmail(event.target.value)}
+								onChange={(event) => {
+									setEmail(event.target.value);
+									clearProfileFeedback();
+								}}
 							/>
 						</div>
 						<div className="flex flex-wrap items-center gap-4 sm:col-span-2">
-							<Button type="submit" disabled={profileMutation.isPending}>
+							<Button
+								type="submit"
+								disabled={!profileIsDirty || profileMutation.isPending}
+							>
 								{profileMutation.isPending ? "Saving..." : "Save profile"}
+							</Button>
+							<Button
+								type="button"
+								variant="ghost"
+								disabled={!profileIsDirty || profileMutation.isPending}
+								onClick={() => {
+									setFirstName(profile.firstName);
+									setLastName(profile.lastName);
+									setEmail(profile.email);
+									setProfileMessage("");
+									setProfileError("");
+								}}
+							>
+								Discard changes
 							</Button>
 							{profileMessage && (
 								<p role="status" className="text-sm text-primary">
