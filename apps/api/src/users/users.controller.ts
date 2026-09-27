@@ -4,7 +4,6 @@ import {
 	Controller,
 	Delete,
 	Get,
-	ParseIntPipe,
 	Post,
 	Put,
 	Request,
@@ -13,6 +12,7 @@ import type { AuthRequest } from "@/auth/auth.types";
 import { RequireAny } from "@/auth/permissions.decorator";
 import { createCrudResponses } from "@/common/decorators/api-crud-responses.decorator";
 import { ApiPathParam } from "@/common/decorators/api-path-param.decorator";
+import { UserIdPipe } from "./pipes/user-id.pipe";
 import { CreateUserDto } from "./requests/create-user.dto";
 import { UpdateUserDto } from "./requests/update-user.dto";
 import { UserDeleteDto } from "./responses/user-delete.dto";
@@ -21,7 +21,7 @@ import { UserListDto } from "./responses/user-list.dto";
 import { UsersService } from "./users.service";
 import type { UserId } from "./users.types";
 
-const UserIdParam = () => ApiPathParam("id", ParseIntPipe);
+const UserIdParam = () => ApiPathParam("id", UserIdPipe);
 
 const {
 	list: UserListResponse,

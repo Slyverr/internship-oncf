@@ -4,7 +4,6 @@ import {
 	Controller,
 	Delete,
 	Get,
-	ParseIntPipe,
 	Post,
 	Put,
 	Query,
@@ -14,6 +13,7 @@ import { createCrudResponses } from "@/common/decorators/api-crud-responses.deco
 import { ApiPathParam } from "@/common/decorators/api-path-param.decorator";
 import { CustomersService } from "./customers.service";
 import type { CustomerId } from "./customers.types";
+import { CustomerIdPipe } from "./pipes/customer-id.pipe";
 import { CreateCustomerDto } from "./requests/create-customer.dto";
 import { ListCustomerQueryDto } from "./requests/list-customer.dto";
 import { UpdateCustomerDto } from "./requests/update-customer.dto";
@@ -21,7 +21,7 @@ import { CustomerDeleteDto } from "./responses/customer-delete.dto";
 import { CustomerDetailDto } from "./responses/customer-detail.dto";
 import { CustomerListDto } from "./responses/customer-list.dto";
 
-const CustomerIdParam = () => ApiPathParam("id", ParseIntPipe);
+const CustomerIdParam = () => ApiPathParam("id", CustomerIdPipe);
 
 const {
 	list: CustomerListResponse,
