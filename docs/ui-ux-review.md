@@ -2,7 +2,9 @@
 
 ## Review evidence
 
-This is primarily a source-based review, not a full screenshot review. I inspected the ONCF raster asset directly, but this execution environment has no browser automation tool or installed browser binary, so I could not capture rendered route screenshots. Findings marked source-confirmed come from the current route and component code; page composition, clipping, contrast, and responsive behavior still need browser confirmation. Do not treat this document as claiming those checks passed. The shared interface rules are recorded in [design-system.md](./design-system.md).
+This review combines source inspection with a live browser screenshot pass. On 2026-09-27, I captured all 24 protected route paths and the four public authentication routes in light and dark themes at 390px and 1440px. The protected routes used the existing signed-in admin test session; public routes used an isolated browser context with no cookies. I also captured all five table pages and five create forms at 320px and 768px in both themes. Long mobile details and Settings were captured full-page, and I separately inspected the collapsed sidebar, its hover tooltip, the account menu, and the notifications popover. The Next.js development overlay was removed from captures so it would not obscure application controls. Screenshots and manifests are included in the review artifact generated for this session. No business records were changed. The shared interface rules are recorded in [design-system.md](./design-system.md).
+
+The route captures settled before inspection: no route errors or loading placeholders remained, and `document.documentElement.scrollWidth` matched the viewport for each tested route. The first pass exposed a real mobile table issue despite the absence of page-level overflow; the correction and its recheck are recorded below.
 
 The review covers all user-facing route families:
 
@@ -17,15 +19,17 @@ The review covers all user-facing route families:
 
 - Shared semantic color and surface tokens exist for light and dark modes. They are intentionally unchanged in this pass, following the request to keep the current palette.
 - The shared TableCell used 8px padding on all sides and the header was 40px high. That is too tight for the documented table-row spacing and conflicts with the request for visible cell insets. Shared table cells now use 16px padding and the header uses a 48px height.
-- The ONCF asset is a square transparent PNG with a horizontal wordmark. Rendering it in a square image box preserved excess transparent space and made the mark appear too small. The sidebar now crops the source to its horizontal mark proportions inside the existing tile; the logo still needs a browser screenshot check at expanded and collapsed widths.
+- The ONCF asset is a square transparent PNG with a horizontal wordmark. Rendering it in a square image box preserved excess transparent space and made the mark appear too small. The sidebar now crops the source to its horizontal mark proportions inside the existing tile; screenshots confirm the mark remains centered and uncropped in expanded and collapsed widths.
 - The shared record summary uses a clear small-label/value hierarchy, but several page-specific rows and cards still need a visual pass for wrapping, alignment, and dense values.
 - The shared page wrapper used 32px between every route's top-level sections and a fixed 16px gutter at all widths. It now uses 24px section rhythm, 16px mobile gutters, and 24px tablet/desktop gutters within a 1536px reading width.
+- At 390px, wide table columns expanded the dashboard's single-column CSS grid to their min-content width. That pushed the Orders status filter outside the viewport and made the table look clipped. The shared page grid now uses one shrinkable column; every tested route stayed within the viewport afterward. Wide tables scroll in their own keyboard-focusable region and now show a small mobile hint only while more columns remain.
 - Ghost buttons and sidebar rows used fully opaque muted/accent hover fills. Their hover fills are now softer; collapsed sidebar items keep the full 44px target but no longer paint the entire icon button on hover. Button transitions are limited to color instead of animating every property.
+- At desktop width, the collapsed sidebar measured 63px wide. Its logo/profile groups retain 16px vertical padding, with 44px controls centered in the rail. The collapsed icon tooltip was visually heavy against the page; it now uses the popover surface, a quiet border, compact padding, and an 8px gap.
 - Inputs and textareas now use 12px horizontal padding from the 4px grid. Scrollable tables can receive keyboard focus and expose a named region; table row hover is subdued.
 
 **Self-critique**
 
-These measurements identify likely density and hover issues, but cannot prove that the rendered layouts look balanced at real viewport sizes. A 16px table inset may also make wide data tables scroll sooner on mobile; inspect each table at 320px, 390px, tablet, and desktop widths.
+The screenshot pass verified the shared rhythm at 320px, 390px, 768px, and desktop width for the table/form routes. Horizontal table scrolling is retained because it preserves column relationships; the hint makes the gesture discoverable. Dense tables still need content review with larger real datasets, since the current seed data has only a few rows.
 
 ## Assessment round 2: task flow and next actions
 
@@ -33,11 +37,13 @@ These measurements identify likely density and hover issues, but cannot prove th
 
 - Order details show forecast-program counts, while program creation previously required returning to Programs and selecting the order again.
 - The eligible-program API allows orders in APPROVED, SENT_TO_DTM, and IN_PROGRESS; it is permission protected. The order detail now offers Create program only when the user has programs:create, can manage other orders or owns this order, the order has no forecast programs, and its status is eligible. This mirrors the eligible-orders API ownership filter. The route carries the order ID and number search; the create form preselects the order only while it remains in the eligible query. Cancel returns to the originating order detail.
-- The create/edit flows use shared guided progress/actions. Cancel routes are stable, and navigation actions are disabled during an in-flight submit.
+- The create/edit flows use shared guided progress/actions. Cancel routes are stable, and navigation actions are disabled during an in-flight submit. Guided forms now validate only the fields on the active step before advancing; the complete schema runs on final submit and maps errors back to the corresponding field. Browser checks confirmed New User can advance without profile errors, then shows required names after final submit, and New Claim displays its description error without submitting.
+- The order detail action logic is covered for every order status, owner/manager scope, permission, and existing-program count. The current development data has no eligible order without a program, so the positive Create program button state could not be captured safely in the live UI; use a dedicated fixture before final workflow acceptance.
+- The notifications control opens a 360px popover aligned below its trigger, with a clear empty state and a separate View all notifications destination. The collapsed profile menu opens above the avatar and keeps Profile, Settings, and Log out reachable.
 
 **Self-critique**
 
-The action is implemented from current API rules, but role/status combinations need runtime interaction checks. Confirm that a stale or no-longer-eligible order clears from the selector and cannot advance with an invisible selection. Check the CTA on both detail and list/dashboard contexts to ensure its placement does not overwhelm primary status actions.
+The CTA rule has exhaustive unit coverage, but a successful end-to-end Create program run still needs a fixture that is both eligible and unprogrammed. Confirm the selector clears stale orders and does not advance with an invisible selection. The CTA currently lives on eligible order details; decide whether it also belongs in an order list row or dashboard card after measuring action density with realistic data. The create forms were also checked for premature validation: a later-step required field must stay quiet until the user reaches that step and submits.
 
 ## Assessment round 3: consistency, responsiveness, and maintainability
 
@@ -49,10 +55,12 @@ The action is implemented from current API rules, but role/status combinations n
 - The previous order detail guard allowed same-customer access while order lists and reports only filtered by creator. List and report queries now use the same assigned-customer scope, and program list/detail access follows the related order's customer. The exact role and schema mapping is recorded in [authorization-matrix.md](./authorization-matrix.md).
 - The 24 dashboard route files cover the core operational pages; four public authentication routes are separate. A source-reference scan found no clearly orphaned web modules. Dependency-name scanning produced framework/runtime false positives, so no dependencies were removed without stronger evidence.
 - Existing reduced-motion handling is present. It should be retained for every new transition.
+- The light and dark screenshots use the same semantic surface roles; the current warm light cards separate from the canvas without changing the palette. Full-page Settings screenshots show the appearance, account, and security sections in one consistent card rhythm.
+- Full-page order, program, claim, customer, and user details retain the same label/value hierarchy down the page. One local claim currently contains ad hoc test comments and description text that do not appear in committed fixtures; treat those as local data cleanup, not UI copy.
 
 **Self-critique**
 
-Shared primitives reduce drift but do not make all page content consistent. Copy, empty/loading/error states, image sizing, shadow use, and action placement remain page-specific. Static checks cannot detect clipped text, awkward wrapping, poor visual balance, or confusing hover areas.
+Shared primitives reduce drift but do not make all page content consistent. The route screenshots cover first-viewport layouts; below-fold details were inspected on representative long pages, not exhaustively on every route and theme. Copy, empty/loading/error/success states, and action placement still need state-by-state review. The seed data does not provide a positive order-to-program CTA case.
 
 ## Prioritized work list
 
@@ -67,19 +75,23 @@ Shared primitives reduce drift but do not make all page content consistent. Copy
 - [x] Add a permission- and status-aware Create program action to eligible order details and carry the selected order into the guided create flow.
 - [x] Hide customer/user/program overflow triggers when the current role and record state provide no menu action; cover default roles and program status in frontend checks.
 - [x] Require a customer assignment for client representatives in user management and the API; align order, program, and report reads with the existing customer ownership relation; assign the development client fixture to a seeded customer.
+- [x] Capture all protected and public route paths in light/dark at 390px and 1440px after loading settles; inspect the route contact sheets for page-level overflow and rendering errors.
+- [x] Capture all table pages and create forms in light/dark at 320px and 768px; constrain the shared dashboard grid and add a conditional mobile table-scroll hint after the screenshots exposed clipping.
+- [x] Capture full-page mobile Settings and representative order/program/claim/customer/user detail pages; inspect collapsed sidebar spacing, the small tooltip, account menu, and notification popover.
+- [x] Keep the existing palette and confirm the warm light surfaces and charcoal dark surfaces remain consistent across the route set.
 
 ### Next visual review
 
-- [ ] Capture screenshots for every route family in light and dark at 390px and desktop width; include expanded and collapsed sidebar, settings, all tables, every guided-form step, and open notification/account menus.
-- [ ] Inspect the screenshot set for clipping, alignment, line wrapping, type hierarchy, card/surface contrast, image crop/aspect, shadow strength, and hover footprint; record per-route corrections.
-- [ ] Verify the order-to-program CTA for admin, commercial agent, and client representative, and for each eligible/ineligible order status and existing-program state.
-- [ ] Inspect all tables at 320px, 390px, tablet, and desktop; decide where horizontal scroll is acceptable and where a mobile row/card layout is needed.
-- [ ] Audit empty/loading/error/success states across each list, detail, and form route; make wording and action placement consistent.
+- [ ] Capture every remaining guided-form step, open select/menu/dialog state, and full-page section in both themes; current captures include the initial create steps, second edit steps for orders/customers/users, and validation states for user and claim creation.
+- [ ] Review route-specific copy, alignment, wrapping, shadow use, success/error states, and action placement below the fold; the first-viewport route pass and representative full-page details are complete.
+- [ ] Run the successful order-to-program flow with an eligible, unprogrammed order for admin and commercial-agent accounts; confirm the client representative cannot see or invoke it.
+- [x] Inspect table/form screens at 320px, 390px, 768px, and 1440px. Keep horizontal scrolling for wide tables, with a visible hint on phones, unless realistic data reveals a table-specific card layout is clearer.
+- [ ] Audit empty/loading/error/success states across each list, detail, and form route; make wording and action placement consistent. Recheck all guided-form fields when backend error messages arrive, since this browser pass exercised client-side validation.
 - [ ] Compare form labels/help/errors, page titles/subtitles, record rows, and action bars against the design-system type and spacing scale.
-- [ ] Keep color tokens fixed unless the user requests another palette change; visually confirm light/dark surface hierarchy and text contrast.
-- [ ] Add screenshot or visual-regression coverage after a browser runner is available.
+- [x] Keep color tokens fixed and visually compare light/dark surface hierarchy across captured routes.
+- [ ] Add repeatable screenshot or visual-regression coverage to the repository; this pass used the live Chrome debugging session and generated a review bundle, not a checked-in browser test runner.
 - [ ] Decide whether public signup is part of this MVP; `/signup` currently renders the shared Under Construction view and there is no public registration API route.
 
-## Screenshot limitation
+## Current review limits
 
-The screenshot checklist remains open because the current environment does not expose browser control and does not contain Chromium, Chrome, Firefox, Playwright, or Puppeteer. A later review needs a browser-capable session or a browser installed in the development environment. The app is reachable at http://localhost:3000; endpoint availability is not evidence of visual correctness.
+The screenshot pass verified rendered route screens and responsive width behavior, but it does not replace keyboard/screen-reader testing or a complete interaction-state matrix. A final-submit validation bug discovered during the form pass was fixed and verified in live user and claim flows; its screenshots are included in the review artifact. The dev database lacks an eligible unprogrammed order, and some seeded/local detail content is sparse. Add that fixture before accepting the order-to-program workflow visually; do not alter user-created local records just to produce a screenshot. Public signup remains an Under Construction page with no registration API route.

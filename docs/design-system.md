@@ -8,6 +8,7 @@ This document is the shared UI contract for the Next.js application. Apply it to
 - Standard spacing aliases in this repo: 4px `gap-compact`, 8px `gap-control` / `px-control`, and 12px `px-field`. Larger layout gaps use the 4px-grid utilities (`gap-4`=16px, `gap-6`=24px, `gap-8`=32px). Choose by the resolved pixel value, not by a class name that looks familiar. Prefer named aliases for control insets and parent `gap` for layout rhythm.
 - Use `p-control` / `px-control` for an 8px control inset and `px-field` for the 12px field inset. Use 16px (`p-4`) for mobile page gutters and 24px (`p-6`) for wider page gutters. Every new spacing choice should be deliberate and on the 4px grid.
 - Dashboard content uses 16px gutters on small screens and 24px from tablet width upward, with a 1536px maximum content width. Keep page sections 24px apart. Keep related controls 8–16px apart and related sections inside a card 16–24px apart.
+- The dashboard content grid has one shrinkable column (`minmax(0, 1fr)`) so wide child content cannot expand the page past the viewport. Give grid/flex children that contain wide data `min-w-0`; constrain overflow to the specific table region.
 - Keep content width readable on ultrawide displays. Tables can use the available width, but text-heavy descriptions should have a readable maximum line length.
 - Stack page headings and primary actions on narrow screens. Actions should wrap cleanly and remain easy to tap; do not shrink targets to gain density.
 - Use responsive grids that start as one column. Introduce two columns only when each field/card has enough room to remain readable.
@@ -52,6 +53,7 @@ Use the same semantic roles in light and dark modes. Cards should separate from 
 - Cards use one consistent radius, quiet outline, and 16px interior spacing on mobile / 24px from the `sm` breakpoint upward. The 44px control size and 16px table cell insets do not shrink on mobile.
 - Tables use 14px text, aligned values, a restrained header style, and at least 16px horizontal and vertical cell insets on desktop. Keep row actions and links within their own hit areas.
 - On narrow screens, let wide tables scroll inside their own container; do not compress important values until they collide. Ensure the scroll area can be reached by keyboard and communicates its purpose.
+- When a table overflows on a phone, show a quiet “Scroll to see the remaining columns” hint below it while more columns remain. Hide the hint at the end of the scroll area and expose it to the scroll region through `aria-describedby` while it is visible.
 - Use one label/value pattern in record details: muted 13px label, stronger 14–16px value, 8px separation, and wrapping for long values.
 - A standard table row is at least 56px tall; a row with a title and supporting line is at least 64px. Give each cell its own inset and keep related values aligned by column. Use tabular numerals for comparable dates and quantities.
 - Keep long values readable. Truncate only when the same record has a clear detail destination or the full value is available to assistive technology. On phones, preserve table column meaning inside the horizontal scroll area rather than squeezing text together.
@@ -82,6 +84,7 @@ Use the same semantic roles in light and dark modes. Cards should separate from 
 - Keep logo and profile controls centered with the same top/bottom breathing room in both sidebar states.
 - Notifications open next to their trigger as a bounded popover. The full inbox remains a separate destination for reviewing older items.
 - Transitions should be short and limited to the property that changes. Respect `prefers-reduced-motion`.
+- Tooltips use the semantic popover surface, a quiet border, and compact 8px × 4px insets. Keep icon controls at their full hit size; the tooltip should label the control without becoming a large hover panel.
 
 ### Application shell measurements
 
