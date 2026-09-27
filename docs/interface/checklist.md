@@ -12,7 +12,7 @@ This is the running review list for the application-wide usability and visual ov
 | 4 | Button surfaces | Find light-theme buttons that look like unbounded white text; set a consistent semantic surface, border, or restrained elevation. Check every button variant in both themes. | To review |
 | 5 | Settings controls | Review dialog title area, fixed size, option density, touch targets, save state, close, tabs, and profile/security actions. | In progress |
 | 6 | Sidebar alignment | Compare expanded and collapsed logo, nav, and account alignment; keep header/footer padding and navigation centers consistent. | Complete |
-| 7 | Sidebar motion | Add restrained, reduced-motion-aware transitions for collapse/expand and content state changes; verify no abrupt layout shift. | In progress |
+| 7 | Sidebar motion | Add restrained, reduced-motion-aware transitions for collapse/expand and content state changes; verify no abrupt layout shift. | Complete |
 | 8 | Dashboard content | Replace the sparse three-panel impression with useful role- and permission-aware metrics, trends, and prioritized next actions based on available data. Surface eligible order-to-program actions without bypassing server rules. | In progress |
 | 9 | Workspace width consistency | Compare dashboard and all inner routes under both shell layouts at laptop through 4K widths. Use one shared content-width rule per shell and prevent unexplained route-specific centering. | Complete |
 | 10 | Table density | Review header, row, cell padding, wrapping, and phone overflow. Add a user-controlled density preference only if the responsive behavior still benefits from it. | To review |
@@ -45,6 +45,7 @@ Review both light and dark appearances, and both workspace layouts where the rou
 - After collapsing, the first navigation item now remains at the same vertical start as the expanded state while every 44px icon target stays centered in the 64px rail; the logo and profile retain their 16px vertical inset.
 - Fresh settings-dialog captures at 320px and 390px show three compact, evenly sized tabs with no horizontal overflow; the Appearance label remains fully readable at 320px and each tab retains a 48px minimum target.
 - Fresh collapsed-rail measurements found that the empty label gap shifted logo, avatar, and nav icons 4px left. Removing that gap centers all nine marks at 31.5px within the 63px bordered rail; the buttons retain 44px targets.
+- A fresh collapse capture measured the rail moving from 255px to 63px over 200ms while the menu labels faded out; the content moved with the rail and no horizontal overflow appeared. Setting the user's motion preference to reduced reduced transition and animation durations to 0.01ms.
 - The notification popover keeps click, keyboard, and touch behavior; its empty/loading states use a tighter header, body, and footer rhythm while keeping the 44px footer action target.
 - Fresh settings captures at 1440×900, 390×844, and 320×640 show a fixed 768px desktop dialog and an internally scrolling phone panel with no page-level horizontal overflow. The desktop title strip was tightened by one 4px spacing step; mobile title space was already compact.
 - Auth form content now uses the shared 180ms page-entry fade and 4px rise; the existing system and user reduced-motion rules disable it.
