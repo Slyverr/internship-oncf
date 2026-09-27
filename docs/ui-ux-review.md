@@ -82,6 +82,7 @@ Shared primitives reduce drift but do not make all page content consistent. The 
 - [x] Give the goods selector an explicit retry action when its catalog query fails, keeping order forms recoverable.
 - [x] Distinguish empty results from failed customer, goods, unit, order, and user option queries; keep stale choices available and provide inline retry actions.
 - [x] Preserve an order-detail preselection while program eligibility is loading, refreshing, or failed; clear it only after a successful response says it is no longer eligible.
+- [x] Give appearance theme choices semantic-token previews, including both device modes for System, without changing any theme colors.
 - [x] Hide customer/user/program overflow triggers when the current role and record state provide no menu action; cover default roles and program status in frontend checks.
 - [x] Require a customer assignment for client representatives in user management and the API; align order, program, and report reads with the existing customer ownership relation; assign the development client fixture to a seeded customer.
 - [x] Capture all protected and public route paths in light/dark at 390px and 1440px after loading settles; inspect the route contact sheets for page-level overflow and rendering errors.

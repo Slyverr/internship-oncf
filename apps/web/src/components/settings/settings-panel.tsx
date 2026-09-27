@@ -1,7 +1,7 @@
 "use client";
 
 import { isStrongPassword, STRONG_PASSWORD_HINT } from "@ecommand/shared";
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, type ReactNode, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -102,12 +102,14 @@ function PreferenceChoices<Value extends string>({
 	value,
 	options,
 	onChange,
+	renderPreview,
 	columns = "sm:grid-cols-2",
 }: {
 	label: string;
 	value: Value;
 	options: { value: Value; label: string; description: string }[];
 	onChange: (value: Value) => void;
+	renderPreview?: (value: Value) => ReactNode;
 	columns?: string;
 }) {
 	const id = label.toLowerCase().replaceAll(" ", "-");
@@ -131,7 +133,8 @@ function PreferenceChoices<Value extends string>({
 						className="flex min-h-20 cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors hover:bg-muted/60 has-[[data-checked]]:border-primary has-[[data-checked]]:bg-primary/5"
 					>
 						<RadioGroupItem id={`${id}-${option.value}`} value={option.value} />
-						<span className="grid gap-compact">
+						{renderPreview?.(option.value)}
+						<span className="grid min-w-0 flex-1 gap-compact">
 							<span className="text-sm font-medium">{option.label}</span>
 							<span className="text-sm text-muted-foreground">
 								{option.description}
@@ -141,6 +144,42 @@ function PreferenceChoices<Value extends string>({
 				))}
 			</RadioGroup>
 		</fieldset>
+	);
+}
+
+type PreviewTheme = Exclude<ThemeMode, "system">;
+
+function ThemeSurface({ theme }: { theme: PreviewTheme }) {
+	const isDark = theme === "dark" || theme === "mono-dark";
+
+	return (
+		<span
+			data-theme={theme}
+			className={`grid min-w-0 grid-cols-[0.6fr_1.4fr] ${isDark ? "dark" : ""}`}
+		>
+			<span className="bg-sidebar" />
+			<span className="grid content-center gap-1 bg-background p-1">
+				<span className="h-1 w-5 rounded-full bg-muted-foreground/40" />
+				<span className="h-2 rounded-sm border border-border bg-card" />
+				<span className="h-1 w-3/4 rounded-full bg-primary" />
+			</span>
+		</span>
+	);
+}
+
+function ThemePreview({ theme }: { theme: ThemeMode }) {
+	const previews: PreviewTheme[] =
+		theme === "system" ? ["light", "dark"] : [theme];
+
+	return (
+		<span
+			aria-hidden="true"
+			className={`grid h-10 w-14 shrink-0 overflow-hidden rounded-md border border-border ${theme === "system" ? "grid-cols-2" : "grid-cols-1"}`}
+		>
+			{previews.map((previewTheme) => (
+				<ThemeSurface key={previewTheme} theme={previewTheme} />
+			))}
+		</span>
 	);
 }
 
@@ -275,6 +314,7 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 							value={preferences.theme}
 							options={themeOptions}
 							onChange={setTheme}
+							renderPreview={(theme) => <ThemePreview theme={theme} />}
 							columns="sm:grid-cols-2 2xl:grid-cols-3"
 						/>
 						<PreferenceChoices

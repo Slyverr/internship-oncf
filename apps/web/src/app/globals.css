@@ -116,7 +116,8 @@
 	padding-inline: var(--spacing);
 }
 
-:root {
+:root,
+[data-theme="light"] {
 	--type-scale: 1;
 	--surface-canvas: oklch(0.985 0.005 80);
 	--surface-raised: oklch(0.962 0.014 72);
@@ -155,7 +156,8 @@
 	--sidebar-ring: oklch(0.57 0.12 38);
 }
 
-.dark {
+.dark,
+[data-theme="dark"] {
 	--surface-canvas: oklch(0.22 0.004 255);
 	--surface-raised: oklch(0.255 0.005 255);
 	--surface-navigation: oklch(0.205 0.004 255);
