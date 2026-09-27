@@ -110,7 +110,7 @@ Use the same semantic roles in all themes. Cards should separate from the canvas
 
 - The header is 64px high. The mobile sidebar sheet is 288px wide, bounded by the viewport; the expanded desktop sidebar is 256px.
 - The collapsed desktop rail is 64px wide. Keep logo and avatar marks at 32px and center them in 44px controls, with 16px top and bottom padding around the header/footer groups. Keep icon targets at 44px.
-- In the collapsed rail, center every logo/avatar/menu icon. Remove internal horizontal button padding only where it would displace the icon; retain the full button target and the rail's outer breathing room.
+- In the collapsed rail, center every logo/avatar/menu icon. Remove internal horizontal button padding and any gap left by a hidden label when either would displace the icon; retain the full button target and the rail's outer breathing room.
 - Keep the brand art inside its tile without stretching the logo to a square. If an asset includes transparent canvas, size/crop it by its visible content proportions and preserve the complete wordmark where there is room.
 - Expanded navigation hover may tint its full 44px row using a low-opacity accent. Collapsed hover changes the icon/foreground gently without filling the whole target. Focus uses the visible ring and remains distinct from hover.
 - Keep the footer anchored below the independently scrollable navigation. Group labels have a distinct treatment and may hide when collapsed. The collapsed logo, each nav icon, and the profile control need accessible names/tooltips; account name and role may hide in the rail.

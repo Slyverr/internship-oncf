@@ -43,6 +43,8 @@ Review both light and dark appearances, and both workspace layouts where the rou
 - Page headings now choose inline actions from the available workspace width, so the tablet sidebar does not squeeze the title into a narrow column beside stacked buttons.
 - Fresh 1440×900 sidebar captures show the collapsed logo and account controls centered in 44px targets with 16px top and bottom insets; expanded and collapsed navigation icons remain on the same vertical rhythm.
 - After collapsing, the first navigation item now remains at the same vertical start as the expanded state while every 44px icon target stays centered in the 64px rail; the logo and profile retain their 16px vertical inset.
+- Fresh settings-dialog captures at 320px and 390px show three compact, evenly sized tabs with no horizontal overflow; the Appearance label remains fully readable at 320px and each tab retains a 48px minimum target.
+- Fresh collapsed-rail measurements found that the empty label gap shifted logo, avatar, and nav icons 4px left. Removing that gap centers all nine marks at 31.5px within the 63px bordered rail; the buttons retain 44px targets.
 - The notification popover keeps click, keyboard, and touch behavior; its empty/loading states use a tighter header, body, and footer rhythm while keeping the 44px footer action target.
 - Fresh settings captures at 1440×900, 390×844, and 320×640 show a fixed 768px desktop dialog and an internally scrolling phone panel with no page-level horizontal overflow. The desktop title strip was tightened by one 4px spacing step; mobile title space was already compact.
 - Auth form content now uses the shared 180ms page-entry fade and 4px rise; the existing system and user reduced-motion rules disable it.
