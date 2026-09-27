@@ -11,10 +11,10 @@ describe("canAccessOrder", () => {
 		expect(canAccessOrder(undefined, user)).toBeUndefined();
 	});
 
-	it("allows the order creator", () => {
+	it("uses the assigned customer as the scope for assigned users", () => {
 		expect(
 			canAccessOrder({ customerId: 99, createdByUserId: user.id }, user),
-		).toBe(true);
+		).toBe(false);
 	});
 
 	it("allows users assigned to the order's customer", () => {
@@ -29,7 +29,16 @@ describe("canAccessOrder", () => {
 		);
 	});
 
-	it("does not grant customer access when the user has no assignment", () => {
+	it("allows creators when they have no customer assignment", () => {
+		expect(
+			canAccessOrder(
+				{ customerId: 42, createdByUserId: 18 },
+				createUser(18, null),
+			),
+		).toBe(true);
+	});
+
+	it("does not grant customer access to an unassigned non-creator", () => {
 		expect(
 			canAccessOrder(
 				{ customerId: 42, createdByUserId: 77 },

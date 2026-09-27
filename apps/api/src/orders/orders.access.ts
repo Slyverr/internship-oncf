@@ -11,7 +11,9 @@ export function canAccessOrder(
 ): boolean | undefined {
 	if (!order) return undefined;
 
-	return (
-		user.customerId === order.customerId || user.id === order.createdByUserId
-	);
+	if (user.customerId !== null) {
+		return user.customerId === order.customerId;
+	}
+
+	return user.id === order.createdByUserId;
 }

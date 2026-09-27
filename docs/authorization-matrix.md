@@ -22,10 +22,10 @@ Admin receives every defined permission. Parent permissions imply descendants (f
 
 | Resource / action | API permission | Web surface | Additional scope |
 | --- | --- | --- | --- |
-| Orders list/detail/files | orders:read | Sidebar Orders; order list/detail and attachments | Lists, reports, ID routes, and files agree: manage-other sees cross-customer records; otherwise a linked customer scopes records to that customer, falling back to creator-only when no customer is linked. |
+| Orders list/detail/files | orders:read | Sidebar Orders; order list/detail and attachments | Lists, reports, ID routes, and files agree: manage-other sees cross-customer records; otherwise a linked customer is the exclusive scope, falling back to creator-only when no customer is linked. |
 | Orders create/edit/delete | orders:create/update/delete | Create form; order action menu | The API and web both restrict deletion to draft orders. |
 | Order lifecycle | orders:action:* | OrderActions | API state transitions are authoritative. |
-| Programs list/detail | programs:read | Sidebar Programs; list/detail | Lists and ID routes use creator scope, or the assigned customer's order relation; `PROGRAMS_MANAGE_OTHER` bypasses the scope. |
+| Programs list/detail | programs:read | Sidebar Programs; list/detail | Lists and ID routes use the assigned customer's order relation when a customer is linked, or creator scope when no customer is linked; `PROGRAMS_MANAGE_OTHER` bypasses the scope. |
 | Programs create/edit/delete | programs:create/update/delete | Create form; program action menu | The API and web both restrict deletion to draft programs. |
 | Program lifecycle | programs:action:* | ProgramActions | Valid path: draft → pending approval → approved → confirmed → sent to DTM → in progress. Cancellation is allowed before dispatch. |
 | Claims list/detail/comments | claims:read | Sidebar Claims; details and comments | ID routes use ClaimOwnershipGuard; list filters are constrained for users without manage-other. |

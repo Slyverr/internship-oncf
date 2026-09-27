@@ -12,8 +12,19 @@ describe("canAccessProgram", () => {
 		expect(canAccessProgram(undefined, user)).toBeUndefined();
 	});
 
-	it("allows the program creator", () => {
-		expect(canAccessProgram({ createdByUserId: user.id }, user)).toBe(true);
+	it("uses the assigned customer's orders as the scope for assigned users", () => {
+		expect(
+			canAccessProgram(
+				{ createdByUserId: user.id, order: { customerId: 99 } },
+				user,
+			),
+		).toBe(false);
+	});
+
+	it("allows creators when they have no customer assignment", () => {
+		expect(
+			canAccessProgram({ createdByUserId: 18 }, createUser(18, null)),
+		).toBe(true);
 	});
 
 	it("allows a customer user to read programs linked to their customer orders", () => {

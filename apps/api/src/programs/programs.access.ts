@@ -10,9 +10,10 @@ export function canAccessProgram(
 	user: AuthUser,
 ): boolean | undefined {
 	if (!program) return undefined;
-	if (program.createdByUserId === user.id) return true;
 
-	return (
-		user.customerId !== null && program.order?.customerId === user.customerId
-	);
+	if (user.customerId !== null) {
+		return program.order?.customerId === user.customerId;
+	}
+
+	return program.createdByUserId === user.id;
 }
