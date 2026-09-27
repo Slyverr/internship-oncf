@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { TableLoadingState } from "@/components/common/table-loading-state";
 import { Input } from "@/components/ui/input";
 import {
 	Table,
@@ -111,7 +112,7 @@ export function CustomersTable({
 	});
 
 	if (isLoading) {
-		return <div>Loading customers…</div>;
+		return <TableLoadingState resource="customers" />;
 	}
 
 	return (

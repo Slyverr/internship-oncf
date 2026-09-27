@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { TableLoadingState } from "@/components/common/table-loading-state";
 import { Input } from "@/components/ui/input";
 import {
 	Select,
@@ -149,7 +150,7 @@ export function OrdersTable({
 	});
 
 	if (isLoading) {
-		return <div>Loading orders…</div>;
+		return <TableLoadingState resource="orders" />;
 	}
 
 	return (

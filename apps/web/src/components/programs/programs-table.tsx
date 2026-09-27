@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { TableLoadingState } from "@/components/common/table-loading-state";
 import { Input } from "@/components/ui/input";
 import {
 	Select,
@@ -136,7 +137,7 @@ export function ProgramsTable({ data, isLoading }: ProgramsTableProps) {
 	});
 
 	if (isLoading) {
-		return <div>Loading programs…</div>;
+		return <TableLoadingState resource="programs" />;
 	}
 
 	return (

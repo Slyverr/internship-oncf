@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { TableLoadingState } from "@/components/common/table-loading-state";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
@@ -121,7 +122,7 @@ export function UsersTable({
 	});
 
 	if (isLoading) {
-		return <div className="p-4 text-center">Loading users...</div>;
+		return <TableLoadingState resource="users" />;
 	}
 
 	return (

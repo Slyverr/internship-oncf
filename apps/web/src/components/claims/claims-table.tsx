@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { TableLoadingState } from "@/components/common/table-loading-state";
 import { Input } from "@/components/ui/input";
 import {
 	Select,
@@ -170,7 +171,7 @@ export function ClaimsTable({
 	});
 
 	if (isLoading) {
-		return <div>Loading claims…</div>;
+		return <TableLoadingState resource="claims" />;
 	}
 
 	return (
