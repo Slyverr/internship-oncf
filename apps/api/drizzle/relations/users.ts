@@ -15,6 +15,10 @@ const usersPart = defineRelationsPart(schema, (r) => ({
 			from: r.users.agencyId,
 			to: r.agencies.id,
 		}),
+		preferences: r.one.userPreferences({
+			from: r.users.id,
+			to: r.userPreferences.userId,
+		}),
 		userSessions: r.many.userSessions({
 			from: r.users.id,
 			to: r.userSessions.userId,
@@ -189,6 +193,15 @@ const userCustomersPart = defineRelationsPart(schema, (r) => ({
 	},
 }));
 
+const userPreferencesPart = defineRelationsPart(schema, (r) => ({
+	userPreferences: {
+		user: r.one.users({
+			from: r.userPreferences.userId,
+			to: r.users.id,
+		}),
+	},
+}));
+
 export const usersRelations = {
 	...usersPart,
 	...rolesPart,
@@ -198,4 +211,5 @@ export const usersRelations = {
 	...userActivityLogPart,
 	...passwordResetTokensPart,
 	...userCustomersPart,
+	...userPreferencesPart,
 };

@@ -5,6 +5,7 @@ import {
 } from "@nestjs/common";
 import type { UserId } from "@/users/users.types";
 import { ProfileQuery } from "./profile.query";
+import { UpdateAppearancePreferencesDto } from "./requests/update-appearance-preferences.dto";
 import { UpdateProfileDto } from "./requests/update-profile.dto";
 
 @Injectable()
@@ -33,5 +34,13 @@ export class ProfileService {
 	async update(id: UserId, dto: UpdateProfileDto) {
 		await this.profileQuery.updateProfile(id, dto);
 		return this.findOne(id);
+	}
+
+	async findPreferences(id: UserId) {
+		return (await this.profileQuery.findPreferences(id)) ?? null;
+	}
+
+	async updatePreferences(id: UserId, dto: UpdateAppearancePreferencesDto) {
+		return this.profileQuery.savePreferences(id, dto);
 	}
 }

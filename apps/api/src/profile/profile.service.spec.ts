@@ -4,6 +4,7 @@ import {
 } from "@nestjs/common";
 import type { ProfileQuery } from "./profile.query";
 import { ProfileService } from "./profile.service";
+import type { UpdateAppearancePreferencesDto } from "./requests/update-appearance-preferences.dto";
 import type { UpdateProfileDto } from "./requests/update-profile.dto";
 
 const profile = {
@@ -25,6 +26,8 @@ describe("ProfileService", () => {
 	const query = {
 		findProfile: jest.fn(),
 		updateProfile: jest.fn(),
+		findPreferences: jest.fn(),
+		savePreferences: jest.fn(),
 	} as unknown as jest.Mocked<ProfileQuery>;
 	const service = new ProfileService(query);
 
@@ -68,5 +71,26 @@ describe("ProfileService", () => {
 		});
 		expect(query.updateProfile).toHaveBeenCalledWith(9, dto);
 		expect(query.findProfile).toHaveBeenCalledWith(9);
+	});
+
+	it("returns null when the user has not saved appearance preferences", async () => {
+		query.findPreferences.mockResolvedValue(undefined);
+		await expect(service.findPreferences(9 as never)).resolves.toBeNull();
+		expect(query.findPreferences).toHaveBeenCalledWith(9);
+	});
+
+	it("saves appearance preferences for the authenticated user", async () => {
+		const preferences: UpdateAppearancePreferencesDto = {
+			theme: "mono-dark",
+			fontFamily: "geist",
+			textSize: "large",
+			motion: "reduced",
+		};
+		query.savePreferences.mockResolvedValue({ ...preferences } as never);
+
+		await expect(
+			service.updatePreferences(9 as never, preferences),
+		).resolves.toEqual(preferences);
+		expect(query.savePreferences).toHaveBeenCalledWith(9, preferences);
 	});
 });

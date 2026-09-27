@@ -1,3 +1,9 @@
+import type {
+	AppearanceFontFamily,
+	AppearanceMotionPreference,
+	AppearanceTextSize,
+	AppearanceTheme,
+} from "@ecommand/shared";
 import { sql } from "drizzle-orm";
 import {
 	bigint,
@@ -144,6 +150,56 @@ export const users = pgTable(
 		index("idx_users_agency").on(table.agencyId),
 		index("idx_users_active").on(table.isActive),
 		index("idx_users_locked").on(table.accountLockedUntil),
+	],
+);
+
+export const userPreferences = pgTable(
+	"user_preferences",
+	{
+		userId: bigint("user_id", { mode: "number" }).notNull(),
+		theme: varchar("theme", { length: 20 })
+			.$type<AppearanceTheme>()
+			.default("system")
+			.notNull(),
+		fontFamily: varchar("font_family", { length: 20 })
+			.$type<AppearanceFontFamily>()
+			.default("inter")
+			.notNull(),
+		textSize: varchar("text_size", { length: 20 })
+			.$type<AppearanceTextSize>()
+			.default("default")
+			.notNull(),
+		motion: varchar("motion", { length: 20 })
+			.$type<AppearanceMotionPreference>()
+			.default("system")
+			.notNull(),
+		updatedAt: timestamp("updated_at", { mode: "string" })
+			.default(sql`CURRENT_TIMESTAMP`)
+			.notNull(),
+	},
+	(table) => [
+		primaryKey({ columns: [table.userId], name: "user_preferences_pkey" }),
+		foreignKey({
+			columns: [table.userId],
+			foreignColumns: [users.id],
+			name: "user_preferences_user_id_fkey",
+		}).onDelete("cascade"),
+		check(
+			"user_preferences_theme_check",
+			sql`${table.theme} IN ('system', 'light', 'dark', 'mono-light', 'mono-dark')`,
+		),
+		check(
+			"user_preferences_font_family_check",
+			sql`${table.fontFamily} IN ('inter', 'geist', 'system')`,
+		),
+		check(
+			"user_preferences_text_size_check",
+			sql`${table.textSize} IN ('small', 'default', 'large')`,
+		),
+		check(
+			"user_preferences_motion_check",
+			sql`${table.motion} IN ('system', 'reduced')`,
+		),
 	],
 );
 

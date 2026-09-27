@@ -1,10 +1,11 @@
 import { Injectable } from "@nestjs/common";
-import { users } from "drizzle/schema";
+import { userPreferences, users } from "drizzle/schema";
 import { eq } from "drizzle-orm";
 import { DrizzleService } from "@/database/drizzle.service";
 import { QueryColumns, QueryRelations } from "@/database/drizzle.types";
 import { withDbErrorHandling } from "@/database/drizzle.util";
 import type { UserId, UserUpdate } from "@/users/users.types";
+import type { UpdateAppearancePreferencesDto } from "./requests/update-appearance-preferences.dto";
 
 type UsersColumns = QueryColumns<"users">;
 type UsersRelations = QueryRelations<"users">;
@@ -64,5 +65,43 @@ export class ProfileQuery {
 			values,
 		);
 		return updated;
+	}
+
+	async findPreferences(userId: UserId) {
+		return this.drizzle.db.query.userPreferences.findFirst({
+			where: { userId },
+			columns: {
+				theme: true,
+				fontFamily: true,
+				textSize: true,
+				motion: true,
+				updatedAt: true,
+			},
+		});
+	}
+
+	async savePreferences(
+		userId: UserId,
+		values: UpdateAppearancePreferencesDto,
+	) {
+		const [saved] = await withDbErrorHandling(
+			() =>
+				this.drizzle.db
+					.insert(userPreferences)
+					.values({ userId, ...values })
+					.onConflictDoUpdate({
+						target: userPreferences.userId,
+						set: { ...values, updatedAt: new Date().toISOString() },
+					})
+					.returning({
+						theme: userPreferences.theme,
+						fontFamily: userPreferences.fontFamily,
+						textSize: userPreferences.textSize,
+						motion: userPreferences.motion,
+						updatedAt: userPreferences.updatedAt,
+					}),
+			{ userId, ...values },
+		);
+		return saved;
 	}
 }
