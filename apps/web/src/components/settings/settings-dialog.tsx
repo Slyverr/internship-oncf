@@ -63,7 +63,7 @@ export function SettingsDialog() {
 				<div className="grid min-h-0 min-w-0 grid-cols-1 lg:grid-cols-[15rem_minmax(0,1fr)]">
 					<nav
 						aria-label="Settings sections"
-						className="flex min-w-0 gap-control overflow-x-auto border-b px-3 py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex-col lg:overflow-visible lg:border-r lg:border-b-0 lg:p-4"
+						className="flex min-w-0 gap-2 border-b px-3 py-3 lg:flex-col lg:gap-control lg:overflow-visible lg:border-r lg:border-b-0 lg:p-4"
 					>
 						{sections.map(({ id, label, icon: Icon }) => (
 							<button
@@ -72,14 +72,17 @@ export function SettingsDialog() {
 								id={`settings-tab-${id}`}
 								aria-current={activeSection === id ? "page" : undefined}
 								onClick={() => selectSection(id)}
-								className={`flex min-h-12 shrink-0 items-center gap-control rounded-lg px-4 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+								className={`flex min-h-12 min-w-0 flex-1 items-center justify-center gap-control rounded-lg px-1 text-center text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:flex-none lg:justify-start lg:px-4 lg:text-left lg:text-sm ${
 									activeSection === id
 										? "bg-muted text-foreground"
 										: "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
 								}`}
 							>
-								<Icon aria-hidden="true" className="size-4 shrink-0" />
-								{label}
+								<Icon
+									aria-hidden="true"
+									className="hidden size-4 shrink-0 lg:block"
+								/>
+								<span className="leading-tight lg:truncate">{label}</span>
 							</button>
 						))}
 					</nav>
