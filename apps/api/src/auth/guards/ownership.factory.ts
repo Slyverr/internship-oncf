@@ -18,9 +18,13 @@ export interface OwnershipGuardOptions<TService, TId> {
 	/**
 	 * @deprecated Use canAccess instead.
 	 */
-	resolveOwnerId?: (service: TService, id: TId) => Promise<UserId>;
+	resolveOwnerId?: (service: TService, id: TId) => Promise<UserId | undefined>;
 
-	canAccess?: (service: TService, id: TId, user: AuthUser) => Promise<boolean>;
+	canAccess?: (
+		service: TService,
+		id: TId,
+		user: AuthUser,
+	) => Promise<boolean | undefined>;
 
 	pipe: PipeTransform<string, TId>;
 	permission?: Permission;
@@ -69,6 +73,8 @@ export function createOwnershipGuard<TService, TId>(
 				: resolveOwnerId
 					? (await resolveOwnerId(serviceInstance, id)) === user.id
 					: false;
+
+			if (accessGranted === undefined) return true;
 
 			if (!accessGranted) {
 				throw new ForbiddenException(errorMessage);

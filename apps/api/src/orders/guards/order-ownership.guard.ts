@@ -10,6 +10,8 @@ export const OrderOwnershipGuard = createOwnershipGuard<OrdersService, OrderId>(
 
 		canAccess: async (service, id, user) => {
 			const order = await service.findOneForAccess(id);
+			if (!order) return undefined;
+
 			if (user.customerId === order.customerId) {
 				return true;
 			}
