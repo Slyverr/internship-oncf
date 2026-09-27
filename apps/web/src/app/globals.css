@@ -5,6 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+	--breakpoint-3xl: 120rem;
 	--spacing-control: calc(var(--spacing) * 2);
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);

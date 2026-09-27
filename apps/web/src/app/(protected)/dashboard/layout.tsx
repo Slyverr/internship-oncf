@@ -18,7 +18,7 @@ export default async function Layout({
 						<AppHeader />
 					</div>
 
-					<div className="page-enter mx-auto grid w-full min-w-0 max-w-screen-2xl grid-cols-1 gap-6 p-4 sm:p-6 print:p-0">
+					<div className="page-enter mx-auto grid w-full min-w-0 max-w-screen-3xl grid-cols-1 gap-6 p-4 sm:p-6 print:p-0">
 						{children}
 					</div>
 				</BreadcrumbProvider>
