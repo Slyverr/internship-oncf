@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { TableEmptyStateRow } from "@/components/common/table-empty-state-row";
 import { TableLoadingState } from "@/components/common/table-loading-state";
 import { Input } from "@/components/ui/input";
 import {
@@ -296,14 +297,10 @@ export function ClaimsTable({
 								</TableRow>
 							))
 						) : (
-							<TableRow>
-								<TableCell
-									colSpan={columns.length}
-									className="py-8 text-center"
-								>
-									No claims found.
-								</TableCell>
-							</TableRow>
+							<TableEmptyStateRow
+								colSpan={columns.length}
+								message="No claims found."
+							/>
 						)}
 					</TableBody>
 				</Table>

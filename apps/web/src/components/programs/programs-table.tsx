@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { TableEmptyStateRow } from "@/components/common/table-empty-state-row";
 import { TableLoadingState } from "@/components/common/table-loading-state";
 import { Input } from "@/components/ui/input";
 import {
@@ -236,14 +237,10 @@ export function ProgramsTable({ data, isLoading }: ProgramsTableProps) {
 								</TableRow>
 							))
 						) : (
-							<TableRow>
-								<TableCell
-									colSpan={columns.length}
-									className="py-8 text-center"
-								>
-									No programs found.
-								</TableCell>
-							</TableRow>
+							<TableEmptyStateRow
+								colSpan={columns.length}
+								message="No programs found."
+							/>
 						)}
 					</TableBody>
 				</Table>

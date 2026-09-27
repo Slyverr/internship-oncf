@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { TableEmptyStateRow } from "@/components/common/table-empty-state-row";
 import { TableLoadingState } from "@/components/common/table-loading-state";
 import { Input } from "@/components/ui/input";
 import {
@@ -179,14 +180,10 @@ export function CustomersTable({
 								</TableRow>
 							))
 						) : (
-							<TableRow>
-								<TableCell
-									colSpan={columns.length}
-									className="py-8 text-center"
-								>
-									No customers found.
-								</TableCell>
-							</TableRow>
+							<TableEmptyStateRow
+								colSpan={columns.length}
+								message="No customers found."
+							/>
 						)}
 					</TableBody>
 				</Table>
