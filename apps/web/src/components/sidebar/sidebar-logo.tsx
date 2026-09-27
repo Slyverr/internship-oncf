@@ -14,7 +14,7 @@ export function SidebarLogo() {
 				<SidebarMenuButton
 					size="lg"
 					render={<Link href="/dashboard" />}
-					className="h-12 hover:bg-sidebar-accent"
+					className="h-12 hover:bg-sidebar-accent/50"
 				>
 					<div className="flex aspect-square size-8 shrink-0 items-center justify-center rounded-sm bg-sidebar-primary p-1 text-sidebar-primary-foreground shadow-sm shadow-sidebar-primary/30">
 						<Image

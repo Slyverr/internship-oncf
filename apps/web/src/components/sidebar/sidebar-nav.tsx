@@ -39,7 +39,7 @@ export function SidebarNav() {
 							className={`group/button relative w-full px-4 py-2 rounded-none transition-colors ${
 								isActive
 									? "bg-sidebar-primary/10 font-semibold dark:bg-sidebar-primary/20"
-									: "text-sidebar-foreground/70 hover:bg-sidebar-accent"
+									: "text-sidebar-foreground/70 hover:bg-sidebar-accent/50"
 							} group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:rounded-md`}
 						>
 							{isActive && (
