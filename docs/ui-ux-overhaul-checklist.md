@@ -17,7 +17,7 @@ This is the running review list for the application-wide usability and visual ov
 | 9 | Workspace width consistency | Compare dashboard and all inner routes under both shell layouts at laptop through 4K widths. Use one shared content-width rule per shell and prevent unexplained route-specific centering. | Complete |
 | 10 | Table density | Review header, row, cell padding, wrapping, and phone overflow. Add a user-controlled density preference only if the responsive behavior still benefits from it. | To review |
 | 11 | Appearance options | Keep themes, fonts, text scale, motion, and layouts extensible and understandable. Review whether a bounded text-scale control is more useful than only three presets; retain sensible defaults and database sync. | To review |
-| 12 | Notifications | Review trigger, panel size, spacing, typography, empty/loading states, action reachability, and dismissal behavior on touch and desktop. Keep keyboard access; do not make hover the only way to open it. | To review |
+| 12 | Notifications | Review trigger, panel size, spacing, typography, empty/loading states, action reachability, and dismissal behavior on touch and desktop. Keep keyboard access; do not make hover the only way to open it. | In progress |
 | 13 | Sidebar inset details | Recheck collapsed-state padding and the relationship between logo, navigation, profile, and shell breadcrumbs after alignment changes. | Complete |
 | 14 | Shared visual styles | Inventory repeated card, control, field, table, and dialog classes. Extract stable patterns into named utilities or shared components where that improves consistency without hiding feature-specific behavior. | In progress |
 | 15 | Full route and state audit | Capture all routes and meaningful loading, empty, error, success, permission, and dialog states. Review every form control for clear labels, useful examples/placeholders, hints, autocomplete/input modes, and validation feedback; record findings and assess the work in three passes before closing the overhaul. | In progress |
@@ -42,6 +42,7 @@ Review both light and dark appearances, and both workspace layouts where the rou
 - The dashboard now keeps all three recent-work panels together once the workspace reaches 1152px, avoiding a sidebar-state-dependent jump from three columns to one. Fresh 1440px screenshot shows the panels in one balanced row with shorter subtitles; smaller widths stay stacked to avoid an orphaned third panel. Actionable metrics and role-specific next steps still need review.
 - Page headings now choose inline actions from the available workspace width, so the tablet sidebar does not squeeze the title into a narrow column beside stacked buttons.
 - Fresh 1440×900 sidebar captures show the collapsed logo and account controls centered in 44px targets with 16px top and bottom insets; expanded and collapsed navigation icons remain on the same vertical rhythm.
+- The notification popover keeps click, keyboard, and touch behavior; its empty/loading states use a tighter header, body, and footer rhythm while keeping the 44px footer action target.
 
 ## Working rules
 

@@ -87,7 +87,7 @@ export function NotificationLink() {
 						aria-label="Notifications"
 						className="flex max-h-[70vh] w-[min(22.5rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-lg border border-border bg-popover text-popover-foreground shadow-lg outline-none data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0"
 					>
-						<div className="flex min-h-16 items-center justify-between gap-4 border-b border-border px-4 py-3">
+						<div className="flex min-h-15 items-center justify-between gap-4 border-b border-border px-4 py-2">
 							<div className="min-w-0">
 								<h2 className="text-base font-semibold leading-6">
 									Notifications
@@ -108,7 +108,7 @@ export function NotificationLink() {
 						<div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
 							{listQuery.isLoading ? (
 								<p
-									className="px-4 py-8 text-center text-sm text-muted-foreground"
+									className="px-4 py-6 text-center text-sm text-muted-foreground"
 									role="status"
 								>
 									Loading notifications…
@@ -125,7 +125,7 @@ export function NotificationLink() {
 									</Button>
 								</div>
 							) : notifications.length === 0 ? (
-								<p className="px-4 py-8 text-center text-sm text-muted-foreground">
+								<p className="px-4 py-6 text-center text-sm text-muted-foreground">
 									No notifications yet.
 								</p>
 							) : (
@@ -196,7 +196,7 @@ export function NotificationLink() {
 								</ul>
 							)}
 						</div>
-						<div className="border-t border-border p-3">
+						<div className="border-t border-border p-2">
 							<Button
 								variant="ghost"
 								nativeButton={false}
