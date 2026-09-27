@@ -5,6 +5,7 @@ This document is the shared UI contract for the Next.js application. Apply it to
 ## 1. Layout and page rhythm
 
 - Use a 4px base spacing unit. Choose spacing values from 4, 8, 12, 16, 24, and 32px; use 0 when no inset is needed. Prefer padding for component interiors and reserve margin for intentional relationships between separate blocks. Avoid one-off measurements and unexplained spacing classes.
+- Every padding, gap, and margin must resolve to a multiple of 4px. Use the named spacing utilities where available (`gap-compact`, `gap-control`, `p-control`, `px-field`) and check the resolved pixels rather than judging by a Tailwind class number.
 - Standard spacing aliases in this repo: 4px `gap-compact`, 8px `gap-control` / `px-control`, and 12px `px-field`. Larger layout gaps use the 4px-grid utilities (`gap-4`=16px, `gap-6`=24px, `gap-8`=32px). Choose by the resolved pixel value, not by a class name that looks familiar. Prefer named aliases for control insets and parent `gap` for layout rhythm.
 - Use `p-control` / `px-control` for an 8px control inset and `px-field` for the 12px field inset. Use 16px (`p-4`) for mobile page gutters and 24px (`p-6`) for wider page gutters. Every new spacing choice should be deliberate and on the 4px grid.
 - Dashboard content uses 16px gutters on small screens and 24px from tablet width upward, with a 2400px maximum content width for large 2K/4K displays. Keep page sections 24px apart. Keep related controls 8–16px apart and related sections inside a card 16–24px apart.
@@ -59,6 +60,13 @@ Use the same semantic roles in all themes. Cards should separate from the canvas
 - A standard table row is at least 56px tall; a row with a title and supporting line is at least 64px. Give each cell its own inset and keep related values aligned by column. Use tabular numerals for comparable dates and quantities.
 - Keep long values readable. Truncate only when the same record has a clear detail destination or the full value is available to assistive technology. On phones, preserve table column meaning inside the horizontal scroll area rather than squeezing text together.
 - Empty, loading, error, and success states should occupy the same content region and provide the next useful action when one exists.
+
+### Dialogs
+
+- Use the shared `DialogContent` primitive so overlay, focus behavior, close control, motion, and surface styles stay consistent. Its default size is for focused tasks; use `size="wide"` for a bounded workspace such as Settings instead of repeating width calculations on each dialog.
+- Keep a dialog title and short description visible while its body changes or scrolls. Dialogs should have one independently scrollable content area; add `min-h-0` to grid/flex children that need to shrink inside a bounded dialog.
+- Keep close and primary-action targets at least 44px. On phones, leave 16px around the dialog, prevent horizontal overflow, and keep section navigation reachable before the scrolling body.
+- Do not place a Card inside a dialog pane just to repeat the outer dialog surface. Use the shared Card only when it separates a genuinely distinct task or data group.
 
 ### Row and list patterns
 
@@ -134,7 +142,8 @@ If browser capture is unavailable, state that limitation. Continue with route in
 - Offer a reduced-motion override in addition to respecting the device's reduced-motion setting. New motion must retain the existing 120–200ms limit and must not be required to understand state.
 - Store signed-in appearance preferences per user on the server so choices follow the account across devices. Use browser storage only as a fast initial display and local fallback when the API is unavailable. Do not key behavior off `NODE_ENV`.
 - Show theme choices with small previews using the same semantic tokens as the application. The System preview should communicate that it follows both light and dark device modes; do not duplicate or alter palette values for previews.
-- Settings open as a bounded dialog from the account menu. On desktop, use a fixed-width section navigation rail and a separately scrollable content pane; on phones, show a horizontally scrollable section selector above the pane. Keep title, close action, and current section clear while content scrolls.
+- Settings open as a bounded dialog from the account menu. At 1024px and wider, use a fixed-width section navigation rail and a separately scrollable content pane; below that, show a horizontally scrollable section selector above the pane. Keep title, close action, and current section clear while content scrolls.
+- Make appearance choices compact, visible, and easy to hit. Use concise labels and brief supporting text rather than tall description cards; keep every choice at least 44px high and do not hide choices behind extra scrolling when the viewport has room.
 - Keep Appearance, Profile, and Security as the settings sections. Profile in the account menu opens the Profile section directly; Settings opens Appearance. Each section has a stable deep link, and closing returns to the page the user came from. A direct visit to the settings URL remains usable without requiring prior navigation.
 - Target a dialog width of at most 1120px and a height of at most `100svh - 32px`. On small screens, use the available viewport with 16px outer spacing; do not let the close button overlap content or place nested scroll regions beside one another.
 

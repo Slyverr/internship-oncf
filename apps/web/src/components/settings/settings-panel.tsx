@@ -103,7 +103,8 @@ function PreferenceChoices<Value extends string>({
 	options,
 	onChange,
 	renderPreview,
-	columns = "sm:grid-cols-2",
+	columns = "grid-cols-2 xl:grid-cols-3",
+	compact = false,
 }: {
 	label: string;
 	value: Value;
@@ -111,11 +112,12 @@ function PreferenceChoices<Value extends string>({
 	onChange: (value: Value) => void;
 	renderPreview?: (value: Value) => ReactNode;
 	columns?: string;
+	compact?: boolean;
 }) {
 	const id = label.toLowerCase().replaceAll(" ", "-");
 
 	return (
-		<fieldset className="grid gap-3">
+		<fieldset className="grid gap-control">
 			<legend className="text-sm font-medium">{label}</legend>
 			<RadioGroup
 				aria-label={label}
@@ -124,19 +126,23 @@ function PreferenceChoices<Value extends string>({
 					const option = options.find((item) => item.value === nextValue);
 					if (option) onChange(option.value);
 				}}
-				className={`grid gap-3 ${columns}`}
+				className={`grid gap-control ${columns}`}
 			>
 				{options.map((option) => (
 					<Label
 						key={option.value}
 						htmlFor={`${id}-${option.value}`}
-						className="flex min-h-20 cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors hover:bg-muted/60 has-[[data-checked]]:border-primary has-[[data-checked]]:bg-primary/5"
+						className={`flex cursor-pointer items-center gap-control rounded-lg border px-field py-control transition-colors hover:bg-muted/60 has-[[data-checked]]:border-primary has-[[data-checked]]:bg-primary/5 ${compact ? "min-h-12" : "min-h-14"}`}
 					>
 						<RadioGroupItem id={`${id}-${option.value}`} value={option.value} />
 						{renderPreview?.(option.value)}
 						<span className="grid min-w-0 flex-1 gap-compact">
 							<span className="text-sm font-medium">{option.label}</span>
-							<span className="text-sm text-muted-foreground">
+							<span
+								className={
+									compact ? "sr-only" : "text-xs text-muted-foreground"
+								}
+							>
 								{option.description}
 							</span>
 						</span>
@@ -301,42 +307,45 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 				</nav>
 			)}
 			{(!section || section === "appearance") && (
-				<Card id="appearance" className="scroll-mt-8">
+				<Card
+					id="appearance"
+					className={`scroll-mt-8 ${section ? "border-0 bg-transparent py-0 shadow-none ring-0 [--card-spacing:0px]" : ""}`}
+				>
 					<CardHeader>
 						<CardTitle>Appearance</CardTitle>
 						<CardDescription>
 							Set up colors, text, and motion for a comfortable workspace.
 						</CardDescription>
 					</CardHeader>
-					<CardContent className="grid gap-8">
+					<CardContent className="grid gap-6">
 						<PreferenceChoices
 							label="Color theme"
 							value={preferences.theme}
 							options={themeOptions}
 							onChange={setTheme}
 							renderPreview={(theme) => <ThemePreview theme={theme} />}
-							columns="sm:grid-cols-2 2xl:grid-cols-3"
+							columns="grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3"
 						/>
 						<PreferenceChoices
 							label="Font"
 							value={preferences.fontFamily}
 							options={fontOptions}
 							onChange={setFontFamily}
-							columns="sm:grid-cols-3"
+							compact
 						/>
 						<PreferenceChoices
 							label="Text size"
 							value={preferences.textSize}
 							options={textSizeOptions}
 							onChange={setTextSize}
-							columns="sm:grid-cols-3"
+							compact
 						/>
 						<PreferenceChoices
 							label="Motion"
 							value={preferences.motion}
 							options={motionOptions}
 							onChange={setMotion}
-							columns="sm:grid-cols-2"
+							compact
 						/>
 						<div className="flex items-center gap-4 text-sm text-muted-foreground">
 							<span className="size-3 rounded-full bg-primary" />
@@ -358,7 +367,10 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 			)}
 
 			{(!section || section === "profile") && (
-				<Card id="account" className="scroll-mt-8">
+				<Card
+					id="account"
+					className={`scroll-mt-8 ${section ? "border-0 bg-transparent py-0 shadow-none ring-0 [--card-spacing:0px]" : ""}`}
+				>
 					<CardHeader>
 						<CardTitle>Account details</CardTitle>
 						<CardDescription>
@@ -445,7 +457,10 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 			)}
 
 			{(!section || section === "security") && (
-				<Card id="security" className="scroll-mt-8">
+				<Card
+					id="security"
+					className={`scroll-mt-8 ${section ? "border-0 bg-transparent py-0 shadow-none ring-0 [--card-spacing:0px]" : ""}`}
+				>
 					<CardHeader>
 						<CardTitle>Security</CardTitle>
 						<CardDescription>

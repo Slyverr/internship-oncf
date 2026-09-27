@@ -50,17 +50,20 @@ export function SettingsDialog() {
 
 	return (
 		<Dialog open onOpenChange={(open) => !open && router.back()}>
-			<DialogContent className="grid max-h-[calc(100svh-2rem)] w-[calc(100%-2rem)] max-w-[70rem] grid-rows-[auto_minmax(0,1fr)] gap-0 overflow-hidden p-0">
-				<DialogHeader className="border-b p-6 pr-16">
+			<DialogContent
+				size="wide"
+				className="grid max-h-[calc(100svh-2rem)] min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-0 overflow-hidden p-0"
+			>
+				<DialogHeader className="border-b p-4 pr-16 sm:p-6 sm:pr-16">
 					<DialogTitle className="text-lg">Settings</DialogTitle>
 					<DialogDescription>
 						Personalize your workspace and manage your account.
 					</DialogDescription>
 				</DialogHeader>
-				<div className="grid min-h-0 grid-cols-1 md:grid-cols-[15rem_minmax(0,1fr)]">
+				<div className="grid min-h-0 min-w-0 grid-cols-1 lg:grid-cols-[15rem_minmax(0,1fr)]">
 					<nav
 						aria-label="Settings sections"
-						className="flex gap-2 overflow-x-auto border-b p-4 md:flex-col md:overflow-visible md:border-r md:border-b-0"
+						className="flex min-w-0 gap-control overflow-x-auto border-b p-4 lg:flex-col lg:overflow-visible lg:border-r lg:border-b-0"
 					>
 						{sections.map(({ id, label, icon: Icon }) => (
 							<button
@@ -69,7 +72,7 @@ export function SettingsDialog() {
 								id={`settings-tab-${id}`}
 								aria-current={activeSection === id ? "page" : undefined}
 								onClick={() => selectSection(id)}
-								className={`flex min-h-12 shrink-0 items-center gap-3 rounded-lg px-4 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+								className={`flex min-h-12 shrink-0 items-center gap-control rounded-lg px-4 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
 									activeSection === id
 										? "bg-muted text-foreground"
 										: "text-muted-foreground hover:bg-muted/60 hover:text-foreground"

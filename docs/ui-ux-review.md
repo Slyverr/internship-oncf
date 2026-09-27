@@ -119,3 +119,11 @@ The screenshot pass verified rendered route screens through 1440px, but it does 
 - These auth changes were made after the screenshot bundle above. Browser screenshot automation is unavailable in the current workbench, so the updated login/signup appearance still needs visual confirmation at mobile and desktop widths. The older public-route captures show the earlier UI and should not be used to sign off the new screens.
 - Administrator review now appears in the user list and user detail for pending registrations. The page describes the customer-code/ICE match, and only users with `users:update` can approve or reject. The preview contains a pending local demo request; screenshot review of that state remains outstanding.
 - A live Next-proxy smoke check rejected an invalid customer code with 400, accepted two valid requests as pending, returned the review actions on both user-detail routes, allowed sign-in after approval (201), and denied sign-in after rejection (401). The temporary applicants were deactivated afterward; the pending demo request remains available for visual review.
+
+## Settings dialog follow-up — 2026-09-27
+
+- Source inspection found that Appearance used tall choice cards with repeated descriptions. The Settings dialog also entered a 240px side-navigation layout at tablet width, leaving a narrow content pane.
+- Appearance selections now use shorter controls with the same 48px or 56px minimum target, concise visible labels, and descriptions available to assistive technology. Theme previews remain; the palette and theme tokens are unchanged. The appearance card no longer draws a second card surface inside the dialog.
+- The section rail now starts at 1024px. Below that width, section navigation remains horizontal above the scrollable settings pane.
+- The shared `DialogContent` now provides a `wide` size capped at 1120px; Settings uses it instead of repeating width rules. Shared dialog focus/overlay/close behavior continues to come from the common primitive.
+- Fresh screenshots of the changed Settings dialog are not captured in this workbench session. The new layout is source-reviewed and still needs live visual review at 320px, 390px, 768px, 1024px, 1440px, 1920px, 2560px, and 3840px in all four concrete themes. No visual sign-off is claimed.
