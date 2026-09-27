@@ -3,7 +3,7 @@
 import { Permission, ProgramStatus } from "@ecommand/shared";
 import { useForm } from "@tanstack/react-form-nextjs";
 import { useRouter } from "next/navigation";
-import { type JSX } from "react";
+import { type JSX, useEffect } from "react";
 import { z } from "zod";
 import { FormFieldHeader } from "@/components/common/form-field-header";
 import {
@@ -68,7 +68,13 @@ const programSteps = [
 	{ title: "Execution", description: "Initial progress details" },
 ];
 
-export function ProgramCreateForm(): JSX.Element {
+export function ProgramCreateForm({
+	initialOrderId,
+	initialOrderSearch,
+}: {
+	initialOrderId?: number;
+	initialOrderSearch?: string;
+}): JSX.Element {
 	const router = useRouter();
 	const { profile, hasPermission } = useAuth();
 	const mutation = useProgramsControllerCreate();
@@ -79,7 +85,7 @@ export function ProgramCreateForm(): JSX.Element {
 		useGuidedFormState();
 
 	const defaultValues: CreateProgramFormValues = {
-		orderId: 0,
+		orderId: initialOrderId ?? 0,
 		userId: canManageOther ? undefined : profile?.id,
 		status: canManageStatus ? ProgramStatus.DRAFT : undefined,
 		plannedDate: "",
@@ -125,7 +131,19 @@ export function ProgramCreateForm(): JSX.Element {
 	}
 
 	const { data: orders = [], isLoading: ordersIsLoading } =
-		useOrdersControllerFindEligibleForPrograms({});
+		useOrdersControllerFindEligibleForPrograms(
+			initialOrderSearch ? { search: initialOrderSearch } : {},
+		);
+
+	useEffect(() => {
+		if (
+			initialOrderId &&
+			!ordersIsLoading &&
+			!orders.some((order) => order.id === initialOrderId)
+		) {
+			form.setFieldValue("orderId", 0);
+		}
+	}, [form, initialOrderId, orders, ordersIsLoading]);
 
 	const { data: users = [], isLoading: usersIsLoading } =
 		useUsersControllerFindAll({});
@@ -390,7 +408,11 @@ export function ProgramCreateForm(): JSX.Element {
 					<GuidedFormActions
 						currentStep={step}
 						stepCount={programSteps.length}
-						onCancel={() => router.push("/dashboard/programs")}
+						onCancel={() =>
+							initialOrderId
+								? router.push(`/dashboard/orders/${initialOrderId}`)
+								: router.push("/dashboard/programs")
+						}
 						onPrevious={() => setStep(0)}
 						onContinue={continueToExecution}
 						submitLabel="Create Program"
