@@ -14,7 +14,7 @@ This document defines how current ECommand screens should be laid out and how sh
 
 ### Color
 
-Use the current role-based tokens: background, foreground, card, muted, muted-foreground, border, primary, destructive, and their existing dark variants. This work does not change token values, chart colors, or the ONCF-inspired accent. Components should not introduce one-off palette values.
+Use the current role-based tokens: background, foreground, card, muted, muted-foreground, border, primary, destructive, and their existing dark variants. Surface layers are named by role: `surface-canvas` is the page, `surface-raised` is cards and popovers, and `surface-navigation` is the sidebar. Light mode keeps a near-white canvas, warm raised surfaces, and a slightly deeper warm navigation surface. Dark mode keeps the current low-glare charcoal canvas, lighter cards, and darker navigation surface. Components should not introduce one-off palette values.
 
 ### Spacing
 
@@ -95,9 +95,9 @@ Keep the desktop header at a consistent 64px height. Align the sidebar toggle, b
 
 ### Sidebar
 
-- Expanded width: 256px. Collapsed icon rail: 48px. Mobile opens a sheet with a comfortable 288px target width, bounded by the viewport.
+- Expanded width: 256px. Collapsed icon rail: 64px so the 32px brand and account marks keep the same 16px side inset as the expanded sidebar. Mobile opens a sheet with a comfortable 288px target width, bounded by the viewport.
 - Expanded menu rows are at least 44px high with a 16px icon and readable 14px label. Group labels are distinct from menu rows and may hide when collapsed.
-- In collapsed mode, center each 32px logo/avatar/icon inside the available 48px rail. Collapsed menu buttons have no internal horizontal padding that displaces or clips the icon. Keep the row itself at least 44px high.
+- In collapsed mode, center each 32px logo/avatar inside the available 64px rail with a 16px side inset. Navigation icons remain centered in 44px hit areas. Collapsed menu buttons have no internal horizontal padding that displaces or clips the icon. Keep the row itself at least 44px high.
 - The brand mark keeps its full aspect ratio and never clips. The account avatar stays centered; account name and secondary text hide in the rail. Provide a tooltip or accessible name for each collapsed navigation control and the account control.
 - Use active styling and a focus ring to distinguish current and focused items; do not rely on color alone.
 - Keep footer content anchored at the bottom while navigation scrolls independently. On mobile, close the sheet after a navigation choice.
