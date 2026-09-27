@@ -1,6 +1,18 @@
 "use client";
 
 import {
+	APPEARANCE_FONT_FAMILIES,
+	APPEARANCE_MOTION_PREFERENCES,
+	APPEARANCE_TEXT_SIZES,
+	APPEARANCE_THEMES,
+	type AppearanceFontFamily,
+	type AppearanceMotionPreference,
+	type AppearanceTextSize,
+	type AppearanceTheme,
+	DEFAULT_APPEARANCE_PREFERENCES,
+	type AppearancePreferences as SharedAppearancePreferences,
+} from "@ecommand/shared";
+import {
 	createContext,
 	type ReactNode,
 	useCallback,
@@ -10,25 +22,15 @@ import {
 	useState,
 } from "react";
 
-export type ThemeMode =
-	| "light"
-	| "dark"
-	| "mono-light"
-	| "mono-dark"
-	| "system";
-export type FontFamily = "inter" | "geist" | "system";
-export type TextSize = "small" | "default" | "large";
-export type MotionPreference = "system" | "reduced";
-
-export interface AppearancePreferences {
-	theme: ThemeMode;
-	fontFamily: FontFamily;
-	textSize: TextSize;
-	motion: MotionPreference;
-}
+export type ThemeMode = AppearanceTheme;
+export type FontFamily = AppearanceFontFamily;
+export type TextSize = AppearanceTextSize;
+export type MotionPreference = AppearanceMotionPreference;
+export type AppearancePreferences = SharedAppearancePreferences;
 
 interface AppearanceContextValue {
 	preferences: AppearancePreferences;
+	initialized: boolean;
 	setPreferences: (preferences: AppearancePreferences) => void;
 	setTheme: (theme: ThemeMode) => void;
 	setFontFamily: (fontFamily: FontFamily) => void;
@@ -39,12 +41,7 @@ interface AppearanceContextValue {
 
 const STORAGE_KEY = "ecommand-appearance";
 const LEGACY_STORAGE_KEY = "ecommand-theme";
-const DEFAULT_PREFERENCES: AppearancePreferences = {
-	theme: "system",
-	fontFamily: "inter",
-	textSize: "default",
-	motion: "system",
-};
+const DEFAULT_PREFERENCES = DEFAULT_APPEARANCE_PREFERENCES;
 const AppearanceContext = createContext<AppearanceContextValue | null>(null);
 
 function applyAppearance(preferences: AppearancePreferences) {
@@ -91,24 +88,29 @@ function readPreferences(): AppearancePreferences {
 
 function isThemeMode(value: unknown): value is ThemeMode {
 	return (
-		value === "light" ||
-		value === "dark" ||
-		value === "mono-light" ||
-		value === "mono-dark" ||
-		value === "system"
+		typeof value === "string" && APPEARANCE_THEMES.includes(value as ThemeMode)
 	);
 }
 
 function isFontFamily(value: unknown): value is FontFamily {
-	return value === "inter" || value === "geist" || value === "system";
+	return (
+		typeof value === "string" &&
+		APPEARANCE_FONT_FAMILIES.includes(value as FontFamily)
+	);
 }
 
 function isTextSize(value: unknown): value is TextSize {
-	return value === "small" || value === "default" || value === "large";
+	return (
+		typeof value === "string" &&
+		APPEARANCE_TEXT_SIZES.includes(value as TextSize)
+	);
 }
 
 function isMotionPreference(value: unknown): value is MotionPreference {
-	return value === "system" || value === "reduced";
+	return (
+		typeof value === "string" &&
+		APPEARANCE_MOTION_PREFERENCES.includes(value as MotionPreference)
+	);
 }
 
 export function AppearanceProvider({ children }: { children: ReactNode }) {
@@ -172,6 +174,7 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
 	const value = useMemo(
 		() => ({
 			preferences,
+			initialized,
 			setPreferences,
 			theme: preferences.theme,
 			setTheme,
@@ -181,6 +184,7 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
 		}),
 		[
 			preferences,
+			initialized,
 			setPreferences,
 			setTheme,
 			setFontFamily,

@@ -68,14 +68,14 @@ export function SidebarUser() {
 						sideOffset={4}
 					>
 						<DropdownMenuItem
-							render={<Link href="/dashboard/settings#account" />}
+							render={<Link href="/dashboard/settings?section=profile" />}
 						>
 							<UserIcon className="mr-2 size-4 text-muted-foreground" />
 							Profile
 						</DropdownMenuItem>
 
 						<DropdownMenuItem
-							render={<Link href="/dashboard/settings#appearance" />}
+							render={<Link href="/dashboard/settings?section=appearance" />}
 						>
 							<SettingsIcon className="mr-2 size-4 text-muted-foreground" />
 							Settings

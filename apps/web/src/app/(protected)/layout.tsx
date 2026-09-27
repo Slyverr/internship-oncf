@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/actions/auth";
+import { AppearancePreferencesSync } from "@/providers/appearance-preferences-sync";
 import { AuthProvider } from "@/providers/auth-provider";
 
 export default async function Layout({
@@ -10,5 +11,9 @@ export default async function Layout({
 		redirect("/login");
 	}
 
-	return <AuthProvider profile={profile}>{children}</AuthProvider>;
+	return (
+		<AuthProvider profile={profile}>
+			<AppearancePreferencesSync>{children}</AppearancePreferencesSync>
+		</AuthProvider>
+	);
 }

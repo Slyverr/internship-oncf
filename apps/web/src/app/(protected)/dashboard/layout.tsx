@@ -5,7 +5,8 @@ import { BreadcrumbProvider } from "@/providers/breadcrumb-provider";
 
 export default async function Layout({
 	children,
-}: Readonly<{ children: React.ReactNode }>) {
+	modal,
+}: Readonly<{ children: React.ReactNode; modal: React.ReactNode }>) {
 	return (
 		<SidebarProvider>
 			<AppSidebar className="print:hidden" />
@@ -23,6 +24,7 @@ export default async function Layout({
 					</div>
 				</BreadcrumbProvider>
 			</SidebarInset>
+			{modal}
 		</SidebarProvider>
 	);
 }
