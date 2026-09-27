@@ -8,7 +8,6 @@ import {
 	ChevronUpIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import { TableEmptyStateRow } from "@/components/common/table-empty-state-row";
 import { TableLoadingState } from "@/components/common/table-loading-state";
 import { TableRowLink } from "@/components/common/table-row-link";
@@ -22,7 +21,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { useDebounce } from "@/hooks/use-debounce";
+import { useTableQueryState } from "@/hooks/use-table-query-state";
 import type { UserListDto } from "@/lib/api/generated.schemas";
 
 interface UsersTableProps {
@@ -91,30 +90,11 @@ export function UsersTable({
 	isLoading,
 }: UsersTableProps) {
 	const router = useRouter();
-	const [searchValue, setSearchValue] = useState(search);
-	const debouncedSearch = useDebounce(searchValue, 400);
-
-	useEffect(() => {
-		setSearchValue(search);
-	}, [search]);
-
-	useEffect(() => {
-		const params = new URLSearchParams(window.location.search);
-		if (!debouncedSearch) {
-			params.delete("search");
-		} else {
-			params.set("search", debouncedSearch);
-		}
-		router.push(`?${params.toString()}`);
-	}, [debouncedSearch, router]);
-
-	const updateSort = (column: string) => {
-		const params = new URLSearchParams(window.location.search);
-		const nextOrder = sortBy === column && sortOrder === "asc" ? "desc" : "asc";
-		params.set("sortBy", column);
-		params.set("sortOrder", nextOrder);
-		router.push(`?${params.toString()}`);
-	};
+	const { searchValue, setSearchValue, updateSort } = useTableQueryState({
+		search,
+		sortBy,
+		sortOrder,
+	});
 
 	const table = useTable({
 		key: "users-table",
