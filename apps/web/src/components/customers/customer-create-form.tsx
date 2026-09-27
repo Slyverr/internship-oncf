@@ -31,8 +31,14 @@ import {
 export function CustomerCreateForm(): JSX.Element {
 	const router = useRouter();
 	const mutation = useCustomersControllerCreate();
-	const { step, setStep, stepErrors, advanceIfValid, clearFieldError } =
-		useGuidedFormState();
+	const {
+		step,
+		setStep,
+		stepErrors,
+		advanceIfValid,
+		clearFieldError,
+		validate,
+	} = useGuidedFormState();
 
 	const form = useForm({
 		defaultValues: {
@@ -44,10 +50,11 @@ export function CustomerCreateForm(): JSX.Element {
 			email: "",
 			typeId: "",
 		} as CustomerFormValues,
-		validators: {
-			onChange: customerFormSchema,
-		},
 		onSubmit: async ({ value }) => {
+			if (!validate(customerFormSchema.safeParse(value))) {
+				return;
+			}
+
 			mutation.mutate(
 				{
 					data: {
@@ -175,7 +182,9 @@ export function CustomerCreateForm(): JSX.Element {
 				<CardContent className="grid gap-4 md:grid-cols-2">
 					<form.Field name="email">
 						{(field) => {
-							const errorMsg = getFormErrorMessage(field.state.meta.errors[0]);
+							const errorMsg =
+								stepErrors.email ??
+								getFormErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="space-y-2">
 									<FormFieldHeader

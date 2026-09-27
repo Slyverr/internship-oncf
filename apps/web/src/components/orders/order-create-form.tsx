@@ -77,8 +77,14 @@ export function OrderCreateForm(): JSX.Element {
 
 	const canManageOther = hasPermission(Permission.ORDERS_MANAGE_OTHER);
 	const canManageStatus = hasPermission(Permission.ORDERS_MANAGE_STATUS);
-	const { step, setStep, stepErrors, advanceIfValid, clearFieldError } =
-		useGuidedFormState();
+	const {
+		step,
+		setStep,
+		stepErrors,
+		advanceIfValid,
+		clearFieldError,
+		validate,
+	} = useGuidedFormState();
 
 	function continueToSchedule() {
 		const schema = canManageOther
@@ -103,10 +109,11 @@ export function OrderCreateForm(): JSX.Element {
 
 	const form = useForm({
 		defaultValues,
-		validators: {
-			onChange: createOrderSchema,
-		},
 		onSubmit: async ({ value }) => {
+			if (!validate(createOrderSchema.safeParse(value))) {
+				return;
+			}
+
 			mutation.mutate(
 				{
 					data: {
@@ -343,9 +350,9 @@ export function OrderCreateForm(): JSX.Element {
 								{canManageStatus && (
 									<form.Field name="status">
 										{(field) => {
-											const errorMsg = getFormErrorMessage(
-												field.state.meta.errors[0],
-											);
+											const errorMsg =
+												stepErrors.status ??
+												getFormErrorMessage(field.state.meta.errors[0]);
 											return (
 												<div className="space-y-2">
 													<FormFieldHeader

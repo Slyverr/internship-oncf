@@ -85,8 +85,14 @@ export function ClaimCreateForm(): JSX.Element {
 
 	const canManageOther = hasPermission(Permission.CLAIMS_MANAGE_OTHER);
 	const canManageStatus = hasPermission(Permission.CLAIMS_MANAGE_STATUS);
-	const { step, setStep, stepErrors, advanceIfValid, clearFieldError } =
-		useGuidedFormState();
+	const {
+		step,
+		setStep,
+		stepErrors,
+		advanceIfValid,
+		clearFieldError,
+		validate,
+	} = useGuidedFormState();
 
 	const defaultValues: CreateClaimFormValues = {
 		customerId: profile?.customerId ?? 0,
@@ -101,10 +107,11 @@ export function ClaimCreateForm(): JSX.Element {
 
 	const form = useForm({
 		defaultValues,
-		validators: {
-			onChange: createClaimSchema,
-		},
 		onSubmit: async ({ value }) => {
+			if (!validate(createClaimSchema.safeParse(value))) {
+				return;
+			}
+
 			mutation.mutate(
 				{
 					data: {
@@ -245,7 +252,9 @@ export function ClaimCreateForm(): JSX.Element {
 
 					<form.Field name="priority">
 						{(field) => {
-							const errorMsg = getFormErrorMessage(field.state.meta.errors[0]);
+							const errorMsg =
+								stepErrors.priority ??
+								getFormErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="space-y-2">
 									<FormFieldHeader
@@ -265,9 +274,9 @@ export function ClaimCreateForm(): JSX.Element {
 					{canManageStatus && (
 						<form.Field name="status">
 							{(field) => {
-								const errorMsg = getFormErrorMessage(
-									field.state.meta.errors[0],
-								);
+								const errorMsg =
+									stepErrors.status ??
+									getFormErrorMessage(field.state.meta.errors[0]);
 								return (
 									<div className="space-y-2">
 										<FormFieldHeader
@@ -329,7 +338,9 @@ export function ClaimCreateForm(): JSX.Element {
 				<CardContent className="space-y-4">
 					<form.Field name="description">
 						{(field) => {
-							const errorMsg = getFormErrorMessage(field.state.meta.errors[0]);
+							const errorMsg =
+								stepErrors.description ??
+								getFormErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="space-y-2">
 									<FormFieldHeader
@@ -348,7 +359,10 @@ export function ClaimCreateForm(): JSX.Element {
 												: ""
 										}
 										value={field.state.value}
-										onChange={(event) => field.handleChange(event.target.value)}
+										onChange={(event) => {
+											field.handleChange(event.target.value);
+											clearFieldError("description");
+										}}
 									/>
 								</div>
 							);
@@ -356,20 +370,35 @@ export function ClaimCreateForm(): JSX.Element {
 					</form.Field>
 
 					<form.Field name="resolution">
-						{(field) => (
-							<div className="space-y-2">
-								<Label htmlFor="resolution">
-									Initial Resolution Notes (Optional)
-								</Label>
-								<Textarea
-									id="resolution"
-									placeholder="Enter initial resolution text if resolved immediately..."
-									rows={3}
-									value={field.state.value ?? ""}
-									onChange={(event) => field.handleChange(event.target.value)}
-								/>
-							</div>
-						)}
+						{(field) => {
+							const errorMsg =
+								stepErrors.resolution ??
+								getFormErrorMessage(field.state.meta.errors[0]);
+							return (
+								<div className="space-y-2">
+									<FormFieldHeader
+										htmlFor="resolution"
+										label="Initial Resolution Notes"
+										error={errorMsg}
+									/>
+									<Textarea
+										id="resolution"
+										placeholder="Enter initial resolution text if resolved immediately..."
+										rows={3}
+										className={
+											errorMsg
+												? "border-destructive focus-visible:ring-destructive/20"
+												: ""
+										}
+										value={field.state.value ?? ""}
+										onChange={(event) => {
+											field.handleChange(event.target.value);
+											clearFieldError("resolution");
+										}}
+									/>
+								</div>
+							);
+						}}
 					</form.Field>
 				</CardContent>
 			</Card>

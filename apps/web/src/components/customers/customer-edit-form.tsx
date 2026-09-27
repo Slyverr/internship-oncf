@@ -35,8 +35,14 @@ export function CustomerEditForm({
 }): JSX.Element {
 	const router = useRouter();
 	const mutation = useCustomersControllerUpdate();
-	const { step, setStep, stepErrors, advanceIfValid, clearFieldError } =
-		useGuidedFormState();
+	const {
+		step,
+		setStep,
+		stepErrors,
+		advanceIfValid,
+		clearFieldError,
+		validate,
+	} = useGuidedFormState();
 
 	const form = useForm({
 		defaultValues: {
@@ -48,10 +54,11 @@ export function CustomerEditForm({
 			email: customer.email ?? "",
 			typeId: customer.typeId ?? "",
 		} as CustomerFormValues,
-		validators: {
-			onChange: customerFormSchema,
-		},
 		onSubmit: async ({ value }) => {
+			if (!validate(customerFormSchema.safeParse(value))) {
+				return;
+			}
+
 			mutation.mutate(
 				{
 					id: customer.id,
@@ -179,7 +186,9 @@ export function CustomerEditForm({
 				<CardContent className="grid gap-4 md:grid-cols-2">
 					<form.Field name="email">
 						{(field) => {
-							const errorMsg = getFormErrorMessage(field.state.meta.errors[0]);
+							const errorMsg =
+								stepErrors.email ??
+								getFormErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="space-y-2">
 									<FormFieldHeader
@@ -249,7 +258,7 @@ export function CustomerEditForm({
 					<GuidedFormActions
 						currentStep={step}
 						stepCount={customerFormSteps.length}
-						onCancel={() => router.push("/dashboard/customers/" + customer.id)}
+						onCancel={() => router.push(`/dashboard/customers/${customer.id}`)}
 						onPrevious={() => setStep(0)}
 						onContinue={continueToContact}
 						submitLabel="Save Changes"

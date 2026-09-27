@@ -16,13 +16,21 @@ export function useGuidedFormState() {
 	const [step, setStep] = useState(0);
 	const [stepErrors, setStepErrors] = useState<Record<string, string>>({});
 
-	function advanceIfValid(result: StepValidationResult) {
+	function validate(result: StepValidationResult) {
 		if (!result.success) {
 			setStepErrors(getFormStepErrors(result.error.issues));
 			return false;
 		}
 
 		setStepErrors({});
+		return true;
+	}
+
+	function advanceIfValid(result: StepValidationResult) {
+		if (!validate(result)) {
+			return false;
+		}
+
 		setStep((currentStep) => currentStep + 1);
 		return true;
 	}
@@ -31,5 +39,12 @@ export function useGuidedFormState() {
 		setStepErrors((errors) => omitFormStepError(errors, fieldName));
 	}
 
-	return { step, setStep, stepErrors, advanceIfValid, clearFieldError };
+	return {
+		step,
+		setStep,
+		stepErrors,
+		advanceIfValid,
+		clearFieldError,
+		validate,
+	};
 }

@@ -81,8 +81,14 @@ export function ProgramCreateForm({
 
 	const canManageOther = hasPermission(Permission.PROGRAMS_MANAGE_OTHER);
 	const canManageStatus = hasPermission(Permission.PROGRAMS_MANAGE_STATUS);
-	const { step, setStep, stepErrors, advanceIfValid, clearFieldError } =
-		useGuidedFormState();
+	const {
+		step,
+		setStep,
+		stepErrors,
+		advanceIfValid,
+		clearFieldError,
+		validate,
+	} = useGuidedFormState();
 
 	const defaultValues: CreateProgramFormValues = {
 		orderId: initialOrderId ?? 0,
@@ -96,10 +102,11 @@ export function ProgramCreateForm({
 
 	const form = useForm({
 		defaultValues,
-		validators: {
-			onChange: createProgramSchema,
-		},
 		onSubmit: async ({ value }) => {
+			if (!validate(createProgramSchema.safeParse(value))) {
+				return;
+			}
+
 			mutation.mutate(
 				{
 					data: {
@@ -217,9 +224,9 @@ export function ProgramCreateForm({
 					{canManageOther && (
 						<form.Field name="userId">
 							{(field) => {
-								const errorMsg = getFormErrorMessage(
-									field.state.meta.errors[0],
-								);
+								const errorMsg =
+									stepErrors.userId ??
+									getFormErrorMessage(field.state.meta.errors[0]);
 
 								return (
 									<div className="space-y-2">
@@ -251,9 +258,9 @@ export function ProgramCreateForm({
 					{canManageStatus && (
 						<form.Field name="status">
 							{(field) => {
-								const errorMsg = getFormErrorMessage(
-									field.state.meta.errors[0],
-								);
+								const errorMsg =
+									stepErrors.status ??
+									getFormErrorMessage(field.state.meta.errors[0]);
 
 								return (
 									<div className="space-y-2">
@@ -362,7 +369,9 @@ export function ProgramCreateForm({
 				<CardContent className="grid gap-4 md:grid-cols-2">
 					<form.Field name="quantityRealized">
 						{(field) => {
-							const errorMsg = getFormErrorMessage(field.state.meta.errors[0]);
+							const errorMsg =
+								stepErrors.quantityRealized ??
+								getFormErrorMessage(field.state.meta.errors[0]);
 
 							return (
 								<div className="space-y-2">

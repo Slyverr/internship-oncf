@@ -85,8 +85,14 @@ const userEditSteps = [
 export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 	const router = useRouter();
 	const mutation = useUsersControllerUpdate();
-	const { step, setStep, stepErrors, advanceIfValid, clearFieldError } =
-		useGuidedFormState();
+	const {
+		step,
+		setStep,
+		stepErrors,
+		advanceIfValid,
+		clearFieldError,
+		validate,
+	} = useGuidedFormState();
 
 	const form = useForm({
 		defaultValues: {
@@ -100,10 +106,11 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 			type: (user.type as UpdateUserDtoType) ?? UpdateUserDtoType.internal,
 			customerId: user.customerId ?? undefined,
 		} as UpdateUserFormValues,
-		validators: {
-			onChange: updateUserSchema,
-		},
 		onSubmit: async ({ value }) => {
+			if (!validate(updateUserSchema.safeParse(value))) {
+				return;
+			}
+
 			mutation.mutate(
 				{
 					id: user.id,
@@ -265,7 +272,9 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 				<CardContent className="grid gap-4 md:grid-cols-2">
 					<form.Field name="firstName">
 						{(field) => {
-							const errorMsg = getFormErrorMessage(field.state.meta.errors[0]);
+							const errorMsg =
+								stepErrors.firstName ??
+								getFormErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="space-y-2">
 									<FormFieldHeader
@@ -277,7 +286,10 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 									<Input
 										id="firstName"
 										value={field.state.value}
-										onChange={(e) => field.handleChange(e.target.value)}
+										onChange={(e) => {
+											field.handleChange(e.target.value);
+											clearFieldError("firstName");
+										}}
 										className={
 											errorMsg
 												? "border-destructive focus-visible:ring-destructive/20"
@@ -291,7 +303,9 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 
 					<form.Field name="lastName">
 						{(field) => {
-							const errorMsg = getFormErrorMessage(field.state.meta.errors[0]);
+							const errorMsg =
+								stepErrors.lastName ??
+								getFormErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="space-y-2">
 									<FormFieldHeader
@@ -303,7 +317,10 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 									<Input
 										id="lastName"
 										value={field.state.value}
-										onChange={(e) => field.handleChange(e.target.value)}
+										onChange={(e) => {
+											field.handleChange(e.target.value);
+											clearFieldError("lastName");
+										}}
 										className={
 											errorMsg
 												? "border-destructive focus-visible:ring-destructive/20"
@@ -320,9 +337,9 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 							role === UpdateUserDtoRole.CLIENT_REPRESENTATIVE && (
 								<form.Field name="customerId">
 									{(field) => {
-										const errorMsg = getFormErrorMessage(
-											field.state.meta.errors[0],
-										);
+										const errorMsg =
+											stepErrors.customerId ??
+											getFormErrorMessage(field.state.meta.errors[0]);
 
 										return (
 											<div className="space-y-2 md:col-span-2">
