@@ -129,7 +129,7 @@ export function DashboardOverview() {
 		recentSectionCount === 3
 			? "xl:grid-cols-3"
 			: recentSectionCount === 2
-				? "xl:grid-cols-2"
+				? "lg:grid-cols-2"
 				: "grid-cols-1";
 
 	const ordersQuery = useOrdersControllerFindAll(
