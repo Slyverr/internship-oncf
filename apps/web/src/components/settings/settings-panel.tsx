@@ -24,6 +24,7 @@ import {
 	type TextSize,
 	type ThemeMode,
 	useAppearance,
+	type WorkspaceLayout,
 } from "@/providers/appearance-provider";
 import { useAuth } from "@/providers/auth-provider";
 
@@ -94,6 +95,23 @@ const motionOptions: {
 		value: "reduced",
 		label: "Reduced",
 		description: "Use only essential motion",
+	},
+];
+
+const workspaceLayoutOptions: {
+	value: WorkspaceLayout;
+	label: string;
+	description: string;
+}[] = [
+	{
+		value: "sidebar",
+		label: "Sidebar",
+		description: "Keep navigation in the side rail",
+	},
+	{
+		value: "centered-header",
+		label: "Centered icon bar",
+		description: "Place icon navigation above centered content",
 	},
 ];
 
@@ -180,7 +198,7 @@ function ThemePreview({ theme }: { theme: ThemeMode }) {
 	return (
 		<span
 			aria-hidden="true"
-			className={`grid h-10 w-14 shrink-0 overflow-hidden rounded-md border border-border ${theme === "system" ? "grid-cols-2" : "grid-cols-1"}`}
+			className={`grid h-8 w-12 shrink-0 overflow-hidden rounded-md border border-border ${theme === "system" ? "grid-cols-2" : "grid-cols-1"}`}
 		>
 			{previews.map((previewTheme) => (
 				<ThemeSurface key={previewTheme} theme={previewTheme} />
@@ -194,8 +212,14 @@ export type SettingsSection = "appearance" | "profile" | "security";
 export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 	const { profile, setProfile } = useAuth();
 	const appearanceSyncStatus = useAppearanceSyncStatus();
-	const { preferences, setTheme, setFontFamily, setTextSize, setMotion } =
-		useAppearance();
+	const {
+		preferences,
+		setTheme,
+		setFontFamily,
+		setTextSize,
+		setMotion,
+		setWorkspaceLayout,
+	} = useAppearance();
 	const profileMutation = useProfileControllerUpdate();
 	const passwordMutation = useAuthControllerChangePassword();
 	const [firstName, setFirstName] = useState(profile.firstName);
@@ -319,12 +343,20 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 					</CardHeader>
 					<CardContent className="grid gap-6">
 						<PreferenceChoices
+							label="Workspace layout"
+							value={preferences.workspaceLayout}
+							options={workspaceLayoutOptions}
+							onChange={setWorkspaceLayout}
+							columns="grid-cols-1 sm:grid-cols-2"
+						/>
+						<PreferenceChoices
 							label="Color theme"
 							value={preferences.theme}
 							options={themeOptions}
 							onChange={setTheme}
 							renderPreview={(theme) => <ThemePreview theme={theme} />}
-							columns="grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3"
+							columns="grid-cols-1 sm:grid-cols-2 xl:grid-cols-3"
+							compact
 						/>
 						<PreferenceChoices
 							label="Font"
@@ -347,11 +379,6 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 							onChange={setMotion}
 							compact
 						/>
-						<div className="flex items-center gap-4 text-sm text-muted-foreground">
-							<span className="size-3 rounded-full bg-primary" />
-							<span className="size-3 rounded-full bg-accent" />
-							<span>Warm themes use the existing ONCF-inspired colors</span>
-						</div>
 						<p role="status" className="text-sm text-muted-foreground">
 							{appearanceSyncStatus === "loading" &&
 								"Loading your account appearance settings…"}

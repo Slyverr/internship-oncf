@@ -52,7 +52,7 @@ export function SettingsDialog() {
 		<Dialog open onOpenChange={(open) => !open && router.back()}>
 			<DialogContent
 				size="wide"
-				className="grid max-h-[calc(100svh-2rem)] min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-0 overflow-hidden p-0"
+				className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-0 overflow-hidden p-0"
 			>
 				<DialogHeader className="border-b p-4 pr-16 sm:p-6 sm:pr-16">
 					<DialogTitle className="text-lg">Settings</DialogTitle>

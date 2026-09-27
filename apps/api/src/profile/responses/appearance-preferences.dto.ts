@@ -4,6 +4,7 @@ import {
 	APPEARANCE_MOTION_PREFERENCES,
 	APPEARANCE_TEXT_SIZES,
 	APPEARANCE_THEMES,
+	APPEARANCE_WORKSPACE_LAYOUTS,
 } from "@ecommand/shared";
 import { ApiProperty } from "@nestjs/swagger";
 
@@ -19,6 +20,9 @@ export class AppearancePreferencesDto implements AppearancePreferences {
 
 	@ApiProperty({ enum: APPEARANCE_MOTION_PREFERENCES })
 	motion: AppearancePreferences["motion"];
+
+	@ApiProperty({ enum: APPEARANCE_WORKSPACE_LAYOUTS })
+	workspaceLayout: AppearancePreferences["workspaceLayout"];
 
 	@ApiProperty()
 	updatedAt: string;

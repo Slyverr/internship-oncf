@@ -85,6 +85,7 @@ describe("ProfileService", () => {
 			fontFamily: "geist",
 			textSize: "large",
 			motion: "reduced",
+			workspaceLayout: "centered-header",
 		};
 		query.savePreferences.mockResolvedValue({ ...preferences } as never);
 

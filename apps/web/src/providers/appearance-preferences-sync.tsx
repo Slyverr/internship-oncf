@@ -1,6 +1,9 @@
 "use client";
 
-import type { AppearancePreferences } from "@ecommand/shared";
+import {
+	type AppearancePreferences,
+	DEFAULT_APPEARANCE_PREFERENCES,
+} from "@ecommand/shared";
 import { useQueryClient } from "@tanstack/react-query";
 import {
 	createContext,
@@ -23,11 +26,19 @@ export type AppearanceSyncStatus = "loading" | "saving" | "saved" | "local";
 const AppearanceSyncContext = createContext<AppearanceSyncStatus>("loading");
 
 function toPreferences(value: AppearancePreferencesDto): AppearancePreferences {
+	// The checked-in Orval types predate this field; keep the read adapter tolerant until the API schemas can be regenerated without dropping unrelated DTO fields.
+	const withWorkspaceLayout = value as AppearancePreferencesDto & {
+		workspaceLayout?: AppearancePreferences["workspaceLayout"];
+	};
+
 	return {
 		theme: value.theme,
 		fontFamily: value.fontFamily,
 		textSize: value.textSize,
 		motion: value.motion,
+		workspaceLayout:
+			withWorkspaceLayout.workspaceLayout ??
+			DEFAULT_APPEARANCE_PREFERENCES.workspaceLayout,
 	};
 }
 

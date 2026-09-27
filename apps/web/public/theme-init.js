@@ -7,6 +7,7 @@ try {
 	const fonts = ["inter", "geist", "system"];
 	const sizes = ["small", "default", "large"];
 	const motions = ["system", "reduced"];
+	const workspaceLayouts = ["sidebar", "centered-header"];
 	const theme = themes.includes(stored?.theme)
 		? stored.theme
 		: themes.includes(legacyTheme)
@@ -19,6 +20,9 @@ try {
 		? stored.textSize
 		: "default";
 	const motion = motions.includes(stored?.motion) ? stored.motion : "system";
+	const workspaceLayout = workspaceLayouts.includes(stored?.workspaceLayout)
+		? stored.workspaceLayout
+		: "sidebar";
 	const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 	const dark =
 		theme === "dark" ||
@@ -30,4 +34,5 @@ try {
 	document.documentElement.dataset.fontFamily = fontFamily;
 	document.documentElement.dataset.textSize = textSize;
 	document.documentElement.dataset.motion = motion;
+	document.documentElement.dataset.workspaceLayout = workspaceLayout;
 } catch {}

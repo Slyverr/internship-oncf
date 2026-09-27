@@ -75,6 +75,7 @@ export class ProfileQuery {
 				fontFamily: true,
 				textSize: true,
 				motion: true,
+				workspaceLayout: true,
 				updatedAt: true,
 			},
 		});
@@ -98,6 +99,7 @@ export class ProfileQuery {
 						fontFamily: userPreferences.fontFamily,
 						textSize: userPreferences.textSize,
 						motion: userPreferences.motion,
+						workspaceLayout: userPreferences.workspaceLayout,
 						updatedAt: userPreferences.updatedAt,
 					}),
 			{ userId, ...values },

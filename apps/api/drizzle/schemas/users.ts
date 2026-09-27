@@ -3,8 +3,12 @@ import type {
 	AppearanceMotionPreference,
 	AppearanceTextSize,
 	AppearanceTheme,
+	AppearanceWorkspaceLayout,
 } from "@ecommand/shared";
-import { RegistrationStatus } from "@ecommand/shared";
+import {
+	APPEARANCE_WORKSPACE_LAYOUTS,
+	RegistrationStatus,
+} from "@ecommand/shared";
 import { sql } from "drizzle-orm";
 import {
 	bigint,
@@ -182,6 +186,10 @@ export const userPreferences = pgTable(
 			.$type<AppearanceMotionPreference>()
 			.default("system")
 			.notNull(),
+		workspaceLayout: varchar("workspace_layout", { length: 24 })
+			.$type<AppearanceWorkspaceLayout>()
+			.default("sidebar")
+			.notNull(),
 		updatedAt: timestamp("updated_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
 			.notNull(),
@@ -208,6 +216,13 @@ export const userPreferences = pgTable(
 		check(
 			"user_preferences_motion_check",
 			sql`${table.motion} IN ('system', 'reduced')`,
+		),
+		check(
+			"user_preferences_workspace_layout_check",
+			sql`${table.workspaceLayout} IN (${sql.join(
+				APPEARANCE_WORKSPACE_LAYOUTS.map((layout) => sql`${layout}`),
+				sql`, `,
+			)})`,
 		),
 	],
 );

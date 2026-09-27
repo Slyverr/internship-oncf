@@ -5,10 +5,12 @@ import {
 	APPEARANCE_MOTION_PREFERENCES,
 	APPEARANCE_TEXT_SIZES,
 	APPEARANCE_THEMES,
+	APPEARANCE_WORKSPACE_LAYOUTS,
 	type AppearanceFontFamily,
 	type AppearanceMotionPreference,
 	type AppearanceTextSize,
 	type AppearanceTheme,
+	type AppearanceWorkspaceLayout,
 	DEFAULT_APPEARANCE_PREFERENCES,
 	type AppearancePreferences as SharedAppearancePreferences,
 } from "@ecommand/shared";
@@ -26,6 +28,7 @@ export type ThemeMode = AppearanceTheme;
 export type FontFamily = AppearanceFontFamily;
 export type TextSize = AppearanceTextSize;
 export type MotionPreference = AppearanceMotionPreference;
+export type WorkspaceLayout = AppearanceWorkspaceLayout;
 export type AppearancePreferences = SharedAppearancePreferences;
 
 interface AppearanceContextValue {
@@ -36,6 +39,7 @@ interface AppearanceContextValue {
 	setFontFamily: (fontFamily: FontFamily) => void;
 	setTextSize: (textSize: TextSize) => void;
 	setMotion: (motion: MotionPreference) => void;
+	setWorkspaceLayout: (layout: WorkspaceLayout) => void;
 	theme: ThemeMode;
 }
 
@@ -55,6 +59,8 @@ function applyAppearance(preferences: AppearancePreferences) {
 	document.documentElement.dataset.fontFamily = preferences.fontFamily;
 	document.documentElement.dataset.textSize = preferences.textSize;
 	document.documentElement.dataset.motion = preferences.motion;
+	document.documentElement.dataset.workspaceLayout =
+		preferences.workspaceLayout;
 }
 
 function readPreferences(): AppearancePreferences {
@@ -75,6 +81,9 @@ function readPreferences(): AppearancePreferences {
 				motion: isMotionPreference(parsed.motion)
 					? parsed.motion
 					: DEFAULT_PREFERENCES.motion,
+				workspaceLayout: isWorkspaceLayout(parsed.workspaceLayout)
+					? parsed.workspaceLayout
+					: DEFAULT_PREFERENCES.workspaceLayout,
 			};
 		}
 		const legacyTheme = window.localStorage.getItem(LEGACY_STORAGE_KEY);
@@ -110,6 +119,13 @@ function isMotionPreference(value: unknown): value is MotionPreference {
 	return (
 		typeof value === "string" &&
 		APPEARANCE_MOTION_PREFERENCES.includes(value as MotionPreference)
+	);
+}
+
+function isWorkspaceLayout(value: unknown): value is WorkspaceLayout {
+	return (
+		typeof value === "string" &&
+		APPEARANCE_WORKSPACE_LAYOUTS.includes(value as WorkspaceLayout)
 	);
 }
 
@@ -170,6 +186,11 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
 		(motion: MotionPreference) => setPreferences({ ...preferences, motion }),
 		[preferences, setPreferences],
 	);
+	const setWorkspaceLayout = useCallback(
+		(workspaceLayout: WorkspaceLayout) =>
+			setPreferences({ ...preferences, workspaceLayout }),
+		[preferences, setPreferences],
+	);
 
 	const value = useMemo(
 		() => ({
@@ -181,6 +202,7 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
 			setFontFamily,
 			setTextSize,
 			setMotion,
+			setWorkspaceLayout,
 		}),
 		[
 			preferences,
@@ -190,6 +212,7 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
 			setFontFamily,
 			setTextSize,
 			setMotion,
+			setWorkspaceLayout,
 		],
 	);
 

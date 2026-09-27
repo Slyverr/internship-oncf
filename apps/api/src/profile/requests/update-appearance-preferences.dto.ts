@@ -3,10 +3,12 @@ import {
 	APPEARANCE_MOTION_PREFERENCES,
 	APPEARANCE_TEXT_SIZES,
 	APPEARANCE_THEMES,
+	APPEARANCE_WORKSPACE_LAYOUTS,
 	type AppearanceFontFamily,
 	type AppearanceMotionPreference,
 	type AppearanceTextSize,
 	type AppearanceTheme,
+	type AppearanceWorkspaceLayout,
 } from "@ecommand/shared";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsIn } from "class-validator";
@@ -27,4 +29,8 @@ export class UpdateAppearancePreferencesDto {
 	@ApiProperty({ enum: APPEARANCE_MOTION_PREFERENCES })
 	@IsIn(APPEARANCE_MOTION_PREFERENCES)
 	motion: AppearanceMotionPreference;
+
+	@ApiProperty({ enum: APPEARANCE_WORKSPACE_LAYOUTS })
+	@IsIn(APPEARANCE_WORKSPACE_LAYOUTS)
+	workspaceLayout: AppearanceWorkspaceLayout;
 }

@@ -8,6 +8,7 @@ describe("UpdateAppearancePreferencesDto", () => {
 			fontFamily: "geist",
 			textSize: "large",
 			motion: "reduced",
+			workspaceLayout: "centered-header",
 		});
 
 		await expect(validate(dto)).resolves.toHaveLength(0);
@@ -19,6 +20,7 @@ describe("UpdateAppearancePreferencesDto", () => {
 			fontFamily: "comic-sans",
 			textSize: "tiny",
 			motion: "always",
+			workspaceLayout: "floating-panels",
 		});
 
 		const errors = await validate(dto);
@@ -27,6 +29,7 @@ describe("UpdateAppearancePreferencesDto", () => {
 			"motion",
 			"textSize",
 			"theme",
+			"workspaceLayout",
 		]);
 	});
 });

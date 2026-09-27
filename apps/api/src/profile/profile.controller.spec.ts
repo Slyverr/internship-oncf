@@ -54,6 +54,7 @@ describe("ProfileController authorization mapping", () => {
 			fontFamily: "inter",
 			textSize: "default",
 			motion: "system",
+			workspaceLayout: "sidebar",
 		};
 		service.updatePreferences.mockResolvedValue(dto as never);
 		expect(
