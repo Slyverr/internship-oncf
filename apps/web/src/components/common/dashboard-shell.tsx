@@ -14,10 +14,7 @@ type DashboardWorkspaceProps = {
 	modal: ReactNode;
 };
 
-const sidebarContentClassName =
-	"page-enter mx-auto grid w-full min-w-0 max-w-screen-3xl grid-cols-1 content-start gap-6 p-4 sm:p-6 print:p-0";
-
-const centeredContentClassName =
+const workspaceContentClassName =
 	"page-enter mx-auto grid w-full min-w-0 max-w-screen-2xl grid-cols-1 content-start gap-6 p-4 sm:p-6 print:p-0";
 
 function SidebarWorkspace({ children, modal }: DashboardWorkspaceProps) {
@@ -28,7 +25,7 @@ function SidebarWorkspace({ children, modal }: DashboardWorkspaceProps) {
 				<div className="print:hidden">
 					<AppHeader />
 				</div>
-				<main className={sidebarContentClassName}>{children}</main>
+				<main className={workspaceContentClassName}>{children}</main>
 			</SidebarInset>
 			{modal}
 		</SidebarProvider>
@@ -39,7 +36,7 @@ function CenteredHeaderWorkspace({ children, modal }: DashboardWorkspaceProps) {
 	return (
 		<div className="@container/workspace flex min-h-screen w-full min-w-0 flex-col">
 			<CenteredAppHeader />
-			<main className={`${centeredContentClassName} flex-1`}>
+			<main className={`${workspaceContentClassName} flex-1`}>
 				<WorkspaceBreadcrumbs />
 				{children}
 			</main>
