@@ -167,7 +167,7 @@ export function ClaimCreateForm(): JSX.Element {
 				}
 				form.handleSubmit();
 			}}
-			className="max-w-5xl space-y-4"
+			className="mx-auto w-full max-w-5xl space-y-4 @7xl/workspace:max-w-7xl"
 		>
 			<PageHeader
 				title="New claim"
