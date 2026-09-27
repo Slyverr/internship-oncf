@@ -10,11 +10,12 @@ import {
 import { useCustomersControllerFindAll } from "@/lib/api/customers";
 
 interface CustomerSelectProps {
+	id?: string;
 	value?: number;
 	onChange: (value: number) => void;
 }
 
-export function CustomerSelect({ value, onChange }: CustomerSelectProps) {
+export function CustomerSelect({ id, value, onChange }: CustomerSelectProps) {
 	const { data: customers = [], isLoading } = useCustomersControllerFindAll({});
 
 	const selectedCustomer = customers.find((customer) => customer.id === value);
@@ -25,7 +26,7 @@ export function CustomerSelect({ value, onChange }: CustomerSelectProps) {
 			onValueChange={(value) => onChange(Number(value))}
 			disabled={isLoading}
 		>
-			<SelectTrigger className="w-full">
+			<SelectTrigger id={id} className="w-full">
 				<SelectValue>
 					{selectedCustomer ? selectedCustomer.companyName : "Select customer"}
 				</SelectValue>

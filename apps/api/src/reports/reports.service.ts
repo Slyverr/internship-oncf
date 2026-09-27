@@ -32,10 +32,17 @@ export class ReportsService {
 		}
 		const nextDay = to ? new Date(`${query.to}T00:00:00.000Z`) : undefined;
 		nextDay?.setUTCDate(nextDay.getUTCDate() + 1);
+		const canManageOther = hasOnePermission(
+			user,
+			Permission.ORDERS_MANAGE_OTHER,
+		);
+		const dataScope = canManageOther
+			? undefined
+			: user.customerId !== null
+				? eq(orders.customerId, user.customerId)
+				: eq(orders.createdByUserId, user.id);
 		const where = and(
-			!hasOnePermission(user, Permission.ORDERS_MANAGE_OTHER)
-				? eq(orders.createdByUserId, user.id)
-				: undefined,
+			dataScope,
 			from ? gte(orders.orderDate, from) : undefined,
 			nextDay
 				? lt(orders.orderDate, `${nextDay.toISOString().slice(0, 10)} 00:00:00`)

@@ -9,6 +9,7 @@ import {
 	GuidedFormActions,
 	GuidedFormProgress,
 } from "@/components/common/guided-form";
+import { CustomerSelect } from "@/components/customers/customer-select";
 import {
 	Card,
 	CardContent,
@@ -34,7 +35,7 @@ import {
 import { useUsersControllerUpdate } from "@/lib/api/users";
 import { getFormErrorMessage } from "@/lib/form-utils";
 
-const updateUserSchema = z.object({
+const updateUserSchemaBase = z.object({
 	email: z.string().email("Valid email is required").max(100).optional(),
 	firstName: z
 		.string()
@@ -51,11 +52,27 @@ const updateUserSchema = z.object({
 	role: z.nativeEnum(UpdateUserDtoRole).optional(),
 	employeeId: z.string().max(50).optional(),
 	type: z.nativeEnum(UpdateUserDtoType).optional(),
+	customerId: z.number().int().positive().optional(),
 });
+
+const updateUserSchema = updateUserSchemaBase.superRefine(
+	({ role, customerId }, context) => {
+		if (
+			role === UpdateUserDtoRole.CLIENT_REPRESENTATIVE &&
+			(!customerId || customerId < 1)
+		) {
+			context.addIssue({
+				code: "custom",
+				path: ["customerId"],
+				message: "Select the customer this representative belongs to",
+			});
+		}
+	},
+);
 
 type UpdateUserFormValues = z.infer<typeof updateUserSchema>;
 
-const userAccessSchema = updateUserSchema.pick({
+const userAccessSchema = updateUserSchemaBase.pick({
 	email: true,
 	role: true,
 	type: true,
@@ -77,10 +94,11 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 			firstName: user.firstName,
 			lastName: user.lastName,
 			role:
-				(user.roleId as UpdateUserDtoRole) ??
+				(user.role?.name as UpdateUserDtoRole | undefined) ??
 				UpdateUserDtoRole.AGENT_COMMERCIAL,
 			employeeId: user.employeeId ?? "",
 			type: (user.type as UpdateUserDtoType) ?? UpdateUserDtoType.internal,
+			customerId: user.customerId ?? undefined,
 		} as UpdateUserFormValues,
 		validators: {
 			onChange: updateUserSchema,
@@ -102,6 +120,7 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 							? { employeeId: value.employeeId.trim() }
 							: {}),
 						...(value.type ? { type: value.type } : {}),
+						...(value.customerId ? { customerId: value.customerId } : {}),
 					},
 				},
 				{
@@ -295,6 +314,39 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 							);
 						}}
 					</form.Field>
+
+					<form.Subscribe selector={(state) => state.values.role}>
+						{(role) =>
+							role === UpdateUserDtoRole.CLIENT_REPRESENTATIVE && (
+								<form.Field name="customerId">
+									{(field) => {
+										const errorMsg = getFormErrorMessage(
+											field.state.meta.errors[0],
+										);
+
+										return (
+											<div className="space-y-2 md:col-span-2">
+												<FormFieldHeader
+													htmlFor="customerId"
+													label="Customer Company"
+													required
+													error={errorMsg}
+												/>
+												<CustomerSelect
+													id="customerId"
+													value={field.state.value}
+													onChange={(value) => {
+														field.handleChange(value);
+														clearFieldError("customerId");
+													}}
+												/>
+											</div>
+										);
+									}}
+								</form.Field>
+							)
+						}
+					</form.Subscribe>
 
 					<form.Field name="employeeId">
 						{(field) => (

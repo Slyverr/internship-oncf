@@ -1,5 +1,9 @@
 import { Permission, Role } from "@ecommand/shared";
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+	BadRequestException,
+	Injectable,
+	NotFoundException,
+} from "@nestjs/common";
 import { AuthUser } from "@/auth/auth.types";
 import { CreateUserDto } from "./requests/create-user.dto";
 import { UpdateUserDto } from "./requests/update-user.dto";
@@ -50,12 +54,18 @@ export class UsersService {
 	}
 
 	async create(dto: CreateUserDto, user: AuthUser) {
+		this.ensureCustomerAssignment(dto.role, dto.customerId);
 		const values = await this.usersMapper.toCreate(dto, user);
 		const created = await this.usersQuery.createUser(values);
 		return this.findOne(created.id);
 	}
 
 	async update(id: UserId, dto: UpdateUserDto, user: AuthUser) {
+		const current = await this.findOne(id);
+		const role = dto.role ?? (current.role?.name as Role | undefined);
+		const customerId = dto.customerId ?? current.customerId;
+		this.ensureCustomerAssignment(role, customerId);
+
 		const values = await this.usersMapper.toUpdate(dto, user);
 		await this.usersQuery.updateUser(id, values);
 		return this.findOne(id);
@@ -75,5 +85,16 @@ export class UsersService {
 			throw new NotFoundException(`User with id ${id} not found`);
 		}
 		return user;
+	}
+
+	private ensureCustomerAssignment(
+		role: Role | undefined,
+		customerId: number | null | undefined,
+	) {
+		if (role === Role.CLIENT_REPRESENTATIVE && !customerId) {
+			throw new BadRequestException(
+				"A customer must be assigned to client representatives",
+			);
+		}
 	}
 }

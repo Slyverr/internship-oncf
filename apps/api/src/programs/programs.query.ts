@@ -88,16 +88,23 @@ export class ProgramsQuery {
 			sortOrder = "desc",
 		} = query;
 
-		const createdByUserId = hasOnePermission(
+		const canManageOther = hasOnePermission(
 			user,
 			Permission.PROGRAMS_MANAGE_OTHER,
-		)
+		);
+		const customerScope = canManageOther ? null : user.customerId;
+		const createdByUserId = canManageOther
 			? userId
-			: user.id;
+			: customerScope !== null
+				? undefined
+				: user.id;
 
 		return this.drizzle.db.query.forecastPrograms.findMany({
 			where: {
 				...(createdByUserId !== undefined && { createdByUserId }),
+				...(customerScope !== null && {
+					order: { customerId: customerScope },
+				}),
 				...(orderId !== undefined && { orderId }),
 				...(status && {
 					programStatus: {
@@ -133,6 +140,13 @@ export class ProgramsQuery {
 			where: { id },
 			columns: {
 				createdByUserId: true,
+			},
+			with: {
+				order: {
+					columns: {
+						customerId: true,
+					},
+				},
 			},
 		});
 	}

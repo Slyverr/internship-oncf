@@ -1,6 +1,7 @@
 import { Permission } from "@ecommand/shared";
 import { createOwnershipGuard } from "@/auth/guards/ownership.factory";
 import { ProgramIdPipe } from "../pipes/program-id.pipe";
+import { canAccessProgram } from "../programs.access";
 import { ProgramsService } from "../programs.service";
 import { ProgramId } from "../programs.types";
 
@@ -9,9 +10,9 @@ export const ProgramOwnershipGuard = createOwnershipGuard<
 	ProgramId
 >({
 	service: ProgramsService,
-	resolveOwnerId: async (service, id) => {
+	canAccess: async (service, id, user) => {
 		const program = await service.findOneForOwnership(id);
-		return program?.createdByUserId;
+		return canAccessProgram(program, user);
 	},
 	pipe: new ProgramIdPipe(),
 	permission: Permission.PROGRAMS_MANAGE_OTHER,

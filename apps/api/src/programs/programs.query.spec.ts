@@ -2,8 +2,11 @@ import { Permission } from "@ecommand/shared";
 import type { AuthUser } from "@/auth/auth.types";
 import { ProgramsQuery } from "./programs.query";
 
-const createUser = (id: number, permissions: Permission[] = []) =>
-	({ id, permissions: new Set(permissions) }) as AuthUser;
+const createUser = (
+	id: number,
+	permissions: Permission[] = [],
+	customerId: number | null = null,
+) => ({ id, permissions: new Set(permissions), customerId }) as AuthUser;
 
 describe("ProgramsQuery authorization scope", () => {
 	const findMany = jest.fn();
@@ -46,5 +49,18 @@ describe("ProgramsQuery authorization scope", () => {
 		const user = createUser(18, [Permission.PROGRAMS_MANAGE_OTHER]);
 		await query.findPrograms(user, { page: 1, limit: 10 } as never);
 		expect(findMany.mock.calls[0][0].where).toEqual({});
+	});
+
+	it("scopes customer-assigned users to programs linked to their customer", async () => {
+		const user = createUser(18, [], 42);
+		await query.findPrograms(user, {
+			page: 1,
+			limit: 10,
+			userId: 91,
+		} as never);
+
+		expect(findMany.mock.calls[0][0].where).toEqual({
+			order: { customerId: 42 },
+		});
 	});
 });

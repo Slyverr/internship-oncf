@@ -1,5 +1,5 @@
 import { Permission, Role } from "@ecommand/shared";
-import { NotFoundException } from "@nestjs/common";
+import { BadRequestException, NotFoundException } from "@nestjs/common";
 import type { AuthUser } from "@/auth/auth.types";
 import { UsersMapper } from "./users.mapper";
 import { UsersQuery } from "./users.query";
@@ -131,6 +131,20 @@ describe("UsersService", () => {
 		expect(query.findUser).toHaveBeenCalledWith(12);
 	});
 
+	it("requires a customer when creating a client representative", async () => {
+		await expect(
+			service.create(
+				{ email: user.email, role: Role.CLIENT_REPRESENTATIVE } as never,
+				authUser,
+			),
+		).rejects.toThrow(
+			new BadRequestException(
+				"A customer must be assigned to client representatives",
+			),
+		);
+		expect(mapper.toCreate).not.toHaveBeenCalled();
+	});
+
 	it("maps updates and returns the updated user", async () => {
 		const values = { firstName: "Updated" };
 		mapper.toUpdate.mockResolvedValue(values as never);
@@ -148,6 +162,22 @@ describe("UsersService", () => {
 			authUser,
 		);
 		expect(query.updateUser).toHaveBeenCalledWith(12, values);
+	});
+
+	it("requires a customer when changing a user to client representative", async () => {
+		query.findUser.mockResolvedValue(user as never);
+		await expect(
+			service.update(
+				12,
+				{ role: Role.CLIENT_REPRESENTATIVE } as never,
+				authUser,
+			),
+		).rejects.toThrow(
+			new BadRequestException(
+				"A customer must be assigned to client representatives",
+			),
+		);
+		expect(mapper.toUpdate).not.toHaveBeenCalled();
 	});
 
 	it("deactivates a user", async () => {

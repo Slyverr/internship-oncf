@@ -7,6 +7,7 @@ import {
 	IsOptional,
 	IsString,
 	MaxLength,
+	Min,
 	MinLength,
 } from "class-validator";
 
@@ -43,6 +44,7 @@ export class CreateUserDto {
 
 	@IsOptional()
 	@IsInt()
+	@Min(1)
 	customerId?: number;
 
 	@IsOptional()

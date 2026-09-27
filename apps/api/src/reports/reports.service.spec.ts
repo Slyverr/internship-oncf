@@ -34,13 +34,16 @@ function setup(results: unknown[]) {
 	return { service, db, captures };
 }
 
-const user = (permissions: Permission[]): AuthUser => ({
+const user = (
+	permissions: Permission[],
+	customerId: number | null = null,
+): AuthUser => ({
 	id: 9,
 	email: "client@example.test",
 	role: Role.CLIENT_REPRESENTATIVE,
 	permissions: new Set(permissions),
 	sessionId: "session-1",
-	customerId: null,
+	customerId,
 	agencyId: null,
 });
 
@@ -117,6 +120,17 @@ describe("ReportsService", () => {
 		const compiled = new PgDialect().sqlToQuery(condition as never);
 		expect(compiled.sql).toContain("created_by_user_id");
 		expect(compiled.params).toContain(9);
+	});
+
+	it("scopes customer-assigned reports to the assigned customer", async () => {
+		const { service, captures } = setup([[], [], [], [], []]);
+		await service.getOrders(user([Permission.REPORTS_READ], 42), {});
+
+		const condition = captures[0]?.where;
+		const compiled = new PgDialect().sqlToQuery(condition as never);
+		expect(compiled.sql).toContain("customer_id");
+		expect(compiled.params).toContain(42);
+		expect(compiled.params).not.toContain(9);
 	});
 
 	it("includes the entire final day in a bounded report", async () => {

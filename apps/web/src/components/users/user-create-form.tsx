@@ -9,6 +9,7 @@ import {
 	GuidedFormActions,
 	GuidedFormProgress,
 } from "@/components/common/guided-form";
+import { CustomerSelect } from "@/components/customers/customer-select";
 import {
 	Card,
 	CardContent,
@@ -34,7 +35,7 @@ import {
 import { useUsersControllerCreate } from "@/lib/api/users";
 import { getFormErrorMessage } from "@/lib/form-utils";
 
-const createUserSchema = z.object({
+const createUserSchemaBase = z.object({
 	email: z.email("Valid email is required").max(100),
 	password: z
 		.string()
@@ -49,9 +50,24 @@ const createUserSchema = z.object({
 	agencyId: z.number().optional(),
 });
 
+const createUserSchema = createUserSchemaBase.superRefine(
+	({ role, customerId }, context) => {
+		if (
+			role === CreateUserDtoRole.CLIENT_REPRESENTATIVE &&
+			(!customerId || customerId < 1)
+		) {
+			context.addIssue({
+				code: "custom",
+				path: ["customerId"],
+				message: "Select the customer this representative belongs to",
+			});
+		}
+	},
+);
+
 type CreateUserFormValues = z.infer<typeof createUserSchema>;
 
-const userCredentialsSchema = createUserSchema.pick({
+const userCredentialsSchema = createUserSchemaBase.pick({
 	email: true,
 	password: true,
 });
@@ -73,6 +89,7 @@ export function UserCreateForm(): JSX.Element {
 			firstName: "",
 			lastName: "",
 			role: CreateUserDtoRole.AGENT_COMMERCIAL,
+			customerId: undefined,
 			employeeId: "",
 			type: CreateUserDtoType.internal,
 		} as CreateUserFormValues,
@@ -187,7 +204,7 @@ export function UserCreateForm(): JSX.Element {
 										value={field.state.value}
 										onChange={(e) => {
 											field.handleChange(e.target.value);
-											clearFieldError("password");
+											clearFieldError("firstName");
 										}}
 										className={
 											errorMsg
@@ -298,6 +315,39 @@ export function UserCreateForm(): JSX.Element {
 							</div>
 						)}
 					</form.Field>
+
+					<form.Subscribe selector={(state) => state.values.role}>
+						{(role) =>
+							role === CreateUserDtoRole.CLIENT_REPRESENTATIVE && (
+								<form.Field name="customerId">
+									{(field) => {
+										const errorMsg = getFormErrorMessage(
+											field.state.meta.errors[0],
+										);
+
+										return (
+											<div className="space-y-2 md:col-span-2">
+												<FormFieldHeader
+													htmlFor="customerId"
+													label="Customer Company"
+													required
+													error={errorMsg}
+												/>
+												<CustomerSelect
+													id="customerId"
+													value={field.state.value}
+													onChange={(value) => {
+														field.handleChange(value);
+														clearFieldError("customerId");
+													}}
+												/>
+											</div>
+										);
+									}}
+								</form.Field>
+							)
+						}
+					</form.Subscribe>
 
 					<form.Field name="type">
 						{(field) => (

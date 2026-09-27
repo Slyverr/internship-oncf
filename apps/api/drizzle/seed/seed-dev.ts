@@ -305,6 +305,13 @@ async function seed() {
 		// Users (admin, client, agent)
 		const PASSWORD = "password123";
 		const hashed = await bcrypt.hash(PASSWORD, 10);
+		const clientCustomer = await db.query.customers.findFirst({
+			where: { customerCode: "CLI009" },
+		});
+
+		if (!clientCustomer) {
+			throw new Error("Customer CLI009 is required for the client fixture");
+		}
 
 		const usersData = [
 			{
@@ -348,19 +355,29 @@ async function seed() {
 				continue;
 			}
 
-			await db
-				.insert(users)
-				.values({
-					email: userData.email,
-					password: userData.password,
-					lastName: userData.lastName,
-					firstName: userData.firstName,
-					employeeId: userData.employeeId,
-					type: userData.type,
-					roleId: role.id,
-					isActive: true,
-				})
-				.onConflictDoNothing({ target: users.email });
+			const userValues = {
+				email: userData.email,
+				password: userData.password,
+				lastName: userData.lastName,
+				firstName: userData.firstName,
+				employeeId: userData.employeeId,
+				type: userData.type,
+				roleId: role.id,
+				isActive: true,
+				...(userData.roleName === "CLIENT_REPRESENTATIVE" && {
+					customerId: clientCustomer.id,
+				}),
+			};
+
+			const insertUser = db.insert(users).values(userValues);
+			if (userData.roleName === "CLIENT_REPRESENTATIVE") {
+				await insertUser.onConflictDoUpdate({
+					target: users.email,
+					set: { customerId: clientCustomer.id },
+				});
+			} else {
+				await insertUser.onConflictDoNothing({ target: users.email });
+			}
 		}
 
 		console.log("Dev fixtures and users seeded successfully");

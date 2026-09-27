@@ -45,6 +45,8 @@ The action is implemented from current API rules, but role/status combinations n
 
 - Dashboard list/detail/form pages share common table, record-summary, page-header, and guided-form primitives. Changes to these primitives have broad impact, so the complete route family must be checked after shared style edits.
 - The default commercial-agent role can edit customers but cannot deactivate them. The customer detail previously rendered a More actions trigger with no menu items; the trigger is now shown only when deactivation is permitted. Program overflow actions also now account for the Draft-only delete rule before rendering the trigger.
+- Client representatives had an existing `users.customer_id` field but no customer assignment control in the user forms. Their seeded account also had no customer, so order creation could not supply the hidden customer field. User create/edit now require and expose the assignment, the development fixture links the client to `CLI009`, and order/program/report list scope now follows the matching customer relation. The user edit form now reads the role name rather than the role UUID.
+- The previous order detail guard allowed same-customer access while order lists and reports only filtered by creator. List and report queries now use the same assigned-customer scope, and program list/detail access follows the related order's customer. The exact role and schema mapping is recorded in [authorization-matrix.md](./authorization-matrix.md).
 - The 24 dashboard route files cover the core operational pages; four public authentication routes are separate. A source-reference scan found no clearly orphaned web modules. Dependency-name scanning produced framework/runtime false positives, so no dependencies were removed without stronger evidence.
 - Existing reduced-motion handling is present. It should be retained for every new transition.
 
@@ -64,6 +66,7 @@ Shared primitives reduce drift but do not make all page content consistent. Copy
 - [x] Crop the ONCF horizontal wordmark to its content proportions in the sidebar tile.
 - [x] Add a permission- and status-aware Create program action to eligible order details and carry the selected order into the guided create flow.
 - [x] Hide customer/user/program overflow triggers when the current role and record state provide no menu action; cover default roles and program status in frontend checks.
+- [x] Require a customer assignment for client representatives in user management and the API; align order, program, and report reads with the existing customer ownership relation; assign the development client fixture to a seeded customer.
 
 ### Next visual review
 
@@ -75,6 +78,7 @@ Shared primitives reduce drift but do not make all page content consistent. Copy
 - [ ] Compare form labels/help/errors, page titles/subtitles, record rows, and action bars against the design-system type and spacing scale.
 - [ ] Keep color tokens fixed unless the user requests another palette change; visually confirm light/dark surface hierarchy and text contrast.
 - [ ] Add screenshot or visual-regression coverage after a browser runner is available.
+- [ ] Decide whether public signup is part of this MVP; `/signup` currently renders the shared Under Construction view and there is no public registration API route.
 
 ## Screenshot limitation
 

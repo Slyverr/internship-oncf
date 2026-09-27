@@ -117,16 +117,23 @@ export class OrdersQuery {
 			page,
 			limit,
 		} = query;
+		const canManageOther = hasOnePermission(
+			user,
+			Permission.ORDERS_MANAGE_OTHER,
+		);
+		const hasCustomerScope = !canManageOther && user.customerId !== null;
+		const customerIdFilter = hasCustomerScope ? user.customerId : customerId;
 
 		return this.drizzle.db.query.orders.findMany({
 			where: {
-				...(!hasOnePermission(user, Permission.ORDERS_MANAGE_OTHER)
+				...(!canManageOther && !hasCustomerScope
 					? { createdByUserId: user.id }
 					: {}),
 
 				...(status ? { status } : {}),
 				...(goodsId ? { goodsId } : {}),
-				...(customerId ? { customerId } : {}),
+				...(customerIdFilter !== undefined &&
+					customerIdFilter !== null && { customerId: customerIdFilter }),
 				...(movementTypeId ? { movementTypeId } : {}),
 
 				...(startDate
@@ -228,9 +235,9 @@ export class OrdersQuery {
 				},
 				...(hasOnePermission(user, Permission.ORDERS_MANAGE_OTHER)
 					? {}
-					: {
-							createdByUserId: user.id,
-						}),
+					: user.customerId !== null
+						? { customerId: user.customerId }
+						: { createdByUserId: user.id }),
 				...(query.search
 					? {
 							orderNumber: {

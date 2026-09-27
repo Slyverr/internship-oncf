@@ -2,8 +2,11 @@ import { Permission } from "@ecommand/shared";
 import type { AuthUser } from "@/auth/auth.types";
 import { OrdersQuery } from "./orders.query";
 
-const createUser = (id: number, permissions: Permission[] = []) =>
-	({ id, permissions: new Set(permissions) }) as AuthUser;
+const createUser = (
+	id: number,
+	permissions: Permission[] = [],
+	customerId: number | null = null,
+) => ({ id, permissions: new Set(permissions), customerId }) as AuthUser;
 
 describe("OrdersQuery authorization scope", () => {
 	const findMany = jest.fn();
@@ -45,6 +48,17 @@ describe("OrdersQuery authorization scope", () => {
 		expect(options.limit).toBe(20);
 	});
 
+	it("scopes customer-assigned users to their customer despite query filters", async () => {
+		const user = createUser(23, [], 42);
+		await query.findOrders(user, {
+			page: 1,
+			limit: 20,
+			customerId: 99,
+		} as never);
+
+		expect(findMany.mock.calls[0][0].where).toEqual({ customerId: 42 });
+	});
+
 	it("restricts eligible orders to their creator for ordinary users", async () => {
 		const user = createUser(18);
 		await query.findEligibleOrdersForPrograms(user, {
@@ -74,6 +88,18 @@ describe("OrdersQuery authorization scope", () => {
 		expect(options.where).not.toHaveProperty("createdByUserId");
 		expect(options.where.orderStatus).toEqual({
 			name: { in: ["APPROVED", "SENT_TO_DTM", "IN_PROGRESS"] },
+		});
+	});
+
+	it("scopes eligible program orders to an assigned customer", async () => {
+		const user = createUser(23, [], 42);
+		await query.findEligibleOrdersForPrograms(user, { page: 1, limit: 20 });
+
+		expect(findMany.mock.calls[0][0].where).toEqual({
+			customerId: 42,
+			orderStatus: {
+				name: { in: ["APPROVED", "SENT_TO_DTM", "IN_PROGRESS"] },
+			},
 		});
 	});
 });
