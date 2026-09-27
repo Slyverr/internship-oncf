@@ -11,7 +11,7 @@ This status describes the current repository against the project SDF and report.
 - Public client signup checks the submitted customer code and ICE against an active local customer record, creates an inactive client-representative account in `PENDING` status, and blocks sign-in until an administrator approves it. Administrators can approve or reject pending requests from the user detail screen.
 - The development seed includes a synthetic customer record for exercising the signup and review flow locally; its ICE value is explicitly test-only.
 - Password recovery/reset UI and API. SMTP delivery is available when configured; local development uses git-ignored `.eml` messages otherwise.
-- Permission-aware dashboard with recent orders, forecast programs, and claims for sections the signed-in user can read.
+- Permission-aware dashboard with recent orders, forecast programs, and claims for sections the signed-in user can read. Create order and Create claim shortcuts beside the greeting appear only when the user's effective permissions allow them; program creation remains tied to an eligible order detail.
 - Personal settings for five themes, three font choices, three text sizes, and reduced motion, with preferences synced per user through `user_preferences` and a browser-local fallback. Profile updates and password changes are included. The interface uses an ONCF-inspired orange and warm-neutral palette; no official full hex palette was located.
 - Guided multi-step flows for longer create forms and selected edit forms, with step validation, first-invalid-field focus, back navigation, preserved values, subtle motion, and reduced-motion support.
 - Claim details and forecast program details can be edited from their existing edit routes. Workflow status remains controlled through transition actions.
@@ -28,7 +28,7 @@ This status describes the current repository against the project SDF and report.
 
 - The signup/review flow was exercised through the running Next API proxy: an invalid customer code was rejected, valid requests remained pending until reviewed, the user detail page returned the administrator actions, approved accounts could sign in, and rejected accounts could not. Disposable applicants were deactivated after the check.
 - The order-to-program flow was exercised through the same proxy: eligible before creation, removed from the eligible selector after creation, duplicate creation rejected with 409, and restored after the temporary draft was removed.
-- The latest source passed the full pre-commit gate: 53 API suites / 388 tests, web checks, all typechecks, and production builds. This does not replace the still-pending browser screenshot pass for the updated auth and review screens.
+- The latest source passed the full pre-commit gate: 53 API suites / 390 tests, web checks (including dashboard action visibility for all default roles), all typechecks, and production builds. This does not replace the still-pending browser screenshot pass for the updated dashboard and auth screens.
 
 ## Incomplete for a usable MVP
 

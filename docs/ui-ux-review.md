@@ -63,7 +63,7 @@ The CTA rule has exhaustive unit coverage and its eligible, unprogrammed state i
 
 **Self-critique**
 
-Shared primitives reduce drift but do not make all page content consistent. The route screenshots cover first-viewport layouts; below-fold details were inspected on representative long pages, not exhaustively on every route and theme. Copy, empty/loading/error/success states, and action placement still need state-by-state review. The seed data does not provide a positive order-to-program CTA case.
+Shared primitives reduce drift but do not make all page content consistent. The route screenshots cover first-viewport layouts; below-fold details were inspected on representative long pages, not exhaustively on every route and theme. Copy, empty/loading/error/success states, and action placement still need state-by-state review. The preview has a synthetic eligible order, but the current workbench cannot visually verify its CTA or follow the hydrated create flow.
 
 ## Prioritized work list
 
@@ -92,6 +92,7 @@ Shared primitives reduce drift but do not make all page content consistent. The 
 - [x] Verify the approved, unprogrammed order shortcut for admin and commercial-agent accounts; confirm the client representative can read the order but cannot see the action.
 - [ ] Use browser interaction to confirm the order is selected on program creation, remains eligible through submission, and Cancel returns to its order detail.
 - [x] Inspect table/form screens at 320px, 390px, 768px, and 1440px. Keep horizontal scrolling for wide tables, with a visible hint on phones, unless realistic data reveals a table-specific card layout is clearer.
+- [ ] Capture dashboard, table, detail, and form screens at 1920px, 2560px, and 3840px in both themes; verify the 2400px content cap, table width, and action alignment.
 - [ ] Audit empty/loading/error/success states across each list, detail, and form route; make wording and action placement consistent. Recheck all guided-form fields when backend error messages arrive, since this browser pass exercised client-side validation.
 - [ ] Compare form labels/help/errors, page titles/subtitles, record rows, and action bars against the design-system type and spacing scale.
 - [x] Keep color tokens fixed and visually compare light/dark surface hierarchy across captured routes.
@@ -100,7 +101,7 @@ Shared primitives reduce drift but do not make all page content consistent. The 
 
 ## Current review limits
 
-The screenshot pass verified rendered route screens and responsive width behavior, but it does not replace keyboard/screen-reader testing or a complete interaction-state matrix. A final-submit validation bug discovered during the form pass was fixed and verified in live user and claim flows; its screenshots are included in the review artifact. The current preview contains a synthetic eligible order and a pending signup request; other seeded/local detail content is sparse. The current workbench has no browser automation, so the new auth and order-to-program states have HTTP/source verification but still need screenshot review. The public-route captures predate the authentication updates below.
+The screenshot pass verified rendered route screens through 1440px, but it does not replace keyboard/screen-reader testing or a complete interaction-state matrix. A final-submit validation bug discovered during the form pass was fixed and verified in live user and claim flows; its screenshots are included in the review artifact. The current preview contains a synthetic eligible order and a pending signup request; other seeded/local detail content is sparse. The current workbench has no browser automation, so the new dashboard shortcuts, auth routes, and order-to-program states have source/HTTP verification but still need screenshot review. The public-route captures predate the authentication updates below.
 
 ## Authentication follow-up — 2026-09-27
 

@@ -119,7 +119,7 @@ When implementing any shortcut, map actor permission, ownership scope, resource 
 
 ## 8. Review checklist
 
-For each route family, inspect light and dark modes at 320px, 375px, 390px, 640px, 768px, 1024px, and 1440px. Check title/subtitle hierarchy, 4px-grid spacing, clipping and wrapping, table scroll, control target size, empty/loading/error/success states, hover/focus distinction, action visibility by role, and the route back to the originating task.
+For each route family, inspect light and dark modes at 320px, 375px, 390px, 640px, 768px, 1024px, 1440px, 1920px, 2560px, and 3840px. Check title/subtitle hierarchy, 4px-grid spacing, clipping and wrapping, table scroll, control target size, empty/loading/error/success states, hover/focus distinction, action visibility by role, keyboard/focus behavior, and the route back to the originating task. At 2K and 4K widths, confirm the shared 2400px content cap keeps forms and detail text readable while tables retain useful width.
 
 Review the public login/signup/forgot/reset routes; dashboard overview; each order, program, claim, customer, and user list/detail/create/edit route; reports; settings; notifications; and the shared shell in both expanded and collapsed states. For each guided form, inspect every step, field error, submit-pending state, and cancel/back route. For the sidebar, check logo/avatar centering and padding. For the bell and account menu, capture both closed and open states. Source inspection, HTTP status, and successful builds do not replace screenshot review.
 
