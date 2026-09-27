@@ -75,4 +75,42 @@ describe("default role permission matrix", () => {
 		);
 		expect(grants(Role.AGENT_COMMERCIAL, Permission.USERS_READ)).toBe(false);
 	});
+	it("keeps cross-user grants limited to the commercial order workflow", () => {
+		expect(grants(Role.AGENT_COMMERCIAL, Permission.ORDERS_MANAGE_OTHER)).toBe(
+			true,
+		);
+		expect(grants(Role.AGENT_COMMERCIAL, Permission.CLAIMS_MANAGE_OTHER)).toBe(
+			false,
+		);
+		expect(
+			grants(Role.AGENT_COMMERCIAL, Permission.PROGRAMS_MANAGE_OTHER),
+		).toBe(false);
+		expect(
+			grants(Role.AGENT_COMMERCIAL, Permission.PROGRAMS_MANAGE_OWNERSHIP),
+		).toBe(true);
+		expect(
+			grants(Role.CLIENT_REPRESENTATIVE, Permission.ORDERS_MANAGE_OTHER),
+		).toBe(false);
+		expect(
+			grants(Role.CLIENT_REPRESENTATIVE, Permission.CLAIMS_MANAGE_OTHER),
+		).toBe(false);
+		expect(
+			grants(Role.CLIENT_REPRESENTATIVE, Permission.PROGRAMS_MANAGE_OTHER),
+		).toBe(false);
+	});
+
+	it("allows client representatives to delete only through their own-order scope", () => {
+		expect(grants(Role.CLIENT_REPRESENTATIVE, Permission.ORDERS_DELETE)).toBe(
+			true,
+		);
+		expect(
+			grants(Role.CLIENT_REPRESENTATIVE, Permission.ORDERS_MANAGE_OTHER),
+		).toBe(false);
+		expect(grants(Role.CLIENT_REPRESENTATIVE, Permission.PROGRAMS_CREATE)).toBe(
+			false,
+		);
+		expect(grants(Role.CLIENT_REPRESENTATIVE, Permission.CLAIMS_UPDATE)).toBe(
+			false,
+		);
+	});
 });
