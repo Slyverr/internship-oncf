@@ -1,4 +1,5 @@
 import axios, { AxiosRequestConfig } from "axios";
+import { sanitizeApiError } from "./safe-api-error";
 
 export async function customFetch<T>(
 	config: AxiosRequestConfig,
@@ -10,21 +11,25 @@ export async function customFetch<T>(
 				?.value
 		: undefined;
 
-	const { data } = await axios<T>({
-		...config,
-		...options,
-		baseURL: isServer
-			? (process.env.BACKEND_API_URL ?? "http://localhost:8000")
-			: "/api/proxy",
-		withCredentials: !isServer,
-		headers: {
-			...config.headers,
-			...options?.headers,
-			...(token && { Authorization: `Bearer ${token}` }),
-		},
-	});
+	try {
+		const { data } = await axios<T>({
+			...config,
+			...options,
+			baseURL: isServer
+				? (process.env.BACKEND_API_URL ?? "http://localhost:8000")
+				: "/api/proxy",
+			withCredentials: !isServer,
+			headers: {
+				...config.headers,
+				...options?.headers,
+				...(token && { Authorization: `Bearer ${token}` }),
+			},
+		});
 
-	return data;
+		return data;
+	} catch (error) {
+		throw sanitizeApiError(error);
+	}
 }
 
 export default customFetch;
