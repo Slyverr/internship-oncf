@@ -1,13 +1,9 @@
-import { BadRequestException, Injectable, PipeTransform } from "@nestjs/common";
+import { Injectable, PipeTransform } from "@nestjs/common";
+import { parsePositiveInteger } from "@/common/utils/parse-positive-integer";
 
 @Injectable()
 export class OrderIdPipe implements PipeTransform<string> {
 	transform(value: string) {
-		const id = parseInt(value, 10);
-		if (Number.isNaN(id) || id <= 0) {
-			throw new BadRequestException("Invalid order ID");
-		}
-
-		return id;
+		return parsePositiveInteger(value, "order");
 	}
 }

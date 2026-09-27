@@ -96,11 +96,27 @@ export class FilesController {
 		const file = await this.filesService.downloadFile(id, fileId);
 
 		res.setHeader("Content-Type", file.mimeType);
+		const safeFileName = [...file.fileName]
+			.map((character) => {
+				const code = character.charCodeAt(0);
+				const unsafe =
+					code < 0x20 ||
+					code === 0x7f ||
+					character === "/" ||
+					character === "\\" ||
+					character === '"';
+				return unsafe ? "_" : character;
+			})
+			.join("");
+		const fallbackFileName = safeFileName.replace(/[^\x20-\x7E]/g, "_");
+		const encodedFileName = encodeURIComponent(safeFileName).replace(
+			/[!'()*]/g,
+			(character) => `%${character.charCodeAt(0).toString(16).toUpperCase()}`,
+		);
 		res.setHeader(
 			"Content-Disposition",
-			`attachment; filename="${file.fileName}"`,
+			`attachment; filename="${fallbackFileName}"; filename*=UTF-8''${encodedFileName}`,
 		);
-
 		res.send(file.buffer);
 	}
 
