@@ -32,6 +32,11 @@ The review covers all user-facing route families:
 - The in-app Settings dialog was captured at 320, 390, 768, 1440, 2560, and 3840px. It remains 1120×768px on desktop and fits within the viewport on phones; the Appearance panel scrolls internally at 320px, while Profile and Security stay reachable in the section navigation. No horizontal overflow appeared.
 - This pass validates the dialog layout and login/signup rendering only. Theme selection persistence, profile-save feedback, security submission states, reset-password pages, centered-header mode, and dark/monochrome Settings captures still need direct interaction and visual review.
 
+## Appearance save ordering correction — 2026-09-27
+
+- Rechecking after a full reload exposed that quickly changed appearance fields could save full preference records concurrently; an earlier response could overwrite a newer shell selection. Preference updates are now queued and each queued request reads the latest selected values when it runs.
+- A rapid Sidebar + Charcoal dark selection was synced as one consistent combination. I then restored Warm light + Sidebar, read those values back from the account API, and confirmed them again after a full reload. No business data changed.
+
 ## Fresh appearance preference interaction pass — 2026-09-27
 
 - Starting from the saved Warm light + Sidebar preference, I selected Charcoal dark and Centered icon bar in the Settings dialog. The active theme and shell updated immediately, and the persisted local preference plus “synced to your account” state matched those selections after navigation.

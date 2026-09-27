@@ -8,6 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
 	createContext,
 	type ReactNode,
+	useCallback,
 	useContext,
 	useEffect,
 	useRef,
@@ -56,8 +57,34 @@ export function AppearancePreferencesSync({
 	const [status, setStatus] = useState<AppearanceSyncStatus>("loading");
 	const hydrated = useRef(false);
 	const lastSent = useRef<string | null>(null);
+	const saveQueue = useRef<Promise<void>>(Promise.resolve());
 	const currentPreferences = useRef(preferences);
 	currentPreferences.current = preferences;
+	const enqueueLatestSave = useCallback(() => {
+		saveQueue.current = saveQueue.current.then(async () => {
+			const latestPreferences = currentPreferences.current;
+			const serialized = JSON.stringify(latestPreferences);
+			if (serialized === lastSent.current) return;
+
+			lastSent.current = serialized;
+			try {
+				const saved = await savePreferences.mutateAsync({
+					data: latestPreferences,
+				});
+				queryClient.setQueryData(
+					getProfileControllerGetPreferencesQueryKey(),
+					saved,
+				);
+				if (JSON.stringify(currentPreferences.current) === serialized) {
+					setStatus("saved");
+				}
+			} catch {
+				if (JSON.stringify(currentPreferences.current) === serialized) {
+					setStatus("local");
+				}
+			}
+		});
+	}, [queryClient, savePreferences.mutateAsync]);
 
 	useEffect(() => {
 		if (!initialized || hydrated.current) return;
@@ -78,38 +105,15 @@ export function AppearancePreferencesSync({
 			return;
 		}
 
-		const localPreferences = preferences;
-		const serialized = JSON.stringify(localPreferences);
-		lastSent.current = serialized;
 		setStatus("saving");
-		savePreferences.mutate(
-			{ data: localPreferences },
-			{
-				onSuccess: (saved) => {
-					queryClient.setQueryData(
-						getProfileControllerGetPreferencesQueryKey(),
-						saved,
-					);
-					if (JSON.stringify(currentPreferences.current) === serialized) {
-						lastSent.current = serialized;
-						setStatus("saved");
-					}
-				},
-				onError: () => {
-					if (JSON.stringify(currentPreferences.current) === serialized) {
-						setStatus("local");
-					}
-				},
-			},
-		);
+		enqueueLatestSave();
 	}, [
 		initialized,
 		preferences,
 		preferencesQuery.data,
 		preferencesQuery.isError,
 		preferencesQuery.isSuccess,
-		queryClient,
-		savePreferences.mutate,
+		enqueueLatestSave,
 		setPreferences,
 	]);
 
@@ -118,32 +122,13 @@ export function AppearancePreferencesSync({
 		const serialized = JSON.stringify(preferences);
 		if (serialized === lastSent.current) return;
 
-		lastSent.current = serialized;
 		setStatus("saving");
 		const timeout = window.setTimeout(() => {
-			savePreferences.mutate(
-				{ data: preferences },
-				{
-					onSuccess: (saved) => {
-						queryClient.setQueryData(
-							getProfileControllerGetPreferencesQueryKey(),
-							saved,
-						);
-						if (JSON.stringify(currentPreferences.current) === serialized) {
-							setStatus("saved");
-						}
-					},
-					onError: () => {
-						if (JSON.stringify(currentPreferences.current) === serialized) {
-							setStatus("local");
-						}
-					},
-				},
-			);
+			enqueueLatestSave();
 		}, 350);
 
 		return () => window.clearTimeout(timeout);
-	}, [preferences, queryClient, savePreferences.mutate]);
+	}, [preferences, enqueueLatestSave]);
 
 	return (
 		<AppearanceSyncContext.Provider value={status}>
