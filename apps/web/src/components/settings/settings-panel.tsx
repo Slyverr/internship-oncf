@@ -1,7 +1,6 @@
 "use client";
 
 import { isStrongPassword, STRONG_PASSWORD_HINT } from "@ecommand/shared";
-import { MonitorIcon, MoonIcon, SunIcon } from "lucide-react";
 import { type FormEvent, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -18,38 +17,136 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useAuthControllerChangePassword } from "@/lib/api/auth";
 import { useProfileControllerUpdate } from "@/lib/api/profile";
 import { getFormErrorMessage } from "@/lib/form-utils";
-import { type ThemeMode, useAppearance } from "@/providers/appearance-provider";
+import {
+	type FontFamily,
+	type MotionPreference,
+	type TextSize,
+	type ThemeMode,
+	useAppearance,
+} from "@/providers/appearance-provider";
 import { useAuth } from "@/providers/auth-provider";
 
 const themeOptions: {
 	value: ThemeMode;
 	label: string;
 	description: string;
-	Icon: typeof SunIcon;
 }[] = [
 	{
 		value: "system",
 		label: "System",
 		description: "Follow your device setting",
-		Icon: MonitorIcon,
 	},
 	{
 		value: "light",
-		label: "Light",
-		description: "Soft warm-neutral surfaces",
-		Icon: SunIcon,
+		label: "Warm light",
+		description: "Warm neutral surfaces with orange accents",
 	},
 	{
 		value: "dark",
-		label: "Dark",
-		description: "Low-glare charcoal surfaces with muted orange accents",
-		Icon: MoonIcon,
+		label: "Charcoal dark",
+		description: "Low-glare charcoal surfaces and soft accents",
+	},
+	{
+		value: "mono-light",
+		label: "Monochrome light",
+		description: "White surfaces, black text, and gray details",
+	},
+	{
+		value: "mono-dark",
+		label: "Monochrome dark",
+		description: "Black surfaces, white text, and gray details",
 	},
 ];
 
+const fontOptions: { value: FontFamily; label: string; description: string }[] =
+	[
+		{ value: "inter", label: "Inter", description: "Crisp and familiar" },
+		{ value: "geist", label: "Geist", description: "Clean and compact" },
+		{ value: "system", label: "System", description: "Use your device font" },
+	];
+
+const textSizeOptions: {
+	value: TextSize;
+	label: string;
+	description: string;
+}[] = [
+	{ value: "small", label: "Small", description: "Slightly smaller text" },
+	{
+		value: "default",
+		label: "Default",
+		description: "Recommended reading size",
+	},
+	{ value: "large", label: "Large", description: "Larger text throughout" },
+];
+
+const motionOptions: {
+	value: MotionPreference;
+	label: string;
+	description: string;
+}[] = [
+	{
+		value: "system",
+		label: "System",
+		description: "Follow your device setting",
+	},
+	{
+		value: "reduced",
+		label: "Reduced",
+		description: "Use only essential motion",
+	},
+];
+
+function PreferenceChoices<Value extends string>({
+	label,
+	value,
+	options,
+	onChange,
+	columns = "sm:grid-cols-2",
+}: {
+	label: string;
+	value: Value;
+	options: { value: Value; label: string; description: string }[];
+	onChange: (value: Value) => void;
+	columns?: string;
+}) {
+	const id = label.toLowerCase().replaceAll(" ", "-");
+
+	return (
+		<fieldset className="grid gap-3">
+			<legend className="text-sm font-medium">{label}</legend>
+			<RadioGroup
+				aria-label={label}
+				value={value}
+				onValueChange={(nextValue) => {
+					const option = options.find((item) => item.value === nextValue);
+					if (option) onChange(option.value);
+				}}
+				className={`grid gap-3 ${columns}`}
+			>
+				{options.map((option) => (
+					<Label
+						key={option.value}
+						htmlFor={`${id}-${option.value}`}
+						className="flex min-h-20 cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors hover:bg-muted/60 has-[[data-checked]]:border-primary has-[[data-checked]]:bg-primary/5"
+					>
+						<RadioGroupItem id={`${id}-${option.value}`} value={option.value} />
+						<span className="grid gap-compact">
+							<span className="text-sm font-medium">{option.label}</span>
+							<span className="text-sm text-muted-foreground">
+								{option.description}
+							</span>
+						</span>
+					</Label>
+				))}
+			</RadioGroup>
+		</fieldset>
+	);
+}
+
 export function SettingsPanel() {
 	const { profile, setProfile } = useAuth();
-	const { theme, setTheme } = useAppearance();
+	const { preferences, setTheme, setFontFamily, setTextSize, setMotion } =
+		useAppearance();
 	const profileMutation = useProfileControllerUpdate();
 	const passwordMutation = useAuthControllerChangePassword();
 	const [firstName, setFirstName] = useState(profile.firstName);
@@ -159,45 +256,42 @@ export function SettingsPanel() {
 				<CardHeader>
 					<CardTitle>Appearance</CardTitle>
 					<CardDescription>
-						Choose a comfortable color theme. Your choice is saved in this
-						browser.
+						Set up colors, text, and motion for a comfortable workspace.
 					</CardDescription>
 				</CardHeader>
-				<CardContent>
-					<RadioGroup
-						aria-label="Color theme"
-						value={theme}
-						onValueChange={(value) => {
-							if (value === "light" || value === "dark" || value === "system") {
-								setTheme(value);
-							}
-						}}
-						className="grid gap-4 sm:grid-cols-3"
-					>
-						{themeOptions.map(({ value, label, description, Icon }) => (
-							<Label
-								key={value}
-								htmlFor={`theme-${value}`}
-								className="flex min-h-24 cursor-pointer items-start gap-4 rounded-lg border p-4 transition-colors hover:bg-muted/60 has-[[data-checked]]:border-primary has-[[data-checked]]:bg-primary/5"
-							>
-								<RadioGroupItem id={`theme-${value}`} value={value} />
-								<Icon
-									className="size-4 self-center text-primary"
-									aria-hidden="true"
-								/>
-								<span className="grid gap-compact">
-									<span className="font-medium">{label}</span>
-									<span className="text-sm text-muted-foreground">
-										{description}
-									</span>
-								</span>
-							</Label>
-						))}
-					</RadioGroup>
-					<div className="pt-4 flex items-center gap-4 text-sm text-muted-foreground">
+				<CardContent className="grid gap-8">
+					<PreferenceChoices
+						label="Color theme"
+						value={preferences.theme}
+						options={themeOptions}
+						onChange={setTheme}
+						columns="sm:grid-cols-2 2xl:grid-cols-3"
+					/>
+					<PreferenceChoices
+						label="Font"
+						value={preferences.fontFamily}
+						options={fontOptions}
+						onChange={setFontFamily}
+						columns="sm:grid-cols-3"
+					/>
+					<PreferenceChoices
+						label="Text size"
+						value={preferences.textSize}
+						options={textSizeOptions}
+						onChange={setTextSize}
+						columns="sm:grid-cols-3"
+					/>
+					<PreferenceChoices
+						label="Motion"
+						value={preferences.motion}
+						options={motionOptions}
+						onChange={setMotion}
+						columns="sm:grid-cols-2"
+					/>
+					<div className="flex items-center gap-4 text-sm text-muted-foreground">
 						<span className="size-3 rounded-full bg-primary" />
 						<span className="size-3 rounded-full bg-accent" />
-						<span>ONCF-inspired orange with softer neutral surfaces</span>
+						<span>Warm themes use the existing ONCF-inspired colors</span>
 					</div>
 				</CardContent>
 			</Card>

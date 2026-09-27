@@ -10,59 +10,184 @@ import {
 	useState,
 } from "react";
 
-export type ThemeMode = "light" | "dark" | "system";
+export type ThemeMode =
+	| "light"
+	| "dark"
+	| "mono-light"
+	| "mono-dark"
+	| "system";
+export type FontFamily = "inter" | "geist" | "system";
+export type TextSize = "small" | "default" | "large";
+export type MotionPreference = "system" | "reduced";
+
+export interface AppearancePreferences {
+	theme: ThemeMode;
+	fontFamily: FontFamily;
+	textSize: TextSize;
+	motion: MotionPreference;
+}
 
 interface AppearanceContextValue {
-	theme: ThemeMode;
+	preferences: AppearancePreferences;
+	setPreferences: (preferences: AppearancePreferences) => void;
 	setTheme: (theme: ThemeMode) => void;
+	setFontFamily: (fontFamily: FontFamily) => void;
+	setTextSize: (textSize: TextSize) => void;
+	setMotion: (motion: MotionPreference) => void;
+	theme: ThemeMode;
 }
 
-const STORAGE_KEY = "ecommand-theme";
+const STORAGE_KEY = "ecommand-appearance";
+const LEGACY_STORAGE_KEY = "ecommand-theme";
+const DEFAULT_PREFERENCES: AppearancePreferences = {
+	theme: "system",
+	fontFamily: "inter",
+	textSize: "default",
+	motion: "system",
+};
 const AppearanceContext = createContext<AppearanceContextValue | null>(null);
 
-function applyTheme(theme: ThemeMode) {
+function applyAppearance(preferences: AppearancePreferences) {
 	const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-	document.documentElement.classList.toggle(
-		"dark",
-		theme === "dark" || (theme === "system" && prefersDark),
-	);
-	document.documentElement.dataset.theme = theme;
+	const isDark =
+		preferences.theme === "dark" ||
+		preferences.theme === "mono-dark" ||
+		(preferences.theme === "system" && prefersDark);
+	document.documentElement.classList.toggle("dark", isDark);
+	document.documentElement.dataset.theme = preferences.theme;
+	document.documentElement.dataset.fontFamily = preferences.fontFamily;
+	document.documentElement.dataset.textSize = preferences.textSize;
+	document.documentElement.dataset.motion = preferences.motion;
 }
 
-function isThemeMode(value: string | null): value is ThemeMode {
-	return value === "light" || value === "dark" || value === "system";
+function readPreferences(): AppearancePreferences {
+	try {
+		const stored = window.localStorage.getItem(STORAGE_KEY);
+		if (stored) {
+			const parsed = JSON.parse(stored) as Partial<AppearancePreferences>;
+			return {
+				theme: isThemeMode(parsed.theme)
+					? parsed.theme
+					: DEFAULT_PREFERENCES.theme,
+				fontFamily: isFontFamily(parsed.fontFamily)
+					? parsed.fontFamily
+					: DEFAULT_PREFERENCES.fontFamily,
+				textSize: isTextSize(parsed.textSize)
+					? parsed.textSize
+					: DEFAULT_PREFERENCES.textSize,
+				motion: isMotionPreference(parsed.motion)
+					? parsed.motion
+					: DEFAULT_PREFERENCES.motion,
+			};
+		}
+		const legacyTheme = window.localStorage.getItem(LEGACY_STORAGE_KEY);
+		return isThemeMode(legacyTheme)
+			? { ...DEFAULT_PREFERENCES, theme: legacyTheme }
+			: DEFAULT_PREFERENCES;
+	} catch {
+		return DEFAULT_PREFERENCES;
+	}
+}
+
+function isThemeMode(value: unknown): value is ThemeMode {
+	return (
+		value === "light" ||
+		value === "dark" ||
+		value === "mono-light" ||
+		value === "mono-dark" ||
+		value === "system"
+	);
+}
+
+function isFontFamily(value: unknown): value is FontFamily {
+	return value === "inter" || value === "geist" || value === "system";
+}
+
+function isTextSize(value: unknown): value is TextSize {
+	return value === "small" || value === "default" || value === "large";
+}
+
+function isMotionPreference(value: unknown): value is MotionPreference {
+	return value === "system" || value === "reduced";
 }
 
 export function AppearanceProvider({ children }: { children: ReactNode }) {
-	const [theme, setThemeState] = useState<ThemeMode>("system");
+	const [preferences, setPreferencesState] =
+		useState<AppearancePreferences>(DEFAULT_PREFERENCES);
 	const [initialized, setInitialized] = useState(false);
 
 	useEffect(() => {
-		const storedTheme = window.localStorage.getItem(STORAGE_KEY);
-		setThemeState(isThemeMode(storedTheme) ? storedTheme : "system");
+		const storedPreferences = readPreferences();
+		setPreferencesState(storedPreferences);
+		applyAppearance(storedPreferences);
 		setInitialized(true);
 	}, []);
 
 	useEffect(() => {
 		if (!initialized) return;
 
-		applyTheme(theme);
+		applyAppearance(preferences);
 		const media = window.matchMedia("(prefers-color-scheme: dark)");
 		const handleSystemThemeChange = () => {
-			if (theme === "system") applyTheme(theme);
+			if (preferences.theme === "system") applyAppearance(preferences);
 		};
 
 		media.addEventListener("change", handleSystemThemeChange);
 		return () => media.removeEventListener("change", handleSystemThemeChange);
-	}, [initialized, theme]);
+	}, [initialized, preferences]);
 
-	const setTheme = useCallback((nextTheme: ThemeMode) => {
-		window.localStorage.setItem(STORAGE_KEY, nextTheme);
-		applyTheme(nextTheme);
-		setThemeState(nextTheme);
-	}, []);
+	const setPreferences = useCallback(
+		(nextPreferences: AppearancePreferences) => {
+			try {
+				window.localStorage.setItem(
+					STORAGE_KEY,
+					JSON.stringify(nextPreferences),
+				);
+			} catch {
+				// Appearance remains available for the current page when storage is blocked.
+			}
+			applyAppearance(nextPreferences);
+			setPreferencesState(nextPreferences);
+		},
+		[],
+	);
 
-	const value = useMemo(() => ({ theme, setTheme }), [theme, setTheme]);
+	const setTheme = useCallback(
+		(theme: ThemeMode) => setPreferences({ ...preferences, theme }),
+		[preferences, setPreferences],
+	);
+	const setFontFamily = useCallback(
+		(fontFamily: FontFamily) => setPreferences({ ...preferences, fontFamily }),
+		[preferences, setPreferences],
+	);
+	const setTextSize = useCallback(
+		(textSize: TextSize) => setPreferences({ ...preferences, textSize }),
+		[preferences, setPreferences],
+	);
+	const setMotion = useCallback(
+		(motion: MotionPreference) => setPreferences({ ...preferences, motion }),
+		[preferences, setPreferences],
+	);
+
+	const value = useMemo(
+		() => ({
+			preferences,
+			setPreferences,
+			theme: preferences.theme,
+			setTheme,
+			setFontFamily,
+			setTextSize,
+			setMotion,
+		}),
+		[
+			preferences,
+			setPreferences,
+			setTheme,
+			setFontFamily,
+			setTextSize,
+			setMotion,
+		],
+	);
 
 	return (
 		<AppearanceContext.Provider value={value}>
