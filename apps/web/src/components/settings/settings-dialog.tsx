@@ -54,7 +54,7 @@ export function SettingsDialog() {
 				size="wide"
 				className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-0 overflow-hidden p-0"
 			>
-				<DialogHeader className="border-b px-4 py-3 pr-16">
+				<DialogHeader className="gap-1 border-b px-4 py-2 pr-16">
 					<DialogTitle className="text-base">Settings</DialogTitle>
 					<DialogDescription className="sr-only sm:not-sr-only">
 						Personalize your workspace and manage your account.

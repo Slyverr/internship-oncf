@@ -10,7 +10,7 @@ This is the running review list for the application-wide usability and visual ov
 | 2 | Order creation | Check the form's usable width, grouping, step navigation, validation, and action placement at phone, tablet, laptop, and wide widths. | Complete |
 | 3 | Menus | Review account and other dropdown hover/focus shapes, item insets, active state, keyboard use, and touch behavior. | To review |
 | 4 | Button surfaces | Find light-theme buttons that look like unbounded white text; set a consistent semantic surface, border, or restrained elevation. Check every button variant in both themes. | To review |
-| 5 | Settings controls | Apply the button/surface review to settings, including close, tabs, selected preferences, and save/discard actions. | In progress |
+| 5 | Settings controls | Review dialog title area, fixed size, option density, touch targets, save state, close, tabs, and profile/security actions. | In progress |
 | 6 | Sidebar alignment | Compare expanded and collapsed logo, nav, and account alignment; keep header/footer padding and navigation centers consistent. | Complete |
 | 7 | Sidebar motion | Add restrained, reduced-motion-aware transitions for collapse/expand and content state changes; verify no abrupt layout shift. | In progress |
 | 8 | Dashboard content | Replace the sparse three-panel impression with useful role- and permission-aware metrics, trends, and prioritized next actions based on available data. | In progress |
@@ -43,6 +43,7 @@ Review both light and dark appearances, and both workspace layouts where the rou
 - Page headings now choose inline actions from the available workspace width, so the tablet sidebar does not squeeze the title into a narrow column beside stacked buttons.
 - Fresh 1440×900 sidebar captures show the collapsed logo and account controls centered in 44px targets with 16px top and bottom insets; expanded and collapsed navigation icons remain on the same vertical rhythm.
 - The notification popover keeps click, keyboard, and touch behavior; its empty/loading states use a tighter header, body, and footer rhythm while keeping the 44px footer action target.
+- Fresh settings captures at 1440×900, 390×844, and 320×640 show a fixed 768px desktop dialog and an internally scrolling phone panel with no page-level horizontal overflow. The desktop title strip was tightened by one 4px spacing step; mobile title space was already compact.
 
 ## Working rules
 
