@@ -1,8 +1,9 @@
 "use client";
 
+import { EyeIcon, EyeOffIcon, LoaderCircleIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { AuthPageLayout } from "@/components/auth/auth-page-layout";
 
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ export default function Page() {
 		loginAction,
 		null as LoginState | null,
 	);
+	const [showPassword, setShowPassword] = useState(false);
 
 	useEffect(() => {
 		if (state?.success) {
@@ -34,17 +36,20 @@ export default function Page() {
 
 	return (
 		<AuthPageLayout>
-			<Card className="w-full max-w-sm">
+			<Card className="w-full max-w-lg">
 				<form action={action}>
-					<CardHeader className="space-y-2 pb-6 text-center">
+					<CardHeader className="space-y-2 pb-6">
 						<CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
 						<CardDescription>
-							Enter your credentials to access your account
+							Sign in to continue to your freight workspace.
 						</CardDescription>
 					</CardHeader>
-					<CardContent className="space-y-6">
+					<CardContent className="space-y-5">
 						{state?.errors?.form && (
-							<div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+							<div
+								role="alert"
+								className="rounded-md border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive"
+							>
 								{state.errors.form}
 							</div>
 						)}
@@ -53,12 +58,21 @@ export default function Page() {
 							<Input
 								id="username"
 								name="username"
-								type="text"
+								type="email"
 								placeholder="email@example.com"
+								autoComplete="username"
+								autoCapitalize="none"
+								spellCheck={false}
 								required
 								defaultValue={state?.data?.username || ""}
+								aria-invalid={Boolean(state?.errors?.username)}
 								aria-describedby={
 									state?.errors?.username ? "username-error" : undefined
+								}
+								className={
+									state?.errors?.username
+										? "border-destructive focus-visible:ring-destructive/20"
+										: ""
 								}
 							/>
 							{state?.errors?.username && (
@@ -77,15 +91,39 @@ export default function Page() {
 									Forgot password?
 								</Link>
 							</div>
-							<Input
-								id="password"
-								name="password"
-								type="password"
-								required
-								aria-describedby={
-									state?.errors?.password ? "password-error" : undefined
-								}
-							/>
+							<div className="relative">
+								<Input
+									id="password"
+									name="password"
+									type={showPassword ? "text" : "password"}
+									autoComplete="current-password"
+									required
+									aria-invalid={Boolean(state?.errors?.password)}
+									aria-describedby={
+										state?.errors?.password ? "password-error" : undefined
+									}
+									className={
+										state?.errors?.password
+											? "border-destructive pr-12 focus-visible:ring-destructive/20"
+											: "pr-12"
+									}
+								/>
+								<Button
+									type="button"
+									variant="ghost"
+									size="icon"
+									aria-label={showPassword ? "Hide password" : "Show password"}
+									aria-pressed={showPassword}
+									className="absolute top-1 right-1 size-9"
+									onClick={() => setShowPassword((visible) => !visible)}
+								>
+									{showPassword ? (
+										<EyeOffIcon aria-hidden="true" />
+									) : (
+										<EyeIcon aria-hidden="true" />
+									)}
+								</Button>
+							</div>
 							{state?.errors?.password && (
 								<p id="password-error" className="text-sm text-destructive">
 									{state.errors.password}
@@ -103,9 +141,19 @@ export default function Page() {
 							</Label>
 						</div>
 					</CardContent>
-					<CardFooter className="flex flex-col space-y-4 pt-2">
+					<CardFooter className="flex flex-col gap-4 pt-2">
 						<Button className="w-full" type="submit" disabled={pending}>
-							{pending ? "Signing in..." : "Sign In"}
+							{pending ? (
+								<>
+									<LoaderCircleIcon
+										aria-hidden="true"
+										className="animate-spin motion-reduce:animate-none"
+									/>
+									Signing in...
+								</>
+							) : (
+								"Sign in"
+							)}
 						</Button>
 						<p className="text-sm text-muted-foreground">
 							Don't have an account?{" "}
