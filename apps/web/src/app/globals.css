@@ -72,8 +72,8 @@
 }
 
 @utility text-meta {
-	font-size: 0.8125rem;
-	line-height: 1.25rem;
+	font-size: calc(0.8125rem * var(--type-scale, 1));
+	line-height: calc(1.25rem * var(--type-scale, 1));
 }
 
 @utility p-control {
