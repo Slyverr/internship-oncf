@@ -42,12 +42,12 @@ Admin receives every defined permission. Parent permissions imply descendants (f
 
 - Sidebar filtering and action visibility shape the interface; API guards, permission metadata, service scoping, and ownership guards enforce access.
 - Role names alone do not authorize a request. Use the authenticated user’s effective permission set.
-- An ID route may apply both permission and ownership checks; review both.
+- An ID route may apply both permission and ownership checks; review both. Ownership guards let missing records reach the route service so callers receive its normal not-found response instead of a 500.
 - Changes to role grants, controller decorators, ownership logic, transition maps, or action buttons require corresponding matrix and test updates.
 
 ## Verification coverage
 
-- apps/api/src/auth/guards/permissions.guard.spec.ts covers missing-user denial, any/all semantics, mixed metadata, and inherited permissions.
+- apps/api/src/auth/guards/permissions.guard.spec.ts covers missing-user denial, any/all semantics, mixed metadata, and inherited permissions. `ownership.factory.spec.ts` covers owner access, denial, manager bypass, missing-resource pass-through, and routes without a guarded ID.
 - apps/api/src/auth/roles-permissions.spec.ts checks admin, commercial-agent, and client-representative grant boundaries.
 - apps/api/src/workflow-transitions.spec.ts locks down order, program, and claim transition graphs.
 - Controller authorization specs for catalog, claims, orders, profile, tracking, and users verify route permission metadata and service arguments; ownership-sensitive routes assert their ownership guard.
