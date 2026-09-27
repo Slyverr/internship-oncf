@@ -15,6 +15,7 @@ type Order = Pick<OrderDetailDto, "id" | "orderNumber">;
 interface OrderSelectProps {
 	orders: Order[];
 	isLoading?: boolean;
+	id?: string;
 
 	value?: Order["id"];
 	onChange: (value: Order["id"]) => void;
@@ -22,6 +23,7 @@ interface OrderSelectProps {
 
 export function OrderSelect({
 	orders,
+	id,
 	value,
 	onChange,
 	isLoading,
@@ -37,7 +39,11 @@ export function OrderSelect({
 			itemToStringLabel={(order) => order.orderNumber ?? `Order #${order.id}`}
 			itemToStringValue={(order) => String(order.id)}
 		>
-			<ComboboxInput placeholder="Select order" aria-label="Select order" />
+			<ComboboxInput
+				id={id}
+				placeholder="Select order"
+				aria-label="Select order"
+			/>
 
 			<ComboboxContent>
 				<ComboboxEmpty>No orders found.</ComboboxEmpty>

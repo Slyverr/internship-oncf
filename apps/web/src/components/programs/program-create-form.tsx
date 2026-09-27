@@ -205,6 +205,7 @@ export function ProgramCreateForm({
 										}
 									>
 										<OrderSelect
+											id="orderId"
 											orders={orders}
 											value={
 												field.state.value > 0 ? field.state.value : undefined
@@ -243,6 +244,7 @@ export function ProgramCreateForm({
 											}
 										>
 											<UserSelect
+												id="userId"
 												users={users}
 												value={field.state.value}
 												onChange={(value) => field.handleChange(value)}
@@ -277,6 +279,7 @@ export function ProgramCreateForm({
 											}
 										>
 											<ProgramStatusSelect
+												id="status"
 												value={field.state.value}
 												onChange={(value) => field.handleChange(value)}
 											/>

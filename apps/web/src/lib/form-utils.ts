@@ -40,6 +40,16 @@ export function getFormStepErrors(
 	return errors;
 }
 
+export function getFirstFormStepErrorField(
+	issues: readonly { path: readonly unknown[]; message: string }[],
+): string | undefined {
+	for (const issue of issues) {
+		if (typeof issue.path[0] === "string") return issue.path[0];
+	}
+
+	return undefined;
+}
+
 export function omitFormStepError(
 	errors: Record<string, string>,
 	fieldName: string,

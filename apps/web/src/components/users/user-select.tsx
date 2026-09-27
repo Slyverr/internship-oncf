@@ -15,6 +15,7 @@ type User = Pick<UserDetailDto, "id" | "firstName" | "lastName">;
 interface UserSelectProps {
 	users: User[];
 	isLoading?: boolean;
+	id?: string;
 	value?: User["id"];
 	onChange: (value: User["id"]) => void;
 	placeholder?: string;
@@ -22,6 +23,7 @@ interface UserSelectProps {
 
 export function UserSelect({
 	users,
+	id,
 	value,
 	onChange,
 	isLoading,
@@ -38,7 +40,11 @@ export function UserSelect({
 			itemToStringLabel={(user) => `${user.firstName} ${user.lastName}`}
 			itemToStringValue={(user) => String(user.id)}
 		>
-			<ComboboxInput placeholder={placeholder} aria-label="Select user" />
+			<ComboboxInput
+				id={id}
+				placeholder={placeholder}
+				aria-label="Select user"
+			/>
 
 			<ComboboxContent>
 				<ComboboxEmpty>No users found.</ComboboxEmpty>

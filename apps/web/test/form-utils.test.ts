@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { OrderStatus } from "@ecommand/shared";
-import { getFormErrorMessage } from "../src/lib/form-utils";
+import {
+	getFirstFormStepErrorField,
+	getFormErrorMessage,
+} from "../src/lib/form-utils";
 import { canCreateProgramForOrder } from "../src/lib/program-creation-eligibility";
 
 assert.equal(
@@ -28,6 +31,20 @@ assert.equal(
 assert.equal(getFormErrorMessage("Invalid form"), "Invalid form");
 assert.equal(getFormErrorMessage(undefined), undefined);
 assert.equal(getFormErrorMessage(null), undefined);
+assert.equal(
+	getFirstFormStepErrorField([
+		{ path: [], message: "Invalid form" },
+		{ path: ["orderId"], message: "Order is required" },
+		{ path: ["plannedDate"], message: "Date is required" },
+	]),
+	"orderId",
+	"the first named field with a validation issue receives focus",
+);
+assert.equal(
+	getFirstFormStepErrorField([{ path: [], message: "Invalid form" }]),
+	undefined,
+	"root-level issues do not focus a nonexistent field",
+);
 console.log("Form error formatter checks passed.");
 
 const baseEligibility = {

@@ -199,6 +199,7 @@ export function ClaimCreateForm(): JSX.Element {
 											}
 										>
 											<CustomerSelect
+												id="customerId"
 												value={
 													field.state.value > 0 ? field.state.value : undefined
 												}
@@ -313,6 +314,7 @@ export function ClaimCreateForm(): JSX.Element {
 							<div className="space-y-2">
 								<Label htmlFor="orderId">Associated Order (Optional)</Label>
 								<OrderSelect
+									id="orderId"
 									orders={orders}
 									value={field.state.value}
 									onChange={(value) => field.handleChange(value)}

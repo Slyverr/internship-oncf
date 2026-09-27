@@ -10,11 +10,13 @@ import {
 } from "@/components/ui/select";
 
 interface ProgramStatusSelectProps {
+	id?: string;
 	value?: ProgramStatus;
 	onChange: (value: ProgramStatus) => void;
 }
 
 export function ProgramStatusSelect({
+	id,
 	value,
 	onChange,
 }: ProgramStatusSelectProps) {
@@ -24,7 +26,7 @@ export function ProgramStatusSelect({
 
 	return (
 		<Select value={value} onValueChange={(value) => value && onChange(value)}>
-			<SelectTrigger className="w-full">
+			<SelectTrigger id={id} className="w-full">
 				<SelectValue>{selected ? selected : "Select status"}</SelectValue>
 			</SelectTrigger>
 

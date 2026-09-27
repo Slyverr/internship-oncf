@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { getFormStepErrors, omitFormStepError } from "@/lib/form-utils";
+import {
+	getFirstFormStepErrorField,
+	getFormStepErrors,
+	omitFormStepError,
+} from "@/lib/form-utils";
 
 type FormStepIssue = {
 	path: readonly unknown[];
@@ -19,6 +23,12 @@ export function useGuidedFormState() {
 	function validate(result: StepValidationResult) {
 		if (!result.success) {
 			setStepErrors(getFormStepErrors(result.error.issues));
+			const firstInvalidField = getFirstFormStepErrorField(result.error.issues);
+			if (firstInvalidField && typeof window !== "undefined") {
+				window.requestAnimationFrame(() => {
+					document.getElementById(firstInvalidField)?.focus();
+				});
+			}
 			return false;
 		}
 

@@ -195,6 +195,7 @@ export function OrderCreateForm(): JSX.Element {
 													}
 												>
 													<CustomerSelect
+														id="customerId"
 														value={
 															field.state.value > 0
 																? field.state.value
