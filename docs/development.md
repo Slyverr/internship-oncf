@@ -2,7 +2,7 @@
 
 ## Local setup
 
-Follow the root [README](../README.md) for installation, Compose services, environment files, schema push, seeding, and startup. The root [bunfig.toml](../bunfig.toml) selects Bun's hoisted workspace linker; install from the repository root and keep that linker setting so Next.js can resolve packages through the workspace root node_modules. Use the sample environment files as templates and keep real `.env` files out of Git.
+Follow the root [README](../README.md) for installation, Compose services, environment files, schema push, seeding, and startup. The root [bunfig.toml](../bunfig.toml) selects Bun's hoisted workspace linker; install from the repository root and keep that linker setting so Next.js can resolve packages through the workspace root node_modules. Use the sample environment files as templates and keep real `.env` files out of Git. Query devtools are off by default; set `NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS=true` in the web environment when debugging query state.
 
 Useful root commands:
 
