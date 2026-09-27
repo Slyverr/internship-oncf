@@ -1,5 +1,6 @@
 "use client";
 
+import { InlineQueryRetry } from "@/components/common/inline-query-retry";
 import {
 	Combobox,
 	ComboboxContent,
@@ -29,7 +30,13 @@ export function UnitSelect({
 	onChange,
 	placeholder = "Select unit",
 }: UnitSelectProps) {
-	const { data: fetchedUnits, isLoading } = useCatalogControllerFindUnits({
+	const {
+		data: fetchedUnits,
+		isLoading,
+		isError,
+		isFetching,
+		refetch,
+	} = useCatalogControllerFindUnits({
 		query: {
 			enabled: !providedUnits,
 		},
@@ -39,32 +46,53 @@ export function UnitSelect({
 	const selected = units.find((unit) => unit.id === value);
 
 	return (
-		<Combobox
-			items={units}
-			disabled={disabled || (isLoading && !providedUnits)}
-			value={selected ?? null}
-			onValueChange={(unit) => unit && onChange(unit.id)}
-			itemToStringLabel={(unit) => unit.name}
-			itemToStringValue={(unit) => unit.id}
-		>
-			<ComboboxInput
-				placeholder={
-					isLoading && !providedUnits ? "Loading units..." : placeholder
+		<div className="space-y-2">
+			<Combobox
+				items={units}
+				disabled={
+					disabled || (!providedUnits && (isLoading || units.length === 0))
 				}
-				aria-label="Select unit"
-			/>
+				value={selected ?? null}
+				onValueChange={(unit) => unit && onChange(unit.id)}
+				itemToStringLabel={(unit) => unit.name}
+				itemToStringValue={(unit) => unit.id}
+			>
+				<ComboboxInput
+					placeholder={
+						isLoading && !providedUnits
+							? "Loading units…"
+							: isError && !providedUnits
+								? "Units unavailable"
+								: placeholder
+					}
+					aria-label="Select unit"
+				/>
 
-			<ComboboxContent>
-				<ComboboxEmpty>No units found.</ComboboxEmpty>
+				<ComboboxContent>
+					<ComboboxEmpty>No units found.</ComboboxEmpty>
 
-				<ComboboxList>
-					{(unit) => (
-						<ComboboxItem key={unit.id} value={unit}>
-							{unit.name}
-						</ComboboxItem>
-					)}
-				</ComboboxList>
-			</ComboboxContent>
-		</Combobox>
+					<ComboboxList>
+						{(unit) => (
+							<ComboboxItem key={unit.id} value={unit}>
+								{unit.name}
+							</ComboboxItem>
+						)}
+					</ComboboxList>
+				</ComboboxContent>
+			</Combobox>
+			{isError && !providedUnits && (
+				<InlineQueryRetry
+					message="Could not load units. Check your connection."
+					retryLabel="Retry units"
+					isFetching={isFetching}
+					onRetry={() => void refetch()}
+				/>
+			)}
+			{!isLoading && !isError && units.length === 0 && !providedUnits && (
+				<p role="status" className="text-sm text-muted-foreground">
+					No units are available.
+				</p>
+			)}
+		</div>
 	);
 }

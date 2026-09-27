@@ -1,5 +1,6 @@
 "use client";
 
+import { InlineQueryRetry } from "@/components/common/inline-query-retry";
 import {
 	Combobox,
 	ComboboxContent,
@@ -15,6 +16,9 @@ type Order = Pick<OrderDetailDto, "id" | "orderNumber">;
 interface OrderSelectProps {
 	orders: Order[];
 	isLoading?: boolean;
+	isError?: boolean;
+	isFetching?: boolean;
+	onRetry?: () => void;
 	id?: string;
 
 	value?: Order["id"];
@@ -27,35 +31,48 @@ export function OrderSelect({
 	value,
 	onChange,
 	isLoading,
+	isError,
+	isFetching = false,
+	onRetry,
 }: OrderSelectProps) {
 	const selected = orders.find((order) => order.id === value);
 
 	return (
-		<Combobox
-			items={orders}
-			disabled={isLoading}
-			value={selected ?? null}
-			onValueChange={(order) => order && onChange(order.id)}
-			itemToStringLabel={(order) => order.orderNumber ?? `Order #${order.id}`}
-			itemToStringValue={(order) => String(order.id)}
-		>
-			<ComboboxInput
-				id={id}
-				placeholder="Select order"
-				aria-label="Select order"
-			/>
+		<div className="space-y-2">
+			<Combobox
+				items={orders}
+				disabled={isLoading || (isError && orders.length === 0)}
+				value={selected ?? null}
+				onValueChange={(order) => order && onChange(order.id)}
+				itemToStringLabel={(order) => order.orderNumber ?? `Order #${order.id}`}
+				itemToStringValue={(order) => String(order.id)}
+			>
+				<ComboboxInput
+					id={id}
+					placeholder="Select order"
+					aria-label="Select order"
+				/>
 
-			<ComboboxContent>
-				<ComboboxEmpty>No orders found.</ComboboxEmpty>
+				<ComboboxContent>
+					<ComboboxEmpty>No orders found.</ComboboxEmpty>
 
-				<ComboboxList>
-					{(order) => (
-						<ComboboxItem key={order.id} value={order}>
-							{order.orderNumber ?? `Order #${order.id}`}
-						</ComboboxItem>
-					)}
-				</ComboboxList>
-			</ComboboxContent>
-		</Combobox>
+					<ComboboxList>
+						{(order) => (
+							<ComboboxItem key={order.id} value={order}>
+								{order.orderNumber ?? `Order #${order.id}`}
+							</ComboboxItem>
+						)}
+					</ComboboxList>
+				</ComboboxContent>
+			</Combobox>
+			{isError && onRetry && (
+				<InlineQueryRetry
+					message="Could not load orders. Check your connection."
+					retryLabel="Retry orders"
+					isFetching={isFetching}
+					onRetry={onRetry}
+				/>
+			)}
+		</div>
 	);
 }

@@ -143,8 +143,13 @@ export function ClaimCreateForm(): JSX.Element {
 		advanceIfValid(result);
 	}
 
-	const { data: orders = [], isLoading: ordersIsLoading } =
-		useOrdersControllerFindAll({});
+	const {
+		data: orders = [],
+		isLoading: ordersIsLoading,
+		isError: ordersIsError,
+		isFetching: ordersIsFetching,
+		refetch: retryOrders,
+	} = useOrdersControllerFindAll({});
 
 	return (
 		<form
@@ -319,6 +324,9 @@ export function ClaimCreateForm(): JSX.Element {
 									value={field.state.value}
 									onChange={(value) => field.handleChange(value)}
 									isLoading={ordersIsLoading}
+									isError={ordersIsError}
+									isFetching={ordersIsFetching}
+									onRetry={() => void retryOrders()}
 								/>
 							</div>
 						)}

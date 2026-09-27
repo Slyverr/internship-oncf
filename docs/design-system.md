@@ -78,6 +78,7 @@ Use the same semantic roles in all themes. Cards should separate from the canvas
 - Validate the active step before advancing, retain entered values when moving backward, and validate the whole form on final submission. Focus the first invalid control after an error; do not rely on color alone to identify it.
 - Prevent duplicate submission while saving and preserve the user's context when Cancel returns to a previous record.
 - Keep loading and pending feedback in the button or the form region being changed so the action does not appear to vanish or shift position.
+- Async selectors distinguish loading, a successful empty result, and a failed fetch. Keep stale options usable when available, provide an inline retry for failures, and disable the control when no usable option remains.
 
 ## 6. Navigation and feedback
 

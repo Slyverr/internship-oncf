@@ -27,6 +27,7 @@ import { useOrdersControllerFindEligibleForPrograms } from "@/lib/api/orders";
 import { useProgramsControllerCreate } from "@/lib/api/programs";
 import { useUsersControllerFindAll } from "@/lib/api/users";
 import { getFormErrorMessage } from "@/lib/form-utils";
+import { shouldClearInitialOrderSelection } from "@/lib/program-creation-eligibility";
 import { useAuth } from "@/providers/auth-provider";
 import { ProgramStatusSelect } from "./program-status-select";
 
@@ -137,23 +138,45 @@ export function ProgramCreateForm({
 		advanceIfValid(result);
 	}
 
-	const { data: orders = [], isLoading: ordersIsLoading } =
-		useOrdersControllerFindEligibleForPrograms(
-			initialOrderSearch ? { search: initialOrderSearch } : {},
-		);
+	const {
+		data: orders = [],
+		isLoading: ordersIsLoading,
+		isError: ordersIsError,
+		isFetching: ordersIsFetching,
+		refetch: retryOrders,
+	} = useOrdersControllerFindEligibleForPrograms(
+		initialOrderSearch ? { search: initialOrderSearch } : {},
+	);
 
 	useEffect(() => {
 		if (
-			initialOrderId &&
-			!ordersIsLoading &&
-			!orders.some((order) => order.id === initialOrderId)
+			shouldClearInitialOrderSelection({
+				initialOrderId,
+				selectedOrderId: form.state.values.orderId,
+				eligibleOrderIds: orders.map((order) => order.id),
+				isLoading: ordersIsLoading,
+				isFetching: ordersIsFetching,
+				isError: ordersIsError,
+			})
 		) {
 			form.setFieldValue("orderId", 0);
 		}
-	}, [form, initialOrderId, orders, ordersIsLoading]);
+	}, [
+		form,
+		initialOrderId,
+		orders,
+		ordersIsError,
+		ordersIsFetching,
+		ordersIsLoading,
+	]);
 
-	const { data: users = [], isLoading: usersIsLoading } =
-		useUsersControllerFindAll({});
+	const {
+		data: users = [],
+		isLoading: usersIsLoading,
+		isError: usersIsError,
+		isFetching: usersIsFetching,
+		refetch: retryUsers,
+	} = useUsersControllerFindAll({});
 
 	return (
 		<form
@@ -215,6 +238,9 @@ export function ProgramCreateForm({
 												clearFieldError("orderId");
 											}}
 											isLoading={ordersIsLoading}
+											isError={ordersIsError}
+											isFetching={ordersIsFetching}
+											onRetry={() => void retryOrders()}
 										/>
 									</div>
 								</div>
@@ -249,6 +275,9 @@ export function ProgramCreateForm({
 												value={field.state.value}
 												onChange={(value) => field.handleChange(value)}
 												isLoading={usersIsLoading}
+												isError={usersIsError}
+												isFetching={usersIsFetching}
+												onRetry={() => void retryUsers()}
 											/>
 										</div>
 									</div>

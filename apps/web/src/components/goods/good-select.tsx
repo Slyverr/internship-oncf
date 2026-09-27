@@ -1,7 +1,6 @@
 "use client";
 
-import { LoaderCircleIcon, RefreshCwIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { InlineQueryRetry } from "@/components/common/inline-query-retry";
 import {
 	Select,
 	SelectContent,
@@ -35,7 +34,7 @@ export function GoodSelect({ value, onChange }: GoodSelectProps) {
 			<Select
 				value={selectedGood?.id.toString() ?? null}
 				onValueChange={(selectedId) => onChange(Number(selectedId))}
-				disabled={isLoading || isError || goods.length === 0}
+				disabled={isLoading || goods.length === 0}
 			>
 				<SelectTrigger className="w-full" aria-label="Goods / Commodity">
 					<SelectValue>
@@ -54,31 +53,17 @@ export function GoodSelect({ value, onChange }: GoodSelectProps) {
 			</Select>
 
 			{isError && (
-				<div
-					role="alert"
-					aria-busy={isFetching}
-					className="flex flex-col items-start gap-3"
-				>
-					<p className="text-sm text-destructive">
-						Could not load goods. Check your connection and retry.
-					</p>
-					<Button
-						type="button"
-						variant="outline"
-						disabled={isFetching}
-						onClick={() => void refetch()}
-					>
-						{isFetching ? (
-							<LoaderCircleIcon
-								aria-hidden="true"
-								className="animate-spin motion-reduce:animate-none"
-							/>
-						) : (
-							<RefreshCwIcon aria-hidden="true" />
-						)}
-						{isFetching ? "Retrying…" : "Retry goods"}
-					</Button>
-				</div>
+				<InlineQueryRetry
+					message="Could not load goods. Check your connection."
+					retryLabel="Retry goods"
+					isFetching={isFetching}
+					onRetry={() => void refetch()}
+				/>
+			)}
+			{!isLoading && !isError && goods.length === 0 && (
+				<p role="status" className="text-sm text-muted-foreground">
+					No active goods are available.
+				</p>
 			)}
 		</div>
 	);

@@ -28,3 +28,28 @@ export function canCreateProgramForOrder({
 		programCount === 0
 	);
 }
+
+export function shouldClearInitialOrderSelection({
+	initialOrderId,
+	selectedOrderId,
+	eligibleOrderIds,
+	isLoading,
+	isFetching,
+	isError,
+}: {
+	initialOrderId?: number;
+	selectedOrderId: number;
+	eligibleOrderIds: number[];
+	isLoading: boolean;
+	isFetching: boolean;
+	isError: boolean;
+}): boolean {
+	return (
+		initialOrderId !== undefined &&
+		selectedOrderId === initialOrderId &&
+		!isLoading &&
+		!isFetching &&
+		!isError &&
+		!eligibleOrderIds.includes(initialOrderId)
+	);
+}
