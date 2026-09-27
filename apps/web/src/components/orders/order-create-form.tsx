@@ -152,7 +152,7 @@ export function OrderCreateForm(): JSX.Element {
 				}
 				form.handleSubmit();
 			}}
-			className="max-w-5xl space-y-4"
+			className="mx-auto w-full max-w-5xl space-y-4 @7xl/workspace:max-w-7xl"
 		>
 			<PageHeader
 				title="New order"
@@ -165,7 +165,7 @@ export function OrderCreateForm(): JSX.Element {
 				aria-labelledby={
 					step === 0 ? "order-details-title" : "order-schedule-title"
 				}
-				className="page-enter grid max-w-5xl gap-4"
+				className="page-enter grid w-full gap-4"
 			>
 				{step === 0 && (
 					<Card>

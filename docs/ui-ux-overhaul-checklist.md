@@ -7,7 +7,7 @@ This is the running review list for the application-wide usability and visual ov
 | # | Area | Required review and acceptance evidence | Status |
 | --- | --- | --- | --- |
 | 1 | Login and registration | Remove redundant nested surfaces and unnecessary explanation; fix the registration form's field layout and logo fit. Review phone, laptop, 2K, and 4K captures. | Complete |
-| 2 | Order creation | Check the form's usable width, grouping, step navigation, validation, and action placement at phone, tablet, laptop, and wide widths. | To review |
+| 2 | Order creation | Check the form's usable width, grouping, step navigation, validation, and action placement at phone, tablet, laptop, and wide widths. | Complete |
 | 3 | Menus | Review account and other dropdown hover/focus shapes, item insets, active state, keyboard use, and touch behavior. | To review |
 | 4 | Button surfaces | Find light-theme buttons that look like unbounded white text; set a consistent semantic surface, border, or restrained elevation. Check every button variant in both themes. | To review |
 | 5 | Settings controls | Apply the button/surface review to settings, including close, tabs, selected preferences, and save/discard actions. | In progress |
@@ -33,6 +33,7 @@ Review both light and dark appearances, and both workspace layouts where the rou
 - Guided form columns share a consistent maximum width and page-level headings.
 - The settings dialog keeps a fixed footprint; appearance choices now fit compactly on common phone widths and avoid clipping at 320px.
 - Login and registration now use a flat form surface inside the shared auth layout, with the repeated login explanation and nested form cards removed. The ONCF mark fits fully; fresh captures at 320, 390, 768, 1440, 2560, and 3840px showed no horizontal overflow. Registration keeps readable grouped fields on desktop and stacks them at phone width.
+- Order creation now centers in the available workspace, filling the regular 5xl form column and expanding to 7xl only in very wide workspaces. Fresh authenticated captures at 390, 768, 1440, and 2560px had no horizontal overflow; the form measured 358px on phone, 464px on tablet, 1024px on laptop, and 1280px on the wide display.
 
 ## Working rules
 
