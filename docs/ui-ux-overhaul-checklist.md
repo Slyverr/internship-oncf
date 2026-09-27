@@ -6,7 +6,7 @@ This is the running review list for the application-wide usability and visual ov
 
 | # | Area | Required review and acceptance evidence | Status |
 | --- | --- | --- | --- |
-| 1 | Login and registration | Remove redundant nested surfaces and unnecessary explanation; fix the registration form's field layout and logo fit. Show concise API-backed password validation. Review phone, laptop, 2K, and 4K captures. | Complete |
+| 1 | Login and registration | Remove redundant nested surfaces and unnecessary explanation; fix the registration form's field layout and logo fit. Show concise API-backed password validation, keep the desktop auth shell the same size for both routes, and add a soft route transition after the shell is stable. Review phone, laptop, 2K, and 4K captures. | In progress |
 | 2 | Order creation | Check the form's usable width, grouping, step navigation, validation, and action placement at phone, tablet, laptop, and wide widths. | Complete |
 | 3 | Menus | Review account and other dropdown hover/focus shapes, item insets, active state, keyboard use, and touch behavior. | To review |
 | 4 | Button surfaces | Find light-theme buttons that look like unbounded white text; set a consistent semantic surface, border, or restrained elevation. Check every button variant in both themes. | To review |
@@ -14,13 +14,14 @@ This is the running review list for the application-wide usability and visual ov
 | 6 | Sidebar alignment | Compare expanded and collapsed logo, nav, and account alignment; keep header/footer padding and navigation centers consistent. | To review |
 | 7 | Sidebar motion | Add restrained, reduced-motion-aware transitions for collapse/expand and content state changes; verify no abrupt layout shift. | To review |
 | 8 | Dashboard content | Replace the sparse three-panel impression with useful role- and permission-aware metrics, trends, and prioritized next actions based on available data. | To review |
-| 9 | Workspace width consistency | Compare dashboard and all inner routes under both shell layouts at laptop through 4K widths. Use one shared content-width rule per shell and prevent unexplained route-specific centering. | To review |
+| 9 | Workspace width consistency | Compare dashboard and all inner routes under both shell layouts at laptop through 4K widths. Use one shared content-width rule per shell and prevent unexplained route-specific centering. | In progress |
 | 10 | Table density | Review header, row, cell padding, wrapping, and phone overflow. Add a user-controlled density preference only if the responsive behavior still benefits from it. | To review |
 | 11 | Appearance options | Keep themes, fonts, text scale, motion, and layouts extensible and understandable. Review whether a bounded text-scale control is more useful than only three presets; retain sensible defaults and database sync. | To review |
 | 12 | Notifications | Review trigger, panel size, spacing, typography, empty/loading states, action reachability, and dismissal behavior on touch and desktop. Keep keyboard access; do not make hover the only way to open it. | To review |
 | 13 | Sidebar inset details | Recheck collapsed-state padding and the relationship between logo, navigation, profile, and shell breadcrumbs after alignment changes. | To review |
 | 14 | Shared visual styles | Inventory repeated card, control, field, table, and dialog classes. Extract stable patterns into named utilities or shared components where that improves consistency without hiding feature-specific behavior. | To review |
-| 15 | Full route and state audit | Capture all routes and meaningful loading, empty, error, success, permission, and dialog states; record findings and assess the work in three passes before closing the overhaul. | In progress |
+| 15 | Full route and state audit | Capture all routes and meaningful loading, empty, error, success, permission, and dialog states. Review every form control for clear labels, useful examples/placeholders, hints, autocomplete/input modes, and validation feedback; record findings and assess the work in three passes before closing the overhaul. | In progress |
+| 16 | Documentation organization | After shared component style utilities (#14) are complete, group docs into clear topic folders and use one-word Markdown filenames when they stay clear. | Queued after #14 |
 
 ## Screenshot coverage
 
@@ -31,9 +32,11 @@ Review both light and dark appearances, and both workspace layouts where the rou
 - Shared shell and centered-header layout rules, page-start alignment, and breadcrumb placement are documented in [the design system](design-system.md).
 - Centered phone navigation now separates account actions from section links, keeps the active route visible, and reserves a stable breadcrumb slot.
 - Guided form columns share a consistent maximum width and page-level headings.
+- The order create form centers in its workspace and uses a larger cap only on ultrawide displays.
 - The settings dialog keeps a fixed footprint; appearance choices now fit compactly on common phone widths and avoid clipping at 320px.
 - Login and registration now use a flat form surface inside the shared auth layout, with the repeated login explanation and nested form cards removed. The ONCF mark fits fully; fresh captures at 320, 390, 768, 1440, 2560, and 3840px showed no horizontal overflow. Registration keeps readable grouped fields on desktop and stacks them at phone width; the password and confirmation controls align. Password validation now shows one compact policy hint, then only unmet requirements and confirmation feedback. The shared policy remains enforced by the API DTO. Fresh captures at 320, 390, and 1440px showed no horizontal overflow.
 - Order creation now centers in the available workspace, filling the regular 5xl form column and expanding to 7xl only in very wide workspaces. Fresh authenticated captures at 390, 768, 1440, and 2560px had no horizontal overflow; the form measured 358px on phone, 464px on tablet, 1024px on laptop, and 1280px on the wide display.
+- Both workspace layouts now share a 1536px page-content cap. Fresh authenticated list-page captures at 1440px and 2560px show aligned table widths within the workspace; the 2560px tables measure about 1486px instead of stretching past 2200px. The page itself has no horizontal overflow. More route and centered-layout review remains in item 15.
 
 ## Working rules
 

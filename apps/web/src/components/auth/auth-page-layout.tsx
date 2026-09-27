@@ -43,7 +43,7 @@ const workspaceHighlights = [
 export function AuthPageLayout({ children }: { children: ReactNode }) {
 	return (
 		<main className="grid min-h-svh items-start justify-items-center bg-background p-4 pt-8 sm:place-items-center sm:p-6">
-			<div className="grid w-full max-w-3xl xl:max-w-6xl xl:grid-cols-2">
+			<div className="grid w-full max-w-3xl xl:auth-shell-height xl:max-w-6xl xl:grid-cols-2">
 				<aside
 					aria-labelledby="auth-brand-heading"
 					className="hidden flex-col justify-between bg-sidebar p-8 text-sidebar-foreground xl:flex xl:p-12"

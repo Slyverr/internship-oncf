@@ -68,6 +68,10 @@
 	gap: var(--spacing);
 }
 
+@utility auth-shell-height {
+	height: min(47rem, calc(100svh - 3rem));
+}
+
 @utility gap-control {
 	gap: var(--spacing-control);
 }
