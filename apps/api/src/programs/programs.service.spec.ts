@@ -7,7 +7,10 @@ import type { ProgramId } from "./programs.types";
 
 describe("ProgramsService lifecycle", () => {
 	const notifyChange = jest.fn();
+	const toCreate = jest.fn();
 	const query = {
+		createProgram: jest.fn(),
+		findProgramForOrder: jest.fn(),
 		findProgram: jest.fn(),
 		findProgramStatus: jest.fn(),
 		updateProgram: jest.fn(),
@@ -15,16 +18,43 @@ describe("ProgramsService lifecycle", () => {
 	const service = new ProgramsService(
 		{ notifyChange } as never,
 		query as unknown as ProgramsQuery,
-		{} as never,
+		{ toCreate } as never,
 	);
 	const id = 5 as ProgramId;
 	const user = { id: 7 } as never;
 
 	beforeEach(() => {
+		query.createProgram.mockReset();
+		query.findProgramForOrder.mockReset();
 		query.findProgram.mockReset();
 		query.findProgramStatus.mockReset();
 		query.updateProgram.mockReset();
 		notifyChange.mockReset();
+		toCreate.mockReset();
+	});
+
+	it("creates the first forecast program for an order", async () => {
+		const dto = { orderId: 12 } as never;
+		const values = { orderId: 12 } as never;
+		const program = { id };
+		query.findProgramForOrder.mockResolvedValue(undefined);
+		toCreate.mockReturnValue(values);
+		query.createProgram.mockResolvedValue({ id });
+		query.findProgram.mockResolvedValue(program);
+
+		await expect(service.create(dto, user)).resolves.toBe(program);
+		expect(toCreate).toHaveBeenCalledWith(dto, user);
+		expect(query.createProgram).toHaveBeenCalledWith(values);
+	});
+
+	it("rejects creating a second program for the same order", async () => {
+		query.findProgramForOrder.mockResolvedValue({ id });
+
+		await expect(
+			service.create({ orderId: 12 } as never, user),
+		).rejects.toThrow("This order already has a forecast program");
+		expect(toCreate).not.toHaveBeenCalled();
+		expect(query.createProgram).not.toHaveBeenCalled();
 	});
 
 	it("submits a draft program with a conditional status update and notification", async () => {

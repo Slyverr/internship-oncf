@@ -224,6 +224,7 @@ export class OrdersQuery {
 	async findEligibleOrdersForPrograms(user: AuthUser, query: ListQueryDto) {
 		return this.drizzle.db.query.orders.findMany({
 			where: {
+				forecastPrograms: false,
 				orderStatus: {
 					name: {
 						in: [

@@ -69,6 +69,7 @@ describe("OrdersQuery authorization scope", () => {
 		expect(findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: {
+					forecastPrograms: false,
 					createdByUserId: user.id,
 					orderStatus: {
 						name: { in: ["APPROVED", "SENT_TO_DTM", "IN_PROGRESS"] },
@@ -89,6 +90,7 @@ describe("OrdersQuery authorization scope", () => {
 		expect(options.where.orderStatus).toEqual({
 			name: { in: ["APPROVED", "SENT_TO_DTM", "IN_PROGRESS"] },
 		});
+		expect(options.where.forecastPrograms).toBe(false);
 	});
 
 	it("scopes eligible program orders to an assigned customer", async () => {
@@ -97,6 +99,7 @@ describe("OrdersQuery authorization scope", () => {
 
 		expect(findMany.mock.calls[0][0].where).toEqual({
 			customerId: 42,
+			forecastPrograms: false,
 			orderStatus: {
 				name: { in: ["APPROVED", "SENT_TO_DTM", "IN_PROGRESS"] },
 			},

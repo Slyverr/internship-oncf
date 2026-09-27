@@ -26,6 +26,13 @@ export class ProgramsService {
 	) {}
 
 	async create(dto: CreateProgramDto, user: AuthUser) {
+		const existingProgram = await this.programsQuery.findProgramForOrder(
+			dto.orderId,
+		);
+		if (existingProgram) {
+			throw new ConflictException("This order already has a forecast program");
+		}
+
 		const values = this.programsMapper.toCreate(dto, user);
 		const created = await this.programsQuery.createProgram(values);
 		return this.findOne(created.id);

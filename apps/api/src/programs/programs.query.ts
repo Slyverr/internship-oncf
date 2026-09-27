@@ -128,6 +128,13 @@ export class ProgramsQuery {
 		});
 	}
 
+	async findProgramForOrder(orderId: number) {
+		return this.drizzle.db.query.forecastPrograms.findFirst({
+			where: { orderId },
+			columns: { id: true },
+		});
+	}
+
 	async findProgram(id: ProgramId) {
 		return this.drizzle.db.query.forecastPrograms.findFirst({
 			where: { id },
