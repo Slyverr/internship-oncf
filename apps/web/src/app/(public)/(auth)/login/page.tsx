@@ -92,7 +92,7 @@ export default function Page() {
 								</p>
 							)}
 						</div>
-						<div className="flex items-center space-x-2 pt-1">
+						<div className="flex min-h-12 items-center gap-2">
 							<Checkbox
 								id="remember"
 								name="remember"
