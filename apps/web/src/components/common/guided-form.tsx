@@ -116,6 +116,7 @@ export function GuidedFormActions({
 	isSubmitDisabled?: boolean;
 }) {
 	const isLastStep = currentStep === stepCount - 1;
+	const isBusy = isPending || isSubmitting;
 
 	return (
 		<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -123,6 +124,7 @@ export function GuidedFormActions({
 				type="button"
 				variant="outline"
 				className="w-full sm:w-auto"
+				disabled={isBusy}
 				onClick={onCancel}
 			>
 				Cancel
@@ -133,6 +135,7 @@ export function GuidedFormActions({
 						type="button"
 						variant="outline"
 						className="w-full sm:w-auto"
+						disabled={isBusy}
 						onClick={onPrevious}
 					>
 						<ArrowLeft />
@@ -147,7 +150,7 @@ export function GuidedFormActions({
 								? "col-span-2 w-full sm:col-span-1 sm:w-auto"
 								: "w-full sm:w-auto"
 						}
-						disabled={isPending || isSubmitting || isSubmitDisabled}
+						disabled={isBusy || isSubmitDisabled}
 					>
 						{isPending || isSubmitting ? pendingLabel : submitLabel}
 					</Button>
@@ -159,6 +162,7 @@ export function GuidedFormActions({
 								? "col-span-2 w-full sm:col-span-1 sm:w-auto"
 								: "w-full sm:w-auto"
 						}
+						disabled={isBusy}
 						onClick={(event) => {
 							event.preventDefault();
 							event.stopPropagation();
