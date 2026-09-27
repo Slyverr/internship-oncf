@@ -9,7 +9,7 @@
 		"start": "next start",
 		"generate:api": "orval",
 		"generate:api:watch": "orval --watch",
-		"test": "bun ./test/form-utils.test.ts"
+		"test": "bun ./test/run.ts"
 	},
 	"dependencies": {
 		"@base-ui/react": "^1.8.0",

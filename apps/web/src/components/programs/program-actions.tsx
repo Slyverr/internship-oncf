@@ -22,6 +22,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useUpdateDetailCache } from "@/hooks/use-update-detail-cache";
+import { canDeleteProgram, hasAvailableActions } from "@/lib/action-visibility";
 import type { ProgramDetailDto } from "@/lib/api/generated.schemas";
 import {
 	getProgramsControllerFindOneQueryKey,
@@ -53,6 +54,11 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 	const removeMutation = useProgramsControllerRemove();
 
 	const status = program.programStatus.name;
+	const canEdit = hasPermission(Permission.PROGRAMS_UPDATE);
+	const canDelete = canDeleteProgram(
+		status,
+		hasPermission(Permission.PROGRAMS_DELETE),
+	);
 
 	const isPending =
 		submitMutation.isPending ||
@@ -171,8 +177,7 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 					)}
 
 				{/* More actions dropdown */}
-				{(hasPermission(Permission.PROGRAMS_UPDATE) ||
-					hasPermission(Permission.PROGRAMS_DELETE)) && (
+				{hasAvailableActions(canEdit, canDelete) && (
 					<DropdownMenu>
 						<DropdownMenuTrigger
 							render={<Button variant="ghost" size="icon" />}
@@ -183,7 +188,7 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 						</DropdownMenuTrigger>
 
 						<DropdownMenuContent align="end">
-							{hasPermission(Permission.PROGRAMS_UPDATE) && (
+							{canEdit && (
 								<DropdownMenuItem
 									onClick={() =>
 										router.push(`/dashboard/programs/${program.id}/edit`)
@@ -194,15 +199,14 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 							)}
 
 							{/* Delete only allowed for DRAFT */}
-							{hasPermission(Permission.PROGRAMS_DELETE) &&
-								status === ProgramStatus.DRAFT && (
-									<DropdownMenuItem
-										className="text-destructive"
-										onClick={() => setDeleteDialogOpen(true)}
-									>
-										Delete
-									</DropdownMenuItem>
-								)}
+							{canDelete && (
+								<DropdownMenuItem
+									className="text-destructive"
+									onClick={() => setDeleteDialogOpen(true)}
+								>
+									Delete
+								</DropdownMenuItem>
+							)}
 						</DropdownMenuContent>
 					</DropdownMenu>
 				)}

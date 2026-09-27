@@ -109,7 +109,7 @@ Place a next action next to the record that makes it relevant. Only offer it whe
 
 Current example: an order detail can link directly to program creation when the signed-in user can create programs, can access that order's creation scope, the order is in an eligible state, and it has no program yet.
 
-When implementing any shortcut, map actor permission, ownership scope, resource status, and related-resource state. Keep the button hidden when any prerequisite fails; then recheck eligibility on the destination page so a stale link cannot silently select an unavailable record.
+When implementing any shortcut, map actor permission, ownership scope, resource status, and related-resource state. Keep the button hidden when any prerequisite fails; then recheck eligibility on the destination page so a stale link cannot silently select an unavailable record. Do not render an overflow trigger unless at least one action inside it is available for this user and record state.
 
 ## 8. Review checklist
 

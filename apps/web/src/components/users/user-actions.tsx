@@ -14,8 +14,8 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { hasAvailableActions } from "@/lib/action-visibility";
 import type { UserDetailDto } from "@/lib/api/generated.schemas";
-
 import {
 	getUsersControllerFindOneQueryKey,
 	useUsersControllerDeactivate,
@@ -48,7 +48,7 @@ export function UserActions({ user }: { user: UserDetailDto }) {
 	const canUpdate = hasPermission(Permission.USERS_UPDATE);
 	const canDeactivate = hasPermission(Permission.USERS_DELETE);
 
-	if (!canUpdate && !canDeactivate) return null;
+	if (!hasAvailableActions(canUpdate, canDeactivate)) return null;
 
 	return (
 		<>
@@ -62,26 +62,28 @@ export function UserActions({ user }: { user: UserDetailDto }) {
 					</Button>
 				)}
 
-				<DropdownMenu>
-					<DropdownMenuTrigger
-						render={<Button variant="ghost" size="icon" />}
-						disabled={deactivateMutation.isPending}
-					>
-						<EllipsisVerticalIcon />
-						<span className="sr-only">More actions</span>
-					</DropdownMenuTrigger>
+				{hasAvailableActions(canDeactivate) && (
+					<DropdownMenu>
+						<DropdownMenuTrigger
+							render={<Button variant="ghost" size="icon" />}
+							disabled={deactivateMutation.isPending}
+						>
+							<EllipsisVerticalIcon />
+							<span className="sr-only">More actions</span>
+						</DropdownMenuTrigger>
 
-					<DropdownMenuContent align="end">
-						{canDeactivate && (
-							<DropdownMenuItem
-								className="text-destructive"
-								onClick={() => setDeactivateDialogOpen(true)}
-							>
-								Deactivate User
-							</DropdownMenuItem>
-						)}
-					</DropdownMenuContent>
-				</DropdownMenu>
+						<DropdownMenuContent align="end">
+							{canDeactivate && (
+								<DropdownMenuItem
+									className="text-destructive"
+									onClick={() => setDeactivateDialogOpen(true)}
+								>
+									Deactivate User
+								</DropdownMenuItem>
+							)}
+						</DropdownMenuContent>
+					</DropdownMenu>
+				)}
 			</div>
 
 			<ConfirmDialog

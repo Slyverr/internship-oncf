@@ -44,6 +44,7 @@ The action is implemented from current API rules, but role/status combinations n
 **Source-confirmed findings**
 
 - Dashboard list/detail/form pages share common table, record-summary, page-header, and guided-form primitives. Changes to these primitives have broad impact, so the complete route family must be checked after shared style edits.
+- The default commercial-agent role can edit customers but cannot deactivate them. The customer detail previously rendered a More actions trigger with no menu items; the trigger is now shown only when deactivation is permitted. Program overflow actions also now account for the Draft-only delete rule before rendering the trigger.
 - The 24 dashboard route files cover the core operational pages; four public authentication routes are separate. A source-reference scan found no clearly orphaned web modules. Dependency-name scanning produced framework/runtime false positives, so no dependencies were removed without stronger evidence.
 - Existing reduced-motion handling is present. It should be retained for every new transition.
 
@@ -62,6 +63,7 @@ Shared primitives reduce drift but do not make all page content consistent. Copy
 - [x] Align input/textarea horizontal padding to the 4px spacing grid; make table scroll regions keyboard reachable.
 - [x] Crop the ONCF horizontal wordmark to its content proportions in the sidebar tile.
 - [x] Add a permission- and status-aware Create program action to eligible order details and carry the selected order into the guided create flow.
+- [x] Hide customer/user/program overflow triggers when the current role and record state provide no menu action; cover default roles and program status in frontend checks.
 
 ### Next visual review
 

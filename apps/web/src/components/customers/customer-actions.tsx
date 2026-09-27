@@ -14,6 +14,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { hasAvailableActions } from "@/lib/action-visibility";
 import {
 	getCustomersControllerFindOneQueryKey,
 	useCustomersControllerDeactivate,
@@ -47,7 +48,7 @@ export function CustomerActions({ customer }: { customer: CustomerDetailDto }) {
 	const canUpdate = hasPermission(Permission.CUSTOMERS_UPDATE);
 	const canDeactivate = hasPermission(Permission.CUSTOMERS_DELETE);
 
-	if (!canUpdate && !canDeactivate) return null;
+	if (!hasAvailableActions(canUpdate, canDeactivate)) return null;
 
 	return (
 		<>
@@ -63,26 +64,28 @@ export function CustomerActions({ customer }: { customer: CustomerDetailDto }) {
 					</Button>
 				)}
 
-				<DropdownMenu>
-					<DropdownMenuTrigger
-						render={<Button variant="ghost" size="icon" />}
-						disabled={deactivateMutation.isPending}
-					>
-						<EllipsisVerticalIcon />
-						<span className="sr-only">More actions</span>
-					</DropdownMenuTrigger>
+				{hasAvailableActions(canDeactivate) && (
+					<DropdownMenu>
+						<DropdownMenuTrigger
+							render={<Button variant="ghost" size="icon" />}
+							disabled={deactivateMutation.isPending}
+						>
+							<EllipsisVerticalIcon />
+							<span className="sr-only">More actions</span>
+						</DropdownMenuTrigger>
 
-					<DropdownMenuContent align="end">
-						{canDeactivate && (
-							<DropdownMenuItem
-								className="text-destructive"
-								onClick={() => setDeactivateDialogOpen(true)}
-							>
-								Deactivate Customer
-							</DropdownMenuItem>
-						)}
-					</DropdownMenuContent>
-				</DropdownMenu>
+						<DropdownMenuContent align="end">
+							{canDeactivate && (
+								<DropdownMenuItem
+									className="text-destructive"
+									onClick={() => setDeactivateDialogOpen(true)}
+								>
+									Deactivate Customer
+								</DropdownMenuItem>
+							)}
+						</DropdownMenuContent>
+					</DropdownMenu>
+				)}
 			</div>
 
 			<ConfirmDialog
