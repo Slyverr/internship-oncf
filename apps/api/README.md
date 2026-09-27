@@ -28,4 +28,4 @@ Set `SMTP_HOST` and `SMTP_FROM` to send password recovery through an SMTP provid
 - `bun run db:push`
 - `bun run db:studio`
 
-See the repository's [architecture guide](../../docs/architecture.md) and [database workflow](../../docs/development.md#database-workflow).
+See the repository's [architecture guide](../../docs/project/architecture.md) and [database workflow](../../docs/development/workflow.md#database-workflow).

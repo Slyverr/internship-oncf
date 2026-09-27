@@ -12,4 +12,4 @@ Copy `apps/web/.env.example` to `apps/web/.env`. The defaults expect the API at 
 - `bun run build`
 - `bun run generate:api` (requires the API OpenAPI JSON endpoint to be available)
 
-See the repository's [architecture guide](../../docs/architecture.md) and [development conventions](../../docs/development.md).
+See the repository's [architecture guide](../../docs/project/architecture.md) and [development conventions](../../docs/development/workflow.md).

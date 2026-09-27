@@ -2,11 +2,12 @@
 
 Use these documents as the maintained guide to the repository:
 
-- [Architecture](architecture.md) — workspace structure, application boundaries, and current technical design.
-- [Development workflow and conventions](development.md) — local commands, naming, code style, UI form patterns, verification, and commits.
-- [Web design system](design-system.md) — spacing, typography, responsive layouts, shell behavior, and interaction details.
-- [MVP readiness](mvp-readiness.md) — implemented user flows, known gaps, and remaining work toward the MVP.
-- [Authorization matrix](authorization-matrix.md) — role grants, API permissions, ownership scope, and web visibility.
-- [UI/UX overhaul checklist](ui-ux-overhaul-checklist.md) — route-level visual review scope, requested improvements, and screenshot coverage.
+- [Architecture](project/architecture.md) — workspace structure, application boundaries, and current technical design.
+- [Development workflow](development/workflow.md) — local commands, naming, code style, UI form patterns, verification, and commits.
+- [Interface design system](interface/system.md) — spacing, typography, responsive layouts, shell behavior, and interaction details.
+- [MVP readiness](project/readiness.md) — implemented user flows, known gaps, and remaining work toward the MVP.
+- [Authorization matrix](security/authorization.md) — role grants, API permissions, ownership scope, and web visibility.
+- [UI/UX review](interface/review.md) — current review findings and screenshot evidence.
+- [UI/UX checklist](interface/checklist.md) — route-level visual review scope, requested improvements, and remaining work.
 
-Keep this index updated when adding or removing maintained project documentation. Use English for maintained documentation and link to the most specific guide from `AGENTS.md` or the root README when contributors need it.
+Keep this index updated when adding or removing maintained project documentation. Put new material in the matching topic folder, use a clear one-word Markdown filename when practical, write in English, and link to the most specific guide from `AGENTS.md` or the root README when contributors need it.

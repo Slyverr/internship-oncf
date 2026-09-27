@@ -21,7 +21,7 @@ This is the running review list for the application-wide usability and visual ov
 | 13 | Sidebar inset details | Recheck collapsed-state padding and the relationship between logo, navigation, profile, and shell breadcrumbs after alignment changes. | Complete |
 | 14 | Shared visual styles | Inventory repeated card, control, field, table, and dialog classes. Extract stable patterns into named utilities or shared components where that improves consistency without hiding feature-specific behavior. | Complete |
 | 15 | Full route and state audit | Capture all routes and meaningful loading, empty, error, success, permission, and dialog states. Review every form control for clear labels, useful examples/placeholders, hints, autocomplete/input modes, and validation feedback; record findings and assess the work in three passes before closing the overhaul. | In progress |
-| 16 | Documentation organization | After shared component style utilities (#14) are complete, group docs into clear topic folders and use one-word Markdown filenames when they stay clear. | Queued after #14 |
+| 16 | Documentation organization | Group docs into clear topic folders, use one-word Markdown filenames when they stay clear, and keep contributor links current. | Complete |
 
 ## Screenshot coverage
 
@@ -29,7 +29,7 @@ Review both light and dark appearances, and both workspace layouts where the rou
 
 ## Completed groundwork
 
-- Shared shell and centered-header layout rules, page-start alignment, and breadcrumb placement are documented in [the design system](design-system.md).
+- Shared shell and centered-header layout rules, page-start alignment, and breadcrumb placement are documented in [the design system](system.md).
 - Centered phone navigation now separates account actions from section links, keeps the active route visible, and reserves a stable breadcrumb slot.
 - Guided form columns share a consistent maximum width and page-level headings.
 - The order create form centers in its workspace and uses a larger cap only on ultrawide displays.

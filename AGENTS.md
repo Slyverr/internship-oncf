@@ -16,7 +16,10 @@ Use these instructions for changes in this repository. The product name in human
 - `apps/web` — Next.js App Router application. Routes live in `src/app`, reusable UI in `src/components`, and API calls use the generated client in `src/lib/api`.
 - `packages/shared` — enums, permissions, catalog definitions, and types shared by the API and web app.
 - `docker-compose.yml` — local PostgreSQL and MinIO services.
-- `docs` — maintained architecture, development conventions, and MVP readiness notes.
+- `docs/project` — architecture and MVP readiness.
+- `docs/development` — setup, workflow, coding conventions, and verification.
+- `docs/security` — roles, permissions, ownership scope, and authorization mapping.
+- `docs/interface` — design system, screenshot review, and the ongoing UI/UX checklist.
 
 The current stack is Bun workspaces and Turborepo, NestJS 11, Next.js 16, React 19, PostgreSQL, Drizzle ORM, and MinIO-compatible object storage. Do not substitute the older Java/Spring stack described in project reference material for this existing implementation.
 
@@ -30,7 +33,7 @@ The current stack is Bun workspaces and Turborepo, NestJS 11, Next.js 16, React 
 - Read secrets and runtime configuration through `@nestjs/config` or the web app's environment configuration. Never commit real credentials.
 - Keep web API types generated from the NestJS OpenAPI contract. Update API DTOs first, then regenerate with `bun run generate:api` from `apps/web` when the API OpenAPI endpoint is running. Do not hand-edit generated client output unless generation is unavailable and the change is explicitly temporary.
 - Prefer existing dependencies and components. For new dependencies, prefer maintained open-source options and keep the addition small.
-- Follow the web layout and visual system in docs/development.md#web-layout-and-visual-system: use semantic theme tokens, mobile-first layouts, and the defined spacing scale.
+- Follow [the interface design system](docs/interface/system.md): use semantic theme tokens, mobile-first layouts, and the defined spacing scale.
 - Add or update focused tests for changed business behavior when appropriate. Run the relevant typecheck/build and tests when asked to verify or when needed to substantiate a completion claim.
 
 ## Database and migrations
@@ -52,4 +55,4 @@ The current database design needs review and is expected to change, so migration
 - Run focused API tests with `bun run test -- <pattern>` from `apps/api`; check the package script before assuming a test runner or command applies elsewhere.
 - In your handoff, state what changed, what you verified, and any unresolved gaps. Do not describe a placeholder, status field, or endpoint as a completed external integration.
 
-For web layout or UI work, read [docs/design-system.md](docs/design-system.md) before editing screens. Treat it as the shared spec for spacing, type hierarchy, hit areas, responsive rules, sidebar states, notifications, motion, and visual review. Preserve current theme token values unless the user explicitly asks for a palette change.
+For web layout or UI work, read [docs/interface/system.md](docs/interface/system.md) before editing screens. Treat it as the shared spec for spacing, type hierarchy, hit areas, responsive rules, sidebar states, notifications, motion, and visual review. Preserve current theme token values unless the user explicitly asks for a palette change.

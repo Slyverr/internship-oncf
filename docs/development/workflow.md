@@ -2,7 +2,7 @@
 
 ## Local setup
 
-Follow the root [README](../README.md) for installation, Compose services, environment files, schema push, seeding, and startup. The root [bunfig.toml](../bunfig.toml) selects Bun's hoisted workspace linker; install from the repository root and keep that linker setting so Next.js can resolve packages through the workspace root node_modules. Use the sample environment files as templates and keep real `.env` files out of Git. Query devtools are off by default; set `NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS=true` in the web environment when debugging query state.
+Follow the root [README](../../README.md) for installation, Compose services, environment files, schema push, seeding, and startup. The root [bunfig.toml](../../bunfig.toml) selects Bun's hoisted workspace linker; install from the repository root and keep that linker setting so Next.js can resolve packages through the workspace root node_modules. Use the sample environment files as templates and keep real `.env` files out of Git. Query devtools are off by default; set `NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS=true` in the web environment when debugging query state.
 
 Useful root commands:
 
@@ -68,7 +68,7 @@ Keep apps/web/src/components/ui focused on primitives used by current screens. A
 
 ## Web layout and visual system
 
-Follow the detailed [web design system](design-system.md) for page structure, type hierarchy, target sizes, responsive behavior, sidebar states, and notification interactions. The current theme values are the source of truth; do not change them as part of layout work.
+Follow the detailed [web design system](../interface/system.md) for page structure, type hierarchy, target sizes, responsive behavior, sidebar states, and notification interactions. The current theme values are the source of truth; do not change them as part of layout work.
 
 - Treat apps/web/src/app/globals.css as the source of truth for semantic color, radius, and motion tokens. Use role-based classes such as bg-background, bg-card, text-muted-foreground, and border-border; avoid one-off palette colors in feature components.
 - The orange accent is ONCF-inspired. Official material confirms the orange logo, but this repository has not verified an official complete digital palette or exact color values. Do not present custom shades as official ONCF values.

@@ -30,7 +30,7 @@ Keep new feature behavior in the matching module. Avoid putting business logic i
 - Reference data and seeders: `apps/api/src/database/reference-data` and `apps/api/drizzle/seed`.
 - Runtime database access: `apps/api/src/database`.
 
-Drizzle schemas and relations are changing; database migrations are intentionally deferred. See [development conventions](development.md#database-workflow) before changing the schema.
+Drizzle schemas and relations are changing; database migrations are intentionally deferred. See the [database workflow](../development/workflow.md#database-workflow) before changing the schema.
 
 ## Web structure
 
