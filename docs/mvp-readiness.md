@@ -12,16 +12,23 @@ This status describes the current repository against the project SDF and report.
 - The development seed includes a synthetic customer record for exercising the signup and review flow locally; its ICE value is explicitly test-only.
 - Password recovery/reset UI and API. SMTP delivery is available when configured; local development uses git-ignored `.eml` messages otherwise.
 - Permission-aware dashboard with recent orders, forecast programs, and claims for sections the signed-in user can read.
-- Personal settings for browser-local theme selection (system, light, and dark), profile updates, and password changes. The interface uses an ONCF-inspired orange and warm-neutral palette; no official full hex palette was located.
-- Guided multi-step flows for longer create forms and selected edit forms, with step validation, back navigation, preserved values, subtle motion, and reduced-motion support.
+- Personal settings for five themes, three font choices, three text sizes, and reduced motion, with preferences synced per user through `user_preferences` and a browser-local fallback. Profile updates and password changes are included. The interface uses an ONCF-inspired orange and warm-neutral palette; no official full hex palette was located.
+- Guided multi-step flows for longer create forms and selected edit forms, with step validation, first-invalid-field focus, back navigation, preserved values, subtle motion, and reduced-motion support.
 - Claim details and forecast program details can be edited from their existing edit routes. Workflow status remains controlled through transition actions.
 - Order create/list/detail/edit, status workflow, access rules/history, attachment endpoints, and web UI.
+- Eligible orders can be sent directly from order details into program creation. The selector excludes orders with an existing program, and the API rejects duplicate program creation.
 - Forecast program create/list/detail and lifecycle transitions, plus its API update endpoint.
 - Claim create/list/detail, lifecycle transitions, comments, and first-agent-response transition to in-progress.
 - In-app notification inbox, unread badge, and read actions. Workflow transitions and claim replies notify the record owner when another user acts; self-actions are quiet.
 - Order reports summarize accessible orders by status, customer, product, and month, with optional date bounds. The web report offers browser print/save-to-PDF without a paid service or schema change.
 - Claim comments include the author’s display name in list and creation responses.
 - Tracking API structures exist; the SDF treats full tracking as a separate lot.
+
+## Local preview verification — 2026-09-27
+
+- The signup/review flow was exercised through the running Next API proxy: an invalid customer code was rejected, valid requests remained pending until reviewed, the user detail page returned the administrator actions, approved accounts could sign in, and rejected accounts could not. Disposable applicants were deactivated after the check.
+- The order-to-program flow was exercised through the same proxy: eligible before creation, removed from the eligible selector after creation, duplicate creation rejected with 409, and restored after the temporary draft was removed.
+- The latest source passed the full pre-commit gate: 53 API suites / 388 tests, web checks, all typechecks, and production builds. This does not replace the still-pending browser screenshot pass for the updated auth and review screens.
 
 ## Incomplete for a usable MVP
 
@@ -40,7 +47,7 @@ This status describes the current repository against the project SDF and report.
 ## Recommended order
 
 1. Confirm the ICE source and maintenance owner; keep the current local-record match explicit until an authoritative registry is available.
-2. Exercise signup with valid and invalid company details, then approve and reject requests through the admin UI.
+2. Capture browser interaction and screenshots for the updated signup and administrator-review screens; the API and route smoke checks now cover valid/invalid registration and both review outcomes.
 3. Review program and claim edit rules against the pilot workflows.
 4. Add reliable notification retries and staff assignment alerts after ownership rules are reviewed.
 5. Keep API client generation on the verified Node runtime and review generated types whenever the API contract changes.
