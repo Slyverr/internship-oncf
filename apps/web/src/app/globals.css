@@ -122,6 +122,10 @@
 	padding-block: var(--spacing);
 }
 
+@utility pt-compact {
+	padding-top: var(--spacing);
+}
+
 @utility px-compact {
 	padding-inline: var(--spacing);
 }

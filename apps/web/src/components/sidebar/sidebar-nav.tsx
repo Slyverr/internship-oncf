@@ -19,7 +19,7 @@ export function SidebarNav() {
 	);
 
 	return (
-		<SidebarMenu className="py-4">
+		<SidebarMenu className="py-4 group-data-[collapsible=icon]:pt-compact">
 			{visibleRoutes.map((route) => {
 				const isActive = route.exact
 					? pathname === route.url
