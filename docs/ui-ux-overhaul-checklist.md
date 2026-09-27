@@ -45,6 +45,7 @@ Review both light and dark appearances, and both workspace layouts where the rou
 - After collapsing, the first navigation item now remains at the same vertical start as the expanded state while every 44px icon target stays centered in the 64px rail; the logo and profile retain their 16px vertical inset.
 - The notification popover keeps click, keyboard, and touch behavior; its empty/loading states use a tighter header, body, and footer rhythm while keeping the 44px footer action target.
 - Fresh settings captures at 1440×900, 390×844, and 320×640 show a fixed 768px desktop dialog and an internally scrolling phone panel with no page-level horizontal overflow. The desktop title strip was tightened by one 4px spacing step; mobile title space was already compact.
+- Auth form content now uses the shared 180ms page-entry fade and 4px rise; the existing system and user reduced-motion rules disable it.
 
 ## Working rules
 

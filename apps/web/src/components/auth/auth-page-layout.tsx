@@ -92,7 +92,7 @@ export function AuthPageLayout({ children }: { children: ReactNode }) {
 						</Link>
 					</header>
 
-					<div className="w-full">{children}</div>
+					<div className="page-enter w-full">{children}</div>
 				</section>
 			</div>
 		</main>
