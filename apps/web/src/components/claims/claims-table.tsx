@@ -12,6 +12,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { TableEmptyStateRow } from "@/components/common/table-empty-state-row";
 import { TableLoadingState } from "@/components/common/table-loading-state";
+import { TableRowLink } from "@/components/common/table-row-link";
 import { Input } from "@/components/ui/input";
 import {
 	Select,
@@ -50,9 +51,9 @@ const columns: ColumnDef<typeof features, ClaimListDto>[] = [
 		accessorKey: "id",
 		header: "Claim #",
 		cell: (info) => (
-			<span className="font-medium text-primary">
-				#{info.getValue<number>()}
-			</span>
+			<TableRowLink href={`/dashboard/claims/${info.row.original.id}`}>
+				{`#${info.getValue<number>()}`}
+			</TableRowLink>
 		),
 	},
 	{

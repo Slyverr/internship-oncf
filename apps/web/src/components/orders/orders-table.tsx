@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { TableEmptyStateRow } from "@/components/common/table-empty-state-row";
 import { TableLoadingState } from "@/components/common/table-loading-state";
+import { TableRowLink } from "@/components/common/table-row-link";
 import { Input } from "@/components/ui/input";
 import {
 	Select,
@@ -48,9 +49,9 @@ const columns: ColumnDef<typeof features, OrderListDto>[] = [
 		accessorKey: "orderNumber",
 		header: "Order #",
 		cell: (info) => (
-			<span className="font-medium text-primary">
-				{info.getValue<string | null>() ?? "—"}
-			</span>
+			<TableRowLink href={`/dashboard/orders/${info.row.original.id}`}>
+				{info.getValue<string | null>() ?? `Order #${info.row.original.id}`}
+			</TableRowLink>
 		),
 	},
 	{

@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { TableEmptyStateRow } from "@/components/common/table-empty-state-row";
 import { TableLoadingState } from "@/components/common/table-loading-state";
+import { TableRowLink } from "@/components/common/table-row-link";
 import { Input } from "@/components/ui/input";
 import {
 	Select,
@@ -54,9 +55,9 @@ const columns: ColumnDef<typeof features, ProgramListDto>[] = [
 		accessorKey: "programNumber",
 		header: "Program #",
 		cell: (info) => (
-			<span className="font-medium text-primary">
+			<TableRowLink href={`/dashboard/programs/${info.row.original.id}`}>
 				{info.getValue<string>()}
-			</span>
+			</TableRowLink>
 		),
 		enableSorting: true,
 	},
@@ -216,18 +217,10 @@ export function ProgramsTable({ data, isLoading }: ProgramsTableProps) {
 							table.getRowModel().rows.map((row) => (
 								<TableRow
 									key={row.id}
-									role="link"
-									tabIndex={0}
-									className="cursor-pointer transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+									className="cursor-pointer"
 									onClick={() =>
 										router.push(`/dashboard/programs/${row.original.id}`)
 									}
-									onKeyDown={(event) => {
-										if (event.key === "Enter" || event.key === " ") {
-											event.preventDefault();
-											router.push(`/dashboard/programs/${row.original.id}`);
-										}
-									}}
 								>
 									{row.getAllCells().map((cell) => (
 										<TableCell key={cell.id}>
