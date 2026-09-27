@@ -7,5 +7,6 @@ Use these documents as the maintained guide to the repository:
 - [Web design system](design-system.md) — spacing, typography, responsive layouts, shell behavior, and interaction details.
 - [MVP readiness](mvp-readiness.md) — implemented user flows, known gaps, and remaining work toward the MVP.
 - [Authorization matrix](authorization-matrix.md) — role grants, API permissions, ownership scope, and web visibility.
+- [UI/UX overhaul checklist](ui-ux-overhaul-checklist.md) — route-level visual review scope, requested improvements, and screenshot coverage.
 
 Keep this index updated when adding or removing maintained project documentation. Use English for maintained documentation and link to the most specific guide from `AGENTS.md` or the root README when contributors need it.
