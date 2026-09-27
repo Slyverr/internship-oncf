@@ -47,7 +47,7 @@ export function GuidedFormProgress({
 					className="h-2 overflow-hidden rounded-full bg-muted"
 				>
 					<span
-						className="block h-full rounded-full bg-primary transition-[width] duration-300 motion-reduce:transition-none"
+						className="block h-full rounded-full bg-primary transition-[width] duration-200 motion-reduce:transition-none"
 						style={{ width: `${progress}%` }}
 					/>
 				</div>
@@ -119,12 +119,22 @@ export function GuidedFormActions({
 
 	return (
 		<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-			<Button type="button" variant="outline" onClick={onCancel}>
+			<Button
+				type="button"
+				variant="outline"
+				className="w-full sm:w-auto"
+				onClick={onCancel}
+			>
 				Cancel
 			</Button>
-			<div className="flex w-full justify-end gap-4 sm:w-auto">
+			<div className="grid w-full grid-cols-[auto_1fr] gap-4 sm:ml-auto sm:flex sm:w-auto sm:justify-end">
 				{currentStep > 0 ? (
-					<Button type="button" variant="outline" onClick={onPrevious}>
+					<Button
+						type="button"
+						variant="outline"
+						className="w-full sm:w-auto"
+						onClick={onPrevious}
+					>
 						<ArrowLeft />
 						Back
 					</Button>
@@ -132,6 +142,11 @@ export function GuidedFormActions({
 				{isLastStep ? (
 					<Button
 						type="submit"
+						className={
+							currentStep === 0
+								? "col-span-2 w-full sm:col-span-1 sm:w-auto"
+								: "w-full sm:w-auto"
+						}
 						disabled={isPending || isSubmitting || isSubmitDisabled}
 					>
 						{isPending || isSubmitting ? pendingLabel : submitLabel}
@@ -139,6 +154,11 @@ export function GuidedFormActions({
 				) : (
 					<Button
 						type="button"
+						className={
+							currentStep === 0
+								? "col-span-2 w-full sm:col-span-1 sm:w-auto"
+								: "w-full sm:w-auto"
+						}
 						onClick={(event) => {
 							event.preventDefault();
 							event.stopPropagation();
