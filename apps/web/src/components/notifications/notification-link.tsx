@@ -134,18 +134,21 @@ export function NotificationLink() {
 										const href = entityLink(item);
 										const content = (
 											<>
-												{!item.readAt && (
-													<span
-														className="mt-2 size-2 shrink-0 rounded-full bg-primary"
-														aria-label="Unread"
-														role="img"
-													/>
-												)}
+												<span
+													className={
+														item.readAt
+															? "mt-2 size-2 shrink-0 rounded-full bg-transparent"
+															: "mt-2 size-2 shrink-0 rounded-full bg-primary"
+													}
+													aria-hidden={item.readAt ? true : undefined}
+													aria-label={!item.readAt ? "Unread" : undefined}
+													role="img"
+												/>
 												<span className="min-w-0 flex-1 py-3">
 													<span className="block truncate text-sm font-semibold leading-5">
 														{item.title}
 													</span>
-													<span className="mt-1 line-clamp-2 block text-meta text-muted-foreground">
+													<span className="mt-1 line-clamp-2 text-meta text-muted-foreground">
 														{item.message}
 													</span>
 													<time

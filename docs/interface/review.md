@@ -38,6 +38,12 @@ The review covers all user-facing route families:
 - Centered-header screenshots at 390, 768, 1440, 2560, and 3840px show a sticky 64px header on desktop, a 117px two-row header at phone/tablet widths, and no horizontal page overflow. Its surface uses bottom-only rounding; the upper edge stays flat. Content remains in the centered 1536px column at 2K/4K.
 - I restored Warm light + Sidebar after the interaction pass and confirmed those values were synced; no profile, password, or business data was changed. Font, text-size, and motion preference persistence still need individual interaction checks.
 
+## Notification item interaction pass — 2026-09-27
+
+- Fresh populated captures at 390px and 1440px show mixed read/unread rows inside the anchored popover, with no page-level horizontal overflow. Row titles align even when the unread marker is absent, and message previews clamp to two lines. Each unread action keeps a 44px target.
+- With browser-only mock responses, marking one item read removed its unread marker and updated the bell count; Mark all read removed both unread actions and set the count to zero. Escape closed the menu and returned focus to the bell. Mock mutation requests were intercepted before reaching the API; no database records changed.
+- This verifies the client interaction contract and visuals. A populated API-backed notification record and backend mutation test remain unverified.
+
 ## Assessment round 1: visual hierarchy and reading comfort
 
 **Source-confirmed findings**
