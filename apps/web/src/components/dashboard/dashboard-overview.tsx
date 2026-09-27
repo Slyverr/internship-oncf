@@ -82,25 +82,25 @@ function RecentSection({
 							<li key={item.id}>
 								<Link
 									href={item.href}
-									className="flex items-center justify-between gap-4 py-4 first:pt-0 last:pb-0 hover:text-primary"
+									className="grid min-w-0 gap-2 py-4 first:pt-0 last:pb-0 hover:text-primary"
 								>
-									<span className="grid min-w-0 gap-compact">
-										<span className="block truncate font-medium">
+									<span className="flex min-w-0 items-center justify-between gap-2">
+										<span className="block min-w-0 truncate font-medium">
 											{item.title}
 										</span>
-										<span className="block truncate text-sm text-muted-foreground">
-											{item.description}
-										</span>
-									</span>
-									<span className="flex shrink-0 flex-col items-end gap-compact">
 										{item.status && (
-											<Badge variant="outline" className="capitalize">
+											<Badge variant="outline" className="shrink-0 capitalize">
 												{item.status.toLowerCase().replaceAll("_", " ")}
 											</Badge>
 										)}
+									</span>
+									<span className="flex min-w-0 items-center justify-between gap-2">
+										<span className="block min-w-0 truncate text-sm text-muted-foreground">
+											{item.description}
+										</span>
 										<time
 											dateTime={item.date}
-											className="text-meta text-muted-foreground"
+											className="shrink-0 text-meta text-muted-foreground"
 										>
 											{new Intl.DateTimeFormat(undefined, {
 												dateStyle: "medium",
@@ -123,6 +123,14 @@ export function DashboardOverview() {
 	const canReadOrders = hasPermission(Permission.ORDERS_READ);
 	const canReadPrograms = hasPermission(Permission.PROGRAMS_READ);
 	const canReadClaims = hasPermission(Permission.CLAIMS_READ);
+	const recentSectionCount =
+		Number(canReadOrders) + Number(canReadPrograms) + Number(canReadClaims);
+	const recentGridColumns =
+		recentSectionCount === 3
+			? "xl:grid-cols-3"
+			: recentSectionCount === 2
+				? "xl:grid-cols-2"
+				: "grid-cols-1";
 
 	const ordersQuery = useOrdersControllerFindAll(
 		{ sortBy: "createdAt", sortOrder: "desc" },
@@ -195,7 +203,7 @@ export function DashboardOverview() {
 	].filter(Boolean);
 
 	return (
-		<section className="grid gap-8">
+		<section className="mx-auto grid w-full max-w-screen-2xl min-w-0 gap-6">
 			<PageHeader
 				title={`Welcome back, ${profile.firstName}`}
 				description="Here is a snapshot of recent activity in ECommand."
@@ -215,7 +223,7 @@ export function DashboardOverview() {
 			</PageHeader>
 
 			{sections.length > 0 ? (
-				<div className="grid gap-4 xl:grid-cols-2">{sections}</div>
+				<div className={`grid gap-4 ${recentGridColumns}`}>{sections}</div>
 			) : (
 				<Card>
 					<CardContent className="flex items-center gap-4 py-8">
