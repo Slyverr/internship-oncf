@@ -108,10 +108,7 @@ export function SettingsPanel() {
 
 	return (
 		<div className="grid max-w-5xl gap-6">
-			<nav
-				aria-label="Settings sections"
-				className="flex gap-4 overflow-x-auto pb-4"
-			>
+			<nav aria-label="Settings sections" className="flex flex-wrap gap-4 pb-4">
 				<a
 					className="shrink-0 rounded-md border px-4 py-4 text-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 					href="#appearance"
