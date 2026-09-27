@@ -2,7 +2,6 @@
 
 import { OrderStatus, Permission } from "@ecommand/shared";
 import { useQueryClient } from "@tanstack/react-query";
-import { isAxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import {
@@ -26,6 +25,7 @@ import {
 	useOrdersControllerUpdate,
 } from "@/lib/api/orders";
 import { toDateInputValue } from "@/lib/date-utils";
+import { getFormErrorMessage } from "@/lib/form-utils";
 import { useAuth } from "@/providers/auth-provider";
 
 const ORDER_QUANTITY_PATTERN = /^\d+(\.\d{1,3})?$/;
@@ -167,20 +167,11 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 			});
 
 			router.refresh();
-		} catch (cause) {
-			const message: unknown = isAxiosError(cause)
-				? cause.response?.data?.message
-				: undefined;
-
+		} catch (error) {
 			toast.add({
 				type: "error",
 				title: "Could not save order",
-				description:
-					typeof message === "string"
-						? message
-						: Array.isArray(message)
-							? message.join(". ")
-							: "Please try again.",
+				description: getFormErrorMessage(error) ?? "Please try again.",
 			});
 		}
 	}

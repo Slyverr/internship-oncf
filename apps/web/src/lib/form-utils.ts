@@ -1,11 +1,32 @@
+function getMessage(value: unknown): string | undefined {
+	if (typeof value === "string") return value;
+	if (Array.isArray(value)) {
+		const messages = value.filter(
+			(item): item is string => typeof item === "string",
+		);
+		return messages.length > 0 ? messages.join(". ") : undefined;
+	}
+	return undefined;
+}
+
+function getProperty(value: unknown, key: string): unknown {
+	if (typeof value !== "object" || value === null || !(key in value)) {
+		return undefined;
+	}
+	return (value as Record<string, unknown>)[key];
+}
+
 export function getFormErrorMessage(error: unknown): string | undefined {
 	if (!error) return undefined;
-	if (typeof error === "string") return error;
-	if (typeof error === "object" && "message" in error) {
-		const message = (error as { message?: unknown }).message;
-		if (typeof message === "string") return message;
-	}
-	return String(error);
+	const responseMessage = getProperty(
+		getProperty(getProperty(error, "response"), "data"),
+		"message",
+	);
+	return (
+		getMessage(responseMessage) ??
+		getMessage(getProperty(error, "message")) ??
+		String(error)
+	);
 }
 
 export function getFormStepErrors(
