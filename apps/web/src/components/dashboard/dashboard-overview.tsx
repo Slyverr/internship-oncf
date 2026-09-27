@@ -1,13 +1,17 @@
 "use client";
 
 import { Permission } from "@ecommand/shared";
+import { useQuery } from "@tanstack/react-query";
 import {
 	ArrowRightIcon,
 	ClipboardListIcon,
+	LoaderCircleIcon,
 	PackageIcon,
 	PlusIcon,
+	RefreshCwIcon,
 } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 import { PageHeader } from "@/components/common/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -26,6 +30,7 @@ import {
 	useOrdersControllerFindEligibleForPrograms,
 } from "@/lib/api/orders";
 import { useProgramsControllerFindAll } from "@/lib/api/programs";
+import { getOrderReport } from "@/lib/reports";
 import { useAuth } from "@/providers/auth-provider";
 
 interface DashboardItem {
@@ -211,6 +216,141 @@ function ReadyOrdersSection({
 	);
 }
 
+function getRecentOrderPeriod() {
+	const today = new Date();
+	const firstMonth = new Date(
+		Date.UTC(today.getUTCFullYear(), today.getUTCMonth() - 5, 1),
+	);
+
+	return {
+		from: firstMonth.toISOString().slice(0, 10),
+		to: today.toISOString().slice(0, 10),
+	};
+}
+
+function getRecentOrderMonths(
+	from: string,
+	byMonth: { month: string; count: number }[],
+) {
+	const firstMonth = new Date(`${from.slice(0, 7)}-01T00:00:00.000Z`);
+	const counts = new Map(byMonth.map(({ month, count }) => [month, count]));
+
+	return Array.from({ length: 6 }, (_, index) => {
+		const month = new Date(
+			Date.UTC(
+				firstMonth.getUTCFullYear(),
+				firstMonth.getUTCMonth() + index,
+				1,
+			),
+		);
+		const key = month.toISOString().slice(0, 7);
+
+		return {
+			key,
+			label: new Intl.DateTimeFormat(undefined, {
+				month: "short",
+				timeZone: "UTC",
+			}).format(month),
+			count: counts.get(key) ?? 0,
+		};
+	});
+}
+
+function OrderActivitySection() {
+	const [period] = useState(getRecentOrderPeriod);
+	const report = useQuery({
+		queryKey: ["dashboard-order-activity", period],
+		queryFn: () => getOrderReport(period),
+	});
+	const months = getRecentOrderMonths(period.from, report.data?.byMonth ?? []);
+	const maxCount = Math.max(1, ...months.map(({ count }) => count));
+
+	return (
+		<Card size="sm">
+			<CardHeader>
+				<div className="flex flex-wrap items-center justify-between gap-control">
+					<div className="grid min-w-0 gap-compact">
+						<CardTitle>Order activity</CardTitle>
+						<CardDescription>Orders from the past six months.</CardDescription>
+					</div>
+					<div className="grid shrink-0 text-right">
+						<span className="text-meta text-muted-foreground">
+							Six-month total
+						</span>
+						<span className="text-3xl font-semibold tabular-nums">
+							{report.data?.totalOrders ?? "—"}
+						</span>
+					</div>
+				</div>
+			</CardHeader>
+			<CardContent>
+				{report.isPending ? (
+					<div
+						role="status"
+						className="flex h-32 items-center justify-center gap-control text-sm text-muted-foreground"
+					>
+						<LoaderCircleIcon
+							aria-hidden="true"
+							className="size-4 animate-spin motion-reduce:animate-none"
+						/>
+						Loading order activity…
+					</div>
+				) : report.isError ? (
+					<div
+						role="alert"
+						className="flex min-h-32 flex-wrap items-center justify-between gap-control"
+					>
+						<p className="text-sm text-destructive">
+							Could not load order activity.
+						</p>
+						<Button
+							variant="outline"
+							disabled={report.isFetching}
+							onClick={() => void report.refetch()}
+						>
+							{report.isFetching ? (
+								<LoaderCircleIcon
+									aria-hidden="true"
+									className="animate-spin motion-reduce:animate-none"
+								/>
+							) : (
+								<RefreshCwIcon aria-hidden="true" />
+							)}
+							{report.isFetching ? "Retrying…" : "Retry"}
+						</Button>
+					</div>
+				) : report.data.totalOrders === 0 ? (
+					<div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
+						No orders in this period.
+					</div>
+				) : (
+					<div
+						role="img"
+						aria-label={`Monthly order counts for the past six months: ${months.map(({ label, count }) => `${label} ${count}`).join(", ")}`}
+						className="grid grid-cols-6 items-end gap-control"
+					>
+						{months.map(({ key, label, count }) => (
+							<div key={key} className="grid min-w-0 gap-compact text-center">
+								<span className="text-meta tabular-nums text-muted-foreground">
+									{count}
+								</span>
+								<div className="flex h-24 items-end justify-center border-b border-border/70">
+									<div
+										aria-hidden="true"
+										className={`w-1/2 rounded-t-sm bg-primary ${count > 0 ? "min-h-2" : ""}`}
+										style={{ height: `${(count / maxCount) * 100}%` }}
+									/>
+								</div>
+								<span className="text-xs text-muted-foreground">{label}</span>
+							</div>
+						))}
+					</div>
+				)}
+			</CardContent>
+		</Card>
+	);
+}
+
 export function DashboardOverview() {
 	const { profile, hasPermission } = useAuth();
 	const quickActions = getDashboardQuickActions(hasPermission);
@@ -220,6 +360,7 @@ export function DashboardOverview() {
 	const canReadPrograms = hasPermission(Permission.PROGRAMS_READ);
 	const canReadClaims = hasPermission(Permission.CLAIMS_READ);
 	const canCreateClaims = hasPermission(Permission.CLAIMS_CREATE);
+	const canReadReports = hasPermission(Permission.REPORTS_READ);
 	const recentSectionCount =
 		Number(canReadOrders) + Number(canReadPrograms) + Number(canReadClaims);
 	const recentGridColumns =
@@ -354,6 +495,7 @@ export function DashboardOverview() {
 					onRetry={() => void readyOrdersQuery.refetch()}
 				/>
 			)}
+			{canReadReports && <OrderActivitySection />}
 
 			{sections.length > 0 ? (
 				<div className={`grid gap-4 ${recentGridColumns}`}>{sections}</div>
