@@ -94,6 +94,10 @@
 	padding: var(--spacing-control);
 }
 
+@utility p-compact {
+	padding: var(--spacing);
+}
+
 @utility px-control {
 	padding-inline: var(--spacing-control);
 }
