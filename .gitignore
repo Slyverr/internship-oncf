@@ -26,6 +26,7 @@ coverage
 
 # Build Outputs
 .next/
+apps/web/.next-verify/
 out/
 build
 dist

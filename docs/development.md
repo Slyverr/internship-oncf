@@ -92,6 +92,9 @@ For disposable local development only, Drizzle `db:push` can synchronize the cur
 
 ## Verification
 
+- Before each commit, run `bun run verify:commit`. It runs repository formatting/linting, workspace typechecks, all API tests, the web test suite, and production builds; it stops at the first failure.
+- The web build check uses Webpack and an ignored `.next-verify` output folder so it can run beside `next dev` without replacing the development build. The gate uses Node when it is on `PATH` and falls back to Bun otherwise; pass a runtime path after `--` to choose explicitly: `bun run verify:commit -- /path/to/node`.
+- To have Git run the same gate automatically before each commit, set the repository hook path once with `git config core.hooksPath .githooks`.
 - Run `bun run typecheck` after TypeScript changes.
 - Run the relevant API tests for changed business behavior when tests exist and verification is requested/needed.
 - Run `bun run build` to verify production compilation when a broad UI/API change warrants it.

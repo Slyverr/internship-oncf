@@ -43,6 +43,8 @@ The current database design needs review and is expected to change, so migration
 - Match the existing history: use app/domain scopes such as `feat(web/orders): add draft editing`, `fix(api/orders): validate draft updates`, and `refactor(api/auth): extract database queries`. Use `shared/auth`, `api/drizzle`, or `config/turbo` for those areas. Use an app-only scope for changes across features in one app, and omit the scope for repository-wide changes such as `docs: document project setup`.
 - Use an imperative, lowercase subject with no trailing period. Valid types include `feat`, `fix`, `refactor`, `chore`, and `docs`.
 - Do not commit secrets, local `.env` files, generated local mail, uploads, or database data.
+- Run `bun run verify:commit` successfully before every commit. The command checks formatting/linting, workspace typechecks, API and web test suites, and production builds; it stops on the first failure.
+- The tracked `.githooks/pre-commit` hook runs the same gate. Enable it for this checkout with `git config core.hooksPath .githooks` when Git hooks are available.
 
 ## Verification and reporting
 

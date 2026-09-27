@@ -6,7 +6,8 @@
 		"dev": "turbo run dev",
 		"typecheck": "turbo run typecheck",
 		"format-and-lint": "biome check .",
-		"format-and-lint:fix": "biome check . --write"
+		"format-and-lint:fix": "biome check . --write",
+		"verify:commit": "\"$npm_execpath\" scripts/verify-commit.ts"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.5.5",
