@@ -68,7 +68,7 @@ export function ClientRegistrationForm() {
 						your request before you can sign in.
 					</p>
 				</header>
-				<div className="grid gap-4 px-4 sm:grid-cols-2">
+				<div className="grid items-start gap-4 px-4 sm:grid-cols-2">
 					{submitted ? (
 						<div
 							role="status"

@@ -32,7 +32,7 @@ Review both light and dark appearances, and both workspace layouts where the rou
 - Centered phone navigation now separates account actions from section links, keeps the active route visible, and reserves a stable breadcrumb slot.
 - Guided form columns share a consistent maximum width and page-level headings.
 - The settings dialog keeps a fixed footprint; appearance choices now fit compactly on common phone widths and avoid clipping at 320px.
-- Login and registration now use a flat form surface inside the shared auth layout, with the repeated login explanation and nested form cards removed. The ONCF mark fits fully; fresh captures at 320, 390, 768, 1440, 2560, and 3840px showed no horizontal overflow. Registration keeps readable grouped fields on desktop and stacks them at phone width.
+- Login and registration now use a flat form surface inside the shared auth layout, with the repeated login explanation and nested form cards removed. The ONCF mark fits fully; fresh captures at 320, 390, 768, 1440, 2560, and 3840px showed no horizontal overflow. Registration keeps readable grouped fields on desktop and stacks them at phone width; the password and confirmation controls now align despite the password hint. Fresh captures at 390 and 1440px confirmed matching control tops and no horizontal overflow.
 - Order creation now centers in the available workspace, filling the regular 5xl form column and expanding to 7xl only in very wide workspaces. Fresh authenticated captures at 390, 768, 1440, and 2560px had no horizontal overflow; the form measured 358px on phone, 464px on tablet, 1024px on laptop, and 1280px on the wide display.
 
 ## Working rules
