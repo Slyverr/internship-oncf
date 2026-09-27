@@ -11,12 +11,12 @@ This status describes the current repository against the project SDF and report.
 - Public client signup checks the submitted customer code and ICE against an active local customer record, creates an inactive client-representative account in `PENDING` status, and blocks sign-in until an administrator approves it. Administrators can approve or reject pending requests from the user detail screen.
 - The development seed includes a synthetic customer record for exercising the signup and review flow locally; its ICE value is explicitly test-only.
 - Password recovery/reset UI and API. SMTP delivery is available when configured; local development uses git-ignored `.eml` messages otherwise.
-- Permission-aware dashboard with recent orders, forecast programs, and claims for sections the signed-in user can read. Create order and Create claim shortcuts beside the greeting appear only when the user's effective permissions allow them; program creation remains tied to an eligible order detail.
+- Permission-aware dashboard with recent orders, forecast programs, and claims for sections the signed-in user can read. Create order and Create claim shortcuts beside the greeting appear only when the user's effective permissions allow them. Eligible orders are surfaced as direct program-creation actions only for users who can read orders and create programs.
 - Personal settings for five themes, three font choices, three text sizes, and reduced motion, with preferences synced per user through `user_preferences` and a browser-local fallback. Profile updates and password changes are included. The interface uses an ONCF-inspired orange and warm-neutral palette; no official full hex palette was located.
 - Guided multi-step flows for longer create forms and selected edit forms, with step validation, first-invalid-field focus, back navigation, preserved values, subtle motion, and reduced-motion support.
 - Claim details and forecast program details can be edited from their existing edit routes. Workflow status remains controlled through transition actions.
 - Order create/list/detail/edit, status workflow, access rules/history, attachment endpoints, and web UI.
-- Eligible orders can be sent directly from order details into program creation. The selector excludes orders with an existing program, and the API rejects duplicate program creation.
+- Eligible orders can be sent directly from the dashboard or order details into program creation. The selector excludes orders with an existing program, and the API rejects duplicate program creation.
 - Forecast program create/list/detail and lifecycle transitions, plus its API update endpoint.
 - Claim create/list/detail, lifecycle transitions, comments, and first-agent-response transition to in-progress.
 - In-app notification inbox, unread badge, and read actions. Workflow transitions and claim replies notify the record owner when another user acts; self-actions are quiet.
