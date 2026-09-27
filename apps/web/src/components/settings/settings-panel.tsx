@@ -421,6 +421,7 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 								<Input
 									id="settings-first-name"
 									value={firstName}
+									placeholder="e.g. Samira"
 									autoComplete="given-name"
 									required
 									onChange={(event) => {
@@ -434,6 +435,7 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 								<Input
 									id="settings-last-name"
 									value={lastName}
+									placeholder="e.g. El Amrani"
 									autoComplete="family-name"
 									required
 									onChange={(event) => {
@@ -448,6 +450,7 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 									id="settings-email"
 									type="email"
 									value={email}
+									placeholder="name@company.com"
 									autoComplete="email"
 									required
 									onChange={(event) => {

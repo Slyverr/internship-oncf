@@ -141,6 +141,7 @@ export function ClaimEditForm({ claim }: { claim: ClaimDetailDto }) {
 						<Label htmlFor="description">Description</Label>
 						<Textarea
 							id="description"
+							placeholder="Describe the issue and its impact."
 							value={description}
 							onChange={(event) => setDescription(event.target.value)}
 							minLength={10}

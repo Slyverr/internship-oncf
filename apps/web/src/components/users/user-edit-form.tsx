@@ -191,6 +191,7 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 									<Input
 										id="email"
 										type="email"
+										placeholder="name@company.com"
 										value={field.state.value}
 										onChange={(e) => {
 											field.handleChange(e.target.value);
@@ -290,6 +291,7 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 									/>
 									<Input
 										id="firstName"
+										placeholder="e.g. Samira"
 										value={field.state.value}
 										onChange={(e) => {
 											field.handleChange(e.target.value);
@@ -321,6 +323,7 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 									/>
 									<Input
 										id="lastName"
+										placeholder="e.g. El Amrani"
 										value={field.state.value}
 										onChange={(e) => {
 											field.handleChange(e.target.value);
@@ -376,6 +379,7 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 								<Label htmlFor="employeeId">Employee ID</Label>
 								<Input
 									id="employeeId"
+									placeholder="Employee ID"
 									value={field.state.value ?? ""}
 									onChange={(e) => field.handleChange(e.target.value)}
 								/>

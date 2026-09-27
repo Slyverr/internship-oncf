@@ -136,6 +136,7 @@ export function CustomerEditForm({
 									/>
 									<Input
 										id="companyName"
+										placeholder="Company name"
 										value={field.state.value}
 										onChange={(e) => {
 											field.handleChange(e.target.value);
@@ -158,6 +159,7 @@ export function CustomerEditForm({
 								<Label htmlFor="customerCode">Customer Code</Label>
 								<Input
 									id="customerCode"
+									placeholder="Customer code"
 									value={field.state.value ?? ""}
 									onChange={(e) => field.handleChange(e.target.value)}
 								/>
@@ -226,6 +228,7 @@ export function CustomerEditForm({
 									<Input
 										id="email"
 										type="email"
+										placeholder="name@company.com"
 										value={field.state.value ?? ""}
 										onChange={(e) => field.handleChange(e.target.value)}
 										className={
@@ -245,6 +248,7 @@ export function CustomerEditForm({
 								<Label htmlFor="phone">Phone Number</Label>
 								<Input
 									id="phone"
+									placeholder="e.g. +212 6 12 34 56 78"
 									value={field.state.value ?? ""}
 									onChange={(e) => field.handleChange(e.target.value)}
 								/>
@@ -258,6 +262,7 @@ export function CustomerEditForm({
 								<Label htmlFor="address">Street Address</Label>
 								<Input
 									id="address"
+									placeholder="Street address"
 									value={field.state.value ?? ""}
 									onChange={(e) => field.handleChange(e.target.value)}
 								/>
@@ -271,6 +276,7 @@ export function CustomerEditForm({
 								<Label htmlFor="city">City</Label>
 								<Input
 									id="city"
+									placeholder="e.g. Casablanca"
 									value={field.state.value ?? ""}
 									onChange={(e) => field.handleChange(e.target.value)}
 								/>

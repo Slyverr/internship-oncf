@@ -109,6 +109,7 @@ export function ClientRegistrationForm() {
 								<Input
 									id="registration-first-name"
 									value={firstName}
+									placeholder="e.g. Samira"
 									autoComplete="given-name"
 									required
 									maxLength={100}
@@ -120,6 +121,7 @@ export function ClientRegistrationForm() {
 								<Input
 									id="registration-last-name"
 									value={lastName}
+									placeholder="e.g. El Amrani"
 									autoComplete="family-name"
 									required
 									maxLength={100}
@@ -167,6 +169,7 @@ export function ClientRegistrationForm() {
 									id="registration-email"
 									value={email}
 									type="email"
+									placeholder="name@company.com"
 									autoComplete="email"
 									required
 									maxLength={100}

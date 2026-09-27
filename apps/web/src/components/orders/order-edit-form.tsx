@@ -229,6 +229,7 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 							<Input
 								id="quantityDemanded"
 								inputMode="decimal"
+								placeholder="e.g. 500"
 								required
 								value={values.quantityDemanded}
 								onChange={(event) =>
@@ -248,6 +249,7 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 							<Input
 								id="supervisor"
 								maxLength={200}
+								placeholder="Name of supervisor"
 								value={values.supervisor}
 								onChange={(event) => change("supervisor", event.target.value)}
 							/>
@@ -281,6 +283,7 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 							<Label htmlFor="remarks">Remarks</Label>
 							<Textarea
 								id="remarks"
+								placeholder="Add any delivery or handling instructions."
 								value={values.remarks}
 								onChange={(event) => change("remarks", event.target.value)}
 							/>

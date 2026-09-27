@@ -109,6 +109,7 @@ export function ProgramEditForm({ program }: { program: ProgramDetailDto }) {
 						<Input
 							id="quantityPlanned"
 							inputMode="decimal"
+							placeholder="e.g. 500"
 							value={quantityPlanned}
 							onChange={(event) => setQuantityPlanned(event.target.value)}
 							required
