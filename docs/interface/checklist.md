@@ -16,7 +16,7 @@ This is the running review list for the application-wide usability and visual ov
 | 8 | Dashboard content | Replace the sparse three-panel impression with useful role- and permission-aware metrics, trends, and prioritized next actions based on available data. Surface eligible order-to-program actions without bypassing server rules. | In progress |
 | 9 | Workspace width consistency | Compare dashboard and all inner routes under both shell layouts at laptop through 4K widths. Use one shared content-width rule per shell and prevent unexplained route-specific centering. | Complete |
 | 10 | Table density | Review header, row, cell padding, wrapping, and phone overflow. Add a user-controlled density preference only if the responsive behavior still benefits from it. | Complete |
-| 11 | Appearance options | Keep themes, fonts, text scale, motion, and layouts extensible and understandable. Review whether a bounded text-scale control is more useful than only three presets; retain sensible defaults and database sync. | To review |
+| 11 | Appearance options | Keep themes, fonts, text scale, motion, and layouts extensible and understandable. Review whether a bounded text-scale control is more useful than only three presets; retain sensible defaults and database sync. | In progress |
 | 12 | Notifications | Review trigger, panel size, spacing, typography, empty/loading states, action reachability, and dismissal behavior on touch and desktop. Keep keyboard access; do not make hover the only way to open it. | In progress |
 | 13 | Sidebar inset details | Recheck collapsed-state padding and the relationship between logo, navigation, profile, and shell breadcrumbs after alignment changes. | Complete |
 | 14 | Shared visual styles | Inventory repeated card, control, field, table, and dialog classes. Extract stable patterns into named utilities or shared components where that improves consistency without hiding feature-specific behavior. | Complete |
@@ -25,6 +25,7 @@ This is the running review list for the application-wide usability and visual ov
 
 - Fresh auth captures at 320, 390, 768, 1440, 2560, and 3840px show centered forms and no horizontal overflow. The signup step transition was checked with temporary values: required fields gate Continue, Back preserves company fields, and password/confirmation feedback updates. No registration request was sent.
 - Fresh Settings dialog captures at the same widths show a stable 1120×768 desktop footprint and internal scrolling on a 320px phone, with no horizontal overflow. Profile and Security tabs remain available. Theme persistence, profile/security save states, reset-password routes, and Settings in dark/monochrome modes remain open.
+- The Settings controls were exercised: changing Warm light → Charcoal dark and Sidebar → Centered icon bar applied on the live shell and reported account sync after navigation. Both settings were restored to Warm light + Sidebar. Centered-header captures at 390, 768, 1440, 2560, and 3840px confirm sticky behavior and no page overflow. Font, text-size, and motion persistence remain open.
 
 ## Screenshot coverage
 
