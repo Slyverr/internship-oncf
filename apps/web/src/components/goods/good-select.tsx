@@ -1,5 +1,7 @@
 "use client";
 
+import { LoaderCircleIcon, RefreshCwIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
 	Select,
 	SelectContent,
@@ -19,6 +21,8 @@ export function GoodSelect({ value, onChange }: GoodSelectProps) {
 		data: catalogGoods,
 		isLoading,
 		isError,
+		isFetching,
+		refetch,
 	} = useCatalogControllerFindGoods();
 
 	const goods = (catalogGoods ?? []).filter(
@@ -50,9 +54,31 @@ export function GoodSelect({ value, onChange }: GoodSelectProps) {
 			</Select>
 
 			{isError && (
-				<p role="alert" className="text-sm text-destructive">
-					Could not load goods. Please try again.
-				</p>
+				<div
+					role="alert"
+					aria-busy={isFetching}
+					className="flex flex-col items-start gap-3"
+				>
+					<p className="text-sm text-destructive">
+						Could not load goods. Check your connection and retry.
+					</p>
+					<Button
+						type="button"
+						variant="outline"
+						disabled={isFetching}
+						onClick={() => void refetch()}
+					>
+						{isFetching ? (
+							<LoaderCircleIcon
+								aria-hidden="true"
+								className="animate-spin motion-reduce:animate-none"
+							/>
+						) : (
+							<RefreshCwIcon aria-hidden="true" />
+						)}
+						{isFetching ? "Retrying…" : "Retry goods"}
+					</Button>
+				</div>
 			)}
 		</div>
 	);
