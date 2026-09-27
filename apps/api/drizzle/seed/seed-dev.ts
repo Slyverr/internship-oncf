@@ -212,6 +212,13 @@ async function seed() {
 				email: "contact@ceralog.ma",
 				customerCode: "CLI014",
 			},
+			{
+				companyName: "ECommand Local Signup Test",
+				address: "Local development only",
+				city: "Casablanca",
+				customerCode: "LOCAL-REG-TEST",
+				ice: "000000000000000",
+			},
 		];
 
 		const customerType = await db.query.customerTypes.findFirst({

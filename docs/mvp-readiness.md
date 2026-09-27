@@ -9,6 +9,7 @@ This status describes the current repository against the project SDF and report.
 - Authentication, JWT-backed sessions, logout, password change, session revocation, account lock checks, and role/permission/ownership enforcement.
 - User and customer CRUD APIs and screens. Customer records store the customer code and ICE used by client signup.
 - Public client signup checks the submitted customer code and ICE against an active local customer record, creates an inactive client-representative account in `PENDING` status, and blocks sign-in until an administrator approves it. Administrators can approve or reject pending requests from the user detail screen.
+- The development seed includes a synthetic customer record for exercising the signup and review flow locally; its ICE value is explicitly test-only.
 - Password recovery/reset UI and API. SMTP delivery is available when configured; local development uses git-ignored `.eml` messages otherwise.
 - Permission-aware dashboard with recent orders, forecast programs, and claims for sections the signed-in user can read.
 - Personal settings for browser-local theme selection (system, light, and dark), profile updates, and password changes. The interface uses an ONCF-inspired orange and warm-neutral palette; no official full hex palette was located.

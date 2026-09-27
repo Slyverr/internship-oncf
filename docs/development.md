@@ -32,6 +32,8 @@ bun run generate:api
 
 For local password-recovery testing, omit SMTP settings, submit the forgot-password form for a seeded account, and open the newest `.eml` file under `apps/api/.local-mailbox` (or the configured `LOCAL_MAILBOX_PATH`). With an SMTP provider, configure `SMTP_HOST` and `SMTP_FROM`; configure `SMTP_USER` and `SMTP_PASSWORD` together when authentication is required.
 
+For local client-registration testing, run `bun run seed` from `apps/api`, then register at `/signup` with customer code `LOCAL-REG-TEST` and ICE `000000000000000`. These belong to a synthetic development-only customer and are not real business identifiers. The request appears in Dashboard → Users; open it to approve or reject the account. This checks a match against the local customer record, not an external registry.
+
 ## Naming and language
 
 - Use **ECommand** in human-facing product text. The hyphenated French spelling is not used in UI or documentation.
