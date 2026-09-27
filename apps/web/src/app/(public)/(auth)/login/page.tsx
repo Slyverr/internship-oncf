@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect } from "react";
+import { AuthPageLayout } from "@/components/auth/auth-page-layout";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -32,7 +33,7 @@ export default function Page() {
 	}, [state, router]);
 
 	return (
-		<div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 p-4 dark:bg-black">
+		<AuthPageLayout>
 			<Card className="w-full max-w-sm">
 				<form action={action}>
 					<CardHeader className="space-y-2 pb-6 text-center">
@@ -118,6 +119,6 @@ export default function Page() {
 					</CardFooter>
 				</form>
 			</Card>
-		</div>
+		</AuthPageLayout>
 	);
 }

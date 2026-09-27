@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AuthPageLayout } from "./auth-page-layout";
 import {
 	type ForgotPasswordState,
 	forgotPasswordAction,
@@ -25,7 +26,7 @@ export function ForgotPasswordForm() {
 	);
 
 	return (
-		<div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 p-4 dark:bg-black">
+		<AuthPageLayout>
 			<Card className="w-full max-w-sm">
 				<form action={action}>
 					<CardHeader className="space-y-2 text-center">
@@ -72,6 +73,6 @@ export function ForgotPasswordForm() {
 					</CardFooter>
 				</form>
 			</Card>
-		</div>
+		</AuthPageLayout>
 	);
 }
