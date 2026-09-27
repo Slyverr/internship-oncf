@@ -2,6 +2,7 @@ import { CheckIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { AuthThemeSelector } from "./auth-theme-selector";
 
 function OncfLogo({ large = false }: { large?: boolean }) {
 	return (
@@ -81,15 +82,16 @@ export function AuthPageLayout({ children }: { children: ReactNode }) {
 					</p>
 				</aside>
 
-				<section className="flex min-w-0 flex-col justify-center gap-6 p-4 sm:p-8 xl:p-12">
-					<header className="flex justify-center xl:hidden">
+				<section className="relative flex min-w-0 flex-col justify-center gap-6 p-4 sm:p-8 xl:p-12">
+					<header className="flex w-full items-center justify-between xl:absolute xl:top-4 xl:right-4 xl:w-auto">
 						<Link
 							href="/login"
 							aria-label="ECommand sign in"
-							className="rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+							className="rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring xl:hidden"
 						>
 							<BrandHeader />
 						</Link>
+						<AuthThemeSelector />
 					</header>
 
 					<div className="page-enter w-full">{children}</div>

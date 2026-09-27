@@ -6,7 +6,7 @@ This is the running review list for the application-wide usability and visual ov
 
 | # | Area | Required review and acceptance evidence | Status |
 | --- | --- | --- | --- |
-| 1 | Login and registration | Remove redundant nested surfaces and unnecessary explanation; fix the registration form's field layout and logo fit. Show concise API-backed password validation, keep the desktop auth shell the same size for both routes, and add a soft route transition after the shell is stable. Review phone, laptop, 2K, and 4K captures. | In progress |
+| 1 | Login and registration | Remove redundant nested surfaces and unnecessary explanation; fix the registration form's field layout and logo fit. Show concise API-backed password validation, keep the desktop auth shell the same size for both routes, add a public theme selector and a soft route transition, then review phone, laptop, 2K, and 4K captures. | In progress |
 | 2 | Order creation | Check the form's usable width, grouping, step navigation, validation, and action placement at phone, tablet, laptop, and wide widths. | Complete |
 | 3 | Menus | Review account and other dropdown hover/focus shapes, item insets, active state, keyboard use, and touch behavior. | To review |
 | 4 | Button surfaces | Find light-theme buttons that look like unbounded white text; set a consistent semantic surface, border, or restrained elevation. Check every button variant in both themes. | To review |
@@ -46,6 +46,7 @@ Review both light and dark appearances, and both workspace layouts where the rou
 - The notification popover keeps click, keyboard, and touch behavior; its empty/loading states use a tighter header, body, and footer rhythm while keeping the 44px footer action target.
 - Fresh settings captures at 1440×900, 390×844, and 320×640 show a fixed 768px desktop dialog and an internally scrolling phone panel with no page-level horizontal overflow. The desktop title strip was tightened by one 4px spacing step; mobile title space was already compact.
 - Auth form content now uses the shared 180ms page-entry fade and 4px rise; the existing system and user reduced-motion rules disable it.
+- Public auth pages expose the same five theme choices as settings and save the choice to the existing local preference before sign-in.
 
 ## Working rules
 
