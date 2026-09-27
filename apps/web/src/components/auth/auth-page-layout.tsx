@@ -1,49 +1,103 @@
+import { CheckIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-function OncfLogo() {
+function OncfLogo({ large = false }: { large?: boolean }) {
 	return (
-		<span className="relative block h-10 w-24 shrink-0 overflow-hidden">
+		<span
+			className={`relative block shrink-0 overflow-hidden ${large ? "h-12 w-32" : "h-10 w-24"}`}
+		>
 			<Image
 				src="/oncf.png"
 				alt="ONCF"
 				fill
 				priority
-				sizes="96px"
+				sizes={large ? "128px" : "96px"}
 				className="object-cover object-[center_40%]"
 			/>
 		</span>
 	);
 }
 
+function BrandHeader({ large = false }: { large?: boolean }) {
+	return (
+		<div className="flex items-center gap-4">
+			<OncfLogo large={large} />
+			<span className="grid gap-compact border-l border-border pl-4">
+				<span className="text-sm font-semibold tracking-tight">ECommand</span>
+				<span className="text-xs text-muted-foreground">
+					Freight operations
+				</span>
+			</span>
+		</div>
+	);
+}
+
+const workspaceHighlights = [
+	"Keep customer orders and their context together.",
+	"Link eligible orders directly to forecast programs.",
+	"Follow freight progress and manage claims in one workspace.",
+];
+
 export function AuthPageLayout({ children }: { children: ReactNode }) {
 	return (
-		<main className="grid min-h-svh place-items-center bg-background px-4 py-8 sm:px-6 sm:py-12">
-			<div className="grid w-full max-w-2xl justify-items-center gap-6">
-				<header className="flex items-center gap-3">
-					<Link
-						href="/login"
-						aria-label="ECommand sign in"
-						className="rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-					>
-						<OncfLogo />
-					</Link>
-					<span className="border-l border-border pl-3">
-						<span className="block text-sm font-semibold tracking-tight">
-							ECommand
-						</span>
-						<span className="block text-xs text-muted-foreground">
-							Freight operations
-						</span>
-					</span>
-				</header>
+		<main className="grid min-h-svh place-items-center bg-background p-4 sm:p-6">
+			<div className="grid w-full max-w-6xl overflow-hidden rounded-2xl border border-border bg-background shadow-sm xl:grid-cols-2">
+				<aside
+					aria-labelledby="auth-brand-heading"
+					className="hidden flex-col justify-between bg-sidebar p-8 text-sidebar-foreground xl:flex xl:p-12"
+				>
+					<BrandHeader large />
+					<div className="grid gap-8">
+						<div className="grid max-w-xl gap-4">
+							<p className="text-sm font-medium text-sidebar-primary">
+								ONCF freight operations
+							</p>
+							<h1
+								id="auth-brand-heading"
+								className="text-4xl font-semibold leading-tight tracking-tight"
+							>
+								Keep freight work moving.
+							</h1>
+							<p className="max-w-lg text-base leading-7 text-muted-foreground">
+								Bring orders, forecast programs, claims, and tracking into one
+								clear operational workspace.
+							</p>
+						</div>
+						<ul className="grid max-w-xl gap-4">
+							{workspaceHighlights.map((highlight) => (
+								<li key={highlight} className="flex items-center gap-3 text-sm">
+									<span className="grid size-8 shrink-0 place-items-center rounded-full bg-sidebar-primary/10 text-sidebar-primary">
+										<CheckIcon aria-hidden="true" className="size-4" />
+									</span>
+									<span className="text-muted-foreground">{highlight}</span>
+								</li>
+							))}
+						</ul>
+					</div>
+					<p className="text-sm text-muted-foreground">
+						A shared workspace for the teams behind every shipment.
+					</p>
+				</aside>
 
-				{children}
+				<section className="flex min-w-0 flex-col justify-center gap-6 p-4 sm:p-8 xl:p-12">
+					<header className="flex justify-center xl:hidden">
+						<Link
+							href="/login"
+							aria-label="ECommand sign in"
+							className="rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+						>
+							<BrandHeader />
+						</Link>
+					</header>
 
-				<footer className="text-center text-xs text-muted-foreground">
-					ONCF freight operations
-				</footer>
+					<div className="w-full">{children}</div>
+
+					<footer className="text-center text-xs text-muted-foreground">
+						ONCF freight operations
+					</footer>
+				</section>
 			</div>
 		</main>
 	);

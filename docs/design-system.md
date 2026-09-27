@@ -20,6 +20,7 @@ This document is the shared UI contract for the Next.js application. Apply it to
 3. Below 640px, stack heading and actions, make form actions full width when it improves reach, and collapse multi-column cards/forms to one column. At tablet width, use two columns only when both remain readable.
 4. Long values wrap. Buttons may wrap or stack; controls and type do not get smaller to fit. A 320px screen may scroll horizontally only inside a data-table region.
 5. Form/detail text fields use a readable maximum width instead of stretching across ultrawide monitors. Data tables may use the remaining page width.
+6. Public authentication routes share the ONCF-branded shell. Keep the form compact and centered below extra-large width; use a balanced brand-and-form split on wide screens. Reuse the existing transparent mark and semantic theme surfaces, and keep the form width readable.
 
 ## 2. Type hierarchy
 

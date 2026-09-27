@@ -83,6 +83,7 @@ Shared primitives reduce drift but do not make all page content consistent. The 
 - [x] Distinguish empty results from failed customer, goods, unit, order, and user option queries; keep stale choices available and provide inline retry actions.
 - [x] Preserve an order-detail preselection while program eligibility is loading, refreshing, or failed; clear it only after a successful response says it is no longer eligible.
 - [x] Give appearance theme choices semantic-token previews, including both device modes for System, without changing any theme colors.
+- [x] Make the login password-visibility button meet the 44px target size and associate it with its password field.
 - [x] Hide customer/user/program overflow triggers when the current role and record state provide no menu action; cover default roles and program status in frontend checks.
 - [x] Require a customer assignment for client representatives in user management and the API; align order, program, and report reads with the existing customer ownership relation; assign the development client fixture to a seeded customer.
 - [x] Capture all protected and public route paths in light/dark at 390px and 1440px after loading settles; inspect the route contact sheets for page-level overflow and rendering errors.
@@ -111,7 +112,7 @@ The screenshot pass verified rendered route screens through 1440px, but it does 
 ## Authentication follow-up — 2026-09-27
 
 - `/signup` now contains the client-registration form. It validates customer code and ICE against a locally maintained active customer record, submits a pending client-representative account, and explains that administrator approval is required before sign-in.
-- The login page uses a compact, centered layout. The web API client and Next.js proxy both default to `http://localhost:8000` when `BACKEND_API_URL` is unset, so local sign-in works without a provider-specific environment variable.
+- The public auth routes share a compact centered layout below extra-large width and a two-panel ONCF-branded layout on wide screens. The sign-in password visibility control uses a 44px target. The web API client and Next.js proxy both default to `http://localhost:8000` when `BACKEND_API_URL` is unset, so local sign-in works without a provider-specific environment variable.
 - The live HTTP check returned 200 for `/login` and `/signup`; a valid test login through the Next.js proxy returned 201, and an invalid password returned 401.
 - These auth changes were made after the screenshot bundle above. Browser screenshot automation is unavailable in the current workbench, so the updated login/signup appearance still needs visual confirmation at mobile and desktop widths. The older public-route captures show the earlier UI and should not be used to sign off the new screens.
 - Administrator review now appears in the user list and user detail for pending registrations. The page describes the customer-code/ICE match, and only users with `users:update` can approve or reject. The preview contains a pending local demo request; screenshot review of that state remains outstanding.

@@ -114,7 +114,8 @@ export default function Page() {
 									size="icon"
 									aria-label={showPassword ? "Hide password" : "Show password"}
 									aria-pressed={showPassword}
-									className="absolute top-1 right-1 size-9"
+									aria-controls="password"
+									className="absolute top-0.5 right-0.5 size-11"
 									onClick={() => setShowPassword((visible) => !visible)}
 								>
 									{showPassword ? (
