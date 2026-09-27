@@ -51,6 +51,6 @@ Admin receives every defined permission. Parent permissions imply descendants (f
 - apps/api/src/auth/roles-permissions.spec.ts checks admin, commercial-agent, and client-representative grant boundaries.
 - apps/api/src/workflow-transitions.spec.ts locks down order, program, and claim transition graphs.
 - Controller authorization specs for catalog, claims, orders, profile, tracking, and users verify route permission metadata and service arguments; ownership-sensitive routes assert their ownership guard.
-- Claim mapper and service specs check customer-scope enforcement on create/list. Order and program service specs check draft-only deletion.
+- Claim mapper/service specs check customer-scope enforcement on create/list. Order query specs verify creator-only list and eligible-order scope unless `orders:manage-other` is granted; order and program service specs check draft-only deletion.
 - `apps/api/src/common/utils/route-id-pipes.spec.ts` verifies strict parsing for claim, customer, notification, program, and user route IDs; tracking pipes have equivalent coverage.
 - These unit tests do not replace endpoint integration tests for database queries and full guard execution. Add integration coverage when changing those boundaries.
