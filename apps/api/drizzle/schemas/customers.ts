@@ -85,6 +85,7 @@ export const customers = pgTable(
 		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
 		companyName: varchar("company_name", { length: 300 }).notNull(),
 		customerCode: varchar("customer_code", { length: 50 }),
+		ice: varchar("ice", { length: 15 }),
 		address: varchar("address", { length: 500 }),
 		city: varchar("city", { length: 100 }),
 		phone: varchar("phone", { length: 20 }),
@@ -100,6 +101,7 @@ export const customers = pgTable(
 	},
 	(table) => [
 		unique("customers_customer_code_key").on(table.customerCode),
+		unique("customers_ice_key").on(table.ice),
 		foreignKey({
 			columns: [table.typeId],
 			foreignColumns: [customerTypes.id],

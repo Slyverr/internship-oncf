@@ -22,6 +22,7 @@ const customerListColumns = {
 	email: true,
 	typeId: true,
 	customerCode: true,
+	ice: true,
 	isActive: true,
 	createdAt: true,
 	updatedAt: true,
@@ -89,6 +90,13 @@ export class CustomersQuery {
 		return this.drizzle.db.query.customers.findFirst({
 			where: { id },
 			columns: customerListColumns,
+		});
+	}
+
+	async findActiveCustomerForRegistration(customerCode: string, ice: string) {
+		return this.drizzle.db.query.customers.findFirst({
+			where: { customerCode, ice, isActive: true },
+			columns: { id: true },
 		});
 	}
 

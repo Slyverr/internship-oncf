@@ -8,6 +8,7 @@ describe("CustomersService", () => {
 	const query = {
 		findCustomers: jest.fn(),
 		findCustomer: jest.fn(),
+		findActiveCustomerForRegistration: jest.fn(),
 		createCustomer: jest.fn(),
 		updateCustomer: jest.fn(),
 	};
@@ -39,6 +40,17 @@ describe("CustomersService", () => {
 		await expect(service.findOne(id)).resolves.toBe(customer);
 		query.findCustomer.mockResolvedValue(undefined);
 		await expect(service.findOne(id)).rejects.toBeInstanceOf(NotFoundException);
+	});
+
+	it("looks up only a customer with the exact signup identifiers", async () => {
+		query.findActiveCustomerForRegistration.mockResolvedValue({ id } as never);
+		await expect(
+			service.findActiveCustomerForRegistration("CLI009", "123456789012345"),
+		).resolves.toEqual({ id });
+		expect(query.findActiveCustomerForRegistration).toHaveBeenCalledWith(
+			"CLI009",
+			"123456789012345",
+		);
 	});
 
 	it("maps and persists a new customer, then returns its detail", async () => {

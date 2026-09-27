@@ -4,6 +4,7 @@ import {
 	IsOptional,
 	IsString,
 	IsUUID,
+	Matches,
 	MaxLength,
 } from "class-validator";
 
@@ -40,6 +41,11 @@ export class CreateCustomerDto {
 	@IsString()
 	@MaxLength(50)
 	customerCode?: string;
+
+	@IsOptional()
+	@IsString()
+	@Matches(/^\d{15}$/, { message: "ICE must contain exactly 15 digits" })
+	ice?: string;
 
 	@IsOptional()
 	@IsBoolean()

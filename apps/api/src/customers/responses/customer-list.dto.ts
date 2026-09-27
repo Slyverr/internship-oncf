@@ -15,4 +15,5 @@ export class CustomerListDto implements CustomerList {
 	email: string | null;
 	typeId: string | null;
 	customerCode: string | null;
+	ice: string | null;
 }

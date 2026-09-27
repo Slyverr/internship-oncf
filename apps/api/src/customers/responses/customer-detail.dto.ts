@@ -15,4 +15,5 @@ export class CustomerDetailDto implements CustomerDetail {
 	updatedAt: string;
 	isActive: boolean;
 	customerCode: string | null;
+	ice: string | null;
 }

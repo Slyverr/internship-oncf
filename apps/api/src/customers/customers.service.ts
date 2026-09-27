@@ -22,6 +22,13 @@ export class CustomersService {
 		return this.ensure(customer, id);
 	}
 
+	async findActiveCustomerForRegistration(customerCode: string, ice: string) {
+		return this.customersQuery.findActiveCustomerForRegistration(
+			customerCode,
+			ice,
+		);
+	}
+
 	async create(dto: CreateCustomerDto) {
 		const values = this.customersMapper.toCreate(dto);
 		const created = await this.customersQuery.createCustomer(values);
