@@ -23,24 +23,15 @@ export function CenteredAppHeader() {
 		<>
 			<header className="sticky top-0 z-40 w-full px-4 print:static">
 				<div className="relative mx-auto w-full max-w-screen-2xl">
-					<svg
+					<div
 						aria-hidden="true"
-						className="pointer-events-none absolute inset-0 h-full w-full overflow-visible drop-shadow-sm"
-						viewBox="0 0 1000 100"
-						preserveAspectRatio="none"
-					>
-						<path
-							d="M0 0 H1000 C1008 0 1016 8 1016 24 C1016 46 1000 54 1000 76 V84 Q1000 100 984 100 H16 Q0 100 0 84 V76 C0 54 -16 46 -16 24 C-16 8 -8 0 0 0 Z"
-							className="fill-card stroke-border"
-							strokeWidth="1"
-							vectorEffect="non-scaling-stroke"
-						/>
-					</svg>
-					<div className="relative grid min-h-16 w-full grid-cols-[1fr_auto] items-center gap-control px-4 py-control sm:px-8 md:px-12 lg:flex lg:h-16 lg:gap-6 lg:px-20 lg:py-0">
+						className="pointer-events-none absolute inset-0 rounded-b-2xl border border-border bg-card shadow-sm"
+					></div>
+					<div className="relative z-10 grid min-h-16 w-full grid-cols-[1fr_auto] items-center gap-x-control gap-y-0 px-4 py-0 sm:px-8 md:px-12 lg:flex lg:h-16 lg:gap-6 lg:px-20">
 						<Link
 							href="/dashboard"
 							aria-label="ECommand home"
-							className="inline-flex min-h-11 items-center gap-control rounded-md text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:order-1"
+							className="inline-flex min-h-16 items-center gap-control rounded-md text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:order-1"
 						>
 							<span className="flex size-8 shrink-0 items-center justify-center rounded-sm bg-sidebar-primary p-control">
 								<Image
@@ -55,7 +46,7 @@ export function CenteredAppHeader() {
 							<span>ECommand</span>
 						</Link>
 
-						<div className="ml-auto flex items-center gap-control lg:order-3">
+						<div className="ml-auto flex min-h-16 items-center gap-control lg:order-3">
 							<NotificationLink />
 							<SidebarUser variant="header" />
 						</div>
