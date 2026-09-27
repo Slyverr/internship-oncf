@@ -7,9 +7,7 @@ export const metadata: Metadata = { title: "Reports" };
 export default function Page() {
 	return (
 		<>
-			<div className="print:hidden">
-				<Breadcrumbs items={[{ label: "Reports" }]} />
-			</div>
+			<Breadcrumbs items={[{ label: "Reports" }]} />
 			<OrderReportView />
 		</>
 	);
