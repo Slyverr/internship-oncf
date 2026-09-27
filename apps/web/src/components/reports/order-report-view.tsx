@@ -8,6 +8,14 @@ import { PageHeader } from "@/components/common/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
 import { getOrderReport, type ReportCount } from "@/lib/reports";
 import { useAuth } from "@/providers/auth-provider";
 
@@ -21,22 +29,24 @@ function Breakdown({ title, rows }: { title: string; rows: ReportCount[] }) {
 				{rows.length === 0 ? (
 					<p className="text-muted-foreground">No orders in this period.</p>
 				) : (
-					<table className="w-full text-left">
-						<thead>
-							<tr className="border-b text-muted-foreground">
-								<th className="pb-2 font-medium">Name</th>
-								<th className="pb-2 text-right font-medium">Orders</th>
-							</tr>
-						</thead>
-						<tbody>
+					<Table aria-label={`${title} order counts`}>
+						<TableHeader>
+							<TableRow>
+								<TableHead>Name</TableHead>
+								<TableHead className="text-right">Orders</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody>
 							{rows.map((row) => (
-								<tr key={row.id} className="border-b last:border-0">
-									<td className="py-2 pr-3">{row.name}</td>
-									<td className="py-2 text-right tabular-nums">{row.count}</td>
-								</tr>
+								<TableRow key={row.id}>
+									<TableCell>{row.name}</TableCell>
+									<TableCell className="text-right tabular-nums">
+										{row.count}
+									</TableCell>
+								</TableRow>
 							))}
-						</tbody>
-					</table>
+						</TableBody>
+					</Table>
 				)}
 			</CardContent>
 		</Card>
