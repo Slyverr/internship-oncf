@@ -8,7 +8,7 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, description, children }: PageHeaderProps) {
 	return (
-		<header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+		<header className="flex min-w-0 flex-col gap-4 @5xl/workspace:flex-row @5xl/workspace:items-start @5xl/workspace:justify-between">
 			<div className="min-w-0 space-y-2">
 				<h1 className="text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
 					{title}

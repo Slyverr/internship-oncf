@@ -54,7 +54,7 @@ function RecentSection({
 		<Card>
 			<CardHeader>
 				<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-					<div className="grid gap-compact">
+					<div className="grid min-w-0 gap-compact">
 						<CardTitle>{title}</CardTitle>
 						<CardDescription>{description}</CardDescription>
 					</div>
@@ -127,7 +127,7 @@ export function DashboardOverview() {
 		Number(canReadOrders) + Number(canReadPrograms) + Number(canReadClaims);
 	const recentGridColumns =
 		recentSectionCount === 3
-			? "@7xl/workspace:grid-cols-3"
+			? "@6xl/workspace:grid-cols-3"
 			: recentSectionCount === 2
 				? "@5xl/workspace:grid-cols-2"
 				: "grid-cols-1";
@@ -150,7 +150,7 @@ export function DashboardOverview() {
 			<RecentSection
 				key="orders"
 				title="Recent orders"
-				description="The latest customer orders you can access."
+				description="Latest customer orders."
 				href="/dashboard/orders"
 				isLoading={ordersQuery.isLoading}
 				isError={ordersQuery.isError}
@@ -168,7 +168,7 @@ export function DashboardOverview() {
 			<RecentSection
 				key="programs"
 				title="Recent programs"
-				description="The latest forecast programs you can access."
+				description="Latest forecast programs."
 				href="/dashboard/programs"
 				isLoading={programsQuery.isLoading}
 				isError={programsQuery.isError}
@@ -186,7 +186,7 @@ export function DashboardOverview() {
 			<RecentSection
 				key="claims"
 				title="Recent claims"
-				description="The latest customer claims you can access."
+				description="Latest customer claims."
 				href="/dashboard/claims"
 				isLoading={claimsQuery.isLoading}
 				isError={claimsQuery.isError}

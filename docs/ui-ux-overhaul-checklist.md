@@ -13,7 +13,7 @@ This is the running review list for the application-wide usability and visual ov
 | 5 | Settings controls | Apply the button/surface review to settings, including close, tabs, selected preferences, and save/discard actions. | In progress |
 | 6 | Sidebar alignment | Compare expanded and collapsed logo, nav, and account alignment; keep header/footer padding and navigation centers consistent. | To review |
 | 7 | Sidebar motion | Add restrained, reduced-motion-aware transitions for collapse/expand and content state changes; verify no abrupt layout shift. | To review |
-| 8 | Dashboard content | Replace the sparse three-panel impression with useful role- and permission-aware metrics, trends, and prioritized next actions based on available data. | To review |
+| 8 | Dashboard content | Replace the sparse three-panel impression with useful role- and permission-aware metrics, trends, and prioritized next actions based on available data. | In progress |
 | 9 | Workspace width consistency | Compare dashboard and all inner routes under both shell layouts at laptop through 4K widths. Use one shared content-width rule per shell and prevent unexplained route-specific centering. | Complete |
 | 10 | Table density | Review header, row, cell padding, wrapping, and phone overflow. Add a user-controlled density preference only if the responsive behavior still benefits from it. | To review |
 | 11 | Appearance options | Keep themes, fonts, text scale, motion, and layouts extensible and understandable. Review whether a bounded text-scale control is more useful than only three presets; retain sensible defaults and database sync. | To review |
@@ -39,6 +39,8 @@ Review both light and dark appearances, and both workspace layouts where the rou
 - Order creation now centers in the available workspace, filling the regular 5xl form column and expanding to 7xl only in very wide workspaces. Fresh authenticated captures at 390, 768, 1440, and 2560px had no horizontal overflow; the form measured 358px on phone, 464px on tablet, 1024px on laptop, and 1280px on the wide display.
 - Both workspace layouts now share a 1536px page-content cap. Fresh authenticated captures of dashboard, orders, programs, claims, customers, users, and reports at 1440px and 2560px show aligned content edges and no horizontal overflow. At 4K, dashboard, orders, and reports stay centered; list tables remain 1486px within the workspace instead of stretching across the display. The browser preference was restored to the sidebar layout after comparing both modes.
 - Shared style inventory confirmed that card and button visuals already live in their reusable UI primitives. Repeated form-field wrappers now use the `oncf-field` Tailwind utility for one 8px grid gap; continue reviewing repeated panel, table, control, and dialog patterns before completing item 14.
+- The dashboard now keeps all three recent-work panels together once the workspace reaches 1152px, avoiding a sidebar-state-dependent jump from three columns to one. Fresh 1440px screenshot shows the panels in one balanced row with shorter subtitles; smaller widths stay stacked to avoid an orphaned third panel. Actionable metrics and role-specific next steps still need review.
+- Page headings now choose inline actions from the available workspace width, so the tablet sidebar does not squeeze the title into a narrow column beside stacked buttons.
 
 ## Working rules
 
