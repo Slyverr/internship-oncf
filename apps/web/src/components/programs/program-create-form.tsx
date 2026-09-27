@@ -205,7 +205,7 @@ export function ProgramCreateForm({
 					</CardDescription>
 				</CardHeader>
 
-				<CardContent className="grid gap-4 md:grid-cols-2">
+				<CardContent className="grid gap-4 @3xl/workspace:grid-cols-2">
 					<form.Field name="orderId">
 						{(field) => {
 							const errorMsg =
@@ -398,7 +398,7 @@ export function ProgramCreateForm({
 					</CardDescription>
 				</CardHeader>
 
-				<CardContent className="grid gap-4 md:grid-cols-2">
+				<CardContent className="grid gap-4 @3xl/workspace:grid-cols-2">
 					<form.Field name="quantityRealized">
 						{(field) => {
 							const errorMsg =

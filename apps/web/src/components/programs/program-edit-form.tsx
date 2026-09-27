@@ -93,7 +93,7 @@ export function ProgramEditForm({ program }: { program: ProgramDetailDto }) {
 						with the program actions.
 					</CardDescription>
 				</CardHeader>
-				<CardContent className="grid gap-4 md:grid-cols-2">
+				<CardContent className="grid gap-4 @3xl/workspace:grid-cols-2">
 					<div className="space-y-2">
 						<Label htmlFor="plannedDate">Planned date</Label>
 						<Input

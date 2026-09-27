@@ -17,7 +17,7 @@ export function ClaimOverview({ claim }: { claim: ClaimDetailDto }) {
 	return (
 		<div className="space-y-6">
 			{/* Existing grid of cards */}
-			<div className="grid gap-4 md:grid-cols-2">
+			<div className="grid gap-4 @3xl/workspace:grid-cols-2">
 				<Card>
 					<CardHeader>
 						<CardTitle>Claim Information</CardTitle>
@@ -105,7 +105,7 @@ export function ClaimOverview({ claim }: { claim: ClaimDetailDto }) {
 			</div>
 
 			{/* Comments section – spans full width */}
-			<div className="grid gap-6 md:grid-cols-2">
+			<div className="grid gap-6 @3xl/workspace:grid-cols-2">
 				<ClaimComments claimId={claim.id} />
 				<ClaimCommentForm claimId={claim.id} />
 			</div>

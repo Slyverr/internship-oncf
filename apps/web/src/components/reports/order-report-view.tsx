@@ -174,7 +174,7 @@ export function OrderReportView() {
 							{report.data.totalOrders}
 						</CardContent>
 					</Card>
-					<div className="grid gap-4 lg:grid-cols-2 print:grid-cols-2">
+					<div className="grid gap-4 @3xl/workspace:grid-cols-2 print:grid-cols-2">
 						<Breakdown title="By status" rows={report.data.byStatus} />
 						<Breakdown title="By customer" rows={report.data.byCustomer} />
 						<Breakdown title="By product" rows={report.data.byProduct} />

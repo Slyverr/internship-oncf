@@ -169,7 +169,7 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 						Update login email and access settings.
 					</CardDescription>
 				</CardHeader>
-				<CardContent className="grid gap-4 md:grid-cols-2">
+				<CardContent className="grid gap-4 @3xl/workspace:grid-cols-2">
 					<form.Field name="email">
 						{(field) => {
 							const errorMsg =
@@ -269,7 +269,7 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 						Update the user name and employee ID.
 					</CardDescription>
 				</CardHeader>
-				<CardContent className="grid gap-4 md:grid-cols-2">
+				<CardContent className="grid gap-4 @3xl/workspace:grid-cols-2">
 					<form.Field name="firstName">
 						{(field) => {
 							const errorMsg =
@@ -342,7 +342,7 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 											getFormErrorMessage(field.state.meta.errors[0]);
 
 										return (
-											<div className="space-y-2 md:col-span-2">
+											<div className="space-y-2 @3xl/workspace:col-span-2">
 												<FormFieldHeader
 													htmlFor="customerId"
 													label="Customer Company"

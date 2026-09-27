@@ -115,7 +115,7 @@ export function CustomerEditForm({
 						Update identifiers used to verify customer account requests.
 					</CardDescription>
 				</CardHeader>
-				<CardContent className="grid gap-4 md:grid-cols-2">
+				<CardContent className="grid gap-4 @3xl/workspace:grid-cols-2">
 					<form.Field name="companyName">
 						{(field) => {
 							const errorMsg =
@@ -205,7 +205,7 @@ export function CustomerEditForm({
 						Address and primary communication lines.
 					</CardDescription>
 				</CardHeader>
-				<CardContent className="grid gap-4 md:grid-cols-2">
+				<CardContent className="grid gap-4 @3xl/workspace:grid-cols-2">
 					<form.Field name="email">
 						{(field) => {
 							const errorMsg =
@@ -249,7 +249,7 @@ export function CustomerEditForm({
 
 					<form.Field name="address">
 						{(field) => (
-							<div className="space-y-2 md:col-span-2">
+							<div className="space-y-2 @3xl/workspace:col-span-2">
 								<Label htmlFor="address">Street Address</Label>
 								<Input
 									id="address"

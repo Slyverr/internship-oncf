@@ -7,7 +7,7 @@ import { OrderAttachments } from "./order-attachments";
 export function OrderOverview({ order }: { order: OrderDetailDto }) {
 	return (
 		<div className="flex flex-col gap-8">
-			<div className="grid gap-4 md:grid-cols-2">
+			<div className="grid gap-4 @3xl/workspace:grid-cols-2">
 				<Card>
 					<CardHeader>
 						<CardTitle>Order Information</CardTitle>

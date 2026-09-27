@@ -172,7 +172,7 @@ export function OrderCreateForm(): JSX.Element {
 							</CardDescription>
 						</CardHeader>
 
-						<CardContent className="grid gap-4 md:grid-cols-2">
+						<CardContent className="grid gap-4 @3xl/workspace:grid-cols-2">
 							{canManageOther && (
 								<form.Field name="customerId">
 									{(field) => {
@@ -331,7 +331,7 @@ export function OrderCreateForm(): JSX.Element {
 								</CardDescription>
 							</CardHeader>
 
-							<CardContent className="grid gap-4 md:grid-cols-2">
+							<CardContent className="grid gap-4 @3xl/workspace:grid-cols-2">
 								<form.Field name="supervisor">
 									{(field) => (
 										<div className="space-y-2">

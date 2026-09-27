@@ -201,7 +201,7 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 					<fieldset
 						disabled={mutation.isPending || step !== 0}
 						hidden={step !== 0}
-						className={`grid gap-4 md:grid-cols-2 ${step === 0 ? "page-enter" : ""}`}
+						className={`grid gap-4 @3xl/workspace:grid-cols-2 ${step === 0 ? "page-enter" : ""}`}
 					>
 						<div className="space-y-2">
 							<Label>Goods / Commodity</Label>
@@ -236,7 +236,7 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 					<fieldset
 						disabled={mutation.isPending || step !== 1}
 						hidden={step !== 1}
-						className={`grid gap-4 md:grid-cols-2 ${step === 1 ? "page-enter" : ""}`}
+						className={`grid gap-4 @3xl/workspace:grid-cols-2 ${step === 1 ? "page-enter" : ""}`}
 					>
 						<div className="space-y-2">
 							<Label htmlFor="supervisor">Supervisor</Label>
@@ -272,7 +272,7 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 							</div>
 						))}
 
-						<div className="space-y-2 md:col-span-2">
+						<div className="space-y-2 @3xl/workspace:col-span-2">
 							<Label htmlFor="remarks">Remarks</Label>
 							<Textarea
 								id="remarks"

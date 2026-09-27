@@ -110,7 +110,7 @@ export function CustomerCreateForm(): JSX.Element {
 						Primary identifiers used by customers when requesting an account.
 					</CardDescription>
 				</CardHeader>
-				<CardContent className="grid gap-4 md:grid-cols-2">
+				<CardContent className="grid gap-4 @3xl/workspace:grid-cols-2">
 					<form.Field name="companyName">
 						{(field) => {
 							const errorMsg =
@@ -201,7 +201,7 @@ export function CustomerCreateForm(): JSX.Element {
 					<CardTitle>Contact & Location</CardTitle>
 					<CardDescription>Address and communication channels.</CardDescription>
 				</CardHeader>
-				<CardContent className="grid gap-4 md:grid-cols-2">
+				<CardContent className="grid gap-4 @3xl/workspace:grid-cols-2">
 					<form.Field name="email">
 						{(field) => {
 							const errorMsg =
@@ -247,7 +247,7 @@ export function CustomerCreateForm(): JSX.Element {
 
 					<form.Field name="address">
 						{(field) => (
-							<div className="space-y-2 md:col-span-2">
+							<div className="space-y-2 @3xl/workspace:col-span-2">
 								<Label htmlFor="address">Street Address</Label>
 								<Input
 									id="address"

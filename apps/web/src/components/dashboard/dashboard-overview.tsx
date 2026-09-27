@@ -127,9 +127,9 @@ export function DashboardOverview() {
 		Number(canReadOrders) + Number(canReadPrograms) + Number(canReadClaims);
 	const recentGridColumns =
 		recentSectionCount === 3
-			? "xl:grid-cols-3"
+			? "@7xl/workspace:grid-cols-3"
 			: recentSectionCount === 2
-				? "lg:grid-cols-2"
+				? "@5xl/workspace:grid-cols-2"
 				: "grid-cols-1";
 
 	const ordersQuery = useOrdersControllerFindAll(

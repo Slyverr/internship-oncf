@@ -7,7 +7,7 @@ import { formatDisplayDateTime } from "@/lib/date-utils";
 
 export function UserOverview({ user }: { user: UserDetailDto }) {
 	return (
-		<div className="grid gap-4 md:grid-cols-2">
+		<div className="grid gap-4 @3xl/workspace:grid-cols-2">
 			<Card>
 				<CardHeader>
 					<CardTitle>Personal Information</CardTitle>
@@ -77,7 +77,7 @@ export function UserOverview({ user }: { user: UserDetailDto }) {
 				</CardContent>
 			</Card>
 
-			<Card className="md:col-span-2">
+			<Card className="@3xl/workspace:col-span-2">
 				<CardHeader>
 					<CardTitle>Activity Timestamps</CardTitle>
 				</CardHeader>

@@ -9,7 +9,7 @@ export function CustomerOverview({
 	customer: CustomerDetailDto;
 }) {
 	return (
-		<div className="grid gap-4 md:grid-cols-2">
+		<div className="grid gap-4 @3xl/workspace:grid-cols-2">
 			<Card>
 				<CardHeader>
 					<CardTitle>Company Details</CardTitle>
@@ -41,7 +41,7 @@ export function CustomerOverview({
 				</CardContent>
 			</Card>
 
-			<Card className="md:col-span-2">
+			<Card className="@3xl/workspace:col-span-2">
 				<CardHeader>
 					<CardTitle>Metadata</CardTitle>
 				</CardHeader>

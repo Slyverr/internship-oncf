@@ -14,6 +14,9 @@ This document is the shared UI contract for the Next.js application. Apply it to
 - Keep content width readable on ultrawide displays. Tables can use the available width, but text-heavy descriptions should have a readable maximum line length. A workspace layout preference changes only the shared application shell; page components stay the same.
 - Stack page headings and primary actions on narrow screens. Actions should wrap cleanly and remain easy to tap; do not shrink targets to gain density.
 - Use responsive grids that start as one column. Introduce two columns only when each field/card has enough room to remain readable.
+- `DashboardShell` owns the exhaustive workspace-layout registry. Add shell variants there and in the shared appearance preference contract; keep route pages independent of the selected shell.
+- The shell exposes its usable content area as the named `workspace` container. Use `@…/workspace` container queries for form, detail, and dashboard columns so a sidebar or centered content cap is included in the available-width calculation. Use viewport breakpoints for viewport-level behavior such as mobile navigation.
+- Workspace content starts at the top. When a shell main area fills the viewport, align its grid tracks with `content-start` so sparse pages do not spread their sections down the page.
 
 ### Page composition and breakpoints
 
