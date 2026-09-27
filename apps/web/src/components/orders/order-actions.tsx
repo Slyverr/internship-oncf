@@ -1,7 +1,6 @@
 "use client";
 
 import { OrderStatus, Permission } from "@ecommand/shared";
-import { useQueryClient } from "@tanstack/react-query";
 import { EllipsisVerticalIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -23,6 +22,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
+import { useUpdateDetailCache } from "@/hooks/use-update-detail-cache";
 import type { OrderDetailDto } from "@/lib/api/generated.schemas";
 import {
 	getOrdersControllerFindOneQueryKey,
@@ -38,7 +38,9 @@ import { ConfirmDialog } from "../common/confirm-dialog";
 
 export function OrderActions({ order }: { order: OrderDetailDto }) {
 	const { hasPermission } = useAuth();
-	const queryClient = useQueryClient();
+	const updateOrderCache = useUpdateDetailCache<OrderDetailDto>(
+		getOrdersControllerFindOneQueryKey,
+	);
 	const router = useRouter();
 
 	const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
@@ -51,13 +53,6 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 	const cancelMutation = useOrdersControllerCancel();
 	const sendToDtmMutation = useOrdersControllerSendToDtm();
 	const removeMutation = useOrdersControllerRemove();
-
-	const updateOrderCache = (updatedOrder: OrderDetailDto) => {
-		queryClient.setQueryData(
-			getOrdersControllerFindOneQueryKey(updatedOrder.id),
-			updatedOrder,
-		);
-	};
 
 	const status = order.orderStatus.name;
 

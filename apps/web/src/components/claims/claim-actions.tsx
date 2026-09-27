@@ -1,7 +1,6 @@
 "use client";
 
 import { ClaimStatus, Permission } from "@ecommand/shared";
-import { useQueryClient } from "@tanstack/react-query";
 import { EllipsisVerticalIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -23,6 +22,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
+import { useUpdateDetailCache } from "@/hooks/use-update-detail-cache";
 import {
 	getClaimsControllerFindOneQueryKey,
 	useClaimsControllerAwaitInfo,
@@ -40,7 +40,9 @@ import { ConfirmDialog } from "../common/confirm-dialog";
 
 export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 	const { hasPermission } = useAuth();
-	const queryClient = useQueryClient();
+	const updateClaimCache = useUpdateDetailCache<ClaimDetailDto>(
+		getClaimsControllerFindOneQueryKey,
+	);
 	const router = useRouter();
 
 	const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
@@ -58,13 +60,6 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 	const closeMutation = useClaimsControllerClose();
 	const rejectMutation = useClaimsControllerReject();
 	const removeMutation = useClaimsControllerRemove();
-
-	const updateClaimCache = (updatedClaim: ClaimDetailDto) => {
-		queryClient.setQueryData(
-			getClaimsControllerFindOneQueryKey(updatedClaim.id),
-			updatedClaim,
-		);
-	};
 
 	const status = claim.claimStatus?.name;
 

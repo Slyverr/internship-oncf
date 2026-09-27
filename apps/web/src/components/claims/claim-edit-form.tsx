@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
+import { useUpdateDetailCache } from "@/hooks/use-update-detail-cache";
 import {
 	getClaimsControllerFindOneQueryKey,
 	useClaimsControllerUpdate,
@@ -34,6 +35,9 @@ import { useAuth } from "@/providers/auth-provider";
 export function ClaimEditForm({ claim }: { claim: ClaimDetailDto }) {
 	const router = useRouter();
 	const queryClient = useQueryClient();
+	const updateDetailCache = useUpdateDetailCache<ClaimDetailDto>(
+		getClaimsControllerFindOneQueryKey,
+	);
 	const { hasPermission } = useAuth();
 	const mutation = useClaimsControllerUpdate();
 	const initialType = claim.claimType.name as ClaimType;
@@ -76,10 +80,7 @@ export function ClaimEditForm({ claim }: { claim: ClaimDetailDto }) {
 					}),
 				},
 			});
-			queryClient.setQueryData(
-				getClaimsControllerFindOneQueryKey(claim.id),
-				updated,
-			);
+			updateDetailCache(updated);
 			void queryClient.invalidateQueries({ queryKey: ["/claims"] });
 			toast.add({
 				type: "success",

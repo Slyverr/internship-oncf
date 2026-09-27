@@ -1,7 +1,6 @@
 "use client";
 
 import { Permission, ProgramStatus } from "@ecommand/shared";
-import { useQueryClient } from "@tanstack/react-query";
 import { EllipsisVerticalIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -22,6 +21,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useUpdateDetailCache } from "@/hooks/use-update-detail-cache";
 import type { ProgramDetailDto } from "@/lib/api/generated.schemas";
 import {
 	getProgramsControllerFindOneQueryKey,
@@ -37,7 +37,9 @@ import { ConfirmDialog } from "../common/confirm-dialog";
 
 export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 	const { hasPermission } = useAuth();
-	const queryClient = useQueryClient();
+	const updateProgramCache = useUpdateDetailCache<ProgramDetailDto>(
+		getProgramsControllerFindOneQueryKey,
+	);
 	const router = useRouter();
 
 	const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
@@ -49,13 +51,6 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 	const sendToDtmMutation = useProgramsControllerSendToDtm();
 	const cancelMutation = useProgramsControllerCancel();
 	const removeMutation = useProgramsControllerRemove();
-
-	const updateProgramCache = (updatedProgram: ProgramDetailDto) => {
-		queryClient.setQueryData(
-			getProgramsControllerFindOneQueryKey(updatedProgram.id),
-			updatedProgram,
-		);
-	};
 
 	const status = program.programStatus.name;
 

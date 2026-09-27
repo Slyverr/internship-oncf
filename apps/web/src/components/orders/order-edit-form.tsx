@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { UnitSelect } from "@/components/units/unit-select";
+import { useUpdateDetailCache } from "@/hooks/use-update-detail-cache";
 import type {
 	OrderDetailDto,
 	UpdateOrderDto,
@@ -36,6 +37,9 @@ const orderEditSteps = [
 export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 	const router = useRouter();
 	const queryClient = useQueryClient();
+	const updateDetailCache = useUpdateDetailCache<OrderDetailDto>(
+		getOrdersControllerFindOneQueryKey,
+	);
 	const { hasPermission } = useAuth();
 	const mutation = useOrdersControllerUpdate();
 
@@ -153,10 +157,7 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 
 			setSavedValues(values);
 
-			queryClient.setQueryData(
-				getOrdersControllerFindOneQueryKey(order.id),
-				updated,
-			);
+			updateDetailCache(updated);
 			void queryClient.invalidateQueries({ queryKey: ["/orders"] });
 
 			toast.add({

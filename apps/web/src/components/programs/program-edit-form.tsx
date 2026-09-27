@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/toast";
+import { useUpdateDetailCache } from "@/hooks/use-update-detail-cache";
 import type { ProgramDetailDto } from "@/lib/api/generated.schemas";
 import {
 	getProgramsControllerFindOneQueryKey,
@@ -27,6 +28,9 @@ const QUANTITY_PATTERN = /^\d+(\.\d{1,3})?$/;
 export function ProgramEditForm({ program }: { program: ProgramDetailDto }) {
 	const router = useRouter();
 	const queryClient = useQueryClient();
+	const updateDetailCache = useUpdateDetailCache<ProgramDetailDto>(
+		getProgramsControllerFindOneQueryKey,
+	);
 	const mutation = useProgramsControllerUpdate();
 	const initialPlannedDate = toDateInputValue(program.plannedDate);
 	const [plannedDate, setPlannedDate] = useState(initialPlannedDate);
@@ -61,10 +65,7 @@ export function ProgramEditForm({ program }: { program: ProgramDetailDto }) {
 				id: program.id,
 				data: { plannedDate, quantityPlanned: quantity },
 			});
-			queryClient.setQueryData(
-				getProgramsControllerFindOneQueryKey(program.id),
-				updated,
-			);
+			updateDetailCache(updated);
 			void queryClient.invalidateQueries({ queryKey: ["/programs"] });
 			toast.add({
 				type: "success",
