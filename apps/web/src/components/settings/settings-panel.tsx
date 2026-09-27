@@ -1,5 +1,6 @@
 "use client";
 
+import { isStrongPassword, STRONG_PASSWORD_HINT } from "@ecommand/shared";
 import { MonitorIcon, MoonIcon, SunIcon } from "lucide-react";
 import { type FormEvent, useState } from "react";
 
@@ -91,6 +92,10 @@ export function SettingsPanel() {
 		event.preventDefault();
 		setPasswordMessage("");
 		setPasswordError("");
+		if (!isStrongPassword(newPassword)) {
+			setPasswordError(STRONG_PASSWORD_HINT);
+			return;
+		}
 		if (newPassword !== confirmNewPassword) {
 			setPasswordError("New passwords do not match.");
 			return;
@@ -272,6 +277,12 @@ export function SettingsPanel() {
 								required
 								onChange={(event) => setNewPassword(event.target.value)}
 							/>
+							<p
+								id="new-password-help"
+								className="text-sm text-muted-foreground"
+							>
+								{STRONG_PASSWORD_HINT}
+							</p>
 						</div>
 						<div className="grid gap-control">
 							<Label htmlFor="confirm-new-password">Confirm new password</Label>

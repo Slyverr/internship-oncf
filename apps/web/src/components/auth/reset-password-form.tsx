@@ -1,5 +1,6 @@
 "use client";
 
+import { STRONG_PASSWORD_HINT } from "@ecommand/shared";
 import Link from "next/link";
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
@@ -34,10 +35,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
 						<CardTitle className="text-2xl font-bold">
 							Choose a new password
 						</CardTitle>
-						<CardDescription>
-							Use at least 8 characters, with upper and lowercase letters, a
-							number, and a symbol.
-						</CardDescription>
+						<CardDescription>{STRONG_PASSWORD_HINT}</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
 						{state?.success ? (

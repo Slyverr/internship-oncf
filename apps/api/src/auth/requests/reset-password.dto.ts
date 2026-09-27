@@ -1,10 +1,11 @@
-import { IsString, IsStrongPassword } from "class-validator";
+import { STRONG_PASSWORD_PATTERN } from "@ecommand/shared";
+import { IsString, Matches } from "class-validator";
 
 export class ResetPasswordDto {
 	@IsString()
 	token: string;
 
 	@IsString()
-	@IsStrongPassword()
+	@Matches(STRONG_PASSWORD_PATTERN)
 	newPassword: string;
 }

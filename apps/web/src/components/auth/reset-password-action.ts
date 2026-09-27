@@ -1,5 +1,6 @@
 "use server";
 
+import { isStrongPassword, STRONG_PASSWORD_HINT } from "@ecommand/shared";
 import { customFetch } from "@/lib/axios";
 
 export type ResetPasswordState = {
@@ -18,17 +19,8 @@ export async function resetPasswordAction(
 	if (password !== confirmation) {
 		return { error: "The passwords do not match." };
 	}
-	if (
-		password.length < 8 ||
-		!/[a-z]/.test(password) ||
-		!/[A-Z]/.test(password) ||
-		!/[0-9]/.test(password) ||
-		!/[^a-zA-Z0-9]/.test(password)
-	) {
-		return {
-			error:
-				"Use at least 8 characters, with upper and lowercase letters, a number, and a symbol.",
-		};
+	if (!isStrongPassword(password)) {
+		return { error: STRONG_PASSWORD_HINT };
 	}
 	if (!token) {
 		return { error: "This reset link is invalid or has expired." };
