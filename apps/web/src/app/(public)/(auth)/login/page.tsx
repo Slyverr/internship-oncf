@@ -41,7 +41,7 @@ export default function Page() {
 							{state.errors.form}
 						</div>
 					)}
-					<div className="space-y-2">
+					<div className="oncf-field">
 						<Label htmlFor="username">Email</Label>
 						<Input
 							id="username"
@@ -69,7 +69,7 @@ export default function Page() {
 							</p>
 						)}
 					</div>
-					<div className="space-y-2">
+					<div className="oncf-field">
 						<div className="flex items-center justify-between">
 							<Label htmlFor="password">Password</Label>
 							<Link

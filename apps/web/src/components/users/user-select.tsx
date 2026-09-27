@@ -39,7 +39,7 @@ export function UserSelect({
 	const selectedUser = users.find((user) => user.id === value);
 
 	return (
-		<div className="space-y-2">
+		<div className="oncf-field">
 			<Combobox
 				items={users}
 				disabled={isLoading || (isError && users.length === 0)}

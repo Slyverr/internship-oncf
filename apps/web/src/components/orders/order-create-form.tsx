@@ -185,7 +185,7 @@ export function OrderCreateForm(): JSX.Element {
 											stepErrors.customerId ??
 											getFormErrorMessage(field.state.meta.errors[0]);
 										return (
-											<div className="space-y-2">
+											<div className="oncf-field">
 												<FormFieldHeader
 													htmlFor="customerId"
 													label="Customer Company"
@@ -224,7 +224,7 @@ export function OrderCreateForm(): JSX.Element {
 										stepErrors.goodsId ??
 										getFormErrorMessage(field.state.meta.errors[0]);
 									return (
-										<div className="space-y-2">
+										<div className="oncf-field">
 											<FormFieldHeader
 												htmlFor="goodsId"
 												label="Goods / Commodity"
@@ -261,7 +261,7 @@ export function OrderCreateForm(): JSX.Element {
 										stepErrors.unitId ??
 										getFormErrorMessage(field.state.meta.errors[0]);
 									return (
-										<div className="space-y-2">
+										<div className="oncf-field">
 											<FormFieldHeader
 												htmlFor="unitId"
 												label="Unit of Measurement"
@@ -294,7 +294,7 @@ export function OrderCreateForm(): JSX.Element {
 										stepErrors.quantityDemanded ??
 										getFormErrorMessage(field.state.meta.errors[0]);
 									return (
-										<div className="space-y-2">
+										<div className="oncf-field">
 											<FormFieldHeader
 												htmlFor="quantityDemanded"
 												label="Quantity Demanded"
@@ -339,7 +339,7 @@ export function OrderCreateForm(): JSX.Element {
 							<CardContent className="grid gap-4 @3xl/workspace:grid-cols-2">
 								<form.Field name="supervisor">
 									{(field) => (
-										<div className="space-y-2">
+										<div className="oncf-field">
 											<Label htmlFor="supervisor">Supervisor Name</Label>
 											<Input
 												id="supervisor"
@@ -360,7 +360,7 @@ export function OrderCreateForm(): JSX.Element {
 												stepErrors.status ??
 												getFormErrorMessage(field.state.meta.errors[0]);
 											return (
-												<div className="space-y-2">
+												<div className="oncf-field">
 													<FormFieldHeader
 														htmlFor="status"
 														label="Initial Status Override"
@@ -385,7 +385,7 @@ export function OrderCreateForm(): JSX.Element {
 								)}
 								<form.Field name="orderDate">
 									{(field) => (
-										<div className="space-y-2">
+										<div className="oncf-field">
 											<Label htmlFor="orderDate">Order Date</Label>
 											<Input
 												id="orderDate"
@@ -401,7 +401,7 @@ export function OrderCreateForm(): JSX.Element {
 
 								<form.Field name="startDate">
 									{(field) => (
-										<div className="space-y-2">
+										<div className="oncf-field">
 											<Label htmlFor="startDate">Planned Transport Start</Label>
 											<Input
 												id="startDate"
@@ -417,7 +417,7 @@ export function OrderCreateForm(): JSX.Element {
 
 								<form.Field name="endDate">
 									{(field) => (
-										<div className="space-y-2">
+										<div className="oncf-field">
 											<Label htmlFor="endDate">Planned Completion Target</Label>
 											<Input
 												id="endDate"
@@ -444,7 +444,7 @@ export function OrderCreateForm(): JSX.Element {
 							<CardContent>
 								<form.Field name="remarks">
 									{(field) => (
-										<div className="space-y-2">
+										<div className="oncf-field">
 											<Label htmlFor="remarks">
 												Remarks & Operational Notes
 											</Label>

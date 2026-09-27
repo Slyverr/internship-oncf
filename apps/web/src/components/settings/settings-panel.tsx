@@ -416,7 +416,7 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 					</CardHeader>
 					<CardContent>
 						<form onSubmit={saveProfile} className="grid gap-4 sm:grid-cols-2">
-							<div className="grid gap-control">
+							<div className="oncf-field">
 								<Label htmlFor="settings-first-name">First name</Label>
 								<Input
 									id="settings-first-name"
@@ -430,7 +430,7 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 									}}
 								/>
 							</div>
-							<div className="grid gap-control">
+							<div className="oncf-field">
 								<Label htmlFor="settings-last-name">Last name</Label>
 								<Input
 									id="settings-last-name"
@@ -444,7 +444,7 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 									}}
 								/>
 							</div>
-							<div className="grid gap-control sm:col-span-2">
+							<div className="oncf-field sm:col-span-2">
 								<Label htmlFor="settings-email">Email address</Label>
 								<Input
 									id="settings-email"
@@ -509,7 +509,7 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 					</CardHeader>
 					<CardContent>
 						<form onSubmit={changePassword} className="grid max-w-xl gap-4">
-							<div className="grid gap-control">
+							<div className="oncf-field">
 								<Label htmlFor="current-password">Current password</Label>
 								<Input
 									id="current-password"
@@ -520,7 +520,7 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 									onChange={(event) => setCurrentPassword(event.target.value)}
 								/>
 							</div>
-							<div className="grid gap-control">
+							<div className="oncf-field">
 								<Label htmlFor="new-password">New password</Label>
 								<Input
 									id="new-password"
@@ -539,7 +539,7 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 									{STRONG_PASSWORD_HINT}
 								</p>
 							</div>
-							<div className="grid gap-control">
+							<div className="oncf-field">
 								<Label htmlFor="confirm-new-password">
 									Confirm new password
 								</Label>

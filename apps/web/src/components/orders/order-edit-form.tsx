@@ -208,7 +208,7 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 						hidden={step !== 0}
 						className={`grid gap-4 @3xl/workspace:grid-cols-2 ${step === 0 ? "page-enter" : ""}`}
 					>
-						<div className="space-y-2">
+						<div className="oncf-field">
 							<Label>Goods / Commodity</Label>
 							<GoodSelect
 								value={values.goodsId}
@@ -216,7 +216,7 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 							/>
 						</div>
 
-						<div className="space-y-2">
+						<div className="oncf-field">
 							<Label>Unit of Measurement</Label>
 							<UnitSelect
 								value={values.unitId}
@@ -224,7 +224,7 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 							/>
 						</div>
 
-						<div className="space-y-2">
+						<div className="oncf-field">
 							<Label htmlFor="quantityDemanded">Quantity Demanded *</Label>
 							<Input
 								id="quantityDemanded"
@@ -244,7 +244,7 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 						hidden={step !== 1}
 						className={`grid gap-4 @3xl/workspace:grid-cols-2 ${step === 1 ? "page-enter" : ""}`}
 					>
-						<div className="space-y-2">
+						<div className="oncf-field">
 							<Label htmlFor="supervisor">Supervisor</Label>
 							<Input
 								id="supervisor"
@@ -262,7 +262,7 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 								["endDate", "Planned Completion Target"],
 							] as const
 						).map(([key, label]) => (
-							<div key={key} className="space-y-2">
+							<div key={key} className="oncf-field">
 								<Label htmlFor={key}>{label}</Label>
 								<Input
 									id={key}
@@ -279,7 +279,7 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 							</div>
 						))}
 
-						<div className="space-y-2 @3xl/workspace:col-span-2">
+						<div className="oncf-field @3xl/workspace:col-span-2">
 							<Label htmlFor="remarks">Remarks</Label>
 							<Textarea
 								id="remarks"

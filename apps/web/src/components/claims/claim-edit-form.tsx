@@ -114,7 +114,7 @@ export function ClaimEditForm({ claim }: { claim: ClaimDetailDto }) {
 				</CardHeader>
 				<CardContent className="space-y-4">
 					<div className="grid gap-4 @3xl/workspace:grid-cols-2">
-						<div className="space-y-2">
+						<div className="oncf-field">
 							<Label htmlFor="claimType">Claim type</Label>
 							<Select
 								value={type}
@@ -132,12 +132,12 @@ export function ClaimEditForm({ claim }: { claim: ClaimDetailDto }) {
 								</SelectContent>
 							</Select>
 						</div>
-						<div className="space-y-2">
+						<div className="oncf-field">
 							<Label htmlFor="claimPriority">Priority</Label>
 							<ClaimPrioritySelect value={priority} onChange={setPriority} />
 						</div>
 					</div>
-					<div className="space-y-2">
+					<div className="oncf-field">
 						<Label htmlFor="description">Description</Label>
 						<Textarea
 							id="description"

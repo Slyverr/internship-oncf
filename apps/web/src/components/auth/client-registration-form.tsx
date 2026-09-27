@@ -104,7 +104,7 @@ export function ClientRegistrationForm() {
 									{formError}
 								</p>
 							)}
-							<div className="grid gap-control">
+							<div className="oncf-field">
 								<Label htmlFor="registration-first-name">First name</Label>
 								<Input
 									id="registration-first-name"
@@ -116,7 +116,7 @@ export function ClientRegistrationForm() {
 									onChange={(event) => setFirstName(event.target.value)}
 								/>
 							</div>
-							<div className="grid gap-control">
+							<div className="oncf-field">
 								<Label htmlFor="registration-last-name">Last name</Label>
 								<Input
 									id="registration-last-name"
@@ -128,7 +128,7 @@ export function ClientRegistrationForm() {
 									onChange={(event) => setLastName(event.target.value)}
 								/>
 							</div>
-							<div className="grid gap-control">
+							<div className="oncf-field">
 								<Label htmlFor="registration-customer-code">
 									Customer code
 								</Label>
@@ -142,7 +142,7 @@ export function ClientRegistrationForm() {
 									onChange={(event) => setCustomerCode(event.target.value)}
 								/>
 							</div>
-							<div className="grid gap-control">
+							<div className="oncf-field">
 								<Label htmlFor="registration-ice">ICE</Label>
 								<Input
 									id="registration-ice"
@@ -163,7 +163,7 @@ export function ClientRegistrationForm() {
 									Enter your company's 15-digit ICE.
 								</p>
 							</div>
-							<div className="grid gap-control sm:col-span-2">
+							<div className="oncf-field sm:col-span-2">
 								<Label htmlFor="registration-email">Email address</Label>
 								<Input
 									id="registration-email"
@@ -176,7 +176,7 @@ export function ClientRegistrationForm() {
 									onChange={(event) => setEmail(event.target.value)}
 								/>
 							</div>
-							<div className="grid gap-control">
+							<div className="oncf-field">
 								<Label htmlFor="registration-password">Password</Label>
 								<Input
 									id="registration-password"
@@ -189,7 +189,7 @@ export function ClientRegistrationForm() {
 									onChange={(event) => setPassword(event.target.value)}
 								/>
 							</div>
-							<div className="grid gap-control">
+							<div className="oncf-field">
 								<Label htmlFor="registration-password-confirmation">
 									Confirm password
 								</Label>

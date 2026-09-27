@@ -169,7 +169,7 @@ export function UserCreateForm(): JSX.Element {
 								stepErrors.email ??
 								getFormErrorMessage(field.state.meta.errors[0]);
 							return (
-								<div className="space-y-2">
+								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="email"
 										label="Email Address"
@@ -202,7 +202,7 @@ export function UserCreateForm(): JSX.Element {
 								stepErrors.password ??
 								getFormErrorMessage(field.state.meta.errors[0]);
 							return (
-								<div className="space-y-2">
+								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="password"
 										label="Password"
@@ -248,7 +248,7 @@ export function UserCreateForm(): JSX.Element {
 								stepErrors.firstName ??
 								getFormErrorMessage(field.state.meta.errors[0]);
 							return (
-								<div className="space-y-2">
+								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="firstName"
 										label="First Name"
@@ -280,7 +280,7 @@ export function UserCreateForm(): JSX.Element {
 								stepErrors.lastName ??
 								getFormErrorMessage(field.state.meta.errors[0]);
 							return (
-								<div className="space-y-2">
+								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="lastName"
 										label="Last Name"
@@ -308,7 +308,7 @@ export function UserCreateForm(): JSX.Element {
 
 					<form.Field name="role">
 						{(field) => (
-							<div className="space-y-2">
+							<div className="oncf-field">
 								<Label htmlFor="role">User Role *</Label>
 								<Select
 									value={field.state.value}
@@ -345,7 +345,7 @@ export function UserCreateForm(): JSX.Element {
 											getFormErrorMessage(field.state.meta.errors[0]);
 
 										return (
-											<div className="space-y-2 @3xl/workspace:col-span-2">
+											<div className="oncf-field @3xl/workspace:col-span-2">
 												<FormFieldHeader
 													htmlFor="customerId"
 													label="Customer Company"
@@ -370,7 +370,7 @@ export function UserCreateForm(): JSX.Element {
 
 					<form.Field name="type">
 						{(field) => (
-							<div className="space-y-2">
+							<div className="oncf-field">
 								<Label htmlFor="type">User Type</Label>
 								<Select
 									value={field.state.value}
@@ -396,7 +396,7 @@ export function UserCreateForm(): JSX.Element {
 
 					<form.Field name="employeeId">
 						{(field) => (
-							<div className="space-y-2">
+							<div className="oncf-field">
 								<Label htmlFor="employeeId">Employee ID</Label>
 								<Input
 									id="employeeId"

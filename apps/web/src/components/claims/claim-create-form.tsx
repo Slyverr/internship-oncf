@@ -194,7 +194,7 @@ export function ClaimCreateForm(): JSX.Element {
 									stepErrors.customerId ?? field.state.meta.errors[0],
 								);
 								return (
-									<div className="space-y-2">
+									<div className="oncf-field">
 										<FormFieldHeader
 											htmlFor="customerId"
 											label="Customer Company"
@@ -231,7 +231,7 @@ export function ClaimCreateForm(): JSX.Element {
 								stepErrors.type ??
 								getFormErrorMessage(field.state.meta.errors[0]);
 							return (
-								<div className="space-y-2">
+								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="type"
 										label="Claim Type"
@@ -267,7 +267,7 @@ export function ClaimCreateForm(): JSX.Element {
 								stepErrors.priority ??
 								getFormErrorMessage(field.state.meta.errors[0]);
 							return (
-								<div className="space-y-2">
+								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="priority"
 										label="Priority"
@@ -289,7 +289,7 @@ export function ClaimCreateForm(): JSX.Element {
 									stepErrors.status ??
 									getFormErrorMessage(field.state.meta.errors[0]);
 								return (
-									<div className="space-y-2">
+									<div className="oncf-field">
 										<FormFieldHeader
 											htmlFor="status"
 											label="Initial Status Override"
@@ -321,7 +321,7 @@ export function ClaimCreateForm(): JSX.Element {
 				<CardContent className="grid gap-4 @3xl/workspace:grid-cols-2">
 					<form.Field name="orderId">
 						{(field) => (
-							<div className="space-y-2">
+							<div className="oncf-field">
 								<Label htmlFor="orderId">Associated Order (Optional)</Label>
 								<OrderSelect
 									id="orderId"
@@ -357,7 +357,7 @@ export function ClaimCreateForm(): JSX.Element {
 								stepErrors.description ??
 								getFormErrorMessage(field.state.meta.errors[0]);
 							return (
-								<div className="space-y-2">
+								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="description"
 										label="Claim Description"
@@ -390,7 +390,7 @@ export function ClaimCreateForm(): JSX.Element {
 								stepErrors.resolution ??
 								getFormErrorMessage(field.state.meta.errors[0]);
 							return (
-								<div className="space-y-2">
+								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="resolution"
 										label="Initial Resolution Notes"

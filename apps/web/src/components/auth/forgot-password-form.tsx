@@ -41,7 +41,7 @@ export function ForgotPasswordForm() {
 								If an account matches that address, a reset link will be sent.
 							</p>
 						) : (
-							<div className="space-y-2">
+							<div className="oncf-field">
 								<Label htmlFor="email">Email</Label>
 								<Input
 									id="email"

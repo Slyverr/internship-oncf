@@ -76,6 +76,11 @@
 	gap: var(--spacing-control);
 }
 
+@utility oncf-field {
+	display: grid;
+	gap: var(--spacing-control);
+}
+
 @utility text-meta {
 	font-size: calc(0.8125rem * var(--type-scale, 1));
 	line-height: calc(1.25rem * var(--type-scale, 1));

@@ -28,7 +28,7 @@ export function CustomerSelect({ id, value, onChange }: CustomerSelectProps) {
 	const selectedCustomer = customers.find((customer) => customer.id === value);
 
 	return (
-		<div className="space-y-2">
+		<div className="oncf-field">
 			<Select
 				value={value?.toString() ?? null}
 				onValueChange={(value) => onChange(Number(value))}

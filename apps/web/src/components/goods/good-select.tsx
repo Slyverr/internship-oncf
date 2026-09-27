@@ -30,7 +30,7 @@ export function GoodSelect({ value, onChange }: GoodSelectProps) {
 	const selectedGood = goods.find((good) => good.id === value);
 
 	return (
-		<div className="space-y-2">
+		<div className="oncf-field">
 			<Select
 				value={selectedGood?.id.toString() ?? null}
 				onValueChange={(selectedId) => onChange(Number(selectedId))}

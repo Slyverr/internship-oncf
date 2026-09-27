@@ -218,7 +218,7 @@ export function ProgramCreateForm({
 								getFormErrorMessage(field.state.meta.errors[0]);
 
 							return (
-								<div className="space-y-2">
+								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="orderId"
 										label="Order"
@@ -261,7 +261,7 @@ export function ProgramCreateForm({
 									getFormErrorMessage(field.state.meta.errors[0]);
 
 								return (
-									<div className="space-y-2">
+									<div className="oncf-field">
 										<FormFieldHeader
 											htmlFor="userId"
 											label="Responsible User"
@@ -299,7 +299,7 @@ export function ProgramCreateForm({
 									getFormErrorMessage(field.state.meta.errors[0]);
 
 								return (
-									<div className="space-y-2">
+									<div className="oncf-field">
 										<FormFieldHeader
 											htmlFor="status"
 											label="Initial Status Override"
@@ -331,7 +331,7 @@ export function ProgramCreateForm({
 								getFormErrorMessage(field.state.meta.errors[0]);
 
 							return (
-								<div className="space-y-2">
+								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="plannedDate"
 										label="Planned Date"
@@ -364,7 +364,7 @@ export function ProgramCreateForm({
 								getFormErrorMessage(field.state.meta.errors[0]);
 
 							return (
-								<div className="space-y-2">
+								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="quantityPlanned"
 										label="Quantity Planned"
@@ -411,7 +411,7 @@ export function ProgramCreateForm({
 								getFormErrorMessage(field.state.meta.errors[0]);
 
 							return (
-								<div className="space-y-2">
+								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="quantityRealized"
 										label="Quantity Realized"
@@ -435,7 +435,7 @@ export function ProgramCreateForm({
 
 					<form.Field name="dtmStatus">
 						{(field) => (
-							<div className="space-y-2">
+							<div className="oncf-field">
 								<Label htmlFor="dtmStatus">DTM Status</Label>
 								<Input
 									id="dtmStatus"

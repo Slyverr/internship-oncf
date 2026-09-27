@@ -94,7 +94,7 @@ export function ProgramEditForm({ program }: { program: ProgramDetailDto }) {
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="grid gap-4 @3xl/workspace:grid-cols-2">
-					<div className="space-y-2">
+					<div className="oncf-field">
 						<Label htmlFor="plannedDate">Planned date</Label>
 						<Input
 							id="plannedDate"
@@ -104,7 +104,7 @@ export function ProgramEditForm({ program }: { program: ProgramDetailDto }) {
 							required
 						/>
 					</div>
-					<div className="space-y-2">
+					<div className="oncf-field">
 						<Label htmlFor="quantityPlanned">Planned quantity</Label>
 						<Input
 							id="quantityPlanned"

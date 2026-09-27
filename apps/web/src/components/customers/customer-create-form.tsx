@@ -122,7 +122,7 @@ export function CustomerCreateForm(): JSX.Element {
 								stepErrors.companyName ??
 								getFormErrorMessage(field.state.meta.errors[0]);
 							return (
-								<div className="space-y-2">
+								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="companyName"
 										label="Company Name"
@@ -150,7 +150,7 @@ export function CustomerCreateForm(): JSX.Element {
 
 					<form.Field name="customerCode">
 						{(field) => (
-							<div className="space-y-2">
+							<div className="oncf-field">
 								<Label htmlFor="customerCode">Customer Code</Label>
 								<Input
 									id="customerCode"
@@ -164,7 +164,7 @@ export function CustomerCreateForm(): JSX.Element {
 
 					<form.Field name="ice">
 						{(field) => (
-							<div className="grid gap-control">
+							<div className="oncf-field">
 								<Label htmlFor="customer-ice">ICE</Label>
 								<Input
 									id="customer-ice"
@@ -184,7 +184,7 @@ export function CustomerCreateForm(): JSX.Element {
 
 					<form.Field name="typeId">
 						{(field) => (
-							<div className="space-y-2">
+							<div className="oncf-field">
 								<Label htmlFor="typeId">Type Identifier</Label>
 								<Input
 									id="typeId"
@@ -213,7 +213,7 @@ export function CustomerCreateForm(): JSX.Element {
 								stepErrors.email ??
 								getFormErrorMessage(field.state.meta.errors[0]);
 							return (
-								<div className="space-y-2">
+								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="email"
 										label="Email Address"
@@ -238,7 +238,7 @@ export function CustomerCreateForm(): JSX.Element {
 
 					<form.Field name="phone">
 						{(field) => (
-							<div className="space-y-2">
+							<div className="oncf-field">
 								<Label htmlFor="phone">Phone Number</Label>
 								<Input
 									id="phone"
@@ -252,7 +252,7 @@ export function CustomerCreateForm(): JSX.Element {
 
 					<form.Field name="address">
 						{(field) => (
-							<div className="space-y-2 @3xl/workspace:col-span-2">
+							<div className="oncf-field @3xl/workspace:col-span-2">
 								<Label htmlFor="address">Street Address</Label>
 								<Input
 									id="address"
@@ -266,7 +266,7 @@ export function CustomerCreateForm(): JSX.Element {
 
 					<form.Field name="city">
 						{(field) => (
-							<div className="space-y-2">
+							<div className="oncf-field">
 								<Label htmlFor="city">City</Label>
 								<Input
 									id="city"

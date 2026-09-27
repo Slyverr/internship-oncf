@@ -38,7 +38,7 @@ export function OrderSelect({
 	const selected = orders.find((order) => order.id === value);
 
 	return (
-		<div className="space-y-2">
+		<div className="oncf-field">
 			<Combobox
 				items={orders}
 				disabled={isLoading || (isError && orders.length === 0)}

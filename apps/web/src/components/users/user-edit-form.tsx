@@ -181,7 +181,7 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 								stepErrors.email ??
 								getFormErrorMessage(field.state.meta.errors[0]);
 							return (
-								<div className="space-y-2">
+								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="email"
 										label="Email Address"
@@ -210,7 +210,7 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 
 					<form.Field name="role">
 						{(field) => (
-							<div className="space-y-2">
+							<div className="oncf-field">
 								<Label htmlFor="role">User Role</Label>
 								<Select
 									value={field.state.value}
@@ -239,7 +239,7 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 
 					<form.Field name="type">
 						{(field) => (
-							<div className="space-y-2">
+							<div className="oncf-field">
 								<Label htmlFor="type">User Type</Label>
 								<Select
 									value={field.state.value}
@@ -282,7 +282,7 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 								stepErrors.firstName ??
 								getFormErrorMessage(field.state.meta.errors[0]);
 							return (
-								<div className="space-y-2">
+								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="firstName"
 										label="First Name"
@@ -314,7 +314,7 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 								stepErrors.lastName ??
 								getFormErrorMessage(field.state.meta.errors[0]);
 							return (
-								<div className="space-y-2">
+								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="lastName"
 										label="Last Name"
@@ -350,7 +350,7 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 											getFormErrorMessage(field.state.meta.errors[0]);
 
 										return (
-											<div className="space-y-2 @3xl/workspace:col-span-2">
+											<div className="oncf-field @3xl/workspace:col-span-2">
 												<FormFieldHeader
 													htmlFor="customerId"
 													label="Customer Company"
@@ -375,7 +375,7 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 
 					<form.Field name="employeeId">
 						{(field) => (
-							<div className="space-y-2">
+							<div className="oncf-field">
 								<Label htmlFor="employeeId">Employee ID</Label>
 								<Input
 									id="employeeId"

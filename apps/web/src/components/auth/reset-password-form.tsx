@@ -44,7 +44,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
 							</p>
 						) : (
 							<>
-								<div className="space-y-2">
+								<div className="oncf-field">
 									<Label htmlFor="password">New password</Label>
 									<Input
 										id="password"
@@ -54,7 +54,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
 										autoComplete="new-password"
 									/>
 								</div>
-								<div className="space-y-2">
+								<div className="oncf-field">
 									<Label htmlFor="confirmation">Confirm password</Label>
 									<Input
 										id="confirmation"

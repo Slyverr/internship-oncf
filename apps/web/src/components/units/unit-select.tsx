@@ -46,7 +46,7 @@ export function UnitSelect({
 	const selected = units.find((unit) => unit.id === value);
 
 	return (
-		<div className="space-y-2">
+		<div className="oncf-field">
 			<Combobox
 				items={units}
 				disabled={

@@ -52,7 +52,7 @@ export function ClaimCommentForm({ claimId }: ClaimCommentFormProps) {
 			</CardHeader>
 
 			<CardContent>
-				<div className="space-y-2">
+				<div className="oncf-field">
 					<Textarea
 						placeholder="Write a comment..."
 						value={content}
