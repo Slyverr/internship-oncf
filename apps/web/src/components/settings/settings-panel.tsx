@@ -161,16 +161,16 @@ export function SettingsPanel() {
 									className="size-4 self-center text-primary"
 									aria-hidden="true"
 								/>
-								<span className="grid gap-4">
+								<span className="grid gap-compact">
 									<span className="font-medium">{label}</span>
-									<span className="text-xs text-muted-foreground">
+									<span className="text-sm text-muted-foreground">
 										{description}
 									</span>
 								</span>
 							</Label>
 						))}
 					</RadioGroup>
-					<div className="pt-4 flex items-center gap-4 text-xs text-muted-foreground">
+					<div className="pt-4 flex items-center gap-4 text-sm text-muted-foreground">
 						<span className="size-3 rounded-full bg-primary" />
 						<span className="size-3 rounded-full bg-accent" />
 						<span>ONCF-inspired orange with softer neutral surfaces</span>
@@ -187,7 +187,7 @@ export function SettingsPanel() {
 				</CardHeader>
 				<CardContent>
 					<form onSubmit={saveProfile} className="grid gap-4 sm:grid-cols-2">
-						<div className="grid gap-4">
+						<div className="grid gap-control">
 							<Label htmlFor="settings-first-name">First name</Label>
 							<Input
 								id="settings-first-name"
@@ -197,7 +197,7 @@ export function SettingsPanel() {
 								onChange={(event) => setFirstName(event.target.value)}
 							/>
 						</div>
-						<div className="grid gap-4">
+						<div className="grid gap-control">
 							<Label htmlFor="settings-last-name">Last name</Label>
 							<Input
 								id="settings-last-name"
@@ -207,7 +207,7 @@ export function SettingsPanel() {
 								onChange={(event) => setLastName(event.target.value)}
 							/>
 						</div>
-						<div className="grid gap-4 sm:col-span-2">
+						<div className="grid gap-control sm:col-span-2">
 							<Label htmlFor="settings-email">Email address</Label>
 							<Input
 								id="settings-email"
@@ -246,7 +246,7 @@ export function SettingsPanel() {
 				</CardHeader>
 				<CardContent>
 					<form onSubmit={changePassword} className="grid max-w-xl gap-4">
-						<div className="grid gap-4">
+						<div className="grid gap-control">
 							<Label htmlFor="current-password">Current password</Label>
 							<Input
 								id="current-password"
@@ -257,7 +257,7 @@ export function SettingsPanel() {
 								onChange={(event) => setCurrentPassword(event.target.value)}
 							/>
 						</div>
-						<div className="grid gap-4">
+						<div className="grid gap-control">
 							<Label htmlFor="new-password">New password</Label>
 							<Input
 								id="new-password"
