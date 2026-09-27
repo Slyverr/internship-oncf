@@ -13,7 +13,9 @@ export async function customFetch<T>(
 	const { data } = await axios<T>({
 		...config,
 		...options,
-		baseURL: isServer ? process.env.BACKEND_API_URL : "/api/proxy",
+		baseURL: isServer
+			? (process.env.BACKEND_API_URL ?? "http://localhost:8000")
+			: "/api/proxy",
 		withCredentials: !isServer,
 		headers: {
 			...config.headers,

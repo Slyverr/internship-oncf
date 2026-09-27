@@ -36,12 +36,12 @@ export default function Page() {
 
 	return (
 		<AuthPageLayout>
-			<Card className="w-full max-w-lg">
+			<Card className="mx-auto w-full max-w-md">
 				<form action={action}>
 					<CardHeader className="space-y-2 pb-6">
-						<CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
+						<CardTitle className="text-2xl font-bold">Sign in</CardTitle>
 						<CardDescription>
-							Sign in to continue to your freight workspace.
+							Use your ECommand account to continue.
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-5">

@@ -12,9 +12,10 @@ async function handler(
 	const { path } = await params;
 	const token = (await cookies()).get("access_token")?.value;
 	const contentType = req.headers.get("content-type");
+	const backendUrl = process.env.BACKEND_API_URL ?? "http://localhost:8000";
 
 	const res = await fetch(
-		`${process.env.BACKEND_API_URL}/${path.join("/")}${req.nextUrl.search}`,
+		`${backendUrl}/${path.join("/")}${req.nextUrl.search}`,
 		{
 			method: req.method,
 			headers: {
