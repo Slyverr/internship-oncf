@@ -555,6 +555,11 @@ function SidebarMenuButton({
 				align="center"
 				hidden={state !== "collapsed" || isMobile}
 				{...tooltip}
+				sideOffset={8}
+				className={cn(
+					"border border-border bg-popover px-2 py-1 text-popover-foreground shadow-sm",
+					tooltip.className,
+				)}
 			/>
 		</Tooltip>
 	);
