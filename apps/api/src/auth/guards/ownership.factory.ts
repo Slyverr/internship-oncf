@@ -68,11 +68,15 @@ export function createOwnershipGuard<TService, TId>(
 				strict: false,
 			});
 
-			const accessGranted = canAccess
-				? await canAccess(serviceInstance, id, user)
-				: resolveOwnerId
-					? (await resolveOwnerId(serviceInstance, id)) === user.id
-					: false;
+			let accessGranted: boolean | undefined;
+			if (canAccess) {
+				accessGranted = await canAccess(serviceInstance, id, user);
+			} else if (resolveOwnerId) {
+				const ownerId = await resolveOwnerId(serviceInstance, id);
+				accessGranted = ownerId === undefined ? undefined : ownerId === user.id;
+			} else {
+				accessGranted = false;
+			}
 
 			if (accessGranted === undefined) return true;
 

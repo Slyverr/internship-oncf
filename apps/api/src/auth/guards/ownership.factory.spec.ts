@@ -15,11 +15,13 @@ const identityPipe: PipeTransform<string, number> = {
 
 function createGuard({
 	ownerId = 12,
+	ownerMissing = false,
 	permissionGranted = false,
 	param = "12",
 	canAccess,
 }: {
 	ownerId?: number;
+	ownerMissing?: boolean;
 	permissionGranted?: boolean;
 	param?: string;
 	canAccess?: (id: number, user: AuthUser) => Promise<boolean | undefined>;
@@ -36,7 +38,7 @@ function createGuard({
 		service: OwnedResourceService,
 		pipe: identityPipe,
 		permission: Permission.ORDERS_MANAGE_OTHER,
-		resolveOwnerId: async () => ownerId,
+		resolveOwnerId: async () => (ownerMissing ? undefined : ownerId),
 		...(canAccess && {
 			canAccess: (_service, id, authUser) => canAccess(id, authUser),
 		}),
@@ -65,7 +67,7 @@ describe("createOwnershipGuard", () => {
 	});
 
 	it("lets the route handler return its not-found response when the resource does not exist", async () => {
-		const { guard, context } = createGuard({ ownerId: undefined });
+		const { guard, context } = createGuard({ ownerMissing: true });
 		await expect(guard.canActivate(context)).resolves.toBe(true);
 	});
 
