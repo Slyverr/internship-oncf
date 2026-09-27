@@ -3,7 +3,6 @@
 import { useForm } from "@tanstack/react-form-nextjs";
 import { useRouter } from "next/navigation";
 import { type JSX, useState } from "react";
-import { z } from "zod";
 import { FormFieldHeader } from "@/components/common/form-field-header";
 import {
 	GuidedFormActions,
@@ -25,32 +24,12 @@ import {
 	getFormStepErrors,
 	omitFormStepError,
 } from "@/lib/form-utils";
-
-const createCustomerSchema = z.object({
-	companyName: z
-		.string()
-		.trim()
-		.min(1, "Company name is required")
-		.max(300, "Max 300 characters"),
-	customerCode: z.string().max(50, "Max 50 characters").optional(),
-	address: z.string().max(500, "Max 500 characters").optional(),
-	city: z.string().max(100, "Max 100 characters").optional(),
-	phone: z.string().max(20, "Max 20 characters").optional(),
-	email: z
-		.email("Invalid email")
-		.max(100, "Max 100 characters")
-		.optional()
-		.or(z.literal("")),
-	typeId: z.string().optional(),
-});
-
-type CreateCustomerFormValues = z.infer<typeof createCustomerSchema>;
-
-const customerIdentitySchema = createCustomerSchema.pick({ companyName: true });
-const customerSteps = [
-	{ title: "Company", description: "Identification details" },
-	{ title: "Contact", description: "Address and communication" },
-];
+import {
+	type CustomerFormValues,
+	customerFormSchema,
+	customerFormSteps,
+	customerIdentitySchema,
+} from "./customer-form";
 
 export function CustomerCreateForm(): JSX.Element {
 	const router = useRouter();
@@ -67,9 +46,9 @@ export function CustomerCreateForm(): JSX.Element {
 			phone: "",
 			email: "",
 			typeId: "",
-		} as CreateCustomerFormValues,
+		} as CustomerFormValues,
 		validators: {
-			onChange: createCustomerSchema,
+			onChange: customerFormSchema,
 		},
 		onSubmit: async ({ value }) => {
 			mutation.mutate(
@@ -119,7 +98,7 @@ export function CustomerCreateForm(): JSX.Element {
 			}}
 			className="space-y-4"
 		>
-			<GuidedFormProgress steps={customerSteps} currentStep={step} />
+			<GuidedFormProgress steps={customerFormSteps} currentStep={step} />
 
 			<Card
 				hidden={step !== 0}
@@ -280,7 +259,7 @@ export function CustomerCreateForm(): JSX.Element {
 				{(state: typeof form.state) => (
 					<GuidedFormActions
 						currentStep={step}
-						stepCount={customerSteps.length}
+						stepCount={customerFormSteps.length}
 						onCancel={() => router.back()}
 						onPrevious={() => setStep(0)}
 						onContinue={continueToContact}
