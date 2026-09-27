@@ -42,6 +42,23 @@ describe("default role permission matrix", () => {
 		);
 	});
 
+	it.each([Role.CLIENT_REPRESENTATIVE, Role.AGENT_COMMERCIAL])(
+		"grants %s catalog reads without catalog administration",
+		(role) => {
+			const managementPermissions = [
+				Permission.CATALOG_MANAGE_UNITS,
+				Permission.CATALOG_MANAGE_GOODS_TYPES,
+				Permission.CATALOG_MANAGE_GOODS,
+				Permission.CATALOG_MANAGE_ACCESSORY_OPERATIONS,
+				Permission.CATALOG_MANAGE_REJECTION_REASONS,
+			];
+			expect(grants(role, Permission.CATALOG_READ)).toBe(true);
+			for (const permission of managementPermissions) {
+				expect(grants(role, permission)).toBe(false);
+			}
+		},
+	);
+
 	it("grants commercial agents operational lifecycle actions without user administration", () => {
 		expect(
 			grants(Role.AGENT_COMMERCIAL, Permission.ORDERS_ACTION_APPROVE),
