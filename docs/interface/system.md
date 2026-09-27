@@ -28,7 +28,7 @@ This document is the shared UI contract for the Next.js application. Apply it to
 3. Stack page headings and actions until their workspace container is at least 1024px wide; do not base this choice on viewport width alone because the sidebar reduces available space. Below 640px, make form actions full width when it improves reach and collapse multi-column cards/forms to one column. At tablet width, use two columns only when both remain readable.
 4. Long values wrap. Buttons may wrap or stack; controls and type do not get smaller to fit. A 320px screen may scroll horizontally only inside a data-table region.
 5. Form/detail text fields use a readable maximum width instead of stretching across ultrawide monitors. Data tables may use the remaining page width.
-6. Public authentication routes share the ONCF-branded shell. Keep the form compact and centered below extra-large width; use a balanced brand-and-form split on wide screens. The desktop shell has one stable height across login and signup, and both forms center within it; phone layouts stay content-led and scroll naturally. Reuse the existing transparent mark and semantic theme surfaces, and keep the form width readable. Signup password guidance comes from the shared policy enforced by the API: show one short hint before entry, then only unmet requirements; report confirmation mismatch inline.
+6. Public authentication routes share the ONCF-branded shell and theme selector. Center compact auth content on phones; let long forms grow and scroll on short viewports. On wide screens, use a balanced brand-and-form split with one stable desktop shell height across login and signup. Keep both forms at the same readable width. Signup uses the shared two-step progress pattern to separate company details from sign-in details while preserving entered values. Password guidance comes from the shared API-enforced policy: show one short hint before entry, then only unmet requirements; report confirmation mismatch inline.
 
 ## 2. Type hierarchy
 
@@ -109,7 +109,7 @@ Use the same semantic roles in all themes. Cards should separate from the canvas
 ### Application shell measurements
 
 - The header is 64px high. The mobile sidebar sheet is 288px wide, bounded by the viewport; the expanded desktop sidebar is 256px.
-- The collapsed desktop rail is 64px wide. Keep logo and avatar marks at 32px and center them in 44px controls, with 16px top and bottom padding around the header/footer groups. Keep icon targets at 44px.
+- The collapsed desktop rail is 64px wide. Keep logo and avatar marks at 32px and center them in 44px controls. Header and footer groups stay 64px tall in both states, with the controls vertically centered; keep icon targets at 44px.
 - In the collapsed rail, center every logo/avatar/menu icon. Remove internal horizontal button padding and any gap left by a hidden label when either would displace the icon; retain the full button target and the rail's outer breathing room.
 - Keep the brand art inside its tile without stretching the logo to a square. If an asset includes transparent canvas, size/crop it by its visible content proportions and preserve the complete wordmark where there is room.
 - Expanded navigation hover may tint its full 44px row using a low-opacity accent. Collapsed hover changes the icon/foreground gently without filling the whole target. Focus uses the visible ring and remains distinct from hover.
