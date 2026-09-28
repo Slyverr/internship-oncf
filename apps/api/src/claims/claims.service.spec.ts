@@ -40,6 +40,21 @@ describe("ClaimsService access scoping", () => {
 		);
 	});
 
+	it("lets commercial claims managers see the shared claims queue", async () => {
+		const agent = {
+			...client,
+			role: Role.AGENT_COMMERCIAL,
+			customerId: null,
+			permissions: new Set([
+				Permission.CLAIMS_READ,
+				Permission.CLAIMS_MANAGE_OTHER,
+			]),
+		};
+		const query = { customerId: 43 } as ListClaimQueryDto;
+		await service.findAll(agent, query);
+		expect(findClaims).toHaveBeenCalledWith(query);
+	});
+
 	it("preserves broad claims scope for users with manage-other permission", async () => {
 		const admin = {
 			...client,

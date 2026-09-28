@@ -174,6 +174,10 @@ export const PERMISSION_DEFINITIONS: Record<Permission, PermissionDefinition> =
 		[Permission.CLAIMS_ACTION]: {
 			description: "Perform claim actions",
 		},
+		[Permission.CLAIMS_ACTION_COMMENT]: {
+			description: "Add comments to accessible claims",
+			parent: Permission.CLAIMS_ACTION,
+		},
 		[Permission.CLAIMS_ACTION_START_PROGRESS]: {
 			description: "Start claim progress",
 			parent: Permission.CLAIMS_ACTION,

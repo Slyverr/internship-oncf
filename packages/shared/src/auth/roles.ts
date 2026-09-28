@@ -14,6 +14,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, Permission[] | "ALL"> = {
 
 		Permission.CLAIMS_CREATE,
 		Permission.CLAIMS_READ,
+		Permission.CLAIMS_ACTION_COMMENT,
 
 		Permission.REPORTS_READ,
 		Permission.PROFILE_UPDATE,
@@ -36,9 +37,9 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, Permission[] | "ALL"> = {
 		Permission.CUSTOMERS_READ,
 		Permission.CUSTOMERS_UPDATE,
 
-		Permission.CLAIMS_CREATE,
 		Permission.CLAIMS_READ,
 		Permission.CLAIMS_UPDATE,
+		Permission.CLAIMS_MANAGE_OTHER,
 		Permission.CLAIMS_MANAGE_STATUS,
 		Permission.CLAIMS_ACTION,
 

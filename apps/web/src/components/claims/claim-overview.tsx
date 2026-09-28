@@ -1,12 +1,16 @@
+import { Permission } from "@ecommand/shared";
 import { RecordDetail, RecordMetric } from "@/components/common/record-summary";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ClaimDetailDto } from "@/lib/api/generated.schemas";
 import { formatDisplayDate } from "@/lib/date-utils";
 import { formatEnumLabel } from "@/lib/enum-labels";
+import { useAuth } from "@/providers/auth-provider";
 import { ClaimCommentForm } from "./claim-comment-form";
 import { ClaimComments } from "./claim-comments";
 
 export function ClaimOverview({ claim }: { claim: ClaimDetailDto }) {
+	const { hasPermission } = useAuth();
+	const canComment = hasPermission(Permission.CLAIMS_ACTION_COMMENT);
 	const createdBy = claim.createdByUser
 		? `${claim.createdByUser.firstName} ${claim.createdByUser.lastName}`
 		: "—";
@@ -109,9 +113,13 @@ export function ClaimOverview({ claim }: { claim: ClaimDetailDto }) {
 			</div>
 
 			{/* Comments section – spans full width */}
-			<div className="grid gap-6 @3xl/workspace:grid-cols-2">
+			<div
+				className={
+					canComment ? "grid gap-6 @3xl/workspace:grid-cols-2" : "grid gap-6"
+				}
+			>
 				<ClaimComments claimId={claim.id} />
-				<ClaimCommentForm claimId={claim.id} />
+				{canComment && <ClaimCommentForm claimId={claim.id} />}
 			</div>
 		</div>
 	);

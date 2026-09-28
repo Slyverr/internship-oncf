@@ -2,11 +2,13 @@
 
 import { MessageCircleIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useClaimsControllerGetComments } from "@/lib/api/claims";
 import type { ClaimCommentDto } from "@/lib/api/generated.schemas";
 import { formatRelativeTime } from "@/lib/date-utils";
+import { getFormErrorMessage } from "@/lib/form-utils";
 
 interface ClaimCommentsProps {
 	claimId: number;
@@ -46,7 +48,13 @@ function CommentItem({ comment }: { comment: ClaimCommentDto }) {
 }
 
 export function ClaimComments({ claimId }: ClaimCommentsProps) {
-	const { data: comments, isLoading } = useClaimsControllerGetComments(claimId);
+	const {
+		data: comments,
+		isLoading,
+		isError,
+		error,
+		refetch,
+	} = useClaimsControllerGetComments(claimId);
 
 	if (isLoading) {
 		return (
@@ -76,7 +84,16 @@ export function ClaimComments({ claimId }: ClaimCommentsProps) {
 			</CardHeader>
 
 			<CardContent>
-				{comments && comments.length > 0 ? (
+				{isError ? (
+					<div className="space-y-2" role="alert">
+						<p className="text-sm text-destructive">
+							Could not load comments. {getFormErrorMessage(error)}
+						</p>
+						<Button variant="outline" size="sm" onClick={() => void refetch()}>
+							Try again
+						</Button>
+					</div>
+				) : comments && comments.length > 0 ? (
 					<div className="divide-y">
 						{comments.map((comment) => (
 							<CommentItem key={comment.id} comment={comment} />

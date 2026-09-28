@@ -159,6 +159,16 @@ export function ClaimCreateForm(): JSX.Element {
 			: undefined,
 		{ query: { enabled: selectedCustomerId > 0 } },
 	);
+	const canCreateClaims = hasPermission(Permission.CLAIMS_CREATE);
+
+	if (!canCreateClaims) {
+		return (
+			<p role="alert" className="text-sm text-muted-foreground">
+				You do not have permission to create claims. Return to the claims list
+				to review existing claims.
+			</p>
+		);
+	}
 
 	return (
 		<form

@@ -47,7 +47,7 @@ const endpoints = [
 	},
 	{
 		action: "addComment",
-		permission: Permission.CLAIMS_UPDATE,
+		permission: Permission.CLAIMS_ACTION_COMMENT,
 		serviceMethod: "addComment",
 		args: [42, dto, { user }],
 		serviceArgs: [42, dto.content, user],

@@ -108,7 +108,7 @@ export class ClaimsController {
 	}
 
 	@Post(":id/comments")
-	@RequireAny(Permission.CLAIMS_UPDATE)
+	@RequireAny(Permission.CLAIMS_ACTION_COMMENT)
 	@ClaimCommentResponse()
 	async addComment(
 		@ClaimIdParam() id: ClaimId,

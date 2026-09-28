@@ -64,6 +64,7 @@ export enum Permission {
 	CLAIMS_MANAGE_OTHER = "claims:manage:other",
 	CLAIMS_MANAGE_STATUS = "claims:manage:status",
 	CLAIMS_ACTION = "claims:action",
+	CLAIMS_ACTION_COMMENT = "claims:action:comment",
 	CLAIMS_ACTION_START_PROGRESS = "claims:action:start-progress",
 	CLAIMS_ACTION_AWAIT_INFO = "claims:action:await-info",
 	CLAIMS_ACTION_START_TREATMENT = "claims:action:start-treatment",

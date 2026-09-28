@@ -9,7 +9,7 @@ This guide maps default roles to API permissions, ownership rules, and web surfa
 | User administration and registration review | All user actions, including approving/rejecting client signup | — | — |
 | Orders | All actions and records | Operational actions and cross-customer records | Create/read/update/delete drafts and submit; reads use the assigned customer when present, otherwise own-created records |
 | Programs | All actions and records | Create/read/update; status, ownership, and lifecycle actions | Read programs linked to orders for the assigned customer; no create/update/delete/workflow actions |
-| Claims | All actions and records | Create/read/update; status and lifecycle actions | Create/read own claims |
+| Claims | All actions and records | Read/update all claims; status and lifecycle actions, including comments | Create/read/comment on own claims |
 | Customers | All actions | Read/update | — |
 | Catalog | Read and manage | Read | Read |
 | Tracking | Read and update | Read | — |
@@ -28,9 +28,9 @@ Admin receives every defined permission. Parent permissions imply descendants (f
 | Programs list/detail | programs:read | Sidebar Programs; list/detail | Lists and ID routes use the assigned customer's order relation when a customer is linked, or creator scope when no customer is linked; `PROGRAMS_MANAGE_OTHER` bypasses the scope. |
 | Programs create/edit/delete | programs:create/update/delete | Create form; program action menu | The API and web both restrict deletion to draft programs. |
 | Program lifecycle | programs:action:* | ProgramActions | Valid path: draft → pending approval → approved → confirmed → sent to DTM → in progress. Cancellation is allowed before dispatch. |
-| Claims list/detail/comments | claims:read | Sidebar Claims; details and comments | ID routes use ClaimOwnershipGuard; list filters are constrained for users without manage-other. |
-| Claims create/edit/delete | claims:create/update/delete | Dashboard quick action; create form; claim action menu | The dashboard action is permission-filtered; delete is admin-only by default. |
-| Claim lifecycle | claims:action:* | ClaimActions | Buttons use specific action permissions and supported current states. |
+| Claims list/detail/comments | claims:read; claims:action:comment | Sidebar Claims; details, comment list, and role-gated comment form | Agents with `CLAIMS_MANAGE_OTHER` process the shared queue. Client representatives see and comment on their own claims only. |
+| Claims create/edit/delete | claims:create/update/delete | Client/admin dashboard quick action; create form; claim action menu | Client representatives submit claims; agents do not create claims. Delete is admin-only by default. |
+| Claim lifecycle | claims:action:* | ClaimActions | Buttons use specific action permissions and supported current states; parent `claims:action` also grants commenting. |
 | Customers | customers:read/create/update/delete | Sidebar Customers; forms and action menu | Commercial agents read/update; create/deactivate are admin-only. |
 | Public client signup | Public `/auth/register` | `/signup` registration form | Submitted customer code and ICE must match an active local customer; new account is inactive and pending admin review. |
 | Users and registration review | users:read/create/update/delete | Sidebar Users; forms, request status, approve/reject actions | Admin-only by default. Only pending client-representative requests can be reviewed; pending and rejected accounts cannot sign in. |
@@ -45,7 +45,7 @@ Admin receives every defined permission. Parent permissions imply descendants (f
 - Role names alone do not authorize a request. Use the authenticated user’s effective permission set.
 - `users.customer_id` is the existing relation that anchors client representatives to a company. User forms and the API require it for the client-representative role; the development fixture assigns the seeded client to customer `CLI009`.
 - An ID route may apply both permission and ownership checks; review both. Ownership guards let missing records reach the route service so callers receive its normal not-found response instead of a 500.
-- Customer scope follows the existing order access rule: compare the user's customer assignment with `orders.customer_id`; program reads follow `forecast_programs.order_id -> orders.customer_id`. Claims remain creator-scoped for direct access and user/customer-scoped in list queries.
+- Customer scope follows the existing order access rule: compare the user's customer assignment with `orders.customer_id`; program reads follow `forecast_programs.order_id -> orders.customer_id`. Claims are creator-scoped for client representatives and shared with commercial agents through `CLAIMS_MANAGE_OTHER` so they can process customer submissions.
 - Changes to role grants, controller decorators, ownership logic, transition maps, or action buttons require corresponding matrix and test updates.
 
 ## Verification coverage

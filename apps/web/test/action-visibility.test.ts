@@ -123,18 +123,26 @@ for (const role of [
 		getDashboardQuickActions((permission) =>
 			roleHasPermission(role, permission),
 		),
-		[
-			{
-				type: "order",
-				label: "Create order",
-				href: "/dashboard/orders/new",
-			},
-			{
-				type: "claim",
-				label: "Create claim",
-				href: "/dashboard/claims/new",
-			},
-		],
+		role === Role.AGENT_COMMERCIAL
+			? [
+					{
+						type: "order",
+						label: "Create order",
+						href: "/dashboard/orders/new",
+					},
+				]
+			: [
+					{
+						type: "order",
+						label: "Create order",
+						href: "/dashboard/orders/new",
+					},
+					{
+						type: "claim",
+						label: "Create claim",
+						href: "/dashboard/claims/new",
+					},
+				],
 		`${role} gets quick actions for workflows granted by its default permissions`,
 	);
 }

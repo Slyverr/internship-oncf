@@ -1,15 +1,17 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { type FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/toast";
 import {
 	getClaimsControllerFindOneQueryKey,
 	getClaimsControllerGetCommentsQueryKey,
 	useClaimsControllerAddComment,
 } from "@/lib/api/claims";
+import { getFormErrorMessage } from "@/lib/form-utils";
 
 interface ClaimCommentFormProps {
 	claimId: number;
@@ -21,26 +23,38 @@ export function ClaimCommentForm({ claimId }: ClaimCommentFormProps) {
 
 	const mutation = useClaimsControllerAddComment();
 
-	const handleSubmit = () => {
-		if (!content.trim()) return;
+	const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		const trimmedContent = content.trim();
+		if (!trimmedContent || mutation.isPending) return;
 
-		mutation.mutate(
-			{
+		try {
+			await mutation.mutateAsync({
 				id: claimId,
-				data: { content: content.trim() },
-			},
-			{
-				onSuccess: () => {
-					setContent("");
-					void queryClient.invalidateQueries({
-						queryKey: getClaimsControllerGetCommentsQueryKey(claimId),
-					});
-					void queryClient.invalidateQueries({
-						queryKey: getClaimsControllerFindOneQueryKey(claimId),
-					});
-				},
-			},
-		);
+				data: { content: trimmedContent },
+			});
+			setContent("");
+			await Promise.all([
+				queryClient.invalidateQueries({
+					queryKey: getClaimsControllerGetCommentsQueryKey(claimId),
+				}),
+				queryClient.invalidateQueries({
+					queryKey: getClaimsControllerFindOneQueryKey(claimId),
+				}),
+			]);
+			toast.add({
+				type: "success",
+				title: "Comment added",
+				description: "Your comment has been added to this claim.",
+			});
+		} catch (error) {
+			toast.add({
+				type: "error",
+				title: "Could not add comment",
+				description:
+					getFormErrorMessage(error) ?? "Please try again in a moment.",
+			});
+		}
 	};
 
 	const isPending = mutation.isPending;
@@ -52,24 +66,29 @@ export function ClaimCommentForm({ claimId }: ClaimCommentFormProps) {
 			</CardHeader>
 
 			<CardContent>
-				<div className="oncf-field">
+				<form className="oncf-field" onSubmit={handleSubmit}>
 					<Textarea
+						aria-label="Comment"
 						placeholder="Write a comment..."
 						value={content}
 						onChange={(e) => setContent(e.target.value)}
 						rows={3}
+						maxLength={2000}
 						disabled={isPending}
 					/>
+					<p className="text-meta text-muted-foreground" aria-live="polite">
+						{content.length}/2000 characters
+					</p>
 
 					<div className="flex justify-end">
 						<Button
-							onClick={handleSubmit}
-							disabled={isPending || !content.trim()}
+							type="submit"
+							disabled={isPending || !content.trim() || content.length > 2000}
 						>
 							{isPending ? "Sending..." : "Send Comment"}
 						</Button>
 					</div>
-				</div>
+				</form>
 			</CardContent>
 		</Card>
 	);

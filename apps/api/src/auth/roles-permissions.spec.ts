@@ -32,6 +32,9 @@ describe("default role permission matrix", () => {
 			true,
 		);
 		expect(
+			grants(Role.CLIENT_REPRESENTATIVE, Permission.CLAIMS_ACTION_COMMENT),
+		).toBe(true);
+		expect(
 			grants(
 				Role.CLIENT_REPRESENTATIVE,
 				Permission.CLAIMS_ACTION_START_PROGRESS,
@@ -69,18 +72,26 @@ describe("default role permission matrix", () => {
 		expect(
 			grants(Role.AGENT_COMMERCIAL, Permission.CLAIMS_ACTION_START_TREATMENT),
 		).toBe(true);
+		expect(grants(Role.AGENT_COMMERCIAL, Permission.CLAIMS_CREATE)).toBe(false);
+		expect(grants(Role.AGENT_COMMERCIAL, Permission.CLAIMS_READ)).toBe(true);
+		expect(
+			grants(Role.AGENT_COMMERCIAL, Permission.CLAIMS_ACTION_COMMENT),
+		).toBe(true);
+		expect(grants(Role.AGENT_COMMERCIAL, Permission.CLAIMS_MANAGE_OTHER)).toBe(
+			true,
+		);
 		expect(grants(Role.AGENT_COMMERCIAL, Permission.CUSTOMERS_READ)).toBe(true);
 		expect(grants(Role.AGENT_COMMERCIAL, Permission.CUSTOMERS_CREATE)).toBe(
 			false,
 		);
 		expect(grants(Role.AGENT_COMMERCIAL, Permission.USERS_READ)).toBe(false);
 	});
-	it("keeps cross-user grants limited to the commercial order workflow", () => {
+	it("grants commercial agents cross-user access to the claims work queue", () => {
 		expect(grants(Role.AGENT_COMMERCIAL, Permission.ORDERS_MANAGE_OTHER)).toBe(
 			true,
 		);
 		expect(grants(Role.AGENT_COMMERCIAL, Permission.CLAIMS_MANAGE_OTHER)).toBe(
-			false,
+			true,
 		);
 		expect(
 			grants(Role.AGENT_COMMERCIAL, Permission.PROGRAMS_MANAGE_OTHER),

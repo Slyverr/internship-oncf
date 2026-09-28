@@ -1,9 +1,6 @@
-import { PlusIcon } from "lucide-react";
-import Link from "next/link";
+import { ClaimsPageHeader } from "@/components/claims/claims-page-header";
 import { ClaimsTable } from "@/components/claims/claims-table";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
-import { PageHeader } from "@/components/common/page-header";
-import { buttonVariants } from "@/components/ui/button";
 import { claimsControllerFindAll } from "@/lib/api/claims";
 import { ClaimsControllerFindAllParams } from "@/lib/api/generated.schemas";
 import { claimsBreadcrumbs } from "./breadcrumbs";
@@ -20,12 +17,7 @@ export default async function Page({ searchParams }: PageProps) {
 		<>
 			<Breadcrumbs items={claimsBreadcrumbs.home()} />
 
-			<PageHeader title="Claims" description="Manage and edit claims.">
-				<Link className={buttonVariants()} href="/dashboard/claims/new">
-					<PlusIcon />
-					Create Claim
-				</Link>
-			</PageHeader>
+			<ClaimsPageHeader />
 
 			<ClaimsTable data={claims} />
 		</>
