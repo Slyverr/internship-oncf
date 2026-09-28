@@ -157,6 +157,7 @@ If browser capture is unavailable, state that limitation. Continue with route in
 - Make appearance choices compact, visible, and easy to hit. Use concise labels and brief supporting text rather than tall description cards; keep every choice at least 44px high and do not hide choices behind extra scrolling when the viewport has room.
 - Keep Appearance, Profile, and Security as the settings sections. Profile in the account menu opens the Profile section directly; Settings opens Appearance. Each section has a stable deep link, and closing returns to the page the user came from. A direct visit to the settings URL remains usable without requiring prior navigation.
 - Target a dialog width of at most 1120px and a height of at most 768px or `100svh - 32px`, whichever is smaller. Keep its footprint stable when switching settings sections. On small screens, use the available viewport with 16px outer spacing; do not let the close button overlap content or place nested scroll regions beside one another.
+- Keep the Settings dialog title strip to a short title and close control; each section owns its descriptive copy. In Appearance, keep 16px between each group label and its option controls. Form fields use the semantic `background` surface so they remain distinct from cards and dialogs in every theme.
 
 ### Visual review rounds
 

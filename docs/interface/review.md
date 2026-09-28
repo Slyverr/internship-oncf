@@ -2,6 +2,12 @@
 
 > **Screenshot freshness:** The source-only observations from earlier passes are historical. The review evidence below includes fresh captures from the running application on 2026-09-27; use those captures and the follow-up checks recorded in the checklist rather than the older bundle when reviewing current UI.
 
+## Settings follow-up — 2026-09-28
+
+- Freshly inspected the Settings modal at 390×844 and 1440×1000 in warm light and charcoal dark. The repeated generic description under the dialog title used vertical space without adding context, so the title strip now contains only “Settings” and the close control; section descriptions remain with their content.
+- Profile and Security fields were transparent in light mode and blended into the dialog surface. The shared input now uses the semantic background surface; dark mode retains its existing input token. The Appearance option group spacing is 16px from legend to selector.
+- The phone section tabs fit without clipping, and the desktop section rail is readable. The fixed 1120×768 desktop / viewport-bounded phone footprint is preserved. Monochrome, keyboard/focus, and field error states remain open review items.
+
 ## Current shell source review — 2026-09-27
 
 This is a source-level check of the current sidebar and centered-header layouts, not a rendered visual review.

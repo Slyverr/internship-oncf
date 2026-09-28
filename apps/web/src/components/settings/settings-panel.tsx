@@ -136,7 +136,7 @@ function PreferenceChoices<Value extends string>({
 	const inlineChoices = compact && !renderPreview;
 
 	return (
-		<fieldset className="grid gap-control">
+		<fieldset className="grid">
 			<legend className="text-sm font-medium">{label}</legend>
 			<RadioGroup
 				aria-label={label}
@@ -147,8 +147,8 @@ function PreferenceChoices<Value extends string>({
 				}}
 				className={
 					inlineChoices
-						? "flex flex-wrap gap-control"
-						: `grid gap-control ${columns}`
+						? "mt-4 flex flex-wrap gap-control"
+						: `mt-4 grid gap-control ${columns}`
 				}
 			>
 				{options.map((option) => (
