@@ -101,7 +101,7 @@ export function CenteredNavigation({ compact = false }: { compact?: boolean }) {
 				>
 					<div
 						ref={navigationItemsRef}
-						className={`flex w-max min-w-full items-center ${compact ? "justify-between gap-0 px-compact sm:gap-control sm:px-4" : "justify-start gap-control px-4 md:justify-center md:px-0"}`}
+						className={`flex w-max min-w-full items-center ${compact ? "justify-center gap-0 px-compact min-[22.5rem]:gap-compact sm:gap-control sm:px-4" : "justify-start gap-control px-4 md:justify-center md:px-0"}`}
 					>
 						{visibleRoutes.map((route) => {
 							const isActive = route.exact

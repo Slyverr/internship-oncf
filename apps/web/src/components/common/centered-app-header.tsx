@@ -14,7 +14,7 @@ export function CenteredAppHeader() {
 					aria-hidden="true"
 					className="pointer-events-none absolute inset-y-0 right-0 left-auto w-28 rounded-bl-2xl border-b border-l border-border bg-card shadow-sm md:inset-0 md:w-auto md:rounded-b-2xl md:border"
 				></div>
-				<div className="relative z-10 grid min-h-16 w-full grid-cols-[1fr_auto] items-center gap-x-control gap-y-0 px-0 sm:px-8 md:flex md:h-16 md:gap-6 md:px-12 lg:px-20">
+				<div className="relative z-10 grid min-h-16 w-full grid-cols-[1fr_auto] items-center gap-x-control gap-y-0 px-0 md:flex md:h-16 md:gap-6 md:pl-12 md:pr-control lg:pl-20">
 					<Link
 						href="/dashboard"
 						aria-label="ECommand home"
@@ -32,7 +32,7 @@ export function CenteredAppHeader() {
 						</span>
 					</Link>
 
-					<div className="ml-auto flex h-16 w-28 items-center justify-end gap-control pr-control pl-0 md:min-h-16 md:w-auto md:px-0 md:order-3">
+					<div className="ml-auto flex h-16 w-28 items-center justify-end gap-control p-0 md:min-h-16 md:w-auto md:order-3">
 						<NotificationLink />
 						<SidebarUser variant="header" />
 					</div>
