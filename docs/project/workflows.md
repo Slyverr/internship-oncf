@@ -43,21 +43,21 @@ The order/program/claim are preserved so their resulting workflow state can be i
 
 ### P1 — Complete workflow identifiers and useful dashboard insights
 
-3. Replace numeric-only row labels with stable human-readable record codes where the SDF and workflows expect them. Start with claims using `CLM-` plus a unique ten-character suffix, matching the order/program code pattern; audit every table/detail/dashboard that currently renders `#<id>`, and define safe backfill, collision handling, search, DTO, and display behavior. Schema changes remain subject to the existing schema-stabilization guidance; do not add migrations prematurely.
-4. Add role-aware dashboard insights so the home page answers what needs attention and what changed, with meaningful metrics/charts, useful empty states, and links to the next action. Reuse existing scoped report/workflow data where appropriate; do not duplicate or leak cross-customer data.
-5. The SDF allows login by email or employee/matricule identifier; verify the current login DTO/strategy and implement the second identifier if the requirement remains.
+1. Replace numeric-only row labels with stable human-readable record codes where the SDF and workflows expect them. Start with claims using `CLM-` plus a unique ten-character suffix, matching the order/program code pattern; audit every table/detail/dashboard that currently renders `#<id>`, and define safe backfill, collision handling, search, DTO, and display behavior. Schema changes remain subject to the existing schema-stabilization guidance; do not add migrations prematurely.
+2. Add role-aware dashboard insights so the home page answers what needs attention and what changed, with meaningful metrics/charts, useful empty states, and links to the next action. Reuse existing scoped report/workflow data where appropriate; do not duplicate or leak cross-customer data.
+3. Completed: sign-in accepts either email or employee/matricule identifier. Email and employee-code matching are case-insensitive, and the schema enforces case-insensitive employee-code uniqueness. Apply the evolving schema with `bun run db:push` only against a disposable development database, per repository policy.
 
 ### P1 — Complete integration and test readiness
 
-6. API end-to-end Jest config now resolves the project aliases, but Bun fails inside a dependency before tests run. Rerun with a supported Node runtime, then add HTTP integration cases for auth, ownership, role denials, and order/program/claim transitions.
-7. Treat DTM/GSCWF handoff, durable notification retry, and external email activation as integrations that need ONCF/provider contracts. The current local `Send to DTM` action is only a status change; do not report it as an external handoff.
+1. API end-to-end Jest config now resolves the project aliases, but Bun fails inside a dependency before tests run. Rerun with a supported Node runtime, then add HTTP integration cases for auth, ownership, role denials, and order/program/claim transitions.
+2. Treat DTM/GSCWF handoff, durable notification retry, and external email activation as integrations that need ONCF/provider contracts. The current local `Send to DTM` action is only a status change; do not report it as an external handoff.
 
 ### P2 — Branding, internationalization, and pilot operations
 
-8. Review the app's centered brand wording and page metadata. Replace any remaining generic Vercel favicon with approved ONCF/ECommand artwork, and make browser titles consistent across every route.
-9. Plan i18n before translating piecemeal: select initial locales with the product owner, centralize all UI copy, validation/API error labels, status and enum labels, date/number/plural formatting, and public/auth pages, then migrate every route and shared component. Keep business identifiers and stored enum values language-neutral.
-10. Confirm who maintains customer ICE values and how signup verifies them against an authoritative source.
-11. Run and inspect the complete route screenshot pass across desktop and phone sizes after shared layout or branding changes; the dashboard-specific pass does not cover every page.
+1. Review the app's centered brand wording and page metadata. Replace any remaining generic Vercel favicon with approved ONCF/ECommand artwork, and make browser titles consistent across every route.
+2. Plan i18n before translating piecemeal: select initial locales with the product owner, centralize all UI copy, validation/API error labels, status and enum labels, date/number/plural formatting, and public/auth pages, then migrate every route and shared component. Keep business identifiers and stored enum values language-neutral.
+3. Confirm who maintains customer ICE values and how signup verifies them against an authoritative source.
+4. Run and inspect the complete route screenshot pass across desktop and phone sizes after shared layout or branding changes; the dashboard-specific pass does not cover every page.
 
 ### Dashboard polish completed
 
