@@ -5,9 +5,9 @@ interface RecordDetailProps {
 
 export function RecordDetail({ label, value }: RecordDetailProps) {
 	return (
-		<div className="grid min-w-0 gap-2 sm:grid-cols-2 sm:items-baseline">
+		<div className="grid min-w-0 grid-cols-2 items-baseline gap-2">
 			<span className="text-meta text-muted-foreground">{label}</span>
-			<span className="break-words text-sm font-medium sm:text-right sm:text-base">
+			<span className="min-w-0 break-words text-right text-sm font-medium sm:text-base">
 				{value}
 			</span>
 		</div>
