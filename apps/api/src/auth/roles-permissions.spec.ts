@@ -35,6 +35,9 @@ describe("default role permission matrix", () => {
 			grants(Role.CLIENT_REPRESENTATIVE, Permission.CLAIMS_ACTION_COMMENT),
 		).toBe(true);
 		expect(
+			grants(Role.CLIENT_REPRESENTATIVE, Permission.CLAIMS_ACTION_CLOSE),
+		).toBe(true);
+		expect(
 			grants(
 				Role.CLIENT_REPRESENTATIVE,
 				Permission.CLAIMS_ACTION_START_PROGRESS,
@@ -72,7 +75,7 @@ describe("default role permission matrix", () => {
 		expect(
 			grants(Role.AGENT_COMMERCIAL, Permission.CLAIMS_ACTION_START_TREATMENT),
 		).toBe(true);
-		expect(grants(Role.AGENT_COMMERCIAL, Permission.CLAIMS_CREATE)).toBe(false);
+		expect(grants(Role.AGENT_COMMERCIAL, Permission.CLAIMS_CREATE)).toBe(true);
 		expect(grants(Role.AGENT_COMMERCIAL, Permission.CLAIMS_READ)).toBe(true);
 		expect(
 			grants(Role.AGENT_COMMERCIAL, Permission.CLAIMS_ACTION_COMMENT),

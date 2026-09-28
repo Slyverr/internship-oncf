@@ -9,7 +9,7 @@ This guide maps default roles to API permissions, ownership rules, and web surfa
 | User administration and registration review | All user actions, including approving/rejecting client signup | — | — |
 | Orders | All actions and records | Operational actions and cross-customer records | Create/read/update/delete drafts and submit; reads use the assigned customer when present, otherwise own-created records |
 | Programs | All actions and records | Create/read/update; status, ownership, and lifecycle actions | Read programs linked to orders for the assigned customer; no create/update/delete/workflow actions |
-| Claims | All actions and records | Read/update all claims; status and lifecycle actions, including comments | Create/read/comment on own claims |
+| Claims | All actions and records | Create/read/update claims; status and lifecycle actions, including comments | Create/read/comment on own claims and close own resolved claims |
 | Customers | All actions | Read/update | — |
 | Catalog | Read and manage | Read | Read |
 | Tracking | Read and update | Read | — |
@@ -29,8 +29,8 @@ Admin receives every defined permission. Parent permissions imply descendants (f
 | Programs create/edit/delete | programs:create/update/delete | Create form; program action menu | The API and web both restrict deletion to draft programs. |
 | Program lifecycle | programs:action:* | ProgramActions | Valid path: draft → pending approval → approved → confirmed → sent to DTM → in progress. Cancellation is allowed before dispatch. |
 | Claims list/detail/comments | claims:read; claims:action:comment | Sidebar Claims; details, comment list, and role-gated comment form | Agents with `CLAIMS_MANAGE_OTHER` process the shared queue. Client representatives see and comment on their own claims only. |
-| Claims create/edit/delete | claims:create/update/delete | Client/admin dashboard quick action; create form; claim action menu | Client representatives submit claims; agents do not create claims. Delete is admin-only by default. |
-| Claim lifecycle | claims:action:* | ClaimActions | Buttons use specific action permissions and supported current states; parent `claims:action` also grants commenting. |
+| Claims create/edit/delete | claims:create/update/delete | Dashboard quick action; create form; claim action menu | Clients and commercial agents can submit claims. Client ownership still limits which existing claims they can access. Delete is admin-only by default. |
+| Claim lifecycle | claims:action:* | ClaimActions | Buttons use specific action permissions and supported current states; clients can close their own resolved claims; parent `claims:action` also grants commenting. |
 | Customers | customers:read/create/update/delete | Sidebar Customers; forms and action menu | Commercial agents read/update; create/deactivate are admin-only. |
 | Public client signup | Public `/auth/register` | `/signup` registration form | Submitted customer code and ICE must match an active local customer; new account is inactive and pending admin review. |
 | Users and registration review | users:read/create/update/delete | Sidebar Users; forms, request status, approve/reject actions | Admin-only by default. Only pending client-representative requests can be reviewed; pending and rejected accounts cannot sign in. |
