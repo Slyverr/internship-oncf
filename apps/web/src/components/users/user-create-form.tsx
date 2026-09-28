@@ -35,6 +35,7 @@ import {
 } from "@/lib/api/generated.schemas";
 import { useUsersControllerCreate } from "@/lib/api/users";
 import { getFormErrorMessage } from "@/lib/form-utils";
+import { formatUserRole, formatUserType } from "@/lib/user-labels";
 
 const createUserSchemaBase = z.object({
 	email: z.email("Valid email is required").max(100),
@@ -76,7 +77,6 @@ const userSteps = [
 	{ title: "Credentials", description: "Email and password" },
 	{ title: "Profile", description: "Name and role" },
 ];
-
 export function UserCreateForm(): JSX.Element {
 	const router = useRouter();
 	const mutation = useUsersControllerCreate();
@@ -317,17 +317,19 @@ export function UserCreateForm(): JSX.Element {
 									}
 								>
 									<SelectTrigger id="role">
-										<SelectValue placeholder="Select Role" />
+										<SelectValue>
+											{formatUserRole(field.state.value)}
+										</SelectValue>
 									</SelectTrigger>
 									<SelectContent>
 										<SelectItem value={CreateUserDtoRole.ADMIN}>
-											ADMIN
+											{formatUserRole(CreateUserDtoRole.ADMIN)}
 										</SelectItem>
 										<SelectItem value={CreateUserDtoRole.AGENT_COMMERCIAL}>
-											AGENT COMMERCIAL
+											{formatUserRole(CreateUserDtoRole.AGENT_COMMERCIAL)}
 										</SelectItem>
 										<SelectItem value={CreateUserDtoRole.CLIENT_REPRESENTATIVE}>
-											CLIENT REPRESENTATIVE
+											{formatUserRole(CreateUserDtoRole.CLIENT_REPRESENTATIVE)}
 										</SelectItem>
 									</SelectContent>
 								</Select>
@@ -379,7 +381,9 @@ export function UserCreateForm(): JSX.Element {
 									}
 								>
 									<SelectTrigger id="type">
-										<SelectValue placeholder="Select Type" />
+										<SelectValue>
+											{formatUserType(field.state.value)}
+										</SelectValue>
 									</SelectTrigger>
 									<SelectContent>
 										<SelectItem value={CreateUserDtoType.internal}>

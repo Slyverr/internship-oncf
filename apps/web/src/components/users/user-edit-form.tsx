@@ -35,6 +35,7 @@ import {
 } from "@/lib/api/generated.schemas";
 import { useUsersControllerUpdate } from "@/lib/api/users";
 import { getFormErrorMessage } from "@/lib/form-utils";
+import { formatUserRole, formatUserType } from "@/lib/user-labels";
 
 const updateUserSchemaBase = z.object({
 	email: z.string().email("Valid email is required").max(100).optional(),
@@ -219,17 +220,19 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 									}
 								>
 									<SelectTrigger id="role">
-										<SelectValue placeholder="Select Role" />
+										<SelectValue>
+											{formatUserRole(field.state.value)}
+										</SelectValue>
 									</SelectTrigger>
 									<SelectContent>
 										<SelectItem value={UpdateUserDtoRole.ADMIN}>
-											ADMIN
+											{formatUserRole(UpdateUserDtoRole.ADMIN)}
 										</SelectItem>
 										<SelectItem value={UpdateUserDtoRole.AGENT_COMMERCIAL}>
-											AGENT COMMERCIAL
+											{formatUserRole(UpdateUserDtoRole.AGENT_COMMERCIAL)}
 										</SelectItem>
 										<SelectItem value={UpdateUserDtoRole.CLIENT_REPRESENTATIVE}>
-											CLIENT REPRESENTATIVE
+											{formatUserRole(UpdateUserDtoRole.CLIENT_REPRESENTATIVE)}
 										</SelectItem>
 									</SelectContent>
 								</Select>
@@ -248,7 +251,9 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 									}
 								>
 									<SelectTrigger id="type">
-										<SelectValue placeholder="Select Type" />
+										<SelectValue>
+											{formatUserType(field.state.value)}
+										</SelectValue>
 									</SelectTrigger>
 									<SelectContent>
 										<SelectItem value={UpdateUserDtoType.internal}>

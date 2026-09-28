@@ -3,3 +3,4 @@ import "./action-visibility.test";
 import "./program-creation-selection.test";
 import "./safe-api-error.test";
 import "./report-date-range.test";
+import "./user-labels.test";

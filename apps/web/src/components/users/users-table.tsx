@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/table";
 import { useTableQueryState } from "@/hooks/use-table-query-state";
 import type { UserListDto } from "@/lib/api/generated.schemas";
+import { formatUserRole } from "@/lib/user-labels";
 
 interface UsersTableProps {
 	data: UserListDto[];
@@ -59,8 +60,8 @@ const columns: ColumnDef<typeof features, UserListDto>[] = [
 		accessorKey: "role.name",
 		header: "Role",
 		cell: (info) => (
-			<Badge variant="outline" className="uppercase font-mono text-xs">
-				{info.getValue<string>()}
+			<Badge variant="outline" className="text-xs">
+				{formatUserRole(info.getValue<string>())}
 			</Badge>
 		),
 	},

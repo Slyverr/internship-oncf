@@ -22,6 +22,7 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { formatUserRole } from "@/lib/user-labels";
 import { useAuth } from "@/providers/auth-provider";
 
 export function SidebarUser({
@@ -65,7 +66,7 @@ export function SidebarUser({
 						<div className="grid min-w-0 max-w-40 flex-1 overflow-hidden text-left text-sm leading-tight transition-[max-width,opacity] duration-200 ease-linear motion-reduce:transition-none group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:max-w-0 group-data-[collapsible=icon]:opacity-0">
 							<span className="truncate font-medium">{name}</span>
 							<span className="truncate text-meta text-muted-foreground">
-								{role}
+								{formatUserRole(role)}
 							</span>
 						</div>
 

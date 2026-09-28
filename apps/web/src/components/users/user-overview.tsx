@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { UserDetailDto } from "@/lib/api/generated.schemas";
 import { formatDisplayDateTime } from "@/lib/date-utils";
+import { formatUserRole, formatUserType } from "@/lib/user-labels";
 
 export function UserOverview({ user }: { user: UserDetailDto }) {
 	return (
@@ -27,11 +28,14 @@ export function UserOverview({ user }: { user: UserDetailDto }) {
 				<CardContent className="space-y-4">
 					<div className="grid min-w-0 gap-2 sm:grid-cols-2 sm:items-baseline">
 						<span className="text-sm text-muted-foreground">Role</span>
-						<Badge variant="outline" className="uppercase font-mono text-xs">
-							{user.role.name}
+						<Badge variant="outline" className="text-xs">
+							{formatUserRole(user.role.name)}
 						</Badge>
 					</div>
-					<RecordDetail label="Account Type" value={user.type ?? "—"} />
+					<RecordDetail
+						label="Account Type"
+						value={formatUserType(user.type)}
+					/>
 					<RecordDetail
 						label="Customer ID"
 						value={user.customerId ? String(user.customerId) : "—"}
