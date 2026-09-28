@@ -192,13 +192,7 @@ export function OrderCreateForm(): JSX.Element {
 													required
 													error={errorMsg}
 												/>
-												<div
-													className={
-														errorMsg
-															? "[&>button]:border-destructive [&>button]:focus:ring-destructive/20"
-															: ""
-													}
-												>
+												<div className={errorMsg ? "oncf-invalid-control" : ""}>
 													<CustomerSelect
 														id="customerId"
 														value={
@@ -231,13 +225,7 @@ export function OrderCreateForm(): JSX.Element {
 												required
 												error={errorMsg}
 											/>
-											<div
-												className={
-													errorMsg
-														? "[&>button]:border-destructive [&>button]:focus:ring-destructive/20"
-														: ""
-												}
-											>
+											<div className={errorMsg ? "oncf-invalid-control" : ""}>
 												<GoodSelect
 													id="goodsId"
 													value={
@@ -269,13 +257,7 @@ export function OrderCreateForm(): JSX.Element {
 												required
 												error={errorMsg}
 											/>
-											<div
-												className={
-													errorMsg
-														? "[&>button]:border-destructive [&>button]:focus:ring-destructive/20"
-														: ""
-												}
-											>
+											<div className={errorMsg ? "oncf-invalid-control" : ""}>
 												<UnitSelect
 													id="unitId"
 													value={field.state.value}
@@ -369,11 +351,7 @@ export function OrderCreateForm(): JSX.Element {
 														error={errorMsg}
 													/>
 													<div
-														className={
-															errorMsg
-																? "[&>button]:border-destructive [&>button]:focus:ring-destructive/20"
-																: ""
-														}
+														className={errorMsg ? "oncf-invalid-control" : ""}
 													>
 														<OrderStatusSelect
 															value={field.state.value}

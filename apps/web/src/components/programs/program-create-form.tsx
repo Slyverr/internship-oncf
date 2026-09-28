@@ -227,13 +227,7 @@ export function ProgramCreateForm({
 										required
 										error={errorMsg}
 									/>
-									<div
-										className={
-											errorMsg
-												? "[&>button]:border-destructive [&>button]:focus:ring-destructive/20"
-												: ""
-										}
-									>
+									<div className={errorMsg ? "oncf-invalid-control" : ""}>
 										<OrderSelect
 											id="orderId"
 											orders={orders}
@@ -300,13 +294,7 @@ export function ProgramCreateForm({
 											label="Responsible User"
 											error={errorMsg}
 										/>
-										<div
-											className={
-												errorMsg
-													? "[&>button]:border-destructive [&>button]:focus:ring-destructive/20"
-													: ""
-											}
-										>
+										<div className={errorMsg ? "oncf-invalid-control" : ""}>
 											<UserSelect
 												id="userId"
 												users={users}
@@ -338,13 +326,7 @@ export function ProgramCreateForm({
 											label="Initial Status Override"
 											error={errorMsg}
 										/>
-										<div
-											className={
-												errorMsg
-													? "[&>button]:border-destructive [&>button]:focus:ring-destructive/20"
-													: ""
-											}
-										>
+										<div className={errorMsg ? "oncf-invalid-control" : ""}>
 											<ProgramStatusSelect
 												id="status"
 												value={field.state.value}

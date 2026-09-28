@@ -204,13 +204,7 @@ export function ClaimCreateForm(): JSX.Element {
 											required
 											error={errorMsg}
 										/>
-										<div
-											className={
-												errorMsg
-													? "[&>button]:border-destructive [&>button]:focus:ring-destructive/20"
-													: ""
-											}
-										>
+										<div className={errorMsg ? "oncf-invalid-control" : ""}>
 											<CustomerSelect
 												id="customerId"
 												value={
