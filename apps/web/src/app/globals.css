@@ -123,6 +123,14 @@
 	@apply fixed top-1/2 left-1/2 z-50 grid -translate-x-1/2 -translate-y-1/2 gap-6 rounded-xl bg-popover p-6 text-popover-foreground ring-1 ring-foreground/10;
 }
 
+@utility oncf-brand-surface {
+	background-color: var(--oncf-brand-surface, var(--sidebar-primary));
+}
+
+@utility oncf-brand-mark {
+	filter: var(--oncf-brand-filter, brightness(0) invert(1));
+}
+
 @utility text-meta {
 	font-size: calc(0.8125rem * var(--type-scale, 1));
 	line-height: calc(1.25rem * var(--type-scale, 1));
@@ -182,6 +190,8 @@
 
 :root,
 [data-theme="light"] {
+	--oncf-brand-surface: var(--sidebar-primary);
+	--oncf-brand-filter: brightness(0) invert(1);
 	--type-scale: 1;
 	--surface-canvas: oklch(0.985 0.005 80);
 	--surface-raised: oklch(0.962 0.014 72);
@@ -296,6 +306,8 @@
 }
 
 [data-theme="mono-dark"] {
+	--oncf-brand-surface: white;
+	--oncf-brand-filter: none;
 	--surface-canvas: oklch(0.1 0 0);
 	--surface-raised: oklch(0.16 0 0);
 	--surface-navigation: oklch(0.07 0 0);

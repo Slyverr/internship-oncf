@@ -16,13 +16,13 @@ export function SidebarLogo() {
 					render={<Link href="/dashboard" />}
 					className="h-12 hover:bg-sidebar-accent/30 group-data-[collapsible=icon]:hover:bg-transparent group-data-[collapsible=icon]:hover:text-sidebar-primary"
 				>
-					<div className="flex aspect-square size-8 shrink-0 items-center justify-center rounded-sm bg-sidebar-primary p-1 text-sidebar-primary-foreground shadow-sm shadow-sidebar-primary/30">
+					<div className="flex aspect-square size-8 shrink-0 items-center justify-center rounded-sm oncf-brand-surface p-1 text-sidebar-primary-foreground shadow-sm shadow-sidebar-primary/30">
 						<Image
 							src="/oncf.png"
 							alt="ONCF Mark"
 							width={24}
 							height={12}
-							className="h-3 w-6 object-cover object-[center_40%] brightness-0 invert"
+							className="h-3 w-6 object-cover object-[center_40%] oncf-brand-mark"
 							priority
 						/>
 					</div>

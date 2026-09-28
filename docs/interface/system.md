@@ -55,7 +55,7 @@ Keep the existing warm light and charcoal dark palettes as the default themes. A
 - `muted` and `muted-foreground`: secondary surfaces and supporting information.
 - `border`: grouping and control boundaries; prefer this over additional shadows.
 
-Use the same semantic roles in all themes. Cards should separate from the canvas through the raised-surface token and a quiet border/ring, not an unexpectedly bright fill or heavy shadow. Hover is a small feedback cue, not a large decorative block. Focus indicators must remain visible and stronger than hover.
+Use the same semantic roles in all themes. Cards should separate from the canvas through the raised-surface token and a quiet border/ring, not an unexpectedly bright fill or heavy shadow. Hover is a small feedback cue, not a large decorative block. Focus indicators must remain visible and stronger than hover. Preserve the orange ONCF source mark in monochrome themes with the shared `oncf-brand-surface` and `oncf-brand-mark` tokens; do not invert it to white on a white tile. Keep brand treatment semantic so sidebar and centered-header logos stay consistent.
 
 ## 4. Cards, tables, and data
 

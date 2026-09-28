@@ -20,13 +20,13 @@ export function CenteredAppHeader() {
 						aria-label="ECommand home"
 						className="inline-flex min-h-16 items-center gap-control rounded-md px-4 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring max-md:hidden md:order-1"
 					>
-						<span className="flex size-8 shrink-0 items-center justify-center rounded-sm bg-sidebar-primary p-control">
+						<span className="flex size-8 shrink-0 items-center justify-center rounded-sm oncf-brand-surface p-control">
 							<Image
 								src="/oncf.png"
 								alt=""
 								width={24}
 								height={12}
-								className="h-3 w-6 object-cover object-[center_40%] brightness-0 invert"
+								className="h-3 w-6 object-cover object-[center_40%] oncf-brand-mark"
 								priority
 							/>
 						</span>
