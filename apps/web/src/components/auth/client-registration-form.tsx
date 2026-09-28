@@ -44,7 +44,7 @@ export function ClientRegistrationForm() {
 			? STRONG_PASSWORD_HINT
 			: missingPasswordRequirements.length === 0
 				? "Password meets the requirements."
-				: "Add " + missingPasswordRequirements.join(", ") + ".";
+				: `Add ${missingPasswordRequirements.join(", ")}.`;
 
 	function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
