@@ -46,7 +46,7 @@ function DialogContent({
 	...props
 }: DialogPrimitive.Popup.Props & {
 	showCloseButton?: boolean;
-	size?: "default" | "form" | "wide";
+	size?: "default" | "form" | "settings" | "wide";
 }) {
 	return (
 		<DialogPortal>
@@ -57,9 +57,11 @@ function DialogContent({
 					"oncf-dialog-surface max-h-[calc(100svh-2rem)] w-[calc(100%-2rem)] text-sm duration-100 outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
 					size === "wide"
 						? "h-[calc(100svh-2rem)] max-h-[48rem] max-w-[70rem]"
-						: size === "form"
-							? "h-[min(36rem,calc(100svh-2rem))] max-w-lg"
-							: "h-[min(24rem,calc(100svh-2rem))] max-w-md",
+						: size === "settings"
+							? "h-[min(40rem,calc(100svh-2rem))] max-w-4xl"
+							: size === "form"
+								? "h-[min(36rem,calc(100svh-2rem))] max-w-lg"
+								: "h-[min(24rem,calc(100svh-2rem))] max-w-md",
 					className,
 				)}
 				{...props}

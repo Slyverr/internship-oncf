@@ -50,13 +50,13 @@ export function SettingsDialog() {
 	return (
 		<Dialog open onOpenChange={(open) => !open && router.back()}>
 			<DialogContent
-				size="wide"
+				size="settings"
 				className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)] gap-0 overflow-hidden p-0"
 			>
-				<DialogHeader className="border-b px-4 py-2 pr-16">
+				<DialogHeader className="min-h-12 flex-row items-center border-b px-4 py-0 pr-16 pb-0">
 					<DialogTitle className="text-base">Settings</DialogTitle>
 				</DialogHeader>
-				<div className="grid min-h-0 min-w-0 grid-cols-1 grid-rows-[max-content_minmax(0,1fr)] lg:grid-cols-[15rem_minmax(0,1fr)] lg:grid-rows-1">
+				<div className="grid min-h-0 min-w-0 grid-cols-1 grid-rows-[max-content_minmax(0,1fr)] lg:grid-cols-[11rem_minmax(0,1fr)] lg:grid-rows-1">
 					<nav
 						aria-label="Settings sections"
 						className="flex min-w-0 gap-2 border-b px-3 py-3 lg:flex-col lg:gap-control lg:overflow-visible lg:border-r lg:border-b-0 lg:p-4"
