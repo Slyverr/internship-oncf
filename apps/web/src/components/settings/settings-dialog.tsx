@@ -10,6 +10,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { useAppearance } from "@/providers/appearance-provider";
 import { SettingsPanel, type SettingsSection } from "./settings-panel";
 
 const sections: {
@@ -27,6 +28,7 @@ function isSettingsSection(value: string | null): value is SettingsSection {
 }
 
 export function SettingsDialog() {
+	const { preferences } = useAppearance();
 	const router = useRouter();
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
@@ -39,6 +41,10 @@ export function SettingsDialog() {
 		() => new URLSearchParams(currentSearch),
 		[currentSearch],
 	);
+	const sectionRailWidthClass =
+		preferences.textSize === "large"
+			? "lg:grid-cols-[12rem_minmax(0,1fr)]"
+			: "lg:grid-cols-[11rem_minmax(0,1fr)]";
 
 	function selectSection(section: SettingsSection) {
 		query.set("section", section);
@@ -78,7 +84,9 @@ export function SettingsDialog() {
 				<DialogHeader className="min-h-12 flex-row items-center border-b px-4 py-0 pr-16 pb-0">
 					<DialogTitle className="text-base">Settings</DialogTitle>
 				</DialogHeader>
-				<DialogBody className="grid min-h-0 min-w-0 grid-cols-1 grid-rows-[max-content_minmax(0,1fr)] overflow-hidden p-0 lg:grid-cols-[11rem_minmax(0,1fr)] lg:grid-rows-1">
+				<DialogBody
+					className={`grid min-h-0 min-w-0 grid-cols-1 grid-rows-[max-content_minmax(0,1fr)] overflow-hidden p-0 lg:grid-rows-1 ${sectionRailWidthClass}`}
+				>
 					<div
 						role="tablist"
 						aria-label="Settings sections"
