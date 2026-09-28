@@ -192,8 +192,7 @@ function ReadyOrdersSection({
 								<span className="min-w-0 truncate font-medium">
 									{order.orderNumber}
 								</span>
-								<span className="flex shrink-0 items-center gap-compact text-muted-foreground">
-									<Badge variant="outline">Eligible</Badge>
+								<span className="shrink-0 text-muted-foreground">
 									<ArrowRightIcon aria-hidden="true" className="size-4" />
 								</span>
 							</Link>
@@ -275,7 +274,7 @@ function OrderActivitySection() {
 					</div>
 					<div className="grid shrink-0 text-right">
 						<span className="text-meta text-muted-foreground">
-							Six-month total
+							6-month total
 						</span>
 						<span className="text-3xl font-semibold tabular-nums">
 							{report.data?.totalOrders ?? "—"}
@@ -491,8 +490,10 @@ export function DashboardOverview() {
 			</PageHeader>
 
 			{(showReadyOrders || canReadReports) && (
-				<div
-					className={`grid min-w-0 gap-6 ${showReadyOrders && canReadReports ? "@6xl/workspace:grid-cols-2" : "grid-cols-1"}`}
+				<section
+					aria-label="Dashboard insights"
+					tabIndex={showReadyOrders && canReadReports ? 0 : undefined}
+					className={`min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${showReadyOrders && canReadReports ? "workspace-insight-rail @4xl/workspace:grid-cols-2" : "grid gap-6"}`}
 				>
 					{showReadyOrders && (
 						<ReadyOrdersSection
@@ -503,7 +504,12 @@ export function DashboardOverview() {
 						/>
 					)}
 					{canReadReports && <OrderActivitySection />}
-				</div>
+				</section>
+			)}
+			{showReadyOrders && canReadReports && (
+				<p className="workspace-scroll-hint text-meta text-muted-foreground">
+					Swipe or use the arrow keys to view more dashboard insights.
+				</p>
 			)}
 
 			{sections.length > 0 ? (
