@@ -1,7 +1,7 @@
 "use client";
 
 import { PaletteIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -28,9 +28,9 @@ export function AuthThemeSelector() {
 		<DropdownMenu>
 			<DropdownMenuTrigger
 				render={
-					<Button
-						variant="outline"
-						size="icon"
+					<button
+						type="button"
+						className={buttonVariants({ variant: "outline", size: "icon" })}
 						aria-label="Choose appearance theme"
 						disabled={!initialized}
 					/>

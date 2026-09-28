@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -122,7 +122,12 @@ export function UserActions({ user }: { user: UserDetailDto }) {
 				{hasAvailableActions(canDeactivate) && (
 					<DropdownMenu>
 						<DropdownMenuTrigger
-							render={<Button variant="ghost" size="icon" />}
+							render={
+								<button
+									type="button"
+									className={buttonVariants({ variant: "ghost", size: "icon" })}
+								/>
+							}
 							disabled={deactivateMutation.isPending}
 						>
 							<EllipsisVerticalIcon />

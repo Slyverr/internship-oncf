@@ -14,7 +14,7 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -237,7 +237,12 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 					hasPermission(Permission.CLAIMS_DELETE)) && (
 					<DropdownMenu>
 						<DropdownMenuTrigger
-							render={<Button variant="ghost" size="icon" />}
+							render={
+								<button
+									type="button"
+									className={buttonVariants({ variant: "ghost", size: "icon" })}
+								/>
+							}
 							disabled={isPending}
 						>
 							<EllipsisVerticalIcon />

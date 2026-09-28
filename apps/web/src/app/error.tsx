@@ -47,6 +47,7 @@ export default function ErrorPage({
 				</CardContent>
 				<CardFooter className="flex-col-reverse gap-3 sm:flex-row sm:justify-center">
 					<Button
+						nativeButton={false}
 						type="button"
 						variant="outline"
 						render={<Link href="/login" />}

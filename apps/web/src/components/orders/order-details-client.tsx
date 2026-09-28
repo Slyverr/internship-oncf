@@ -44,6 +44,7 @@ export function OrderDetailsClient({ order }: OrderDetailsClientProps) {
 					programCount: currentOrder.forecastPrograms.length,
 				}) && (
 					<Button
+						nativeButton={false}
 						render={
 							<Link
 								href={
