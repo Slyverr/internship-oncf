@@ -6,7 +6,6 @@ import {
 	ArrowRightIcon,
 	ClipboardListIcon,
 	LoaderCircleIcon,
-	PackageIcon,
 	PlusIcon,
 	RefreshCwIcon,
 } from "lucide-react";
@@ -123,7 +122,7 @@ function RecentSection({
 										)}
 									</span>
 									<span className="flex min-w-0 items-center justify-between gap-2">
-										<span className="block min-w-0 truncate text-sm text-muted-foreground">
+										<span className="block min-w-0 truncate text-meta text-muted-foreground">
 											{item.description}
 										</span>
 										<time
@@ -545,7 +544,7 @@ export function DashboardOverview() {
 		<section className="mx-auto grid w-full max-w-screen-2xl min-w-0 gap-6">
 			<PageHeader
 				title={`Welcome back, ${profile.firstName}`}
-				description="Here is a snapshot of recent activity in ECommand."
+				description="A snapshot of recent activity across your workspace."
 			>
 				{quickActions.map((action, index) => (
 					<Link
@@ -612,13 +611,6 @@ export function DashboardOverview() {
 					</CardContent>
 				</Card>
 			)}
-
-			<div className="flex min-w-0 items-start gap-compact text-sm text-muted-foreground">
-				<PackageIcon aria-hidden="true" className="mt-1 size-4 shrink-0" />
-				<p className="min-w-0">
-					Showing the latest two records here. View all opens the complete list.
-				</p>
-			</div>
 		</section>
 	);
 }
