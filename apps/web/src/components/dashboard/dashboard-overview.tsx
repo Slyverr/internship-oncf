@@ -105,12 +105,12 @@ function RecentSection({
 						)}
 					</div>
 				) : (
-					<ul className="divide-y">
+					<ul className="grid gap-4">
 						{items.map((item) => (
 							<li key={item.id}>
 								<Link
 									href={item.href}
-									className="grid min-w-0 gap-2 py-4 first:pt-0 last:pb-0 hover:text-primary"
+									className="grid min-w-0 gap-2 hover:text-primary"
 								>
 									<span className="flex min-w-0 items-center justify-between gap-2">
 										<span className="block min-w-0 truncate font-medium">
