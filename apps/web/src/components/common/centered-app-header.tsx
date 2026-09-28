@@ -3,16 +3,24 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CenteredNavigation } from "@/components/common/centered-navigation";
+import { WorkspaceLayoutSwitch } from "@/components/common/workspace-layout-switch";
 import { NotificationLink } from "@/components/notifications/notification-link";
 import { SidebarUser } from "@/components/sidebar/sidebar-user";
+import { useAuth } from "@/providers/auth-provider";
 
 export function CenteredAppHeader() {
+	const { profile } = useAuth();
+	const customerName =
+		profile.customerId === null
+			? null
+			: (profile.customerName ?? `Customer account #${profile.customerId}`);
+
 	return (
 		<header className="sticky top-0 z-40 w-full px-0 print:static">
 			<div className="relative mx-auto w-full max-w-screen-2xl">
 				<div
 					aria-hidden="true"
-					className="pointer-events-none absolute inset-y-0 right-0 left-auto w-28 rounded-bl-2xl border-b border-l border-border bg-card shadow-sm md:inset-0 md:w-auto md:rounded-b-2xl md:border"
+					className="pointer-events-none absolute inset-y-0 right-0 left-auto w-36 rounded-bl-2xl border-b border-l border-border bg-card shadow-sm md:inset-0 md:w-auto md:rounded-b-2xl md:border"
 				></div>
 				<div className="relative z-10 grid min-h-16 w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-y-0 px-control md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:px-4 lg:h-16 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
 					<div className="hidden min-w-0 items-center justify-start md:col-start-1 md:row-start-1 md:flex">
@@ -31,6 +39,11 @@ export function CenteredAppHeader() {
 									priority
 								/>
 							</span>
+							{customerName && (
+								<span className="max-w-48 truncate text-sm font-medium text-muted-foreground xl:max-w-64">
+									{customerName}
+								</span>
+							)}
 						</Link>
 					</div>
 
@@ -38,7 +51,8 @@ export function CenteredAppHeader() {
 						<CenteredNavigation />
 					</div>
 
-					<div className="ml-auto flex h-16 w-28 items-center justify-end gap-control p-0 md:col-start-2 md:row-start-1 md:ml-0 md:w-full lg:col-start-3">
+					<div className="ml-auto flex h-12 w-36 items-center justify-end gap-control px-compact md:col-start-2 md:row-start-1 md:ml-0 md:h-16 md:w-full md:px-0 lg:col-start-3">
+						<WorkspaceLayoutSwitch />
 						<NotificationLink />
 						<SidebarUser variant="header" />
 					</div>

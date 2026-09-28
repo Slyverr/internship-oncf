@@ -31,21 +31,25 @@ export function SidebarUser({
 	variant?: "sidebar" | "header";
 } = {}) {
 	const {
-		profile: { firstName, lastName, role },
+		profile: { firstName, lastName, role, customerId, customerName },
 	} = useAuth();
 
 	const name = `${firstName} ${lastName}`;
+	const accountName =
+		customerId === null
+			? null
+			: (customerName ?? `Customer account #${customerId}`);
 	const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`;
 	const trigger =
 		variant === "sidebar" ? (
 			<SidebarMenuButton
 				size="lg"
-				className="h-12 hover:bg-sidebar-accent/30 group-data-[collapsible=icon]:hover:bg-transparent group-data-[collapsible=icon]:hover:text-sidebar-primary data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+				className="h-auto min-h-16 hover:bg-sidebar-accent/30 group-data-[collapsible=icon]:hover:bg-transparent group-data-[collapsible=icon]:hover:text-sidebar-primary data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
 			/>
 		) : (
 			<button
 				type="button"
-				className="inline-flex size-8 items-center justify-center rounded-md border border-transparent p-0 transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+				className="relative inline-flex size-8 items-center justify-center rounded-md border border-transparent p-0 after:absolute after:-inset-1.5 after:content-[''] transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 			/>
 		);
 	const menu = (
@@ -68,6 +72,11 @@ export function SidebarUser({
 							<span className="truncate text-meta text-muted-foreground">
 								{formatUserRole(role)}
 							</span>
+							{accountName && (
+								<span className="truncate text-micro text-muted-foreground">
+									{accountName}
+								</span>
+							)}
 						</div>
 
 						<ChevronsUpDownIcon className="ml-auto size-4 group-data-[collapsible=icon]:hidden" />

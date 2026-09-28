@@ -66,7 +66,7 @@ export function NotificationLink() {
 	return (
 		<Popover.Root open={open} onOpenChange={setOpen}>
 			<Popover.Trigger
-				className="relative inline-flex size-11 shrink-0 items-center justify-center rounded-md hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+				className="relative inline-flex size-8 shrink-0 items-center justify-center rounded-md after:absolute after:-inset-1.5 after:content-[''] hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
 				aria-label={`Notifications${count ? `, ${count} unread` : ""}`}
 			>
 				<BellIcon className="size-5" aria-hidden="true" />
