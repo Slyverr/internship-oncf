@@ -2,8 +2,16 @@
 
 import { Permission } from "@ecommand/shared";
 import { useQueryClient } from "@tanstack/react-query";
+import { format, isToday, isYesterday } from "date-fns";
 import { MessageCircleIcon, SendIcon } from "lucide-react";
-import { type FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import {
+	type FormEvent,
+	Fragment,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -41,15 +49,25 @@ interface ClaimConversationProps {
 function CommentMessage({
 	comment,
 	currentUserId,
+	grouped,
+	groupPosition,
+	startsNewDay,
+	timeVisible,
+	onHoverTime,
+	onToggleTime,
 }: {
 	comment: ClaimCommentDto;
 	currentUserId: number;
+	grouped: boolean;
+	groupPosition: "single" | "first" | "middle" | "last";
+	startsNewDay: boolean;
+	timeVisible: boolean;
+	onHoverTime: (id: number | null) => void;
+	onToggleTime: () => void;
 }) {
 	const isOwnMessage = comment.authorUserId === currentUserId;
 	const date = new Date(comment.createdAt);
 	const messageTime = new Intl.DateTimeFormat(undefined, {
-		month: "short",
-		day: "numeric",
 		hour: "numeric",
 		minute: "2-digit",
 	}).format(date);
@@ -57,45 +75,107 @@ function CommentMessage({
 		dateStyle: "full",
 		timeStyle: "short",
 	}).format(date);
-	const initials = comment.authorName
+	const authorName = comment.authorName;
+	const initials = authorName
 		.split(" ")
 		.map((part) => part[0])
 		.join("")
 		.toUpperCase();
-
+	const showIncomingAvatar =
+		!isOwnMessage && (groupPosition === "single" || groupPosition === "last");
+	const groupedCornerRadius = isOwnMessage
+		? {
+				first: "rounded-br-sm",
+				middle: "rounded-tr-sm rounded-br-sm",
+				last: "rounded-tr-sm",
+			}
+		: {
+				first: "rounded-bl-sm",
+				middle: "rounded-tl-sm rounded-bl-sm",
+				last: "rounded-tl-sm",
+			};
 	return (
-		<li className={cn("flex", isOwnMessage ? "justify-end" : "justify-start")}>
-			<article
+		<li
+			className={cn(
+				"flex",
+				startsNewDay ? "pt-0" : grouped ? "pt-0.5" : "pt-3",
+			)}
+		>
+			<div
 				className={cn(
-					"grid max-w-[88%] gap-2 rounded-2xl border p-3 sm:max-w-[80%] sm:p-4",
-					isOwnMessage
-						? "rounded-br-md border-primary/20 bg-primary/10"
-						: "rounded-bl-md border-border bg-muted/70",
+					"group/message flex w-fit max-w-[92%] flex-col sm:max-w-[80%]",
+					isOwnMessage ? "ml-auto items-end" : "mr-auto items-start",
 				)}
+				onPointerEnter={(event) => {
+					if (event.pointerType === "mouse") onHoverTime(comment.id);
+				}}
+				onPointerLeave={(event) => {
+					if (event.pointerType === "mouse") onHoverTime(null);
+				}}
 			>
-				<div className="flex min-w-0 items-center gap-2">
-					{!isOwnMessage && (
-						<Avatar className="size-8 shrink-0">
-							<AvatarFallback className="text-meta">{initials}</AvatarFallback>
-						</Avatar>
-					)}
-					<span className="truncate text-xs font-semibold text-foreground/80">
-						{isOwnMessage ? "You" : comment.authorName}
-					</span>
+				<div className="flex max-w-full items-end gap-2">
+					{!isOwnMessage &&
+						(showIncomingAvatar ? (
+							<Avatar
+								className={cn(
+									"size-8 shrink-0 border border-border/70",
+									groupPosition !== "single" && "rounded-bl-sm",
+								)}
+							>
+								<AvatarFallback className="text-caption font-medium">
+									{initials}
+								</AvatarFallback>
+							</Avatar>
+						) : (
+							<span aria-hidden="true" className="size-8 shrink-0" />
+						))}
+					<button
+						type="button"
+						aria-expanded={timeVisible}
+						aria-label={`${authorName}: ${comment.comment}. Sent ${fullMessageTime}.`}
+						onClick={onToggleTime}
+						className={cn(
+							"grid w-fit min-w-0 max-w-full gap-0 rounded-2xl border px-3 py-1 text-left font-normal transition-colors hover:border-foreground/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none",
+							groupPosition !== "single" && groupedCornerRadius[groupPosition],
+							isOwnMessage
+								? "border-primary/20 bg-primary/10"
+								: "border-border bg-muted/70",
+						)}
+					>
+						{!grouped && !isOwnMessage && (
+							<span className="mb-1 truncate text-xs font-semibold text-foreground/80">
+								{authorName}
+							</span>
+						)}
+						<span className="block whitespace-pre-wrap break-words text-sm leading-6 text-foreground">
+							{comment.comment}
+						</span>
+					</button>
 				</div>
-				<p className="whitespace-pre-wrap break-words text-sm leading-6 text-foreground">
-					{comment.comment}
-				</p>
-				<time
-					dateTime={comment.createdAt}
-					title={fullMessageTime}
-					className="justify-self-end text-xs tabular-nums text-muted-foreground"
+				<div
+					aria-hidden={!timeVisible}
+					className={cn(
+						"overflow-hidden text-micro leading-3 tabular-nums text-muted-foreground transition-[max-height,opacity,margin] duration-200 motion-reduce:transition-none",
+						isOwnMessage ? "self-end" : "self-start",
+						timeVisible ? "mt-1 max-h-3 opacity-100" : "mt-0 max-h-0 opacity-0",
+					)}
 				>
-					{messageTime}
-				</time>
-			</article>
+					<time dateTime={comment.createdAt}>{messageTime}</time>
+				</div>
+			</div>
 		</li>
 	);
+}
+
+function getMessageDayLabel(value: string) {
+	const date = new Date(value);
+	if (isToday(date)) return "Today";
+	if (isYesterday(date)) return "Yesterday";
+	return format(date, "MMM d");
+}
+
+function getMessageDayKey(value: string) {
+	return format(new Date(value), "yyyy-MM-dd");
 }
 
 export function ClaimConversation({
@@ -106,6 +186,9 @@ export function ClaimConversation({
 	const canComment = hasPermission(Permission.CLAIMS_ACTION_COMMENT);
 	const [open, setOpen] = useState(false);
 	const [content, setContent] = useState("");
+	const [pinnedTimeId, setPinnedTimeId] = useState<number | null>(null);
+	const [hoveredTimeId, setHoveredTimeId] = useState<number | null>(null);
+	const visibleTimeId = hoveredTimeId ?? pinnedTimeId;
 	const queryClient = useQueryClient();
 	const processedNotificationIds = useRef(new Set<number>());
 	const messagesEndRef = useRef<HTMLLIElement>(null);
@@ -135,6 +218,14 @@ export function ClaimConversation({
 			),
 		[commentsQuery.data],
 	);
+	const conversationDayKeys = new Set(
+		chronological.map((comment) => getMessageDayKey(comment.createdAt)),
+	);
+	const hasMultipleConversationDays = conversationDayKeys.size > 1;
+	const hasOlderOnlyDay =
+		chronological.length > 0 &&
+		!isToday(new Date(chronological[chronological.length - 1].createdAt));
+	const showDateSeparators = hasMultipleConversationDays || hasOlderOnlyDay;
 	const commentsUpdatedAt = commentsQuery.dataUpdatedAt;
 
 	useEffect(() => {
@@ -284,18 +375,64 @@ export function ClaimConversation({
 								</Button>
 							</div>
 						) : chronological.length > 0 ? (
-							<ul className="flex min-h-full flex-col justify-end gap-3">
-								{chronological.map((comment) => (
-									<CommentMessage
-										key={comment.id}
-										comment={comment}
-										currentUserId={profile.id}
-									/>
-								))}
+							<ul className="flex min-h-full flex-col justify-end">
+								{chronological.map((comment, index) => {
+									const previousComment = chronological[index - 1];
+									const startsNewDay =
+										!previousComment ||
+										getMessageDayKey(previousComment.createdAt) !==
+											getMessageDayKey(comment.createdAt);
+									const nextComment = chronological[index + 1];
+									const groupedPrevious =
+										!startsNewDay &&
+										previousComment?.authorUserId === comment.authorUserId;
+									const groupedNext =
+										nextComment?.authorUserId === comment.authorUserId &&
+										getMessageDayKey(nextComment.createdAt) ===
+											getMessageDayKey(comment.createdAt);
+									const groupPosition = groupedPrevious
+										? groupedNext
+											? "middle"
+											: "last"
+										: groupedNext
+											? "first"
+											: "single";
+
+									return (
+										<Fragment key={comment.id}>
+											{startsNewDay && showDateSeparators && (
+												<li className="flex items-center gap-3 py-3">
+													<span className="h-px flex-1 bg-border" />
+													<time
+														dateTime={getMessageDayKey(comment.createdAt)}
+														className="text-caption font-medium text-muted-foreground"
+													>
+														{getMessageDayLabel(comment.createdAt)}
+													</time>
+													<span className="h-px flex-1 bg-border" />
+												</li>
+											)}
+											<CommentMessage
+												comment={comment}
+												currentUserId={profile.id}
+												grouped={groupedPrevious}
+												groupPosition={groupPosition}
+												startsNewDay={startsNewDay}
+												timeVisible={visibleTimeId === comment.id}
+												onHoverTime={setHoveredTimeId}
+												onToggleTime={() =>
+													setPinnedTimeId((current) =>
+														current === comment.id ? null : comment.id,
+													)
+												}
+											/>
+										</Fragment>
+									);
+								})}
 								<li
 									ref={messagesEndRef}
 									aria-hidden="true"
-									className="h-0 shrink-0"
+									className="h-4 shrink-0"
 								/>
 							</ul>
 						) : (
@@ -319,6 +456,16 @@ export function ClaimConversation({
 									placeholder="Write a reply…"
 									value={content}
 									onChange={(event) => setContent(event.target.value)}
+									onKeyDown={(event) => {
+										if (
+											event.key !== "Enter" ||
+											event.shiftKey ||
+											event.nativeEvent.isComposing
+										)
+											return;
+										event.preventDefault();
+										event.currentTarget.form?.requestSubmit();
+									}}
 									rows={1}
 									maxLength={2000}
 									disabled={addComment.isPending}

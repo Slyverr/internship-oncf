@@ -41,6 +41,7 @@ This document is the shared UI contract for the Next.js application. Apply it to
 | Card/section title | 16px, semibold |
 | Body and table values | 14px with comfortable line height |
 | Form labels and metadata | 13–14px, medium for labels, muted for supporting values |
+| Timestamps and quiet metadata | 9px micro text, muted; keep visually attached to the content it qualifies |
 | Secondary descriptions | 14px, muted, with 4–8px separation from their title |
 
 Do not make a title and its subtitle the same size or weight. Use tabular numerals for quantities and dates that users compare.
@@ -111,7 +112,8 @@ Use the same semantic roles in all themes. Cards should separate from the canvas
 - Expanded sidebar hover may tint the full navigation row softly. In collapsed mode, keep the 44px target but make hover feedback local and subtle around the icon.
 - Keep logo and profile controls centered with the same top/bottom breathing room in both sidebar states.
 - Notifications open next to their trigger as a bounded popover. The full inbox remains a separate destination for reviewing older items.
-- Claim conversations open from the claim detail header in the named 672px × 640px dialog. Use a one-line claim-specific title, readable chat bubbles with compact local timestamps, chronological replies with the newest at the bottom, and scroll to the latest reply when opened. Keep the growing reply field and send button visually joined at the bottom of the scrollable history. Show an unread dot only for unread comment notifications on that claim; opening the conversation marks those comment notifications as read. Client replies notify the commercial-agent queue; agent replies notify the claim creator.
+- Claim conversations open from the claim detail header in the named 672px × 640px dialog. Use a one-line claim-specific title, compact content-fitting bubbles with an avatar beside the last incoming message in each sender group, and date separators (Today, Yesterday, or a short date) when there are multiple days or the conversation is from an older day. In a sender group, soften only the corners where adjacent bubbles meet; keep the outer corners fully rounded. Keep message times hidden by default; desktop hover or a tap reveals a small time below the bubble, aligned to the sender's outer edge. Only one message time may be visible at a time. Keep times available to assistive technology. Enter sends a reply; Shift+Enter inserts a line break. Keep chronological replies with the newest at the bottom, and scroll to the latest reply when opened. Keep the growing reply field and send button visually joined at the bottom of the scrollable history. Show an unread dot only for unread comment notifications on that claim; opening the conversation marks those comment notifications as read. Client replies notify the commercial-agent queue; agent replies notify the claim creator.
+- Leave 2px between adjacent messages in one sender group and 12px before a different sender group. The 2px group gap is a deliberate exception to the general 4px spacing grid for this chat pattern.
 - Transitions should be short and limited to the property that changes. Respect `prefers-reduced-motion`.
 - Tooltips use the semantic popover surface, a quiet border, and compact 8px × 4px insets. Keep icon controls at their full hit size; the tooltip should label the control without becoming a large hover panel.
 

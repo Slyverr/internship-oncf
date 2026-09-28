@@ -166,6 +166,16 @@
 	line-height: calc(1.25rem * var(--type-scale, 1));
 }
 
+@utility text-caption {
+	font-size: calc(0.6875rem * var(--type-scale, 1));
+	line-height: calc(1rem * var(--type-scale, 1));
+}
+
+@utility text-micro {
+	font-size: calc(0.5625rem * var(--type-scale, 1));
+	line-height: calc(0.75rem * var(--type-scale, 1));
+}
+
 @utility p-control {
 	padding: var(--spacing-control);
 }
