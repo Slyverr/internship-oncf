@@ -78,6 +78,7 @@ Use the same semantic roles in all themes. Cards should separate from the canvas
 - Keep the shared dialog surface above app chrome and fixed mobile navigation, with its backdrop directly below the surface. Apply these shared layers in both `Dialog` and `AlertDialog`; individual dialog content must not choose its own stacking level.
 - Keep close and primary-action targets at least 44px. On phones, leave 16px around the dialog, prevent horizontal overflow, and keep section navigation reachable before the scrolling body.
 - In appearance settings, use a two-column theme grid when each option has room to wrap its label (the `xs` breakpoint is 384px); narrower viewports use one column to prevent clipped theme names. Use compact radio chips for text preferences. Keep the three settings sections in a horizontally reachable, scrollbar-free mobile tab row and preserve the dialog's fixed outer size. Implement the section switcher as keyboard-operable tabs with arrow-key and Home/End navigation.
+- Organize Appearance controls as two groups once the settings pane has at least 42rem of usable width: layout and themes together, then font, text size, and motion together. Below that pane width, keep the groups stacked so theme labels and controls remain readable.
 - Do not place a Card inside a dialog pane just to repeat the outer dialog surface. Use the shared Card only when it separates a genuinely distinct task or data group.
 
 ### Row and list patterns

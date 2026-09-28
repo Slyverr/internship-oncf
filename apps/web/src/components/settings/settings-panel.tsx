@@ -351,44 +351,50 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="grid gap-4">
-						<PreferenceChoices
-							label="Workspace layout"
-							value={preferences.workspaceLayout}
-							options={workspaceLayoutOptions}
-							onChange={setWorkspaceLayout}
-							columns="grid-cols-2"
-							compact
-						/>
-						<PreferenceChoices
-							label="Color theme"
-							value={preferences.theme}
-							options={themeOptions}
-							onChange={setTheme}
-							renderPreview={(theme) => <ThemePreview theme={theme} />}
-							columns="grid-cols-1 xs:grid-cols-2 xl:grid-cols-3"
-							compact
-						/>
-						<PreferenceChoices
-							label="Font"
-							value={preferences.fontFamily}
-							options={fontOptions}
-							onChange={setFontFamily}
-							compact
-						/>
-						<PreferenceChoices
-							label="Text size"
-							value={preferences.textSize}
-							options={textSizeOptions}
-							onChange={setTextSize}
-							compact
-						/>
-						<PreferenceChoices
-							label="Motion"
-							value={preferences.motion}
-							options={motionOptions}
-							onChange={setMotion}
-							compact
-						/>
+						<div className="grid gap-4 @2xl/settings:grid-cols-2">
+							<div className="grid content-start gap-4">
+								<PreferenceChoices
+									label="Workspace layout"
+									value={preferences.workspaceLayout}
+									options={workspaceLayoutOptions}
+									onChange={setWorkspaceLayout}
+									columns="grid-cols-2"
+									compact
+								/>
+								<PreferenceChoices
+									label="Color theme"
+									value={preferences.theme}
+									options={themeOptions}
+									onChange={setTheme}
+									renderPreview={(theme) => <ThemePreview theme={theme} />}
+									columns="grid-cols-1 xs:grid-cols-2"
+									compact
+								/>
+							</div>
+							<div className="grid content-start gap-4">
+								<PreferenceChoices
+									label="Font"
+									value={preferences.fontFamily}
+									options={fontOptions}
+									onChange={setFontFamily}
+									compact
+								/>
+								<PreferenceChoices
+									label="Text size"
+									value={preferences.textSize}
+									options={textSizeOptions}
+									onChange={setTextSize}
+									compact
+								/>
+								<PreferenceChoices
+									label="Motion"
+									value={preferences.motion}
+									options={motionOptions}
+									onChange={setMotion}
+									compact
+								/>
+							</div>
+						</div>
 						<p role="status" className="text-sm text-muted-foreground">
 							{appearanceSyncStatus === "loading" &&
 								"Loading your account appearance settings…"}

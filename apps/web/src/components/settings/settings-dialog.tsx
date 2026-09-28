@@ -113,7 +113,7 @@ export function SettingsDialog() {
 						role="tabpanel"
 						id="settings-panel"
 						aria-labelledby={`settings-tab-${activeSection}`}
-						className="min-h-0 min-w-0 overflow-y-auto p-4 sm:p-6"
+						className="@container/settings min-h-0 min-w-0 overflow-y-auto p-4 sm:p-6"
 					>
 						<SettingsPanel section={activeSection} />
 					</section>
