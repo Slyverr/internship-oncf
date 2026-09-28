@@ -64,6 +64,20 @@ export class ClaimsQuery {
 		return created;
 	}
 
+	async findOrderCustomer(orderId: number) {
+		return this.drizzle.db.query.orders.findFirst({
+			where: { id: orderId },
+			columns: { customerId: true },
+		});
+	}
+
+	async findClaimAssociation(id: ClaimId) {
+		return this.drizzle.db.query.claims.findFirst({
+			where: { id },
+			columns: { customerId: true, orderId: true },
+		});
+	}
+
 	async findClaims(query: ListClaimQueryDto) {
 		const {
 			page = 1,

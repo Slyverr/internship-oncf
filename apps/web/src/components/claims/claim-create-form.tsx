@@ -8,7 +8,7 @@ import {
 } from "@ecommand/shared";
 import { useForm } from "@tanstack/react-form-nextjs";
 import { useRouter } from "next/navigation";
-import { type JSX } from "react";
+import { type JSX, useState } from "react";
 import { z } from "zod";
 import { ClaimPrioritySelect } from "@/components/claims/claim-priority-select";
 import { ClaimStatusSelect } from "@/components/claims/claim-status-select";
@@ -74,8 +74,7 @@ const claimBasicsSchema = createClaimSchema.pick({
 	type: true,
 });
 const claimSteps = [
-	{ title: "Claim", description: "Customer and issue type" },
-	{ title: "Association", description: "Link an order if relevant" },
+	{ title: "Claim details", description: "Customer and issue type" },
 	{ title: "Description", description: "Explain the issue" },
 ];
 
@@ -83,6 +82,9 @@ export function ClaimCreateForm(): JSX.Element {
 	const router = useRouter();
 	const { profile, hasPermission } = useAuth();
 	const mutation = useClaimsControllerCreate();
+	const [selectedCustomerId, setSelectedCustomerId] = useState(
+		profile?.customerId ?? 0,
+	);
 
 	const canManageOther = hasPermission(Permission.CLAIMS_MANAGE_OTHER);
 	const canManageStatus = hasPermission(Permission.CLAIMS_MANAGE_STATUS);
@@ -139,7 +141,7 @@ export function ClaimCreateForm(): JSX.Element {
 		},
 	});
 
-	function continueToAssociation() {
+	function continueToDescription() {
 		const result = claimBasicsSchema.safeParse(form.state.values);
 		advanceIfValid(result);
 	}
@@ -150,7 +152,12 @@ export function ClaimCreateForm(): JSX.Element {
 		isError: ordersIsError,
 		isFetching: ordersIsFetching,
 		refetch: retryOrders,
-	} = useOrdersControllerFindAll({});
+	} = useOrdersControllerFindAll(
+		selectedCustomerId > 0
+			? { customerId: selectedCustomerId, limit: 100 }
+			: undefined,
+		{ query: { enabled: selectedCustomerId > 0 } },
+	);
 
 	return (
 		<form
@@ -158,11 +165,7 @@ export function ClaimCreateForm(): JSX.Element {
 				event.preventDefault();
 				event.stopPropagation();
 				if (step === 0) {
-					continueToAssociation();
-					return;
-				}
-				if (step === 1) {
-					setStep(2);
+					continueToDescription();
 					return;
 				}
 				form.handleSubmit();
@@ -182,7 +185,7 @@ export function ClaimCreateForm(): JSX.Element {
 				<CardHeader>
 					<CardTitle>Claim Information</CardTitle>
 					<CardDescription>
-						Provide details regarding the customer complaint or issue ticket.
+						Provide the customer and issue type, and optionally link an order.
 					</CardDescription>
 				</CardHeader>
 
@@ -215,6 +218,10 @@ export function ClaimCreateForm(): JSX.Element {
 												}
 												onChange={(value) => {
 													field.handleChange(value);
+													if (field.state.value !== value) {
+														form.setFieldValue("orderId", undefined);
+													}
+													setSelectedCustomerId(value);
 													clearFieldError("customerId");
 												}}
 											/>
@@ -259,6 +266,25 @@ export function ClaimCreateForm(): JSX.Element {
 								</div>
 							);
 						}}
+					</form.Field>
+
+					<form.Field name="orderId">
+						{(field) => (
+							<div className="oncf-field">
+								<Label htmlFor="orderId">Associated Order (Optional)</Label>
+								<OrderSelect
+									id="orderId"
+									orders={orders}
+									value={field.state.value}
+									onChange={(value) => field.handleChange(value)}
+									emptyMessage="No orders found for this customer."
+									isLoading={ordersIsLoading}
+									isError={ordersIsError}
+									isFetching={ordersIsFetching}
+									onRetry={() => void retryOrders()}
+								/>
+							</div>
+						)}
 					</form.Field>
 
 					<form.Field name="priority">
@@ -310,38 +336,6 @@ export function ClaimCreateForm(): JSX.Element {
 			<Card
 				hidden={step !== 1}
 				className={step === 1 ? "page-enter" : undefined}
-			>
-				<CardHeader>
-					<CardTitle>Associations & Scope</CardTitle>
-					<CardDescription>
-						Optionally link this complaint to an existing order.
-					</CardDescription>
-				</CardHeader>
-
-				<CardContent className="grid gap-4 @3xl/workspace:grid-cols-2">
-					<form.Field name="orderId">
-						{(field) => (
-							<div className="oncf-field">
-								<Label htmlFor="orderId">Associated Order (Optional)</Label>
-								<OrderSelect
-									id="orderId"
-									orders={orders}
-									value={field.state.value}
-									onChange={(value) => field.handleChange(value)}
-									isLoading={ordersIsLoading}
-									isError={ordersIsError}
-									isFetching={ordersIsFetching}
-									onRetry={() => void retryOrders()}
-								/>
-							</div>
-						)}
-					</form.Field>
-				</CardContent>
-			</Card>
-
-			<Card
-				hidden={step !== 2}
-				className={step === 2 ? "page-enter" : undefined}
 			>
 				<CardHeader>
 					<CardTitle>Issue Description & Resolution</CardTitle>
@@ -425,7 +419,7 @@ export function ClaimCreateForm(): JSX.Element {
 						stepCount={claimSteps.length}
 						onCancel={() => router.push("/dashboard/claims")}
 						onPrevious={() => setStep((current) => Math.max(current - 1, 0))}
-						onContinue={step === 0 ? continueToAssociation : () => setStep(2)}
+						onContinue={continueToDescription}
 						submitLabel="Create Claim"
 						pendingLabel="Creating Claim..."
 						isSubmitting={state.isSubmitting}

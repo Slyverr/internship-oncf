@@ -2,6 +2,7 @@ import { ClaimType, Permission, Role } from "@ecommand/shared";
 import { ForbiddenException } from "@nestjs/common";
 import { ClaimsMapper } from "./claims.mapper";
 import type { CreateClaimDto } from "./requests/create-claim.dto";
+import type { UpdateClaimDto } from "./requests/update-claim.dto";
 
 describe("ClaimsMapper customer scope", () => {
 	const mapper = new ClaimsMapper();
@@ -49,5 +50,11 @@ describe("ClaimsMapper customer scope", () => {
 			]),
 		};
 		expect(mapper.toCreate(dto(43), manager).customerId).toBe(43);
+	});
+
+	it("requires manage-other permission to change claim customer", () => {
+		expect(() =>
+			mapper.toUpdate({ customerId: 43 } as UpdateClaimDto, customerUser),
+		).toThrow(ForbiddenException);
 	});
 });

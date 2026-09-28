@@ -28,6 +28,7 @@ export class ClaimsService {
 	) {}
 
 	async create(dto: CreateClaimDto, user: AuthUser) {
+		await this.ensureOrderCustomer(dto.customerId, dto.orderId);
 		const values = this.claimsMapper.toCreate(dto, user);
 		const created = await this.claimsQuery.createClaim(values);
 		return this.findOne(created.id);
@@ -63,6 +64,16 @@ export class ClaimsService {
 
 	async update(id: ClaimId, dto: UpdateClaimDto, user: AuthUser) {
 		const values = this.claimsMapper.toUpdate(dto, user);
+		if (dto.customerId !== undefined || dto.orderId !== undefined) {
+			const claim = this.ensure(
+				await this.claimsQuery.findClaimAssociation(id),
+				id,
+			);
+			await this.ensureOrderCustomer(
+				dto.customerId ?? claim.customerId,
+				dto.orderId ?? claim.orderId ?? undefined,
+			);
+		}
 		await this.persistUpdate(id, values, {
 			history: {
 				userId: user.id,
@@ -181,6 +192,20 @@ export class ClaimsService {
 			throw new ConflictException(`Claim ${id} was modified or does not exist`);
 		}
 		return updated;
+	}
+
+	private async ensureOrderCustomer(
+		customerId: number,
+		orderId?: number | null,
+	) {
+		if (orderId === undefined || orderId === null) return;
+
+		const order = await this.claimsQuery.findOrderCustomer(orderId);
+		if (!order || order.customerId !== customerId) {
+			throw new BadRequestException(
+				"The associated order must belong to the selected customer.",
+			);
+		}
 	}
 
 	private async transition(

@@ -1,5 +1,9 @@
 import { ClaimStatus, Permission, Role } from "@ecommand/shared";
-import { ConflictException, NotFoundException } from "@nestjs/common";
+import {
+	BadRequestException,
+	ConflictException,
+	NotFoundException,
+} from "@nestjs/common";
 import type { AuthUser } from "@/auth/auth.types";
 import { CLAIM_STATUSES } from "@/database/reference-data";
 import type { ClaimsMapper } from "./claims.mapper";
@@ -41,6 +45,8 @@ describe("ClaimsService workflows", () => {
 			findClaim: jest.fn(),
 			findClaimForOwnership: jest.fn(),
 			createClaim: jest.fn(),
+			findOrderCustomer: jest.fn(),
+			findClaimAssociation: jest.fn(),
 			updateClaim: jest.fn(),
 			deleteClaim: jest.fn(),
 			addClaimComment: jest.fn(),
@@ -65,6 +71,68 @@ describe("ClaimsService workflows", () => {
 		expect(mapper.toCreate).toHaveBeenCalledWith(values, agent);
 		expect(query.createClaim).toHaveBeenCalledWith(values);
 		expect(query.findClaim).toHaveBeenCalledWith(id);
+	});
+
+	it("allows an association with the same customer", async () => {
+		const dto = { customerId: 42, orderId: 91, description: "Broken cargo" };
+		const values = { ...dto };
+		query.findOrderCustomer.mockResolvedValue({ customerId: 42 } as never);
+		mapper.toCreate.mockReturnValue(values as never);
+		query.createClaim.mockResolvedValue({ id } as never);
+
+		await service.create(dto as never, agent);
+
+		expect(query.findOrderCustomer).toHaveBeenCalledWith(91);
+		expect(query.createClaim).toHaveBeenCalledWith(values);
+	});
+
+	it("rejects an order association from another customer", async () => {
+		const dto = { customerId: 42, orderId: 91, description: "Broken cargo" };
+		query.findOrderCustomer.mockResolvedValue({ customerId: 43 } as never);
+
+		await expect(service.create(dto as never, agent)).rejects.toThrow(
+			new BadRequestException(
+				"The associated order must belong to the selected customer.",
+			),
+		);
+		expect(mapper.toCreate).not.toHaveBeenCalled();
+		expect(query.createClaim).not.toHaveBeenCalled();
+	});
+
+	it("rejects a missing order association", async () => {
+		const dto = { customerId: 42, orderId: 91, description: "Broken cargo" };
+		query.findOrderCustomer.mockResolvedValue(undefined as never);
+
+		await expect(service.create(dto as never, agent)).rejects.toThrow(
+			new BadRequestException(
+				"The associated order must belong to the selected customer.",
+			),
+		);
+		expect(query.createClaim).not.toHaveBeenCalled();
+	});
+
+	it("rejects updates that mismatch an existing order and new customer", async () => {
+		query.findClaimAssociation.mockResolvedValue({
+			customerId: 42,
+			orderId: 91,
+		} as never);
+		query.findOrderCustomer.mockResolvedValue({ customerId: 42 } as never);
+
+		await expect(
+			service.update(id, { customerId: 43 } as never, {
+				...agent,
+				permissions: new Set([
+					Permission.CLAIMS_READ,
+					Permission.CLAIMS_UPDATE,
+					Permission.CLAIMS_MANAGE_OTHER,
+				]),
+			}),
+		).rejects.toThrow(
+			new BadRequestException(
+				"The associated order must belong to the selected customer.",
+			),
+		);
+		expect(query.updateClaim).not.toHaveBeenCalled();
 	});
 
 	it("reports a missing claim for detail and ownership lookups", async () => {

@@ -41,6 +41,13 @@ export class ClaimsMapper {
 	toUpdate(dto: UpdateClaimDto, user: AuthUser): ClaimUpdate {
 		const result: ClaimUpdate = { ...dto };
 
+		if (
+			dto.customerId !== undefined &&
+			!hasAnyPermission(user, Permission.CLAIMS_MANAGE_OTHER)
+		) {
+			throw new ForbiddenException("Cannot change claim customer");
+		}
+
 		if (dto.userId !== undefined && dto.userId !== user.id) {
 			if (!hasAnyPermission(user, Permission.CLAIMS_MANAGE_OTHER)) {
 				throw new ForbiddenException("Cannot reassign claims to other users");
