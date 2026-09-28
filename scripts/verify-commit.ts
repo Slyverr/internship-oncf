@@ -35,13 +35,9 @@ const checks: Check[] = [
 	},
 	{
 		label: "API tests",
-		command: node,
-		args: [
-			resolve(root, "apps/api/node_modules/jest/bin/jest.js"),
-			"--runInBand",
-		],
-		cwd: `${root}/apps/api`,
-		env: { NODE_PATH: nodePath },
+		command: bun,
+		args: ["run", "test", "--", "--runInBand"],
+		cwd: resolve(root, "apps/api"),
 	},
 	{
 		label: "Web tests",
@@ -64,13 +60,9 @@ const checks: Check[] = [
 	},
 	{
 		label: "API build",
-		command: node,
-		args: [
-			resolve(root, "apps/api/node_modules/@nestjs/cli/bin/nest.js"),
-			"build",
-		],
+		command: bun,
+		args: ["run", "build"],
 		cwd: resolve(root, "apps/api"),
-		env: { NODE_PATH: nodePath },
 	},
 	{
 		label: "Web production build",
