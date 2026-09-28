@@ -46,7 +46,7 @@ function DialogContent({
 	...props
 }: DialogPrimitive.Popup.Props & {
 	showCloseButton?: boolean;
-	size?: "default" | "wide";
+	size?: "default" | "form" | "wide";
 }) {
 	return (
 		<DialogPortal>
@@ -54,10 +54,12 @@ function DialogContent({
 			<DialogPrimitive.Popup
 				data-slot="dialog-content"
 				className={cn(
-					"oncf-dialog-surface max-h-[calc(100svh-2rem)] overflow-y-auto overscroll-contain text-sm duration-100 outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+					"oncf-dialog-surface max-h-[calc(100svh-2rem)] w-[calc(100%-2rem)] text-sm duration-100 outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
 					size === "wide"
-						? "h-[calc(100svh-2rem)] max-h-[48rem] w-[calc(100%-2rem)] max-w-[70rem]"
-						: "w-full max-w-[calc(100%-2rem)] sm:max-w-md",
+						? "h-[calc(100svh-2rem)] max-h-[48rem] max-w-[70rem]"
+						: size === "form"
+							? "h-[min(36rem,calc(100svh-2rem))] max-w-lg"
+							: "h-[min(24rem,calc(100svh-2rem))] max-w-md",
 					className,
 				)}
 				{...props}
@@ -70,7 +72,7 @@ function DialogContent({
 							<Button
 								variant="ghost"
 								className="absolute top-4 right-4"
-								size="icon-sm"
+								size="icon"
 							/>
 						}
 					>
@@ -87,7 +89,10 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
 	return (
 		<div
 			data-slot="dialog-header"
-			className={cn("flex flex-col gap-2", className)}
+			className={cn(
+				"flex shrink-0 flex-col gap-2 border-b pb-4 pr-12",
+				className,
+			)}
 			{...props}
 		/>
 	);
@@ -105,7 +110,7 @@ function DialogFooter({
 		<div
 			data-slot="dialog-footer"
 			className={cn(
-				"flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
+				"flex shrink-0 flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end",
 				className,
 			)}
 			{...props}
@@ -124,7 +129,10 @@ function DialogBody({ className, ...props }: React.ComponentProps<"div">) {
 	return (
 		<div
 			data-slot="dialog-body"
-			className={cn("min-h-0 min-w-0", className)}
+			className={cn(
+				"min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain",
+				className,
+			)}
 			{...props}
 		/>
 	);

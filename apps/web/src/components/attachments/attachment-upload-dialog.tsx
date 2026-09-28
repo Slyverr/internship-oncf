@@ -106,7 +106,10 @@ export function AttachmentUploadDialog({
 				}
 			/>
 
-			<DialogContent className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-6 sm:max-w-lg">
+			<DialogContent
+				size="form"
+				className="min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-6"
+			>
 				<DialogHeader className="pr-12">
 					<DialogTitle>Upload attachment</DialogTitle>
 					<DialogDescription>

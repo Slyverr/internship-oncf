@@ -225,7 +225,7 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 
 			{/* Reject Dialog */}
 			<AlertDialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
-				<AlertDialogContent>
+				<AlertDialogContent size="form">
 					<AlertDialogHeader>
 						<AlertDialogTitle>Reject order</AlertDialogTitle>
 						<AlertDialogDescription>

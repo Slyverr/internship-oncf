@@ -275,7 +275,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 
 			{/* Resolve Dialog */}
 			<AlertDialog open={resolveDialogOpen} onOpenChange={setResolveDialogOpen}>
-				<AlertDialogContent>
+				<AlertDialogContent size="form">
 					<AlertDialogHeader>
 						<AlertDialogTitle>Resolve claim</AlertDialogTitle>
 						<AlertDialogDescription>
@@ -301,7 +301,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 
 			{/* Reject Dialog */}
 			<AlertDialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
-				<AlertDialogContent>
+				<AlertDialogContent size="form">
 					<AlertDialogHeader>
 						<AlertDialogTitle>Reject claim</AlertDialogTitle>
 						<AlertDialogDescription>

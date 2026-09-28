@@ -42,7 +42,7 @@ function AlertDialogContent({
 	size = "default",
 	...props
 }: AlertDialogPrimitive.Popup.Props & {
-	size?: "default" | "sm";
+	size?: "default" | "form";
 }) {
 	return (
 		<AlertDialogPortal>
@@ -51,7 +51,7 @@ function AlertDialogContent({
 				data-slot="alert-dialog-content"
 				data-size={size}
 				className={cn(
-					"group/alert-dialog-content oncf-dialog-surface max-h-[calc(100svh-2rem)] w-[calc(100%-2rem)] overflow-y-auto overscroll-contain duration-100 outline-none data-[size=default]:max-w-xs data-[size=sm]:max-w-xs data-[size=default]:sm:max-w-lg data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+					"group/alert-dialog-content oncf-dialog-surface max-h-[calc(100svh-2rem)] w-[calc(100%-2rem)] justify-between overflow-y-auto overscroll-contain duration-100 outline-none data-[size=default]:h-[min(17rem,calc(100svh-2rem))] data-[size=default]:max-w-md data-[size=form]:h-[min(25rem,calc(100svh-2rem))] data-[size=form]:max-w-lg data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
 					className,
 				)}
 				{...props}
