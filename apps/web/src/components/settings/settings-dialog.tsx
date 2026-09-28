@@ -2,7 +2,7 @@
 
 import { SettingsIcon, ShieldCheckIcon, UserRoundIcon } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
 	Dialog,
 	DialogBody,
@@ -36,6 +36,7 @@ export function SettingsDialog() {
 	const activeSection = isSettingsSection(sectionParam)
 		? sectionParam
 		: "appearance";
+	const previousSection = useRef(activeSection);
 	const currentSearch = searchParams.toString();
 	const query = useMemo(
 		() => new URLSearchParams(currentSearch),
@@ -45,6 +46,15 @@ export function SettingsDialog() {
 		preferences.textSize === "large"
 			? "lg:grid-cols-[12rem_minmax(0,1fr)]"
 			: "lg:grid-cols-[11rem_minmax(0,1fr)]";
+
+	useEffect(() => {
+		if (previousSection.current === activeSection) return;
+
+		previousSection.current = activeSection;
+		document
+			.getElementById(`settings-tab-${activeSection}`)
+			?.focus({ preventScroll: true });
+	}, [activeSection]);
 
 	function selectSection(section: SettingsSection) {
 		query.set("section", section);
