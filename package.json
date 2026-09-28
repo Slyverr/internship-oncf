@@ -7,8 +7,9 @@
 		"typecheck": "turbo run typecheck",
 		"format-and-lint": "biome check .",
 		"format-and-lint:fix": "biome check . --write",
-		"ui:review": "bun scripts/capture-ui-review.ts",
-		"verify:commit": "\"$npm_execpath\" scripts/verify-commit.ts"
+		"test": "turbo run test",
+		"verify": "bun run format-and-lint && bun run typecheck && bun run test && bun run build",
+		"ui:review": "bun scripts/capture-ui-review.ts"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.5.5",

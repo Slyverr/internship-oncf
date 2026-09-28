@@ -46,13 +46,15 @@ The current database design needs review and is expected to change, so migration
 - Match the existing history: use app/domain scopes such as `feat(web/orders): add draft editing`, `fix(api/orders): validate draft updates`, and `refactor(api/auth): extract database queries`. Use `shared/auth`, `api/drizzle`, or `config/turbo` for those areas. Use an app-only scope for changes across features in one app, and omit the scope for repository-wide changes such as `docs: document project setup`.
 - Use an imperative, lowercase subject with no trailing period. Valid types include `feat`, `fix`, `refactor`, `chore`, and `docs`.
 - Do not commit secrets, local `.env` files, generated local mail, uploads, or database data.
-- Run `bun run verify:commit` successfully before every commit. The command checks formatting/linting, workspace typechecks, API and web test suites, and production builds; it stops on the first failure.
-- The tracked `.githooks/pre-commit` hook runs the same gate. Enable it for this checkout with `git config core.hooksPath .githooks` when Git hooks are available.
+- Before committing, run focused tests or typechecks relevant to the changed code when needed. The tracked `.githooks/pre-commit` hook checks staged files with Biome.
+- Before pushing, the tracked `.githooks/pre-push` hook runs workspace typechecks and tests.
+- Enable the tracked hooks for this checkout with `git config core.hooksPath .githooks`.
 
 ## Verification and reporting
 
-- Useful root commands: `bun run typecheck`, `bun run build`, and `bun run format-and-lint`.
-- Run focused API tests with `bun run test -- <pattern>` from `apps/api`; check the package script before assuming a test runner or command applies elsewhere.
+- Use `bun run verify` for full repository verification. It checks formatting/linting, workspace typechecks, tests, and production builds. Use it before important handoffs, merges, releases, or when full verification is specifically needed; it is not required before every commit.
+- Useful root commands: `bun run typecheck`, `bun run test`, `bun run build`, `bun run format-and-lint`, and `bun run verify`.
+- Prefer focused verification while developing. Run focused API tests with `bun run test -- <pattern>` from `apps/api`; check the package script before assuming a test runner or command applies elsewhere.
 - In your handoff, state what changed, what you verified, and any unresolved gaps. Do not describe a placeholder, status field, or endpoint as a completed external integration.
 
 For web layout or UI work, read [docs/interface/system.md](docs/interface/system.md) before editing screens. Treat it as the shared spec for spacing, type hierarchy, hit areas, responsive rules, sidebar states, notifications, motion, and visual review. Preserve current theme token values unless the user explicitly asks for a palette change.
