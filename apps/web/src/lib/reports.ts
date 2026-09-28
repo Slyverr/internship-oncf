@@ -16,6 +16,10 @@ export interface OrderReport {
 	byMonth: { month: string; count: number }[];
 }
 
+export function hasInvalidOrderReportDateRange(from: string, to: string) {
+	return Boolean(from && to && from > to);
+}
+
 export function getOrderReport(params: { from?: string; to?: string }) {
 	return customFetch<OrderReport>({
 		url: "/reports/orders",
