@@ -9,6 +9,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { formatEnumLabel } from "@/lib/enum-labels";
 
 interface ClaimPrioritySelectProps {
 	value?: ClaimPriority;
@@ -25,13 +26,15 @@ export function ClaimPrioritySelect({
 			onValueChange={(val) => onChange(val as ClaimPriority)}
 		>
 			<SelectTrigger className="w-full">
-				<SelectValue placeholder="Select priority" />
+				<SelectValue>
+					{value ? formatEnumLabel(value) : "Select priority"}
+				</SelectValue>
 			</SelectTrigger>
 
 			<SelectContent>
 				{Object.values(ClaimPriority).map((priority) => (
-					<SelectItem key={priority} value={priority} className="capitalize">
-						{priority}
+					<SelectItem key={priority} value={priority}>
+						{formatEnumLabel(priority)}
 					</SelectItem>
 				))}
 			</SelectContent>

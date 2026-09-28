@@ -9,6 +9,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { formatEnumLabel } from "@/lib/enum-labels";
 
 interface OrderStatusSelectProps {
 	value?: OrderStatus;
@@ -22,13 +23,15 @@ export function OrderStatusSelect({ value, onChange }: OrderStatusSelectProps) {
 			onValueChange={(value) => onChange(value as OrderStatus)}
 		>
 			<SelectTrigger className="w-full">
-				<SelectValue placeholder="Select status" />
+				<SelectValue>
+					{value ? formatEnumLabel(value) : "Select status"}
+				</SelectValue>
 			</SelectTrigger>
 
 			<SelectContent>
 				{Object.values(OrderStatus).map((status) => (
 					<SelectItem key={status} value={status}>
-						{status}
+						{formatEnumLabel(status)}
 					</SelectItem>
 				))}
 			</SelectContent>

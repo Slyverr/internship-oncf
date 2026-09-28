@@ -41,6 +41,7 @@ import {
 } from "@/components/ui/table";
 import { ProgramListDto } from "@/lib/api/generated.schemas";
 import { formatDisplayDate } from "@/lib/date-utils";
+import { formatEnumLabel } from "@/lib/enum-labels";
 
 interface ProgramsTableProps {
 	data: ProgramListDto[];
@@ -85,11 +86,7 @@ const columns: ColumnDef<typeof features, ProgramListDto>[] = [
 		accessorFn: (row) => row.programStatus.name,
 		id: "status",
 		header: "Status",
-		cell: (info) => (
-			<span className="capitalize">
-				{String(info.getValue()).toLowerCase()}
-			</span>
-		),
+		cell: (info) => formatEnumLabel(String(info.getValue())),
 	},
 	{
 		accessorKey: "plannedDate",
@@ -160,7 +157,11 @@ export function ProgramsTable({ data, isLoading }: ProgramsTableProps) {
 					onValueChange={(value) => setStatusFilter(value ?? "ALL")}
 				>
 					<SelectTrigger className="w-full max-w-48">
-						<SelectValue placeholder="Filter by status" />
+						<SelectValue>
+							{statusFilter === "ALL"
+								? "All statuses"
+								: formatEnumLabel(statusFilter)}
+						</SelectValue>
 					</SelectTrigger>
 
 					<SelectContent>
@@ -168,7 +169,7 @@ export function ProgramsTable({ data, isLoading }: ProgramsTableProps) {
 
 						{Object.values(ProgramStatus).map((status) => (
 							<SelectItem key={status} value={status}>
-								{status}
+								{formatEnumLabel(status)}
 							</SelectItem>
 						))}
 					</SelectContent>

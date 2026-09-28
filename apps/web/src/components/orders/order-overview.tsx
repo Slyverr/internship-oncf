@@ -2,6 +2,7 @@ import { RecordDetail, RecordMetric } from "@/components/common/record-summary";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { OrderDetailDto } from "@/lib/api/generated.schemas";
 import { formatDisplayDate } from "@/lib/date-utils";
+import { formatEnumLabel } from "@/lib/enum-labels";
 import { OrderAttachments } from "./order-attachments";
 
 export function OrderOverview({ order }: { order: OrderDetailDto }) {
@@ -21,7 +22,10 @@ export function OrderOverview({ order }: { order: OrderDetailDto }) {
 
 						<RecordDetail label="Customer" value={order.customer.companyName} />
 
-						<RecordDetail label="Status" value={order.orderStatus.name} />
+						<RecordDetail
+							label="Status"
+							value={formatEnumLabel(order.orderStatus.name)}
+						/>
 
 						<RecordDetail label="Supervisor" value={order.supervisor ?? "—"} />
 

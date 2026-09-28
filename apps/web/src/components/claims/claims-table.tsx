@@ -34,6 +34,7 @@ import {
 import { useTableQueryState } from "@/hooks/use-table-query-state";
 import { ClaimListDto } from "@/lib/api/generated.schemas";
 import { formatDisplayDate } from "@/lib/date-utils";
+import { formatEnumLabel } from "@/lib/enum-labels";
 
 interface ClaimsTableProps {
 	data: ClaimListDto[];
@@ -68,7 +69,7 @@ const columns: ColumnDef<typeof features, ClaimListDto>[] = [
 		accessorFn: (row) => row.claimType.name,
 		id: "type",
 		header: "Type",
-		cell: (info) => info.getValue<string>(),
+		cell: (info) => formatEnumLabel(info.getValue<string>()),
 	},
 	{
 		accessorFn: (row) => row.order?.orderNumber ?? "—",
@@ -81,22 +82,14 @@ const columns: ColumnDef<typeof features, ClaimListDto>[] = [
 		header: "Priority",
 		cell: (info) => {
 			const value = info.getValue<string | null>();
-			return value ? (
-				<span className="capitalize">{value.toLowerCase()}</span>
-			) : (
-				"—"
-			);
+			return value ? <span>{formatEnumLabel(value)}</span> : "—";
 		},
 	},
 	{
 		accessorFn: (row) => row.claimStatus.name,
 		id: "status",
 		header: "Status",
-		cell: (info) => (
-			<span className="capitalize">
-				{String(info.getValue()).toLowerCase()}
-			</span>
-		),
+		cell: (info) => formatEnumLabel(String(info.getValue())),
 	},
 	{
 		accessorKey: "createdAt",
@@ -173,14 +166,18 @@ export function ClaimsTable({
 					onValueChange={(value) => value && updateQuery("status", value)}
 				>
 					<SelectTrigger className="w-full max-w-44">
-						<SelectValue placeholder="Filter by status" />
+						<SelectValue>
+							{currentStatus === "ALL"
+								? "All statuses"
+								: formatEnumLabel(currentStatus)}
+						</SelectValue>
 					</SelectTrigger>
 
 					<SelectContent>
 						<SelectItem value="ALL">All statuses</SelectItem>
 						{Object.values(ClaimStatus).map((val) => (
 							<SelectItem key={val} value={val}>
-								{val}
+								{formatEnumLabel(val)}
 							</SelectItem>
 						))}
 					</SelectContent>
@@ -191,14 +188,18 @@ export function ClaimsTable({
 					onValueChange={(value) => value && updateQuery("type", value)}
 				>
 					<SelectTrigger className="w-full max-w-48">
-						<SelectValue placeholder="Filter by type" />
+						<SelectValue>
+							{currentType === "ALL"
+								? "All types"
+								: formatEnumLabel(currentType)}
+						</SelectValue>
 					</SelectTrigger>
 
 					<SelectContent>
 						<SelectItem value="ALL">All types</SelectItem>
 						{Object.values(ClaimType).map((val) => (
 							<SelectItem key={val} value={val}>
-								{val}
+								{formatEnumLabel(val)}
 							</SelectItem>
 						))}
 					</SelectContent>
@@ -209,14 +210,18 @@ export function ClaimsTable({
 					onValueChange={(value) => value && updateQuery("priority", value)}
 				>
 					<SelectTrigger className="w-full max-w-36">
-						<SelectValue placeholder="Filter by priority" />
+						<SelectValue>
+							{currentPriority === "ALL"
+								? "All priorities"
+								: formatEnumLabel(currentPriority)}
+						</SelectValue>
 					</SelectTrigger>
 
 					<SelectContent>
 						<SelectItem value="ALL">All priorities</SelectItem>
 						{Object.values(ClaimPriority).map((val) => (
 							<SelectItem key={val} value={val}>
-								{val}
+								{formatEnumLabel(val)}
 							</SelectItem>
 						))}
 					</SelectContent>

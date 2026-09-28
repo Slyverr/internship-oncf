@@ -2,6 +2,7 @@ import { RecordDetail, RecordMetric } from "@/components/common/record-summary";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ProgramDetailDto } from "@/lib/api/generated.schemas";
 import { formatDisplayDate } from "@/lib/date-utils";
+import { formatEnumLabel } from "@/lib/enum-labels";
 
 export function ProgramOverview({ program }: { program: ProgramDetailDto }) {
 	return (
@@ -17,7 +18,10 @@ export function ProgramOverview({ program }: { program: ProgramDetailDto }) {
 						label="Order Number"
 						value={program.order.orderNumber ?? "—"}
 					/>
-					<RecordDetail label="Status" value={program.programStatus.name} />
+					<RecordDetail
+						label="Status"
+						value={formatEnumLabel(program.programStatus.name)}
+					/>
 					<RecordDetail
 						label="Quantity Planned"
 						value={program.quantityPlanned}

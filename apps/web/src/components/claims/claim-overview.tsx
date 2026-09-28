@@ -2,6 +2,7 @@ import { RecordDetail, RecordMetric } from "@/components/common/record-summary";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ClaimDetailDto } from "@/lib/api/generated.schemas";
 import { formatDisplayDate } from "@/lib/date-utils";
+import { formatEnumLabel } from "@/lib/enum-labels";
 import { ClaimCommentForm } from "./claim-comment-form";
 import { ClaimComments } from "./claim-comments";
 
@@ -29,14 +30,17 @@ export function ClaimOverview({ claim }: { claim: ClaimDetailDto }) {
 							label="Customer"
 							value={claim.customer?.companyName ?? "—"}
 						/>
-						<RecordDetail label="Type" value={claim.claimType?.name ?? "—"} />
+						<RecordDetail
+							label="Type"
+							value={formatEnumLabel(claim.claimType?.name)}
+						/>
 						<RecordDetail
 							label="Status"
-							value={claim.claimStatus?.name ?? "—"}
+							value={formatEnumLabel(claim.claimStatus?.name)}
 						/>
 						<RecordDetail
 							label="Priority"
-							value={claim.priority ? claim.priority.toUpperCase() : "—"}
+							value={formatEnumLabel(claim.priority)}
 						/>
 						<RecordDetail label="Created By" value={createdBy} />
 						<RecordDetail

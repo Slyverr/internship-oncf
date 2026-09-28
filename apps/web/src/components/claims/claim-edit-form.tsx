@@ -29,6 +29,7 @@ import {
 	useClaimsControllerUpdate,
 } from "@/lib/api/claims";
 import type { ClaimDetailDto } from "@/lib/api/generated.schemas";
+import { formatEnumLabel } from "@/lib/enum-labels";
 import { getFormErrorMessage } from "@/lib/form-utils";
 import { useAuth } from "@/providers/auth-provider";
 
@@ -121,12 +122,12 @@ export function ClaimEditForm({ claim }: { claim: ClaimDetailDto }) {
 								onValueChange={(value) => value && setType(value as ClaimType)}
 							>
 								<SelectTrigger id="claimType" className="w-full">
-									<SelectValue placeholder="Select claim type" />
+									<SelectValue>{formatEnumLabel(type)}</SelectValue>
 								</SelectTrigger>
 								<SelectContent>
 									{Object.values(ClaimType).map((claimType) => (
 										<SelectItem key={claimType} value={claimType}>
-											{claimType.replaceAll("_", " ").toLowerCase()}
+											{formatEnumLabel(claimType)}
 										</SelectItem>
 									))}
 								</SelectContent>

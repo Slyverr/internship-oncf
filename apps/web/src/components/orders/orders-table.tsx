@@ -31,6 +31,7 @@ import {
 import { useTableQueryState } from "@/hooks/use-table-query-state";
 import { OrderListDto } from "@/lib/api/generated.schemas";
 import { formatDisplayDate } from "@/lib/date-utils";
+import { formatEnumLabel } from "@/lib/enum-labels";
 
 interface OrdersTableProps {
 	data: OrderListDto[];
@@ -74,11 +75,7 @@ const columns: ColumnDef<typeof features, OrderListDto>[] = [
 		accessorFn: (row) => row.orderStatus.name,
 		id: "status",
 		header: "Status",
-		cell: (info) => (
-			<span className="capitalize">
-				{String(info.getValue()).toLowerCase()}
-			</span>
-		),
+		cell: (info) => formatEnumLabel(String(info.getValue())),
 	},
 	{
 		accessorKey: "orderDate",
@@ -129,7 +126,9 @@ export function OrdersTable({
 					onValueChange={(value) => value && updateQuery("status", value)}
 				>
 					<SelectTrigger className="w-full max-w-48">
-						<SelectValue placeholder="Filter by status" />
+						<SelectValue>
+							{status ? formatEnumLabel(status) : "All statuses"}
+						</SelectValue>
 					</SelectTrigger>
 
 					<SelectContent>
@@ -137,7 +136,7 @@ export function OrdersTable({
 
 						{Object.values(OrderStatus).map((value) => (
 							<SelectItem key={value} value={value}>
-								{value}
+								{formatEnumLabel(value)}
 							</SelectItem>
 						))}
 					</SelectContent>

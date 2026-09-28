@@ -40,6 +40,7 @@ import { useGuidedFormState } from "@/hooks/use-guided-form-state";
 import { useClaimsControllerCreate } from "@/lib/api/claims";
 import type { ClaimDetailDto } from "@/lib/api/generated.schemas";
 import { useOrdersControllerFindAll } from "@/lib/api/orders";
+import { formatEnumLabel } from "@/lib/enum-labels";
 import { getFormErrorMessage } from "@/lib/form-utils";
 import { useAuth } from "@/providers/auth-provider";
 
@@ -247,12 +248,16 @@ export function ClaimCreateForm(): JSX.Element {
 										}}
 									>
 										<SelectTrigger className="w-full">
-											<SelectValue placeholder="Select claim type" />
+											<SelectValue>
+												{field.state.value
+													? formatEnumLabel(field.state.value)
+													: "Select claim type"}
+											</SelectValue>
 										</SelectTrigger>
 										<SelectContent>
 											{Object.values(ClaimType).map((typeVal) => (
 												<SelectItem key={typeVal} value={typeVal}>
-													{typeVal}
+													{formatEnumLabel(typeVal)}
 												</SelectItem>
 											))}
 										</SelectContent>

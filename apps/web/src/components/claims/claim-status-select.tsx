@@ -9,6 +9,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { formatEnumLabel } from "@/lib/enum-labels";
 
 interface ClaimStatusSelectProps {
 	value?: ClaimStatus;
@@ -19,13 +20,15 @@ export function ClaimStatusSelect({ value, onChange }: ClaimStatusSelectProps) {
 	return (
 		<Select value={value} onValueChange={(val) => onChange(val as ClaimStatus)}>
 			<SelectTrigger className="w-full">
-				<SelectValue placeholder="Select status" />
+				<SelectValue>
+					{value ? formatEnumLabel(value) : "Select status"}
+				</SelectValue>
 			</SelectTrigger>
 
 			<SelectContent>
 				{Object.values(ClaimStatus).map((status) => (
 					<SelectItem key={status} value={status}>
-						{status}
+						{formatEnumLabel(status)}
 					</SelectItem>
 				))}
 			</SelectContent>

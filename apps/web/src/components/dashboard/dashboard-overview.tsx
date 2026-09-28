@@ -35,6 +35,7 @@ import {
 } from "@/lib/api/orders";
 import { useProgramsControllerFindAll } from "@/lib/api/programs";
 import { useUsersControllerFindAll } from "@/lib/api/users";
+import { formatEnumLabel } from "@/lib/enum-labels";
 import { getOrderReport } from "@/lib/reports";
 import { useAuth } from "@/providers/auth-provider";
 
@@ -118,8 +119,8 @@ function RecentSection({
 											{item.title}
 										</span>
 										{item.status && (
-											<Badge variant="outline" className="shrink-0 capitalize">
-												{item.status.toLowerCase().replaceAll("_", " ")}
+											<Badge variant="outline" className="shrink-0">
+												{formatEnumLabel(item.status)}
 											</Badge>
 										)}
 									</span>

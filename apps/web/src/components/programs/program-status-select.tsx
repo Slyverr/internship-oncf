@@ -8,6 +8,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { formatEnumLabel } from "@/lib/enum-labels";
 
 interface ProgramStatusSelectProps {
 	id?: string;
@@ -27,13 +28,15 @@ export function ProgramStatusSelect({
 	return (
 		<Select value={value} onValueChange={(value) => value && onChange(value)}>
 			<SelectTrigger id={id} className="w-full">
-				<SelectValue>{selected ? selected : "Select status"}</SelectValue>
+				<SelectValue>
+					{selected ? formatEnumLabel(selected) : "Select status"}
+				</SelectValue>
 			</SelectTrigger>
 
 			<SelectContent>
 				{statuses.map((status) => (
 					<SelectItem key={status} value={status}>
-						{status}
+						{formatEnumLabel(status)}
 					</SelectItem>
 				))}
 			</SelectContent>

@@ -24,6 +24,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { formatEnumLabel } from "@/lib/enum-labels";
 import {
 	getOrderReport,
 	hasInvalidOrderReportDateRange,
@@ -31,7 +32,15 @@ import {
 } from "@/lib/reports";
 import { useAuth } from "@/providers/auth-provider";
 
-function Breakdown({ title, rows }: { title: string; rows: ReportCount[] }) {
+function Breakdown({
+	title,
+	rows,
+	formatName = (name) => name,
+}: {
+	title: string;
+	rows: ReportCount[];
+	formatName?: (name: string) => string;
+}) {
 	return (
 		<Card>
 			<CardHeader>
@@ -51,7 +60,7 @@ function Breakdown({ title, rows }: { title: string; rows: ReportCount[] }) {
 						<TableBody>
 							{rows.map((row) => (
 								<TableRow key={row.id}>
-									<TableCell>{row.name}</TableCell>
+									<TableCell>{formatName(row.name)}</TableCell>
 									<TableCell className="text-right tabular-nums">
 										{row.count}
 									</TableCell>
@@ -246,7 +255,11 @@ export function OrderReportView() {
 						/>
 					</div>
 					<div className="grid gap-4 @3xl/workspace:grid-cols-2 print:grid-cols-2">
-						<Breakdown title="By status" rows={report.data.byStatus} />
+						<Breakdown
+							title="By status"
+							rows={report.data.byStatus}
+							formatName={formatEnumLabel}
+						/>
 						<Breakdown title="By customer" rows={report.data.byCustomer} />
 						<Breakdown title="By product" rows={report.data.byProduct} />
 						<Breakdown
