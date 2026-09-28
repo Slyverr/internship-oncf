@@ -7,7 +7,7 @@ import {
 	STRONG_PASSWORD_REQUIREMENTS,
 } from "@ecommand/shared";
 import Link from "next/link";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useRef, useState } from "react";
 import {
 	GuidedFormProgress,
 	type GuidedFormStep,
@@ -36,6 +36,8 @@ export function ClientRegistrationForm() {
 	const [password, setPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
 	const [formError, setFormError] = useState("");
+	const passwordRef = useRef<HTMLInputElement>(null);
+	const confirmationRef = useRef<HTMLInputElement>(null);
 	const missingPasswordRequirements = STRONG_PASSWORD_REQUIREMENTS.filter(
 		(requirement) => !requirement.isMet(password),
 	).map((requirement) => requirement.label);
@@ -55,10 +57,12 @@ export function ClientRegistrationForm() {
 		}
 		if (!isStrongPassword(password)) {
 			setFormError(STRONG_PASSWORD_HINT);
+			window.requestAnimationFrame(() => passwordRef.current?.focus());
 			return;
 		}
 		if (password !== confirmPassword) {
 			setFormError("Passwords do not match.");
+			window.requestAnimationFrame(() => confirmationRef.current?.focus());
 			return;
 		}
 
@@ -207,8 +211,12 @@ export function ClientRegistrationForm() {
 											<Label htmlFor="registration-password">Password</Label>
 											<Input
 												id="registration-password"
+												ref={passwordRef}
 												value={password}
 												type="password"
+												aria-invalid={
+													password.length > 0 && !isStrongPassword(password)
+												}
 												autoComplete="new-password"
 												aria-describedby="registration-password-status"
 												required
@@ -223,8 +231,13 @@ export function ClientRegistrationForm() {
 											</Label>
 											<Input
 												id="registration-password-confirmation"
+												ref={confirmationRef}
 												value={confirmPassword}
 												type="password"
+												aria-invalid={
+													confirmPassword.length > 0 &&
+													confirmPassword !== password
+												}
 												autoComplete="new-password"
 												aria-describedby="registration-confirmation-status"
 												required
