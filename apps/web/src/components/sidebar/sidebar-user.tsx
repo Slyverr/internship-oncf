@@ -45,7 +45,7 @@ export function SidebarUser({
 		) : (
 			<button
 				type="button"
-				className="inline-flex size-11 items-center justify-center rounded-md border border-transparent transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+				className="inline-flex size-8 items-center justify-center rounded-md border border-transparent p-0 transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 			/>
 		);
 	const menu = (
