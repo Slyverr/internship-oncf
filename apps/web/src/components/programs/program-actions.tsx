@@ -7,6 +7,7 @@ import { useState } from "react";
 import {
 	AlertDialog,
 	AlertDialogAction,
+	AlertDialogBody,
 	AlertDialogCancel,
 	AlertDialogContent,
 	AlertDialogDescription,
@@ -222,11 +223,13 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>Cancel program</AlertDialogTitle>
+					</AlertDialogHeader>
+					<AlertDialogBody>
 						<AlertDialogDescription>
 							Are you sure you want to cancel this program? This action cannot
 							be undone.
 						</AlertDialogDescription>
-					</AlertDialogHeader>
+					</AlertDialogBody>
 
 					<AlertDialogFooter>
 						<AlertDialogCancel disabled={isPending}>

@@ -7,6 +7,7 @@ import { useState } from "react";
 import {
 	AlertDialog,
 	AlertDialogAction,
+	AlertDialogBody,
 	AlertDialogCancel,
 	AlertDialogContent,
 	AlertDialogDescription,
@@ -283,11 +284,13 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 
-					<Textarea
-						value={resolutionText}
-						onChange={(event) => setResolutionText(event.target.value)}
-						placeholder="Resolution details..."
-					/>
+					<AlertDialogBody>
+						<Textarea
+							value={resolutionText}
+							onChange={(event) => setResolutionText(event.target.value)}
+							placeholder="Resolution details..."
+						/>
+					</AlertDialogBody>
 
 					<AlertDialogFooter>
 						<AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
@@ -309,11 +312,13 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 
-					<Textarea
-						value={rejectionReason}
-						onChange={(event) => setRejectionReason(event.target.value)}
-						placeholder="Rejection reason..."
-					/>
+					<AlertDialogBody>
+						<Textarea
+							value={rejectionReason}
+							onChange={(event) => setRejectionReason(event.target.value)}
+							placeholder="Rejection reason..."
+						/>
+					</AlertDialogBody>
 
 					<AlertDialogFooter>
 						<AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>

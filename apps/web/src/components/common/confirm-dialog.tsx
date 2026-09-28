@@ -1,6 +1,7 @@
 import {
 	AlertDialog,
 	AlertDialogAction,
+	AlertDialogBody,
 	AlertDialogCancel,
 	AlertDialogContent,
 	AlertDialogDescription,
@@ -37,8 +38,10 @@ export function ConfirmDialog({
 			<AlertDialogContent>
 				<AlertDialogHeader>
 					<AlertDialogTitle>{title}</AlertDialogTitle>
-					<AlertDialogDescription>{description}</AlertDialogDescription>
 				</AlertDialogHeader>
+				<AlertDialogBody className="flex items-center">
+					<AlertDialogDescription>{description}</AlertDialogDescription>
+				</AlertDialogBody>
 
 				<AlertDialogFooter>
 					<AlertDialogCancel disabled={disabled}>

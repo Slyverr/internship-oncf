@@ -7,6 +7,7 @@ import { useState } from "react";
 import {
 	AlertDialog,
 	AlertDialogAction,
+	AlertDialogBody,
 	AlertDialogCancel,
 	AlertDialogContent,
 	AlertDialogDescription,
@@ -233,12 +234,14 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 
-					<Textarea
-						value={rejectionReason}
-						onChange={(event) => setRejectionReason(event.target.value)}
-						placeholder="Rejection reason"
-						className="min-h-25"
-					/>
+					<AlertDialogBody>
+						<Textarea
+							value={rejectionReason}
+							onChange={(event) => setRejectionReason(event.target.value)}
+							placeholder="Rejection reason"
+							className="min-h-25"
+						/>
+					</AlertDialogBody>
 
 					<AlertDialogFooter>
 						<AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
