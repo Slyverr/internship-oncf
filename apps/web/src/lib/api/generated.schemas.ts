@@ -26,7 +26,7 @@ export interface UserListDto {
   lastName: string;
   firstName: string;
   /** @nullable */
-  employeeId: string | null;
+  employeeCode: string | null;
   /** @nullable */
   type: string | null;
   roleId: string;
@@ -54,7 +54,7 @@ export interface UserDetailDto {
   lastName: string;
   firstName: string;
   /** @nullable */
-  employeeId: string | null;
+  employeeCode: string | null;
   /** @nullable */
   type: string | null;
   roleId: string;
@@ -104,7 +104,7 @@ export interface CreateUserDto {
   lastName: string;
   role: CreateUserDtoRole;
   /** @maxLength 50 */
-  employeeId?: string;
+  employeeCode?: string;
   /** @maxLength 20 */
   type?: CreateUserDtoType;
   /** @minimum 1 */
@@ -142,7 +142,7 @@ export interface UpdateUserDto {
   lastName?: string;
   role?: UpdateUserDtoRole;
   /** @maxLength 50 */
-  employeeId?: string;
+  employeeCode?: string;
   /** @maxLength 20 */
   type?: UpdateUserDtoType;
   /** @minimum 1 */
@@ -168,6 +168,11 @@ export interface UserDeleteDto {
 }
 
 export interface LoginDto {
+  /**
+     * @minLength 1
+     * @maxLength 100
+     * @pattern \S
+     */
   username: string;
   /** @minLength 8 */
   password: string;
@@ -1221,12 +1226,16 @@ export interface ProfileDto {
   role: string;
   permissions: string[];
   /** @nullable */
-  employeeId: string | null;
+  employeeCode: string | null;
   /** @nullable */
   type: string | null;
   roleId: string;
   /** @nullable */
   customerId: number | null;
+  /** @nullable */
+  customerName: string | null;
+  /** @nullable */
+  customerCode: string | null;
   /** @nullable */
   agencyId: number | null;
   createdAt: string;
@@ -1252,6 +1261,9 @@ export const AppearancePreferencesDtoFontFamily = {
   inter: 'inter',
   geist: 'geist',
   system: 'system',
+  arial: 'arial',
+  serif: 'serif',
+  monospace: 'monospace',
 } as const;
 
 export type AppearancePreferencesDtoTextSize = typeof AppearancePreferencesDtoTextSize[keyof typeof AppearancePreferencesDtoTextSize];
@@ -1271,11 +1283,20 @@ export const AppearancePreferencesDtoMotion = {
   reduced: 'reduced',
 } as const;
 
+export type AppearancePreferencesDtoWorkspaceLayout = typeof AppearancePreferencesDtoWorkspaceLayout[keyof typeof AppearancePreferencesDtoWorkspaceLayout];
+
+
+export const AppearancePreferencesDtoWorkspaceLayout = {
+  sidebar: 'sidebar',
+  'centered-header': 'centered-header',
+} as const;
+
 export interface AppearancePreferencesDto {
   theme: AppearancePreferencesDtoTheme;
   fontFamily: AppearancePreferencesDtoFontFamily;
   textSize: AppearancePreferencesDtoTextSize;
   motion: AppearancePreferencesDtoMotion;
+  workspaceLayout: AppearancePreferencesDtoWorkspaceLayout;
   updatedAt: string;
 }
 
@@ -1297,6 +1318,9 @@ export const UpdateAppearancePreferencesDtoFontFamily = {
   inter: 'inter',
   geist: 'geist',
   system: 'system',
+  arial: 'arial',
+  serif: 'serif',
+  monospace: 'monospace',
 } as const;
 
 export type UpdateAppearancePreferencesDtoTextSize = typeof UpdateAppearancePreferencesDtoTextSize[keyof typeof UpdateAppearancePreferencesDtoTextSize];
@@ -1316,11 +1340,20 @@ export const UpdateAppearancePreferencesDtoMotion = {
   reduced: 'reduced',
 } as const;
 
+export type UpdateAppearancePreferencesDtoWorkspaceLayout = typeof UpdateAppearancePreferencesDtoWorkspaceLayout[keyof typeof UpdateAppearancePreferencesDtoWorkspaceLayout];
+
+
+export const UpdateAppearancePreferencesDtoWorkspaceLayout = {
+  sidebar: 'sidebar',
+  'centered-header': 'centered-header',
+} as const;
+
 export interface UpdateAppearancePreferencesDto {
   theme: UpdateAppearancePreferencesDtoTheme;
   fontFamily: UpdateAppearancePreferencesDtoFontFamily;
   textSize: UpdateAppearancePreferencesDtoTextSize;
   motion: UpdateAppearancePreferencesDtoMotion;
+  workspaceLayout: UpdateAppearancePreferencesDtoWorkspaceLayout;
 }
 
 export interface UpdateProfileDto {

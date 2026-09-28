@@ -9,6 +9,11 @@ import { ClientRegistrationInput, UserInsert, UserUpdate } from "./users.types";
 
 @Injectable()
 export class UsersMapper {
+	private normalizeEmployeeCode(employeeCode?: string) {
+		const normalized = employeeCode?.trim().toUpperCase();
+		return normalized || undefined;
+	}
+
 	async toRegistration(input: ClientRegistrationInput): Promise<UserInsert> {
 		const { password, ...values } = input;
 		return {
@@ -27,6 +32,7 @@ export class UsersMapper {
 
 		return {
 			...values,
+			employeeCode: this.normalizeEmployeeCode(values.employeeCode),
 			password: await bcrypt.hash(password, 10),
 			createdBy: user.email,
 			roleId: ROLES[role].id,
@@ -38,6 +44,9 @@ export class UsersMapper {
 
 		return {
 			...values,
+			...(values.employeeCode !== undefined && {
+				employeeCode: this.normalizeEmployeeCode(values.employeeCode),
+			}),
 			...(role && { roleId: ROLES[role].id }),
 			updatedBy: user.email,
 		};

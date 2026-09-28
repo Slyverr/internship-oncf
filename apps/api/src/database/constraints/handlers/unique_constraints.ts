@@ -33,6 +33,11 @@ export const uniqueHandlers: Record<string, ConstraintHandler> = {
 		code: ConstraintCode.DUPLICATE_USER_EMAIL,
 		message: `A user with the email "${ctx.email}" already exists`,
 	}),
+	users_employee_code_key: (ctx) => ({
+		statusCode: HttpStatus.CONFLICT,
+		code: ConstraintCode.DUPLICATE_USER_EMPLOYEE_CODE,
+		message: `A user with employee code "${ctx.employeeCode}" already exists`,
+	}),
 	goods_types_name_key: (ctx) => ({
 		statusCode: HttpStatus.CONFLICT,
 		code: ConstraintCode.DUPLICATE_GOODS_TYPE_NAME,

@@ -52,7 +52,7 @@ const updateUserSchemaBase = z.object({
 		.max(100)
 		.optional(),
 	role: z.nativeEnum(UpdateUserDtoRole).optional(),
-	employeeId: z.string().max(50).optional(),
+	employeeCode: z.string().max(50).optional(),
 	type: z.nativeEnum(UpdateUserDtoType).optional(),
 	customerId: z.number().int().positive().optional(),
 });
@@ -81,7 +81,7 @@ const userAccessSchema = updateUserSchemaBase.pick({
 });
 const userEditSteps = [
 	{ title: "Access", description: "Email and role settings" },
-	{ title: "Profile", description: "Name and employee ID" },
+	{ title: "Profile", description: "Name and employee code" },
 ];
 
 export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
@@ -104,7 +104,7 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 			role:
 				(user.role?.name as UpdateUserDtoRole | undefined) ??
 				UpdateUserDtoRole.AGENT_COMMERCIAL,
-			employeeId: user.employeeId ?? "",
+			employeeCode: user.employeeCode ?? "",
 			type: (user.type as UpdateUserDtoType) ?? UpdateUserDtoType.internal,
 			customerId: user.customerId ?? undefined,
 		} as UpdateUserFormValues,
@@ -125,8 +125,8 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 							? { lastName: value.lastName.trim() }
 							: {}),
 						...(value.role ? { role: value.role } : {}),
-						...(value.employeeId?.trim()
-							? { employeeId: value.employeeId.trim() }
+						...(value.employeeCode?.trim()
+							? { employeeCode: value.employeeCode.trim() }
 							: {}),
 						...(value.type ? { type: value.type } : {}),
 						...(value.customerId ? { customerId: value.customerId } : {}),
@@ -277,7 +277,7 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 				<CardHeader>
 					<CardTitle>Profile</CardTitle>
 					<CardDescription>
-						Update the user name and employee ID.
+						Update the user name and employee code.
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="grid gap-4 @3xl/workspace:grid-cols-2">
@@ -378,13 +378,13 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 						}
 					</form.Subscribe>
 
-					<form.Field name="employeeId">
+					<form.Field name="employeeCode">
 						{(field) => (
 							<div className="oncf-field">
-								<Label htmlFor="employeeId">Employee ID</Label>
+								<Label htmlFor="employeeCode">Employee code</Label>
 								<Input
-									id="employeeId"
-									placeholder="Employee ID"
+									id="employeeCode"
+									placeholder="Employee code"
 									value={field.state.value ?? ""}
 									onChange={(e) => field.handleChange(e.target.value)}
 								/>

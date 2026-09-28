@@ -12,7 +12,7 @@ import { AuthService } from "./auth.service";
 describe("AuthService", () => {
 	let service: AuthService;
 	let users: {
-		findOneByEmail: jest.Mock;
+		findOneByLoginIdentifier: jest.Mock;
 		findOneForAuth: jest.Mock;
 		registerClient: jest.Mock;
 	};
@@ -24,7 +24,7 @@ describe("AuthService", () => {
 
 	beforeEach(() => {
 		users = {
-			findOneByEmail: jest.fn(),
+			findOneByLoginIdentifier: jest.fn(),
 			findOneForAuth: jest.fn(),
 			registerClient: jest.fn(),
 		};
@@ -57,11 +57,11 @@ describe("AuthService", () => {
 	});
 
 	it("rejects inactive and currently locked accounts before checking passwords", async () => {
-		users.findOneByEmail.mockResolvedValue({ isActive: false });
+		users.findOneByLoginIdentifier.mockResolvedValue({ isActive: false });
 		expect(
 			await service.validateUser("agent@example.test", "secret"),
 		).toBeNull();
-		users.findOneByEmail.mockResolvedValue({
+		users.findOneByLoginIdentifier.mockResolvedValue({
 			isActive: true,
 			registrationStatus: RegistrationStatus.APPROVED,
 			accountLockedUntil: new Date(Date.now() + 60_000).toISOString(),
@@ -73,7 +73,7 @@ describe("AuthService", () => {
 
 	it("returns null for a wrong password and omits the stored hash on success", async () => {
 		const password = await bcrypt.hash("correct horse battery staple", 4);
-		users.findOneByEmail.mockResolvedValue({
+		users.findOneByLoginIdentifier.mockResolvedValue({
 			id: 7,
 			email: "agent@example.test",
 			password,
@@ -91,12 +91,18 @@ describe("AuthService", () => {
 		expect(result).not.toHaveProperty("password");
 	});
 
+	it("uses a trimmed email or employee identifier for account lookup", async () => {
+		users.findOneByLoginIdentifier.mockResolvedValue(undefined);
+		expect(await service.validateUser(" EMP-12 ", "secret")).toBeNull();
+		expect(users.findOneByLoginIdentifier).toHaveBeenCalledWith("EMP-12");
+	});
+
 	it("rejects pending or rejected accounts even if they are active", async () => {
 		for (const registrationStatus of [
 			RegistrationStatus.PENDING,
 			RegistrationStatus.REJECTED,
 		]) {
-			users.findOneByEmail.mockResolvedValue({
+			users.findOneByLoginIdentifier.mockResolvedValue({
 				isActive: true,
 				registrationStatus,
 			});

@@ -18,7 +18,7 @@ export class ProfileDto implements Profile {
 	@ApiProperty({ type: [String] })
 	permissions: string[];
 	@ApiProperty({ nullable: true })
-	employeeId: string | null;
+	employeeCode: string | null;
 	@ApiProperty({ nullable: true })
 	type: string | null;
 	@ApiProperty()

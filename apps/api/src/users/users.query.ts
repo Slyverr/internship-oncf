@@ -15,7 +15,7 @@ const userListColumns = {
 	email: true,
 	firstName: true,
 	lastName: true,
-	employeeId: true,
+	employeeCode: true,
 	type: true,
 	roleId: true,
 	registrationStatus: true,
@@ -88,6 +88,14 @@ export class UsersQuery {
 	async findUserByEmail(email: UserEmail) {
 		return this.drizzle.db.query.users.findFirst({
 			where: { email },
+		});
+	}
+
+	async findUserByLoginIdentifier(identifier: string) {
+		return this.drizzle.db.query.users.findFirst({
+			where: identifier.includes("@")
+				? { email: { ilike: identifier } }
+				: { employeeCode: { ilike: identifier } },
 		});
 	}
 

@@ -36,6 +36,10 @@ export class UsersService {
 		return user;
 	}
 
+	async findOneByLoginIdentifier(identifier: string) {
+		return this.usersQuery.findUserByLoginIdentifier(identifier);
+	}
+
 	async findOneForAuth(id: UserId) {
 		const user = this.ensure(await this.usersQuery.findUserForAuth(id), id);
 		if (!user.role) {

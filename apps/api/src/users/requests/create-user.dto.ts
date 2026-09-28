@@ -35,7 +35,7 @@ export class CreateUserDto {
 	@IsOptional()
 	@IsString()
 	@MaxLength(50)
-	employeeId?: string;
+	employeeCode?: string;
 
 	@IsOptional()
 	@IsString()

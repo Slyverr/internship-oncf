@@ -31,6 +31,7 @@ describe("UsersService", () => {
 			findUsers: jest.fn(),
 			findUser: jest.fn(),
 			findUserByEmail: jest.fn(),
+			findUserByLoginIdentifier: jest.fn(),
 			findUserEmailExists: jest.fn(),
 			findUserForAuth: jest.fn(),
 			createUser: jest.fn(),
@@ -75,6 +76,21 @@ describe("UsersService", () => {
 		query.findUserByEmail.mockResolvedValue(undefined);
 		await expect(service.findOneByEmail(user.email)).rejects.toThrow(
 			new NotFoundException("User with email 'person@example.test' not found"),
+		);
+	});
+
+	it("returns a matching email or employee code", async () => {
+		query.findUserByLoginIdentifier.mockResolvedValue(user as never);
+		await expect(service.findOneByLoginIdentifier("EMP-12")).resolves.toEqual(
+			user,
+		);
+		expect(query.findUserByLoginIdentifier).toHaveBeenCalledWith("EMP-12");
+	});
+
+	it("returns undefined for a missing login identifier", async () => {
+		query.findUserByLoginIdentifier.mockResolvedValue(undefined);
+		await expect(service.findOneByLoginIdentifier("missing")).resolves.toBe(
+			undefined,
 		);
 	});
 

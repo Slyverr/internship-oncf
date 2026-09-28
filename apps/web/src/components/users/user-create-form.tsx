@@ -46,7 +46,7 @@ const createUserSchemaBase = z.object({
 	firstName: z.string().trim().min(1, "First name is required").max(100),
 	lastName: z.string().trim().min(1, "Last name is required").max(100),
 	role: z.enum(CreateUserDtoRole, { message: "Role is required" }),
-	employeeId: z.string().max(50).optional(),
+	employeeCode: z.string().max(50).optional(),
 	type: z.enum(CreateUserDtoType).optional(),
 	customerId: z.number().optional(),
 	agencyId: z.number().optional(),
@@ -97,7 +97,7 @@ export function UserCreateForm(): JSX.Element {
 			lastName: "",
 			role: CreateUserDtoRole.AGENT_COMMERCIAL,
 			customerId: undefined,
-			employeeId: "",
+			employeeCode: "",
 			type: CreateUserDtoType.internal,
 		} as CreateUserFormValues,
 		onSubmit: async ({ value }) => {
@@ -113,8 +113,8 @@ export function UserCreateForm(): JSX.Element {
 						firstName: value.firstName.trim(),
 						lastName: value.lastName.trim(),
 						role: value.role,
-						...(value.employeeId?.trim()
-							? { employeeId: value.employeeId.trim() }
+						...(value.employeeCode?.trim()
+							? { employeeCode: value.employeeCode.trim() }
 							: {}),
 						...(value.type ? { type: value.type } : {}),
 						...(value.customerId ? { customerId: value.customerId } : {}),
@@ -398,12 +398,12 @@ export function UserCreateForm(): JSX.Element {
 						)}
 					</form.Field>
 
-					<form.Field name="employeeId">
+					<form.Field name="employeeCode">
 						{(field) => (
 							<div className="oncf-field">
-								<Label htmlFor="employeeId">Employee ID</Label>
+								<Label htmlFor="employeeCode">Employee code</Label>
 								<Input
-									id="employeeId"
+									id="employeeCode"
 									placeholder="EMP-1234"
 									value={field.state.value ?? ""}
 									onChange={(e) => field.handleChange(e.target.value)}

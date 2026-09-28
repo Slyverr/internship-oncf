@@ -78,8 +78,8 @@ const columns: ColumnDef<typeof features, UserListDto>[] = [
 		),
 	},
 	{
-		accessorKey: "employeeId",
-		header: "Employee ID",
+		accessorKey: "employeeCode",
+		header: "Employee code",
 		cell: (info) => info.getValue<string | null>() ?? "—",
 	},
 	{
@@ -128,7 +128,7 @@ export function UsersTable({
 			user.email,
 			user.firstName,
 			user.lastName,
-			user.employeeId ?? "",
+			user.employeeCode ?? "",
 			user.role.name,
 		];
 

@@ -10,7 +10,7 @@ export class UserListDto implements UserList {
 	email: string;
 	lastName: string;
 	firstName: string;
-	employeeId: string | null;
+	employeeCode: string | null;
 	type: string | null;
 	roleId: string;
 	@ApiProperty({ enum: RegistrationStatus, enumName: "RegistrationStatus" })

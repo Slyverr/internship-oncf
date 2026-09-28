@@ -55,7 +55,7 @@ function registrationUser(
 		firstName: `Client${id}`,
 		lastName: "Representative",
 		email: `client${id}@example.test`,
-		employeeId: null,
+		employeeCode: null,
 		type: "external",
 		roleId: role,
 		role: { id: role, name: role },

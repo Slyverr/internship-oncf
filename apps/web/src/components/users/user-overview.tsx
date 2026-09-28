@@ -17,7 +17,10 @@ export function UserOverview({ user }: { user: UserDetailDto }) {
 					<RecordDetail label="First Name" value={user.firstName} />
 					<RecordDetail label="Last Name" value={user.lastName} />
 					<RecordDetail label="Email" value={user.email} />
-					<RecordDetail label="Employee ID" value={user.employeeId ?? "—"} />
+					<RecordDetail
+						label="Employee code"
+						value={user.employeeCode ?? "—"}
+					/>
 				</CardContent>
 			</Card>
 

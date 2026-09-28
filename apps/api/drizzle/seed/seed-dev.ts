@@ -326,7 +326,7 @@ async function seed() {
 				password: hashed,
 				lastName: "Admin",
 				firstName: "System",
-				employeeId: "ADMIN001",
+				employeeCode: "EMP-000001",
 				type: "internal",
 				roleName: "ADMIN",
 			},
@@ -335,7 +335,7 @@ async function seed() {
 				password: hashed,
 				lastName: "Client",
 				firstName: "Representative",
-				employeeId: "CLI001",
+				employeeCode: null,
 				type: "external",
 				roleName: "CLIENT_REPRESENTATIVE",
 			},
@@ -344,7 +344,7 @@ async function seed() {
 				password: hashed,
 				lastName: "Commercial",
 				firstName: "Agent",
-				employeeId: "AGT001",
+				employeeCode: "EMP-000002",
 				type: "internal",
 				roleName: "AGENT_COMMERCIAL",
 			},
@@ -367,7 +367,7 @@ async function seed() {
 				password: userData.password,
 				lastName: userData.lastName,
 				firstName: userData.firstName,
-				employeeId: userData.employeeId,
+				employeeCode: userData.employeeCode,
 				type: userData.type,
 				roleId: role.id,
 				isActive: true,
@@ -376,15 +376,20 @@ async function seed() {
 				}),
 			};
 
-			const insertUser = db.insert(users).values(userValues);
-			if (userData.roleName === "CLIENT_REPRESENTATIVE") {
-				await insertUser.onConflictDoUpdate({
+			await db
+				.insert(users)
+				.values(userValues)
+				.onConflictDoUpdate({
 					target: users.email,
-					set: { customerId: clientCustomer.id },
+					set: {
+						employeeCode: userData.employeeCode,
+						type: userData.type,
+						roleId: role.id,
+						...(userData.roleName === "CLIENT_REPRESENTATIVE" && {
+							customerId: clientCustomer.id,
+						}),
+					},
 				});
-			} else {
-				await insertUser.onConflictDoNothing({ target: users.email });
-			}
 		}
 
 		console.log("Dev fixtures and users seeded successfully");

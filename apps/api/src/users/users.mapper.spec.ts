@@ -29,4 +29,20 @@ describe("UsersMapper registration", () => {
 			isActive: false,
 		});
 	});
+	it("normalizes employee codes when creating internal users", async () => {
+		const mapper = new UsersMapper();
+		const values = await mapper.toCreate(
+			{
+				email: "employee@example.test",
+				password: "StrongPass1!",
+				firstName: "Sam",
+				lastName: "Employee",
+				role: Role.AGENT_COMMERCIAL,
+				employeeCode: "  emp-000042  ",
+			},
+			{ email: "admin@oncf.ma" } as never,
+		);
+
+		expect(values.employeeCode).toBe("EMP-000042");
+	});
 });

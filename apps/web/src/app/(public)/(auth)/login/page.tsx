@@ -42,12 +42,12 @@ export default function Page() {
 						</div>
 					)}
 					<div className="oncf-field">
-						<Label htmlFor="username">Email</Label>
+						<Label htmlFor="username">Email or employee code</Label>
 						<Input
 							id="username"
 							name="username"
-							type="email"
-							placeholder="email@example.com"
+							type="text"
+							placeholder="email@example.com or employee code"
 							autoComplete="username"
 							autoCapitalize="none"
 							spellCheck={false}

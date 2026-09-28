@@ -33,8 +33,12 @@ export class AuthService {
 		private readonly customersService: CustomersService,
 	) {}
 
-	async validateUser(email: string, password: string) {
-		const user = await this.usersService.findOneByEmail(email);
+	async validateUser(identifier: string, password: string) {
+		const user = await this.usersService.findOneByLoginIdentifier(
+			identifier.trim(),
+		);
+		if (!user) return null;
+
 		if (
 			!user.isActive ||
 			user.registrationStatus !== RegistrationStatus.APPROVED

@@ -21,14 +21,14 @@ export async function loginAction(
 	_prevState: LoginState | null,
 	formData: FormData,
 ): Promise<LoginState> {
-	const username = formData.get("username") as string;
+	const username = String(formData.get("username") ?? "").trim();
 	const password = formData.get("password") as string;
 	const remember = formData.get("remember") === "on";
 
 	const errors: LoginState["errors"] = {};
 
-	if (!username?.includes("@") || !username.includes(".")) {
-		errors.username = "Please enter a valid email address";
+	if (!username) {
+		errors.username = "Enter your email or employee code.";
 	}
 
 	if (!password || password.length < 8) {
@@ -53,7 +53,7 @@ export async function loginAction(
 		if (!accessToken) {
 			return {
 				errors: {
-					form: "Invalid email or password",
+					form: "Invalid email or employee code, or password",
 				},
 				success: false,
 				data: { username, remember },
@@ -78,7 +78,7 @@ export async function loginAction(
 		const status = isAxiosError(error) ? error.response?.status : undefined;
 
 		if (status === 401) {
-			formError = "Invalid email or password";
+			formError = "Invalid email or employee code, or password";
 		} else if (status === 429) {
 			formError = "Too many attempts. Please try again later";
 		} else if (status !== undefined && status >= 500) {

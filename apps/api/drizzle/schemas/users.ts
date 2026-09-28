@@ -24,6 +24,7 @@ import {
 	text,
 	timestamp,
 	unique,
+	uniqueIndex,
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
@@ -109,7 +110,7 @@ export const users = pgTable(
 		password: varchar("password", { length: 255 }).notNull(),
 		lastName: varchar("last_name", { length: 100 }).notNull(),
 		firstName: varchar("first_name", { length: 100 }).notNull(),
-		employeeId: varchar("employee_id", { length: 50 }),
+		employeeCode: varchar("employee_code", { length: 50 }),
 		type: varchar("type", { length: 20 }),
 		roleId: uuid("role_id").notNull(),
 		registrationStatus: varchar("registration_status", { length: 20 })
@@ -133,6 +134,9 @@ export const users = pgTable(
 	},
 	(table) => [
 		unique("users_email_key").on(table.email),
+		uniqueIndex("users_employee_code_key").on(
+			sql`lower(${table.employeeCode})`,
+		),
 		foreignKey({
 			columns: [table.roleId],
 			foreignColumns: [roles.id],
@@ -157,7 +161,7 @@ export const users = pgTable(
 			sql`${table.registrationStatus} IN ('PENDING', 'APPROVED', 'REJECTED')`,
 		),
 		index("idx_users_email").on(table.email),
-		index("idx_users_employee").on(table.employeeId),
+		index("idx_users_employee_code").on(table.employeeCode),
 		index("idx_users_type").on(table.type),
 		index("idx_users_role").on(table.roleId),
 		index("idx_users_customer").on(table.customerId),

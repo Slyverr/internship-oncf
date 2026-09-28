@@ -15,7 +15,7 @@ const profileColumns = {
 	email: true,
 	firstName: true,
 	lastName: true,
-	employeeId: true,
+	employeeCode: true,
 	type: true,
 	roleId: true,
 	customerId: true,
