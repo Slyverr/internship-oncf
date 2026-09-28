@@ -62,7 +62,7 @@ export function GuidedFormProgress({
 							</span>
 							<span
 								className={
-									"max-w-full text-sm leading-5 " +
+									"max-w-full px-2 text-sm leading-5 " +
 									(currentStep === index
 										? "font-semibold text-foreground"
 										: "text-muted-foreground")
