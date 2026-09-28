@@ -4,6 +4,7 @@ import type { AppearanceWorkspaceLayout } from "@ecommand/shared";
 import type { ComponentType, ReactNode } from "react";
 import { AppHeader } from "@/components/common/app-header";
 import { CenteredAppHeader } from "@/components/common/centered-app-header";
+import { CenteredNavigation } from "@/components/common/centered-navigation";
 import { WorkspaceBreadcrumbs } from "@/components/common/workspace-breadcrumbs";
 import AppSidebar from "@/components/sidebar/sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -36,10 +37,15 @@ function CenteredHeaderWorkspace({ children, modal }: DashboardWorkspaceProps) {
 	return (
 		<div className="@container/workspace flex min-h-screen w-full min-w-0 flex-col">
 			<CenteredAppHeader />
-			<main className={`${workspaceContentClassName} flex-1`}>
+			<main className={`${workspaceContentClassName} flex-1 pb-24 md:pb-6`}>
 				<WorkspaceBreadcrumbs />
 				{children}
 			</main>
+			<div className="fixed inset-x-0 bottom-0 z-50 min-h-16 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] shadow-md md:hidden print:hidden">
+				<div className="mx-auto flex min-h-16 w-full max-w-screen-2xl items-center">
+					<CenteredNavigation compact />
+				</div>
+			</div>
 			{modal}
 		</div>
 	);

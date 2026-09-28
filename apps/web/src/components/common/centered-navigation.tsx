@@ -12,7 +12,7 @@ import {
 import { useAuth } from "@/providers/auth-provider";
 import { sidebarRoutes } from "../sidebar/sidebar-routes";
 
-export function CenteredNavigation() {
+export function CenteredNavigation({ compact = false }: { compact?: boolean }) {
 	const pathname = usePathname();
 	const { hasPermission } = useAuth();
 	const navigationRef = useRef<HTMLElement>(null);
@@ -101,7 +101,7 @@ export function CenteredNavigation() {
 				>
 					<div
 						ref={navigationItemsRef}
-						className="flex w-max min-w-full items-center justify-start gap-control px-4 md:justify-center md:px-0"
+						className={`flex w-max min-w-full items-center ${compact ? "justify-between gap-0 px-compact sm:gap-control sm:px-4" : "justify-start gap-control px-4 md:justify-center md:px-0"}`}
 					>
 						{visibleRoutes.map((route) => {
 							const isActive = route.exact
