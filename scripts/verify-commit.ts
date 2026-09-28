@@ -28,36 +28,9 @@ const checks: Check[] = [
 		cwd: root,
 	},
 	{
-		label: "Shared typecheck",
-		command: node,
-		args: [
-			resolve(root, "node_modules/typescript/bin/tsc"),
-			"--noEmit",
-			"-p",
-			resolve(root, "packages/shared/tsconfig.json"),
-		],
-		cwd: root,
-	},
-	{
-		label: "API typecheck",
-		command: node,
-		args: [
-			resolve(root, "node_modules/typescript/bin/tsc"),
-			"--noEmit",
-			"-p",
-			resolve(root, "apps/api/tsconfig.json"),
-		],
-		cwd: root,
-	},
-	{
-		label: "Web typecheck",
-		command: node,
-		args: [
-			resolve(root, "node_modules/typescript/bin/tsc"),
-			"--noEmit",
-			"-p",
-			resolve(root, "apps/web/tsconfig.json"),
-		],
+		label: "Workspace typecheck",
+		command: bun,
+		args: ["run", "typecheck"],
 		cwd: root,
 	},
 	{

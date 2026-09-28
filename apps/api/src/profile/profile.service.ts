@@ -22,8 +22,11 @@ export class ProfileService {
 			throw new InternalServerErrorException(`User ${id} has no role assigned`);
 		}
 
+		const { customer, ...profile } = user;
 		return {
-			...user,
+			...profile,
+			customerName: customer?.companyName ?? null,
+			customerCode: customer?.customerCode ?? null,
 			role: user.role.name,
 			permissions: user.role.rolePermissions
 				.map((rp) => rp.permission?.name)

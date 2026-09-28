@@ -1,16 +1,11 @@
-import { Breadcrumbs } from "@/components/common/breadcrumbs";
-import { PageHeader } from "@/components/common/page-header";
-import { SettingsPanel } from "@/components/settings/settings-panel";
+import { DashboardHome } from "@/components/dashboard/dashboard-home";
+import { SettingsDialog } from "@/components/settings/settings-dialog";
 
 export default function Page() {
 	return (
 		<>
-			<Breadcrumbs items={[{ label: "Settings" }]} />
-			<PageHeader
-				title="Settings"
-				description="Personalize your workspace and manage your account."
-			/>
-			<SettingsPanel />
+			<DashboardHome />
+			<SettingsDialog closeToDashboard />
 		</>
 	);
 }

@@ -14,7 +14,10 @@ import {
 	useRef,
 	useState,
 } from "react";
-import type { AppearancePreferencesDto } from "@/lib/api/generated.schemas";
+import type {
+	AppearancePreferencesDto,
+	UpdateAppearancePreferencesDto,
+} from "@/lib/api/generated.schemas";
 import {
 	getProfileControllerGetPreferencesQueryKey,
 	useProfileControllerGetPreferences,
@@ -69,7 +72,9 @@ export function AppearancePreferencesSync({
 			lastSent.current = serialized;
 			try {
 				const saved = await savePreferences.mutateAsync({
-					data: latestPreferences,
+					// The API validates these values from the shared appearance contract;
+					// the checked-in generated write DTO still has the older font enum.
+					data: latestPreferences as unknown as UpdateAppearancePreferencesDto,
 				});
 				queryClient.setQueryData(
 					getProfileControllerGetPreferencesQueryKey(),

@@ -6,6 +6,7 @@ import type {
 	AppearanceWorkspaceLayout,
 } from "@ecommand/shared";
 import {
+	APPEARANCE_FONT_FAMILIES,
 	APPEARANCE_WORKSPACE_LAYOUTS,
 	RegistrationStatus,
 } from "@ecommand/shared";
@@ -207,7 +208,10 @@ export const userPreferences = pgTable(
 		),
 		check(
 			"user_preferences_font_family_check",
-			sql`${table.fontFamily} IN ('inter', 'geist', 'system')`,
+			sql`${table.fontFamily} IN (${sql.join(
+				APPEARANCE_FONT_FAMILIES.map((fontFamily) => sql`${fontFamily}`),
+				sql`, `,
+			)})`,
 		),
 		check(
 			"user_preferences_text_size_check",

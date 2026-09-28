@@ -80,7 +80,7 @@ function DialogHeader({
 		<div
 			data-slot="dialog-header"
 			className={cn(
-				"row-start-1 flex min-w-0 shrink-0 items-start justify-between gap-4 border-b pb-4",
+				"row-start-1 flex min-w-0 shrink-0 items-center justify-between gap-4 border-b pb-4",
 				className,
 			)}
 			{...props}

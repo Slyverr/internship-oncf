@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { Breadcrumbs } from "@/components/common/breadcrumbs";
-import { DashboardOverview } from "@/components/dashboard/dashboard-overview";
+import { DashboardHome } from "@/components/dashboard/dashboard-home";
 
 export const metadata: Metadata = {
 	title: "Dashboard",
@@ -8,10 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-	return (
-		<>
-			<Breadcrumbs items={[]} />
-			<DashboardOverview />
-		</>
-	);
+	return <DashboardHome />;
 }

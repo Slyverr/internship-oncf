@@ -1,6 +1,13 @@
 "use client";
 
-import { SettingsIcon, ShieldCheckIcon, UserRoundIcon } from "lucide-react";
+import {
+	CheckCircle2Icon,
+	CloudOffIcon,
+	LoaderCircleIcon,
+	SettingsIcon,
+	ShieldCheckIcon,
+	UserRoundIcon,
+} from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef } from "react";
 import {
@@ -10,6 +17,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { useAppearanceSyncStatus } from "@/providers/appearance-preferences-sync";
 import { useAppearance } from "@/providers/appearance-provider";
 import { SettingsPanel, type SettingsSection } from "./settings-panel";
 
@@ -27,7 +35,41 @@ function isSettingsSection(value: string | null): value is SettingsSection {
 	return sections.some((section) => section.id === value);
 }
 
-export function SettingsDialog() {
+function AppearanceSyncIndicator() {
+	const status = useAppearanceSyncStatus();
+	const statusCopy = {
+		loading: "Loading",
+		saving: "Saving",
+		saved: "Synced",
+		local: "On this device",
+	}[status];
+	const StatusIcon =
+		status === "loading" || status === "saving"
+			? LoaderCircleIcon
+			: status === "saved"
+				? CheckCircle2Icon
+				: CloudOffIcon;
+
+	return (
+		<span
+			role="status"
+			aria-live="polite"
+			className="inline-flex min-w-0 items-center gap-compact text-meta text-muted-foreground"
+		>
+			<StatusIcon
+				aria-hidden="true"
+				className={`size-4 shrink-0 ${status === "loading" || status === "saving" ? "animate-spin motion-reduce:animate-none" : ""}`}
+			/>
+			<span className="truncate">{statusCopy}</span>
+		</span>
+	);
+}
+
+export function SettingsDialog({
+	closeToDashboard = false,
+}: {
+	closeToDashboard?: boolean;
+} = {}) {
 	const { preferences } = useAppearance();
 	const router = useRouter();
 	const pathname = usePathname();
@@ -89,10 +131,20 @@ export function SettingsDialog() {
 	}
 
 	return (
-		<Dialog open onOpenChange={(open) => !open && router.back()}>
+		<Dialog
+			open
+			onOpenChange={(open) => {
+				if (open) return;
+				if (closeToDashboard) router.replace("/dashboard");
+				else router.back();
+			}}
+		>
 			<DialogContent size="settings" className="gap-0 overflow-hidden p-0">
-				<DialogHeader className="min-h-12 flex-row items-center border-b px-4 py-0 pb-0">
-					<DialogTitle className="text-base">Settings</DialogTitle>
+				<DialogHeader className="h-14 flex-row border-b px-4 py-0 pb-0">
+					<div className="flex min-w-0 items-center gap-3">
+						<DialogTitle className="shrink-0 text-base">Settings</DialogTitle>
+						<AppearanceSyncIndicator />
+					</div>
 				</DialogHeader>
 				<DialogBody
 					className={`grid min-h-0 min-w-0 grid-cols-1 grid-rows-[max-content_minmax(0,1fr)] overflow-hidden p-0 lg:grid-rows-1 ${sectionRailWidthClass}`}

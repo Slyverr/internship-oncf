@@ -9,14 +9,19 @@ import {
 import { createContext, ReactNode, useContext, useState } from "react";
 import { ProfileDto } from "@/lib/api/generated.schemas";
 
+export type AuthenticatedProfile = ProfileDto & {
+	customerName?: string | null;
+	customerCode?: string | null;
+};
+
 export interface AuthProviderProps {
-	profile: ProfileDto;
+	profile: AuthenticatedProfile;
 	children: ReactNode;
 }
 
 export interface AuthContextType {
-	profile: ProfileDto;
-	setProfile: (profile: ProfileDto) => void;
+	profile: AuthenticatedProfile;
+	setProfile: (profile: AuthenticatedProfile) => void;
 	hasPermission: (permission: Permission) => boolean;
 	hasAnyPermission: (...permissions: Permission[]) => boolean;
 	hasAllPermissions: (...permissions: Permission[]) => boolean;

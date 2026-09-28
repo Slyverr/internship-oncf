@@ -25,6 +25,9 @@ const profileColumns = {
 } satisfies UsersColumns;
 
 const profileRelations = {
+	customer: {
+		columns: { companyName: true, customerCode: true },
+	},
 	role: {
 		columns: { name: true },
 		with: {

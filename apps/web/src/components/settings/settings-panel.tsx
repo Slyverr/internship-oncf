@@ -1,7 +1,7 @@
 "use client";
 
 import { isStrongPassword, STRONG_PASSWORD_HINT } from "@ecommand/shared";
-import { type FormEvent, type ReactNode, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -13,11 +13,16 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { useAuthControllerChangePassword } from "@/lib/api/auth";
 import { useProfileControllerUpdate } from "@/lib/api/profile";
 import { getFormErrorMessage } from "@/lib/form-utils";
-import { useAppearanceSyncStatus } from "@/providers/appearance-preferences-sync";
 import {
 	type FontFamily,
 	type MotionPreference,
@@ -64,7 +69,18 @@ const fontOptions: { value: FontFamily; label: string; description: string }[] =
 	[
 		{ value: "inter", label: "Inter", description: "Crisp and familiar" },
 		{ value: "geist", label: "Geist", description: "Clean and compact" },
-		{ value: "system", label: "System", description: "Use your device font" },
+		{
+			value: "system",
+			label: "System UI",
+			description: "Use your device font",
+		},
+		{ value: "arial", label: "Arial", description: "Neutral sans serif" },
+		{ value: "serif", label: "Georgia", description: "Traditional serif" },
+		{
+			value: "monospace",
+			label: "Monospace",
+			description: "Fixed-width lettering",
+		},
 	];
 
 const textSizeOptions: {
@@ -88,13 +104,13 @@ const motionOptions: {
 }[] = [
 	{
 		value: "system",
-		label: "System",
+		label: "Follow system",
 		description: "Follow your device setting",
 	},
 	{
 		value: "reduced",
-		label: "Reduced",
-		description: "Use only essential motion",
+		label: "Reduce motion",
+		description: "Limit animation and transitions",
 	},
 ];
 
@@ -115,104 +131,46 @@ const workspaceLayoutOptions: {
 	},
 ];
 
-function PreferenceChoices<Value extends string>({
+function PreferenceSelect<Value extends string>({
+	id,
 	label,
 	value,
 	options,
 	onChange,
-	renderPreview,
-	columns = "grid-cols-2 xl:grid-cols-3",
-	compact = false,
 }: {
+	id: string;
 	label: string;
 	value: Value;
 	options: { value: Value; label: string; description: string }[];
 	onChange: (value: Value) => void;
-	renderPreview?: (value: Value) => ReactNode;
-	columns?: string;
-	compact?: boolean;
 }) {
-	const id = label.toLowerCase().replaceAll(" ", "-");
-	const inlineChoices = compact && !renderPreview;
+	const selected = options.find((option) => option.value === value);
 
 	return (
-		<fieldset className="grid">
-			<legend className="text-sm font-medium">{label}</legend>
-			<RadioGroup
-				aria-label={label}
+		<div className="oncf-field min-w-0">
+			<Label htmlFor={id}>{label}</Label>
+			<Select
 				value={value}
 				onValueChange={(nextValue) => {
 					const option = options.find((item) => item.value === nextValue);
 					if (option) onChange(option.value);
 				}}
-				className={
-					inlineChoices
-						? "mt-4 flex flex-wrap gap-control"
-						: `mt-4 grid gap-control ${columns}`
-				}
 			>
-				{options.map((option) => (
-					<Label
-						key={option.value}
-						htmlFor={`${id}-${option.value}`}
-						className={`flex cursor-pointer items-center ${compact && renderPreview ? "gap-compact" : "gap-control"} rounded-lg border px-field py-control transition-colors hover:bg-muted/60 has-[[data-checked]]:border-primary has-[[data-checked]]:bg-primary/5 ${inlineChoices ? "min-h-11 rounded-md px-3" : compact ? "min-h-12" : "min-h-14"}`}
-					>
-						<RadioGroupItem id={`${id}-${option.value}`} value={option.value} />
-						{renderPreview?.(option.value)}
-						<span className="grid min-w-0 flex-1 gap-compact">
-							<span
-								className={`${renderPreview ? "text-xs sm:text-sm" : "text-sm"} font-medium`}
-							>
-								{option.label}
-							</span>
-							<span
-								className={
-									compact ? "sr-only" : "text-xs text-muted-foreground"
-								}
-							>
-								{option.description}
-							</span>
-						</span>
-					</Label>
-				))}
-			</RadioGroup>
-		</fieldset>
-	);
-}
-
-type PreviewTheme = Exclude<ThemeMode, "system">;
-
-function ThemeSurface({ theme }: { theme: PreviewTheme }) {
-	const isDark = theme === "dark" || theme === "mono-dark";
-
-	return (
-		<span
-			data-theme={theme}
-			className={`grid min-w-0 grid-cols-[0.6fr_1.4fr] ${isDark ? "dark" : ""}`}
-		>
-			<span className="bg-sidebar" />
-			<span className="grid content-center gap-1 bg-background p-1">
-				<span className="h-1 w-5 rounded-full bg-muted-foreground/40" />
-				<span className="h-2 rounded-sm border border-border bg-card" />
-				<span className="h-1 w-3/4 rounded-full bg-primary" />
-			</span>
-		</span>
-	);
-}
-
-function ThemePreview({ theme }: { theme: ThemeMode }) {
-	const previews: PreviewTheme[] =
-		theme === "system" ? ["light", "dark"] : [theme];
-
-	return (
-		<span
-			aria-hidden="true"
-			className={`grid h-8 w-8 shrink-0 overflow-hidden rounded-md border border-border sm:w-12 ${theme === "system" ? "grid-cols-2" : "grid-cols-1"}`}
-		>
-			{previews.map((previewTheme) => (
-				<ThemeSurface key={previewTheme} theme={previewTheme} />
-			))}
-		</span>
+				<SelectTrigger id={id} className="w-full min-w-0">
+					<SelectValue>{selected?.label}</SelectValue>
+				</SelectTrigger>
+				<SelectContent align="start" className="max-w-[calc(100vw-2rem)]">
+					{options.map((option) => (
+						<SelectItem key={option.value} value={option.value}>
+							{option.label}
+						</SelectItem>
+					))}
+				</SelectContent>
+			</Select>
+			<p className="min-h-8 line-clamp-2 text-meta text-muted-foreground">
+				{selected?.description}
+			</p>
+		</div>
 	);
 }
 
@@ -220,7 +178,6 @@ export type SettingsSection = "appearance" | "profile" | "security";
 
 export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 	const { profile, setProfile } = useAuth();
-	const appearanceSyncStatus = useAppearanceSyncStatus();
 	const {
 		preferences,
 		setTheme,
@@ -357,58 +314,45 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 					<CardContent className="grid gap-4">
 						<div className="grid gap-4 @2xl/settings:grid-cols-2">
 							<div className="grid content-start gap-4">
-								<PreferenceChoices
+								<PreferenceSelect
+									id="appearance-workspace-layout"
 									label="Workspace layout"
 									value={preferences.workspaceLayout}
 									options={workspaceLayoutOptions}
 									onChange={setWorkspaceLayout}
-									columns="grid-cols-2"
-									compact
 								/>
-								<PreferenceChoices
+								<PreferenceSelect
+									id="appearance-theme"
 									label="Color theme"
 									value={preferences.theme}
 									options={themeOptions}
 									onChange={setTheme}
-									renderPreview={(theme) => <ThemePreview theme={theme} />}
-									columns="grid-cols-1 xs:grid-cols-2"
-									compact
 								/>
 							</div>
 							<div className="grid content-start gap-4">
-								<PreferenceChoices
+								<PreferenceSelect
+									id="appearance-font"
 									label="Font"
 									value={preferences.fontFamily}
 									options={fontOptions}
 									onChange={setFontFamily}
-									compact
 								/>
-								<PreferenceChoices
+								<PreferenceSelect
+									id="appearance-text-size"
 									label="Text size"
 									value={preferences.textSize}
 									options={textSizeOptions}
 									onChange={setTextSize}
-									compact
 								/>
-								<PreferenceChoices
+								<PreferenceSelect
+									id="appearance-motion"
 									label="Motion"
 									value={preferences.motion}
 									options={motionOptions}
 									onChange={setMotion}
-									compact
 								/>
 							</div>
 						</div>
-						<p role="status" className="text-sm text-muted-foreground">
-							{appearanceSyncStatus === "loading" &&
-								"Loading your account appearance settings…"}
-							{appearanceSyncStatus === "saving" &&
-								"Saving appearance settings to your account…"}
-							{appearanceSyncStatus === "saved" &&
-								"Appearance settings are synced to your account."}
-							{appearanceSyncStatus === "local" &&
-								"Saved on this device. Account sync is temporarily unavailable."}
-						</p>
 					</CardContent>
 				</Card>
 			)}
@@ -426,6 +370,22 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 					</CardHeader>
 					<CardContent>
 						<form onSubmit={saveProfile} className="grid gap-4 sm:grid-cols-2">
+							{profile.customerId !== null && (
+								<div className="oncf-field min-w-0 sm:col-span-2">
+									<p className="text-sm font-medium">Customer account</p>
+									<div className="grid min-h-11 min-w-0 gap-1 rounded-md border border-input bg-background px-field py-control shadow-xs">
+										<span className="truncate text-sm font-medium">
+											{profile.customerName ??
+												`Customer account #${profile.customerId}`}
+										</span>
+										{profile.customerCode && (
+											<span className="text-meta text-muted-foreground">
+												Customer code: {profile.customerCode}
+											</span>
+										)}
+									</div>
+								</div>
+							)}
 							<div className="oncf-field">
 								<Label htmlFor="settings-first-name">First name</Label>
 								<Input

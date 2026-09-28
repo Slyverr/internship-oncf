@@ -12,6 +12,7 @@ const profile = {
 	email: "user@oncf.ma",
 	firstName: "Samira",
 	lastName: "Test",
+	customer: { companyName: "Atlas Import", customerCode: "CLI009" },
 	role: {
 		name: "commercial_agent",
 		rolePermissions: [
@@ -38,7 +39,12 @@ describe("ProfileService", () => {
 	it("returns the current profile with flattened role permissions", async () => {
 		query.findProfile.mockResolvedValue(profile as never);
 		expect(await service.findOne(9 as never)).toEqual({
-			...profile,
+			id: profile.id,
+			email: profile.email,
+			firstName: profile.firstName,
+			lastName: profile.lastName,
+			customerName: "Atlas Import",
+			customerCode: "CLI009",
 			role: "commercial_agent",
 			permissions: ["orders:read", "profile:update"],
 		});

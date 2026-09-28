@@ -6,7 +6,14 @@ export const APPEARANCE_THEMES = [
 	"mono-dark",
 ] as const;
 
-export const APPEARANCE_FONT_FAMILIES = ["inter", "geist", "system"] as const;
+export const APPEARANCE_FONT_FAMILIES = [
+	"inter",
+	"geist",
+	"system",
+	"arial",
+	"serif",
+	"monospace",
+] as const;
 
 export const APPEARANCE_TEXT_SIZES = ["small", "default", "large"] as const;
 
