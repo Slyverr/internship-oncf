@@ -19,7 +19,7 @@ interface UserSelectProps {
 	isError?: boolean;
 	isFetching?: boolean;
 	onRetry?: () => void;
-	id?: string;
+	id: string;
 	value?: User["id"];
 	onChange: (value: User["id"]) => void;
 	placeholder?: string;
@@ -48,11 +48,7 @@ export function UserSelect({
 				itemToStringLabel={(user) => `${user.firstName} ${user.lastName}`}
 				itemToStringValue={(user) => String(user.id)}
 			>
-				<ComboboxInput
-					id={id}
-					placeholder={placeholder}
-					aria-label="Select user"
-				/>
+				<ComboboxInput id={id} placeholder={placeholder} />
 
 				<ComboboxContent>
 					<ComboboxEmpty>No users found.</ComboboxEmpty>

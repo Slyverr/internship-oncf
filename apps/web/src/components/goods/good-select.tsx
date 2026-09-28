@@ -11,11 +11,12 @@ import {
 import { useCatalogControllerFindGoods } from "@/lib/api/catalog";
 
 interface GoodSelectProps {
+	id: string;
 	value?: number;
 	onChange: (value: number) => void;
 }
 
-export function GoodSelect({ value, onChange }: GoodSelectProps) {
+export function GoodSelect({ id, value, onChange }: GoodSelectProps) {
 	const {
 		data: catalogGoods,
 		isLoading,
@@ -36,7 +37,7 @@ export function GoodSelect({ value, onChange }: GoodSelectProps) {
 				onValueChange={(selectedId) => onChange(Number(selectedId))}
 				disabled={isLoading || goods.length === 0}
 			>
-				<SelectTrigger className="w-full" aria-label="Goods / Commodity">
+				<SelectTrigger id={id} className="w-full">
 					<SelectValue>
 						{selectedGood?.name ??
 							(isLoading ? "Loading goods..." : "Select good")}

@@ -209,16 +209,18 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 						className={`grid gap-4 @3xl/workspace:grid-cols-2 ${step === 0 ? "page-enter" : ""}`}
 					>
 						<div className="oncf-field">
-							<Label>Goods / Commodity</Label>
+							<Label htmlFor="goodsId">Goods / Commodity</Label>
 							<GoodSelect
+								id="goodsId"
 								value={values.goodsId}
 								onChange={(value) => change("goodsId", value)}
 							/>
 						</div>
 
 						<div className="oncf-field">
-							<Label>Unit of Measurement</Label>
+							<Label htmlFor="unitId">Unit of Measurement</Label>
 							<UnitSelect
+								id="unitId"
 								value={values.unitId}
 								onChange={(value) => change("unitId", value)}
 							/>

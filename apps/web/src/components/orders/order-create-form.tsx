@@ -239,6 +239,7 @@ export function OrderCreateForm(): JSX.Element {
 												}
 											>
 												<GoodSelect
+													id="goodsId"
 													value={
 														field.state.value > 0
 															? field.state.value
@@ -276,6 +277,7 @@ export function OrderCreateForm(): JSX.Element {
 												}
 											>
 												<UnitSelect
+													id="unitId"
 													value={field.state.value}
 													onChange={(value) => {
 														field.handleChange(value);

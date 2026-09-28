@@ -17,6 +17,7 @@ export type Unit = Pick<UnitDto, "id" | "name">;
 interface UnitSelectProps {
 	units?: Unit[];
 	disabled?: boolean;
+	id: string;
 	placeholder?: string;
 
 	value?: Unit["id"];
@@ -26,6 +27,7 @@ interface UnitSelectProps {
 export function UnitSelect({
 	units: providedUnits,
 	disabled,
+	id,
 	value,
 	onChange,
 	placeholder = "Select unit",
@@ -58,6 +60,7 @@ export function UnitSelect({
 				itemToStringValue={(unit) => unit.id}
 			>
 				<ComboboxInput
+					id={id}
 					placeholder={
 						isLoading && !providedUnits
 							? "Loading units…"
@@ -65,7 +68,6 @@ export function UnitSelect({
 								? "Units unavailable"
 								: placeholder
 					}
-					aria-label="Select unit"
 				/>
 
 				<ComboboxContent>

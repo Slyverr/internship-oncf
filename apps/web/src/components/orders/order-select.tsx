@@ -20,7 +20,7 @@ interface OrderSelectProps {
 	isFetching?: boolean;
 	emptyMessage?: string;
 	onRetry?: () => void;
-	id?: string;
+	id: string;
 
 	value?: Order["id"];
 	onChange: (value: Order["id"]) => void;
@@ -49,11 +49,7 @@ export function OrderSelect({
 				itemToStringLabel={(order) => order.orderNumber ?? `Order #${order.id}`}
 				itemToStringValue={(order) => String(order.id)}
 			>
-				<ComboboxInput
-					id={id}
-					placeholder="Select order"
-					aria-label="Select order"
-				/>
+				<ComboboxInput id={id} placeholder="Select order" />
 
 				<ComboboxContent>
 					<ComboboxEmpty>{emptyMessage}</ComboboxEmpty>
