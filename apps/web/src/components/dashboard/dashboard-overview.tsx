@@ -361,6 +361,7 @@ export function DashboardOverview() {
 	const canReadClaims = hasPermission(Permission.CLAIMS_READ);
 	const canCreateClaims = hasPermission(Permission.CLAIMS_CREATE);
 	const canReadReports = hasPermission(Permission.REPORTS_READ);
+	const showReadyOrders = canReadOrders && canCreatePrograms;
 	const recentSectionCount =
 		Number(canReadOrders) + Number(canReadPrograms) + Number(canReadClaims);
 	const recentGridColumns =
@@ -489,15 +490,21 @@ export function DashboardOverview() {
 				))}
 			</PageHeader>
 
-			{canReadOrders && canCreatePrograms && (
-				<ReadyOrdersSection
-					orders={readyOrdersQuery.data ?? []}
-					isLoading={readyOrdersQuery.isLoading}
-					isError={readyOrdersQuery.isError}
-					onRetry={() => void readyOrdersQuery.refetch()}
-				/>
+			{(showReadyOrders || canReadReports) && (
+				<div
+					className={`grid min-w-0 gap-6 ${showReadyOrders && canReadReports ? "@6xl/workspace:grid-cols-2" : "grid-cols-1"}`}
+				>
+					{showReadyOrders && (
+						<ReadyOrdersSection
+							orders={readyOrdersQuery.data ?? []}
+							isLoading={readyOrdersQuery.isLoading}
+							isError={readyOrdersQuery.isError}
+							onRetry={() => void readyOrdersQuery.refetch()}
+						/>
+					)}
+					{canReadReports && <OrderActivitySection />}
+				</div>
 			)}
-			{canReadReports && <OrderActivitySection />}
 
 			{sections.length > 0 ? (
 				<>
