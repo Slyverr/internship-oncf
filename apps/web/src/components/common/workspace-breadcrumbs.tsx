@@ -8,7 +8,7 @@ export function WorkspaceBreadcrumbs() {
 	const showTrail = breadcrumbs.length > 1;
 
 	return (
-		<div className="min-h-6">
+		<div className="-mb-4 min-h-6">
 			{showTrail && (
 				<div className="hidden sm:block">
 					<BreadcrumbTrail items={breadcrumbs} />
