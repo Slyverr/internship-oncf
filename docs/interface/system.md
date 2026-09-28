@@ -60,7 +60,8 @@ Use the same semantic roles in all themes. Cards should separate from the canvas
 ## 4. Cards, tables, and data
 
 - Cards use one consistent radius, quiet outline, and 16px interior spacing on mobile / 24px from the `sm` breakpoint upward. The 44px control size and 16px horizontal table cell insets do not shrink on mobile.
-- Tables use 14px text, aligned values, a restrained header style, 16px horizontal cell insets, and the shared 8px vertical control inset. Keep row actions and links within their own 44px hit areas.
+- Tables use 14px text, aligned values, a restrained header style, 16px horizontal cell insets, and a shared 4px vertical inset. Keep row actions and links within their own 44px hit areas so rows stay comfortably clickable without excess height; let wrapped content grow naturally.
+- Keep empty-state table copy visible at the initial horizontal scroll position on phones; left-align and wrap it there, then center it on wider screens. Give empty rows a deliberate inset so they remain distinct from the header and surrounding card.
 - On narrow screens, let wide tables scroll inside their own container; do not compress important values until they collide. Ensure the scroll area can be reached by keyboard and communicates its purpose.
 - When a table overflows, show a quiet “Scroll to see the remaining columns” hint above it while more columns remain, including at tablet widths where the workspace is narrowed by the sidebar. Hide the hint at the end of the scroll area and expose it to the scroll region through `aria-describedby` while it is visible.
 - Use one label/value pattern in record details: muted 13px label, stronger 14–16px value, 8px separation, and wrapping for long values.

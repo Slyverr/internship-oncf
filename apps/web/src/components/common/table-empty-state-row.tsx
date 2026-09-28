@@ -9,7 +9,10 @@ export function TableEmptyStateRow({
 }) {
 	return (
 		<TableRow>
-			<TableCell colSpan={colSpan} className="py-8 text-center">
+			<TableCell
+				colSpan={colSpan}
+				className="py-4! text-left whitespace-normal sm:text-center"
+			>
 				{message}
 			</TableCell>
 		</TableRow>

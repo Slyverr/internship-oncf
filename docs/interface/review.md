@@ -12,6 +12,11 @@
 
 - A new login capture pass at 320×568, 360×740, and 390×844 showed that centering the shared auth shell created a 203px empty band above the brand on the 390px phone. Auth content now starts near the top on phone widths and returns to centered positioning from `sm`; large-screen positioning is unchanged. Verify both login and signup at these phone widths after the update.
 
+## Table density follow-up — 2026-09-28
+
+- Re-captured Orders, Claims, Programs, Customers, and Users at phone, tablet, laptop, 2K, and 4K widths. Horizontal overflow stays inside the table region on phone widths, with no page overflow; the table and workspace remain aligned to the 1536px content cap on 2K/4K screens.
+- Linked table cells were producing 61px rows from a 44px target plus 8px vertical inset on each side. The shared cell inset is now 4px, preserving touch size and horizontal padding while reducing linked rows to 52.5–53px. Empty-state copy previously centered beyond the visible phone scroll area; it now starts within the viewport, wraps, and centers at wider sizes with a preserved 16px vertical inset. Verify empty and populated lists after refresh.
+
 ## Current shell source review — 2026-09-27
 
 This is a source-level check of the current sidebar and centered-header layouts, not a rendered visual review.
