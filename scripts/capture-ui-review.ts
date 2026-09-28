@@ -247,6 +247,21 @@ async function evaluate<T>(expression: string): Promise<T> {
 	return result.value as T;
 }
 
+async function waitForPaint() {
+	await evaluate<boolean>(`(() => {
+		for (const element of document.querySelectorAll("ol[aria-label='Form steps'] *")) {
+			const rect = element.getBoundingClientRect();
+			const style = getComputedStyle(element);
+			void rect.width;
+			void style.backgroundColor;
+		}
+		return true;
+	})()`);
+	await evaluate<boolean>(
+		"new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve(true))))",
+	);
+}
+
 async function navigate(url: string) {
 	const loaded = waitForEvent("Page.loadEventFired");
 	await call("Page.navigate", { url });
@@ -275,14 +290,15 @@ const results: CaptureResult[] = [];
 
 try {
 	for (const viewport of viewports) {
-		await navigate(baseUrl);
 		await call("Emulation.setDeviceMetricsOverride", {
 			width: viewport.width,
 			height: viewport.height,
 			deviceScaleFactor: 1,
 			mobile: viewport.width <= 640,
 		});
-		if (settleMs > 0) await Bun.sleep(Math.min(settleMs, 500));
+		await waitForPaint();
+		await navigate(baseUrl);
+		if (settleMs > 0) await Bun.sleep(settleMs);
 
 		const missingClickTargets: string[] = [];
 		const missingFillTargets: string[] = [];
@@ -314,7 +330,7 @@ try {
 				return true;
 			})()`);
 			if (!clicked) missingClickTargets.push(selector);
-			if (settleMs > 0) await Bun.sleep(Math.min(settleMs, 500));
+			if (settleMs > 0) await Bun.sleep(settleMs);
 		}
 
 		let waitSelectorFound: boolean | null = null;
@@ -324,6 +340,7 @@ try {
 			);
 		}
 		await evaluate<boolean>("document.fonts?.ready.then(() => true) ?? true");
+		await waitForPaint();
 
 		const dimensions = await evaluate<{
 			pageWidth: number;
