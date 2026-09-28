@@ -120,7 +120,7 @@
 }
 
 @utility oncf-dialog-surface {
-	@apply fixed top-1/2 left-1/2 z-50 flex -translate-x-1/2 -translate-y-1/2 flex-col gap-6 overflow-hidden rounded-xl bg-popover p-6 text-popover-foreground ring-1 ring-foreground/10;
+	@apply fixed top-1/2 left-1/2 z-[100] flex -translate-x-1/2 -translate-y-1/2 flex-col gap-6 overflow-hidden rounded-xl bg-popover p-6 text-popover-foreground ring-1 ring-foreground/10;
 }
 
 @utility oncf-brand-surface {
