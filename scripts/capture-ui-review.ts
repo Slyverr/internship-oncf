@@ -35,6 +35,7 @@ const cdpUrl = readOption("--cdp") ?? "http://localhost:9235";
 const freshContext = args.includes("--fresh-context");
 const settleMs = Number(readOption("--settle-ms") ?? "500");
 const clickSelectors = readOptions("--click");
+const fillFields = readAssignments("--fill");
 const waitSelector = readOption("--wait-for");
 const requestedWidths = readOption("--widths")?.split(",").map(Number);
 const viewports = requestedWidths
@@ -52,6 +53,7 @@ if (args.includes("--help")) {
 Usage: bun run ui:review -- [options]
   --url <path-or-url>    Route to capture; defaults to the current browser URL
   --fresh-context        Use an isolated browser profile without saved app login
+  --fill <selector=value> Set a form field and dispatch input/change events (repeatable)
   --label <name>         Screenshot filename prefix
   --click <selector>     Click a non-submitting control before capture (repeatable)
   --wait-for <selector>  Wait for a UI element after the route and clicks
@@ -61,8 +63,9 @@ Usage: bun run ui:review -- [options]
   --settle-ms <number>   Delay after route/actions (default: 500)
 
 The local web app and a Chrome session with remote debugging enabled must be running.
-The tool saves screenshots and reports page overflow; it does not submit forms or
-compare pixels against a baseline.`);
+The tool saves screenshots and reports page overflow; it does not automatically
+submit forms or compare pixels against a baseline. Click selectors are real UI
+actions, so only use them for non-persisting controls or explicitly reviewed steps.`);
 	process.exit(0);
 }
 
@@ -263,6 +266,7 @@ type CaptureResult = {
 	pageHeight: number;
 	horizontalOverflow: boolean;
 	missingClickTargets: string[];
+	missingFillTargets: string[];
 	waitSelectorFound: boolean | null;
 	actualRoute: string;
 	routeMatches: boolean;
@@ -281,6 +285,27 @@ try {
 		if (settleMs > 0) await Bun.sleep(Math.min(settleMs, 500));
 
 		const missingClickTargets: string[] = [];
+		const missingFillTargets: string[] = [];
+		for (const { selector, value } of fillFields) {
+			const filled = await evaluate<boolean>(`(() => {
+				const target = document.querySelector(${JSON.stringify(selector)});
+				if (!(target instanceof HTMLInputElement) &&
+					!(target instanceof HTMLTextAreaElement) &&
+					!(target instanceof HTMLSelectElement)) return false;
+				const prototype = target instanceof HTMLInputElement
+					? HTMLInputElement.prototype
+					: target instanceof HTMLTextAreaElement
+						? HTMLTextAreaElement.prototype
+						: HTMLSelectElement.prototype;
+				const setter = Object.getOwnPropertyDescriptor(prototype, "value")?.set;
+				if (!setter) return false;
+				setter.call(target, ${JSON.stringify(value)});
+				target.dispatchEvent(new Event("input", { bubbles: true }));
+				target.dispatchEvent(new Event("change", { bubbles: true }));
+				return true;
+			})()`);
+			if (!filled) missingFillTargets.push(selector);
+		}
 		for (const selector of clickSelectors) {
 			const clicked = await evaluate<boolean>(`(() => {
 				const target = document.querySelector(${JSON.stringify(selector)});
@@ -329,6 +354,7 @@ try {
 			...dimensions,
 			horizontalOverflow: dimensions.pageWidth > viewport.width,
 			missingClickTargets,
+			missingFillTargets,
 			waitSelectorFound,
 			actualRoute: dimensions.actualRoute,
 			routeMatches: actualPath === expectedPath,
@@ -366,6 +392,8 @@ console.log(
 if (results.some((result) => result.horizontalOverflow)) process.exitCode = 1;
 if (results.some((result) => result.missingClickTargets.length > 0))
 	process.exitCode = 1;
+if (results.some((result) => result.missingFillTargets.length > 0))
+	process.exitCode = 1;
 if (results.some((result) => result.waitSelectorFound === false))
 	process.exitCode = 1;
 if (results.some((result) => !result.routeMatches)) process.exitCode = 1;
@@ -379,6 +407,20 @@ function readOptions(name: string): string[] {
 	const values: string[] = [];
 	for (let index = 0; index < args.length; index++) {
 		if (args[index] === name && args[index + 1]) values.push(args[index + 1]);
+	}
+	return values;
+}
+
+function readAssignments(name: string) {
+	const values: Array<{ selector: string; value: string }> = [];
+	for (const assignment of readOptions(name)) {
+		const separator = assignment.indexOf("=");
+		if (separator < 1)
+			throw new Error(`${name} expects a selector=value argument.`);
+		values.push({
+			selector: assignment.slice(0, separator),
+			value: assignment.slice(separator + 1),
+		});
 	}
 	return values;
 }
