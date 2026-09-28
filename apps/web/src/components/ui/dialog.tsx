@@ -54,7 +54,7 @@ function DialogContent({
 			<DialogPrimitive.Popup
 				data-slot="dialog-content"
 				className={cn(
-					"oncf-dialog-surface max-h-[calc(100svh-2rem)] w-[calc(100%-2rem)] text-sm duration-100 outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+					"oncf-dialog-surface grid min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] max-h-[calc(100svh-2rem)] w-[calc(100%-2rem)] text-sm duration-100 outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
 					size === "wide"
 						? "h-[calc(100svh-2rem)] max-h-[48rem] max-w-[70rem]"
 						: size === "settings"
@@ -92,7 +92,7 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
 		<div
 			data-slot="dialog-header"
 			className={cn(
-				"flex shrink-0 flex-col gap-2 border-b pb-4 pr-12",
+				"row-start-1 flex shrink-0 flex-col gap-2 border-b pb-4 pr-12",
 				className,
 			)}
 			{...props}
@@ -112,7 +112,7 @@ function DialogFooter({
 		<div
 			data-slot="dialog-footer"
 			className={cn(
-				"flex shrink-0 flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end",
+				"row-start-3 flex shrink-0 flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-end",
 				className,
 			)}
 			{...props}
@@ -132,7 +132,7 @@ function DialogBody({ className, ...props }: React.ComponentProps<"div">) {
 		<div
 			data-slot="dialog-body"
 			className={cn(
-				"min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain",
+				"row-start-2 min-h-0 min-w-0 overflow-y-auto overscroll-contain",
 				className,
 			)}
 			{...props}
