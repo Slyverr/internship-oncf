@@ -9,7 +9,6 @@ import {
 	PackageIcon,
 	PlusIcon,
 	RefreshCwIcon,
-	UserRoundCheckIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -20,7 +19,6 @@ import {
 	Card,
 	CardContent,
 	CardDescription,
-	CardFooter,
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
@@ -163,9 +161,18 @@ function ReadyOrdersSection({
 	return (
 		<Card size="sm">
 			<CardHeader>
-				<div className="grid min-w-0 gap-compact">
+				<div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-x-control gap-y-compact">
 					<CardTitle>Orders ready for a program</CardTitle>
-					<CardDescription>
+					{!isLoading && !isError && orders.length > 0 && (
+						<Link
+							href="/dashboard/orders?eligibleForProgram=true"
+							className="inline-flex min-h-11 shrink-0 items-center gap-compact text-sm text-primary hover:underline"
+						>
+							Browse eligible orders
+							<ArrowRightIcon aria-hidden="true" className="size-4" />
+						</Link>
+					)}
+					<CardDescription className="col-span-2">
 						Continue directly from an order that is eligible for planning.
 					</CardDescription>
 				</div>
@@ -206,17 +213,6 @@ function ReadyOrdersSection({
 					</div>
 				)}
 			</CardContent>
-			{!isLoading && !isError && orders.length > 0 && (
-				<CardFooter className="border-t">
-					<Link
-						href="/dashboard/programs/new"
-						className="inline-flex min-h-11 items-center gap-compact text-sm text-primary hover:underline"
-					>
-						Browse eligible orders
-						<ArrowRightIcon aria-hidden="true" className="size-4" />
-					</Link>
-				</CardFooter>
-			)}
 		</Card>
 	);
 }
@@ -231,16 +227,25 @@ function PendingRegistrationsSection({
 	return (
 		<Card size="sm">
 			<CardHeader>
-				<div className="flex min-w-0 items-start justify-between gap-control">
+				<div className="flex min-w-0 flex-wrap items-start justify-between gap-control">
 					<div className="grid min-w-0 gap-compact">
 						<CardTitle>Registration requests</CardTitle>
 						<CardDescription>
 							Client accounts awaiting your review.
 						</CardDescription>
 					</div>
-					<Badge variant="outline" className="shrink-0 tabular-nums">
-						{users.length} pending
-					</Badge>
+					<div className="flex shrink-0 items-center gap-control">
+						<Badge variant="outline" className="tabular-nums">
+							{users.length} pending
+						</Badge>
+						<Link
+							href="/dashboard/users?registrationStatus=PENDING&role=CLIENT_REPRESENTATIVE"
+							className="inline-flex min-h-11 items-center gap-compact text-sm text-primary hover:underline"
+						>
+							View all
+							<ArrowRightIcon aria-hidden="true" className="size-4" />
+						</Link>
+					</div>
 				</div>
 			</CardHeader>
 			<CardContent>
@@ -268,17 +273,6 @@ function PendingRegistrationsSection({
 					))}
 				</ul>
 			</CardContent>
-			{users.length > 3 && (
-				<CardFooter className="border-t">
-					<Link
-						href="/dashboard/users"
-						className="inline-flex min-h-11 items-center gap-compact text-sm text-primary hover:underline"
-					>
-						<UserRoundCheckIcon aria-hidden="true" className="size-4" />
-						View all users
-					</Link>
-				</CardFooter>
-			)}
 		</Card>
 	);
 }

@@ -1,4 +1,4 @@
-import { RegistrationStatus } from "@ecommand/shared";
+import { RegistrationStatus, Role } from "@ecommand/shared";
 import { PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
@@ -8,7 +8,21 @@ import { UsersTable } from "@/components/users/users-table";
 import { usersControllerFindAll } from "@/lib/api/users";
 import { usersBreadcrumbs } from "./breadcrumbs";
 
-export default async function Page() {
+interface PageProps {
+	searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+export default async function Page({ searchParams }: PageProps) {
+	const query = await searchParams;
+	const registrationStatus = Object.values(RegistrationStatus).find(
+		(value) => value === query.registrationStatus,
+	);
+	const role = Object.values(Role).find((value) => value === query.role);
+	const activeStatus =
+		query.activeStatus === "ACTIVE" || query.activeStatus === "INACTIVE"
+			? query.activeStatus
+			: undefined;
+	const search = typeof query.search === "string" ? query.search : undefined;
 	const users = await usersControllerFindAll();
 	const pendingRegistrations = users.filter(
 		(user) => user.registrationStatus === RegistrationStatus.PENDING,
@@ -32,7 +46,13 @@ export default async function Page() {
 				</Link>
 			</PageHeader>
 
-			<UsersTable data={users} />
+			<UsersTable
+				data={users}
+				registrationStatus={registrationStatus}
+				role={role}
+				activeStatus={activeStatus}
+				search={search}
+			/>
 		</>
 	);
 }
