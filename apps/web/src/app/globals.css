@@ -89,6 +89,36 @@
 	}
 }
 
+@utility workspace-recent-rail {
+	display: grid;
+	gap: calc(var(--spacing) * 4);
+
+	@container workspace (width < 28rem) {
+		display: flex;
+		overflow-x: auto;
+		scrollbar-width: none;
+		padding-bottom: var(--spacing-control);
+		scroll-snap-type: x mandatory;
+
+		&::-webkit-scrollbar {
+			display: none;
+		}
+
+		& > * {
+			flex: 0 0 calc(100cqw - 5rem);
+			scroll-snap-align: start;
+		}
+	}
+}
+
+@utility workspace-scroll-hint {
+	display: none;
+
+	@container workspace (width < 28rem) {
+		display: block;
+	}
+}
+
 @utility oncf-dialog-surface {
 	@apply fixed top-1/2 left-1/2 z-50 grid -translate-x-1/2 -translate-y-1/2 gap-6 rounded-xl bg-popover p-6 text-popover-foreground ring-1 ring-foreground/10;
 }
@@ -140,6 +170,10 @@
 
 @utility pt-compact {
 	padding-top: var(--spacing);
+}
+
+@utility pb-compact {
+	padding-bottom: var(--spacing);
 }
 
 @utility px-compact {

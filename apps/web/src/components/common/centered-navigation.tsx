@@ -1,6 +1,5 @@
 "use client";
 
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
@@ -21,7 +20,6 @@ export function CenteredNavigation() {
 	const navigationId = useId();
 	const [hasOverflow, setHasOverflow] = useState(false);
 	const [navigationWidth, setNavigationWidth] = useState(0);
-	const [scrollEdges, setScrollEdges] = useState({ left: false, right: false });
 	const visibleRoutes = sidebarRoutes.filter(
 		(route) => !route.permission || hasPermission(route.permission),
 	);
@@ -41,10 +39,6 @@ export function CenteredNavigation() {
 				width === navigation.clientWidth ? width : navigation.clientWidth,
 			);
 			setHasOverflow(maxScrollLeft > 1);
-			setScrollEdges({
-				left: navigation.scrollLeft > 1,
-				right: maxScrollLeft - navigation.scrollLeft > 1,
-			});
 		};
 
 		updateScrollEdges();
@@ -92,39 +86,14 @@ export function CenteredNavigation() {
 		}
 	}, [activeRoute?.url, navigationWidth]);
 
-	function scrollNavigation(direction: -1 | 1) {
-		const navigation = navigationRef.current;
-		if (!navigation) return;
-
-		const reduceMotion = window.matchMedia(
-			"(prefers-reduced-motion: reduce)",
-		).matches;
-		navigation.scrollBy({
-			left: direction * navigation.clientWidth * 0.75,
-			behavior: reduceMotion ? "auto" : "smooth",
-		});
-	}
-
 	return (
 		<TooltipProvider>
 			<div className="flex min-w-0 items-center">
-				{hasOverflow && (
-					<button
-						type="button"
-						aria-label="Show earlier navigation sections"
-						aria-controls={navigationId}
-						disabled={!scrollEdges.left}
-						onClick={() => scrollNavigation(-1)}
-						className="flex size-11 shrink-0 items-center justify-center border border-border bg-card text-muted-foreground transition-colors hover:bg-muted disabled:cursor-default disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:hidden"
-					>
-						<ChevronLeftIcon aria-hidden="true" className="size-4" />
-					</button>
-				)}
 				<nav
 					ref={navigationRef}
 					id={navigationId}
 					aria-label={
-						scrollEdges.left || scrollEdges.right
+						hasOverflow
 							? "Main navigation; scroll horizontally to see more sections"
 							: "Main navigation"
 					}
@@ -170,18 +139,6 @@ export function CenteredNavigation() {
 						})}
 					</div>
 				</nav>
-				{hasOverflow && (
-					<button
-						type="button"
-						aria-label="Show more navigation sections"
-						aria-controls={navigationId}
-						disabled={!scrollEdges.right}
-						onClick={() => scrollNavigation(1)}
-						className="flex size-11 shrink-0 items-center justify-center border border-border bg-card text-muted-foreground transition-colors hover:bg-muted disabled:cursor-default disabled:opacity-30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:hidden"
-					>
-						<ChevronRightIcon aria-hidden="true" className="size-4" />
-					</button>
-				)}
 			</div>
 		</TooltipProvider>
 	);

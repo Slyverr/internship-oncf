@@ -38,7 +38,7 @@ export function CenteredAppHeader() {
 						<SidebarUser variant="header" />
 					</div>
 
-					<div className="col-span-2 row-start-2 min-w-0 border-t pt-control lg:order-2 lg:flex-1 lg:border-0 lg:pt-0">
+					<div className="col-span-2 row-start-2 min-w-0 border-t pt-control pb-compact lg:order-2 lg:flex-1 lg:border-0 lg:py-0">
 						<CenteredNavigation />
 					</div>
 				</div>

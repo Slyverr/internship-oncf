@@ -64,7 +64,7 @@ function RecentSection({
 	isError,
 }: RecentSectionProps) {
 	return (
-		<Card>
+		<Card className="h-56">
 			<CardHeader>
 				<div className="flex flex-wrap items-center justify-between gap-control">
 					<div className="grid min-w-0 flex-1 gap-compact">
@@ -369,6 +369,8 @@ export function DashboardOverview() {
 			: recentSectionCount === 2
 				? "@5xl/workspace:grid-cols-2"
 				: "grid-cols-1";
+	const recentRailClassName =
+		recentSectionCount > 1 ? "workspace-recent-rail" : "grid gap-4";
 
 	const ordersQuery = useOrdersControllerFindAll(
 		{ sortBy: "createdAt", sortOrder: "desc" },
@@ -407,7 +409,7 @@ export function DashboardOverview() {
 				})}
 				isLoading={ordersQuery.isLoading}
 				isError={ordersQuery.isError}
-				items={(ordersQuery.data ?? []).slice(0, 5).map((order) => ({
+				items={(ordersQuery.data ?? []).slice(0, 2).map((order) => ({
 					id: order.id,
 					title: order.orderNumber,
 					description: `${order.customer.companyName} · ${order.good.name} · ${order.quantityDemanded} ${order.unit.name}`,
@@ -430,7 +432,7 @@ export function DashboardOverview() {
 				}
 				isLoading={programsQuery.isLoading}
 				isError={programsQuery.isError}
-				items={(programsQuery.data ?? []).slice(0, 5).map((program) => ({
+				items={(programsQuery.data ?? []).slice(0, 2).map((program) => ({
 					id: program.id,
 					title: program.programNumber,
 					description: `Order ${program.order.orderNumber} · ${program.quantityPlanned} planned`,
@@ -455,7 +457,7 @@ export function DashboardOverview() {
 				})}
 				isLoading={claimsQuery.isLoading}
 				isError={claimsQuery.isError}
-				items={(claimsQuery.data ?? []).slice(0, 5).map((claim) => ({
+				items={(claimsQuery.data ?? []).slice(0, 2).map((claim) => ({
 					id: claim.id,
 					title: `Claim #${claim.id}`,
 					description: `${claim.customer.companyName} · ${claim.claimType.name}`,
@@ -498,7 +500,20 @@ export function DashboardOverview() {
 			{canReadReports && <OrderActivitySection />}
 
 			{sections.length > 0 ? (
-				<div className={`grid gap-4 ${recentGridColumns}`}>{sections}</div>
+				<>
+					<section
+						aria-label="Recent activity"
+						tabIndex={recentSectionCount > 1 ? 0 : undefined}
+						className={`${recentRailClassName} ${recentGridColumns} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
+					>
+						{sections}
+					</section>
+					{recentSectionCount > 1 && (
+						<p className="workspace-scroll-hint text-meta text-muted-foreground">
+							Scroll horizontally to view more recent activity.
+						</p>
+					)}
+				</>
 			) : (
 				<Card>
 					<CardContent className="flex items-center gap-4 py-8">
@@ -511,9 +526,11 @@ export function DashboardOverview() {
 				</Card>
 			)}
 
-			<div className="flex items-center gap-compact text-sm text-muted-foreground">
-				<PackageIcon className="size-4" />
-				Showing up to five latest records for each section.
+			<div className="flex min-w-0 items-start gap-compact text-sm text-muted-foreground">
+				<PackageIcon aria-hidden="true" className="mt-1 size-4 shrink-0" />
+				<p className="min-w-0">
+					Showing the latest two records here. View all opens the complete list.
+				</p>
 			</div>
 		</section>
 	);
