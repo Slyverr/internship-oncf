@@ -1,8 +1,9 @@
-import { ClaimStatus, Permission } from "@ecommand/shared";
+import { ClaimStatus, Permission, Role } from "@ecommand/shared";
 import {
 	BadRequestException,
 	ConflictException,
 	Injectable,
+	Logger,
 	NotFoundException,
 } from "@nestjs/common";
 import { claims } from "drizzle/schema";
@@ -21,6 +22,8 @@ import { UpdateClaimDto } from "./requests/update-claim.dto";
 
 @Injectable()
 export class ClaimsService {
+	private readonly logger = new Logger(ClaimsService.name);
+
 	constructor(
 		private readonly notifications: NotificationsService,
 		private readonly claimsQuery: ClaimsQuery,
@@ -112,12 +115,34 @@ export class ClaimsService {
 		const [created] = await this.getComments(claimId, comment.id);
 		if (!created) throw new NotFoundException("Comment no longer exists");
 		const claim = await this.findOneForOwnership(claimId);
-		await this.notifications.notifyChange(
-			claim.createdByUserId,
-			user.id,
-			"claims",
-			claimId,
-			`A new comment was added to claim #${claimId}.`,
+		const recipients = new Set<number>();
+		if (claim.createdByUserId !== user.id) {
+			recipients.add(claim.createdByUserId);
+		}
+
+		if (user.role !== Role.AGENT_COMMERCIAL) {
+			try {
+				for (const agentId of await this.claimsQuery.findCommercialAgentIds()) {
+					if (agentId !== user.id) recipients.add(agentId);
+				}
+			} catch (error) {
+				this.logger.error(
+					`Could not find commercial agents to notify about claim #${claimId}`,
+					error instanceof Error ? error.stack : String(error),
+				);
+			}
+		}
+
+		await Promise.all(
+			[...recipients].map((recipientId) =>
+				this.notifications.notifyChange(
+					recipientId,
+					user.id,
+					"claims",
+					claimId,
+					`A new comment was added to claim #${claimId}.`,
+				),
+			),
 		);
 		return created;
 	}

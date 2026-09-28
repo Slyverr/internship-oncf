@@ -52,6 +52,7 @@ describe("ClaimsService workflows", () => {
 			addClaimComment: jest.fn(),
 			findClaimComments: jest.fn(),
 			findClaimStatus: jest.fn(),
+			findCommercialAgentIds: jest.fn().mockResolvedValue([]),
 		} as unknown as jest.Mocked<ClaimsQuery>;
 		mapper = {
 			toCreate: jest.fn(),
@@ -329,6 +330,42 @@ describe("ClaimsService workflows", () => {
 			customer.id,
 			{},
 		);
+	});
+
+	it("notifies the shared agent queue when a client replies to their claim", async () => {
+		const client: AuthUser = {
+			id: 12,
+			email: "client@example.test",
+			role: Role.CLIENT_REPRESENTATIVE,
+			permissions: new Set([
+				Permission.CLAIMS_READ,
+				Permission.CLAIMS_ACTION_COMMENT,
+			]),
+			sessionId: "client-session",
+			customerId: 42,
+			agencyId: null,
+		};
+		query.addClaimComment.mockResolvedValue({ id: 91 } as never);
+		query.findClaimComments.mockResolvedValue([
+			{ id: 91, authorUser: { firstName: "Client", lastName: "Rep" } },
+		] as never);
+		query.findClaimForOwnership.mockResolvedValue({
+			createdByUserId: client.id,
+		} as never);
+		query.findCommercialAgentIds.mockResolvedValue([7, 8]);
+
+		await service.addComment(id, "Please provide an update", client);
+
+		expect(notifications.notifyChange).toHaveBeenCalledTimes(2);
+		for (const agentId of [7, 8]) {
+			expect(notifications.notifyChange).toHaveBeenCalledWith(
+				agentId,
+				client.id,
+				"claims",
+				id,
+				`A new comment was added to claim #${id}.`,
+			);
+		}
 	});
 
 	it("reports when a newly added comment cannot be read back", async () => {

@@ -44,7 +44,7 @@ function DialogContent({
 	size = "default",
 	...props
 }: DialogPrimitive.Popup.Props & {
-	size?: "default" | "form" | "settings" | "wide";
+	size?: "default" | "form" | "conversation" | "settings" | "wide";
 }) {
 	return (
 		<DialogPortal>
@@ -57,9 +57,11 @@ function DialogContent({
 						? "h-[calc(100svh-2rem)] max-h-[48rem] max-w-[70rem]"
 						: size === "settings"
 							? "h-[min(40rem,calc(100svh-2rem))] max-w-4xl"
-							: size === "form"
-								? "h-[min(36rem,calc(100svh-2rem))] max-w-lg"
-								: "h-[min(24rem,calc(100svh-2rem))] max-w-md",
+							: size === "conversation"
+								? "h-[min(40rem,calc(100svh-2rem))] max-w-2xl"
+								: size === "form"
+									? "h-[min(36rem,calc(100svh-2rem))] max-w-lg"
+									: "h-[min(24rem,calc(100svh-2rem))] max-w-md",
 					className,
 				)}
 				{...props}

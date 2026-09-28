@@ -1,3 +1,4 @@
+import { Role } from "@ecommand/shared";
 import { Injectable } from "@nestjs/common";
 import { claimComments, claimStatusHistory, claims } from "drizzle/schema";
 import { and, eq, type SQL } from "drizzle-orm";
@@ -187,6 +188,17 @@ export class ClaimsQuery {
 				statusId: true,
 			},
 		});
+	}
+
+	async findCommercialAgentIds() {
+		const agents = await this.drizzle.db.query.users.findMany({
+			where: {
+				isActive: true,
+				role: { name: Role.AGENT_COMMERCIAL },
+			},
+			columns: { id: true },
+		});
+		return agents.map(({ id }) => id);
 	}
 
 	async updateClaim(
