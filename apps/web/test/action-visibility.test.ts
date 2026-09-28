@@ -12,8 +12,10 @@ import {
 	canDeleteProgram,
 	canReviewRegistration,
 	getDashboardQuickActions,
+	getPendingClientRegistrations,
 	hasAvailableActions,
 } from "../src/lib/action-visibility";
+import type { UserListDto } from "../src/lib/api/generated.schemas";
 import { canCreateProgramForOrder } from "../src/lib/program-creation-eligibility";
 
 assert.equal(
@@ -40,6 +42,68 @@ assert.equal(
 	canReviewRegistration(RegistrationStatus.PENDING, true, false),
 	false,
 	"only client-representative registrations can be reviewed",
+);
+
+function registrationUser(
+	id: number,
+	registrationStatus: RegistrationStatus,
+	role: Role,
+	createdAt: string,
+): UserListDto {
+	return {
+		id,
+		firstName: `Client${id}`,
+		lastName: "Representative",
+		email: `client${id}@example.test`,
+		employeeId: null,
+		type: "external",
+		roleId: role,
+		role: { id: role, name: role },
+		registrationStatus,
+		customerId: null,
+		agencyId: null,
+		createdAt,
+		updatedAt: createdAt,
+		isActive: registrationStatus === RegistrationStatus.APPROVED,
+		lastLogin: null,
+	};
+}
+
+const registrationUsers = [
+	registrationUser(
+		8,
+		RegistrationStatus.PENDING,
+		Role.CLIENT_REPRESENTATIVE,
+		"2026-09-28T10:00:00.000Z",
+	),
+	registrationUser(
+		4,
+		RegistrationStatus.PENDING,
+		Role.CLIENT_REPRESENTATIVE,
+		"2026-09-27T10:00:00.000Z",
+	),
+	registrationUser(
+		12,
+		RegistrationStatus.PENDING,
+		Role.AGENT_COMMERCIAL,
+		"2026-09-26T10:00:00.000Z",
+	),
+	registrationUser(
+		2,
+		RegistrationStatus.APPROVED,
+		Role.CLIENT_REPRESENTATIVE,
+		"2026-09-25T10:00:00.000Z",
+	),
+];
+assert.deepEqual(
+	getPendingClientRegistrations(registrationUsers, true).map((user) => user.id),
+	[4, 8],
+	"the review queue includes pending client accounts oldest first",
+);
+assert.deepEqual(
+	getPendingClientRegistrations(registrationUsers, false),
+	[],
+	"users without review permissions do not receive pending account details",
 );
 
 function roleHasPermission(role: Role, permission: Permission): boolean {

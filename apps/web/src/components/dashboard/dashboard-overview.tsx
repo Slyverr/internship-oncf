@@ -9,6 +9,7 @@ import {
 	PackageIcon,
 	PlusIcon,
 	RefreshCwIcon,
+	UserRoundCheckIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -23,13 +24,17 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { getDashboardQuickActions } from "@/lib/action-visibility";
+import {
+	getDashboardQuickActions,
+	getPendingClientRegistrations,
+} from "@/lib/action-visibility";
 import { useClaimsControllerFindAll } from "@/lib/api/claims";
 import {
 	useOrdersControllerFindAll,
 	useOrdersControllerFindEligibleForPrograms,
 } from "@/lib/api/orders";
 import { useProgramsControllerFindAll } from "@/lib/api/programs";
+import { useUsersControllerFindAll } from "@/lib/api/users";
 import { getOrderReport } from "@/lib/reports";
 import { useAuth } from "@/providers/auth-provider";
 
@@ -215,6 +220,68 @@ function ReadyOrdersSection({
 	);
 }
 
+function PendingRegistrationsSection({
+	users,
+}: {
+	users: ReturnType<typeof getPendingClientRegistrations>;
+}) {
+	if (users.length === 0) return null;
+
+	return (
+		<Card size="sm">
+			<CardHeader>
+				<div className="flex min-w-0 items-start justify-between gap-control">
+					<div className="grid min-w-0 gap-compact">
+						<CardTitle>Registration requests</CardTitle>
+						<CardDescription>
+							Client accounts awaiting your review.
+						</CardDescription>
+					</div>
+					<Badge variant="outline" className="shrink-0 tabular-nums">
+						{users.length} pending
+					</Badge>
+				</div>
+			</CardHeader>
+			<CardContent>
+				<ul className="grid gap-control">
+					{users.slice(0, 3).map((user) => (
+						<li key={user.id}>
+							<Link
+								href={`/dashboard/users/${user.id}`}
+								aria-label={`Review registration for ${user.firstName} ${user.lastName}`}
+								className="flex min-h-11 min-w-0 items-center justify-between gap-control rounded-md border px-control py-compact text-sm transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+							>
+								<span className="grid min-w-0 gap-compact">
+									<span className="truncate font-medium">
+										{user.firstName} {user.lastName}
+									</span>
+									<span className="truncate text-xs text-muted-foreground">
+										{user.email}
+									</span>
+								</span>
+								<span className="shrink-0 text-muted-foreground">
+									<ArrowRightIcon aria-hidden="true" className="size-4" />
+								</span>
+							</Link>
+						</li>
+					))}
+				</ul>
+			</CardContent>
+			{users.length > 3 && (
+				<CardFooter className="border-t">
+					<Link
+						href="/dashboard/users"
+						className="inline-flex min-h-11 items-center gap-compact text-sm text-primary hover:underline"
+					>
+						<UserRoundCheckIcon aria-hidden="true" className="size-4" />
+						View all users
+					</Link>
+				</CardFooter>
+			)}
+		</Card>
+	);
+}
+
 function getRecentOrderPeriod() {
 	const today = new Date();
 	const firstMonth = new Date(
@@ -360,6 +427,9 @@ export function DashboardOverview() {
 	const canReadClaims = hasPermission(Permission.CLAIMS_READ);
 	const canCreateClaims = hasPermission(Permission.CLAIMS_CREATE);
 	const canReadReports = hasPermission(Permission.REPORTS_READ);
+	const canReviewUsers =
+		hasPermission(Permission.USERS_READ) &&
+		hasPermission(Permission.USERS_UPDATE);
 	const showReadyOrders = canReadOrders && canCreatePrograms;
 	const recentSectionCount =
 		Number(canReadOrders) + Number(canReadPrograms) + Number(canReadClaims);
@@ -391,6 +461,13 @@ export function DashboardOverview() {
 	const claimsQuery = useClaimsControllerFindAll(
 		{ sortBy: "createdAt", sortOrder: "desc" },
 		{ query: { enabled: canReadClaims } },
+	);
+	const usersQuery = useUsersControllerFindAll({
+		query: { enabled: canReviewUsers },
+	});
+	const pendingRegistrations = getPendingClientRegistrations(
+		usersQuery.data ?? [],
+		canReviewUsers,
 	);
 
 	const sections = [
@@ -488,6 +565,8 @@ export function DashboardOverview() {
 					</Link>
 				))}
 			</PageHeader>
+
+			<PendingRegistrationsSection users={pendingRegistrations} />
 
 			{(showReadyOrders || canReadReports) && (
 				<section

@@ -2,7 +2,9 @@ import {
 	Permission,
 	ProgramStatus,
 	RegistrationStatus,
+	Role,
 } from "@ecommand/shared";
+import type { UserListDto } from "@/lib/api/generated.schemas";
 
 export type DashboardQuickAction = {
 	type: "order" | "claim";
@@ -31,6 +33,24 @@ export function getDashboardQuickActions(
 	return actions
 		.filter(({ permission }) => hasPermission(permission))
 		.map(({ permission: _permission, ...action }) => action);
+}
+
+export function getPendingClientRegistrations(
+	users: UserListDto[],
+	canReviewUsers: boolean,
+): UserListDto[] {
+	if (!canReviewUsers) return [];
+
+	return users
+		.filter(
+			(user) =>
+				user.registrationStatus === RegistrationStatus.PENDING &&
+				user.role?.name === Role.CLIENT_REPRESENTATIVE,
+		)
+		.sort(
+			(first, second) =>
+				first.createdAt.localeCompare(second.createdAt) || first.id - second.id,
+		);
 }
 
 export function hasAvailableActions(...actions: boolean[]): boolean {
