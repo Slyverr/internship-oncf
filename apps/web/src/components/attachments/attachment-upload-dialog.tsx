@@ -5,6 +5,7 @@ import { type ChangeEvent, type FormEvent, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
+	DialogBody,
 	DialogContent,
 	DialogDescription,
 	DialogFooter,
@@ -105,16 +106,15 @@ export function AttachmentUploadDialog({
 				}
 			/>
 
-			<DialogContent className="sm:max-w-lg">
-				<form className="flex flex-col gap-8" onSubmit={handleSubmit}>
-					<DialogHeader>
-						<DialogTitle>Upload attachment</DialogTitle>
-						<DialogDescription>
-							Add a document or supporting file.
-						</DialogDescription>
-					</DialogHeader>
-
-					<div className="flex flex-col gap-8">
+			<DialogContent className="grid min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-6 sm:max-w-lg">
+				<DialogHeader className="pr-12">
+					<DialogTitle>Upload attachment</DialogTitle>
+					<DialogDescription>
+						Add a document or supporting file.
+					</DialogDescription>
+				</DialogHeader>
+				<form className="contents" onSubmit={handleSubmit}>
+					<DialogBody className="grid content-start gap-8 overflow-y-auto overscroll-contain">
 						<div className="flex flex-col gap-4">
 							<Label htmlFor="attachment-file">File</Label>
 
@@ -174,7 +174,7 @@ export function AttachmentUploadDialog({
 								{error}
 							</p>
 						)}
-					</div>
+					</DialogBody>
 
 					<DialogFooter>
 						<Button

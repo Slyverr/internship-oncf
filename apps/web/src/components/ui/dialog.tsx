@@ -54,7 +54,7 @@ function DialogContent({
 			<DialogPrimitive.Popup
 				data-slot="dialog-content"
 				className={cn(
-					"oncf-dialog-surface text-sm duration-100 outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+					"oncf-dialog-surface max-h-[calc(100svh-2rem)] overflow-y-auto overscroll-contain text-sm duration-100 outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
 					size === "wide"
 						? "h-[calc(100svh-2rem)] max-h-[48rem] w-[calc(100%-2rem)] max-w-[70rem]"
 						: "w-full max-w-[calc(100%-2rem)] sm:max-w-md",
@@ -120,6 +120,16 @@ function DialogFooter({
 	);
 }
 
+function DialogBody({ className, ...props }: React.ComponentProps<"div">) {
+	return (
+		<div
+			data-slot="dialog-body"
+			className={cn("min-h-0 min-w-0", className)}
+			{...props}
+		/>
+	);
+}
+
 function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
 	return (
 		<DialogPrimitive.Title
@@ -148,6 +158,7 @@ function DialogDescription({
 
 export {
 	Dialog,
+	DialogBody,
 	DialogClose,
 	DialogContent,
 	DialogDescription,
