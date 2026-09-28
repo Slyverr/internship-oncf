@@ -8,6 +8,10 @@
 - Profile and Security fields were transparent in light mode and blended into the dialog surface. The shared input now uses the semantic background surface; dark mode retains its existing input token. The Appearance option group spacing is 16px from legend to selector.
 - The phone section tabs fit without clipping, and the desktop section rail is readable. The fixed 1120×768 desktop / viewport-bounded phone footprint is preserved. Monochrome, keyboard/focus, and field error states remain open review items.
 
+## Auth phone alignment — 2026-09-28
+
+- A new login capture pass at 320×568, 360×740, and 390×844 showed that centering the shared auth shell created a 203px empty band above the brand on the 390px phone. Auth content now starts near the top on phone widths and returns to centered positioning from `sm`; large-screen positioning is unchanged. Verify both login and signup at these phone widths after the update.
+
 ## Current shell source review — 2026-09-27
 
 This is a source-level check of the current sidebar and centered-header layouts, not a rendered visual review.
