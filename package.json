@@ -7,6 +7,7 @@
 		"typecheck": "turbo run typecheck",
 		"format-and-lint": "biome check .",
 		"format-and-lint:fix": "biome check . --write",
+		"ui:review": "bun scripts/capture-ui-review.ts",
 		"verify:commit": "\"$npm_execpath\" scripts/verify-commit.ts"
 	},
 	"devDependencies": {

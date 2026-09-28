@@ -14,6 +14,15 @@ bun run build
 bun run format-and-lint
 ```
 
+For a repeatable responsive screenshot pass, start `bun run dev` and open the app in a Chrome session with the DevTools endpoint enabled at `http://localhost:9235`. Then run:
+
+```sh
+bun run ui:review -- --url /dashboard/orders --label orders
+bun run ui:review -- --url /login --fresh-context --label login
+```
+
+The Bun script captures 320, 375, 390, 640, 768, 1024, 1440, 1920, 2560, and 3840px viewports into `/tmp/ecommand-ui-review`, reports document overflow and the route actually rendered, and restores the browser's original route afterward. Protected routes use the current authenticated browser session. Public auth routes should use `--fresh-context` to avoid the signed-in session redirecting away; that option creates and closes an isolated temporary browser profile. The tool adds no dependency. Use `--click '<selector>'` for visible, non-submitting controls such as opening a menu, and `--wait-for '<selector>'` for the resulting state. `--help` lists the available options. These captures are evidence for visual review, not pixel-diff tests; inspect the images and exercise stateful workflows separately.
+
 API database commands run from `apps/api`:
 
 ```sh
