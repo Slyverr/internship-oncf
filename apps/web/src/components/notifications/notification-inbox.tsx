@@ -121,9 +121,9 @@ export function NotificationInbox() {
 							<li key={item.id}>
 								<Card className={item.readAt ? "" : "ring-primary/40"}>
 									<CardContent>
-										<div className="flex flex-wrap items-start justify-between gap-3">
-											<div className="space-y-1">
-												<h2 className="font-medium">
+										<div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
+											<div className="min-w-0 flex-1 space-y-1">
+												<h2 className="break-words font-medium">
 													{!item.readAt && (
 														<span
 															className="mr-2 inline-block size-2 rounded-full bg-primary"
@@ -151,7 +151,7 @@ export function NotificationInbox() {
 												</Button>
 											)}
 										</div>
-										<p className="whitespace-pre-wrap text-sm">
+										<p className="whitespace-pre-wrap break-words text-sm">
 											{item.message}
 										</p>
 										{href && (
