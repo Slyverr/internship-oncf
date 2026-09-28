@@ -121,7 +121,7 @@ Use the same semantic roles in all themes. Cards should separate from the canvas
 ### Notifications
 
 - The bell stays a 44px button in the top bar. Clicking opens an anchored popover; it does not navigate.
-- On desktop the panel is 360px wide and at most 70vh high. On phones it uses the viewport width minus 32px and remains inside the screen.
+- On desktop the panel is 360px wide and at most 70vh high. On phones it uses the viewport width minus 32px; give the positioning primitive 16px collision padding so it keeps an even inset when anchored near the screen edge.
 - The panel has a heading and unread count, a scrollable recent list, and a link to the full inbox. A row has a concise title, secondary context, and time; unread state has a visible non-color cue.
 - Mark-one-read and mark-all-read actions update the view immediately. Escape, outside click, or item selection closes the panel. Keyboard focus can reach its controls and returns to the bell after closing.
 - Selecting a notification opens its related record when a destination exists. Notifications without a destination still expose their full message in the panel or inbox.

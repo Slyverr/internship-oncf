@@ -81,6 +81,7 @@ export function NotificationLink() {
 					side="bottom"
 					align="end"
 					sideOffset={8}
+					collisionPadding={16}
 					className="z-50 outline-none"
 				>
 					<Popover.Popup
