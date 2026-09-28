@@ -241,6 +241,7 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 	const [passwordMessage, setPasswordMessage] = useState("");
 	const [profileError, setProfileError] = useState("");
 	const [passwordError, setPasswordError] = useState("");
+	const [passwordMismatch, setPasswordMismatch] = useState(false);
 
 	const profileIsDirty =
 		firstName.trim() !== profile.firstName ||
@@ -287,12 +288,15 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 		event.preventDefault();
 		setPasswordMessage("");
 		setPasswordError("");
+		setPasswordMismatch(false);
 		if (!isStrongPassword(newPassword)) {
 			setPasswordError(STRONG_PASSWORD_HINT);
+			document.getElementById("new-password")?.focus();
 			return;
 		}
 		if (newPassword !== confirmNewPassword) {
-			setPasswordError("New passwords do not match.");
+			setPasswordMismatch(true);
+			document.getElementById("confirm-new-password")?.focus();
 			return;
 		}
 		passwordMutation.mutate(
@@ -536,7 +540,10 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 									minLength={8}
 									value={newPassword}
 									required
-									onChange={(event) => setNewPassword(event.target.value)}
+									onChange={(event) => {
+										setNewPassword(event.target.value);
+										setPasswordMismatch(false);
+									}}
 								/>
 								<p
 									id="new-password-help"
@@ -554,11 +561,25 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 									type="password"
 									autoComplete="new-password"
 									value={confirmNewPassword}
-									required
-									onChange={(event) =>
-										setConfirmNewPassword(event.target.value)
+									aria-invalid={passwordMismatch}
+									aria-describedby={
+										passwordMismatch ? "confirm-new-password-error" : undefined
 									}
+									required
+									onChange={(event) => {
+										setConfirmNewPassword(event.target.value);
+										setPasswordMismatch(false);
+									}}
 								/>
+								{passwordMismatch && (
+									<p
+										id="confirm-new-password-error"
+										className="text-sm text-destructive"
+										role="alert"
+									>
+										New passwords do not match.
+									</p>
+								)}
 							</div>
 							<div className="flex flex-wrap items-center gap-4">
 								<Button
