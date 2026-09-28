@@ -110,7 +110,7 @@ export function AttachmentUploadDialog({
 				size="form"
 				className="min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-6"
 			>
-				<DialogHeader className="pr-12">
+				<DialogHeader>
 					<DialogTitle>Upload attachment</DialogTitle>
 					<DialogDescription>
 						Add a document or supporting file.

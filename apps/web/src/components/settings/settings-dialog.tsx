@@ -91,7 +91,7 @@ export function SettingsDialog() {
 	return (
 		<Dialog open onOpenChange={(open) => !open && router.back()}>
 			<DialogContent size="settings" className="gap-0 overflow-hidden p-0">
-				<DialogHeader className="min-h-12 flex-row items-center border-b px-4 py-0 pr-16 pb-0">
+				<DialogHeader className="min-h-12 flex-row items-center border-b px-4 py-0 pb-0">
 					<DialogTitle className="text-base">Settings</DialogTitle>
 				</DialogHeader>
 				<DialogBody

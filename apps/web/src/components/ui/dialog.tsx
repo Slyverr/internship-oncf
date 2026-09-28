@@ -41,11 +41,9 @@ function DialogOverlay({
 function DialogContent({
 	className,
 	children,
-	showCloseButton = true,
 	size = "default",
 	...props
 }: DialogPrimitive.Popup.Props & {
-	showCloseButton?: boolean;
 	size?: "default" | "form" | "settings" | "wide";
 }) {
 	return (
@@ -67,36 +65,37 @@ function DialogContent({
 				{...props}
 			>
 				{children}
-				{showCloseButton && (
-					<DialogPrimitive.Close
-						data-slot="dialog-close"
-						render={
-							<Button
-								variant="ghost"
-								className="absolute top-4 right-4"
-								size="icon"
-							/>
-						}
-					>
-						<XIcon />
-						<span className="sr-only">Close</span>
-					</DialogPrimitive.Close>
-				)}
 			</DialogPrimitive.Popup>
 		</DialogPortal>
 	);
 }
 
-function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
+function DialogHeader({
+	className,
+	showCloseButton = true,
+	children,
+	...props
+}: React.ComponentProps<"div"> & { showCloseButton?: boolean }) {
 	return (
 		<div
 			data-slot="dialog-header"
 			className={cn(
-				"row-start-1 flex shrink-0 flex-col gap-2 border-b pb-4 pr-12",
+				"row-start-1 flex min-w-0 shrink-0 items-start justify-between gap-4 border-b pb-4",
 				className,
 			)}
 			{...props}
-		/>
+		>
+			<div className="grid min-w-0 flex-1 gap-2">{children}</div>
+			{showCloseButton && (
+				<DialogPrimitive.Close
+					data-slot="dialog-close"
+					render={<Button variant="ghost" size="icon" className="shrink-0" />}
+				>
+					<XIcon />
+					<span className="sr-only">Close</span>
+				</DialogPrimitive.Close>
+			)}
+		</div>
 	);
 }
 
