@@ -2,6 +2,7 @@
 
 import { Permission, ProgramStatus } from "@ecommand/shared";
 import { useForm } from "@tanstack/react-form-nextjs";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type JSX, useEffect } from "react";
 import { z } from "zod";
@@ -81,6 +82,7 @@ export function ProgramCreateForm({
 	const { profile, hasPermission } = useAuth();
 	const mutation = useProgramsControllerCreate();
 
+	const canCreateOrders = hasPermission(Permission.ORDERS_CREATE);
 	const canManageOther = hasPermission(Permission.PROGRAMS_MANAGE_OTHER);
 	const canManageStatus = hasPermission(Permission.PROGRAMS_MANAGE_STATUS);
 	const {
@@ -235,6 +237,7 @@ export function ProgramCreateForm({
 										<OrderSelect
 											id="orderId"
 											orders={orders}
+											emptyMessage="No eligible orders are ready for planning."
 											value={
 												field.state.value > 0 ? field.state.value : undefined
 											}
@@ -248,6 +251,36 @@ export function ProgramCreateForm({
 											onRetry={() => void retryOrders()}
 										/>
 									</div>
+									{!ordersIsLoading &&
+										!ordersIsError &&
+										orders.length === 0 && (
+											<div className="grid gap-2 rounded-md border bg-muted/30 p-4">
+												<p
+													role="status"
+													className="text-sm text-muted-foreground"
+												>
+													No orders are currently eligible for program planning.
+													A program can be created once an order reaches an
+													eligible status.
+												</p>
+												<div className="flex flex-wrap gap-2">
+													<Link
+														href="/dashboard/orders"
+														className="inline-flex min-h-11 items-center rounded-md px-4 text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+													>
+														Review orders
+													</Link>
+													{canCreateOrders && (
+														<Link
+															href="/dashboard/orders/new"
+															className="inline-flex min-h-11 items-center rounded-md px-4 text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+														>
+															Create an order
+														</Link>
+													)}
+												</div>
+											</div>
+										)}
 								</div>
 							);
 						}}

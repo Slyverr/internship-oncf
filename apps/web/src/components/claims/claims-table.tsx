@@ -7,11 +7,14 @@ import {
 	ChevronDownIcon,
 	ChevronsUpDownIcon,
 	ChevronUpIcon,
+	PlusIcon,
 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { TableEmptyStateRow } from "@/components/common/table-empty-state-row";
 import { TableLoadingState } from "@/components/common/table-loading-state";
 import { TableRowLink } from "@/components/common/table-row-link";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
 	Select,
@@ -116,6 +119,7 @@ export function ClaimsTable({
 	isLoading,
 }: ClaimsTableProps) {
 	const router = useRouter();
+	const pathname = usePathname();
 	const searchParams = useSearchParams();
 
 	const currentStatus = searchParams.get("status") ?? status ?? "ALL";
@@ -124,6 +128,24 @@ export function ClaimsTable({
 
 	const { searchValue, setSearchValue, updateQuery, updateSort } =
 		useTableQueryState({ search, sortBy, sortOrder });
+
+	const hasActiveFilters =
+		searchValue.trim().length > 0 ||
+		currentStatus !== "ALL" ||
+		currentType !== "ALL" ||
+		currentPriority !== "ALL";
+
+	function clearFilters() {
+		setSearchValue("");
+		const params = new URLSearchParams(searchParams.toString());
+		for (const key of ["search", "status", "type", "priority"]) {
+			params.delete(key);
+		}
+		const query = params.toString();
+		router.replace(`${pathname}${query ? `?${query}` : ""}`, {
+			scroll: false,
+		});
+	}
 
 	const table = useTable({
 		key: "claims-table",
@@ -260,7 +282,31 @@ export function ClaimsTable({
 						) : (
 							<TableEmptyStateRow
 								colSpan={columns.length}
-								message="No claims found."
+								message={
+									hasActiveFilters
+										? "No claims match these filters."
+										: "No claims yet."
+								}
+								description={
+									hasActiveFilters
+										? "Change or clear the selected filters to see more claims."
+										: "Customer issues and their progress will appear here."
+								}
+								action={
+									hasActiveFilters ? (
+										<Button variant="outline" onClick={clearFilters}>
+											Clear filters
+										</Button>
+									) : (
+										<Link
+											href="/dashboard/claims/new"
+											className="inline-flex min-h-11 items-center gap-2 rounded-md px-4 text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+										>
+											<PlusIcon aria-hidden="true" className="size-4" />
+											Create a claim
+										</Link>
+									)
+								}
 							/>
 						)}
 					</TableBody>

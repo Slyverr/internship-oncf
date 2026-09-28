@@ -18,6 +18,7 @@ interface OrderSelectProps {
 	isLoading?: boolean;
 	isError?: boolean;
 	isFetching?: boolean;
+	emptyMessage?: string;
 	onRetry?: () => void;
 	id?: string;
 
@@ -33,6 +34,7 @@ export function OrderSelect({
 	isLoading,
 	isError,
 	isFetching = false,
+	emptyMessage = "No orders found.",
 	onRetry,
 }: OrderSelectProps) {
 	const selected = orders.find((order) => order.id === value);
@@ -54,7 +56,7 @@ export function OrderSelect({
 				/>
 
 				<ComboboxContent>
-					<ComboboxEmpty>No orders found.</ComboboxEmpty>
+					<ComboboxEmpty>{emptyMessage}</ComboboxEmpty>
 
 					<ComboboxList>
 						{(order) => (

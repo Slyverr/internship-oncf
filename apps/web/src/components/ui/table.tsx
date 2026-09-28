@@ -67,7 +67,7 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
 				}
 				// biome-ignore lint/a11y/noNoninteractiveTabindex: the scroll region needs keyboard focus when its table overflows
 				tabIndex={0}
-				className="w-full min-w-0 overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+				className="@container/table w-full min-w-0 overflow-x-auto focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
 			>
 				<table
 					ref={tableRef}

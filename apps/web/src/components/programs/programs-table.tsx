@@ -14,12 +14,15 @@ import {
 	ChevronDownIcon,
 	ChevronsUpDownIcon,
 	ChevronUpIcon,
+	PlusIcon,
 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { TableEmptyStateRow } from "@/components/common/table-empty-state-row";
 import { TableLoadingState } from "@/components/common/table-loading-state";
 import { TableRowLink } from "@/components/common/table-row-link";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
 	Select,
@@ -232,7 +235,41 @@ export function ProgramsTable({ data, isLoading }: ProgramsTableProps) {
 						) : (
 							<TableEmptyStateRow
 								colSpan={columns.length}
-								message="No programs found."
+								message={
+									search || statusFilter !== "ALL"
+										? "No programs match your search or filters."
+										: "No programs yet."
+								}
+								description={
+									search || statusFilter !== "ALL"
+										? search && statusFilter !== "ALL"
+											? "Try another search or clear the selected status."
+											: search
+												? "Try a different search term."
+												: "Choose a different status."
+										: "Start from an order that is eligible for planning."
+								}
+								action={
+									search || statusFilter !== "ALL" ? (
+										<Button
+											variant="outline"
+											onClick={() => {
+												setGlobalFilter("");
+												setStatusFilter("ALL");
+											}}
+										>
+											Clear filters
+										</Button>
+									) : (
+										<Link
+											href="/dashboard/programs/new"
+											className="inline-flex min-h-11 items-center gap-2 rounded-md px-4 text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+										>
+											<PlusIcon aria-hidden="true" className="size-4" />
+											Choose an eligible order
+										</Link>
+									)
+								}
 							/>
 						)}
 					</TableBody>

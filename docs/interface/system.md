@@ -67,7 +67,7 @@ Use the same semantic roles in all themes. Cards should separate from the canvas
 - Use one label/value pattern in record details: keep the muted 13px label and stronger 14–16px value in a two-column row at all widths, with the label on the left and the value aligned right. Keep 8px column separation, use `min-w-0`, and let long values wrap within their column.
 - A standard table row is at least 56px tall; a row with a title and supporting line is at least 64px. Give each cell its own inset and keep related values aligned by column. Use tabular numerals for comparable dates and quantities.
 - Keep long values readable. Truncate only when the same record has a clear detail destination or the full value is available to assistive technology. On phones, preserve table column meaning inside the horizontal scroll area rather than squeezing text together.
-- Empty, loading, error, and success states should occupy the same content region and provide the next useful action when one exists.
+- Empty, loading, error, and success states should occupy the same content region and provide the next useful action when one exists. In tables, distinguish a truly empty resource from a search/filter with no matches; offer the contextual create action or one-step filter reset. Anchor empty-state content to the visible scroll viewport on narrow tables, and center it only when the table region is wide enough to show its full columns.
 
 ### Dialogs
 
