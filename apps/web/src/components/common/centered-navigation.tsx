@@ -88,7 +88,7 @@ export function CenteredNavigation({ compact = false }: { compact?: boolean }) {
 
 	return (
 		<TooltipProvider>
-			<div className="flex min-w-0 items-center">
+			<div className="flex w-full min-w-0 items-center">
 				<nav
 					ref={navigationRef}
 					id={navigationId}
