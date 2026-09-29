@@ -10,6 +10,7 @@ import { claims } from "drizzle/schema";
 import { and, eq } from "drizzle-orm";
 import { AuthUser } from "@/auth/auth.types";
 import { hasOnePermission } from "@/auth/auth.utils";
+import { getCustomerScope } from "@/auth/customer-scope";
 import { CLAIM_STATUSES } from "@/database/reference-data";
 import { NotificationsService } from "@/notifications/notifications.service";
 import { CLAIM_STATUS_BY_ID, CLAIM_TRANSITION } from "./claims.constants";
@@ -38,20 +39,22 @@ export class ClaimsService {
 	}
 
 	async findAll(user: AuthUser, query: ListClaimQueryDto) {
-		const canManageOther = hasOnePermission(
-			user,
-			Permission.CLAIMS_MANAGE_OTHER,
-		);
-
-		if (!canManageOther) {
-			if (query.userId !== user.id) {
-				query.userId = user.id;
-			}
-			if (user.customerId !== null) {
-				query.customerId = user.customerId;
-			}
+		if (hasOnePermission(user, Permission.CLAIMS_MANAGE_OTHER)) {
+			return this.claimsQuery.findClaims(query);
 		}
 
+		if (user.role === Role.CLIENT_REPRESENTATIVE && user.customerId !== null) {
+			query.userId = user.id;
+			query.customerId = user.customerId;
+			return this.claimsQuery.findClaims(query);
+		}
+
+		const customerScope = getCustomerScope(user);
+		if (customerScope !== null) {
+			return this.claimsQuery.findClaims(query, customerScope);
+		}
+
+		query.userId = user.id;
 		return this.claimsQuery.findClaims(query);
 	}
 
@@ -122,7 +125,9 @@ export class ClaimsService {
 
 		if (user.role !== Role.AGENT_COMMERCIAL) {
 			try {
-				for (const agentId of await this.claimsQuery.findCommercialAgentIds()) {
+				for (const agentId of await this.claimsQuery.findCommercialAgentIds(
+					claim.customerId,
+				)) {
 					if (agentId !== user.id) recipients.add(agentId);
 				}
 			} catch (error) {

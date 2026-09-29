@@ -79,7 +79,7 @@ export class ClaimsQuery {
 		});
 	}
 
-	async findClaims(query: ListClaimQueryDto) {
+	async findClaims(query: ListClaimQueryDto, customerIds?: readonly number[]) {
 		const {
 			page = 1,
 			limit = 20,
@@ -94,10 +94,22 @@ export class ClaimsQuery {
 			sortBy = "createdAt",
 			sortOrder = "desc",
 		} = query;
+		const scopedCustomerIds =
+			customerIds === undefined
+				? undefined
+				: customerId === undefined
+					? [...customerIds]
+					: customerIds.includes(customerId)
+						? [customerId]
+						: [];
 
 		return this.drizzle.db.query.claims.findMany({
 			where: {
-				...(customerId !== undefined && { customerId }),
+				...(scopedCustomerIds !== undefined
+					? { customerId: { in: scopedCustomerIds } }
+					: customerId !== undefined
+						? { customerId }
+						: {}),
 				...(createdByUserId !== undefined && { createdByUserId }),
 				...(operationId !== undefined && { operationId }),
 				...(orderId !== undefined && { orderId }),
@@ -177,6 +189,7 @@ export class ClaimsQuery {
 			where: { id },
 			columns: {
 				createdByUserId: true,
+				customerId: true,
 			},
 		});
 	}
@@ -190,11 +203,12 @@ export class ClaimsQuery {
 		});
 	}
 
-	async findCommercialAgentIds() {
+	async findCommercialAgentIds(customerId: number) {
 		const agents = await this.drizzle.db.query.users.findMany({
 			where: {
 				isActive: true,
 				role: { name: Role.AGENT_COMMERCIAL },
+				userCustomers: { customerId },
 			},
 			columns: { id: true },
 		});

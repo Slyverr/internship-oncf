@@ -32,11 +32,22 @@ describe("ClaimsMapper customer scope", () => {
 		);
 	});
 
-	it("allows an internal user without a customer assignment to create for a customer", () => {
+	it("rejects an unassigned commercial agent creating a claim", () => {
 		const agent = {
 			...customerUser,
 			role: Role.AGENT_COMMERCIAL,
 			customerId: null,
+			assignedCustomerIds: [],
+		};
+		expect(() => mapper.toCreate(dto(43), agent)).toThrow(ForbiddenException);
+	});
+
+	it("allows a commercial agent to create for an assigned customer", () => {
+		const agent = {
+			...customerUser,
+			role: Role.AGENT_COMMERCIAL,
+			customerId: null,
+			assignedCustomerIds: [43],
 		};
 		expect(mapper.toCreate(dto(43), agent).customerId).toBe(43);
 	});

@@ -2,6 +2,7 @@ import { ClaimStatus, Permission } from "@ecommand/shared";
 import { ForbiddenException, Injectable } from "@nestjs/common";
 import { AuthUser } from "@/auth/auth.types";
 import { hasAnyPermission } from "@/auth/auth.utils";
+import { canAccessCustomer } from "@/auth/customer-scope";
 import { CLAIM_STATUSES, CLAIM_TYPES } from "@/database/reference-data";
 import { ClaimInsert, ClaimUpdate } from "./claims.types";
 import { CreateClaimDto } from "./requests/create-claim.dto";
@@ -12,9 +13,8 @@ export class ClaimsMapper {
 	toCreate(dto: CreateClaimDto, user: AuthUser): ClaimInsert {
 		const userId = dto.userId ?? user.id;
 		if (
-			user.customerId !== null &&
-			user.customerId !== dto.customerId &&
-			!hasAnyPermission(user, Permission.CLAIMS_MANAGE_OTHER)
+			!hasAnyPermission(user, Permission.CLAIMS_MANAGE_OTHER) &&
+			!canAccessCustomer(user, dto.customerId)
 		) {
 			throw new ForbiddenException("Cannot create claims for other customers");
 		}

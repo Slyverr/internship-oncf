@@ -8,11 +8,12 @@ describe("ClaimsQuery comment notification recipients", () => {
 			db: { query: { users: { findMany } } },
 		} as never);
 
-		await expect(query.findCommercialAgentIds()).resolves.toEqual([7, 8]);
+		await expect(query.findCommercialAgentIds(42)).resolves.toEqual([7, 8]);
 		expect(findMany).toHaveBeenCalledWith({
 			where: {
 				isActive: true,
 				role: { name: Role.AGENT_COMMERCIAL },
+				userCustomers: { customerId: 42 },
 			},
 			columns: { id: true },
 		});

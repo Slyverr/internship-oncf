@@ -31,13 +31,28 @@ describe("ClaimsService access scoping", () => {
 		);
 	});
 
-	it("does not impose a customer restriction on an internal user without an assignment", async () => {
-		const agent = { ...client, role: Role.AGENT_COMMERCIAL, customerId: null };
+	it("uses an empty customer scope for an unassigned commercial agent", async () => {
+		const agent = {
+			...client,
+			role: Role.AGENT_COMMERCIAL,
+			customerId: null,
+			assignedCustomerIds: [],
+		};
 		const query = { customerId: 43 } as ListClaimQueryDto;
 		await service.findAll(agent, query);
-		expect(findClaims).toHaveBeenCalledWith(
-			expect.objectContaining({ userId: 12, customerId: 43 }),
-		);
+		expect(findClaims).toHaveBeenCalledWith(query, []);
+	});
+
+	it("scopes a commercial agent to assigned customers", async () => {
+		const agent = {
+			...client,
+			role: Role.AGENT_COMMERCIAL,
+			customerId: null,
+			assignedCustomerIds: [42, 43],
+		};
+		const query = { customerId: 43 } as ListClaimQueryDto;
+		await service.findAll(agent, query);
+		expect(findClaims).toHaveBeenCalledWith(query, [42, 43]);
 	});
 
 	it("lets commercial claims managers see the shared claims queue", async () => {
