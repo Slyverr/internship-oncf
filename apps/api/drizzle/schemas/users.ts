@@ -270,11 +270,14 @@ export const userSessions = pgTable(
 		sessionToken: varchar("session_token", { length: 1700 }).notNull(),
 		ipAddress: varchar("ip_address", { length: 50 }),
 		deviceInfo: varchar("device_info", { length: 500 }),
-		loginAt: timestamp("login_at", { mode: "string" })
+		loginAt: timestamp("login_at", { mode: "string", withTimezone: true })
 			.default(sql`CURRENT_TIMESTAMP`)
 			.notNull(),
-		logoutAt: timestamp("logout_at", { mode: "string" }),
-		expiredAt: timestamp("expired_at", { mode: "string" }).notNull(),
+		logoutAt: timestamp("logout_at", { mode: "string", withTimezone: true }),
+		expiredAt: timestamp("expired_at", {
+			mode: "string",
+			withTimezone: true,
+		}).notNull(),
 	},
 	(table) => [
 		unique("user_sessions_session_token_key").on(table.sessionToken),
@@ -339,9 +342,12 @@ export const passwordResetTokens = pgTable(
 		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
 		userId: bigint("user_id", { mode: "number" }).notNull(),
 		token: varchar("token", { length: 100 }).notNull(),
-		expiresAt: timestamp("expires_at", { mode: "string" }).notNull(),
+		expiresAt: timestamp("expires_at", {
+			mode: "string",
+			withTimezone: true,
+		}).notNull(),
 		used: boolean("used").default(false).notNull(),
-		createdAt: timestamp("created_at", { mode: "string" })
+		createdAt: timestamp("created_at", { mode: "string", withTimezone: true })
 			.default(sql`CURRENT_TIMESTAMP`)
 			.notNull(),
 	},
