@@ -38,7 +38,7 @@ The order/program/claim are preserved so their resulting workflow state can be i
 
 ### P0 — Enforce operational access scope
 
-1. Review agent customer scope. The SDF rule R-16 says commercial agents see only orders belonging to their customers. The checked agent saw orders for two customers, while its profile had no `customerId`. Users can be assigned an `agencyId`, but customers have no agency relation; `order_shares` is the only current agency-to-order link. Confirm whether shared orders define an agent's customer portfolio, then apply that scope consistently to lists, ID routes, reports, program eligibility, and claim creation.
+1. Re-check agent customer scope end to end. Commercial-agent portfolios now use the existing `user_customers` assignment table and are enforced across customer access, orders, program eligibility, claims, and reports. The dev agent is assigned to CLI009 and CLI010; verify API and browser behavior after reseeding.
 2. Review admin scope. The SDF role matrix grants administrators reporting and user administration, and marks order, planning-program, and claim operations unavailable. The current default admin grant is `ALL`, and the live program approval succeeded. This is a broad authorization mismatch; confirm whether the SDF matrix is authoritative for administrators before replacing `ALL` with explicit grants and adjusting admin screens/tests.
 
 ### P1 — Complete workflow identifiers and useful dashboard insights
@@ -69,5 +69,5 @@ The order/program/claim are preserved so their resulting workflow state can be i
 
 - Read this file with `docs/security/authorization.md` and `docs/project/readiness.md` before continuing the role audit.
 - The approved claim-role changes are in `packages/shared/src/auth/roles.ts`; role-permission reference seeding adds the new grants to the existing preview database. Keep the authorization guide and API/web role tests aligned with those grants.
-- Agent-to-customer assignment remains an unresolved domain-model gap: `users.agency_id` and `order_shares.agency_id` exist, but `customers` has no agency link. Do not infer that every shared order means an assigned customer without confirming the intended rule.
+- Agent-to-customer assignment uses the existing `user_customers` many-to-many relation. `users.customer_id` remains the single-customer assignment for client representatives; commercial agents use `user_customers` for their customer portfolio.
 - API end-to-end tests resolve project aliases after the Jest config correction, but Bun currently fails in a dependency before test execution. Unit tests passing do not replace HTTP integration coverage; rerun with a supported Node runtime when available.
