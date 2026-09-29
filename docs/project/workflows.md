@@ -21,6 +21,13 @@ Checked the running local web/API stack against the project SDF using the seeded
 - Admin report queries can see the full report without granting operational order permissions. The API and web role matrices assert this boundary.
 - Reference seeding removes stale extra grants from the default administrator role. The existing local database has not been reseeded as part of this isolated verification; its stored grants may still reflect the previous policy until `seed:ref` is run against the intended disposable development database.
 
+### Isolated preview and browser review — 2026-09-29
+
+- The previously approved `ecommand_preview` database did not exist, so it was created, synchronized with the current Drizzle schema, and seeded with reference data and demo accounts. The ignored `apps/api/.env` now points to this preview DB; the pre-existing `ecommand` database was left untouched.
+- Browser sign-in and dashboard navigation were checked for `admin@oncf.ma`, `client@oncf.ma`, and `agent@oncf.ma`. Admin sees Home, Reports, and Users; client and agent see their role-appropriate operational sections. The admin dashboard links to Reports and Users instead of showing a dead-end no-access card.
+- Fresh route-matched screenshots for the dashboard and recent-list layout reported no horizontal overflow at 390, 768, 1440, and 3840px. The recent rows use a 16px gap with no divider. Screenshots are temporary files under `/tmp/ecommand-ui-review`.
+- This fresh preview has no order/program/claim transactions yet. The old QA row inventory below describes an earlier local check and is not present in this newly created database; create representative workflow data before repeating populated-table browser checks.
+
 ### Automated checks
 
 - Historical live check: API unit tests had 54 suites and 405 tests at the time.
@@ -31,9 +38,9 @@ Checked the running local web/API stack against the project SDF using the seeded
 - On 2026-09-29, fresh headless Chrome captures successfully matched requested routes. Dashboard and create forms were reviewed at phone, tablet, laptop, 2K, and 4K widths; the helper reported no horizontal overflow. Review images are under `/tmp/ecommand-ui-review` and are temporary, not repository assets.
 - Current repository verification passed on 2026-09-29: Biome, all workspace typechecks, web checks, 58 API suites / 440 tests, and production builds.
 
-### QA data retained in the preview database
+### Historical QA records from the earlier local check
 
-These records were created by the live workflow check and are clearly labeled for local QA:
+The earlier live workflow check recorded these QA records:
 
 - Order `3` (`ORD-A8AV3T6VKN`), submitted and agent-approved.
 - Program `7` (`PRG-X8FVKFWS25`), sent to the local DTM status; no external DTM request was made.

@@ -421,9 +421,8 @@ export function DashboardOverview() {
 	const canReadClaims = hasPermission(Permission.CLAIMS_READ);
 	const canCreateClaims = hasPermission(Permission.CLAIMS_CREATE);
 	const canReadReports = hasPermission(Permission.REPORTS_READ);
-	const canReviewUsers =
-		hasPermission(Permission.USERS_READ) &&
-		hasPermission(Permission.USERS_UPDATE);
+	const canReadUsers = hasPermission(Permission.USERS_READ);
+	const canReviewUsers = canReadUsers && hasPermission(Permission.USERS_UPDATE);
 	const showReadyOrders = canReadOrders && canCreatePrograms;
 	const recentSectionCount =
 		Number(canReadOrders) + Number(canReadPrograms) + Number(canReadClaims);
@@ -608,12 +607,39 @@ export function DashboardOverview() {
 				</>
 			) : (
 				<Card>
-					<CardContent className="flex items-center gap-4 py-8">
-						<ClipboardListIcon className="size-5 text-muted-foreground" />
-						<p className="text-sm text-muted-foreground">
-							Your account does not have access to order, program, or claim
-							lists.
-						</p>
+					<CardContent className="flex flex-col items-start justify-between gap-4 py-control sm:flex-row sm:items-center">
+						<div className="flex min-w-0 items-start gap-control">
+							<ClipboardListIcon
+								aria-hidden="true"
+								className="mt-1 size-5 shrink-0 text-muted-foreground"
+							/>
+							<div className="grid min-w-0 gap-compact">
+								<p className="font-medium">No operational lists available</p>
+								<p className="text-sm text-muted-foreground">
+									Choose an available section to continue.
+								</p>
+							</div>
+						</div>
+						<div className="flex flex-wrap gap-control">
+							{canReadReports && (
+								<Link
+									href="/dashboard/reports"
+									className={buttonVariants({ variant: "outline" })}
+								>
+									View reports
+								</Link>
+							)}
+							{canReadUsers && (
+								<Link
+									href="/dashboard/users"
+									className={buttonVariants({
+										variant: canReadReports ? "outline" : "default",
+									})}
+								>
+									Manage users
+								</Link>
+							)}
+						</div>
 					</CardContent>
 				</Card>
 			)}

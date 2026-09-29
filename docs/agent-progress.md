@@ -4,10 +4,10 @@ This is the milestone journal for finishing the ECommand MVP. Read it with [work
 
 ## Current position
 
-- **Completed chapters:** 1 — API E2E foundation and core workflows; 2 — admin portfolio management; 3 — SDF-aligned role authorization.
-- **Active chapter:** 4 — MVP closure: finish role-aware browser checks, remaining workflow gaps, and verification evidence.
+- **Completed chapters:** 1 — API E2E foundation and core workflows; 2 — admin portfolio management; 3 — SDF-aligned role authorization; 4 — role-aware preview review and dashboard next steps.
+- **Active chapter:** 5 — close the remaining explicit SDF capability gaps and finish the highest-priority user workflows.
 - **Current checkout:** `develop`; local commits remain unpublished. Review the task-focused history before any further cleanup; do not rewrite published commits.
-- **Local app:** the development stack was running at `http://localhost:3000` and API `/health` returned HTTP 200 on 2026-09-29. Keep it available for user review.
+- **Local app:** `bun run dev` is running at `http://localhost:3000`; API `/health` returns HTTP 200. The ignored API `.env` points to the freshly initialized `ecommand_preview` database. The pre-existing `ecommand` database was left untouched.
 
 ## Completed chapter 1 — API E2E and core workflows
 
@@ -40,12 +40,22 @@ Coverage includes:
 
 **Verification:** `bun run verify` passed on 2026-09-29: Biome, all workspace typechecks, web checks, 58 API suites / 440 tests, and production builds. Isolated API E2E also passed 2 suites / 21 tests after the authorization change.
 
+## Completed chapter 4 — Role-aware preview review
+
+- Created the previously approved, isolated `ecommand_preview` database, applied the evolving Drizzle schema, and ran `seed:ref` plus `seed:dev`. The provided admin, client, and commercial-agent test accounts can sign in. The existing `ecommand` database was not modified.
+- Browser review confirmed admin sees Home, Reports, and Users only; client and agent see their expected role-specific dashboard and operational navigation. Dashboard captures at 390px and 1440px had no horizontal overflow.
+- The admin dashboard previously ended with an access-denied placeholder despite having Reports and Users. It now offers permission-filtered “View reports” and “Manage users” links.
+- Recent order/program/claim lists use a 16px row gap and no divider. Fresh captures at 390, 768, 1440, and 3840px showed no cramped separator or horizontal overflow.
+- The freshly seeded preview has reference/master data and the three demo users, but no orders/programs/claims. Create sample workflow records before expecting populated recent cards there.
+
+**Verification:** `bun run verify` passed again after the dashboard change. Fresh route-matched screenshots are under `/tmp/ecommand-ui-review` and are temporary.
+
 ## Prioritized remaining work
 
 | Priority | Area | Remaining work / evidence |
 | --- | --- | --- |
-| P0 | Role workflows | Complete current browser checks with seeded client/agent/admin accounts. Confirm the app after default permissions are refreshed in the disposable local database; inspect role-specific visible routes and direct API denials. |
-| P1 | Role/access management | Implement the admin role/permission management UI and API if required for the MVP; currently only the permission identifiers and grants are present. |
+| P0 | Admin role/access management | Explicit SDF Story 5.2 is not implemented. Decide whether pilot admins edit grants only for the three fixed roles or can create roles; then build guarded API/UI, prevent privilege lockout/escalation, and add audit/tests. The current `Role` enum and reference-seeded role table are fixed; do not start a custom-role schema before resolving this model. |
+| P1 | Browser workflow verification | Exercise client order creation/submission, agent approval/program creation, and claim conversation/closure in the preview browser. API journeys already have isolated E2E coverage; seed or create representative records first. |
 | P1 | Browser E2E and CI | Add isolated Playwright journeys for critical client/agent/admin workflows, then wire static checks, unit tests, API E2E, and browser E2E into CI. |
 | P1 | Workflow reliability | Test notification failure/retry behavior, authorization failure paths, and any confirmed gaps in transition validation. Durable retry and assignment alerts need separate design. |
 | P1 | Dashboard | Confirm metrics and next actions are useful for each role and scoped data does not leak. Recent cards/eligible-order and registration links already exist. |
