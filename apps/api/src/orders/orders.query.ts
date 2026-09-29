@@ -4,6 +4,7 @@ import { orderStatusHistory, orders } from "drizzle/schema";
 import { eq, type SQL } from "drizzle-orm";
 import { AuthUser } from "@/auth/auth.types";
 import { hasOnePermission } from "@/auth/auth.utils";
+import { getCustomerScope } from "@/auth/customer-scope";
 import { ListQueryDto } from "@/common/requests/list-query.dto";
 import { DrizzleService } from "@/database/drizzle.service";
 import {
@@ -117,23 +118,32 @@ export class OrdersQuery {
 			page,
 			limit,
 		} = query;
-		const canManageOther = hasOnePermission(
-			user,
-			Permission.ORDERS_MANAGE_OTHER,
-		);
-		const hasCustomerScope = !canManageOther && user.customerId !== null;
-		const customerIdFilter = hasCustomerScope ? user.customerId : customerId;
+		const customerScope = getCustomerScope(user);
+		const managesOther = hasOnePermission(user, Permission.ORDERS_MANAGE_OTHER);
+		const scopedCustomerIds =
+			customerScope === null
+				? null
+				: customerId === undefined || !customerScope.includes(customerId)
+					? [...customerScope]
+					: [customerId];
 
 		return this.drizzle.db.query.orders.findMany({
 			where: {
-				...(!canManageOther && !hasCustomerScope
-					? { createdByUserId: user.id }
-					: {}),
+				...(scopedCustomerIds !== null
+					? {
+							customerId:
+								scopedCustomerIds.length === 1
+									? scopedCustomerIds[0]
+									: { in: scopedCustomerIds },
+						}
+					: managesOther
+						? customerId !== undefined
+							? { customerId }
+							: {}
+						: { createdByUserId: user.id }),
 
 				...(status ? { status } : {}),
 				...(goodsId ? { goodsId } : {}),
-				...(customerIdFilter !== undefined &&
-					customerIdFilter !== null && { customerId: customerIdFilter }),
 				...(movementTypeId ? { movementTypeId } : {}),
 
 				...(startDate
@@ -222,6 +232,9 @@ export class OrdersQuery {
 	}
 
 	async findEligibleOrdersForPrograms(user: AuthUser, query: ListQueryDto) {
+		const customerScope = getCustomerScope(user);
+		const managesOther = hasOnePermission(user, Permission.ORDERS_MANAGE_OTHER);
+
 		return this.drizzle.db.query.orders.findMany({
 			where: {
 				forecastPrograms: false,
@@ -234,10 +247,15 @@ export class OrdersQuery {
 						],
 					},
 				},
-				...(hasOnePermission(user, Permission.ORDERS_MANAGE_OTHER)
-					? {}
-					: user.customerId !== null
-						? { customerId: user.customerId }
+				...(customerScope !== null
+					? {
+							customerId:
+								customerScope.length === 1
+									? customerScope[0]
+									: { in: [...customerScope] },
+						}
+					: managesOther
+						? {}
 						: { createdByUserId: user.id }),
 				...(query.search
 					? {

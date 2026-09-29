@@ -2,7 +2,7 @@ import type { AuthUser } from "@/auth/auth.types";
 import { canAccessOrder } from "./orders.access";
 
 const createUser = (id: number, customerId: number | null) =>
-	({ id, customerId }) as AuthUser;
+	({ id, customerId, permissions: new Set() }) as AuthUser;
 
 describe("canAccessOrder", () => {
 	const user = createUser(12, 42);
@@ -45,5 +45,18 @@ describe("canAccessOrder", () => {
 				createUser(18, null),
 			),
 		).toBe(false);
+	});
+	it("allows a commercial agent to access orders for any assigned customer", () => {
+		const agent = {
+			...createUser(18, null),
+			role: "AGENT_COMMERCIAL",
+			assignedCustomerIds: [42, 43],
+		} as AuthUser;
+		expect(canAccessOrder({ customerId: 43, createdByUserId: 77 }, agent)).toBe(
+			true,
+		);
+		expect(canAccessOrder({ customerId: 99, createdByUserId: 18 }, agent)).toBe(
+			false,
+		);
 	});
 });

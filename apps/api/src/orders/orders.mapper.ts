@@ -6,6 +6,7 @@ import {
 } from "@nestjs/common";
 import { AuthUser } from "@/auth/auth.types";
 import { hasOnePermission } from "@/auth/auth.utils";
+import { canAccessCustomer } from "@/auth/customer-scope";
 import { generateDocumentNumber } from "@/common/utils/document-number";
 import { ORDER_STATUSES } from "@/database/reference-data";
 import { OrderInsert, OrderUpdate } from "./orders.types";
@@ -20,12 +21,8 @@ export class OrdersMapper {
 			throw new BadRequestException("A valid customerId must be provided");
 		}
 
-		if (user.customerId && customerId !== user.customerId) {
-			if (!hasOnePermission(user, Permission.ORDERS_MANAGE_OTHER)) {
-				throw new ForbiddenException(
-					"Cannot create orders for other customers",
-				);
-			}
+		if (!canAccessCustomer(user, customerId)) {
+			throw new ForbiddenException("Cannot create orders for other customers");
 		}
 
 		const canManageStatus = hasOnePermission(

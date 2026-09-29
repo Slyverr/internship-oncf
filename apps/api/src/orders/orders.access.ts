@@ -1,4 +1,7 @@
+import { Permission } from "@ecommand/shared";
 import type { AuthUser } from "@/auth/auth.types";
+import { hasOnePermission } from "@/auth/auth.utils";
+import { getCustomerScope } from "@/auth/customer-scope";
 
 export interface OrderAccessRecord {
 	customerId: number;
@@ -11,9 +14,13 @@ export function canAccessOrder(
 ): boolean | undefined {
 	if (!order) return undefined;
 
-	if (user.customerId !== null) {
-		return user.customerId === order.customerId;
+	const customerScope = getCustomerScope(user);
+	if (customerScope !== null) {
+		return customerScope.includes(order.customerId);
 	}
 
-	return user.id === order.createdByUserId;
+	return (
+		hasOnePermission(user, Permission.ORDERS_MANAGE_OTHER) ||
+		order.createdByUserId === user.id
+	);
 }

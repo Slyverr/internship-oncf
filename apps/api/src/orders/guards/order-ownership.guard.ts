@@ -1,4 +1,3 @@
-import { Permission } from "@ecommand/shared";
 import { createOwnershipGuard } from "@/auth/guards/ownership.factory";
 import { canAccessOrder } from "../orders.access";
 import { OrdersService } from "../orders.service";
@@ -13,7 +12,6 @@ export const OrderOwnershipGuard = createOwnershipGuard<OrdersService, OrderId>(
 			canAccessOrder(await service.findOneForAccess(id), user),
 
 		pipe: new OrderIdPipe(),
-		permission: Permission.ORDERS_MANAGE_OTHER,
 		errorMessage: "You can only access your own orders",
 	},
 );
