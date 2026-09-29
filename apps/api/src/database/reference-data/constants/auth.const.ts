@@ -14,7 +14,7 @@ export const PERMISSIONS_SCOPE = "permissions";
 
 export const ROLES = createReferenceMap(
 	{
-		[Role.ADMIN]: "Full system access with all permissions",
+		[Role.ADMIN]: "Manages accounts, access rights, and reports",
 		[Role.CLIENT_REPRESENTATIVE]:
 			"Client-facing representative with order and claims management",
 		[Role.AGENT_COMMERCIAL]:
@@ -37,13 +37,6 @@ export const ROLE_PERMISSIONS_MAP = createReferenceMap(
 	DEFAULT_ROLE_PERMISSIONS,
 	(roleName, permissions) => {
 		const roleId = ROLES[roleName as Role].id;
-
-		if (permissions === "ALL") {
-			return Object.values(PERMISSIONS).map((perm) => ({
-				roleId,
-				permissionId: perm.id,
-			}));
-		}
 
 		return permissions.map((perm) => ({
 			roleId,

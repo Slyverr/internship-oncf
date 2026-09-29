@@ -1,7 +1,18 @@
 import { Permission, Role } from "../enums";
 
-export const DEFAULT_ROLE_PERMISSIONS: Record<Role, Permission[] | "ALL"> = {
-	[Role.ADMIN]: "ALL",
+export const DEFAULT_ROLE_PERMISSIONS: Record<Role, Permission[]> = {
+	[Role.ADMIN]: [
+		Permission.USERS_CREATE,
+		Permission.USERS_READ,
+		Permission.USERS_UPDATE,
+		Permission.USERS_DELETE,
+		Permission.USERS_MANAGE,
+		Permission.USERS_MANAGE_OTHER,
+		Permission.ROLES_MANAGE,
+		Permission.PERMISSIONS_MANAGE,
+		Permission.REPORTS_READ,
+		Permission.PROFILE_UPDATE,
+	],
 
 	[Role.CLIENT_REPRESENTATIVE]: [
 		Permission.ORDERS_CREATE,

@@ -6,17 +6,18 @@ This guide maps default roles to API permissions, ownership rules, and web surfa
 
 | Capability | Admin | Commercial agent | Client representative |
 | --- | :---: | :---: | :---: |
-| User administration and registration review | All user actions, including approving/rejecting client signup | — | — |
-| Orders | All actions and records | Operational actions for assigned-customer records | Create/read/update/delete drafts and submit; reads use the assigned customer when present, otherwise own-created records |
-| Programs | All actions and records | Create/read/update; status, ownership, and lifecycle actions | Read programs linked to orders for the assigned customer; no create/update/delete/workflow actions |
-| Claims | All actions and records | Create/read/update assigned-customer claims; status and lifecycle actions, including comments | Create/read/comment on own claims and close own resolved claims |
-| Customers | All actions | Read/update | — |
-| Catalog | Read and manage | Read | Read |
-| Tracking | Read and update | Read | — |
-| Reports | Read and export | Read across the assigned-customer portfolio | Read orders for the assigned customer when present, otherwise own-created orders |
+| User administration and registration review | Create/read/update/deactivate accounts | — | — |
+| Roles and permissions | Manage role/access definitions | — | — |
+| Orders | — | Operational actions for assigned-customer records | Create/read/update/delete drafts and submit; reads use the assigned customer when present, otherwise own-created records |
+| Programs | — | Create/read/update; status, ownership, and lifecycle actions | Read programs linked to orders for the assigned customer; no create/update/delete/workflow actions |
+| Claims | — | Create/read/update assigned-customer claims; status and lifecycle actions, including comments | Create/read/comment on own claims and close own resolved claims |
+| Customers | — | Read/update | — |
+| Catalog | — | Read | Read |
+| Tracking | — | Read | — |
+| Reports | Read | Read across the assigned-customer portfolio | Read orders for the assigned customer when present, otherwise own-created orders |
 | Profile | Update | Update | Update |
 
-Admin receives every defined permission. Parent permissions imply descendants (for example, claims:action grants each claim lifecycle action). A dash means the default role has no grant. Custom database grants may change runtime access, so use effective permissions when checking actual access.
+The administrator grant follows the SDF role boundary: manage accounts and access rights, and consult reports. Administrators do not receive order, program, claim, customer, catalog, or tracking access. The role/permission management permissions reserve the specified access-control capability; the management UI/API is not implemented yet. Parent permissions imply descendants (for example, claims:action grants each claim lifecycle action). A dash means the default role has no grant. Custom database grants may change runtime access, so use effective permissions when checking actual access. Reference seeding removes stale extra grants from the default administrator role.
 
 ## API and web mapping
 
@@ -29,13 +30,13 @@ Admin receives every defined permission. Parent permissions imply descendants (f
 | Programs create/edit/delete | programs:create/update/delete | Create form; program action menu | The API and web both restrict deletion to draft programs. |
 | Program lifecycle | programs:action:* | ProgramActions | Valid path: draft → pending approval → approved → confirmed → sent to DTM → in progress. Cancellation is allowed before dispatch. |
 | Claims list/detail/comments | claims:read; claims:action:comment | Sidebar Claims; details, comment list, and role-gated comment form | Commercial agents use `CLAIMS_MANAGE_OTHER` to process other users' claims only inside their assigned-customer portfolio. Client representatives see and comment on their own claims only. |
-| Claims create/edit/delete | claims:create/update/delete | Dashboard quick action; create form; claim action menu | Clients and commercial agents can submit claims. Client ownership still limits which existing claims they can access. Delete is admin-only by default. |
+| Claims create/edit/delete | claims:create/update/delete | Dashboard quick action; create form; claim action menu | Clients and commercial agents can submit claims. Client ownership still limits which existing claims they can access. Delete is not granted to any default role. |
 | Claim lifecycle | claims:action:* | ClaimActions | Buttons use specific action permissions and supported current states; clients can close their own resolved claims; parent `claims:action` also grants commenting. |
-| Customers | customers:read/create/update/delete | Sidebar Customers; forms and action menu | Commercial agents read/update; create/deactivate are admin-only. |
+| Customers | customers:read/create/update/delete | Sidebar Customers; forms and action menu | Commercial agents read/update; the default roles cannot create or deactivate customers. |
 | Public client signup | Public `/auth/register` | `/signup` registration form | Submitted customer code and ICE must match an active local customer; new account is inactive and pending admin review. |
 | Users and registration review | users:read/create/update/delete | Sidebar Users; forms, request status, approve/reject actions | Admin-only by default. Only pending client-representative requests can be reviewed; pending and rejected accounts cannot sign in. |
-| Catalog | catalog:read/manage:* | Order and claim selectors; catalog API | Admin manages catalog; both operational roles read it. |
-| Tracking | tracking:read/update | Tracking API surfaces | Commercial agents read; admin reads and updates. |
+| Catalog | catalog:read/manage:* | Order and claim selectors; catalog API | Both operational roles read catalog data; no default role has catalog management grants. |
+| Tracking | tracking:read/update | Tracking API surfaces | Commercial agents read; no default role has tracking permissions. |
 | Reports | reports:read; reports:action:export | Sidebar Reports and order report | Report scope matches order list/access scope. Only roles with reports:action:export see the browser print / save PDF control; the report API endpoint remains read-only. |
 | Profile and notifications | profile:update; authenticated ownership routes | Settings/profile and notifications | Notifications are scoped to the authenticated user. |
 

@@ -85,6 +85,16 @@ describe("ReportsService", () => {
 		});
 	});
 
+	it("allows administrators to consult the full report without order access", async () => {
+		const { service, captures } = setup([[], [], [], [], []]);
+		await service.getOrders(
+			{ ...user([Permission.REPORTS_READ]), role: Role.ADMIN },
+			{},
+		);
+
+		expect(captures[0]?.where).toBeUndefined();
+	});
+
 	it.each(["2025-02-29", "not-a-date"])(
 		"rejects an invalid from date: %s",
 		async (from) => {

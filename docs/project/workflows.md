@@ -15,14 +15,21 @@ Checked the running local web/API stack against the project SDF using the seeded
 - A QA signup remained pending and could not sign in until the administrator approved it; sign-in then succeeded.
 - Reports, notifications, customer/catalog reads, and denied user-management actions returned expected responses for the checked accounts.
 
+### SDF authorization update — 2026-09-29
+
+- The default administrator role now matches the SDF boundary: user account administration, role/access grants, reports, and profile only. Orders, programs, claims, customers, catalog, and tracking are denied.
+- Admin report queries can see the full report without granting operational order permissions. The API and web role matrices assert this boundary.
+- Reference seeding removes stale extra grants from the default administrator role. The existing local database has not been reseeded as part of this isolated verification; its stored grants may still reflect the previous policy until `seed:ref` is run against the intended disposable development database.
+
 ### Automated checks
 
-- API unit tests: 54 suites and 405 tests passed.
+- Historical live check: API unit tests had 54 suites and 405 tests at the time.
 - Web checks: 9 checks passed, including default-role action visibility.
 - Workspace typecheck passed for shared, API, and web packages.
 - Responsive dashboard screenshots were captured at the documented ten viewport sizes (320px through 3840px). The browser helper reported no horizontal overflow. The 320px and 1440px agent captures showed the new Create claim action; the 1440px recent-activity cards showed separated rows with no divider. The first agent login capture had to be isolated because successful login redirects from `/login` to `/dashboard`.
-- The isolated API E2E runner starts a disposable PostgreSQL database, applies the schema, seeds reference and deterministic E2E data, runs Jest with Node, and removes the Compose project afterward. On 2026-09-29, all 2 suites and 20 tests passed, covering customer/order/claim/program/report scope, order and claim workflows, program eligibility and lifecycle, and administrator assignment/removal of agent customer portfolios.
-- A fresh screenshot attempt on 2026-09-29 used the running headless Chrome endpoint on port `9223` (the helper default is `9235`) but rendered `chrome-error://chromewebdata/` instead of the local app. Those captures are invalid and do not establish layout or overflow. Inspect the browser/server connectivity before retrying. Source review confirms the recent orders/programs/claims share a `grid gap-4` list with no separator.
+- The isolated API E2E runner starts a disposable PostgreSQL database, applies the schema, seeds reference and deterministic E2E data, runs Jest with Node, and removes the Compose project afterward. On 2026-09-29, all 2 suites and 21 tests passed, covering customer/order/claim/program/report scope, order and claim workflows, program eligibility and lifecycle, administrator route denials, and administrator assignment/removal of agent customer portfolios.
+- On 2026-09-29, fresh headless Chrome captures successfully matched requested routes. Dashboard and create forms were reviewed at phone, tablet, laptop, 2K, and 4K widths; the helper reported no horizontal overflow. Review images are under `/tmp/ecommand-ui-review` and are temporary, not repository assets.
+- Current repository verification passed on 2026-09-29: Biome, all workspace typechecks, web checks, 58 API suites / 440 tests, and production builds.
 
 ### QA data retained in the preview database
 
@@ -39,12 +46,12 @@ The order/program/claim are preserved so their resulting workflow state can be i
 
 ### P0 — Enforce operational access scope
 
-1. Agent portfolio scope and core order, claim, and program journeys are covered by 20 isolated API E2E tests. Continue with browser verification and additional failure-path coverage.
-2. Review admin scope. The SDF role matrix grants administrators reporting and user administration, and marks order, planning-program, and claim operations unavailable. The current default admin grant is `ALL`, and the live program approval succeeded. This is a broad authorization mismatch; confirm whether the SDF matrix is authoritative for administrators before replacing `ALL` with explicit grants and adjusting admin screens/tests.
+1. Agent portfolio scope and core order, claim, and program journeys are covered by 21 isolated API E2E tests. Continue with remaining role journeys and failure-path coverage.
+2. Completed: administrator grants now match the SDF; tests verify permitted account/report access and denied operational routes. Role/permission management screens and endpoints remain unimplemented even though their permissions are reserved in the matrix.
 
 ### P1 — Complete workflow identifiers and useful dashboard insights
 
-1. Replace numeric-only row labels with stable human-readable record codes where the SDF and workflows expect them. Start with claims using `CLM-` plus a unique ten-character suffix, matching the order/program code pattern; audit every table/detail/dashboard that currently renders `#<id>`, and define safe backfill, collision handling, search, DTO, and display behavior. Schema changes remain subject to the existing schema-stabilization guidance; do not add migrations prematurely.
+1. Completed: claims now display and search stable `CLM-` identifiers in list/detail/dashboard and related views while numeric IDs remain internal route keys.
 2. Add role-aware dashboard insights so the home page answers what needs attention and what changed, with meaningful metrics/charts, useful empty states, and links to the next action. Reuse existing scoped report/workflow data where appropriate; do not duplicate or leak cross-customer data.
 3. Completed: sign-in accepts either email or employee/matricule identifier. Email and employee-code matching are case-insensitive, and the schema enforces case-insensitive employee-code uniqueness. Apply the evolving schema with `bun run db:push` only against a disposable development database, per repository policy.
 
@@ -62,13 +69,13 @@ The order/program/claim are preserved so their resulting workflow state can be i
 
 ### Dashboard polish completed
 
-- Recent order, program, and claim records share a 16px grid gap without a full-width divider. The latest screenshot attempt rendered Chrome's error page, so visual confirmation remains pending.
+- Recent order, program, and claim records share a 16px grid gap without a full-width divider. Fresh dashboard screenshots confirm the current card layout at representative widths.
 - The redundant “Showing the latest two records…” note was removed.
 - Recent-row secondary text now uses the shared metadata type size, matching the date; the welcome description refers to the workspace rather than repeating the product name.
 
 ## Continuation notes
 
 - Read this file with `docs/security/authorization.md` and `docs/project/readiness.md` before continuing the role audit.
-- The approved claim-role changes are in `packages/shared/src/auth/roles.ts`; role-permission reference seeding adds the new grants to the existing preview database. Keep the authorization guide and API/web role tests aligned with those grants.
+- The default role matrix is in `packages/shared/src/auth/roles.ts`; reference seeding reconciles administrator grants and inserts the client/agent grants. Keep the authorization guide and API/web role tests aligned with those grants.
 - Agent-to-customer assignment uses the existing `user_customers` many-to-many relation. `users.customer_id` remains the single-customer assignment for client representatives; commercial agents use `user_customers` for their customer portfolio.
 - The isolated API E2E runner explicitly uses Node for Jest to avoid Bun-specific dependency incompatibility. Keep E2E data isolated in the disposable Compose database; unit tests do not replace endpoint integration coverage.

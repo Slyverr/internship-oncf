@@ -1,4 +1,4 @@
-import { Permission } from "@ecommand/shared";
+import { Permission, Role } from "@ecommand/shared";
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { customers, goods, orderStatus, orders } from "drizzle/schema";
 import { and, desc, eq, gte, inArray, lt, sql } from "drizzle-orm";
@@ -35,11 +35,13 @@ export class ReportsService {
 		nextDay?.setUTCDate(nextDay.getUTCDate() + 1);
 		const customerScope = getCustomerScope(user);
 		const dataScope =
-			customerScope !== null
-				? inArray(orders.customerId, [...customerScope])
-				: hasOnePermission(user, Permission.ORDERS_MANAGE_OTHER)
-					? undefined
-					: eq(orders.createdByUserId, user.id);
+			user.role === Role.ADMIN
+				? undefined
+				: customerScope !== null
+					? inArray(orders.customerId, [...customerScope])
+					: hasOnePermission(user, Permission.ORDERS_MANAGE_OTHER)
+						? undefined
+						: eq(orders.createdByUserId, user.id);
 		const where = and(
 			dataScope,
 			from ? gte(orders.orderDate, from) : undefined,

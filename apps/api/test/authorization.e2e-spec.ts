@@ -27,14 +27,23 @@ describe("customer portfolio authorization (e2e)", () => {
 
 	beforeAll(async () => {
 		app = await createE2eApp();
-		const adminToken = await login(app, E2E_USERS.admin.email);
-		const response = await request(app.getHttpServer())
-			.get("/customers")
-			.set("Authorization", `Bearer ${adminToken}`)
-			.expect(200);
+		const getRows = async (path: string, username: string) => {
+			const token = await login(app, username);
+			const response = await request(app.getHttpServer())
+				.get(path)
+				.set("Authorization", `Bearer ${token}`)
+				.expect(200);
+			return response.body;
+		};
+		const assignedAgent = E2E_USERS.agentAssigned.employeeCode;
+		const outsideAgent = E2E_USERS.agentOutside.employeeCode;
 
+		const customerRows = [
+			...(await getRows("/customers", assignedAgent)),
+			...(await getRows("/customers", outsideAgent)),
+		];
 		customerIds = Object.fromEntries(
-			response.body
+			customerRows
 				.filter((customer: { customerCode: string }) =>
 					Object.values(E2E_CUSTOMERS).includes(
 						customer.customerCode as (typeof E2E_CUSTOMERS)[keyof typeof E2E_CUSTOMERS],
@@ -50,12 +59,12 @@ describe("customer portfolio authorization (e2e)", () => {
 			expect(customerIds[customerCode]).toEqual(expect.any(Number));
 		}
 
-		const ordersResponse = await request(app.getHttpServer())
-			.get("/orders")
-			.set("Authorization", `Bearer ${adminToken}`)
-			.expect(200);
+		const orderRows = [
+			...(await getRows("/orders", assignedAgent)),
+			...(await getRows("/orders", outsideAgent)),
+		];
 		orderIds = Object.fromEntries(
-			ordersResponse.body
+			orderRows
 				.filter((order: { orderNumber: string }) =>
 					Object.values(E2E_ORDERS).includes(
 						order.orderNumber as (typeof E2E_ORDERS)[keyof typeof E2E_ORDERS],
@@ -71,12 +80,12 @@ describe("customer portfolio authorization (e2e)", () => {
 			expect(orderIds[orderNumber]).toEqual(expect.any(Number));
 		}
 
-		const claimsResponse = await request(app.getHttpServer())
-			.get("/claims")
-			.set("Authorization", `Bearer ${adminToken}`)
-			.expect(200);
+		const claimRows = [
+			...(await getRows("/claims", assignedAgent)),
+			...(await getRows("/claims", outsideAgent)),
+		];
 		claimIds = Object.fromEntries(
-			claimsResponse.body
+			claimRows
 				.filter((claim: { description: string }) =>
 					Object.values(E2E_CLAIMS).includes(
 						claim.description as (typeof E2E_CLAIMS)[keyof typeof E2E_CLAIMS],
@@ -88,7 +97,7 @@ describe("customer portfolio authorization (e2e)", () => {
 				]),
 		);
 		claimNumbers = Object.fromEntries(
-			claimsResponse.body
+			claimRows
 				.filter((claim: { description: string }) =>
 					Object.values(E2E_CLAIMS).includes(
 						claim.description as (typeof E2E_CLAIMS)[keyof typeof E2E_CLAIMS],
@@ -107,12 +116,12 @@ describe("customer portfolio authorization (e2e)", () => {
 			);
 		}
 
-		const programsResponse = await request(app.getHttpServer())
-			.get("/programs")
-			.set("Authorization", `Bearer ${adminToken}`)
-			.expect(200);
+		const programRows = [
+			...(await getRows("/programs", assignedAgent)),
+			...(await getRows("/programs", outsideAgent)),
+		];
 		programIds = Object.fromEntries(
-			programsResponse.body
+			programRows
 				.filter((program: { programNumber: string }) =>
 					Object.values(E2E_PROGRAMS).includes(
 						program.programNumber as (typeof E2E_PROGRAMS)[keyof typeof E2E_PROGRAMS],
@@ -130,7 +139,7 @@ describe("customer portfolio authorization (e2e)", () => {
 	});
 
 	it("returns and searches claims by stable claim number", async () => {
-		const token = await login(app, E2E_USERS.admin.email);
+		const token = await login(app, E2E_USERS.agentAssigned.employeeCode);
 		const claimNumber = claimNumbers[E2E_CLAIMS.assignedA];
 		const searched = await request(app.getHttpServer())
 			.get("/claims")
@@ -239,19 +248,8 @@ describe("customer portfolio authorization (e2e)", () => {
 
 		expect(claimsResponse.body).toEqual([]);
 
-		const adminToken = await login(app, E2E_USERS.admin.email);
-		const adminOrders = await request(app.getHttpServer())
-			.get("/orders")
-			.set("Authorization", `Bearer ${adminToken}`)
-			.expect(200);
-		const assignedOrder = adminOrders.body.find(
-			(order: { orderNumber: string; id: number }) =>
-				order.orderNumber === E2E_ORDERS.assignedA,
-		);
-
-		expect(assignedOrder).toBeDefined();
 		await request(app.getHttpServer())
-			.get(`/orders/${assignedOrder.id}`)
+			.get(`/orders/${orderIds[E2E_ORDERS.assignedA]}`)
 			.set("Authorization", `Bearer ${token}`)
 			.expect(403);
 
@@ -261,18 +259,23 @@ describe("customer portfolio authorization (e2e)", () => {
 			.expect(403);
 	});
 
-	it("keeps administrator portfolio access and denies clients the customer directory", async () => {
+	it("limits administrators to account administration and reports", async () => {
 		const adminToken = await login(app, E2E_USERS.admin.email);
-		const adminResponse = await request(app.getHttpServer())
-			.get("/customers")
+		await request(app.getHttpServer())
+			.get("/users")
+			.set("Authorization", `Bearer ${adminToken}`)
+			.expect(200);
+		await request(app.getHttpServer())
+			.get("/reports/orders")
 			.set("Authorization", `Bearer ${adminToken}`)
 			.expect(200);
 
-		expect(adminResponse.body).toHaveLength(3);
-		await request(app.getHttpServer())
-			.get(`/customers/${customerIds[E2E_CUSTOMERS.outside]}`)
-			.set("Authorization", `Bearer ${adminToken}`)
-			.expect(200);
+		for (const path of ["/customers", "/orders", "/programs", "/claims"]) {
+			await request(app.getHttpServer())
+				.get(path)
+				.set("Authorization", `Bearer ${adminToken}`)
+				.expect(403);
+		}
 
 		const clientToken = await login(app, E2E_USERS.clientA.email);
 		const clientProfile = await request(app.getHttpServer())
@@ -352,19 +355,8 @@ describe("customer portfolio authorization (e2e)", () => {
 			response.body.map((order: { orderNumber: string }) => order.orderNumber),
 		).toEqual([E2E_ORDERS.assignedA]);
 
-		const adminToken = await login(app, E2E_USERS.admin.email);
-		const adminOrders = await request(app.getHttpServer())
-			.get("/orders")
-			.set("Authorization", `Bearer ${adminToken}`)
-			.expect(200);
-		const outsideOrder = adminOrders.body.find(
-			(order: { orderNumber: string; id: number }) =>
-				order.orderNumber === E2E_ORDERS.outside,
-		);
-
-		expect(outsideOrder).toBeDefined();
 		await request(app.getHttpServer())
-			.get(`/orders/${outsideOrder.id}`)
+			.get(`/orders/${orderIds[E2E_ORDERS.outside]}`)
 			.set("Authorization", `Bearer ${clientToken}`)
 			.expect(403);
 	});
@@ -391,19 +383,8 @@ describe("customer portfolio authorization (e2e)", () => {
 
 		expect(excludedFilter.body).toEqual([]);
 
-		const adminToken = await login(app, E2E_USERS.admin.email);
-		const adminOrders = await request(app.getHttpServer())
-			.get("/orders")
-			.set("Authorization", `Bearer ${adminToken}`)
-			.expect(200);
-		const outsideOrder = adminOrders.body.find(
-			(order: { orderNumber: string; id: number }) =>
-				order.orderNumber === E2E_ORDERS.outside,
-		);
-
-		expect(outsideOrder).toBeDefined();
 		await request(app.getHttpServer())
-			.get(`/orders/${outsideOrder.id}`)
+			.get(`/orders/${orderIds[E2E_ORDERS.outside]}`)
 			.set("Authorization", `Bearer ${token}`)
 			.expect(403);
 	});

@@ -1,3 +1,4 @@
+import { Role } from "@ecommand/shared";
 import { relations } from "drizzle/relations";
 import {
 	accessoryOperations,
@@ -21,7 +22,7 @@ import {
 	roles,
 	units,
 } from "drizzle/schema";
-import { inArray } from "drizzle-orm";
+import { and, eq, inArray, notInArray } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import {
 	ACCESSORY_OPERATIONS,
@@ -43,6 +44,7 @@ import {
 	PROGRAM_STATUSES,
 	REJECTION_REASONS,
 	ROLE_PERMISSIONS,
+	ROLE_PERMISSIONS_MAP,
 	ROLES,
 	UNITS,
 } from "@/database/reference-data";
@@ -134,6 +136,18 @@ async function deactivateLegacyUnits(tx: DatabaseClient) {
 
 async function seedRolePermissions(tx: DatabaseClient) {
 	if (!ROLE_PERMISSIONS.length) return;
+
+	const adminPermissionIds = ROLE_PERMISSIONS_MAP[Role.ADMIN].map(
+		({ permissionId }) => permissionId,
+	);
+	await tx
+		.delete(rolePermissions)
+		.where(
+			and(
+				eq(rolePermissions.roleId, ROLES[Role.ADMIN].id),
+				notInArray(rolePermissions.permissionId, adminPermissionIds),
+			),
+		);
 
 	await tx
 		.insert(rolePermissions)

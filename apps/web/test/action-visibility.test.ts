@@ -110,9 +110,7 @@ assert.deepEqual(
 function roleHasPermission(role: Role, permission: Permission): boolean {
 	const permissions = DEFAULT_ROLE_PERMISSIONS[role];
 
-	return (
-		permissions === "ALL" || hasOnePermission(new Set(permissions), permission)
-	);
+	return hasOnePermission(new Set(permissions), permission);
 }
 
 for (const role of [
@@ -124,18 +122,20 @@ for (const role of [
 		getDashboardQuickActions((permission) =>
 			roleHasPermission(role, permission),
 		),
-		[
-			{
-				type: "order",
-				label: "Create order",
-				href: "/dashboard/orders/new",
-			},
-			{
-				type: "claim",
-				label: "Create claim",
-				href: "/dashboard/claims/new",
-			},
-		],
+		role === Role.ADMIN
+			? []
+			: [
+					{
+						type: "order",
+						label: "Create order",
+						href: "/dashboard/orders/new",
+					},
+					{
+						type: "claim",
+						label: "Create claim",
+						href: "/dashboard/claims/new",
+					},
+				],
 		`${role} gets quick actions for workflows granted by its default permissions`,
 	);
 }
@@ -180,8 +180,8 @@ assert.equal(
 	hasAvailableActions(
 		roleHasPermission(Role.ADMIN, Permission.CUSTOMERS_DELETE),
 	),
-	true,
-	"administrators get the customer actions menu when deactivation is available",
+	false,
+	"administrators do not get customer actions outside their SDF role",
 );
 
 const agentCanEditProgram = roleHasPermission(
@@ -213,8 +213,8 @@ assert.equal(
 		ProgramStatus.DRAFT,
 		roleHasPermission(Role.ADMIN, Permission.PROGRAMS_DELETE),
 	),
-	true,
-	"administrators may delete a program while it is Draft",
+	false,
+	"administrators do not get program actions outside their SDF role",
 );
 for (const status of Object.values(ProgramStatus)) {
 	assert.equal(
@@ -237,8 +237,8 @@ function canCreateProgramForRole(role: Role, orderOwnerId: number) {
 
 assert.equal(
 	canCreateProgramForRole(Role.ADMIN, 99),
-	true,
-	"administrators can create programs from eligible orders across owners",
+	false,
+	"administrators cannot create programs outside their SDF role",
 );
 assert.equal(
 	canCreateProgramForRole(Role.AGENT_COMMERCIAL, 99),

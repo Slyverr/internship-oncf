@@ -8,13 +8,35 @@ import {
 describe("default role permission matrix", () => {
 	function grants(role: Role, permission: Permission): boolean {
 		const assigned = DEFAULT_ROLE_PERMISSIONS[role];
-		if (assigned === "ALL") return true;
 		return hasOnePermission(new Set(assigned), permission);
 	}
 
-	it("grants administrators every permission", () => {
-		for (const permission of Object.values(Permission)) {
-			expect(grants(Role.ADMIN, permission)).toBe(true);
+	it("limits administrators to account, access, reporting, and profile work", () => {
+		expect(new Set(DEFAULT_ROLE_PERMISSIONS[Role.ADMIN])).toEqual(
+			new Set([
+				Permission.USERS_CREATE,
+				Permission.USERS_READ,
+				Permission.USERS_UPDATE,
+				Permission.USERS_DELETE,
+				Permission.USERS_MANAGE,
+				Permission.USERS_MANAGE_OTHER,
+				Permission.ROLES_MANAGE,
+				Permission.PERMISSIONS_MANAGE,
+				Permission.REPORTS_READ,
+				Permission.PROFILE_UPDATE,
+			]),
+		);
+
+		const operationalPermissions = [
+			Permission.ORDERS_READ,
+			Permission.PROGRAMS_READ,
+			Permission.CLAIMS_READ,
+			Permission.CUSTOMERS_READ,
+			Permission.CATALOG_READ,
+			Permission.TRACKING_READ,
+		];
+		for (const permission of operationalPermissions) {
+			expect(grants(Role.ADMIN, permission)).toBe(false);
 		}
 	});
 
