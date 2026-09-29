@@ -32,7 +32,10 @@ const customerListColumns = {
 export class CustomersQuery {
 	constructor(private readonly drizzle: DrizzleService) {}
 
-	async findCustomers(query: ListCustomerQueryDto) {
+	async findCustomers(
+		query: ListCustomerQueryDto,
+		customerIds?: readonly number[],
+	) {
 		const {
 			page = 1,
 			limit = 20,
@@ -45,6 +48,7 @@ export class CustomersQuery {
 
 		return this.drizzle.db.query.customers.findMany({
 			where: {
+				...(customerIds !== undefined && { id: { in: [...customerIds] } }),
 				...(typeId !== undefined && { typeId }),
 				...(isActive !== undefined && { isActive }),
 				...(search && {

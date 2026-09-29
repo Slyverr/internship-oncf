@@ -7,7 +7,9 @@ import {
 	Post,
 	Put,
 	Query,
+	Request,
 } from "@nestjs/common";
+import type { AuthRequest } from "@/auth/auth.types";
 import { RequireAny } from "@/auth/permissions.decorator";
 import { createCrudResponses } from "@/common/decorators/api-crud-responses.decorator";
 import { ApiPathParam } from "@/common/decorators/api-path-param.decorator";
@@ -41,15 +43,21 @@ export class CustomersController {
 	@Get()
 	@RequireAny(Permission.CUSTOMERS_READ)
 	@CustomerListResponse()
-	async findAll(@Query() query: ListCustomerQueryDto) {
-		return this.customersService.findAll(query);
+	async findAll(
+		@Query() query: ListCustomerQueryDto,
+		@Request() req: AuthRequest,
+	) {
+		return this.customersService.findAll(query, req.user);
 	}
 
 	@Get(":id")
 	@RequireAny(Permission.CUSTOMERS_READ)
 	@CustomerDetailResponse()
-	async findOne(@CustomerIdParam() id: CustomerId) {
-		return this.customersService.findOne(id);
+	async findOne(
+		@CustomerIdParam() id: CustomerId,
+		@Request() req: AuthRequest,
+	) {
+		return this.customersService.findOne(id, req.user);
 	}
 
 	@Post()
@@ -65,8 +73,9 @@ export class CustomersController {
 	async update(
 		@CustomerIdParam() id: CustomerId,
 		@Body() dto: UpdateCustomerDto,
+		@Request() req: AuthRequest,
 	) {
-		return this.customersService.update(id, dto);
+		return this.customersService.update(id, dto, req.user);
 	}
 
 	@Delete(":id")

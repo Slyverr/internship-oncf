@@ -1,4 +1,6 @@
+import { Role } from "@ecommand/shared";
 import { NotFoundException } from "@nestjs/common";
+import type { AuthUser } from "@/auth/auth.types";
 import { CustomersMapper } from "./customers.mapper";
 import { CustomersQuery } from "./customers.query";
 import { CustomersService } from "./customers.service";
@@ -22,6 +24,16 @@ describe("CustomersService", () => {
 	);
 	const id = 8 as CustomerId;
 	const customer = { id, companyName: "Example Ltd" };
+	const adminUser: AuthUser = {
+		id: 1,
+		email: "admin@oncf.ma",
+		role: Role.ADMIN,
+		permissions: new Set(),
+		sessionId: "test-session",
+		customerId: null,
+		agencyId: null,
+		assignedCustomerIds: [],
+	};
 
 	beforeEach(() => {
 		for (const mock of Object.values(query)) mock.mockReset();
@@ -31,8 +43,10 @@ describe("CustomersService", () => {
 	it("passes list filters to the query", async () => {
 		const filters = { search: "example" } as never;
 		query.findCustomers.mockResolvedValue([customer]);
-		await expect(service.findAll(filters)).resolves.toEqual([customer]);
-		expect(query.findCustomers).toHaveBeenCalledWith(filters);
+		await expect(service.findAll(filters, adminUser)).resolves.toEqual([
+			customer,
+		]);
+		expect(query.findCustomers).toHaveBeenCalledWith(filters, undefined);
 	});
 
 	it("returns a customer and reports a missing record", async () => {
@@ -70,7 +84,7 @@ describe("CustomersService", () => {
 		mapper.toUpdate.mockReturnValue(values);
 		query.updateCustomer.mockResolvedValue({ id });
 		query.findCustomer.mockResolvedValue(customer);
-		await expect(service.update(id, dto)).resolves.toBe(customer);
+		await expect(service.update(id, dto, adminUser)).resolves.toBe(customer);
 		expect(mapper.toUpdate).toHaveBeenCalledWith(dto);
 		expect(query.updateCustomer).toHaveBeenCalledWith(id, values);
 	});
