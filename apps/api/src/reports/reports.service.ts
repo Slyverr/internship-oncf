@@ -1,9 +1,10 @@
 import { Permission } from "@ecommand/shared";
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { customers, goods, orderStatus, orders } from "drizzle/schema";
-import { and, desc, eq, gte, lt, sql } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, lt, sql } from "drizzle-orm";
 import type { AuthUser } from "@/auth/auth.types";
 import { hasOnePermission } from "@/auth/auth.utils";
+import { getCustomerScope } from "@/auth/customer-scope";
 import { DrizzleService } from "@/database/drizzle.service";
 import type { OrderReportQueryDto } from "./reports.dto";
 
@@ -32,15 +33,13 @@ export class ReportsService {
 		}
 		const nextDay = to ? new Date(`${query.to}T00:00:00.000Z`) : undefined;
 		nextDay?.setUTCDate(nextDay.getUTCDate() + 1);
-		const canManageOther = hasOnePermission(
-			user,
-			Permission.ORDERS_MANAGE_OTHER,
-		);
-		const dataScope = canManageOther
-			? undefined
-			: user.customerId !== null
-				? eq(orders.customerId, user.customerId)
-				: eq(orders.createdByUserId, user.id);
+		const customerScope = getCustomerScope(user);
+		const dataScope =
+			customerScope !== null
+				? inArray(orders.customerId, [...customerScope])
+				: hasOnePermission(user, Permission.ORDERS_MANAGE_OTHER)
+					? undefined
+					: eq(orders.createdByUserId, user.id);
 		const where = and(
 			dataScope,
 			from ? gte(orders.orderDate, from) : undefined,
