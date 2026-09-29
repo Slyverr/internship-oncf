@@ -126,7 +126,7 @@ export class ProgramsController {
 	@Delete(":id")
 	@RequireAny(Permission.PROGRAMS_DELETE)
 	@ProgramDeleteResponse()
-	async remove(@ProgramIdParam() id: ProgramId) {
-		return this.programsService.remove(id);
+	async remove(@ProgramIdParam() id: ProgramId, @Request() req: AuthRequest) {
+		return this.programsService.remove(id, req.user);
 	}
 }

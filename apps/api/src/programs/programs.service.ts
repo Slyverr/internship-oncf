@@ -55,7 +55,10 @@ export class ProgramsService {
 		}
 
 		const values = this.programsMapper.toCreate(dto, user);
-		const created = await this.programsQuery.createProgram(values);
+		const created = await this.programsQuery.createProgram(values, {
+			userId: user.id,
+			userName: user.email,
+		});
 		return this.findOne(created.id);
 	}
 
@@ -75,7 +78,10 @@ export class ProgramsService {
 
 	async update(id: ProgramId, dto: UpdateProgramDto, user: AuthUser) {
 		const values = this.programsMapper.toUpdate(dto, user);
-		await this.programsQuery.updateProgram(id, values);
+		await this.programsQuery.updateProgram(id, values, undefined, {
+			userId: user.id,
+			userName: user.email,
+		});
 		return this.findOne(id);
 	}
 
@@ -99,13 +105,16 @@ export class ProgramsService {
 		return this.transition(id, user, ProgramStatus.SENT_TO_DTM);
 	}
 
-	async remove(id: ProgramId) {
+	async remove(id: ProgramId, user: AuthUser) {
 		const program = await this.findOne(id);
 		if (program.programStatus?.name !== ProgramStatus.DRAFT) {
 			throw new ConflictException("Only draft programs can be deleted");
 		}
 
-		const deleted = await this.programsQuery.removeProgram(id);
+		const deleted = await this.programsQuery.removeProgram(id, {
+			userId: user.id,
+			userName: user.email,
+		});
 		return this.ensure(deleted, id);
 	}
 
@@ -149,6 +158,7 @@ export class ProgramsService {
 				eq(forecastPrograms.id, id),
 				eq(forecastPrograms.statusId, program.statusId),
 			),
+			{ userId: user.id, userName: user.email },
 		);
 		if (!updatedProgram) {
 			throw new ConflictException(

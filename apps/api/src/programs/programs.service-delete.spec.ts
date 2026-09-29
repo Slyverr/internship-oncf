@@ -1,4 +1,4 @@
-import { ProgramStatus } from "@ecommand/shared";
+import { ProgramStatus, Role } from "@ecommand/shared";
 import { ConflictException } from "@nestjs/common";
 import { ProgramsQuery } from "./programs.query";
 import { ProgramsService } from "./programs.service";
@@ -13,6 +13,11 @@ describe("ProgramsService deletion", () => {
 		{} as never,
 	);
 	const id = 5 as ProgramId;
+	const user = {
+		id: 7,
+		email: "agent@example.test",
+		role: Role.ADMIN,
+	} as never;
 
 	beforeEach(() => {
 		findProgram.mockReset();
@@ -24,8 +29,11 @@ describe("ProgramsService deletion", () => {
 			programStatus: { name: ProgramStatus.DRAFT },
 		});
 		removeProgram.mockResolvedValue({ id });
-		await expect(service.remove(id)).resolves.toEqual({ id });
-		expect(removeProgram).toHaveBeenCalledWith(id);
+		await expect(service.remove(id, user)).resolves.toEqual({ id });
+		expect(removeProgram).toHaveBeenCalledWith(id, {
+			userId: 7,
+			userName: "agent@example.test",
+		});
 	});
 
 	it.each([
@@ -34,7 +42,9 @@ describe("ProgramsService deletion", () => {
 		ProgramStatus.SENT_TO_DTM,
 	])("rejects deletion for a program in %s status", async (status) => {
 		findProgram.mockResolvedValue({ programStatus: { name: status } });
-		await expect(service.remove(id)).rejects.toBeInstanceOf(ConflictException);
+		await expect(service.remove(id, user)).rejects.toBeInstanceOf(
+			ConflictException,
+		);
 		expect(removeProgram).not.toHaveBeenCalled();
 	});
 });

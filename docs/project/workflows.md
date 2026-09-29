@@ -28,9 +28,9 @@ Checked the running local web/API stack against the project SDF using the seeded
 - Fresh route-matched screenshots for the dashboard and recent-list layout reported no horizontal overflow at 390, 768, 1440, and 3840px. The recent rows use a 16px gap with no divider. Screenshots are temporary files under `/tmp/ecommand-ui-review`.
 - At initial seeding this preview had no order/program/claim transactions. Chapter 5 below records the current preview-only workflow data; the old QA row inventory below describes an earlier local database and is not present here.
 
-### Browser workflow checks — 2026-09-30
+### Browser workflow checks — 2026-09-29
 
-- Current preview data: `ORD-H5VQA5EEQX` and `ORD-3F6L4N654Z` are approved; `ORD-3F6L4N654Z` has draft program `PRG-ZXTKRDYWBG`. The client submitted the second order in the UI; its assigned agent approved it in the UI and created the program from the order detail action. The program wizard preserved the selected order, planned date, and quantity when Continue advanced to Execution.
+- Current preview data: `ORD-H5VQA5EEQX` and `ORD-3F6L4N654Z` are approved; `ORD-3F6L4N654Z` has program `PRG-ZXTKRDYWBG`, currently at the local `SENT_TO_DTM` status. The client submitted the second order in the UI; its assigned agent approved it in the UI and created the program from the order detail action. The program wizard preserved the selected order, planned date, and quantity when Continue advanced to Execution. No external DTM request was made.
 - The Recent orders card was reviewed with two live records at 390px and 1440px. Rows have a 16px gap and no divider. Programs and claims use the same `RecentSection` component.
 - Registration was submitted against the local-only `LOCAL-REG-TEST` customer. Pending login returned 401. One QA account was approved through the API and then signed in successfully; a second was approved through the rendered **Approve access** action and its detail changed to Approved. `workflow.pending.demo@example.test` remains pending for the dashboard demonstration.
 - The dashboard request link opened the Users page with `registrationStatus=PENDING` and `role=CLIENT_REPRESENTATIVE`; only the pending QA account appeared. At 390px the table showed its scroll hint and did not cause page-level overflow.
@@ -46,6 +46,13 @@ Checked the running local web/API stack against the project SDF using the seeded
 - The isolated API E2E runner starts a disposable PostgreSQL database, applies the schema, seeds reference and deterministic E2E data, runs Jest with Node, and removes the Compose project afterward. On 2026-09-29, all 2 suites and 21 tests passed, covering customer/order/claim/program/report scope, order and claim workflows, program eligibility and lifecycle, administrator route denials, and administrator assignment/removal of agent customer portfolios.
 - On 2026-09-29, fresh headless Chrome captures successfully matched requested routes. Dashboard and create forms were reviewed at phone, tablet, laptop, 2K, and 4K widths; the helper reported no horizontal overflow. Review images are under `/tmp/ecommand-ui-review` and are temporary, not repository assets.
 - Current repository verification passed on 2026-09-29: Biome, all workspace typechecks, web checks, 58 API suites / 440 tests, and production builds.
+
+### Program history — 2026-09-29
+
+- Program creation, edits, execution records, lifecycle transitions, and draft deletion now write matching audit events atomically with the program change. Focused tests cover initial state, quantity/date/status/execution events, and conditional update races.
+- Program details show recorded events with actor and timestamp. Existing programs are not retroactively backfilled; their timeline fills as subsequent changes occur.
+- `bun run verify:commit` now delegates to the full repository verification command. It passed on 2026-09-29 with Biome, workspace typechecks, web checks, 58 API suites / 443 tests, and production builds.
+- The screenshot helper was attempted for the program detail route but could not connect to Chrome DevTools at `localhost:9235`; the local web and API health endpoints were still HTTP 200.
 
 ### Historical QA records from the earlier local check
 

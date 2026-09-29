@@ -26,7 +26,12 @@ describe("ProgramsService lifecycle", () => {
 		{ toCreate } as never,
 	);
 	const id = 5 as ProgramId;
-	const user = { id: 7, role: Role.ADMIN, customerId: null } as never;
+	const user = {
+		id: 7,
+		email: "admin@example.test",
+		role: Role.ADMIN,
+		customerId: null,
+	} as never;
 
 	beforeEach(() => {
 		query.createProgram.mockReset();
@@ -57,7 +62,10 @@ describe("ProgramsService lifecycle", () => {
 
 		await expect(service.create(dto, user)).resolves.toBe(program);
 		expect(toCreate).toHaveBeenCalledWith(dto, user);
-		expect(query.createProgram).toHaveBeenCalledWith(values);
+		expect(query.createProgram).toHaveBeenCalledWith(values, {
+			userId: 7,
+			userName: "admin@example.test",
+		});
 	});
 
 	it("rejects a missing order before attempting to create a program", async () => {
@@ -171,6 +179,7 @@ describe("ProgramsService lifecycle", () => {
 			id,
 			{ statusId: PROGRAM_STATUSES[ProgramStatus.PENDING_APPROVAL].id },
 			expect.anything(),
+			{ userId: 7, userName: "admin@example.test" },
 		);
 		expect(notifyChange).toHaveBeenCalledWith(
 			20,

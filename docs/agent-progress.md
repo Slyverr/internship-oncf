@@ -4,8 +4,8 @@ This is the milestone journal for finishing the ECommand MVP. Read it with [work
 
 ## Current position
 
-- **Completed chapters:** 1 — API E2E foundation and core workflows; 2 — admin portfolio management; 3 — SDF-aligned role authorization; 4 — role-aware preview review and dashboard next steps; 5 — browser checks for dashboard, client orders, programs, and registration review.
-- **Active chapter:** 6 — close the remaining explicit SDF capability gaps and finish the highest-priority user workflows.
+- **Completed chapters:** 1 — API E2E foundation and core workflows; 2 — admin portfolio management; 3 — SDF-aligned role authorization; 4 — role-aware preview review and dashboard next steps; 5 — browser checks for dashboard, client orders, programs, and registration review; 6 — program lifecycle audit history and a working verification gate.
+- **Active chapter:** 7 — close the remaining explicit SDF capability gaps and finish the highest-priority user workflows.
 - **Current checkout:** `develop`; local commits remain unpublished. Review the task-focused history before any further cleanup; do not rewrite published commits.
 - **Local app:** `bun run dev` is running at `http://localhost:3000`; API `/health` returns HTTP 200. The ignored API `.env` points to the freshly initialized `ecommand_preview` database. The pre-existing `ecommand` database was left untouched.
 
@@ -57,16 +57,25 @@ Coverage includes:
 - From the second approved order, the agent used **Create program**. The order was preselected; **Continue** advanced to Execution while retaining planned date and quantity; **Create Program** created `PRG-ZXTKRDYWBG` and navigated to its detail page.
 - QA signups verified against the local-only `LOCAL-REG-TEST` customer remained pending and could not sign in (401). One was approved through the API and then signed in successfully (201); a second was approved through the rendered **Approve access** action and its detail changed to Approved.
 - The dashboard registration link opened `/dashboard/users?registrationStatus=PENDING&role=CLIENT_REPRESENTATIVE`; both filters were selected and the table showed only the pending QA account. Fresh 390px and 1440px captures showed no page-level horizontal overflow; the phone table displayed its horizontal-scroll hint.
-- Preview-only data retained for demonstration: two sample orders, one draft program, one approved QA signup, and one pending QA signup (`workflow.pending.demo@example.test`). The existing `ecommand` database remains untouched.
+- Preview-only data retained for demonstration: two approved sample orders, one program (`PRG-ZXTKRDYWBG`, currently sent to the local DTM status), one approved QA signup, and one pending QA signup (`workflow.pending.demo@example.test`). The existing `ecommand` database remains untouched. No external DTM handoff occurred.
 
 **Verification:** Client submit → agent approval and agent program creation succeeded in the browser. Signup → pending login denial → admin UI approval → approved login succeeded through the API and browser. API `/health` and web `/login` returned HTTP 200; API and web typechecks passed. Temporary screenshots are under `/tmp/ecommand-ui-review`.
+
+## Completed chapter 6 — program lifecycle history
+
+- Program creation, status transitions, planned quantity/date edits, execution updates, and draft deletion now write audit events in the same PostgreSQL transaction as the corresponding program change. Failed or raced status updates do not add history.
+- Program details render recorded events with concise labels, changed values where applicable, actor, and timestamp. Existing programs are not backfilled, so programs created before this change may have an empty history until a new event occurs.
+- Added query tests for creation, all update event types, and conditional update races. The documented `bun run verify:commit` command now exists and runs the full `bun run verify` gate.
+- A fresh screenshot could not run because the screenshot helper's Chrome DevTools endpoint at `localhost:9235` was unavailable. The web `/login` and API `/health` endpoints still returned HTTP 200.
+
+**Verification:** `bun run verify:commit` passed: Biome, shared/API/web typechecks, 58 API suites / 443 tests, web checks, and API/web production builds.
 
 ## Prioritized remaining work
 
 | Priority | Area | Remaining work / evidence |
 | --- | --- | --- |
 | P0 | Admin role/access management | Explicit SDF Story 5.2 is not implemented. Decide whether pilot admins edit grants only for the three fixed roles or can create roles; then build guarded API/UI, prevent privilege lockout/escalation, and add audit/tests. The current `Role` enum and reference-seeded role table are fixed; do not start a custom-role schema before resolving this model. |
-| P1 | Browser workflow verification | Done for client order submission, agent approval, order-to-program creation, and admin registration review. Still check program submission/approval and claim conversation/closure in the preview browser. |
+| P1 | Browser workflow verification | Done for client order submission, agent approval, order-to-program creation, and admin registration review. Re-run a fresh program lifecycle to verify the new history timeline; still check claim conversation/closure in the preview browser. |
 | P1 | Browser E2E and CI | Add isolated Playwright journeys for critical client/agent/admin workflows, then wire static checks, unit tests, API E2E, and browser E2E into CI. |
 | P1 | Workflow reliability | Test notification failure/retry behavior, authorization failure paths, and any confirmed gaps in transition validation. Durable retry and assignment alerts need separate design. |
 | P1 | Dashboard | Confirm metrics and next actions are useful for each role and scoped data does not leak. Recent cards/eligible-order and registration links already exist. |
