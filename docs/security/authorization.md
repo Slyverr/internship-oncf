@@ -7,13 +7,13 @@ This guide maps default roles to API permissions, ownership rules, and web surfa
 | Capability | Admin | Commercial agent | Client representative |
 | --- | :---: | :---: | :---: |
 | User administration and registration review | All user actions, including approving/rejecting client signup | — | — |
-| Orders | All actions and records | Operational actions and cross-customer records | Create/read/update/delete drafts and submit; reads use the assigned customer when present, otherwise own-created records |
+| Orders | All actions and records | Operational actions for assigned-customer records | Create/read/update/delete drafts and submit; reads use the assigned customer when present, otherwise own-created records |
 | Programs | All actions and records | Create/read/update; status, ownership, and lifecycle actions | Read programs linked to orders for the assigned customer; no create/update/delete/workflow actions |
-| Claims | All actions and records | Create/read/update claims; status and lifecycle actions, including comments | Create/read/comment on own claims and close own resolved claims |
+| Claims | All actions and records | Create/read/update assigned-customer claims; status and lifecycle actions, including comments | Create/read/comment on own claims and close own resolved claims |
 | Customers | All actions | Read/update | — |
 | Catalog | Read and manage | Read | Read |
 | Tracking | Read and update | Read | — |
-| Reports | Read and export | Read across customers through order-management scope | Read orders for the assigned customer when present, otherwise own-created orders |
+| Reports | Read and export | Read across the assigned-customer portfolio | Read orders for the assigned customer when present, otherwise own-created orders |
 | Profile | Update | Update | Update |
 
 Admin receives every defined permission. Parent permissions imply descendants (for example, claims:action grants each claim lifecycle action). A dash means the default role has no grant. Custom database grants may change runtime access, so use effective permissions when checking actual access.
@@ -22,13 +22,13 @@ Admin receives every defined permission. Parent permissions imply descendants (f
 
 | Resource / action | API permission | Web surface | Additional scope |
 | --- | --- | --- | --- |
-| Orders list/detail/files | orders:read | Sidebar Orders; order list/detail and attachments | Lists, reports, ID routes, and files agree: manage-other sees cross-customer records; otherwise a linked customer is the exclusive scope, falling back to creator-only when no customer is linked. |
+| Orders list/detail/files | orders:read | Sidebar Orders; order list/detail and attachments | Commercial agents are limited to their `user_customers` portfolio even with manage-other. Client representatives use their linked customer; unscoped users fall back to creator-only unless their effective permissions explicitly allow broader access. |
 | Orders create/edit/delete | orders:create/update/delete | Dashboard quick action; create form; order action menu | The dashboard action is permission-filtered; the API and web both restrict deletion to draft orders. |
 | Order lifecycle | orders:action:* | OrderActions | API state transitions are authoritative. |
-| Programs list/detail | programs:read | Sidebar Programs; list/detail | Lists and ID routes use the assigned customer's order relation when a customer is linked, or creator scope when no customer is linked; `PROGRAMS_MANAGE_OTHER` bypasses the scope. |
+| Programs list/detail | programs:read | Sidebar Programs; list/detail | Commercial agents follow their `user_customers` portfolio through the linked order. Client representatives follow their assigned customer; unscoped users fall back to creator scope unless their effective permissions allow broader access. |
 | Programs create/edit/delete | programs:create/update/delete | Create form; program action menu | The API and web both restrict deletion to draft programs. |
 | Program lifecycle | programs:action:* | ProgramActions | Valid path: draft → pending approval → approved → confirmed → sent to DTM → in progress. Cancellation is allowed before dispatch. |
-| Claims list/detail/comments | claims:read; claims:action:comment | Sidebar Claims; details, comment list, and role-gated comment form | Agents with `CLAIMS_MANAGE_OTHER` process the shared queue. Client representatives see and comment on their own claims only. |
+| Claims list/detail/comments | claims:read; claims:action:comment | Sidebar Claims; details, comment list, and role-gated comment form | Commercial agents use `CLAIMS_MANAGE_OTHER` to process other users' claims only inside their assigned-customer portfolio. Client representatives see and comment on their own claims only. |
 | Claims create/edit/delete | claims:create/update/delete | Dashboard quick action; create form; claim action menu | Clients and commercial agents can submit claims. Client ownership still limits which existing claims they can access. Delete is admin-only by default. |
 | Claim lifecycle | claims:action:* | ClaimActions | Buttons use specific action permissions and supported current states; clients can close their own resolved claims; parent `claims:action` also grants commenting. |
 | Customers | customers:read/create/update/delete | Sidebar Customers; forms and action menu | Commercial agents read/update; create/deactivate are admin-only. |
@@ -43,9 +43,9 @@ Admin receives every defined permission. Parent permissions imply descendants (f
 
 - Sidebar filtering and action visibility shape the interface; API guards, permission metadata, service scoping, and ownership guards enforce access.
 - Role names alone do not authorize a request. Use the authenticated user’s effective permission set.
-- `users.customer_id` is the existing relation that anchors client representatives to a company. User forms and the API require it for the client-representative role; the development fixture assigns the seeded client to customer `CLI009`.
+- `users.customer_id` anchors client representatives to one company. Commercial-agent portfolios use the existing `user_customers` many-to-many relation; the development fixture assigns the seeded agent to `CLI009` and `CLI010`.
 - An ID route may apply both permission and ownership checks; review both. Ownership guards let missing records reach the route service so callers receive its normal not-found response instead of a 500.
-- Customer scope follows the existing order access rule: compare the user's customer assignment with `orders.customer_id`; program reads follow `forecast_programs.order_id -> orders.customer_id`. Claims are creator-scoped for client representatives and shared with commercial agents through `CLAIMS_MANAGE_OTHER` so they can process customer submissions.
+- Customer scope is role-aware: client representatives use `users.customer_id`, while commercial agents use `user_customers`. Orders compare that scope with `orders.customer_id`; program reads follow `forecast_programs.order_id -> orders.customer_id`. Claims remain creator-scoped for client representatives; `CLAIMS_MANAGE_OTHER` lets commercial agents process other users' claims inside their portfolio, not escape it.
 - Changes to role grants, controller decorators, ownership logic, transition maps, or action buttons require corresponding matrix and test updates.
 
 ## Verification coverage
@@ -54,7 +54,7 @@ Admin receives every defined permission. Parent permissions imply descendants (f
 - apps/api/src/auth/roles-permissions.spec.ts checks admin, commercial-agent, and client-representative grant boundaries.
 - apps/api/src/workflow-transitions.spec.ts locks down order, program, and claim transition graphs.
 - Controller authorization specs for catalog, claims, notifications, orders, profile, tracking, and users verify route permission metadata or authenticated-user scoping; ownership-sensitive routes assert their ownership guard.
-- Claim mapper/service specs check customer-scope enforcement on create/list. Order query/access specs cover creator-only, assigned-customer, denied-customer, and manager scopes for lists, eligible orders, and ID routes. Program query/access specs cover creator, assigned-customer, and manager scope; notification query specs verify recipient scoping for lists, counts, and read updates. Order and program service specs check draft-only deletion.
+- Claim mapper/service/query/ownership specs check portfolio enforcement on create, update, list filters, and ID routes. Order query/access specs cover creator-only, assigned-customer, denied-customer, and manager scopes for lists, eligible orders, and ID routes. Program query/access specs cover creator, assigned-customer, and manager scope; notification query specs verify recipient scoping for lists, counts, and read updates. Order and program service specs check draft-only deletion.
 - User service specs require customer assignment for client representatives; report service specs cover creator and assigned-customer scope; `apps/web/test/action-visibility.test.ts` covers frontend menu, program-delete, and order-to-program visibility rules.
 - `apps/api/src/common/utils/route-id-pipes.spec.ts` verifies strict parsing for claim, customer, notification, program, and user route IDs; tracking pipes have equivalent coverage.
 - These unit tests do not replace endpoint integration tests for database queries and full guard execution. Add integration coverage when changing those boundaries.
