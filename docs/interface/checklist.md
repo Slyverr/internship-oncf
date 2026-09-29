@@ -108,7 +108,7 @@ Review both light and dark appearances, and both workspace layouts where the rou
 
 - Keep the 4px spacing scale, semantic theme tokens, readable text sizes, and practical 44px interaction targets.
 - Preserve current theme colors while improving component surfaces. Do not describe custom tokens as official ONCF colors.
-- Follow the repository's commit scopes and run `bun run verify:commit` before every commit.
+- Follow the repository's commit scopes and run `bun run verify:commit` before important commits.
 - Update this checklist with concrete evidence as each area is reviewed; do not mark the overall overhaul complete while any required item or screen state remains unverified.
 
 - Fresh auth captures at 390×844 show sign-in centered vertically and signup fitting its two-step flow without horizontal overflow. At 320×568, signup remains top-reachable and scrolls instead of clipping; signup fields are centered at the same max width as sign-in on desktop.
