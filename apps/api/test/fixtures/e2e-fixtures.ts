@@ -10,6 +10,7 @@ export const E2E_ORDERS = {
 	assignedA: "E2E-ORD-A",
 	assignedB: "E2E-ORD-B",
 	outside: "E2E-ORD-C",
+	assignedAIneligible: "E2E-ORD-D",
 } as const;
 
 export const E2E_CLAIMS = {

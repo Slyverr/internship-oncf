@@ -1,12 +1,14 @@
-import { ProgramStatus } from "@ecommand/shared";
+import { OrderStatus, ProgramStatus } from "@ecommand/shared";
 import {
 	ConflictException,
+	ForbiddenException,
 	Injectable,
 	NotFoundException,
 } from "@nestjs/common";
 import { forecastPrograms } from "drizzle/schema";
 import { and, eq } from "drizzle-orm";
 import { AuthUser } from "@/auth/auth.types";
+import { canAccessCustomer } from "@/auth/customer-scope";
 import { PROGRAM_STATUSES } from "@/database/reference-data";
 import { NotificationsService } from "@/notifications/notifications.service";
 import { PROGRAM_STATUS_BY_ID, PROGRAM_TRANSITION } from "./programs.constants";
@@ -26,6 +28,25 @@ export class ProgramsService {
 	) {}
 
 	async create(dto: CreateProgramDto, user: AuthUser) {
+		const order = await this.programsQuery.findOrderCustomer(dto.orderId);
+		if (!order) {
+			throw new NotFoundException(`Order ${dto.orderId} not found`);
+		}
+		if (!canAccessCustomer(user, order.customerId)) {
+			throw new ForbiddenException(
+				"Cannot create programs for orders outside your assigned portfolio",
+			);
+		}
+		if (
+			![
+				OrderStatus.APPROVED,
+				OrderStatus.SENT_TO_DTM,
+				OrderStatus.IN_PROGRESS,
+			].includes(order.orderStatus?.name as OrderStatus)
+		) {
+			throw new ConflictException("Order is not eligible for program creation");
+		}
+
 		const existingProgram = await this.programsQuery.findProgramForOrder(
 			dto.orderId,
 		);

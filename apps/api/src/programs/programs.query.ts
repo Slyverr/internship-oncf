@@ -138,6 +138,16 @@ export class ProgramsQuery {
 		});
 	}
 
+	async findOrderCustomer(orderId: number) {
+		return this.drizzle.db.query.orders.findFirst({
+			where: { id: orderId },
+			columns: { customerId: true },
+			with: {
+				orderStatus: { columns: { name: true } },
+			},
+		});
+	}
+
 	async findProgram(id: ProgramId) {
 		return this.drizzle.db.query.forecastPrograms.findFirst({
 			where: { id },

@@ -1,4 +1,10 @@
-import { ClaimStatus, ClaimType, OrderStatus, Role } from "@ecommand/shared";
+import {
+	ClaimStatus,
+	ClaimType,
+	OrderStatus,
+	ProgramStatus,
+	Role,
+} from "@ecommand/shared";
 import type { INestApplication } from "@nestjs/common";
 import request from "supertest";
 import type { App } from "supertest/types";
@@ -248,7 +254,13 @@ describe("customer portfolio authorization (e2e)", () => {
 
 		expect(
 			response.body.map((order: { orderNumber: string }) => order.orderNumber),
-		).toEqual([E2E_ORDERS.assignedA]);
+		).toEqual(
+			expect.arrayContaining([
+				E2E_ORDERS.assignedA,
+				E2E_ORDERS.assignedAIneligible,
+			]),
+		);
+		expect(response.body).toHaveLength(2);
 
 		const adminToken = await login(app, E2E_USERS.admin.email);
 		const adminOrders = await request(app.getHttpServer())
@@ -277,9 +289,13 @@ describe("customer portfolio authorization (e2e)", () => {
 		expect(
 			response.body.map((order: { orderNumber: string }) => order.orderNumber),
 		).toEqual(
-			expect.arrayContaining([E2E_ORDERS.assignedA, E2E_ORDERS.assignedB]),
+			expect.arrayContaining([
+				E2E_ORDERS.assignedA,
+				E2E_ORDERS.assignedAIneligible,
+				E2E_ORDERS.assignedB,
+			]),
 		);
-		expect(response.body).toHaveLength(2);
+		expect(response.body).toHaveLength(3);
 
 		const excludedFilter = await request(app.getHttpServer())
 			.get("/orders")
@@ -434,7 +450,7 @@ describe("customer portfolio authorization (e2e)", () => {
 		const cases = [
 			{
 				username: E2E_USERS.admin.email,
-				total: 3,
+				total: 4,
 				customers: [
 					"E2E Assigned Customer A",
 					"E2E Assigned Customer B",
@@ -443,7 +459,7 @@ describe("customer portfolio authorization (e2e)", () => {
 			},
 			{
 				username: E2E_USERS.agentAssigned.employeeCode,
-				total: 2,
+				total: 3,
 				customers: ["E2E Assigned Customer A", "E2E Assigned Customer B"],
 			},
 			{
@@ -672,6 +688,107 @@ describe("customer portfolio authorization (e2e)", () => {
 			.post(`/claims/${claimId}/close`)
 			.set("Authorization", `Bearer ${clientToken}`)
 			.expect(409);
+	});
+
+	it("enforces program portfolio access and runs assigned program approvals", async () => {
+		const orderId = orderIds[E2E_ORDERS.assignedB];
+		const assignedToken = await login(
+			app,
+			E2E_USERS.agentAssigned.employeeCode,
+		);
+		const outsideToken = await login(app, E2E_USERS.agentOutside.employeeCode);
+		const unassignedToken = await login(
+			app,
+			E2E_USERS.agentUnassigned.employeeCode,
+		);
+		const clientToken = await login(app, E2E_USERS.clientA.email);
+		const eligibleBefore = await request(app.getHttpServer())
+			.get("/orders/eligible-for-programs")
+			.set("Authorization", `Bearer ${assignedToken}`)
+			.expect(200);
+		expect(
+			eligibleBefore.body.map(
+				(order: { orderNumber: string }) => order.orderNumber,
+			),
+		).toEqual([E2E_ORDERS.assignedB]);
+		const payload = {
+			orderId,
+			plannedDate: "2026-10-03T12:00:00.000Z",
+			quantityPlanned: "20",
+		};
+
+		await request(app.getHttpServer())
+			.post("/programs")
+			.set("Authorization", `Bearer ${outsideToken}`)
+			.send(payload)
+			.expect(403);
+		await request(app.getHttpServer())
+			.post("/programs")
+			.set("Authorization", `Bearer ${unassignedToken}`)
+			.send(payload)
+			.expect(403);
+		await request(app.getHttpServer())
+			.post("/programs")
+			.set("Authorization", `Bearer ${clientToken}`)
+			.send(payload)
+			.expect(403);
+
+		const draftOrderResponse = await request(app.getHttpServer())
+			.post("/programs")
+			.set("Authorization", `Bearer ${assignedToken}`)
+			.send({
+				...payload,
+				orderId: orderIds[E2E_ORDERS.assignedAIneligible],
+			})
+			.expect(409);
+		expect(draftOrderResponse.body.message).toBe(
+			"Order is not eligible for program creation",
+		);
+
+		const createdProgram = await request(app.getHttpServer())
+			.post("/programs")
+			.set("Authorization", `Bearer ${assignedToken}`)
+			.send(payload)
+			.expect(201);
+		const programId = createdProgram.body.id as number;
+		expect(createdProgram.body.programStatus.name).toBe(ProgramStatus.DRAFT);
+
+		await request(app.getHttpServer())
+			.post("/programs")
+			.set("Authorization", `Bearer ${assignedToken}`)
+			.send(payload)
+			.expect(409);
+
+		const eligibleAfter = await request(app.getHttpServer())
+			.get("/orders/eligible-for-programs")
+			.set("Authorization", `Bearer ${assignedToken}`)
+			.expect(200);
+		expect(eligibleAfter.body).toEqual([]);
+
+		await request(app.getHttpServer())
+			.post(`/programs/${programId}/approve`)
+			.set("Authorization", `Bearer ${assignedToken}`)
+			.expect(409);
+
+		const pending = await request(app.getHttpServer())
+			.post(`/programs/${programId}/submit`)
+			.set("Authorization", `Bearer ${assignedToken}`)
+			.expect(200);
+		expect(pending.body.programStatus.name).toBe(
+			ProgramStatus.PENDING_APPROVAL,
+		);
+
+		const approved = await request(app.getHttpServer())
+			.post(`/programs/${programId}/approve`)
+			.set("Authorization", `Bearer ${assignedToken}`)
+			.expect(200);
+		expect(approved.body.programStatus.name).toBe(ProgramStatus.APPROVED);
+
+		const confirmed = await request(app.getHttpServer())
+			.post(`/programs/${programId}/confirm`)
+			.set("Authorization", `Bearer ${assignedToken}`)
+			.expect(200);
+		expect(confirmed.body.programStatus.name).toBe(ProgramStatus.CONFIRMED);
 	});
 
 	afterAll(async () => {

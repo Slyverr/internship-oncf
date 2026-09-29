@@ -1,5 +1,9 @@
-import { ProgramStatus } from "@ecommand/shared";
-import { ConflictException, NotFoundException } from "@nestjs/common";
+import { OrderStatus, ProgramStatus, Role } from "@ecommand/shared";
+import {
+	ConflictException,
+	ForbiddenException,
+	NotFoundException,
+} from "@nestjs/common";
 import { PROGRAM_STATUSES } from "@/database/reference-data";
 import { ProgramsQuery } from "./programs.query";
 import { ProgramsService } from "./programs.service";
@@ -10,6 +14,7 @@ describe("ProgramsService lifecycle", () => {
 	const toCreate = jest.fn();
 	const query = {
 		createProgram: jest.fn(),
+		findOrderCustomer: jest.fn(),
 		findProgramForOrder: jest.fn(),
 		findProgram: jest.fn(),
 		findProgramStatus: jest.fn(),
@@ -21,10 +26,14 @@ describe("ProgramsService lifecycle", () => {
 		{ toCreate } as never,
 	);
 	const id = 5 as ProgramId;
-	const user = { id: 7 } as never;
+	const user = { id: 7, role: Role.ADMIN, customerId: null } as never;
 
 	beforeEach(() => {
 		query.createProgram.mockReset();
+		query.findOrderCustomer.mockReset().mockResolvedValue({
+			customerId: 42,
+			orderStatus: { name: OrderStatus.APPROVED },
+		});
 		query.findProgramForOrder.mockReset();
 		query.findProgram.mockReset();
 		query.findProgramStatus.mockReset();
@@ -37,6 +46,10 @@ describe("ProgramsService lifecycle", () => {
 		const dto = { orderId: 12 } as never;
 		const values = { orderId: 12 } as never;
 		const program = { id };
+		query.findOrderCustomer.mockResolvedValue({
+			customerId: 42,
+			orderStatus: { name: OrderStatus.APPROVED },
+		} as never);
 		query.findProgramForOrder.mockResolvedValue(undefined);
 		toCreate.mockReturnValue(values);
 		query.createProgram.mockResolvedValue({ id });
@@ -47,7 +60,92 @@ describe("ProgramsService lifecycle", () => {
 		expect(query.createProgram).toHaveBeenCalledWith(values);
 	});
 
+	it("rejects a missing order before attempting to create a program", async () => {
+		query.findOrderCustomer.mockResolvedValue(undefined);
+
+		await expect(
+			service.create({ orderId: 12 } as never, user),
+		).rejects.toThrow(new NotFoundException("Order 12 not found"));
+		expect(query.findProgramForOrder).not.toHaveBeenCalled();
+		expect(query.createProgram).not.toHaveBeenCalled();
+	});
+
+	it("rejects an order that is not eligible for a program", async () => {
+		query.findOrderCustomer.mockResolvedValue({
+			customerId: 42,
+			orderStatus: { name: OrderStatus.DRAFT },
+		} as never);
+
+		await expect(
+			service.create({ orderId: 12 } as never, user),
+		).rejects.toThrow(
+			new ConflictException("Order is not eligible for program creation"),
+		);
+		expect(query.findProgramForOrder).not.toHaveBeenCalled();
+		expect(query.createProgram).not.toHaveBeenCalled();
+	});
+
+	it("allows an agent to create a program for an assigned customer's order", async () => {
+		query.findOrderCustomer.mockResolvedValue({
+			customerId: 42,
+			orderStatus: { name: OrderStatus.APPROVED },
+		} as never);
+		query.findProgramForOrder.mockResolvedValue(undefined);
+		toCreate.mockReturnValue({ orderId: 12 } as never);
+		query.createProgram.mockResolvedValue({ id });
+		query.findProgram.mockResolvedValue({ id } as never);
+		const agent = {
+			id: 7,
+			role: Role.AGENT_COMMERCIAL,
+			customerId: null,
+			assignedCustomerIds: [42],
+		} as never;
+
+		await expect(
+			service.create({ orderId: 12 } as never, agent),
+		).resolves.toEqual({ id });
+	});
+
+	it("denies an unassigned agent from creating a program", async () => {
+		query.findOrderCustomer.mockResolvedValue({
+			customerId: 42,
+			orderStatus: { name: OrderStatus.APPROVED },
+		} as never);
+		const agent = {
+			id: 7,
+			role: Role.AGENT_COMMERCIAL,
+			customerId: null,
+			assignedCustomerIds: [],
+		} as never;
+
+		await expect(
+			service.create({ orderId: 12 } as never, agent),
+		).rejects.toBeInstanceOf(ForbiddenException);
+		expect(query.findProgramForOrder).not.toHaveBeenCalled();
+		expect(query.createProgram).not.toHaveBeenCalled();
+	});
+
+	it("denies an agent outside the order customer's portfolio", async () => {
+		query.findOrderCustomer.mockResolvedValue({ customerId: 42 });
+		const agent = {
+			id: 7,
+			role: Role.AGENT_COMMERCIAL,
+			customerId: null,
+			assignedCustomerIds: [43],
+		} as never;
+
+		await expect(
+			service.create({ orderId: 12 } as never, agent),
+		).rejects.toBeInstanceOf(ForbiddenException);
+		expect(query.findProgramForOrder).not.toHaveBeenCalled();
+		expect(query.createProgram).not.toHaveBeenCalled();
+	});
+
 	it("rejects creating a second program for the same order", async () => {
+		query.findOrderCustomer.mockResolvedValue({
+			customerId: 42,
+			orderStatus: { name: OrderStatus.APPROVED },
+		} as never);
 		query.findProgramForOrder.mockResolvedValue({ id });
 
 		await expect(

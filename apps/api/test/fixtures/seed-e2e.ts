@@ -194,6 +194,7 @@ async function seed() {
 		})
 		.returning({ id: goods.id });
 	const draftStatus = ORDER_STATUSES[OrderStatus.DRAFT];
+	const approvedStatus = ORDER_STATUSES[OrderStatus.APPROVED];
 
 	const orderRows = await db
 		.insert(orders)
@@ -211,7 +212,7 @@ async function seed() {
 				goodsId: good.id,
 				customerId: customerId(E2E_CUSTOMERS.assignedB),
 				createdByUserId: userId(E2E_USERS.agentAssigned.email),
-				statusId: draftStatus.id,
+				statusId: approvedStatus.id,
 				orderNumber: E2E_ORDERS.assignedB,
 				quantityDemanded: "20",
 				unitId: UNITS.TONNES.id,
@@ -223,6 +224,15 @@ async function seed() {
 				statusId: draftStatus.id,
 				orderNumber: E2E_ORDERS.outside,
 				quantityDemanded: "30",
+				unitId: UNITS.TONNES.id,
+			},
+			{
+				goodsId: good.id,
+				customerId: customerId(E2E_CUSTOMERS.assignedA),
+				createdByUserId: userId(E2E_USERS.clientA.email),
+				statusId: draftStatus.id,
+				orderNumber: E2E_ORDERS.assignedAIneligible,
+				quantityDemanded: "40",
 				unitId: UNITS.TONNES.id,
 			},
 		])
