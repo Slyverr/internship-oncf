@@ -448,6 +448,12 @@ export function DashboardOverview() {
 			},
 		},
 	);
+	const showReadyOrdersCard =
+		showReadyOrders &&
+		(readyOrdersQuery.isLoading ||
+			readyOrdersQuery.isError ||
+			(readyOrdersQuery.data?.length ?? 0) > 0);
+	const showInsightRail = showReadyOrdersCard && canReadReports;
 	const programsQuery = useProgramsControllerFindAll(
 		{ sortBy: "createdAt", sortOrder: "desc" },
 		{ query: { enabled: canReadPrograms } },
@@ -562,13 +568,13 @@ export function DashboardOverview() {
 
 			<PendingRegistrationsSection users={pendingRegistrations} />
 
-			{(showReadyOrders || canReadReports) && (
+			{(showReadyOrdersCard || canReadReports) && (
 				<section
 					aria-label="Dashboard insights"
-					tabIndex={showReadyOrders && canReadReports ? 0 : undefined}
-					className={`min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${showReadyOrders && canReadReports ? "workspace-insight-rail @4xl/workspace:grid-cols-2" : "grid gap-6"}`}
+					tabIndex={showInsightRail ? 0 : undefined}
+					className={`min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${showInsightRail ? "workspace-insight-rail @4xl/workspace:grid-cols-2" : "grid gap-6"}`}
 				>
-					{showReadyOrders && (
+					{showReadyOrdersCard && (
 						<ReadyOrdersSection
 							orders={readyOrdersQuery.data ?? []}
 							isLoading={readyOrdersQuery.isLoading}
@@ -579,7 +585,7 @@ export function DashboardOverview() {
 					{canReadReports && <OrderActivitySection />}
 				</section>
 			)}
-			{showReadyOrders && canReadReports && (
+			{showInsightRail && (
 				<p className="workspace-scroll-hint text-meta text-muted-foreground">
 					Swipe or use the arrow keys to view more dashboard insights.
 				</p>
