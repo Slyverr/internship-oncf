@@ -226,15 +226,6 @@ async function seed() {
 				quantityDemanded: "30",
 				unitId: UNITS.TONNES.id,
 			},
-			{
-				goodsId: good.id,
-				customerId: customerId(E2E_CUSTOMERS.assignedA),
-				createdByUserId: userId(E2E_USERS.clientA.email),
-				statusId: draftStatus.id,
-				orderNumber: E2E_ORDERS.assignedAIneligible,
-				quantityDemanded: "40",
-				unitId: UNITS.TONNES.id,
-			},
 		])
 		.returning({ id: orders.id, orderNumber: orders.orderNumber });
 	const orderIds = new Map(

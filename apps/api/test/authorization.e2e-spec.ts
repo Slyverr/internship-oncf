@@ -245,6 +245,60 @@ describe("customer portfolio authorization (e2e)", () => {
 			.expect(403);
 	});
 
+	it("lets administrators assign and remove agent customer portfolios", async () => {
+		const adminToken = await login(app, E2E_USERS.admin.email);
+		const users = await request(app.getHttpServer())
+			.get("/users")
+			.set("Authorization", `Bearer ${adminToken}`)
+			.expect(200);
+		const unassignedAgent = users.body.find(
+			(user: { employeeCode: string }) =>
+				user.employeeCode === E2E_USERS.agentUnassigned.employeeCode,
+		);
+		expect(unassignedAgent).toBeDefined();
+
+		const assigned = await request(app.getHttpServer())
+			.put(`/users/${unassignedAgent.id}`)
+			.set("Authorization", `Bearer ${adminToken}`)
+			.send({
+				role: Role.AGENT_COMMERCIAL,
+				customerIds: [customerIds[E2E_CUSTOMERS.assignedA]],
+			})
+			.expect(200);
+		expect(assigned.body.userCustomers).toEqual([
+			{ customerId: customerIds[E2E_CUSTOMERS.assignedA] },
+		]);
+
+		const assignedToken = await login(
+			app,
+			E2E_USERS.agentUnassigned.employeeCode,
+		);
+		const assignedCustomers = await request(app.getHttpServer())
+			.get("/customers")
+			.set("Authorization", `Bearer ${assignedToken}`)
+			.expect(200);
+		expect(
+			assignedCustomers.body.map(
+				(customer: { customerCode: string }) => customer.customerCode,
+			),
+		).toEqual([E2E_CUSTOMERS.assignedA]);
+
+		await request(app.getHttpServer())
+			.put(`/users/${unassignedAgent.id}`)
+			.set("Authorization", `Bearer ${adminToken}`)
+			.send({ role: Role.AGENT_COMMERCIAL, customerIds: [] })
+			.expect(200);
+		const clearedToken = await login(
+			app,
+			E2E_USERS.agentUnassigned.employeeCode,
+		);
+		const clearedCustomers = await request(app.getHttpServer())
+			.get("/customers")
+			.set("Authorization", `Bearer ${clearedToken}`)
+			.expect(200);
+		expect(clearedCustomers.body).toEqual([]);
+	});
+
 	it("scopes client order lists and direct reads to the linked customer", async () => {
 		const clientToken = await login(app, E2E_USERS.clientA.email);
 		const response = await request(app.getHttpServer())
@@ -254,13 +308,7 @@ describe("customer portfolio authorization (e2e)", () => {
 
 		expect(
 			response.body.map((order: { orderNumber: string }) => order.orderNumber),
-		).toEqual(
-			expect.arrayContaining([
-				E2E_ORDERS.assignedA,
-				E2E_ORDERS.assignedAIneligible,
-			]),
-		);
-		expect(response.body).toHaveLength(2);
+		).toEqual([E2E_ORDERS.assignedA]);
 
 		const adminToken = await login(app, E2E_USERS.admin.email);
 		const adminOrders = await request(app.getHttpServer())
@@ -289,13 +337,9 @@ describe("customer portfolio authorization (e2e)", () => {
 		expect(
 			response.body.map((order: { orderNumber: string }) => order.orderNumber),
 		).toEqual(
-			expect.arrayContaining([
-				E2E_ORDERS.assignedA,
-				E2E_ORDERS.assignedAIneligible,
-				E2E_ORDERS.assignedB,
-			]),
+			expect.arrayContaining([E2E_ORDERS.assignedA, E2E_ORDERS.assignedB]),
 		);
-		expect(response.body).toHaveLength(3);
+		expect(response.body).toHaveLength(2);
 
 		const excludedFilter = await request(app.getHttpServer())
 			.get("/orders")
@@ -450,7 +494,7 @@ describe("customer portfolio authorization (e2e)", () => {
 		const cases = [
 			{
 				username: E2E_USERS.admin.email,
-				total: 4,
+				total: 3,
 				customers: [
 					"E2E Assigned Customer A",
 					"E2E Assigned Customer B",
@@ -459,7 +503,7 @@ describe("customer portfolio authorization (e2e)", () => {
 			},
 			{
 				username: E2E_USERS.agentAssigned.employeeCode,
-				total: 3,
+				total: 2,
 				customers: ["E2E Assigned Customer A", "E2E Assigned Customer B"],
 			},
 			{
@@ -716,6 +760,20 @@ describe("customer portfolio authorization (e2e)", () => {
 			plannedDate: "2026-10-03T12:00:00.000Z",
 			quantityPlanned: "20",
 		};
+		const sourceOrder = await request(app.getHttpServer())
+			.get(`/orders/${orderIds[E2E_ORDERS.assignedA]}`)
+			.set("Authorization", `Bearer ${clientToken}`)
+			.expect(200);
+		const ineligibleOrder = await request(app.getHttpServer())
+			.post("/orders")
+			.set("Authorization", `Bearer ${clientToken}`)
+			.send({
+				customerId: customerIds[E2E_CUSTOMERS.assignedA],
+				goodsId: sourceOrder.body.goodsId,
+				unitId: sourceOrder.body.unitId,
+				quantityDemanded: "40",
+			})
+			.expect(201);
 
 		await request(app.getHttpServer())
 			.post("/programs")
@@ -738,7 +796,7 @@ describe("customer portfolio authorization (e2e)", () => {
 			.set("Authorization", `Bearer ${assignedToken}`)
 			.send({
 				...payload,
-				orderId: orderIds[E2E_ORDERS.assignedAIneligible],
+				orderId: ineligibleOrder.body.id,
 			})
 			.expect(409);
 		expect(draftOrderResponse.body.message).toBe(

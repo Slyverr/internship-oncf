@@ -27,6 +27,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { CustomerPortfolioField } from "@/components/users/customer-portfolio-field";
 import { useGuidedFormState } from "@/hooks/use-guided-form-state";
 import {
 	UpdateUserDtoRole,
@@ -55,6 +56,7 @@ const updateUserSchemaBase = z.object({
 	employeeCode: z.string().max(50).optional(),
 	type: z.nativeEnum(UpdateUserDtoType).optional(),
 	customerId: z.number().int().positive().optional(),
+	customerIds: z.array(z.number().int().positive()).optional(),
 });
 
 const updateUserSchema = updateUserSchemaBase.superRefine(
@@ -107,6 +109,7 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 			employeeCode: user.employeeCode ?? "",
 			type: (user.type as UpdateUserDtoType) ?? UpdateUserDtoType.internal,
 			customerId: user.customerId ?? undefined,
+			customerIds: user.userCustomers.map(({ customerId }) => customerId),
 		} as UpdateUserFormValues,
 		onSubmit: async ({ value }) => {
 			if (!validate(updateUserSchema.safeParse(value))) {
@@ -130,6 +133,9 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 							: {}),
 						...(value.type ? { type: value.type } : {}),
 						...(value.customerId ? { customerId: value.customerId } : {}),
+						...(value.role === UpdateUserDtoRole.AGENT_COMMERCIAL
+							? { customerIds: value.customerIds ?? [] }
+							: {}),
 					},
 				},
 				{
@@ -373,6 +379,21 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 											</div>
 										);
 									}}
+								</form.Field>
+							)
+						}
+					</form.Subscribe>
+
+					<form.Subscribe selector={(state) => state.values.role}>
+						{(role) =>
+							role === UpdateUserDtoRole.AGENT_COMMERCIAL && (
+								<form.Field name="customerIds">
+									{(field) => (
+										<CustomerPortfolioField
+											value={field.state.value ?? []}
+											onChange={field.handleChange}
+										/>
+									)}
 								</form.Field>
 							)
 						}

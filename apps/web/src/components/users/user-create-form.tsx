@@ -27,6 +27,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { CustomerPortfolioField } from "@/components/users/customer-portfolio-field";
 import { useGuidedFormState } from "@/hooks/use-guided-form-state";
 import {
 	CreateUserDtoRole,
@@ -49,6 +50,7 @@ const createUserSchemaBase = z.object({
 	employeeCode: z.string().max(50).optional(),
 	type: z.enum(CreateUserDtoType).optional(),
 	customerId: z.number().optional(),
+	customerIds: z.array(z.number().int().positive()),
 	agencyId: z.number().optional(),
 });
 
@@ -97,6 +99,7 @@ export function UserCreateForm(): JSX.Element {
 			lastName: "",
 			role: CreateUserDtoRole.AGENT_COMMERCIAL,
 			customerId: undefined,
+			customerIds: [],
 			employeeCode: "",
 			type: CreateUserDtoType.internal,
 		} as CreateUserFormValues,
@@ -118,6 +121,9 @@ export function UserCreateForm(): JSX.Element {
 							: {}),
 						...(value.type ? { type: value.type } : {}),
 						...(value.customerId ? { customerId: value.customerId } : {}),
+						...(value.role === CreateUserDtoRole.AGENT_COMMERCIAL
+							? { customerIds: value.customerIds }
+							: {}),
 						...(value.agencyId ? { agencyId: value.agencyId } : {}),
 					},
 				},
@@ -365,6 +371,21 @@ export function UserCreateForm(): JSX.Element {
 											</div>
 										);
 									}}
+								</form.Field>
+							)
+						}
+					</form.Subscribe>
+
+					<form.Subscribe selector={(state) => state.values.role}>
+						{(role) =>
+							role === CreateUserDtoRole.AGENT_COMMERCIAL && (
+								<form.Field name="customerIds">
+									{(field) => (
+										<CustomerPortfolioField
+											value={field.state.value}
+											onChange={field.handleChange}
+										/>
+									)}
 								</form.Field>
 							)
 						}
