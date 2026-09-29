@@ -85,9 +85,15 @@ const appOrigin = route?.startsWith("http")
 			pageTargets.find((target) => target.url.startsWith("http"))?.url ??
 				"http://localhost:3000",
 		).origin;
-const originalTarget = pageTargets.find((target) =>
-	target.url.startsWith(appOrigin),
-);
+const requestedPath = route ? new URL(route, appOrigin).pathname : undefined;
+const originalTarget =
+	(requestedPath
+		? pageTargets.find((target) => {
+				if (!target.url.startsWith(appOrigin)) return false;
+				return new URL(target.url).pathname === requestedPath;
+			})
+		: undefined) ??
+	pageTargets.find((target) => target.url.startsWith(appOrigin));
 if (!originalTarget) {
 	throw new Error("No open web page was found in the Chrome session.");
 }
