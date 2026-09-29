@@ -1,7 +1,7 @@
 {
 	"$schema": "https://turborepo.dev/schema.json",
 	"ui": "tui",
-	"globalPassThroughEnv": ["ECOMMAND_E2E_POSTGRES_PORT"],
+	"globalPassThroughEnv": ["ECOMMAND_E2E_POSTGRES_PORT", "ECOMMAND_E2E_NODE"],
 	"tasks": {
 		"build": {
 			"dependsOn": ["^build"],

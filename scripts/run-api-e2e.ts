@@ -2,6 +2,7 @@ import { resolve } from "node:path";
 
 const rootDir = resolve(import.meta.dir, "..");
 const apiDir = resolve(rootDir, "apps/api");
+const jestExecutable = resolve(rootDir, "node_modules/jest/bin/jest.js");
 const composeFile = resolve(rootDir, "docker-compose.e2e.yml");
 const postgresPort = Number(process.env.ECOMMAND_E2E_POSTGRES_PORT ?? "55432");
 
@@ -59,6 +60,13 @@ async function findComposeCommand() {
 
 const compose = await findComposeCommand();
 const composeArgs = [...compose, "-f", composeFile, "-p", "ecommand-e2e"];
+const nodeExecutable = process.env.ECOMMAND_E2E_NODE ?? Bun.which("node");
+
+if (!nodeExecutable) {
+	throw new Error(
+		"Node.js is required to run Jest E2E tests. Put node on PATH or set ECOMMAND_E2E_NODE to its executable path.",
+	);
+}
 
 try {
 	await run([...composeArgs, "down", "--volumes", "--remove-orphans"]);
@@ -70,7 +78,16 @@ try {
 	});
 	await run(["bun", "run", "seed:ref"], { cwd: apiDir });
 	await run(["bun", "run", "seed:e2e"], { cwd: apiDir });
-	await run(["bun", "run", "test:e2e:jest"], { cwd: apiDir });
+	await run(
+		[
+			nodeExecutable,
+			jestExecutable,
+			"--config",
+			"./test/jest-e2e.json",
+			"--runInBand",
+		],
+		{ cwd: apiDir },
+	);
 } finally {
 	await run([...composeArgs, "down", "--volumes", "--remove-orphans"], {
 		env: process.env,

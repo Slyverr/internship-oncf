@@ -1,11 +1,41 @@
-import { RegistrationStatus, Role } from "@ecommand/shared";
+import {
+	ClaimStatus,
+	ClaimType,
+	OrderStatus,
+	ProgramStatus,
+	RegistrationStatus,
+	Role,
+} from "@ecommand/shared";
 import bcrypt from "bcryptjs";
 import { relations } from "drizzle/relations";
-import { customers, userCustomers, users } from "drizzle/schema";
+import {
+	claims,
+	customers,
+	forecastPrograms,
+	goods,
+	orders,
+	userCustomers,
+	users,
+} from "drizzle/schema";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
-import { ROLES } from "@/database/reference-data";
-import { E2E_CUSTOMERS, E2E_PASSWORD, E2E_USERS } from "./e2e-fixtures";
+import {
+	CLAIM_STATUSES,
+	CLAIM_TYPES,
+	GOODS_TYPES,
+	ORDER_STATUSES,
+	PROGRAM_STATUSES,
+	ROLES,
+	UNITS,
+} from "@/database/reference-data";
+import {
+	E2E_CLAIMS,
+	E2E_CUSTOMERS,
+	E2E_ORDERS,
+	E2E_PASSWORD,
+	E2E_PROGRAMS,
+	E2E_USERS,
+} from "./e2e-fixtures";
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) {
@@ -152,6 +182,107 @@ async function seed() {
 		{
 			userId: userId(E2E_USERS.agentOutside.email),
 			customerId: customerId(E2E_CUSTOMERS.outside),
+		},
+	]);
+
+	const [good] = await db
+		.insert(goods)
+		.values({
+			name: "E2E Test Cereals",
+			goodsTypeId: GOODS_TYPES.CEREALS.id,
+			goodsCode: "E2E-GOOD",
+		})
+		.returning({ id: goods.id });
+	const draftStatus = ORDER_STATUSES[OrderStatus.DRAFT];
+
+	const orderRows = await db
+		.insert(orders)
+		.values([
+			{
+				goodsId: good.id,
+				customerId: customerId(E2E_CUSTOMERS.assignedA),
+				createdByUserId: userId(E2E_USERS.clientA.email),
+				statusId: draftStatus.id,
+				orderNumber: E2E_ORDERS.assignedA,
+				quantityDemanded: "10",
+				unitId: UNITS.TONNES.id,
+			},
+			{
+				goodsId: good.id,
+				customerId: customerId(E2E_CUSTOMERS.assignedB),
+				createdByUserId: userId(E2E_USERS.agentAssigned.email),
+				statusId: draftStatus.id,
+				orderNumber: E2E_ORDERS.assignedB,
+				quantityDemanded: "20",
+				unitId: UNITS.TONNES.id,
+			},
+			{
+				goodsId: good.id,
+				customerId: customerId(E2E_CUSTOMERS.outside),
+				createdByUserId: userId(E2E_USERS.clientOutside.email),
+				statusId: draftStatus.id,
+				orderNumber: E2E_ORDERS.outside,
+				quantityDemanded: "30",
+				unitId: UNITS.TONNES.id,
+			},
+		])
+		.returning({ id: orders.id, orderNumber: orders.orderNumber });
+	const orderIds = new Map(
+		orderRows.map((order) => [order.orderNumber, order.id]),
+	);
+	const orderId = (orderNumber: string) => {
+		const id = orderIds.get(orderNumber);
+		if (!id) throw new Error(`Missing E2E order ${orderNumber}`);
+		return id;
+	};
+
+	await db.insert(forecastPrograms).values([
+		{
+			programNumber: E2E_PROGRAMS.assignedA,
+			orderId: orderId(E2E_ORDERS.assignedA),
+			statusId: PROGRAM_STATUSES[ProgramStatus.DRAFT].id,
+			plannedDate: "2026-10-01T12:00:00.000Z",
+			quantityPlanned: "10",
+			createdByUserId: userId(E2E_USERS.agentAssigned.email),
+		},
+		{
+			programNumber: E2E_PROGRAMS.outside,
+			orderId: orderId(E2E_ORDERS.outside),
+			statusId: PROGRAM_STATUSES[ProgramStatus.DRAFT].id,
+			plannedDate: "2026-10-02T12:00:00.000Z",
+			quantityPlanned: "30",
+			createdByUserId: userId(E2E_USERS.agentOutside.email),
+		},
+	]);
+
+	await db.insert(claims).values([
+		{
+			customerId: customerId(E2E_CUSTOMERS.assignedA),
+			createdByUserId: userId(E2E_USERS.clientA.email),
+			typeId: CLAIM_TYPES[ClaimType.OTHER].id,
+			statusId: CLAIM_STATUSES[ClaimStatus.NEW].id,
+			description: E2E_CLAIMS.assignedA,
+		},
+		{
+			customerId: customerId(E2E_CUSTOMERS.assignedA),
+			createdByUserId: userId(E2E_USERS.clientASecond.email),
+			typeId: CLAIM_TYPES[ClaimType.OTHER].id,
+			statusId: CLAIM_STATUSES[ClaimStatus.NEW].id,
+			description: E2E_CLAIMS.assignedASecondClient,
+		},
+		{
+			customerId: customerId(E2E_CUSTOMERS.assignedB),
+			createdByUserId: userId(E2E_USERS.agentAssigned.email),
+			typeId: CLAIM_TYPES[ClaimType.OTHER].id,
+			statusId: CLAIM_STATUSES[ClaimStatus.NEW].id,
+			description: E2E_CLAIMS.assignedBAgent,
+		},
+		{
+			customerId: customerId(E2E_CUSTOMERS.outside),
+			createdByUserId: userId(E2E_USERS.clientOutside.email),
+			typeId: CLAIM_TYPES[ClaimType.OTHER].id,
+			statusId: CLAIM_STATUSES[ClaimStatus.NEW].id,
+			description: E2E_CLAIMS.outside,
 		},
 	]);
 }
