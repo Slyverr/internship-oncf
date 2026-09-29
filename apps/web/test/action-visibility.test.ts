@@ -61,6 +61,7 @@ function registrationUser(
 		role: { id: role, name: role },
 		registrationStatus,
 		customerId: null,
+		userCustomers: [],
 		agencyId: null,
 		createdAt,
 		updatedAt: createdAt,

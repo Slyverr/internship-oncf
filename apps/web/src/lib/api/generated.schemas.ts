@@ -19,6 +19,10 @@ export type UserListDtoRole = {
   name: string;
 };
 
+export type UserListDtoUserCustomersItem = {
+  customerId: number;
+};
+
 export interface UserListDto {
   registrationStatus: RegistrationStatus;
   id: number;
@@ -33,6 +37,7 @@ export interface UserListDto {
   role: UserListDtoRole;
   /** @nullable */
   customerId: number | null;
+  userCustomers: UserListDtoUserCustomersItem[];
   /** @nullable */
   agencyId: number | null;
   createdAt: string;
@@ -45,6 +50,10 @@ export interface UserListDto {
 export type UserDetailDtoRole = {
   id: string;
   name: string;
+};
+
+export type UserDetailDtoUserCustomersItem = {
+  customerId: number;
 };
 
 export interface UserDetailDto {
@@ -61,6 +70,7 @@ export interface UserDetailDto {
   role: UserDetailDtoRole;
   /** @nullable */
   customerId: number | null;
+  userCustomers: UserDetailDtoUserCustomersItem[];
   /** @nullable */
   agencyId: number | null;
   createdAt: string;
@@ -109,6 +119,8 @@ export interface CreateUserDto {
   type?: CreateUserDtoType;
   /** @minimum 1 */
   customerId?: number;
+  /** @items.minimum 1 */
+  customerIds?: number[];
   agencyId?: number;
   isActive?: boolean;
 }
@@ -147,6 +159,8 @@ export interface UpdateUserDto {
   type?: UpdateUserDtoType;
   /** @minimum 1 */
   customerId?: number;
+  /** @items.minimum 1 */
+  customerIds?: number[];
   agencyId?: number;
   isActive?: boolean;
 }
