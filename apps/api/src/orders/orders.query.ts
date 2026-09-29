@@ -1,4 +1,4 @@
-import { OrderStatus, Permission } from "@ecommand/shared";
+import { OrderStatus, Permission, Role } from "@ecommand/shared";
 import { ConflictException, Injectable } from "@nestjs/common";
 import { orderStatusHistory, orders } from "drizzle/schema";
 import { eq, type SQL } from "drizzle-orm";
@@ -123,9 +123,11 @@ export class OrdersQuery {
 		const scopedCustomerIds =
 			customerScope === null
 				? null
-				: customerId === undefined || !customerScope.includes(customerId)
-					? [...customerScope]
-					: [customerId];
+				: user.role === Role.AGENT_COMMERCIAL && customerId !== undefined
+					? customerScope.includes(customerId)
+						? [customerId]
+						: []
+					: [...customerScope];
 
 		return this.drizzle.db.query.orders.findMany({
 			where: {
@@ -142,7 +144,13 @@ export class OrdersQuery {
 							: {}
 						: { createdByUserId: user.id }),
 
-				...(status ? { status } : {}),
+				...(status
+					? {
+							orderStatus: {
+								name: status,
+							},
+						}
+					: {}),
 				...(goodsId ? { goodsId } : {}),
 				...(movementTypeId ? { movementTypeId } : {}),
 

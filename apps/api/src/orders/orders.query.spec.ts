@@ -1,4 +1,4 @@
-import { Permission } from "@ecommand/shared";
+import { Permission, Role } from "@ecommand/shared";
 import type { AuthUser } from "@/auth/auth.types";
 import { OrdersQuery } from "./orders.query";
 
@@ -23,13 +23,13 @@ describe("OrdersQuery authorization scope", () => {
 			page: 2,
 			limit: 10,
 			search: "steel",
-			status: "approved",
+			status: "APPROVED",
 		} as never);
 		expect(findMany).toHaveBeenCalledWith(
 			expect.objectContaining({
 				where: expect.objectContaining({
 					createdByUserId: user.id,
-					status: "approved",
+					orderStatus: { name: "APPROVED" },
 					OR: expect.arrayContaining([
 						expect.objectContaining({ orderNumber: { ilike: "%steel%" } }),
 					]),
@@ -57,6 +57,54 @@ describe("OrdersQuery authorization scope", () => {
 		} as never);
 
 		expect(findMany.mock.calls[0][0].where).toEqual({ customerId: 42 });
+	});
+
+	it("scopes commercial-agent order lists to their full portfolio by default", async () => {
+		const agent = {
+			...createUser(24, [Permission.ORDERS_MANAGE_OTHER]),
+			role: Role.AGENT_COMMERCIAL,
+			assignedCustomerIds: [42, 43],
+		};
+
+		await query.findOrders(agent, { page: 1, limit: 20 } as never);
+
+		expect(findMany.mock.calls[0][0].where).toEqual({
+			customerId: { in: [42, 43] },
+		});
+	});
+
+	it("intersects commercial-agent customer filters with their portfolio", async () => {
+		const agent = {
+			...createUser(24, [Permission.ORDERS_MANAGE_OTHER]),
+			role: Role.AGENT_COMMERCIAL,
+			assignedCustomerIds: [42, 43],
+		};
+
+		await query.findOrders(agent, {
+			page: 1,
+			limit: 20,
+			customerId: 43,
+		} as never);
+
+		expect(findMany.mock.calls[0][0].where).toEqual({ customerId: 43 });
+	});
+
+	it("returns no commercial-agent orders for an unassigned customer filter", async () => {
+		const agent = {
+			...createUser(24, [Permission.ORDERS_MANAGE_OTHER]),
+			role: Role.AGENT_COMMERCIAL,
+			assignedCustomerIds: [42, 43],
+		};
+
+		await query.findOrders(agent, {
+			page: 1,
+			limit: 20,
+			customerId: 99,
+		} as never);
+
+		expect(findMany.mock.calls[0][0].where).toEqual({
+			customerId: { in: [] },
+		});
 	});
 
 	it("restricts eligible orders to their creator for ordinary users", async () => {
