@@ -11,6 +11,7 @@ import { and, eq } from "drizzle-orm";
 import { AuthUser } from "@/auth/auth.types";
 import { hasOnePermission } from "@/auth/auth.utils";
 import { getCustomerScope } from "@/auth/customer-scope";
+import { formatClaimNumber } from "@/common/utils/document-number";
 import { CLAIM_STATUSES } from "@/database/reference-data";
 import { NotificationsService } from "@/notifications/notifications.service";
 import { CLAIM_STATUS_BY_ID, CLAIM_TRANSITION } from "./claims.constants";
@@ -42,29 +43,34 @@ export class ClaimsService {
 		if (user.role === Role.CLIENT_REPRESENTATIVE && user.customerId !== null) {
 			query.userId = user.id;
 			query.customerId = user.customerId;
-			return this.claimsQuery.findClaims(query);
+			return this.withClaimNumbers(this.claimsQuery.findClaims(query));
 		}
 
 		if (user.role === Role.AGENT_COMMERCIAL) {
-			return this.claimsQuery.findClaims(query, getCustomerScope(user) ?? []);
+			return this.withClaimNumbers(
+				this.claimsQuery.findClaims(query, getCustomerScope(user) ?? []),
+			);
 		}
 
 		if (hasOnePermission(user, Permission.CLAIMS_MANAGE_OTHER)) {
-			return this.claimsQuery.findClaims(query);
+			return this.withClaimNumbers(this.claimsQuery.findClaims(query));
 		}
 
 		const customerScope = getCustomerScope(user);
 		if (customerScope !== null) {
-			return this.claimsQuery.findClaims(query, customerScope);
+			return this.withClaimNumbers(
+				this.claimsQuery.findClaims(query, customerScope),
+			);
 		}
 
 		query.userId = user.id;
-		return this.claimsQuery.findClaims(query);
+		return this.withClaimNumbers(this.claimsQuery.findClaims(query));
 	}
 
 	async findOne(id: ClaimId) {
 		const claim = await this.claimsQuery.findClaim(id);
-		return this.ensure(claim, id);
+		const found = this.ensure(claim, id);
+		return { ...found, claimNumber: formatClaimNumber(found.id) };
 	}
 
 	async findOneForOwnership(id: ClaimId) {
@@ -149,7 +155,7 @@ export class ClaimsService {
 					user.id,
 					"claims",
 					claimId,
-					`A new comment was added to claim #${claimId}.`,
+					`A new comment was added to claim ${formatClaimNumber(claimId)}.`,
 				),
 			),
 		);
@@ -291,7 +297,7 @@ export class ClaimsService {
 			userId,
 			"claims",
 			claimId,
-			`Claim #${claimId} is now ${toStatus.toLowerCase().replaceAll("_", " ")}.`,
+			`Claim ${updated.claimNumber} is now ${toStatus.toLowerCase().replaceAll("_", " ")}.`,
 		);
 		return updated;
 	}
@@ -301,5 +307,14 @@ export class ClaimsService {
 			throw new NotFoundException(`Claim ${id} not found`);
 		}
 		return value;
+	}
+
+	private async withClaimNumbers<T extends { id: ClaimId }>(
+		claims: Promise<T[]>,
+	) {
+		return (await claims).map((claim) => ({
+			...claim,
+			claimNumber: formatClaimNumber(claim.id),
+		}));
 	}
 }

@@ -22,6 +22,7 @@ describe("customer portfolio authorization (e2e)", () => {
 	let customerIds: Record<string, number>;
 	let orderIds: Record<string, number>;
 	let claimIds: Record<string, number>;
+	let claimNumbers: Record<string, string>;
 	let programIds: Record<string, number>;
 
 	beforeAll(async () => {
@@ -86,9 +87,24 @@ describe("customer portfolio authorization (e2e)", () => {
 					claim.id,
 				]),
 		);
+		claimNumbers = Object.fromEntries(
+			claimsResponse.body
+				.filter((claim: { description: string }) =>
+					Object.values(E2E_CLAIMS).includes(
+						claim.description as (typeof E2E_CLAIMS)[keyof typeof E2E_CLAIMS],
+					),
+				)
+				.map((claim: { claimNumber: string; description: string }) => [
+					claim.description,
+					claim.claimNumber,
+				]),
+		);
 
 		for (const description of Object.values(E2E_CLAIMS)) {
 			expect(claimIds[description]).toEqual(expect.any(Number));
+			expect(claimNumbers[description]).toBe(
+				`CLM-${String(claimIds[description]).padStart(10, "0")}`,
+			);
 		}
 
 		const programsResponse = await request(app.getHttpServer())
@@ -111,6 +127,32 @@ describe("customer portfolio authorization (e2e)", () => {
 		for (const programNumber of Object.values(E2E_PROGRAMS)) {
 			expect(programIds[programNumber]).toEqual(expect.any(Number));
 		}
+	});
+
+	it("returns and searches claims by stable claim number", async () => {
+		const token = await login(app, E2E_USERS.admin.email);
+		const claimNumber = claimNumbers[E2E_CLAIMS.assignedA];
+		const searched = await request(app.getHttpServer())
+			.get("/claims")
+			.query({ search: claimNumber })
+			.set("Authorization", `Bearer ${token}`)
+			.expect(200);
+
+		expect(searched.body).toEqual(
+			expect.arrayContaining([
+				expect.objectContaining({
+					id: claimIds[E2E_CLAIMS.assignedA],
+					claimNumber,
+				}),
+			]),
+		);
+
+		const detail = await request(app.getHttpServer())
+			.get(`/claims/${claimIds[E2E_CLAIMS.assignedA]}`)
+			.set("Authorization", `Bearer ${token}`)
+			.expect(200);
+
+		expect(detail.body.claimNumber).toBe(claimNumber);
 	});
 
 	it("limits an assigned agent to assigned customers and intersects search filters", async () => {

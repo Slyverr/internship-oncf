@@ -25,11 +25,12 @@ export function ClaimDetailsClient({ claim }: ClaimDetailsClientProps) {
 	return (
 		<>
 			<PageHeader
-				title={`Claim #${currentClaim.id}`}
+				title={currentClaim.claimNumber}
 				description={currentClaim.customer.companyName}
 			>
 				<ClaimConversation
 					claimId={currentClaim.id}
+					claimNumber={currentClaim.claimNumber}
 					commentCount={currentClaim.claimComments?.length ?? 0}
 				/>
 				<ClaimActions claim={currentClaim} />

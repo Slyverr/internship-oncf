@@ -130,6 +130,9 @@ export class ClaimsQuery {
 
 				...(search && {
 					OR: [
+						...(search.match(/^CLM-(\d{1,10})$/i)
+							? [{ id: Number(search.slice(4)) }]
+							: []),
 						{
 							description: {
 								ilike: `%${search}%`,

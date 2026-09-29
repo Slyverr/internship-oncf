@@ -21,7 +21,7 @@ describe("ClaimsService access scoping", () => {
 		agencyId: null,
 	};
 
-	beforeEach(() => findClaims.mockReset());
+	beforeEach(() => findClaims.mockReset().mockResolvedValue([]));
 
 	it("forces customer users to their own user and customer scope", async () => {
 		const query = { userId: 99, customerId: 43 } as ListClaimQueryDto;

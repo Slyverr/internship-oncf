@@ -13,7 +13,7 @@ export default async function Page({ params }: PageProps) {
 
 	return (
 		<>
-			<Breadcrumbs items={claimsBreadcrumbs.edit(id, `#${claim.id}`)} />
+			<Breadcrumbs items={claimsBreadcrumbs.edit(id, claim.claimNumber)} />
 
 			<ClaimEditForm claim={claim} />
 		</>

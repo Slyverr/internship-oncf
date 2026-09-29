@@ -107,7 +107,7 @@ export function ClaimEditForm({ claim }: { claim: ClaimDetailDto }) {
 		<form onSubmit={submit} className="workspace-form">
 			<Card>
 				<CardHeader>
-					<CardTitle>Edit claim #{claim.id}</CardTitle>
+					<CardTitle>Edit {claim.claimNumber}</CardTitle>
 					<CardDescription>
 						Update the claim description, type, and priority. Workflow status is
 						managed with the claim actions.

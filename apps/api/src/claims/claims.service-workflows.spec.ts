@@ -68,7 +68,10 @@ describe("ClaimsService workflows", () => {
 		const values = { description: "Broken cargo" };
 		mapper.toCreate.mockReturnValue(values as never);
 		query.createClaim.mockResolvedValue({ id } as never);
-		expect(await service.create(values as never, agent)).toEqual(claim);
+		expect(await service.create(values as never, agent)).toEqual({
+			...claim,
+			claimNumber: "CLM-0000000023",
+		});
 		expect(mapper.toCreate).toHaveBeenCalledWith(values, agent);
 		expect(query.createClaim).toHaveBeenCalledWith(values);
 		expect(query.findClaim).toHaveBeenCalledWith(id);
@@ -151,7 +154,10 @@ describe("ClaimsService workflows", () => {
 		const dto = { description: "Updated description" };
 		const values = { description: "Updated description" };
 		mapper.toUpdate.mockReturnValue(values as never);
-		expect(await service.update(id, dto, agent)).toEqual(claim);
+		expect(await service.update(id, dto, agent)).toEqual({
+			...claim,
+			claimNumber: "CLM-0000000023",
+		});
 		expect(query.updateClaim).toHaveBeenCalledWith(
 			id,
 			values,
@@ -205,7 +211,7 @@ describe("ClaimsService workflows", () => {
 			agent.id,
 			"claims",
 			id,
-			"Claim #23 is now in progress.",
+			"Claim CLM-0000000023 is now in progress.",
 		);
 	});
 
@@ -302,7 +308,7 @@ describe("ClaimsService workflows", () => {
 			agent.id,
 			"claims",
 			id,
-			"A new comment was added to claim #23.",
+			"A new comment was added to claim CLM-0000000023.",
 		);
 	});
 
@@ -363,7 +369,7 @@ describe("ClaimsService workflows", () => {
 				client.id,
 				"claims",
 				id,
-				`A new comment was added to claim #${id}.`,
+				`A new comment was added to claim CLM-0000000023.`,
 			);
 		}
 	});

@@ -51,11 +51,11 @@ const features = tableFeatures({});
 
 const columns: ColumnDef<typeof features, ClaimListDto>[] = [
 	{
-		accessorKey: "id",
+		accessorKey: "claimNumber",
 		header: "Claim #",
 		cell: (info) => (
 			<TableRowLink href={`/dashboard/claims/${info.row.original.id}`}>
-				{`#${info.getValue<number>()}`}
+				{info.getValue<string>()}
 			</TableRowLink>
 		),
 	},

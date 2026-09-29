@@ -39,4 +39,10 @@ describe("ClaimsQuery customer portfolio filters", () => {
 
 		expect(findMany.mock.calls[0][0].where.customerId).toEqual({ in: [] });
 	});
+
+	it("includes a matching claim ID when searching by stable claim number", async () => {
+		await query.findClaims({ search: "CLM-0000000023" } as never);
+
+		expect(findMany.mock.calls[0][0].where.OR).toContainEqual({ id: 23 });
+	});
 });

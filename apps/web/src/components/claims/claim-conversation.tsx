@@ -43,6 +43,7 @@ import { useAuth } from "@/providers/auth-provider";
 
 interface ClaimConversationProps {
 	claimId: number;
+	claimNumber: string;
 	commentCount: number;
 }
 
@@ -180,6 +181,7 @@ function getMessageDayKey(value: string) {
 
 export function ClaimConversation({
 	claimId,
+	claimNumber,
 	commentCount,
 }: ClaimConversationProps) {
 	const { profile, hasPermission } = useAuth();
@@ -348,7 +350,7 @@ export function ClaimConversation({
 			<DialogContent size="conversation" className="gap-0 overflow-hidden p-0">
 				<DialogHeader className="px-4 py-3 sm:px-6">
 					<DialogTitle className="truncate text-base sm:text-lg">
-						Claim #{claimId} conversation
+						{claimNumber} conversation
 					</DialogTitle>
 				</DialogHeader>
 				<DialogBody className="grid min-h-0 grid-rows-[minmax(0,1fr)_auto] overflow-hidden">

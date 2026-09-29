@@ -5,6 +5,7 @@ type _Assertion = Assert<Equals<ClaimListDto, ClaimList>>;
 
 export class ClaimListDto implements ClaimList {
 	id: number;
+	claimNumber: string;
 	description: string;
 	createdAt: string;
 	updatedAt: string;

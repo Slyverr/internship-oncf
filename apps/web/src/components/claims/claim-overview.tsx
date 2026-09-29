@@ -23,7 +23,7 @@ export function ClaimOverview({ claim }: { claim: ClaimDetailDto }) {
 					</CardHeader>
 
 					<CardContent className="space-y-4">
-						<RecordDetail label="Claim ID" value={`#${claim.id}`} />
+						<RecordDetail label="Claim number" value={claim.claimNumber} />
 						<RecordDetail
 							label="Customer"
 							value={claim.customer?.companyName ?? "—"}

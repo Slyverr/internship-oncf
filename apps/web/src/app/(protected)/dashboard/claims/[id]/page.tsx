@@ -13,7 +13,7 @@ export default async function Page({ params }: PageProps) {
 
 	return (
 		<>
-			<Breadcrumbs items={claimsBreadcrumbs.detail(id, `#${claim.id}`)} />
+			<Breadcrumbs items={claimsBreadcrumbs.detail(id, claim.claimNumber)} />
 
 			<ClaimDetailsClient claim={claim} />
 		</>

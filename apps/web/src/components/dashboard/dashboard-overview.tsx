@@ -530,7 +530,7 @@ export function DashboardOverview() {
 				isError={claimsQuery.isError}
 				items={(claimsQuery.data ?? []).slice(0, 2).map((claim) => ({
 					id: claim.id,
-					title: `Claim #${claim.id}`,
+					title: claim.claimNumber,
 					description: `${claim.customer.companyName} · ${claim.claimType.name}`,
 					status: claim.claimStatus.name,
 					date: claim.createdAt,

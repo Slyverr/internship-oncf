@@ -1063,6 +1063,8 @@ export type ClaimDetailDtoClosedByUser = {
 
 export interface ClaimDetailDto {
   id: number;
+  /** Temporary until the live OpenAPI document reflects inferred claim fields. */
+  claimNumber: string;
   customerId: number;
   createdByUserId: number;
   /** @nullable */
@@ -1126,6 +1128,8 @@ export type ClaimListDtoClaimType = {
 
 export interface ClaimListDto {
   id: number;
+  /** Temporary until the live OpenAPI document reflects inferred claim fields. */
+  claimNumber: string;
   description: string;
   createdAt: string;
   updatedAt: string;

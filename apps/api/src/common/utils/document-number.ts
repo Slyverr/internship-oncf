@@ -11,3 +11,7 @@ function generateCode() {
 export function generateDocumentNumber(prefix: string) {
 	return `${prefix}-${generateCode()}`;
 }
+
+export function formatClaimNumber(id: number) {
+	return `CLM-${String(id).padStart(10, "0")}`;
+}
