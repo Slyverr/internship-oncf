@@ -98,7 +98,7 @@ For disposable local development only, Drizzle `db:push` can synchronize the cur
 - One logical change per commit; split unrelated features, fixes, docs, and dependency changes.
 - Follow the existing commit history with app/domain scopes: `feat(web/orders): add order filters`, `fix(api/auth): reject expired reset links`, `refactor(api/drizzle): revise schema relations`, and `fix(shared/auth): update permissions`. Use an app-only scope when several features are involved; omit the scope for repository-wide work, for example `docs: explain local setup`.
 - Use imperative, lowercase subjects without a trailing period.
-- Common types: `feat`, `fix`, `refactor`, `chore`, and `docs`.
+- Use the established types `feat`, `fix`, `refactor`, `chore`, `docs`, and `test`. For focused tests, scope to the area under test, such as `test(api/orders): cover order workflow`; use `test(api)` when a change spans several API features.
 - Do not commit environment secrets, local mail messages, uploaded files, or database files.
 
 ## Verification

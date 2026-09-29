@@ -44,7 +44,7 @@ The current database design needs review and is expected to change, so migration
 
 - Make one logical change per commit. Keep feature, bug fix, refactor, dependency, and documentation changes separate when they can be reviewed independently.
 - Match the existing history: use app/domain scopes such as `feat(web/orders): add draft editing`, `fix(api/orders): validate draft updates`, and `refactor(api/auth): extract database queries`. Use `shared/auth`, `api/drizzle`, or `config/turbo` for those areas. Use an app-only scope for changes across features in one app, and omit the scope for repository-wide changes such as `docs: document project setup`.
-- Use an imperative, lowercase subject with no trailing period. Valid types include `feat`, `fix`, `refactor`, `chore`, and `docs`.
+- Use an imperative, lowercase subject with no trailing period. Follow the types present in the history: `feat`, `fix`, `refactor`, `chore`, `docs`, and `test`. Scope focused tests to their area, for example `test(api/orders): cover order workflow`; use an app-only scope when a change spans several features in that app.
 - Do not commit secrets, local `.env` files, generated local mail, uploads, or database data.
 - Before committing, run focused tests or typechecks relevant to the changed code when needed. The tracked `.githooks/pre-commit` hook checks staged files with Biome.
 - Before pushing, the tracked `.githooks/pre-push` hook runs workspace typechecks and tests.
