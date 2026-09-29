@@ -1,6 +1,6 @@
 import { RegistrationStatus } from "@ecommand/shared";
 import { Injectable } from "@nestjs/common";
-import { users } from "drizzle/schema";
+import { userCustomers, users } from "drizzle/schema";
 import { and, eq } from "drizzle-orm";
 import { DrizzleService } from "@/database/drizzle.service";
 import { QueryColumns, QueryRelations } from "@/database/drizzle.types";
@@ -28,6 +28,9 @@ const userListColumns = {
 } satisfies UsersColumns;
 
 const userListRelations = {
+	userCustomers: {
+		columns: { customerId: true },
+	},
 	role: {
 		columns: {
 			id: true,
@@ -47,6 +50,9 @@ const userAuthColumns = {
 } satisfies UsersColumns;
 
 const userAuthRelations = {
+	userCustomers: {
+		columns: { customerId: true },
+	},
 	role: {
 		columns: {
 			name: true,
@@ -124,6 +130,20 @@ export class UsersQuery {
 			values,
 		);
 		return created;
+	}
+
+	async replaceCustomerAssignments(
+		userId: UserId,
+		customerIds: readonly number[],
+	) {
+		await this.drizzle.db.transaction(async (tx) => {
+			await tx.delete(userCustomers).where(eq(userCustomers.userId, userId));
+			if (customerIds.length > 0) {
+				await tx
+					.insert(userCustomers)
+					.values(customerIds.map((customerId) => ({ userId, customerId })));
+			}
+		});
 	}
 
 	async updateUser(id: UserId, values: UserUpdate) {

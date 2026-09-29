@@ -1,5 +1,7 @@
 import { Role } from "@ecommand/shared";
 import {
+	ArrayUnique,
+	IsArray,
 	IsBoolean,
 	IsEmail,
 	IsEnum,
@@ -46,6 +48,13 @@ export class CreateUserDto {
 	@IsInt()
 	@Min(1)
 	customerId?: number;
+
+	@IsOptional()
+	@IsArray()
+	@ArrayUnique()
+	@IsInt({ each: true })
+	@Min(1, { each: true })
+	customerIds?: number[];
 
 	@IsOptional()
 	@IsInt()

@@ -12,6 +12,7 @@ import {
 	shippingCompanies,
 	sidings,
 	stations,
+	userCustomers,
 	users,
 	vessels,
 } from "drizzle/schema";
@@ -390,6 +391,23 @@ async function seed() {
 						}),
 					},
 				});
+		}
+
+		const agent = await db.query.users.findFirst({
+			where: { email: "agent@oncf.ma" },
+			columns: { id: true },
+		});
+		const agentCustomers = await db.query.customers.findMany({
+			where: { customerCode: { in: ["CLI009", "CLI010"] } },
+			columns: { id: true },
+		});
+		if (agent) {
+			for (const customer of agentCustomers) {
+				await db
+					.insert(userCustomers)
+					.values({ userId: agent.id, customerId: customer.id })
+					.onConflictDoNothing();
+			}
 		}
 
 		console.log("Dev fixtures and users seeded successfully");

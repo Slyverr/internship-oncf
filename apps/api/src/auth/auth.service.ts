@@ -133,6 +133,7 @@ export class AuthService {
 			sessionId,
 			customerId: user.customerId,
 			agencyId: user.agencyId,
+			assignedCustomerIds: user.assignedCustomerIds,
 		};
 	}
 

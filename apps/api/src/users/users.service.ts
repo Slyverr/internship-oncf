@@ -53,6 +53,9 @@ export class UsersService {
 			registrationStatus: user.registrationStatus,
 			customerId: user.customerId,
 			agencyId: user.agencyId,
+			assignedCustomerIds: (user.userCustomers ?? []).map(
+				({ customerId }) => customerId,
+			),
 			role: user.role.name as Role,
 			permissions: user.role.rolePermissions
 				.map((rp) => rp.permission?.name)
@@ -64,6 +67,12 @@ export class UsersService {
 		this.ensureCustomerAssignment(dto.role, dto.customerId);
 		const values = await this.usersMapper.toCreate(dto, user);
 		const created = await this.usersQuery.createUser(values);
+		if (dto.role === Role.AGENT_COMMERCIAL) {
+			await this.usersQuery.replaceCustomerAssignments(
+				created.id,
+				dto.customerIds ?? [],
+			);
+		}
 		return this.findOne(created.id);
 	}
 
@@ -112,6 +121,14 @@ export class UsersService {
 
 		const values = await this.usersMapper.toUpdate(dto, user);
 		await this.usersQuery.updateUser(id, values);
+		if (dto.customerIds !== undefined) {
+			await this.usersQuery.replaceCustomerAssignments(
+				id,
+				role === Role.AGENT_COMMERCIAL ? dto.customerIds : [],
+			);
+		} else if (dto.role !== undefined && role !== Role.AGENT_COMMERCIAL) {
+			await this.usersQuery.replaceCustomerAssignments(id, []);
+		}
 		return this.findOne(id);
 	}
 

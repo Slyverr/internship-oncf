@@ -17,6 +17,7 @@ export class UserDetailDto implements UserDetail {
 	registrationStatus: RegistrationStatus;
 	role: { id: string; name: string } | null;
 	customerId: number | null;
+	userCustomers: { customerId: number }[];
 	agencyId: number | null;
 	createdAt: string;
 	updatedAt: string;

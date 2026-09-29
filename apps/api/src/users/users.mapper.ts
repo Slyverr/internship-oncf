@@ -28,7 +28,7 @@ export class UsersMapper {
 	}
 
 	async toCreate(dto: CreateUserDto, user: AuthUser): Promise<UserInsert> {
-		const { role, password, ...values } = dto;
+		const { role, password, customerIds: _, ...values } = dto;
 
 		return {
 			...values,
@@ -40,7 +40,7 @@ export class UsersMapper {
 	}
 
 	async toUpdate(dto: UpdateUserDto, user: AuthUser): Promise<UserUpdate> {
-		const { role, ...values } = dto;
+		const { role, customerIds: _, ...values } = dto;
 
 		return {
 			...values,

@@ -17,6 +17,7 @@ export class UserListDto implements UserList {
 	registrationStatus: RegistrationStatus;
 	role: { id: string; name: string } | null;
 	customerId: number | null;
+	userCustomers: { customerId: number }[];
 	agencyId: number | null;
 	createdAt: string;
 	updatedAt: string;

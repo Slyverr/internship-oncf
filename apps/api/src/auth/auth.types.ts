@@ -18,4 +18,5 @@ export interface AuthUser {
 
 	customerId: number | null;
 	agencyId: number | null;
+	assignedCustomerIds?: readonly number[];
 }

@@ -36,6 +36,7 @@ describe("UsersService", () => {
 			findUserForAuth: jest.fn(),
 			createUser: jest.fn(),
 			updateUser: jest.fn(),
+			replaceCustomerAssignments: jest.fn(),
 			reviewRegistration: jest.fn(),
 			findUserExists: jest.fn(),
 		} as unknown as jest.Mocked<UsersQuery>;
@@ -103,6 +104,7 @@ describe("UsersService", () => {
 			registrationStatus: RegistrationStatus.APPROVED,
 			customerId: null,
 			agencyId: null,
+			userCustomers: [],
 			role: {
 				name: Role.ADMIN,
 				rolePermissions: [
@@ -120,6 +122,7 @@ describe("UsersService", () => {
 			registrationStatus: RegistrationStatus.APPROVED,
 			customerId: null,
 			agencyId: null,
+			assignedCustomerIds: [],
 			role: Role.ADMIN,
 			permissions: [Permission.USERS_READ],
 		});
