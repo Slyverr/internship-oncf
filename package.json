@@ -9,7 +9,8 @@
 		"format-and-lint:fix": "biome check . --write",
 		"test": "turbo run test",
 		"verify": "bun run format-and-lint && bun run typecheck && bun run test && bun run build",
-		"ui:review": "bun scripts/capture-ui-review.ts"
+		"ui:review": "bun scripts/capture-ui-review.ts",
+		"test:e2e:api": "bun run --filter ecommand-api test:e2e"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.5.5",

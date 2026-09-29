@@ -1,0 +1,15 @@
+services:
+  postgres-e2e:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ecommand_e2e
+    ports:
+      - "${ECOMMAND_E2E_POSTGRES_PORT:-55432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ecommand_e2e"]
+      interval: 1s
+      timeout: 5s
+      retries: 30
+    restart: "no"

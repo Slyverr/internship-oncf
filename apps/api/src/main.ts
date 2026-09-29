@@ -1,13 +1,13 @@
-import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
+import { configureApp } from "./app.setup";
 import { stripSwaggerInternalMetadata } from "./common/swagger/strip-swagger-internal-metadata";
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
 
-	app.useGlobalPipes(new ValidationPipe({ transform: true }));
+	configureApp(app);
 
 	const config = new DocumentBuilder()
 		.setTitle("ONCF ECommand API")
