@@ -26,7 +26,16 @@ Checked the running local web/API stack against the project SDF using the seeded
 - The previously approved `ecommand_preview` database did not exist, so it was created, synchronized with the current Drizzle schema, and seeded with reference data and demo accounts. The ignored `apps/api/.env` now points to this preview DB; the pre-existing `ecommand` database was left untouched.
 - Browser sign-in and dashboard navigation were checked for `admin@oncf.ma`, `client@oncf.ma`, and `agent@oncf.ma`. Admin sees Home, Reports, and Users; client and agent see their role-appropriate operational sections. The admin dashboard links to Reports and Users instead of showing a dead-end no-access card.
 - Fresh route-matched screenshots for the dashboard and recent-list layout reported no horizontal overflow at 390, 768, 1440, and 3840px. The recent rows use a 16px gap with no divider. Screenshots are temporary files under `/tmp/ecommand-ui-review`.
-- This fresh preview has no order/program/claim transactions yet. The old QA row inventory below describes an earlier local check and is not present in this newly created database; create representative workflow data before repeating populated-table browser checks.
+- At initial seeding this preview had no order/program/claim transactions. Chapter 5 below records the current preview-only workflow data; the old QA row inventory below describes an earlier local database and is not present here.
+
+### Browser workflow checks — 2026-09-30
+
+- Current preview data: `ORD-H5VQA5EEQX` and `ORD-3F6L4N654Z` are approved; `ORD-3F6L4N654Z` has draft program `PRG-ZXTKRDYWBG`. The client submitted the second order in the UI; its assigned agent approved it in the UI and created the program from the order detail action. The program wizard preserved the selected order, planned date, and quantity when Continue advanced to Execution.
+- The Recent orders card was reviewed with two live records at 390px and 1440px. Rows have a 16px gap and no divider. Programs and claims use the same `RecentSection` component.
+- Registration was submitted against the local-only `LOCAL-REG-TEST` customer. Pending login returned 401. One QA account was approved through the API and then signed in successfully; a second was approved through the rendered **Approve access** action and its detail changed to Approved. `workflow.pending.demo@example.test` remains pending for the dashboard demonstration.
+- The dashboard request link opened the Users page with `registrationStatus=PENDING` and `role=CLIENT_REPRESENTATIVE`; only the pending QA account appeared. At 390px the table showed its scroll hint and did not cause page-level overflow.
+- Screenshots are temporary under `/tmp/ecommand-ui-review`: `resumed-client-dashboard-two-orders-*`, `admin-registration-filter-*`, `admin-pending-user-detail-1440x900.png`, `agent-program-create-from-order-1440x900.png`, and `agent-program-create-cdp.png`.
+- No claim conversation or program submission/approval was exercised in this browser chapter; their API lifecycle coverage remains in the isolated E2E suite. The original `ecommand` database was not modified.
 
 ### Automated checks
 
