@@ -1,4 +1,7 @@
+import { Permission } from "@ecommand/shared";
 import type { AuthUser } from "@/auth/auth.types";
+import { hasOnePermission } from "@/auth/auth.utils";
+import { getCustomerScope } from "@/auth/customer-scope";
 
 export interface ProgramAccessRecord {
 	createdByUserId: number;
@@ -11,9 +14,13 @@ export function canAccessProgram(
 ): boolean | undefined {
 	if (!program) return undefined;
 
-	if (user.customerId !== null) {
-		return program.order?.customerId === user.customerId;
+	const customerScope = getCustomerScope(user);
+	if (customerScope !== null) {
+		return !!program.order && customerScope.includes(program.order.customerId);
 	}
 
-	return program.createdByUserId === user.id;
+	return (
+		hasOnePermission(user, Permission.PROGRAMS_MANAGE_OTHER) ||
+		program.createdByUserId === user.id
+	);
 }

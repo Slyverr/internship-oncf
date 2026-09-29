@@ -4,6 +4,7 @@ import { forecastPrograms } from "drizzle/schema";
 import { eq, type SQL } from "drizzle-orm";
 import { AuthUser } from "@/auth/auth.types";
 import { hasOnePermission } from "@/auth/auth.utils";
+import { getCustomerScope } from "@/auth/customer-scope";
 import { DrizzleService } from "@/database/drizzle.service";
 import { QueryColumns, QueryRelations } from "@/database/drizzle.types";
 import { withDbErrorHandling } from "@/database/drizzle.util";
@@ -88,22 +89,24 @@ export class ProgramsQuery {
 			sortOrder = "desc",
 		} = query;
 
-		const canManageOther = hasOnePermission(
+		const customerScope = getCustomerScope(user);
+		const managesOther = hasOnePermission(
 			user,
 			Permission.PROGRAMS_MANAGE_OTHER,
 		);
-		const customerScope = canManageOther ? null : user.customerId;
-		const createdByUserId = canManageOther
-			? userId
-			: customerScope !== null
-				? undefined
-				: user.id;
+		const createdByUserId =
+			customerScope === null ? (managesOther ? userId : user.id) : undefined;
 
 		return this.drizzle.db.query.forecastPrograms.findMany({
 			where: {
 				...(createdByUserId !== undefined && { createdByUserId }),
 				...(customerScope !== null && {
-					order: { customerId: customerScope },
+					order: {
+						customerId:
+							customerScope.length === 1
+								? customerScope[0]
+								: { in: [...customerScope] },
+					},
 				}),
 				...(orderId !== undefined && { orderId }),
 				...(status && {

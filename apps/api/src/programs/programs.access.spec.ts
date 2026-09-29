@@ -2,7 +2,7 @@ import type { AuthUser } from "@/auth/auth.types";
 import { canAccessProgram } from "./programs.access";
 
 const createUser = (id: number, customerId: number | null): AuthUser =>
-	({ id, customerId }) as AuthUser;
+	({ id, customerId, permissions: new Set() }) as AuthUser;
 
 describe("canAccessProgram", () => {
 	const customerId = 42;

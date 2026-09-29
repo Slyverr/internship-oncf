@@ -1,4 +1,3 @@
-import { Permission } from "@ecommand/shared";
 import { createOwnershipGuard } from "@/auth/guards/ownership.factory";
 import { ProgramIdPipe } from "../pipes/program-id.pipe";
 import { canAccessProgram } from "../programs.access";
@@ -15,6 +14,5 @@ export const ProgramOwnershipGuard = createOwnershipGuard<
 		return canAccessProgram(program, user);
 	},
 	pipe: new ProgramIdPipe(),
-	permission: Permission.PROGRAMS_MANAGE_OTHER,
 	errorMessage: "You can only access your own programs",
 });
