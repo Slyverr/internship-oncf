@@ -52,6 +52,21 @@ describe("ClaimsMapper customer scope", () => {
 		expect(mapper.toCreate(dto(43), agent).customerId).toBe(43);
 	});
 
+	it("does not let manage-other expand an agent beyond their portfolio", () => {
+		const agent = {
+			...customerUser,
+			role: Role.AGENT_COMMERCIAL,
+			customerId: null,
+			assignedCustomerIds: [42],
+			permissions: new Set([
+				Permission.CLAIMS_CREATE,
+				Permission.CLAIMS_MANAGE_OTHER,
+			]),
+		};
+
+		expect(() => mapper.toCreate(dto(43), agent)).toThrow(ForbiddenException);
+	});
+
 	it("allows cross-customer creation only with explicit manage-other permission", () => {
 		const manager = {
 			...customerUser,
@@ -66,6 +81,23 @@ describe("ClaimsMapper customer scope", () => {
 	it("requires manage-other permission to change claim customer", () => {
 		expect(() =>
 			mapper.toUpdate({ customerId: 43 } as UpdateClaimDto, customerUser),
+		).toThrow(ForbiddenException);
+	});
+
+	it("lets an agent change a claim only to an assigned customer", () => {
+		const agent = {
+			...customerUser,
+			role: Role.AGENT_COMMERCIAL,
+			customerId: null,
+			assignedCustomerIds: [42, 43],
+			permissions: new Set([Permission.CLAIMS_MANAGE_OTHER]),
+		};
+
+		expect(
+			mapper.toUpdate({ customerId: 43 } as UpdateClaimDto, agent).customerId,
+		).toBe(43);
+		expect(() =>
+			mapper.toUpdate({ customerId: 99 } as UpdateClaimDto, agent),
 		).toThrow(ForbiddenException);
 	});
 });

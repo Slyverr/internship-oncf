@@ -39,13 +39,17 @@ export class ClaimsService {
 	}
 
 	async findAll(user: AuthUser, query: ListClaimQueryDto) {
-		if (hasOnePermission(user, Permission.CLAIMS_MANAGE_OTHER)) {
-			return this.claimsQuery.findClaims(query);
-		}
-
 		if (user.role === Role.CLIENT_REPRESENTATIVE && user.customerId !== null) {
 			query.userId = user.id;
 			query.customerId = user.customerId;
+			return this.claimsQuery.findClaims(query);
+		}
+
+		if (user.role === Role.AGENT_COMMERCIAL) {
+			return this.claimsQuery.findClaims(query, getCustomerScope(user) ?? []);
+		}
+
+		if (hasOnePermission(user, Permission.CLAIMS_MANAGE_OTHER)) {
 			return this.claimsQuery.findClaims(query);
 		}
 

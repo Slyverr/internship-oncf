@@ -1,4 +1,4 @@
-import { ClaimStatus, Permission } from "@ecommand/shared";
+import { ClaimStatus, Permission, Role } from "@ecommand/shared";
 import { ForbiddenException, Injectable } from "@nestjs/common";
 import { AuthUser } from "@/auth/auth.types";
 import { hasAnyPermission } from "@/auth/auth.utils";
@@ -13,8 +13,9 @@ export class ClaimsMapper {
 	toCreate(dto: CreateClaimDto, user: AuthUser): ClaimInsert {
 		const userId = dto.userId ?? user.id;
 		if (
-			!hasAnyPermission(user, Permission.CLAIMS_MANAGE_OTHER) &&
-			!canAccessCustomer(user, dto.customerId)
+			!canAccessCustomer(user, dto.customerId) &&
+			(user.role === Role.AGENT_COMMERCIAL ||
+				!hasAnyPermission(user, Permission.CLAIMS_MANAGE_OTHER))
 		) {
 			throw new ForbiddenException("Cannot create claims for other customers");
 		}
@@ -43,7 +44,9 @@ export class ClaimsMapper {
 
 		if (
 			dto.customerId !== undefined &&
-			!hasAnyPermission(user, Permission.CLAIMS_MANAGE_OTHER)
+			(!hasAnyPermission(user, Permission.CLAIMS_MANAGE_OTHER) ||
+				(user.role === Role.AGENT_COMMERCIAL &&
+					!canAccessCustomer(user, dto.customerId)))
 		) {
 			throw new ForbiddenException("Cannot change claim customer");
 		}

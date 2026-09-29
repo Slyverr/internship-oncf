@@ -1,4 +1,5 @@
-import { Permission } from "@ecommand/shared";
+import { Permission, Role } from "@ecommand/shared";
+import { hasOnePermission } from "@/auth/auth.utils";
 import { getCustomerScope } from "@/auth/customer-scope";
 import { createOwnershipGuard } from "@/auth/guards/ownership.factory";
 import { ClaimsService } from "../claims.service";
@@ -12,13 +13,16 @@ export const ClaimOwnershipGuard = createOwnershipGuard<ClaimsService, ClaimId>(
 			const claim = await service.findOneForOwnership(id);
 			if (!claim) return undefined;
 
-			const customerScope = getCustomerScope(user);
-			return customerScope === null
-				? claim.createdByUserId === user.id
-				: customerScope.includes(claim.customerId);
+			if (user.role === Role.AGENT_COMMERCIAL) {
+				return (getCustomerScope(user) ?? []).includes(claim.customerId);
+			}
+
+			return (
+				hasOnePermission(user, Permission.CLAIMS_MANAGE_OTHER) ||
+				claim.createdByUserId === user.id
+			);
 		},
 		pipe: new ClaimIdPipe(),
-		permission: Permission.CLAIMS_MANAGE_OTHER,
 		errorMessage: "You can only access your own or assigned-customer claims",
 	},
 );

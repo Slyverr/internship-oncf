@@ -19,3 +19,24 @@ describe("ClaimsQuery comment notification recipients", () => {
 		});
 	});
 });
+
+describe("ClaimsQuery customer portfolio filters", () => {
+	const findMany = jest.fn().mockResolvedValue([]);
+	const query = new ClaimsQuery({
+		db: { query: { claims: { findMany } } },
+	} as never);
+
+	beforeEach(() => findMany.mockClear());
+
+	it("intersects a requested customer with the assigned portfolio", async () => {
+		await query.findClaims({ customerId: 43 } as never, [42, 43]);
+
+		expect(findMany.mock.calls[0][0].where.customerId).toEqual({ in: [43] });
+	});
+
+	it("returns no claims when the requested customer is outside the portfolio", async () => {
+		await query.findClaims({ customerId: 99 } as never, [42, 43]);
+
+		expect(findMany.mock.calls[0][0].where.customerId).toEqual({ in: [] });
+	});
+});

@@ -55,11 +55,12 @@ describe("ClaimsService access scoping", () => {
 		expect(findClaims).toHaveBeenCalledWith(query, [42, 43]);
 	});
 
-	it("lets commercial claims managers see the shared claims queue", async () => {
+	it("keeps commercial claims managers inside their customer portfolio", async () => {
 		const agent = {
 			...client,
 			role: Role.AGENT_COMMERCIAL,
 			customerId: null,
+			assignedCustomerIds: [42, 44],
 			permissions: new Set([
 				Permission.CLAIMS_READ,
 				Permission.CLAIMS_MANAGE_OTHER,
@@ -67,7 +68,7 @@ describe("ClaimsService access scoping", () => {
 		};
 		const query = { customerId: 43 } as ListClaimQueryDto;
 		await service.findAll(agent, query);
-		expect(findClaims).toHaveBeenCalledWith(query);
+		expect(findClaims).toHaveBeenCalledWith(query, [42, 44]);
 	});
 
 	it("preserves broad claims scope for users with manage-other permission", async () => {
