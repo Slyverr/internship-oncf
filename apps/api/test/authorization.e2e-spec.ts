@@ -1,4 +1,4 @@
-import { Role } from "@ecommand/shared";
+import { ClaimStatus, ClaimType, OrderStatus, Role } from "@ecommand/shared";
 import type { INestApplication } from "@nestjs/common";
 import request from "supertest";
 import type { App } from "supertest/types";
@@ -478,6 +478,200 @@ describe("customer portfolio authorization (e2e)", () => {
 			).toEqual(expect.arrayContaining(testCase.customers));
 			expect(response.body.byCustomer).toHaveLength(testCase.customers.length);
 		}
+	});
+
+	it("allows clients to create and edit drafts only for their own customer", async () => {
+		const token = await login(app, E2E_USERS.clientA.email);
+		const sourceOrder = await request(app.getHttpServer())
+			.get(`/orders/${orderIds[E2E_ORDERS.assignedA]}`)
+			.set("Authorization", `Bearer ${token}`)
+			.expect(200);
+
+		const createdOrder = await request(app.getHttpServer())
+			.post("/orders")
+			.set("Authorization", `Bearer ${token}`)
+			.send({
+				customerId: customerIds[E2E_CUSTOMERS.assignedA],
+				goodsId: sourceOrder.body.goodsId,
+				unitId: sourceOrder.body.unitId,
+				quantityDemanded: "5",
+			})
+			.expect(201);
+
+		expect(createdOrder.body.orderStatus.name).toBe(OrderStatus.DRAFT);
+		expect(createdOrder.body.customerId).toBe(
+			customerIds[E2E_CUSTOMERS.assignedA],
+		);
+
+		const updatedOrder = await request(app.getHttpServer())
+			.patch(`/orders/${createdOrder.body.id}`)
+			.set("Authorization", `Bearer ${token}`)
+			.send({ supervisor: "E2E Updated Supervisor" })
+			.expect(200);
+		expect(updatedOrder.body.supervisor).toBe("E2E Updated Supervisor");
+
+		await request(app.getHttpServer())
+			.post("/orders")
+			.set("Authorization", `Bearer ${token}`)
+			.send({
+				customerId: customerIds[E2E_CUSTOMERS.outside],
+				goodsId: sourceOrder.body.goodsId,
+				unitId: sourceOrder.body.unitId,
+				quantityDemanded: "5",
+			})
+			.expect(403);
+	});
+
+	it("enforces order submit and approval transitions across client and agent roles", async () => {
+		const orderId = orderIds[E2E_ORDERS.assignedA];
+		const clientToken = await login(app, E2E_USERS.clientA.email);
+		const agentToken = await login(app, E2E_USERS.agentAssigned.employeeCode);
+
+		await request(app.getHttpServer())
+			.post(`/orders/${orderId}/approve`)
+			.set("Authorization", `Bearer ${agentToken}`)
+			.expect(409);
+
+		const submitted = await request(app.getHttpServer())
+			.post(`/orders/${orderId}/submit`)
+			.set("Authorization", `Bearer ${clientToken}`)
+			.expect(200);
+		expect(submitted.body.orderStatus.name).toBe(OrderStatus.SUBMITTED);
+
+		await request(app.getHttpServer())
+			.post(`/orders/${orderId}/submit`)
+			.set("Authorization", `Bearer ${clientToken}`)
+			.expect(409);
+
+		const approved = await request(app.getHttpServer())
+			.post(`/orders/${orderId}/approve`)
+			.set("Authorization", `Bearer ${agentToken}`)
+			.expect(200);
+		expect(approved.body.orderStatus.name).toBe(OrderStatus.APPROVED);
+
+		await request(app.getHttpServer())
+			.post(`/orders/${orderId}/approve`)
+			.set("Authorization", `Bearer ${agentToken}`)
+			.expect(409);
+
+		const outsideAgentToken = await login(
+			app,
+			E2E_USERS.agentOutside.employeeCode,
+		);
+		await request(app.getHttpServer())
+			.post(`/orders/${orderId}/approve`)
+			.set("Authorization", `Bearer ${outsideAgentToken}`)
+			.expect(403);
+	});
+
+	it("runs a client claim through agent treatment, resolution, and client close", async () => {
+		const clientToken = await login(app, E2E_USERS.clientA.email);
+		const createdClaim = await request(app.getHttpServer())
+			.post("/claims")
+			.set("Authorization", `Bearer ${clientToken}`)
+			.send({
+				customerId: customerIds[E2E_CUSTOMERS.assignedA],
+				orderId: orderIds[E2E_ORDERS.assignedA],
+				type: ClaimType.OTHER,
+				description: "E2E lifecycle claim for client close",
+			})
+			.expect(201);
+		const claimId = createdClaim.body.id as number;
+		expect(createdClaim.body.claimStatus.name).toBe(ClaimStatus.NEW);
+
+		await request(app.getHttpServer())
+			.post("/claims")
+			.set("Authorization", `Bearer ${clientToken}`)
+			.send({
+				customerId: customerIds[E2E_CUSTOMERS.outside],
+				type: ClaimType.OTHER,
+				description: "E2E cross-customer claim must be denied",
+			})
+			.expect(403);
+
+		await request(app.getHttpServer())
+			.post(`/claims/${claimId}/start-progress`)
+			.set("Authorization", `Bearer ${clientToken}`)
+			.expect(403);
+		await request(app.getHttpServer())
+			.post(`/claims/${claimId}/close`)
+			.set("Authorization", `Bearer ${clientToken}`)
+			.expect(409);
+
+		const secondClientToken = await login(app, E2E_USERS.clientASecond.email);
+		await request(app.getHttpServer())
+			.post(`/claims/${claimId}/comments`)
+			.set("Authorization", `Bearer ${secondClientToken}`)
+			.send({ content: "E2E non-owner cannot comment" })
+			.expect(403);
+
+		const agentToken = await login(app, E2E_USERS.agentAssigned.employeeCode);
+		const createdByAgent = await request(app.getHttpServer())
+			.post("/claims")
+			.set("Authorization", `Bearer ${agentToken}`)
+			.send({
+				customerId: customerIds[E2E_CUSTOMERS.assignedB],
+				type: ClaimType.OTHER,
+				description: "E2E claim created by assigned agent",
+			})
+			.expect(201);
+		expect(createdByAgent.body.customerId).toBe(
+			customerIds[E2E_CUSTOMERS.assignedB],
+		);
+
+		await request(app.getHttpServer())
+			.post("/claims")
+			.set("Authorization", `Bearer ${agentToken}`)
+			.send({
+				customerId: customerIds[E2E_CUSTOMERS.outside],
+				type: ClaimType.OTHER,
+				description: "E2E agent cannot create outside portfolio",
+			})
+			.expect(403);
+
+		await request(app.getHttpServer())
+			.post(`/claims/${claimId}/comments`)
+			.set("Authorization", `Bearer ${agentToken}`)
+			.send({ content: "We are reviewing this claim." })
+			.expect(201);
+
+		const inProgress = await request(app.getHttpServer())
+			.get(`/claims/${claimId}`)
+			.set("Authorization", `Bearer ${clientToken}`)
+			.expect(200);
+		expect(inProgress.body.claimStatus.name).toBe(ClaimStatus.IN_PROGRESS);
+
+		const comments = await request(app.getHttpServer())
+			.get(`/claims/${claimId}/comments`)
+			.set("Authorization", `Bearer ${clientToken}`)
+			.expect(200);
+		expect(comments.body).toHaveLength(1);
+		expect(comments.body[0].authorName).toBe("Assigned Agent");
+
+		const inTreatment = await request(app.getHttpServer())
+			.post(`/claims/${claimId}/start-treatment`)
+			.set("Authorization", `Bearer ${agentToken}`)
+			.expect(200);
+		expect(inTreatment.body.claimStatus.name).toBe(ClaimStatus.IN_TREATMENT);
+
+		const resolved = await request(app.getHttpServer())
+			.post(`/claims/${claimId}/resolve`)
+			.set("Authorization", `Bearer ${agentToken}`)
+			.send({ resolution: "E2E resolution" })
+			.expect(200);
+		expect(resolved.body.claimStatus.name).toBe(ClaimStatus.RESOLVED);
+
+		const closed = await request(app.getHttpServer())
+			.post(`/claims/${claimId}/close`)
+			.set("Authorization", `Bearer ${clientToken}`)
+			.expect(200);
+		expect(closed.body.claimStatus.name).toBe(ClaimStatus.CLOSED);
+		expect(closed.body.resolution).toBe("E2E resolution");
+
+		await request(app.getHttpServer())
+			.post(`/claims/${claimId}/close`)
+			.set("Authorization", `Bearer ${clientToken}`)
+			.expect(409);
 	});
 
 	afterAll(async () => {
