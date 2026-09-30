@@ -1,4 +1,6 @@
 import "./form-utils.test";
+import "./i18n.test";
+import "./openapi-validation.test";
 import "./action-visibility.test";
 import "./claim-conversation-utils.test";
 import "./date-utils.test";

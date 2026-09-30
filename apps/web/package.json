@@ -7,8 +7,8 @@
 		"typecheck": "tsc --noEmit",
 		"build": "next build",
 		"start": "next start",
-		"generate:api": "orval",
-		"generate:api:watch": "orval --watch",
+		"generate:api": "bun ./scripts/generate-api.ts",
+		"generate:api:watch": "bun ./scripts/generate-api.ts --watch",
 		"test": "bun ./test/run.ts"
 	},
 	"dependencies": {
