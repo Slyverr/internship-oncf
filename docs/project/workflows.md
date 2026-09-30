@@ -47,11 +47,12 @@ Checked the running local web/API stack against the project SDF using the seeded
 - On 2026-09-29, fresh headless Chrome captures successfully matched requested routes. Dashboard and create forms were reviewed at phone, tablet, laptop, 2K, and 4K widths; the helper reported no horizontal overflow. Review images are under `/tmp/ecommand-ui-review` and are temporary, not repository assets.
 - Current repository verification passed on 2026-09-29: Biome, all workspace typechecks, web checks, 58 API suites / 440 tests, and production builds.
 
-### Program history — 2026-09-29
+### Program history — 2026-09-30
 
 - Program creation, edits, execution records, lifecycle transitions, and draft deletion now write matching audit events atomically with the program change. Focused tests cover initial state, quantity/date/status/execution events, and conditional update races.
+- The isolated API E2E lifecycle verifies the returned persisted `CREATED` event and all three status-change events, including actor identity; 2 suites / 21 tests passed using real Node.
 - Program details show recorded events with actor and timestamp. Existing programs are not retroactively backfilled; their timeline fills as subsequent changes occur.
-- `bun run verify:commit` now delegates to the full repository verification command. It passed on 2026-09-29 with Biome, workspace typechecks, web checks, 58 API suites / 443 tests, and production builds.
+- `bun run verify:commit` now delegates to the full repository verification command. It passed on 2026-09-30 with Biome, workspace typechecks, web checks, 58 API suites / 443 tests, and production builds.
 - Turbo build tasks now declare `dist/**` as an output alongside Next.js build files, ensuring shared and API compiled artifacts are restored on cache hits. A stale shared artifact caused the API watcher to fail at runtime; rebuilding it and restarting the development stack restored API `/health` to HTTP 200.
 - The screenshot helper was attempted for the program detail route but could not connect to Chrome DevTools at `localhost:9235`; the local web and API health endpoints were still HTTP 200.
 

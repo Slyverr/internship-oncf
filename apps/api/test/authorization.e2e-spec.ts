@@ -870,6 +870,23 @@ describe("customer portfolio authorization (e2e)", () => {
 			.set("Authorization", `Bearer ${assignedToken}`)
 			.expect(200);
 		expect(confirmed.body.programStatus.name).toBe(ProgramStatus.CONFIRMED);
+		expect(
+			confirmed.body.forecastProgramHistories.map(
+				(event: { eventType: string }) => event.eventType,
+			),
+		).toEqual([
+			"CREATED",
+			"STATUS_CHANGED",
+			"STATUS_CHANGED",
+			"STATUS_CHANGED",
+		]);
+		expect(
+			confirmed.body.forecastProgramHistories.every(
+				(event: { changedByUserId: number; changedByName: string | null }) =>
+					event.changedByUserId === confirmed.body.createdByUserId &&
+					event.changedByName === E2E_USERS.agentAssigned.email,
+			),
+		).toBe(true);
 	});
 
 	afterAll(async () => {
