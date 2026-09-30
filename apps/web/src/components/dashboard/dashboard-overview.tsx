@@ -32,6 +32,7 @@ import {
 } from "@/lib/api/orders";
 import { useProgramsControllerFindAll } from "@/lib/api/programs";
 import { useUsersControllerFindAll } from "@/lib/api/users";
+import { formatMediumDate, formatMonthLabel } from "@/lib/date-utils";
 import { formatEnumLabel } from "@/lib/enum-labels";
 import { getOrderReport } from "@/lib/reports";
 import { useAuth } from "@/providers/auth-provider";
@@ -129,9 +130,7 @@ function RecentSection({
 											dateTime={item.date}
 											className="shrink-0 text-meta text-muted-foreground"
 										>
-											{new Intl.DateTimeFormat(undefined, {
-												dateStyle: "medium",
-											}).format(new Date(item.date))}
+											{formatMediumDate(item.date)}
 										</time>
 									</span>
 								</Link>
@@ -307,10 +306,7 @@ function getRecentOrderMonths(
 
 		return {
 			key,
-			label: new Intl.DateTimeFormat(undefined, {
-				month: "short",
-				timeZone: "UTC",
-			}).format(month),
+			label: formatMonthLabel(month),
 			count: counts.get(key) ?? 0,
 		};
 	});

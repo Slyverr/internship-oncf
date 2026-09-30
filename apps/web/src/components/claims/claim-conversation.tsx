@@ -37,6 +37,7 @@ import {
 	useNotificationsControllerMarkAsRead,
 } from "@/lib/api/notifications";
 import { isUnreadClaimCommentNotification } from "@/lib/claim-conversation-utils";
+import { formatFullMessageTime, formatMessageTime } from "@/lib/date-utils";
 import { getFormErrorMessage } from "@/lib/form-utils";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
@@ -67,15 +68,8 @@ function CommentMessage({
 	onToggleTime: () => void;
 }) {
 	const isOwnMessage = comment.authorUserId === currentUserId;
-	const date = new Date(comment.createdAt);
-	const messageTime = new Intl.DateTimeFormat(undefined, {
-		hour: "numeric",
-		minute: "2-digit",
-	}).format(date);
-	const fullMessageTime = new Intl.DateTimeFormat(undefined, {
-		dateStyle: "full",
-		timeStyle: "short",
-	}).format(date);
+	const messageTime = formatMessageTime(comment.createdAt);
+	const fullMessageTime = formatFullMessageTime(comment.createdAt);
 	const authorName = comment.authorName;
 	const initials = authorName
 		.split(" ")
