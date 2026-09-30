@@ -66,6 +66,7 @@ Coverage includes:
 - Program creation, status transitions, planned quantity/date edits, execution updates, and draft deletion now write audit events in the same PostgreSQL transaction as the corresponding program change. Failed or raced status updates do not add history.
 - Program details render recorded events with concise labels, changed values where applicable, actor, and timestamp. Existing programs are not backfilled, so programs created before this change may have an empty history until a new event occurs.
 - Added query tests for creation, all update event types, and conditional update races. The documented `bun run verify:commit` command now exists and runs the full `bun run verify` gate.
+- Corrected Turbo's build output declaration to include `dist/**`. A stale shared-package build had left the API loading an old administrator permission value despite cached typecheck/build success; rebuilding shared and restarting `bun run dev` restored API startup and `/health` returned HTTP 200.
 - A fresh screenshot could not run because the screenshot helper's Chrome DevTools endpoint at `localhost:9235` was unavailable. The web `/login` and API `/health` endpoints still returned HTTP 200.
 
 **Verification:** `bun run verify:commit` passed: Biome, shared/API/web typechecks, 58 API suites / 443 tests, web checks, and API/web production builds.

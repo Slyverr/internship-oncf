@@ -52,6 +52,7 @@ Checked the running local web/API stack against the project SDF using the seeded
 - Program creation, edits, execution records, lifecycle transitions, and draft deletion now write matching audit events atomically with the program change. Focused tests cover initial state, quantity/date/status/execution events, and conditional update races.
 - Program details show recorded events with actor and timestamp. Existing programs are not retroactively backfilled; their timeline fills as subsequent changes occur.
 - `bun run verify:commit` now delegates to the full repository verification command. It passed on 2026-09-29 with Biome, workspace typechecks, web checks, 58 API suites / 443 tests, and production builds.
+- Turbo build tasks now declare `dist/**` as an output alongside Next.js build files, ensuring shared and API compiled artifacts are restored on cache hits. A stale shared artifact caused the API watcher to fail at runtime; rebuilding it and restarting the development stack restored API `/health` to HTTP 200.
 - The screenshot helper was attempted for the program detail route but could not connect to Chrome DevTools at `localhost:9235`; the local web and API health endpoints were still HTTP 200.
 
 ### Historical QA records from the earlier local check
