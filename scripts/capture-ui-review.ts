@@ -33,6 +33,7 @@ const label = (
 ).replace(/[^a-zA-Z0-9_.-]/g, "-");
 const cdpUrl = readOption("--cdp") ?? "http://localhost:9235";
 const freshContext = args.includes("--fresh-context");
+const actionsFirstViewportOnly = args.includes("--actions-first-viewport");
 const settleMs = Number(readOption("--settle-ms") ?? "500");
 const clickSelectors = readOptions("--click");
 const fillFields = readAssignments("--fill");
@@ -57,6 +58,7 @@ Usage: bun run ui:review -- [options]
   --label <name>         Screenshot filename prefix
   --click <selector>     Click a non-submitting control before capture (repeatable)
   --wait-for <selector>  Wait for a UI element after the route and clicks
+  --actions-first-viewport Run fill/click actions only for the first viewport
   --widths <list>        Comma-separated widths; defaults to 320..3840px
   --out <directory>     Output directory (default: /tmp/ecommand-ui-review)
   --cdp <url>            Chrome DevTools endpoint (default: http://localhost:9235)
@@ -306,9 +308,10 @@ try {
 		await navigate(baseUrl);
 		if (settleMs > 0) await Bun.sleep(settleMs);
 
+		const runActions = !actionsFirstViewportOnly || results.length === 0;
 		const missingClickTargets: string[] = [];
 		const missingFillTargets: string[] = [];
-		for (const { selector, value } of fillFields) {
+		for (const { selector, value } of runActions ? fillFields : []) {
 			const filled = await evaluate<boolean>(`(() => {
 				const target = document.querySelector(${JSON.stringify(selector)});
 				if (!(target instanceof HTMLInputElement) &&
@@ -328,7 +331,7 @@ try {
 			})()`);
 			if (!filled) missingFillTargets.push(selector);
 		}
-		for (const selector of clickSelectors) {
+		for (const selector of runActions ? clickSelectors : []) {
 			const clicked = await evaluate<boolean>(`(() => {
 				const target = document.querySelector(${JSON.stringify(selector)});
 				if (!target) return false;
@@ -437,7 +440,7 @@ function readOptions(name: string): string[] {
 function readAssignments(name: string) {
 	const values: Array<{ selector: string; value: string }> = [];
 	for (const assignment of readOptions(name)) {
-		const separator = assignment.indexOf("=");
+		const separator = assignment.lastIndexOf("=");
 		if (separator < 1)
 			throw new Error(`${name} expects a selector=value argument.`);
 		values.push({
