@@ -36,7 +36,9 @@ const freshContext = args.includes("--fresh-context");
 const actionsFirstViewportOnly = args.includes("--actions-first-viewport");
 const settleMs = Number(readOption("--settle-ms") ?? "500");
 const clickBeforeFillSelectors = readOptions("--click-before-fill");
+const clickTextBeforeFill = readOptions("--click-text-before-fill");
 const clickSelectors = readOptions("--click");
+const clickText = readOptions("--click-text");
 const fillFields = readAssignments("--fill");
 const waitSelector = readOption("--wait-for");
 const requestedWidths = readOption("--widths")?.split(",").map(Number);
@@ -57,8 +59,10 @@ Usage: bun run ui:review -- [options]
   --fresh-context        Use an isolated browser profile without saved app login
   --fill <selector=value> Set a form field and dispatch input/change events (repeatable)
   --click-before-fill <selector> Click before filling fields (repeatable)
+  --click-text-before-fill <text> Click a visible control by exact text before filling
   --label <name>         Screenshot filename prefix
   --click <selector>     Click a non-submitting control before capture (repeatable)
+  --click-text <text>    Click a visible control by exact text (repeatable)
   --wait-for <selector>  Wait for a UI element after the route and clicks
   --actions-first-viewport Run fill/click actions only for the first viewport
   --widths <list>        Comma-separated widths; defaults to 320..3840px
@@ -323,6 +327,11 @@ try {
 			if (!clicked) missingClickTargets.push(selector);
 			if (settleMs > 0) await Bun.sleep(settleMs);
 		}
+		for (const text of runActions ? clickTextBeforeFill : []) {
+			const clicked = await clickVisibleControlByText(text);
+			if (!clicked) missingClickTargets.push(`text:${text}`);
+			if (settleMs > 0) await Bun.sleep(settleMs);
+		}
 		for (const { selector, value } of runActions ? fillFields : []) {
 			const filled = await evaluate<boolean>(`(() => {
 				const target = document.querySelector(${JSON.stringify(selector)});
@@ -351,6 +360,11 @@ try {
 				return true;
 			})()`);
 			if (!clicked) missingClickTargets.push(selector);
+			if (settleMs > 0) await Bun.sleep(settleMs);
+		}
+		for (const text of runActions ? clickText : []) {
+			const clicked = await clickVisibleControlByText(text);
+			if (!clicked) missingClickTargets.push(`text:${text}`);
 			if (settleMs > 0) await Bun.sleep(settleMs);
 		}
 
@@ -461,4 +475,15 @@ function readAssignments(name: string) {
 		});
 	}
 	return values;
+}
+
+async function clickVisibleControlByText(text: string) {
+	return evaluate<boolean>(`(() => {
+		const normalize = (value) => value.replace(/\\s+/g, " ").trim();
+		const target = Array.from(document.querySelectorAll("button, [role=button], [role=menuitem]"))
+			.find((element) => element.getClientRects().length > 0 && normalize(element.textContent ?? "") === ${JSON.stringify(text)});
+		if (!target) return false;
+		target.click();
+		return true;
+	})()`);
 }
