@@ -6,6 +6,7 @@ Use these documents as the maintained guide to the repository:
 - [Development workflow](development/workflow.md) — local commands, naming, code style, UI form patterns, verification, and commits.
 - [Interface design system](interface/system.md) — spacing, typography, responsive layouts, shell behavior, and interaction details.
 - [MVP readiness](project/readiness.md) — implemented user flows, known gaps, and remaining work toward the MVP.
+- [Internationalization](project/i18n.md) — current string/formatting inventory, decisions, rollout sequence, and acceptance checks.
 - [Workflow verification](project/workflows.md) — role-based live checks, SDF mismatches, QA data, and prioritized continuation plan.
 - [Agent progress](agent-progress.md) — milestone-level continuation journal and prioritized remaining work.
 - [Authorization matrix](security/authorization.md) — role grants, API permissions, ownership scope, and web visibility.

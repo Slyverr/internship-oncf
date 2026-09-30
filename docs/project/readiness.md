@@ -57,6 +57,6 @@ This status describes the current repository against the project SDF and report.
 7. **Pilot product closeout (P2).** Confirm report metrics/export expectations, complete page metadata/favicon review, and capture the full route/role/theme/responsive screenshot matrix after shared UI changes.
 8. **External integrations (contract-dependent).** Confirm DTM/GSCWF endpoints, authentication, payloads, and retry/error expectations. The current local status is not an external handoff. Configure and exercise a real SMTP provider before relying on email delivery.
 
-The immediate next chapter is role/access management discovery and a scoped implementation proposal. While the role policy remains open, continue the independent i18n string inventory and verify the CI workflow when a hosted run is available; do not add a custom-role schema or make the seeded administrator's grants mutable by assumption.
+The immediate implementation priority is role/access management, gated on the role-model decision above; do not add a custom-role schema or make the seeded administrator's grants mutable by assumption. The independent i18n source inventory is now recorded in [Internationalization](i18n.md). Next there, confirm locales/translation ownership and choose the runtime before changing app code. Verify the CI workflow when a hosted run is available.
 
 The older Java/Spring architecture in the report is not the current implementation. Continue with ECommand's existing TypeScript stack unless a deliberate rewrite is approved.
