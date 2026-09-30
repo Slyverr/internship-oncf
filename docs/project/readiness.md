@@ -32,6 +32,7 @@ This status describes the current repository against the project SDF and report.
 
 ## Incomplete for a usable MVP
 
+- **Admin role/access management (P0):** the SDF capability has reserved permissions, but there is no management API or screen. The current role enum and seeded roles are fixed. Confirm whether the pilot should edit grants for those existing roles or create custom roles; then implement guarded management, prevent privilege escalation and administrator lockout, audit changes, and test the API/UI matrix.
 - **Public identifiers and detail URLs:** orders and programs already have random `ORD-` / `PRG-` references, but claims derive `CLM-` from a sequential database ID, and detail routes (including `/dashboard/claims/2`) still expose numeric IDs. Audit every routed entity, reuse suitable random references, add persisted random public codes where needed, and route detail, edit, and workflow actions by those codes. Keep database IDs for internal relations and retain permission and ownership checks; opaque URLs are defense in depth, not authorization. Do not add migrations before the schema is stabilized.
 - **ICE data ownership:** signup compares the submitted customer code and ICE with the locally maintained customer record; it does not query an external ONCF registry. Confirm who maintains customer ICE values and how they are kept current before production use.
 - **OpenAPI generation runtime:** the Bun development API returns empty properties for DTO schemas, but the production-style API started with real Node returns typed schemas. Current Node verification found 41 properties on `OrderDetailDto` and no generic `Object` references. Generate the client from the Node runtime documented in the [development workflow](../development/workflow.md#local-setup), then review the generated diff before accepting it. This is a developer workflow constraint, not a blocked user flow.
@@ -47,13 +48,14 @@ This status describes the current repository against the project SDF and report.
 
 ## Recommended order
 
-1. Confirm the ICE source and maintenance owner; keep the current local-record match explicit until an authoritative registry is available.
-2. Capture browser interaction and screenshots for the updated signup and administrator-review screens; the API and route smoke checks now cover valid/invalid registration and both review outcomes.
-3. Review program and claim edit rules against the pilot workflows.
-4. Add reliable notification retries and staff assignment alerts after ownership rules are reviewed.
-5. Keep API client generation on the verified Node runtime and review generated types whenever the API contract changes.
-6. Confirm report metrics and export expectations with pilot users; the current PDF option uses the browser print dialog.
-7. Confirm whether DTM handoff is available for the pilot; otherwise expose its local/manual status honestly.
-8. Stabilize the schema, then define migrations and production operations.
+1. Resolve the fixed-role versus custom-role decision and implement admin role/access management with privilege and lockout protections.
+2. Replace public numeric IDs in operational detail, edit, and workflow URLs with stable random codes; audit the other routed entities at the same time.
+3. Confirm the ICE source and maintenance owner; keep the current local-record match explicit until an authoritative registry is available.
+4. Add isolated browser E2E journeys and CI for the client order, agent program/claim, and admin registration workflows. Manual browser checks now cover orders, programs, registration review, and the claim conversation/closure path.
+5. Review remaining program/claim edit rules and add durable notification retries and assignment alerts after ownership rules are reviewed.
+6. Keep API client generation on the verified Node runtime and review generated types whenever the API contract changes.
+7. Confirm report metrics and export expectations with pilot users; the current PDF option uses the browser print dialog.
+8. Confirm whether DTM handoff is available for the pilot; otherwise expose its local/manual status honestly.
+9. Stabilize the schema, then define migrations and production operations.
 
 The older Java/Spring architecture in the report is not the current implementation. Continue with ECommand's existing TypeScript stack unless a deliberate rewrite is approved.
