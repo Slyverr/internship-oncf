@@ -429,6 +429,8 @@ export type OrderDetailDtoOrderFilesItem = {
 
 export type OrderDetailDtoClaimsItem = {
   id: number;
+  /** Temporary until the live OpenAPI document reflects inferred claim fields. */
+  claimNumber: string;
   customerId: number;
   createdByUserId: number;
   statusId: string;
@@ -1782,4 +1784,3 @@ from?: string;
  */
 to?: string;
 };
-

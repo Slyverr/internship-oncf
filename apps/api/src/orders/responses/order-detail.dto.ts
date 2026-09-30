@@ -74,6 +74,7 @@ export class OrderDetailDto implements OrderDetail {
 	}[];
 	claims: {
 		id: number;
+		claimNumber: string;
 		customerId: number;
 		createdByUserId: number;
 		statusId: string;

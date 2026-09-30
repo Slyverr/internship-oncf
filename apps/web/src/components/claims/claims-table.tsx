@@ -54,7 +54,7 @@ const columns: ColumnDef<typeof features, ClaimListDto>[] = [
 		accessorKey: "claimNumber",
 		header: "Claim #",
 		cell: (info) => (
-			<TableRowLink href={`/dashboard/claims/${info.row.original.id}`}>
+			<TableRowLink href={`/dashboard/claims/${info.row.original.claimNumber}`}>
 				{info.getValue<string>()}
 			</TableRowLink>
 		),
@@ -274,7 +274,7 @@ export function ClaimsTable({
 									key={row.id}
 									className="cursor-pointer"
 									onClick={() =>
-										router.push(`/dashboard/claims/${row.original.id}`)
+										router.push(`/dashboard/claims/${row.original.claimNumber}`)
 									}
 								>
 									{row.getAllCells().map((cell) => (

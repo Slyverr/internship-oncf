@@ -11,13 +11,12 @@ import { and, eq } from "drizzle-orm";
 import { AuthUser } from "@/auth/auth.types";
 import { hasOnePermission } from "@/auth/auth.utils";
 import { getCustomerScope } from "@/auth/customer-scope";
-import { formatClaimNumber } from "@/common/utils/document-number";
 import { CLAIM_STATUSES } from "@/database/reference-data";
 import { NotificationsService } from "@/notifications/notifications.service";
 import { CLAIM_STATUS_BY_ID, CLAIM_TRANSITION } from "./claims.constants";
 import { ClaimsMapper } from "./claims.mapper";
 import { ClaimsQuery } from "./claims.query";
-import type { ClaimId } from "./claims.types";
+import type { ClaimId, ClaimIdentifier, ClaimNumber } from "./claims.types";
 import { CreateClaimDto } from "./requests/create-claim.dto";
 import { ListClaimQueryDto } from "./requests/list-claim.dto";
 import { UpdateClaimDto } from "./requests/update-claim.dto";
@@ -43,42 +42,49 @@ export class ClaimsService {
 		if (user.role === Role.CLIENT_REPRESENTATIVE && user.customerId !== null) {
 			query.userId = user.id;
 			query.customerId = user.customerId;
-			return this.withClaimNumbers(this.claimsQuery.findClaims(query));
+			return this.claimsQuery.findClaims(query);
 		}
 
 		if (user.role === Role.AGENT_COMMERCIAL) {
-			return this.withClaimNumbers(
-				this.claimsQuery.findClaims(query, getCustomerScope(user) ?? []),
-			);
+			return this.claimsQuery.findClaims(query, getCustomerScope(user) ?? []);
 		}
 
 		if (hasOnePermission(user, Permission.CLAIMS_MANAGE_OTHER)) {
-			return this.withClaimNumbers(this.claimsQuery.findClaims(query));
+			return this.claimsQuery.findClaims(query);
 		}
 
 		const customerScope = getCustomerScope(user);
 		if (customerScope !== null) {
-			return this.withClaimNumbers(
-				this.claimsQuery.findClaims(query, customerScope),
-			);
+			return this.claimsQuery.findClaims(query, customerScope);
 		}
 
 		query.userId = user.id;
-		return this.withClaimNumbers(this.claimsQuery.findClaims(query));
+		return this.claimsQuery.findClaims(query);
 	}
 
-	async findOne(id: ClaimId) {
-		const claim = await this.claimsQuery.findClaim(id);
-		const found = this.ensure(claim, id);
-		return { ...found, claimNumber: formatClaimNumber(found.id) };
+	async findOne(identifier: ClaimIdentifier) {
+		const claim =
+			typeof identifier === "number"
+				? await this.claimsQuery.findClaim(identifier)
+				: await this.claimsQuery.findClaimByNumber(identifier);
+		const found = this.ensure(claim, identifier);
+		return found;
 	}
 
-	async findOneForOwnership(id: ClaimId) {
-		const claim = await this.claimsQuery.findClaimForOwnership(id);
-		return this.ensure(claim, id);
+	async findOneForOwnership(identifier: ClaimIdentifier) {
+		const claim =
+			typeof identifier === "number"
+				? await this.claimsQuery.findClaimForOwnership(identifier)
+				: await this.claimsQuery.findClaimForOwnershipByNumber(identifier);
+		return this.ensure(claim, identifier);
 	}
 
-	async update(id: ClaimId, dto: UpdateClaimDto, user: AuthUser) {
+	async update(
+		identifier: ClaimIdentifier,
+		dto: UpdateClaimDto,
+		user: AuthUser,
+	) {
+		const id = await this.resolveClaimId(identifier);
 		const values = this.claimsMapper.toUpdate(dto, user);
 		if (dto.customerId !== undefined || dto.orderId !== undefined) {
 			const claim = this.ensure(
@@ -98,12 +104,18 @@ export class ClaimsService {
 		return this.findOne(id);
 	}
 
-	async remove(id: ClaimId) {
+	async remove(identifier: ClaimIdentifier) {
+		const id = await this.resolveClaimId(identifier);
 		const deleted = await this.claimsQuery.deleteClaim(id);
 		return this.ensure(deleted, id);
 	}
 
-	async addComment(claimId: ClaimId, content: string, user: AuthUser) {
+	async addComment(
+		identifier: ClaimIdentifier,
+		content: string,
+		user: AuthUser,
+	) {
+		const claimId = await this.resolveClaimId(identifier);
 		const startsProgress = hasOnePermission(
 			user,
 			Permission.CLAIMS_ACTION_START_PROGRESS,
@@ -155,14 +167,15 @@ export class ClaimsService {
 					user.id,
 					"claims",
 					claimId,
-					`A new comment was added to claim ${formatClaimNumber(claimId)}.`,
+					`A new comment was added to claim ${claim.claimNumber}.`,
 				),
 			),
 		);
 		return created;
 	}
 
-	async getComments(claimId: ClaimId, commentId?: number) {
+	async getComments(identifier: ClaimIdentifier, commentId?: number) {
+		const claimId = await this.resolveClaimId(identifier);
 		const comments = await this.claimsQuery.findClaimComments(
 			claimId,
 			commentId,
@@ -175,26 +188,30 @@ export class ClaimsService {
 		}));
 	}
 
-	async startProgress(claimId: ClaimId, user: AuthUser) {
-		return this.transition(claimId, user.id, ClaimStatus.IN_PROGRESS);
+	async startProgress(identifier: ClaimIdentifier, user: AuthUser) {
+		return this.transition(identifier, user.id, ClaimStatus.IN_PROGRESS);
 	}
 
-	async awaitInfo(claimId: ClaimId, user: AuthUser) {
-		return this.transition(claimId, user.id, ClaimStatus.AWAITING_INFO);
+	async awaitInfo(identifier: ClaimIdentifier, user: AuthUser) {
+		return this.transition(identifier, user.id, ClaimStatus.AWAITING_INFO);
 	}
 
-	async startTreatment(claimId: ClaimId, user: AuthUser) {
-		return this.transition(claimId, user.id, ClaimStatus.IN_TREATMENT);
+	async startTreatment(identifier: ClaimIdentifier, user: AuthUser) {
+		return this.transition(identifier, user.id, ClaimStatus.IN_TREATMENT);
 	}
 
-	async resolve(claimId: ClaimId, user: AuthUser, resolution?: string) {
-		const claim = await this.findOne(claimId);
+	async resolve(
+		identifier: ClaimIdentifier,
+		user: AuthUser,
+		resolution?: string,
+	) {
+		const claim = await this.findOne(identifier);
 		if (!resolution && !claim.resolution) {
 			throw new ConflictException("Resolution required to resolve claim");
 		}
 
 		return this.transition(
-			claimId,
+			identifier,
 			user.id,
 			ClaimStatus.RESOLVED,
 			resolution,
@@ -202,24 +219,28 @@ export class ClaimsService {
 		);
 	}
 
-	async close(claimId: ClaimId, user: AuthUser) {
-		return this.transition(claimId, user.id, ClaimStatus.CLOSED, undefined, {
+	async close(identifier: ClaimIdentifier, user: AuthUser) {
+		return this.transition(identifier, user.id, ClaimStatus.CLOSED, undefined, {
 			closedByUserId: user.id,
 			closedAt: new Date().toISOString(),
 		});
 	}
 
-	async reject(claimId: ClaimId, user: AuthUser, rejectionReason?: string) {
+	async reject(
+		identifier: ClaimIdentifier,
+		user: AuthUser,
+		rejectionReason?: string,
+	) {
 		return this.transition(
-			claimId,
+			identifier,
 			user.id,
 			ClaimStatus.REJECTED,
 			rejectionReason,
 		);
 	}
 
-	async sendToDtm(claimId: ClaimId, user: AuthUser) {
-		return this.transition(claimId, user.id, ClaimStatus.SENT_TO_DTM);
+	async sendToDtm(identifier: ClaimIdentifier, user: AuthUser) {
+		return this.transition(identifier, user.id, ClaimStatus.SENT_TO_DTM);
 	}
 
 	private async persistUpdate(
@@ -249,12 +270,13 @@ export class ClaimsService {
 	}
 
 	private async transition(
-		claimId: ClaimId,
+		identifier: ClaimIdentifier,
 		userId: number,
 		toStatus: ClaimStatus,
 		comment?: string,
 		extraValues: Record<string, unknown> = {},
 	) {
+		const claimId = await this.resolveClaimId(identifier);
 		const claim = this.ensure(
 			await this.claimsQuery.findClaimStatus(claimId),
 			claimId,
@@ -302,19 +324,18 @@ export class ClaimsService {
 		return updated;
 	}
 
-	private ensure<T>(value: T | undefined, id: ClaimId): T {
+	private async resolveClaimId(identifier: ClaimIdentifier): Promise<ClaimId> {
+		if (typeof identifier === "number") return identifier;
+		const claim = await this.claimsQuery.findClaimIdByNumber(
+			identifier as ClaimNumber,
+		);
+		return this.ensure(claim, identifier).id;
+	}
+
+	private ensure<T>(value: T | undefined, id: ClaimIdentifier): T {
 		if (!value) {
 			throw new NotFoundException(`Claim ${id} not found`);
 		}
 		return value;
-	}
-
-	private async withClaimNumbers<T extends { id: ClaimId }>(
-		claims: Promise<T[]>,
-	) {
-		return (await claims).map((claim) => ({
-			...claim,
-			claimNumber: formatClaimNumber(claim.id),
-		}));
 	}
 }

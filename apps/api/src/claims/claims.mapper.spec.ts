@@ -23,7 +23,11 @@ describe("ClaimsMapper customer scope", () => {
 		}) as CreateClaimDto;
 
 	it("allows a customer user to create a claim for their own customer", () => {
-		expect(mapper.toCreate(dto(42), customerUser).customerId).toBe(42);
+		const created = mapper.toCreate(dto(42), customerUser);
+		expect(created.customerId).toBe(42);
+		expect(created.claimNumber).toMatch(
+			/^CLM-[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{10}$/,
+		);
 	});
 
 	it("rejects a customer user trying to create a claim for another customer", () => {

@@ -15,11 +15,11 @@ import {
 import type { AuthRequest } from "@/auth/auth.types";
 import { RequireAny } from "@/auth/permissions.decorator";
 import { createCrudResponses } from "@/common/decorators/api-crud-responses.decorator";
-import { ApiPathParam } from "@/common/decorators/api-path-param.decorator";
+import { ApiStringPathParam } from "@/common/decorators/api-path-param.decorator";
 import { ClaimsService } from "./claims.service";
-import type { ClaimId } from "./claims.types";
+import type { ClaimNumber } from "./claims.types";
 import { ClaimOwnershipGuard } from "./guards/claim-ownership.guard";
-import { ClaimIdPipe } from "./pipes/claim-id.pipe";
+import { ClaimNumberPipe } from "./pipes/claim-number.pipe";
 import { CreateClaimDto } from "./requests/create-claim.dto";
 import { CreateClaimCommentDto } from "./requests/create-claim-comment.dto";
 import { ListClaimQueryDto } from "./requests/list-claim.dto";
@@ -31,7 +31,7 @@ import { ClaimDeleteDto } from "./responses/claim-delete.dto";
 import { ClaimDetailDto } from "./responses/claim-detail.dto";
 import { ClaimListDto } from "./responses/claim-list.dto";
 
-const ClaimIdParam = () => ApiPathParam("id", ClaimIdPipe);
+const ClaimNumberParam = () => ApiStringPathParam("id", ClaimNumberPipe);
 
 const {
 	list: ClaimListResponse,
@@ -85,7 +85,7 @@ export class ClaimsController {
 	@Get(":id")
 	@RequireAny(Permission.CLAIMS_READ)
 	@ClaimDetailResponse()
-	async findOne(@ClaimIdParam() id: ClaimId) {
+	async findOne(@ClaimNumberParam() id: ClaimNumber) {
 		return this.claimsService.findOne(id);
 	}
 
@@ -93,7 +93,7 @@ export class ClaimsController {
 	@RequireAny(Permission.CLAIMS_UPDATE)
 	@ClaimDetailResponse()
 	async update(
-		@ClaimIdParam() id: ClaimId,
+		@ClaimNumberParam() id: ClaimNumber,
 		@Body() dto: UpdateClaimDto,
 		@Request() req: AuthRequest,
 	) {
@@ -103,7 +103,7 @@ export class ClaimsController {
 	@Delete(":id")
 	@RequireAny(Permission.CLAIMS_DELETE)
 	@ClaimDeleteResponse()
-	async remove(@ClaimIdParam() id: ClaimId) {
+	async remove(@ClaimNumberParam() id: ClaimNumber) {
 		return this.claimsService.remove(id);
 	}
 
@@ -111,7 +111,7 @@ export class ClaimsController {
 	@RequireAny(Permission.CLAIMS_ACTION_COMMENT)
 	@ClaimCommentResponse()
 	async addComment(
-		@ClaimIdParam() id: ClaimId,
+		@ClaimNumberParam() id: ClaimNumber,
 		@Body() dto: CreateClaimCommentDto,
 		@Request() req: AuthRequest,
 	) {
@@ -121,7 +121,7 @@ export class ClaimsController {
 	@Get(":id/comments")
 	@RequireAny(Permission.CLAIMS_READ)
 	@ClaimCommentsResponse()
-	async getComments(@ClaimIdParam() id: ClaimId) {
+	async getComments(@ClaimNumberParam() id: ClaimNumber) {
 		return this.claimsService.getComments(id);
 	}
 
@@ -130,7 +130,7 @@ export class ClaimsController {
 	@RequireAny(Permission.CLAIMS_ACTION_START_PROGRESS)
 	@ClaimDetailResponse()
 	async startProgress(
-		@ClaimIdParam() id: ClaimId,
+		@ClaimNumberParam() id: ClaimNumber,
 		@Request() req: AuthRequest,
 	) {
 		return this.claimsService.startProgress(id, req.user);
@@ -140,7 +140,10 @@ export class ClaimsController {
 	@HttpCode(HttpStatus.OK)
 	@RequireAny(Permission.CLAIMS_ACTION_AWAIT_INFO)
 	@ClaimDetailResponse()
-	async awaitInfo(@ClaimIdParam() id: ClaimId, @Request() req: AuthRequest) {
+	async awaitInfo(
+		@ClaimNumberParam() id: ClaimNumber,
+		@Request() req: AuthRequest,
+	) {
 		return this.claimsService.awaitInfo(id, req.user);
 	}
 
@@ -149,7 +152,7 @@ export class ClaimsController {
 	@RequireAny(Permission.CLAIMS_ACTION_START_TREATMENT)
 	@ClaimDetailResponse()
 	async startTreatment(
-		@ClaimIdParam() id: ClaimId,
+		@ClaimNumberParam() id: ClaimNumber,
 		@Request() req: AuthRequest,
 	) {
 		return this.claimsService.startTreatment(id, req.user);
@@ -160,7 +163,7 @@ export class ClaimsController {
 	@RequireAny(Permission.CLAIMS_ACTION_RESOLVE)
 	@ClaimDetailResponse()
 	async resolve(
-		@ClaimIdParam() id: ClaimId,
+		@ClaimNumberParam() id: ClaimNumber,
 		@Body() dto: ResolveClaimDto,
 		@Request() req: AuthRequest,
 	) {
@@ -171,7 +174,10 @@ export class ClaimsController {
 	@HttpCode(HttpStatus.OK)
 	@RequireAny(Permission.CLAIMS_ACTION_CLOSE)
 	@ClaimDetailResponse()
-	async close(@ClaimIdParam() id: ClaimId, @Request() req: AuthRequest) {
+	async close(
+		@ClaimNumberParam() id: ClaimNumber,
+		@Request() req: AuthRequest,
+	) {
 		return this.claimsService.close(id, req.user);
 	}
 
@@ -180,7 +186,7 @@ export class ClaimsController {
 	@RequireAny(Permission.CLAIMS_ACTION_REJECT)
 	@ClaimDetailResponse()
 	async reject(
-		@ClaimIdParam() id: ClaimId,
+		@ClaimNumberParam() id: ClaimNumber,
 		@Body() dto: RejectClaimDto,
 		@Request() req: AuthRequest,
 	) {
@@ -191,7 +197,10 @@ export class ClaimsController {
 	@HttpCode(HttpStatus.OK)
 	@RequireAny(Permission.CLAIMS_ACTION_SEND_TO_DTM)
 	@ClaimDetailResponse()
-	async sendToDtm(@ClaimIdParam() id: ClaimId, @Request() req: AuthRequest) {
+	async sendToDtm(
+		@ClaimNumberParam() id: ClaimNumber,
+		@Request() req: AuthRequest,
+	) {
 		return this.claimsService.sendToDtm(id, req.user);
 	}
 }

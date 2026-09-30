@@ -539,7 +539,7 @@ export function DashboardOverview() {
 					description: `${claim.customer.companyName} · ${claim.claimType.name}`,
 					status: claim.claimStatus.name,
 					date: claim.createdAt,
-					href: `/dashboard/claims/${claim.id}`,
+					href: `/dashboard/claims/${claim.claimNumber}`,
 				}))}
 			/>
 		),

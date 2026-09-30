@@ -9,7 +9,7 @@ interface PageProps {
 
 export default async function Page({ params }: PageProps) {
 	const { id } = await params;
-	const claim = await claimsControllerFindOne(Number(id));
+	const claim = await claimsControllerFindOne(id);
 
 	return (
 		<>

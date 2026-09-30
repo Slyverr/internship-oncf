@@ -55,6 +55,11 @@ export const claims = pgTable(
 	"claims",
 	{
 		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
+		claimNumber: varchar("claim_number", { length: 14 })
+			.default(
+				sql`'CLM-' || upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 10))`,
+			)
+			.notNull(),
 		customerId: bigint("customer_id", { mode: "number" }).notNull(),
 		createdByUserId: bigint("created_by_user_id", { mode: "number" }).notNull(),
 		orderId: bigint("order_id", { mode: "number" }),
@@ -74,6 +79,11 @@ export const claims = pgTable(
 		closedAt: timestamp("closed_at", { mode: "string" }),
 	},
 	(table) => [
+		unique("claims_claim_number_key").on(table.claimNumber),
+		check(
+			"claims_claim_number_format_check",
+			sql`${table.claimNumber} ~ '^CLM-[A-Z0-9]{10}$'`,
+		),
 		foreignKey({
 			columns: [table.customerId],
 			foreignColumns: [customers.id],

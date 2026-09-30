@@ -19,3 +19,22 @@ export function ApiPathParam(
 		}
 	};
 }
+
+export function ApiStringPathParam(
+	name: string,
+	...pipes: (PipeTransform | Type<PipeTransform>)[]
+): ParameterDecorator {
+	const bindRouteParam = Param(name, ...pipes);
+	const bindOpenApiParam = ApiParam({ name, type: String });
+
+	return (target, propertyKey, parameterIndex) => {
+		bindRouteParam(target, propertyKey, parameterIndex);
+
+		if (propertyKey === undefined) return;
+
+		const descriptor = Object.getOwnPropertyDescriptor(target, propertyKey);
+		if (descriptor) {
+			bindOpenApiParam(target, propertyKey, descriptor);
+		}
+	};
+}

@@ -111,9 +111,7 @@ describe("customer portfolio authorization (e2e)", () => {
 
 		for (const description of Object.values(E2E_CLAIMS)) {
 			expect(claimIds[description]).toEqual(expect.any(Number));
-			expect(claimNumbers[description]).toBe(
-				`CLM-${String(claimIds[description]).padStart(10, "0")}`,
-			);
+			expect(claimNumbers[description]).toMatch(/^CLM-[A-Z0-9]{10}$/);
 		}
 
 		const programRows = [
@@ -157,7 +155,7 @@ describe("customer portfolio authorization (e2e)", () => {
 		);
 
 		const detail = await request(app.getHttpServer())
-			.get(`/claims/${claimIds[E2E_CLAIMS.assignedA]}`)
+			.get(`/claims/${claimNumber}`)
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200);
 
@@ -254,7 +252,7 @@ describe("customer portfolio authorization (e2e)", () => {
 			.expect(403);
 
 		await request(app.getHttpServer())
-			.get(`/claims/${claimIds[E2E_CLAIMS.assignedA]}`)
+			.get(`/claims/${claimNumbers[E2E_CLAIMS.assignedA]}`)
 			.set("Authorization", `Bearer ${token}`)
 			.expect(403);
 	});
@@ -413,11 +411,11 @@ describe("customer portfolio authorization (e2e)", () => {
 		).toEqual([E2E_CLAIMS.assignedA]);
 
 		await request(app.getHttpServer())
-			.get(`/claims/${claimIds[E2E_CLAIMS.assignedASecondClient]}`)
+			.get(`/claims/${claimNumbers[E2E_CLAIMS.assignedASecondClient]}`)
 			.set("Authorization", `Bearer ${token}`)
 			.expect(403);
 		await request(app.getHttpServer())
-			.get(`/claims/${claimIds[E2E_CLAIMS.outside]}`)
+			.get(`/claims/${claimNumbers[E2E_CLAIMS.outside]}`)
 			.set("Authorization", `Bearer ${token}`)
 			.expect(403);
 	});
@@ -448,7 +446,7 @@ describe("customer portfolio authorization (e2e)", () => {
 		expect(excludedFilter.body).toEqual([]);
 
 		await request(app.getHttpServer())
-			.get(`/claims/${claimIds[E2E_CLAIMS.outside]}`)
+			.get(`/claims/${claimNumbers[E2E_CLAIMS.outside]}`)
 			.set("Authorization", `Bearer ${token}`)
 			.expect(403);
 	});
@@ -659,7 +657,7 @@ describe("customer portfolio authorization (e2e)", () => {
 				description: "E2E lifecycle claim for client close",
 			})
 			.expect(201);
-		const claimId = createdClaim.body.id as number;
+		const claimNumber = createdClaim.body.claimNumber as string;
 		expect(createdClaim.body.claimStatus.name).toBe(ClaimStatus.NEW);
 
 		await request(app.getHttpServer())
@@ -673,17 +671,17 @@ describe("customer portfolio authorization (e2e)", () => {
 			.expect(403);
 
 		await request(app.getHttpServer())
-			.post(`/claims/${claimId}/start-progress`)
+			.post(`/claims/${claimNumber}/start-progress`)
 			.set("Authorization", `Bearer ${clientToken}`)
 			.expect(403);
 		await request(app.getHttpServer())
-			.post(`/claims/${claimId}/close`)
+			.post(`/claims/${claimNumber}/close`)
 			.set("Authorization", `Bearer ${clientToken}`)
 			.expect(409);
 
 		const secondClientToken = await login(app, E2E_USERS.clientASecond.email);
 		await request(app.getHttpServer())
-			.post(`/claims/${claimId}/comments`)
+			.post(`/claims/${claimNumber}/comments`)
 			.set("Authorization", `Bearer ${secondClientToken}`)
 			.send({ content: "E2E non-owner cannot comment" })
 			.expect(403);
@@ -713,46 +711,46 @@ describe("customer portfolio authorization (e2e)", () => {
 			.expect(403);
 
 		await request(app.getHttpServer())
-			.post(`/claims/${claimId}/comments`)
+			.post(`/claims/${claimNumber}/comments`)
 			.set("Authorization", `Bearer ${agentToken}`)
 			.send({ content: "We are reviewing this claim." })
 			.expect(201);
 
 		const inProgress = await request(app.getHttpServer())
-			.get(`/claims/${claimId}`)
+			.get(`/claims/${claimNumber}`)
 			.set("Authorization", `Bearer ${clientToken}`)
 			.expect(200);
 		expect(inProgress.body.claimStatus.name).toBe(ClaimStatus.IN_PROGRESS);
 
 		const comments = await request(app.getHttpServer())
-			.get(`/claims/${claimId}/comments`)
+			.get(`/claims/${claimNumber}/comments`)
 			.set("Authorization", `Bearer ${clientToken}`)
 			.expect(200);
 		expect(comments.body).toHaveLength(1);
 		expect(comments.body[0].authorName).toBe("Assigned Agent");
 
 		const inTreatment = await request(app.getHttpServer())
-			.post(`/claims/${claimId}/start-treatment`)
+			.post(`/claims/${claimNumber}/start-treatment`)
 			.set("Authorization", `Bearer ${agentToken}`)
 			.expect(200);
 		expect(inTreatment.body.claimStatus.name).toBe(ClaimStatus.IN_TREATMENT);
 
 		const resolved = await request(app.getHttpServer())
-			.post(`/claims/${claimId}/resolve`)
+			.post(`/claims/${claimNumber}/resolve`)
 			.set("Authorization", `Bearer ${agentToken}`)
 			.send({ resolution: "E2E resolution" })
 			.expect(200);
 		expect(resolved.body.claimStatus.name).toBe(ClaimStatus.RESOLVED);
 
 		const closed = await request(app.getHttpServer())
-			.post(`/claims/${claimId}/close`)
+			.post(`/claims/${claimNumber}/close`)
 			.set("Authorization", `Bearer ${clientToken}`)
 			.expect(200);
 		expect(closed.body.claimStatus.name).toBe(ClaimStatus.CLOSED);
 		expect(closed.body.resolution).toBe("E2E resolution");
 
 		await request(app.getHttpServer())
-			.post(`/claims/${claimId}/close`)
+			.post(`/claims/${claimNumber}/close`)
 			.set("Authorization", `Bearer ${clientToken}`)
 			.expect(409);
 	});

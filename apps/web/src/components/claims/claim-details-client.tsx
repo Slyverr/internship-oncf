@@ -12,7 +12,7 @@ interface ClaimDetailsClientProps {
 }
 
 export function ClaimDetailsClient({ claim }: ClaimDetailsClientProps) {
-	const { data: currentClaim } = useClaimsControllerFindOne(claim.id, {
+	const { data: currentClaim } = useClaimsControllerFindOne(claim.claimNumber, {
 		query: {
 			initialData: claim,
 		},

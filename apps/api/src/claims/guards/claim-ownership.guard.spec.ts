@@ -6,6 +6,7 @@ import { ClaimOwnershipGuard } from "./claim-ownership.guard";
 const claim = (createdByUserId: number, customerId: number) => ({
 	createdByUserId,
 	customerId,
+	claimNumber: "CLM-ABCDEFGHJK",
 });
 
 const createUser = (overrides: Partial<AuthUser>): AuthUser => ({
@@ -27,7 +28,7 @@ function createGuard(user: AuthUser, ownership: ReturnType<typeof claim>) {
 	const guard = new ClaimOwnershipGuard(moduleRef as never);
 	const context = {
 		switchToHttp: () => ({
-			getRequest: () => ({ params: { id: "31" }, user }),
+			getRequest: () => ({ params: { id: "CLM-ABCDEFGHJK" }, user }),
 		}),
 	} as ExecutionContext;
 	return { guard, service, context };

@@ -135,7 +135,7 @@ export function ClaimCreateForm(): JSX.Element {
 				},
 				{
 					onSuccess: (claim: ClaimDetailDto) => {
-						router.push(`/dashboard/claims/${claim.id}`);
+						router.push(`/dashboard/claims/${claim.claimNumber}`);
 					},
 				},
 			);

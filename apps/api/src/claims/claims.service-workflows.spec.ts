@@ -27,6 +27,7 @@ const agent: AuthUser = {
 };
 const claim = {
 	id,
+	claimNumber: "CLM-ABCDEFGHJK",
 	createdByUserId: 12,
 	statusId: CLAIM_STATUSES[ClaimStatus.NEW].id,
 	claimStatus: { name: ClaimStatus.NEW },
@@ -43,7 +44,10 @@ describe("ClaimsService workflows", () => {
 		query = {
 			findClaims: jest.fn(),
 			findClaim: jest.fn(),
+			findClaimByNumber: jest.fn(),
 			findClaimForOwnership: jest.fn(),
+			findClaimForOwnershipByNumber: jest.fn(),
+			findClaimIdByNumber: jest.fn(),
 			createClaim: jest.fn(),
 			findOrderCustomer: jest.fn(),
 			findClaimAssociation: jest.fn(),
@@ -62,16 +66,15 @@ describe("ClaimsService workflows", () => {
 		service = new ClaimsService(notifications as never, query, mapper);
 		query.updateClaim.mockResolvedValue({ id } as never);
 		query.findClaim.mockResolvedValue(claim as never);
+		query.findClaimByNumber.mockResolvedValue(claim as never);
+		query.findClaimIdByNumber.mockResolvedValue({ id } as never);
 	});
 
 	it("maps and creates a claim, then returns its detail", async () => {
 		const values = { description: "Broken cargo" };
 		mapper.toCreate.mockReturnValue(values as never);
 		query.createClaim.mockResolvedValue({ id } as never);
-		expect(await service.create(values as never, agent)).toEqual({
-			...claim,
-			claimNumber: "CLM-0000000023",
-		});
+		expect(await service.create(values as never, agent)).toEqual(claim);
 		expect(mapper.toCreate).toHaveBeenCalledWith(values, agent);
 		expect(query.createClaim).toHaveBeenCalledWith(values);
 		expect(query.findClaim).toHaveBeenCalledWith(id);
@@ -150,14 +153,36 @@ describe("ClaimsService workflows", () => {
 		);
 	});
 
+	it("resolves a public claim number for detail lookups", async () => {
+		query.findClaimByNumber.mockResolvedValue(claim as never);
+
+		await expect(service.findOne(claim.claimNumber)).resolves.toEqual(claim);
+		expect(query.findClaimByNumber).toHaveBeenCalledWith(claim.claimNumber);
+	});
+
+	it("resolves a public claim number before persisting a workflow change", async () => {
+		query.findClaimIdByNumber.mockResolvedValue({ id } as never);
+		query.findClaimStatus.mockResolvedValue({
+			statusId: CLAIM_STATUSES[ClaimStatus.NEW].id,
+		} as never);
+
+		await service.startProgress(claim.claimNumber, agent);
+
+		expect(query.findClaimIdByNumber).toHaveBeenCalledWith(claim.claimNumber);
+		expect(query.updateClaim).toHaveBeenCalledWith(
+			id,
+			expect.objectContaining({
+				statusId: CLAIM_STATUSES[ClaimStatus.IN_PROGRESS].id,
+			}),
+			expect.any(Object),
+		);
+	});
+
 	it("maps and persists claim updates", async () => {
 		const dto = { description: "Updated description" };
 		const values = { description: "Updated description" };
 		mapper.toUpdate.mockReturnValue(values as never);
-		expect(await service.update(id, dto, agent)).toEqual({
-			...claim,
-			claimNumber: "CLM-0000000023",
-		});
+		expect(await service.update(id, dto, agent)).toEqual(claim);
 		expect(query.updateClaim).toHaveBeenCalledWith(
 			id,
 			values,
@@ -211,7 +236,7 @@ describe("ClaimsService workflows", () => {
 			agent.id,
 			"claims",
 			id,
-			"Claim CLM-0000000023 is now in progress.",
+			`Claim ${claim.claimNumber} is now in progress.`,
 		);
 	});
 
@@ -292,6 +317,7 @@ describe("ClaimsService workflows", () => {
 		] as never);
 		query.findClaimForOwnership.mockResolvedValue({
 			createdByUserId: 12,
+			claimNumber: claim.claimNumber,
 		} as never);
 
 		expect(
@@ -308,7 +334,7 @@ describe("ClaimsService workflows", () => {
 			agent.id,
 			"claims",
 			id,
-			"A new comment was added to claim CLM-0000000023.",
+			`A new comment was added to claim ${claim.claimNumber}.`,
 		);
 	});
 
@@ -323,6 +349,7 @@ describe("ClaimsService workflows", () => {
 		] as never);
 		query.findClaimForOwnership.mockResolvedValue({
 			createdByUserId: 12,
+			claimNumber: claim.claimNumber,
 		} as never);
 
 		expect(
@@ -357,6 +384,7 @@ describe("ClaimsService workflows", () => {
 		] as never);
 		query.findClaimForOwnership.mockResolvedValue({
 			createdByUserId: client.id,
+			claimNumber: claim.claimNumber,
 		} as never);
 		query.findCommercialAgentIds.mockResolvedValue([7, 8]);
 
@@ -369,7 +397,7 @@ describe("ClaimsService workflows", () => {
 				client.id,
 				"claims",
 				id,
-				`A new comment was added to claim CLM-0000000023.`,
+				`A new comment was added to claim ${claim.claimNumber}.`,
 			);
 		}
 	});

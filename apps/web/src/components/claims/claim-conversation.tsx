@@ -196,7 +196,7 @@ export function ClaimConversation({
 	const messagesEndRef = useRef<HTMLLIElement>(null);
 	const positionedAtLatest = useRef(false);
 	const scrollAfterReply = useRef(false);
-	const commentsQuery = useClaimsControllerGetComments(claimId, {
+	const commentsQuery = useClaimsControllerGetComments(claimNumber, {
 		query: { enabled: open },
 	});
 	const notificationsQuery = useNotificationsControllerFindAll({
@@ -298,17 +298,17 @@ export function ClaimConversation({
 
 		try {
 			await addComment.mutateAsync({
-				id: claimId,
+				id: claimNumber,
 				data: { content: trimmedContent },
 			});
 			setContent("");
 			scrollAfterReply.current = true;
 			await Promise.all([
 				queryClient.invalidateQueries({
-					queryKey: getClaimsControllerGetCommentsQueryKey(claimId),
+					queryKey: getClaimsControllerGetCommentsQueryKey(claimNumber),
 				}),
 				queryClient.invalidateQueries({
-					queryKey: getClaimsControllerFindOneQueryKey(claimId),
+					queryKey: getClaimsControllerFindOneQueryKey(claimNumber),
 				}),
 			]);
 			toast.add({

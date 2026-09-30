@@ -4,8 +4,8 @@ This is the milestone journal for finishing the ECommand MVP. Read it with [work
 
 ## Current position
 
-- **Completed chapters:** 1 — API E2E foundation and core workflows; 2 — admin portfolio management; 3 — SDF-aligned role authorization; 4 — role-aware preview review and dashboard next steps; 5 — browser checks for dashboard, client orders, programs, and registration review; 6 — program lifecycle audit history and a working verification gate.
-- **Active chapter:** 7 — close the remaining explicit SDF capability gaps and finish the highest-priority user workflows.
+- **Completed chapters:** 1 — API E2E foundation and core workflows; 2 — admin portfolio management; 3 — SDF-aligned role authorization; 4 — role-aware preview review and dashboard next steps; 5 — browser checks for dashboard, client orders, programs, and registration review; 6 — program lifecycle audit history and a working verification gate; 7 — claim workflow verification; 8 — random claim codes and public-code claim routes.
+- **Active chapter:** 9 — close the remaining explicit SDF capability gaps and finish the highest-priority user workflows.
 - **Current checkout:** `develop`; local commits remain unpublished. Review the task-focused history before any further cleanup; do not rewrite published commits.
 - **Local app:** `bun run dev` is running at `http://localhost:3000`; web `/login` and API `http://localhost:8000/health` return HTTP 200. The ignored API `.env` points to the isolated `ecommand_preview` database. The pre-existing `ecommand` database was left untouched.
 
@@ -77,7 +77,7 @@ Coverage includes:
 | Priority | Area | Remaining work / evidence |
 | --- | --- | --- |
 | P0 | Admin role/access management | Explicit SDF Story 5.2 is not implemented. Decide whether pilot admins edit grants only for the three fixed roles or can create roles; then build guarded API/UI, prevent privilege lockout/escalation, and add audit/tests. The current `Role` enum and reference-seeded role table are fixed; do not start a custom-role schema before resolving this model. |
-| P1 | Public identifiers and URLs | Order/program display codes are already random, but their API and web detail/action URLs still use numeric database IDs. Claim codes still derive from sequential IDs. Persist random `AAA-XXXXXXXXXX`-style codes for each routed entity, use them in web routes and related API action/file endpoints, preserve numeric IDs for relations, and keep ownership/permission guards active. |
+| P1 | Public identifiers and URLs | Claims now persist random `CLM-XXXXXXXXXX` codes and use them in API/web detail, edit, comment, and workflow routes. Order/program codes are already random, but detail/edit/workflow API and web routes still use numeric IDs; order attachment endpoints do too. Migrate those routes while preserving numeric IDs for relations and retaining ownership/permission guards. |
 | P1 | Browser E2E and CI | Manual browser checks now cover client order submission, agent approval, order-to-program creation, admin registration review, and claim conversation/closure. GitHub Actions now runs `bun run verify` and isolated API E2E; its first hosted run is pending. Automated browser journeys remain to be added. |
 | P1 | Workflow reliability | Test notification failure/retry behavior, authorization failure paths, and confirmed gaps in transition validation. Durable retry and assignment alerts need separate design. |
 | P1 | Dashboard | Confirm metrics and next actions are useful for each role and scoped data does not leak. Recent cards and next-step links already exist. |
@@ -102,3 +102,11 @@ Coverage includes:
 - Added `.github/workflows/verify.yml`, which runs workspace verification and isolated API E2E on pushes and pull requests. YAML parsing and whitespace validation passed locally; the first hosted run is pending because these commits have not been pushed.
 - Restarted `bun run dev` from the current `develop` checkout. Web `/login` and API `/health` returned HTTP 200. Keep the process running for browser review.
 - Commits for this milestone: `0ee0803 docs(project): specify opaque public codes` and `79d13bf chore(config): run verification in ci`.
+
+## Chapter 8 — claim public identifiers — 2026-09-30
+
+- Claims now store unique random `CLM-` codes with ten uppercase alphanumeric characters. The evolving Drizzle schema backfills existing preview rows with random codes and enforces uniqueness and format; no migration files were added.
+- Claim detail, edit, comment, and workflow API routes now accept the public code. The ownership guard validates the code and still applies customer/creator ownership checks. Dashboard and table links use the code; numeric claim route segments return 400.
+- A live check against the isolated preview app authenticated as the test client, fetched its claim list, opened a claim by `CLM-` code (200), and verified a numeric claim route is rejected (400).
+- `bun run verify:commit` passed: Biome, all workspace typechecks, web checks, 58 API suites / 442 tests, and production builds. Local isolated API E2E could not run in this environment because only Bun's Node shim is available; CI uses Node 24 and should be checked on its first hosted run.
+- The remaining public-URL gap is order/program route migration, including order file endpoints. Existing IDs remain internal for relations and notification metadata.

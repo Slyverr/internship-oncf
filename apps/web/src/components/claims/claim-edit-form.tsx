@@ -36,8 +36,9 @@ import { useAuth } from "@/providers/auth-provider";
 export function ClaimEditForm({ claim }: { claim: ClaimDetailDto }) {
 	const router = useRouter();
 	const queryClient = useQueryClient();
-	const updateDetailCache = useUpdateDetailCache<ClaimDetailDto>(
+	const updateDetailCache = useUpdateDetailCache<ClaimDetailDto, string>(
 		getClaimsControllerFindOneQueryKey,
+		(updatedClaim) => updatedClaim.claimNumber,
 	);
 	const { hasPermission } = useAuth();
 	const mutation = useClaimsControllerUpdate();
@@ -70,7 +71,7 @@ export function ClaimEditForm({ claim }: { claim: ClaimDetailDto }) {
 
 		try {
 			const updated = await mutation.mutateAsync({
-				id: claim.id,
+				id: claim.claimNumber,
 				data: {
 					...(type !== initialType && { type }),
 					...(priority && priority !== (initialPriority ?? undefined)
@@ -88,7 +89,7 @@ export function ClaimEditForm({ claim }: { claim: ClaimDetailDto }) {
 				title: "Claim saved",
 				description: "The claim details have been updated.",
 			});
-			router.push(`/dashboard/claims/${claim.id}`);
+			router.push(`/dashboard/claims/${claim.claimNumber}`);
 			router.refresh();
 		} catch (error) {
 			toast.add({
@@ -157,7 +158,7 @@ export function ClaimEditForm({ claim }: { claim: ClaimDetailDto }) {
 					variant="outline"
 					type="button"
 					disabled={mutation.isPending}
-					onClick={() => router.push(`/dashboard/claims/${claim.id}`)}
+					onClick={() => router.push(`/dashboard/claims/${claim.claimNumber}`)}
 				>
 					Cancel
 				</Button>

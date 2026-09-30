@@ -5,7 +5,12 @@ import { and, eq, type SQL } from "drizzle-orm";
 import { DrizzleService } from "@/database/drizzle.service";
 import { QueryColumns, QueryRelations } from "@/database/drizzle.types";
 import { withDbErrorHandling } from "@/database/drizzle.util";
-import type { ClaimId, ClaimInsert, ClaimUpdate } from "./claims.types";
+import type {
+	ClaimId,
+	ClaimInsert,
+	ClaimNumber,
+	ClaimUpdate,
+} from "./claims.types";
 import { ListClaimQueryDto } from "./requests/list-claim.dto";
 
 type ClaimsColumns = QueryColumns<"claims">;
@@ -13,6 +18,7 @@ type ClaimsRelations = QueryRelations<"claims">;
 
 const claimListColumns = {
 	id: true,
+	claimNumber: true,
 	customerId: true,
 	createdByUserId: true,
 	orderId: true,
@@ -130,9 +136,7 @@ export class ClaimsQuery {
 
 				...(search && {
 					OR: [
-						...(search.match(/^CLM-(\d{1,10})$/i)
-							? [{ id: Number(search.slice(4)) }]
-							: []),
+						{ claimNumber: { ilike: `%${search}%` } },
 						{
 							description: {
 								ilike: `%${search}%`,
@@ -187,10 +191,36 @@ export class ClaimsQuery {
 		});
 	}
 
+	async findClaimByNumber(claimNumber: ClaimNumber) {
+		return this.drizzle.db.query.claims.findFirst({
+			where: { claimNumber },
+			with: claimDetailRelations,
+		});
+	}
+
+	async findClaimIdByNumber(claimNumber: ClaimNumber) {
+		return this.drizzle.db.query.claims.findFirst({
+			where: { claimNumber },
+			columns: { id: true },
+		});
+	}
+
 	async findClaimForOwnership(id: ClaimId) {
 		return this.drizzle.db.query.claims.findFirst({
 			where: { id },
 			columns: {
+				claimNumber: true,
+				createdByUserId: true,
+				customerId: true,
+			},
+		});
+	}
+
+	async findClaimForOwnershipByNumber(claimNumber: ClaimNumber) {
+		return this.drizzle.db.query.claims.findFirst({
+			where: { claimNumber },
+			columns: {
+				claimNumber: true,
 				createdByUserId: true,
 				customerId: true,
 			},

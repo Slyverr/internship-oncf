@@ -1,12 +1,11 @@
 import { BadRequestException } from "@nestjs/common";
-import { ClaimIdPipe } from "@/claims/pipes/claim-id.pipe";
+import { ClaimNumberPipe } from "@/claims/pipes/claim-number.pipe";
 import { CustomerIdPipe } from "@/customers/pipes/customer-id.pipe";
 import { NotificationIdPipe } from "@/notifications/pipes/notification-id.pipe";
 import { ProgramIdPipe } from "@/programs/pipes/program-id.pipe";
 import { UserIdPipe } from "@/users/pipes/user-id.pipe";
 
 const cases = [
-	["claim", new ClaimIdPipe()],
 	["customer", new CustomerIdPipe()],
 	["notification", new NotificationIdPipe()],
 	["program", new ProgramIdPipe()],
@@ -22,6 +21,24 @@ describe.each(cases)("%s route ID", (label, pipe) => {
 		(value) => {
 			expect(() => pipe.transform(value)).toThrow(
 				new BadRequestException(`Invalid ${label} ID`),
+			);
+		},
+	);
+});
+
+describe("claim public-code route parameter", () => {
+	const pipe = new ClaimNumberPipe();
+	const code = "CLM-ABCDEFGHJK";
+
+	it("accepts a ten-character claim code", () => {
+		expect(pipe.transform(code)).toBe(code);
+	});
+
+	it.each(["1", "CLM-000000001", "ORD-ABCDEFGHJK", "CLM-short"])(
+		"rejects malformed claim code %s",
+		(value) => {
+			expect(() => pipe.transform(value)).toThrow(
+				new BadRequestException("Invalid claim number"),
 			);
 		},
 	);

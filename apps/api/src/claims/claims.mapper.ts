@@ -3,6 +3,7 @@ import { ForbiddenException, Injectable } from "@nestjs/common";
 import { AuthUser } from "@/auth/auth.types";
 import { hasAnyPermission } from "@/auth/auth.utils";
 import { canAccessCustomer } from "@/auth/customer-scope";
+import { generateDocumentNumber } from "@/common/utils/document-number";
 import { CLAIM_STATUSES, CLAIM_TYPES } from "@/database/reference-data";
 import { ClaimInsert, ClaimUpdate } from "./claims.types";
 import { CreateClaimDto } from "./requests/create-claim.dto";
@@ -33,6 +34,7 @@ export class ClaimsMapper {
 
 		return {
 			...dto,
+			claimNumber: generateDocumentNumber("CLM"),
 			createdByUserId: userId,
 			typeId: CLAIM_TYPES[dto.type].id,
 			statusId: CLAIM_STATUSES[status].id,

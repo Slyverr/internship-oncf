@@ -41,8 +41,9 @@ import { ConfirmDialog } from "../common/confirm-dialog";
 
 export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 	const { hasPermission } = useAuth();
-	const updateClaimCache = useUpdateDetailCache<ClaimDetailDto>(
+	const updateClaimCache = useUpdateDetailCache<ClaimDetailDto, string>(
 		getClaimsControllerFindOneQueryKey,
+		(claim) => claim.claimNumber,
 	);
 	const router = useRouter();
 
@@ -77,7 +78,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 	const handleReject = () => {
 		rejectMutation.mutate(
 			{
-				id: claim.id,
+				id: claim.claimNumber,
 				data: { rejectionReason },
 			},
 			{
@@ -93,7 +94,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 	const handleResolve = () => {
 		resolveMutation.mutate(
 			{
-				id: claim.id,
+				id: claim.claimNumber,
 				data: { resolution: resolutionText },
 			},
 			{
@@ -108,7 +109,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 
 	const handleDelete = () => {
 		removeMutation.mutate(
-			{ id: claim.id },
+			{ id: claim.claimNumber },
 			{
 				onSuccess: () => {
 					setDeleteDialogOpen(false);
@@ -128,7 +129,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 							disabled={isPending}
 							onClick={() =>
 								startProgressMutation.mutate(
-									{ id: claim.id },
+									{ id: claim.claimNumber },
 									{ onSuccess: updateClaimCache },
 								)
 							}
@@ -145,7 +146,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 							variant="outline"
 							onClick={() =>
 								awaitInfoMutation.mutate(
-									{ id: claim.id },
+									{ id: claim.claimNumber },
 									{ onSuccess: updateClaimCache },
 								)
 							}
@@ -163,7 +164,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 							variant="secondary"
 							onClick={() =>
 								startTreatmentMutation.mutate(
-									{ id: claim.id },
+									{ id: claim.claimNumber },
 									{ onSuccess: updateClaimCache },
 								)
 							}
@@ -192,7 +193,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 							disabled={isPending}
 							onClick={() =>
 								closeMutation.mutate(
-									{ id: claim.id },
+									{ id: claim.claimNumber },
 									{ onSuccess: updateClaimCache },
 								)
 							}
@@ -224,7 +225,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 							variant="outline"
 							onClick={() =>
 								sendToDtmMutation.mutate(
-									{ id: claim.id },
+									{ id: claim.claimNumber },
 									{ onSuccess: updateClaimCache },
 								)
 							}
@@ -254,7 +255,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 							{hasPermission(Permission.CLAIMS_UPDATE) && (
 								<DropdownMenuItem
 									onClick={() =>
-										router.push(`/dashboard/claims/${claim.id}/edit`)
+										router.push(`/dashboard/claims/${claim.claimNumber}/edit`)
 									}
 								>
 									Edit
