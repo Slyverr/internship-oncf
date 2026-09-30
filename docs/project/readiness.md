@@ -48,13 +48,15 @@ This status describes the current repository against the project SDF and report.
 
 ## Recommended order
 
-1. Resolve the fixed-role versus custom-role decision and implement admin role/access management with privilege and lockout protections.
-2. Confirm the ICE source and maintenance owner; keep the current local-record match explicit until an authoritative registry is available.
-3. Add isolated browser E2E journeys for client order, agent program/claim, and admin registration workflows. GitHub Actions runs repository verification and isolated API E2E; confirm its first hosted run after push.
-4. Review remaining program/claim edit rules and add durable notification retries and assignment alerts after ownership rules are reviewed.
-5. Keep API client generation on the verified Node runtime and review generated types whenever the API contract changes.
-6. Confirm report metrics and export expectations with pilot users; the current PDF option uses the browser print dialog.
-7. Confirm whether DTM handoff is available for the pilot; otherwise expose its local/manual status honestly.
-8. Stabilize the schema, then define migrations and production operations.
+1. **Admin role/access management (P0).** First settle the boundary: manage grants for the three existing roles or create custom roles. The schema already has roles, permissions, and role-permission relations, but the shared `Role` enum and seeded defaults currently define the supported role set. Do not expose permission mutation until the allowed role set, protected admin grants, self-lockout prevention, and audit expectations are agreed. Then add guarded API/UI, deny privilege escalation, and cover the complete permission matrix.
+2. **Automated user journeys (P1).** CI already runs workspace verification and isolated API E2E. Check its first hosted result, then add browser-level journeys for client order submission, agent approval/program and claim handling, and admin registration review. Keep test data isolated and assert both visible actions and API denials by role.
+3. **Internationalization foundation (P1).** Agree on initial locales and translation ownership. Inventory and centralize UI copy, validation/API errors, status and enum labels, dates, numbers, plurals, and public/auth pages; keep persisted values and public codes language-neutral. Migrate by route family with English fallback and add locale/formatting tests before translating every screen.
+4. **Workflow reliability (P1).** Test transition validation and notification failure paths. Design durable retries and assignment alerts only after ownership and assignment rules are confirmed; current notification delivery is best effort.
+5. **Customer identity and signup (P1).** Name the owner and update process for ICE values. Until ONCF supplies an authoritative registry, keep signup's local customer-code/ICE match explicit and verify refresh/revocation expectations with the pilot.
+6. **Data and deployment readiness (P1).** Agree on entity ownership, lifecycle, constraints, and reference data; only then stabilize the schema and select migrations. Define production secrets, HTTPS, backup/restore for PostgreSQL and object storage, and monitoring.
+7. **Pilot product closeout (P2).** Confirm report metrics/export expectations, complete page metadata/favicon review, and capture the full route/role/theme/responsive screenshot matrix after shared UI changes.
+8. **External integrations (contract-dependent).** Confirm DTM/GSCWF endpoints, authentication, payloads, and retry/error expectations. The current local status is not an external handoff. Configure and exercise a real SMTP provider before relying on email delivery.
+
+The immediate next chapter is role/access management discovery and a scoped implementation proposal. While the role policy remains open, continue the independent i18n string inventory and verify the CI workflow when a hosted run is available; do not add a custom-role schema or make the seeded administrator's grants mutable by assumption.
 
 The older Java/Spring architecture in the report is not the current implementation. Continue with ECommand's existing TypeScript stack unless a deliberate rewrite is approved.

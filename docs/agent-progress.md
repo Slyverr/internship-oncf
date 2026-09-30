@@ -5,7 +5,7 @@ This is the milestone journal for finishing the ECommand MVP. Read it with [work
 ## Current position
 
 - **Completed chapters:** 1 — API E2E foundation and core workflows; 2 — admin portfolio management; 3 — SDF-aligned role authorization; 4 — role-aware preview review and dashboard next steps; 5 — browser checks for dashboard, client orders, programs, and registration review; 6 — program lifecycle audit history and a working verification gate; 7 — claim workflow verification; 8 — random claim codes and public-code claim routes; 9 — order/program public-code routes and attachment/tracking URLs.
-- **Active chapter:** 10 — close remaining explicit SDF capability gaps and production-readiness requirements.
+- **Active chapter:** 10 — close remaining explicit SDF capability gaps and production-readiness requirements. The ranked continuation plan is in [MVP readiness](project/readiness.md); role/access management is first, followed by automated browser journeys and the i18n foundation.
 - **Current checkout:** `develop`; local commits remain unpublished. Review the task-focused history before any further cleanup; do not rewrite published commits.
 - **Local app:** `bun run dev` is running at `http://localhost:3000`; web `/login` and API `http://localhost:8000/health` return HTTP 200. The ignored API `.env` points to the isolated `ecommand_preview` database. The pre-existing `ecommand` database was left untouched.
 
@@ -116,3 +116,11 @@ Coverage includes:
 - Route guards validate the entity-specific code format and resolve records before the existing ownership/portfolio check. Numeric order/program route segments return 400. Numeric IDs remain in API response relation fields and database joins.
 - Fresh read-only smoke checks against the isolated preview verified client order detail (200), order files (200), agent order tracking (200), and agent program detail (200) by public code. Numeric order and program routes returned 400.
 - Focused API tests passed: 7 suites / 80 tests. Web logic checks passed, including preselection by order number. `bun run verify:commit` passed: Biome, all workspace typechecks, web checks, 58 API suites / 447 tests, and production builds. Isolated API E2E remains unverified locally because this environment provides Bun's Node shim; CI uses Node 24 and its first hosted run is pending.
+
+## Chapter 10 review checkpoint — 2026-09-30
+
+- Rechecked the current Recent orders UI and the shared `RecentSection` used by orders, programs, and claims. Current populated dashboard captures at 390px and 1440px show row spacing and no separator; source has `gap-4`, `divide-y-0`, and no row border. The reported separator is not reproducible in this checkout, so no CSS change was made. Latest review captures are `/tmp/ecommand-home-recents-review/dashboard-recents-390x844.png` and `/tmp/ecommand-home-recents-review/dashboard-recents-1440x900.png`; the screenshot helper reported no page overflow.
+- Re-ranked remaining work by requirement impact and dependencies. Admin role/access management is first, but the policy boundary (fixed seeded roles versus custom roles) must be confirmed before permission writes are exposed. The existing schema includes role, permission, and role-permission tables; shared types/defaults still define only the three seeded roles.
+- Promoted the i18n foundation to P1: choose initial locales, inventory and centralize UI/API validation copy and locale formatting, preserve language-neutral stored values/codes, migrate route families with fallback, and add coverage. No translation system was introduced in this review.
+- CI has a checked-in workflow, but its first hosted run is still pending publication. Once available, inspect the result before treating CI as verified.
+- No application code changed in this checkpoint. The next code chapter should begin with role/access scope and security invariants; the independent i18n inventory can proceed while that policy is resolved. See [MVP readiness](project/readiness.md) for the ranked sequence and acceptance intent.
