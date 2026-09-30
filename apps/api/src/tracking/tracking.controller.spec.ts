@@ -1,10 +1,12 @@
 import { Permission } from "@ecommand/shared";
 import { PERMISSIONS_ANY_KEY } from "@/auth/permissions.decorator";
 import { OrderOwnershipGuard } from "@/orders/guards/order-ownership.guard";
+import type { OrdersService } from "@/orders/orders.service";
 import { TrackingController } from "./tracking.controller";
 import type { TrackingService } from "./tracking.service";
 
 const dto = { latitude: 35, longitude: -5 };
+const orderNumber = "ORD-ABCDEFGHIJ";
 const endpoints = [
 	{
 		action: "trackWagon",
@@ -22,7 +24,8 @@ const endpoints = [
 		action: "trackOrder",
 		permission: Permission.TRACKING_READ,
 		method: "trackOrder",
-		args: [23],
+		args: [orderNumber],
+		serviceArgs: [23],
 	},
 	{
 		action: "updateWagonPosition",
@@ -45,8 +48,10 @@ describe("TrackingController authorization mapping", () => {
 			jest.fn().mockResolvedValue({ method }),
 		]),
 	);
+	const ordersService = { resolveOrderId: jest.fn().mockResolvedValue(23) };
 	const controller = new TrackingController(
 		service as unknown as TrackingService,
+		ordersService as unknown as OrdersService,
 	);
 	const methods = controller as unknown as Record<
 		string,
@@ -54,10 +59,11 @@ describe("TrackingController authorization mapping", () => {
 	>;
 	beforeEach(() => {
 		for (const fn of Object.values(service)) fn.mockClear();
+		ordersService.resolveOrderId.mockClear().mockResolvedValue(23);
 	});
 	it.each(endpoints)(
 		"requires $permission for $action and forwards input",
-		async ({ action, permission, method, args }) => {
+		async ({ action, permission, method, args, ...endpoint }) => {
 			expect(
 				Reflect.getMetadata(
 					PERMISSIONS_ANY_KEY,
@@ -65,7 +71,12 @@ describe("TrackingController authorization mapping", () => {
 				),
 			).toEqual([permission]);
 			await expect(methods[action](...args)).resolves.toEqual({ method });
-			expect(service[method]).toHaveBeenCalledWith(...args);
+			const serviceArgs =
+				"serviceArgs" in endpoint ? endpoint.serviceArgs : args;
+			expect(service[method]).toHaveBeenCalledWith(...serviceArgs);
+			if (action === "trackOrder") {
+				expect(ordersService.resolveOrderId).toHaveBeenCalledWith(orderNumber);
+			}
 		},
 	);
 	it("checks order ownership for order tracking", () => {

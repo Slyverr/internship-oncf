@@ -7,6 +7,8 @@ export type ProgramInsert = InferInsertModel<typeof forecastPrograms>;
 export type ProgramUpdate = Partial<ProgramInsert>;
 
 export type ProgramId = Program["id"];
+export type ProgramNumber = Program["programNumber"];
+export type ProgramIdentifier = ProgramId | ProgramNumber;
 
 export type ProgramList = Awaited<
 	ReturnType<ProgramsService["findAll"]>

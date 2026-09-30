@@ -49,7 +49,7 @@ const columns: ColumnDef<typeof features, OrderListDto>[] = [
 		accessorKey: "orderNumber",
 		header: "Order #",
 		cell: (info) => (
-			<TableRowLink href={`/dashboard/orders/${info.row.original.id}`}>
+			<TableRowLink href={`/dashboard/orders/${info.row.original.orderNumber}`}>
 				{info.getValue<string | null>() ?? `Order #${info.row.original.id}`}
 			</TableRowLink>
 		),
@@ -189,7 +189,7 @@ export function OrdersTable({
 									key={row.id}
 									className="cursor-pointer"
 									onClick={() =>
-										router.push(`/dashboard/orders/${row.original.id}`)
+										router.push(`/dashboard/orders/${row.original.orderNumber}`)
 									}
 								>
 									{row.getAllCells().map((cell) => (

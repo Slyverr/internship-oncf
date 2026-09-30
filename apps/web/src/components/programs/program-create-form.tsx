@@ -4,7 +4,7 @@ import { Permission, ProgramStatus } from "@ecommand/shared";
 import { useForm } from "@tanstack/react-form-nextjs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type JSX, useEffect } from "react";
+import { type JSX, useEffect, useState } from "react";
 import { z } from "zod";
 import { FormFieldHeader } from "@/components/common/form-field-header";
 import {
@@ -29,7 +29,7 @@ import { useOrdersControllerFindEligibleForPrograms } from "@/lib/api/orders";
 import { useProgramsControllerCreate } from "@/lib/api/programs";
 import { useUsersControllerFindAll } from "@/lib/api/users";
 import { getFormErrorMessage } from "@/lib/form-utils";
-import { shouldClearInitialOrderSelection } from "@/lib/program-creation-eligibility";
+import { getEligibleOrderId } from "@/lib/program-creation-eligibility";
 import { useAuth } from "@/providers/auth-provider";
 import { ProgramStatusSelect } from "./program-status-select";
 
@@ -72,15 +72,16 @@ const programSteps = [
 ];
 
 export function ProgramCreateForm({
-	initialOrderId,
+	initialOrderNumber,
 	initialOrderSearch,
 }: {
-	initialOrderId?: number;
+	initialOrderNumber?: string;
 	initialOrderSearch?: string;
 }): JSX.Element {
 	const router = useRouter();
 	const { profile, hasPermission } = useAuth();
 	const mutation = useProgramsControllerCreate();
+	const [initialOrderResolved, setInitialOrderResolved] = useState(false);
 
 	const canCreateOrders = hasPermission(Permission.ORDERS_CREATE);
 	const canManageOther = hasPermission(Permission.PROGRAMS_MANAGE_OTHER);
@@ -95,7 +96,7 @@ export function ProgramCreateForm({
 	} = useGuidedFormState();
 
 	const defaultValues: CreateProgramFormValues = {
-		orderId: initialOrderId ?? 0,
+		orderId: 0,
 		userId: canManageOther ? undefined : profile?.id,
 		status: canManageStatus ? ProgramStatus.DRAFT : undefined,
 		plannedDate: "",
@@ -129,7 +130,7 @@ export function ProgramCreateForm({
 				},
 				{
 					onSuccess: (program: ProgramDetailDto) => {
-						router.push(`/dashboard/programs/${program.id}`);
+						router.push(`/dashboard/programs/${program.programNumber}`);
 					},
 				},
 			);
@@ -153,20 +154,23 @@ export function ProgramCreateForm({
 
 	useEffect(() => {
 		if (
-			shouldClearInitialOrderSelection({
-				initialOrderId,
-				selectedOrderId: form.state.values.orderId,
-				eligibleOrderIds: orders.map((order) => order.id),
-				isLoading: ordersIsLoading,
-				isFetching: ordersIsFetching,
-				isError: ordersIsError,
-			})
-		) {
-			form.setFieldValue("orderId", 0);
-		}
+			!initialOrderNumber ||
+			initialOrderResolved ||
+			ordersIsLoading ||
+			ordersIsFetching ||
+			ordersIsError
+		)
+			return;
+
+		form.setFieldValue(
+			"orderId",
+			getEligibleOrderId(initialOrderNumber, orders),
+		);
+		setInitialOrderResolved(true);
 	}, [
 		form,
-		initialOrderId,
+		initialOrderNumber,
+		initialOrderResolved,
 		orders,
 		ordersIsError,
 		ordersIsFetching,
@@ -470,8 +474,8 @@ export function ProgramCreateForm({
 						currentStep={step}
 						stepCount={programSteps.length}
 						onCancel={() =>
-							initialOrderId
-								? router.push(`/dashboard/orders/${initialOrderId}`)
+							initialOrderNumber
+								? router.push(`/dashboard/orders/${initialOrderNumber}`)
 								: router.push("/dashboard/programs")
 						}
 						onPrevious={() => setStep(0)}

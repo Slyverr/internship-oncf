@@ -131,7 +131,7 @@ export function OrderOverview({ order }: { order: OrderDetailDto }) {
 				</Card>
 			</div>
 
-			<OrderAttachments orderId={order.id} />
+			<OrderAttachments orderNumber={order.orderNumber} />
 		</div>
 	);
 }

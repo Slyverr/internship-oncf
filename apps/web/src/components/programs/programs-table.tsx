@@ -59,7 +59,9 @@ const columns: ColumnDef<typeof features, ProgramListDto>[] = [
 		accessorKey: "programNumber",
 		header: "Program #",
 		cell: (info) => (
-			<TableRowLink href={`/dashboard/programs/${info.row.original.id}`}>
+			<TableRowLink
+				href={`/dashboard/programs/${info.row.original.programNumber}`}
+			>
 				{info.getValue<string>()}
 			</TableRowLink>
 		),
@@ -223,7 +225,9 @@ export function ProgramsTable({ data, isLoading }: ProgramsTableProps) {
 									key={row.id}
 									className="cursor-pointer"
 									onClick={() =>
-										router.push(`/dashboard/programs/${row.original.id}`)
+										router.push(
+											`/dashboard/programs/${row.original.programNumber}`,
+										)
 									}
 								>
 									{row.getAllCells().map((cell) => (

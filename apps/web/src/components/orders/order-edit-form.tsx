@@ -38,8 +38,9 @@ const orderEditSteps = [
 export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 	const router = useRouter();
 	const queryClient = useQueryClient();
-	const updateDetailCache = useUpdateDetailCache<OrderDetailDto>(
+	const updateDetailCache = useUpdateDetailCache<OrderDetailDto, string>(
 		getOrdersControllerFindOneQueryKey,
+		(updatedOrder) => updatedOrder.orderNumber,
 	);
 	const { hasPermission } = useAuth();
 	const mutation = useOrdersControllerUpdate();
@@ -154,7 +155,10 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 		}
 
 		try {
-			const updated = await mutation.mutateAsync({ id: order.id, data });
+			const updated = await mutation.mutateAsync({
+				id: order.orderNumber,
+				data,
+			});
 
 			setSavedValues(values);
 
@@ -303,7 +307,7 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 			<GuidedFormActions
 				currentStep={step}
 				stepCount={orderEditSteps.length}
-				onCancel={() => router.push(`/dashboard/orders/${order.id}`)}
+				onCancel={() => router.push(`/dashboard/orders/${order.orderNumber}`)}
 				onPrevious={() => setStep(0)}
 				onContinue={continueToSchedule}
 				submitLabel="Save Changes"

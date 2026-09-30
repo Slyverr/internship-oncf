@@ -18,7 +18,7 @@ interface OrderDetailsClientProps {
 
 export function OrderDetailsClient({ order }: OrderDetailsClientProps) {
 	const { profile, hasPermission } = useAuth();
-	const { data: currentOrder } = useOrdersControllerFindOne(order.id, {
+	const { data: currentOrder } = useOrdersControllerFindOne(order.orderNumber, {
 		query: {
 			initialData: order,
 		},
@@ -48,8 +48,8 @@ export function OrderDetailsClient({ order }: OrderDetailsClientProps) {
 						render={
 							<Link
 								href={
-									"/dashboard/programs/new?orderId=" +
-									currentOrder.id +
+									"/dashboard/programs/new?orderNumber=" +
+									currentOrder.orderNumber +
 									"&search=" +
 									encodeURIComponent(currentOrder.orderNumber)
 								}

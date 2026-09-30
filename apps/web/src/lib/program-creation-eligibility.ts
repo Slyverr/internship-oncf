@@ -29,27 +29,9 @@ export function canCreateProgramForOrder({
 	);
 }
 
-export function shouldClearInitialOrderSelection({
-	initialOrderId,
-	selectedOrderId,
-	eligibleOrderIds,
-	isLoading,
-	isFetching,
-	isError,
-}: {
-	initialOrderId?: number;
-	selectedOrderId: number;
-	eligibleOrderIds: number[];
-	isLoading: boolean;
-	isFetching: boolean;
-	isError: boolean;
-}): boolean {
-	return (
-		initialOrderId !== undefined &&
-		selectedOrderId === initialOrderId &&
-		!isLoading &&
-		!isFetching &&
-		!isError &&
-		!eligibleOrderIds.includes(initialOrderId)
-	);
+export function getEligibleOrderId(
+	orderNumber: string | undefined,
+	orders: { id: number; orderNumber: string }[],
+): number {
+	return orders.find((order) => order.orderNumber === orderNumber)?.id ?? 0;
 }

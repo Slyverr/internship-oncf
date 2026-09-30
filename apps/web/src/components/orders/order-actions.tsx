@@ -39,8 +39,9 @@ import { ConfirmDialog } from "../common/confirm-dialog";
 
 export function OrderActions({ order }: { order: OrderDetailDto }) {
 	const { hasPermission } = useAuth();
-	const updateOrderCache = useUpdateDetailCache<OrderDetailDto>(
+	const updateOrderCache = useUpdateDetailCache<OrderDetailDto, string>(
 		getOrdersControllerFindOneQueryKey,
+		(order) => order.orderNumber,
 	);
 	const router = useRouter();
 
@@ -74,7 +75,7 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 	const handleReject = () => {
 		rejectMutation.mutate(
 			{
-				id: order.id,
+				id: order.orderNumber,
 				data: {
 					reason: rejectionReason,
 				},
@@ -91,7 +92,7 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 
 	const handleDelete = () => {
 		removeMutation.mutate(
-			{ id: order.id },
+			{ id: order.orderNumber },
 			{
 				onSuccess: () => {
 					setDeleteDialogOpen(false);
@@ -111,7 +112,7 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 							disabled={isPending}
 							onClick={() =>
 								submitMutation.mutate(
-									{ id: order.id },
+									{ id: order.orderNumber },
 									{ onSuccess: updateOrderCache },
 								)
 							}
@@ -128,7 +129,7 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 							disabled={isPending}
 							onClick={() =>
 								approveMutation.mutate(
-									{ id: order.id },
+									{ id: order.orderNumber },
 									{ onSuccess: updateOrderCache },
 								)
 							}
@@ -158,7 +159,7 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 							disabled={isPending}
 							onClick={() =>
 								cancelMutation.mutate(
-									{ id: order.id },
+									{ id: order.orderNumber },
 									{ onSuccess: updateOrderCache },
 								)
 							}
@@ -175,7 +176,7 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 							disabled={isPending}
 							onClick={() =>
 								sendToDtmMutation.mutate(
-									{ id: order.id },
+									{ id: order.orderNumber },
 									{ onSuccess: updateOrderCache },
 								)
 							}
@@ -204,7 +205,7 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 							{canEdit && (
 								<DropdownMenuItem
 									onClick={() =>
-										router.push(`/dashboard/orders/${order.id}/edit`)
+										router.push(`/dashboard/orders/${order.orderNumber}/edit`)
 									}
 								>
 									Edit

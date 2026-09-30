@@ -11,11 +11,14 @@ interface ProgramDetailsClientProps {
 }
 
 export function ProgramDetailsClient({ program }: ProgramDetailsClientProps) {
-	const { data: currentProgram } = useProgramsControllerFindOne(program.id, {
-		query: {
-			initialData: program,
+	const { data: currentProgram } = useProgramsControllerFindOne(
+		program.programNumber,
+		{
+			query: {
+				initialData: program,
+			},
 		},
-	});
+	);
 
 	if (!currentProgram) {
 		return null;

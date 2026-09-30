@@ -7,9 +7,9 @@ export const E2E_CUSTOMERS = {
 } as const;
 
 export const E2E_ORDERS = {
-	assignedA: "E2E-ORD-A",
-	assignedB: "E2E-ORD-B",
-	outside: "E2E-ORD-C",
+	assignedA: "ORD-E2E0000001",
+	assignedB: "ORD-E2E0000002",
+	outside: "ORD-E2E0000003",
 } as const;
 
 export const E2E_CLAIMS = {
@@ -20,8 +20,8 @@ export const E2E_CLAIMS = {
 } as const;
 
 export const E2E_PROGRAMS = {
-	assignedA: "E2E-PRG-A",
-	outside: "E2E-PRG-C",
+	assignedA: "PRG-E2E0000001",
+	outside: "PRG-E2E0000002",
 } as const;
 
 export const E2E_USERS = {

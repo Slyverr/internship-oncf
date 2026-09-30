@@ -197,7 +197,7 @@ function ReadyOrdersSection({
 						{orders.slice(0, 4).map((order) => (
 							<Link
 								key={order.id}
-								href={`/dashboard/programs/new?orderId=${order.id}&search=${encodeURIComponent(order.orderNumber)}`}
+								href={`/dashboard/programs/new?orderNumber=${order.orderNumber}&search=${encodeURIComponent(order.orderNumber)}`}
 								aria-label={`Create a program for order ${order.orderNumber}`}
 								className="flex min-h-11 min-w-0 items-center justify-between gap-control rounded-md border px-control py-compact text-sm transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 							>
@@ -491,7 +491,7 @@ export function DashboardOverview() {
 					description: `${order.customer.companyName} · ${order.good.name} · ${order.quantityDemanded} ${order.unit.name}`,
 					status: order.orderStatus.name,
 					date: order.createdAt,
-					href: `/dashboard/orders/${order.id}`,
+					href: `/dashboard/orders/${order.orderNumber}`,
 				}))}
 			/>
 		),
@@ -514,7 +514,7 @@ export function DashboardOverview() {
 					description: `Order ${program.order.orderNumber} · ${program.quantityPlanned} planned`,
 					status: program.programStatus.name,
 					date: program.createdAt,
-					href: `/dashboard/programs/${program.id}`,
+					href: `/dashboard/programs/${program.programNumber}`,
 				}))}
 			/>
 		),

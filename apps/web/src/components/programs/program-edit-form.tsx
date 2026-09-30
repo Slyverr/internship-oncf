@@ -28,8 +28,9 @@ const QUANTITY_PATTERN = /^\d+(\.\d{1,3})?$/;
 export function ProgramEditForm({ program }: { program: ProgramDetailDto }) {
 	const router = useRouter();
 	const queryClient = useQueryClient();
-	const updateDetailCache = useUpdateDetailCache<ProgramDetailDto>(
+	const updateDetailCache = useUpdateDetailCache<ProgramDetailDto, string>(
 		getProgramsControllerFindOneQueryKey,
+		(updatedProgram) => updatedProgram.programNumber,
 	);
 	const mutation = useProgramsControllerUpdate();
 	const initialPlannedDate = toDateInputValue(program.plannedDate);
@@ -62,7 +63,7 @@ export function ProgramEditForm({ program }: { program: ProgramDetailDto }) {
 
 		try {
 			const updated = await mutation.mutateAsync({
-				id: program.id,
+				id: program.programNumber,
 				data: { plannedDate, quantityPlanned: quantity },
 			});
 			updateDetailCache(updated);
@@ -72,7 +73,7 @@ export function ProgramEditForm({ program }: { program: ProgramDetailDto }) {
 				title: "Program saved",
 				description: "The planned date and quantity have been updated.",
 			});
-			router.push(`/dashboard/programs/${program.id}`);
+			router.push(`/dashboard/programs/${program.programNumber}`);
 			router.refresh();
 		} catch (error) {
 			toast.add({
@@ -123,7 +124,9 @@ export function ProgramEditForm({ program }: { program: ProgramDetailDto }) {
 					variant="outline"
 					type="button"
 					disabled={mutation.isPending}
-					onClick={() => router.push(`/dashboard/programs/${program.id}`)}
+					onClick={() =>
+						router.push(`/dashboard/programs/${program.programNumber}`)
+					}
 				>
 					Cancel
 				</Button>

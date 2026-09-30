@@ -1,18 +1,18 @@
 import { createOwnershipGuard } from "@/auth/guards/ownership.factory";
-import { ProgramIdPipe } from "../pipes/program-id.pipe";
+import { ProgramNumberPipe } from "../pipes/program-number.pipe";
 import { canAccessProgram } from "../programs.access";
 import { ProgramsService } from "../programs.service";
-import { ProgramId } from "../programs.types";
+import { ProgramNumber } from "../programs.types";
 
 export const ProgramOwnershipGuard = createOwnershipGuard<
 	ProgramsService,
-	ProgramId
+	ProgramNumber
 >({
 	service: ProgramsService,
 	canAccess: async (service, id, user) => {
 		const program = await service.findOneForOwnership(id);
 		return canAccessProgram(program, user);
 	},
-	pipe: new ProgramIdPipe(),
+	pipe: new ProgramNumberPipe(),
 	errorMessage: "You can only access your own programs",
 });

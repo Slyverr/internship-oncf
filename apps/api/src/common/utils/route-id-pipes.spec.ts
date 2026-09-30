@@ -2,13 +2,13 @@ import { BadRequestException } from "@nestjs/common";
 import { ClaimNumberPipe } from "@/claims/pipes/claim-number.pipe";
 import { CustomerIdPipe } from "@/customers/pipes/customer-id.pipe";
 import { NotificationIdPipe } from "@/notifications/pipes/notification-id.pipe";
-import { ProgramIdPipe } from "@/programs/pipes/program-id.pipe";
+import { OrderNumberPipe } from "@/orders/pipes/order-number.pipe";
+import { ProgramNumberPipe } from "@/programs/pipes/program-number.pipe";
 import { UserIdPipe } from "@/users/pipes/user-id.pipe";
 
 const cases = [
 	["customer", new CustomerIdPipe()],
 	["notification", new NotificationIdPipe()],
-	["program", new ProgramIdPipe()],
 	["user", new UserIdPipe()],
 ] as const;
 
@@ -39,6 +39,23 @@ describe("claim public-code route parameter", () => {
 		(value) => {
 			expect(() => pipe.transform(value)).toThrow(
 				new BadRequestException("Invalid claim number"),
+			);
+		},
+	);
+});
+
+describe.each([
+	["order", new OrderNumberPipe(), "ORD-ABCDEFGHIJ"],
+	["program", new ProgramNumberPipe(), "PRG-ABCDEFGHIJ"],
+])("%s public-code route parameter", (label, pipe, code) => {
+	it("accepts a ten-character public code", () => {
+		expect(pipe.transform(code)).toBe(code);
+	});
+	it.each(["1", "CLM-ABCDEFGHJK", `${label.toUpperCase()}-short`])(
+		"rejects malformed public code %s",
+		(value) => {
+			expect(() => pipe.transform(value)).toThrow(
+				new BadRequestException(`Invalid ${label} number`),
 			);
 		},
 	);

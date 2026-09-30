@@ -2,10 +2,14 @@ import { Permission } from "@ecommand/shared";
 import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
 import { RequireAny } from "@/auth/permissions.decorator";
 import { createCrudResponses } from "@/common/decorators/api-crud-responses.decorator";
-import { ApiPathParam } from "@/common/decorators/api-path-param.decorator";
+import {
+	ApiPathParam,
+	ApiStringPathParam,
+} from "@/common/decorators/api-path-param.decorator";
 import { OrderOwnershipGuard } from "@/orders/guards/order-ownership.guard";
-import type { OrderId } from "@/orders/orders.types";
-import { OrderIdPipe } from "@/orders/pipes/order-id.pipe";
+import { OrdersService } from "@/orders/orders.service";
+import type { OrderNumber } from "@/orders/orders.types";
+import { OrderNumberPipe } from "@/orders/pipes/order-number.pipe";
 import { TrainIdPipe } from "./pipes/train-id.pipe";
 import { WagonIdPipe } from "./pipes/wagon-id.pipe";
 import { UpdateTrainPositionDto } from "./requests/update-train-position.dto";
@@ -18,7 +22,7 @@ import { WagonPositionDto } from "./responses/wagon-position.dto";
 import { TrackingService } from "./tracking.service";
 import type { TrainId, WagonId } from "./tracking.types";
 
-const OrderIdParam = () => ApiPathParam("id", OrderIdPipe);
+const OrderNumberParam = () => ApiStringPathParam("id", OrderNumberPipe);
 
 const { detail: TrackWagonResponse } = createCrudResponses({
 	detail: TrackWagonDto,
@@ -47,7 +51,10 @@ const { detail: TrainPositionResponse } = createCrudResponses({
 
 @Controller("tracking")
 export class TrackingController {
-	constructor(private readonly trackingService: TrackingService) {}
+	constructor(
+		private readonly trackingService: TrackingService,
+		private readonly ordersService: OrdersService,
+	) {}
 
 	@Get("wagon/:wagonNumber")
 	@RequireAny(Permission.TRACKING_READ)
@@ -67,8 +74,10 @@ export class TrackingController {
 	@RequireAny(Permission.TRACKING_READ)
 	@UseGuards(OrderOwnershipGuard)
 	@TrackOrderResponse()
-	async trackOrder(@OrderIdParam() id: OrderId) {
-		return this.trackingService.trackOrder(id);
+	async trackOrder(@OrderNumberParam() orderNumber: OrderNumber) {
+		return this.trackingService.trackOrder(
+			await this.ordersService.resolveOrderId(orderNumber),
+		);
 	}
 
 	@Post("wagon/:id/position")

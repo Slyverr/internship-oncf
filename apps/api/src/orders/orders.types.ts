@@ -7,6 +7,8 @@ export type OrderInsert = InferInsertModel<typeof orders>;
 export type OrderUpdate = Partial<OrderInsert>;
 
 export type OrderId = Order["id"];
+export type OrderNumber = Order["orderNumber"];
+export type OrderIdentifier = OrderId | OrderNumber;
 
 export type OrderList = Awaited<ReturnType<OrdersService["findAll"]>>[number];
 export type OrderDetail = NonNullable<

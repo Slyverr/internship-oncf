@@ -15,6 +15,7 @@ This status describes the current repository against the project SDF and report.
 - Personal settings for five themes, three font choices, three text sizes, and reduced motion, with preferences synced per user through `user_preferences` and a browser-local fallback. Profile updates and password changes are included. The interface uses an ONCF-inspired orange and warm-neutral palette; no official full hex palette was located.
 - Guided multi-step flows for longer create forms and selected edit forms, with step validation, first-invalid-field focus, back navigation, preserved values, subtle motion, and reduced-motion support.
 - Claim details and forecast program details can be edited from their existing edit routes. Workflow status remains controlled through transition actions.
+- Orders, forecast programs, and claims now use their persisted random document codes in web detail/edit links and API detail/workflow routes. Order attachment and tracking routes use the order number too. Database IDs remain in internal relations; ownership and permission guards still check access after resolving each code.
 - Order create/list/detail/edit, status workflow, access rules/history, attachment endpoints, and web UI.
 - Eligible orders can be sent directly from the dashboard or order details into program creation. The selector excludes orders with an existing program, and the API rejects duplicate program creation.
 - Forecast program create/list/detail and lifecycle transitions, plus its API update endpoint.
@@ -33,7 +34,6 @@ This status describes the current repository against the project SDF and report.
 ## Incomplete for a usable MVP
 
 - **Admin role/access management (P0):** the SDF capability has reserved permissions, but there is no management API or screen. The current role enum and seeded roles are fixed. Confirm whether the pilot should edit grants for those existing roles or create custom roles; then implement guarded management, prevent privilege escalation and administrator lockout, audit changes, and test the API/UI matrix.
-- **Public identifiers and detail URLs:** every user-facing record code should use a three-letter entity prefix plus ten random, non-sequential characters (`AAA-XXXXXXXXXX`, for example `ORD-…`, `PRG-…`, or `CLM-…`). Orders and programs already have random `ORD-` / `PRG-` references, but their API and web detail, edit, workflow, and attachment URLs still use numeric IDs. Claims now persist random `CLM-` codes and use them for API actions and web detail/edit routes; numeric claim paths are rejected. Move the remaining order and program routes to their public codes, including order file endpoints. Keep database IDs for internal relations and retain permission and ownership checks; opaque URLs are defense in depth, not authorization. Do not add migrations before the schema is stabilized.
 - **ICE data ownership:** signup compares the submitted customer code and ICE with the locally maintained customer record; it does not query an external ONCF registry. Confirm who maintains customer ICE values and how they are kept current before production use.
 - **OpenAPI generation runtime:** the Bun development API returns empty properties for DTO schemas, but the production-style API started with real Node returns typed schemas. Current Node verification found 41 properties on `OrderDetailDto` and no generic `Object` references. Generate the client from the Node runtime documented in the [development workflow](../development/workflow.md#local-setup), then review the generated diff before accepting it. This is a developer workflow constraint, not a blocked user flow.
 
@@ -49,13 +49,12 @@ This status describes the current repository against the project SDF and report.
 ## Recommended order
 
 1. Resolve the fixed-role versus custom-role decision and implement admin role/access management with privilege and lockout protections.
-2. Replace numeric order and program IDs in operational detail, edit, workflow, and order-file URLs with their existing random public codes; audit the other routed entities at the same time.
-3. Confirm the ICE source and maintenance owner; keep the current local-record match explicit until an authoritative registry is available.
-4. Add isolated browser E2E journeys for client order, agent program/claim, and admin registration workflows. GitHub Actions now runs repository verification and isolated API E2E; confirm its first hosted run after push.
-5. Review remaining program/claim edit rules and add durable notification retries and assignment alerts after ownership rules are reviewed.
-6. Keep API client generation on the verified Node runtime and review generated types whenever the API contract changes.
-7. Confirm report metrics and export expectations with pilot users; the current PDF option uses the browser print dialog.
-8. Confirm whether DTM handoff is available for the pilot; otherwise expose its local/manual status honestly.
-9. Stabilize the schema, then define migrations and production operations.
+2. Confirm the ICE source and maintenance owner; keep the current local-record match explicit until an authoritative registry is available.
+3. Add isolated browser E2E journeys for client order, agent program/claim, and admin registration workflows. GitHub Actions runs repository verification and isolated API E2E; confirm its first hosted run after push.
+4. Review remaining program/claim edit rules and add durable notification retries and assignment alerts after ownership rules are reviewed.
+5. Keep API client generation on the verified Node runtime and review generated types whenever the API contract changes.
+6. Confirm report metrics and export expectations with pilot users; the current PDF option uses the browser print dialog.
+7. Confirm whether DTM handoff is available for the pilot; otherwise expose its local/manual status honestly.
+8. Stabilize the schema, then define migrations and production operations.
 
 The older Java/Spring architecture in the report is not the current implementation. Continue with ECommand's existing TypeScript stack unless a deliberate rewrite is approved.

@@ -4,8 +4,8 @@ This is the milestone journal for finishing the ECommand MVP. Read it with [work
 
 ## Current position
 
-- **Completed chapters:** 1 — API E2E foundation and core workflows; 2 — admin portfolio management; 3 — SDF-aligned role authorization; 4 — role-aware preview review and dashboard next steps; 5 — browser checks for dashboard, client orders, programs, and registration review; 6 — program lifecycle audit history and a working verification gate; 7 — claim workflow verification; 8 — random claim codes and public-code claim routes.
-- **Active chapter:** 9 — close the remaining explicit SDF capability gaps and finish the highest-priority user workflows.
+- **Completed chapters:** 1 — API E2E foundation and core workflows; 2 — admin portfolio management; 3 — SDF-aligned role authorization; 4 — role-aware preview review and dashboard next steps; 5 — browser checks for dashboard, client orders, programs, and registration review; 6 — program lifecycle audit history and a working verification gate; 7 — claim workflow verification; 8 — random claim codes and public-code claim routes; 9 — order/program public-code routes and attachment/tracking URLs.
+- **Active chapter:** 10 — close remaining explicit SDF capability gaps and production-readiness requirements.
 - **Current checkout:** `develop`; local commits remain unpublished. Review the task-focused history before any further cleanup; do not rewrite published commits.
 - **Local app:** `bun run dev` is running at `http://localhost:3000`; web `/login` and API `http://localhost:8000/health` return HTTP 200. The ignored API `.env` points to the isolated `ecommand_preview` database. The pre-existing `ecommand` database was left untouched.
 
@@ -77,7 +77,6 @@ Coverage includes:
 | Priority | Area | Remaining work / evidence |
 | --- | --- | --- |
 | P0 | Admin role/access management | Explicit SDF Story 5.2 is not implemented. Decide whether pilot admins edit grants only for the three fixed roles or can create roles; then build guarded API/UI, prevent privilege lockout/escalation, and add audit/tests. The current `Role` enum and reference-seeded role table are fixed; do not start a custom-role schema before resolving this model. |
-| P1 | Public identifiers and URLs | Claims now persist random `CLM-XXXXXXXXXX` codes and use them in API/web detail, edit, comment, and workflow routes. Order/program codes are already random, but detail/edit/workflow API and web routes still use numeric IDs; order attachment endpoints do too. Migrate those routes while preserving numeric IDs for relations and retaining ownership/permission guards. |
 | P1 | Browser E2E and CI | Manual browser checks now cover client order submission, agent approval, order-to-program creation, admin registration review, and claim conversation/closure. GitHub Actions now runs `bun run verify` and isolated API E2E; its first hosted run is pending. Automated browser journeys remain to be added. |
 | P1 | Workflow reliability | Test notification failure/retry behavior, authorization failure paths, and confirmed gaps in transition validation. Durable retry and assignment alerts need separate design. |
 | P1 | Dashboard | Confirm metrics and next actions are useful for each role and scoped data does not leak. Recent cards and next-step links already exist. |
@@ -109,4 +108,11 @@ Coverage includes:
 - Claim detail, edit, comment, and workflow API routes now accept the public code. The ownership guard validates the code and still applies customer/creator ownership checks. Dashboard and table links use the code; numeric claim route segments return 400.
 - A live check against the isolated preview app authenticated as the test client, fetched its claim list, opened a claim by `CLM-` code (200), and verified a numeric claim route is rejected (400).
 - `bun run verify:commit` passed: Biome, all workspace typechecks, web checks, 58 API suites / 442 tests, and production builds. Local isolated API E2E could not run in this environment because only Bun's Node shim is available; CI uses Node 24 and should be checked on its first hosted run.
-- The remaining public-URL gap is order/program route migration, including order file endpoints. Existing IDs remain internal for relations and notification metadata.
+- Order/program route conversion was the next item after this chapter and is now completed in [Chapter 9](#chapter-9--order-and-program-public-routes--2026-09-30). Existing IDs remain internal for relations and notification metadata.
+
+## Chapter 9 — order and program public routes — 2026-09-30
+
+- Order and program detail, edit, update, lifecycle, delete, order file, and order tracking routes now use their persisted `ORD-` / `PRG-` document numbers. The create-program deep link selects an order by its public number, then submits the internal relation ID as required by the API schema.
+- Route guards validate the entity-specific code format and resolve records before the existing ownership/portfolio check. Numeric order/program route segments return 400. Numeric IDs remain in API response relation fields and database joins.
+- Fresh read-only smoke checks against the isolated preview verified client order detail (200), order files (200), agent order tracking (200), and agent program detail (200) by public code. Numeric order and program routes returned 400.
+- Focused API tests passed: 7 suites / 80 tests. Web logic checks passed, including preselection by order number. `bun run verify:commit` passed: Biome, all workspace typechecks, web checks, 58 API suites / 447 tests, and production builds. Isolated API E2E remains unverified locally because this environment provides Bun's Node shim; CI uses Node 24 and its first hosted run is pending.

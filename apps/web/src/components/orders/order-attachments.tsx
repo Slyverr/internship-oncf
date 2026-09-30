@@ -17,14 +17,14 @@ import { customFetch } from "@/lib/axios";
 import { useAuth } from "@/providers/auth-provider";
 
 interface OrderAttachmentsProps {
-	orderId: number;
+	orderNumber: string;
 }
 
-export function OrderAttachments({ orderId }: OrderAttachmentsProps) {
+export function OrderAttachments({ orderNumber }: OrderAttachmentsProps) {
 	const queryClient = useQueryClient();
 	const { hasPermission } = useAuth();
 
-	const { data: files, isLoading } = useFilesControllerListFiles(orderId);
+	const { data: files, isLoading } = useFilesControllerListFiles(orderNumber);
 
 	const deleteMutation = useFilesControllerDeleteFile();
 
@@ -32,7 +32,7 @@ export function OrderAttachments({ orderId }: OrderAttachmentsProps) {
 
 	const invalidateFiles = () =>
 		queryClient.invalidateQueries({
-			queryKey: getFilesControllerListFilesQueryKey(orderId),
+			queryKey: getFilesControllerListFilesQueryKey(orderNumber),
 		});
 
 	const handleUpload = async ({ file, description }: AttachmentUploadInput) => {
@@ -45,7 +45,7 @@ export function OrderAttachments({ orderId }: OrderAttachmentsProps) {
 		}
 
 		await customFetch({
-			url: `/orders/${orderId}/files`,
+			url: `/orders/${orderNumber}/files`,
 			method: "POST",
 			data: formData,
 		});
@@ -55,7 +55,7 @@ export function OrderAttachments({ orderId }: OrderAttachmentsProps) {
 
 	const handleDownload = async (file: FileDto) => {
 		const blob = await customFetch<Blob>({
-			url: `/orders/${orderId}/files/${file.id}/download`,
+			url: `/orders/${orderNumber}/files/${file.id}/download`,
 			method: "GET",
 			responseType: "blob",
 		});
@@ -77,7 +77,7 @@ export function OrderAttachments({ orderId }: OrderAttachmentsProps) {
 
 	const handleDelete = async (file: FileDto) => {
 		await deleteMutation.mutateAsync({
-			id: orderId,
+			id: orderNumber,
 			fileId: file.id,
 		});
 

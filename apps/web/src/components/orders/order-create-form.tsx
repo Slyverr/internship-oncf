@@ -134,7 +134,7 @@ export function OrderCreateForm(): JSX.Element {
 				},
 				{
 					onSuccess: (order: OrderDetailDto) => {
-						router.push(`/dashboard/orders/${order.id}`);
+						router.push(`/dashboard/orders/${order.orderNumber}`);
 					},
 				},
 			);

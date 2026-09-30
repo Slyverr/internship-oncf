@@ -14,7 +14,11 @@ import { NotificationsService } from "@/notifications/notifications.service";
 import { PROGRAM_STATUS_BY_ID, PROGRAM_TRANSITION } from "./programs.constants";
 import { ProgramsMapper } from "./programs.mapper";
 import { ProgramsQuery } from "./programs.query";
-import type { ProgramId } from "./programs.types";
+import type {
+	ProgramId,
+	ProgramIdentifier,
+	ProgramNumber,
+} from "./programs.types";
 import { CreateProgramDto } from "./requests/create-program.dto";
 import { ListProgramQueryDto } from "./requests/list-program.dto";
 import { UpdateProgramDto } from "./requests/update-program.dto";
@@ -71,9 +75,20 @@ export class ProgramsService {
 		return this.ensure(program, id);
 	}
 
-	async findOneForOwnership(id: ProgramId) {
-		const program = await this.programsQuery.findProgramForOwnership(id);
-		return this.ensure(program, id);
+	async findOneForOwnership(identifier: ProgramIdentifier) {
+		const program =
+			typeof identifier === "number"
+				? await this.programsQuery.findProgramForOwnership(identifier)
+				: await this.programsQuery.findProgramForOwnershipByNumber(identifier);
+		return this.ensure(program, identifier);
+	}
+
+	async resolveProgramId(identifier: ProgramIdentifier): Promise<ProgramId> {
+		if (typeof identifier === "number") return identifier;
+		const program = await this.programsQuery.findProgramIdByNumber(
+			identifier as ProgramNumber,
+		);
+		return this.ensure(program, identifier).id;
 	}
 
 	async update(id: ProgramId, dto: UpdateProgramDto, user: AuthUser) {
@@ -118,7 +133,7 @@ export class ProgramsService {
 		return this.ensure(deleted, id);
 	}
 
-	private ensure<T>(program: T | undefined, id: ProgramId): T {
+	private ensure<T>(program: T | undefined, id: ProgramIdentifier): T {
 		if (!program) {
 			throw new NotFoundException(`Program ${id} not found`);
 		}

@@ -15,11 +15,11 @@ import {
 import type { AuthRequest } from "@/auth/auth.types";
 import { RequireAny } from "@/auth/permissions.decorator";
 import { createCrudResponses } from "@/common/decorators/api-crud-responses.decorator";
-import { ApiPathParam } from "@/common/decorators/api-path-param.decorator";
+import { ApiStringPathParam } from "@/common/decorators/api-path-param.decorator";
 import { ProgramOwnershipGuard } from "./guards/program-ownership.guard";
-import { ProgramIdPipe } from "./pipes/program-id.pipe";
+import { ProgramNumberPipe } from "./pipes/program-number.pipe";
 import { ProgramsService } from "./programs.service";
-import type { ProgramId } from "./programs.types";
+import type { ProgramNumber } from "./programs.types";
 import { CreateProgramDto } from "./requests/create-program.dto";
 import { ListProgramQueryDto } from "./requests/list-program.dto";
 import { UpdateProgramDto } from "./requests/update-program.dto";
@@ -27,7 +27,7 @@ import { ProgramDeleteDto } from "./responses/program-delete.dto";
 import { ProgramDetailDto } from "./responses/program-detail.dto";
 import { ProgramListDto } from "./responses/program-list.dto";
 
-const ProgramIdParam = () => ApiPathParam("id", ProgramIdPipe);
+const ProgramNumberParam = () => ApiStringPathParam("id", ProgramNumberPipe);
 
 const {
 	list: ProgramListResponse,
@@ -65,43 +65,67 @@ export class ProgramsController {
 	@Get(":id")
 	@RequireAny(Permission.PROGRAMS_READ)
 	@ProgramDetailResponse()
-	async findOne(@ProgramIdParam() id: ProgramId) {
-		return this.programsService.findOne(id);
+	async findOne(@ProgramNumberParam() number: ProgramNumber) {
+		return this.programsService.findOne(
+			await this.programsService.resolveProgramId(number),
+		);
 	}
 
 	@Patch(":id")
 	@RequireAny(Permission.PROGRAMS_UPDATE)
 	@ProgramDetailResponse()
 	async update(
-		@ProgramIdParam() id: ProgramId,
+		@ProgramNumberParam() number: ProgramNumber,
 		@Body() dto: UpdateProgramDto,
 		@Request() req: AuthRequest,
 	) {
-		return this.programsService.update(id, dto, req.user);
+		return this.programsService.update(
+			await this.programsService.resolveProgramId(number),
+			dto,
+			req.user,
+		);
 	}
 
 	@Post(":id/submit")
 	@HttpCode(HttpStatus.OK)
 	@RequireAny(Permission.PROGRAMS_ACTION_SUBMIT)
 	@ProgramDetailResponse()
-	async submit(@ProgramIdParam() id: ProgramId, @Request() req: AuthRequest) {
-		return this.programsService.submit(id, req.user);
+	async submit(
+		@ProgramNumberParam() number: ProgramNumber,
+		@Request() req: AuthRequest,
+	) {
+		return this.programsService.submit(
+			await this.programsService.resolveProgramId(number),
+			req.user,
+		);
 	}
 
 	@Post(":id/approve")
 	@HttpCode(HttpStatus.OK)
 	@RequireAny(Permission.PROGRAMS_ACTION_APPROVE)
 	@ProgramDetailResponse()
-	async approve(@ProgramIdParam() id: ProgramId, @Request() req: AuthRequest) {
-		return this.programsService.approve(id, req.user);
+	async approve(
+		@ProgramNumberParam() number: ProgramNumber,
+		@Request() req: AuthRequest,
+	) {
+		return this.programsService.approve(
+			await this.programsService.resolveProgramId(number),
+			req.user,
+		);
 	}
 
 	@Post(":id/confirm")
 	@HttpCode(HttpStatus.OK)
 	@RequireAny(Permission.PROGRAMS_ACTION_CONFIRM)
 	@ProgramDetailResponse()
-	async confirm(@ProgramIdParam() id: ProgramId, @Request() req: AuthRequest) {
-		return this.programsService.confirm(id, req.user);
+	async confirm(
+		@ProgramNumberParam() number: ProgramNumber,
+		@Request() req: AuthRequest,
+	) {
+		return this.programsService.confirm(
+			await this.programsService.resolveProgramId(number),
+			req.user,
+		);
 	}
 
 	@Post(":id/send")
@@ -109,24 +133,39 @@ export class ProgramsController {
 	@RequireAny(Permission.PROGRAMS_ACTION_SEND)
 	@ProgramDetailResponse()
 	async sendToDtm(
-		@ProgramIdParam() id: ProgramId,
+		@ProgramNumberParam() number: ProgramNumber,
 		@Request() req: AuthRequest,
 	) {
-		return this.programsService.sendToDtm(id, req.user);
+		return this.programsService.sendToDtm(
+			await this.programsService.resolveProgramId(number),
+			req.user,
+		);
 	}
 
 	@Post(":id/cancel")
 	@HttpCode(HttpStatus.OK)
 	@RequireAny(Permission.PROGRAMS_ACTION_CANCEL)
 	@ProgramDetailResponse()
-	async cancel(@ProgramIdParam() id: ProgramId, @Request() req: AuthRequest) {
-		return this.programsService.cancel(id, req.user);
+	async cancel(
+		@ProgramNumberParam() number: ProgramNumber,
+		@Request() req: AuthRequest,
+	) {
+		return this.programsService.cancel(
+			await this.programsService.resolveProgramId(number),
+			req.user,
+		);
 	}
 
 	@Delete(":id")
 	@RequireAny(Permission.PROGRAMS_DELETE)
 	@ProgramDeleteResponse()
-	async remove(@ProgramIdParam() id: ProgramId, @Request() req: AuthRequest) {
-		return this.programsService.remove(id, req.user);
+	async remove(
+		@ProgramNumberParam() number: ProgramNumber,
+		@Request() req: AuthRequest,
+	) {
+		return this.programsService.remove(
+			await this.programsService.resolveProgramId(number),
+			req.user,
+		);
 	}
 }

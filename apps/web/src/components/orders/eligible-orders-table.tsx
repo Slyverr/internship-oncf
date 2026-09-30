@@ -82,7 +82,7 @@ export function EligibleOrdersTable({
 									{canCreatePrograms && (
 										<TableCell className="text-right">
 											<Link
-												href={`/dashboard/programs/new?orderId=${order.id}&search=${encodeURIComponent(order.orderNumber ?? "")}`}
+												href={`/dashboard/programs/new?orderNumber=${order.orderNumber}&search=${encodeURIComponent(order.orderNumber ?? "")}`}
 												className="inline-flex min-h-11 items-center justify-end gap-compact text-sm text-primary hover:underline"
 											>
 												Create program

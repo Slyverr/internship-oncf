@@ -15,12 +15,12 @@ import {
 import type { AuthRequest } from "@/auth/auth.types";
 import { RequireAny } from "@/auth/permissions.decorator";
 import { createCrudResponses } from "@/common/decorators/api-crud-responses.decorator";
-import { ApiPathParam } from "@/common/decorators/api-path-param.decorator";
+import { ApiStringPathParam } from "@/common/decorators/api-path-param.decorator";
 import { ListQueryDto } from "@/common/requests/list-query.dto";
 import { OrderOwnershipGuard } from "./guards/order-ownership.guard";
 import { OrdersService } from "./orders.service";
-import type { OrderId } from "./orders.types";
-import { OrderIdPipe } from "./pipes/order-id.pipe";
+import type { OrderNumber } from "./orders.types";
+import { OrderNumberPipe } from "./pipes/order-number.pipe";
 import { CreateOrderDto } from "./requests/create-order.dto";
 import { OrderListQueryDto } from "./requests/order-list-query.dto";
 import { RejectOrderDto } from "./requests/reject-order.dto";
@@ -30,7 +30,7 @@ import { OrderDeleteDto } from "./responses/order-delete.dto";
 import { OrderDetailDto } from "./responses/order-detail.dto";
 import { OrderListDto } from "./responses/order-list.dto";
 
-const OrderIdParam = () => ApiPathParam("id", OrderIdPipe);
+const OrderNumberParam = () => ApiStringPathParam("id", OrderNumberPipe);
 
 const {
 	list: OrderListResponse,
@@ -90,7 +90,8 @@ export class OrdersController {
 	@Get(":id")
 	@RequireAny(Permission.ORDERS_READ)
 	@OrderDetailResponse()
-	async findOne(@OrderIdParam() id: OrderId) {
+	async findOne(@OrderNumberParam() number: OrderNumber) {
+		const id = await this.ordersService.resolveOrderId(number);
 		return this.ordersService.findOne(id);
 	}
 
@@ -98,27 +99,43 @@ export class OrdersController {
 	@RequireAny(Permission.ORDERS_UPDATE)
 	@OrderDetailResponse()
 	async update(
-		@OrderIdParam() id: OrderId,
+		@OrderNumberParam() number: OrderNumber,
 		@Body() updateOrderDto: UpdateOrderDto,
 		@Request() req: AuthRequest,
 	) {
-		return this.ordersService.update(id, updateOrderDto, req.user);
+		return this.ordersService.update(
+			await this.ordersService.resolveOrderId(number),
+			updateOrderDto,
+			req.user,
+		);
 	}
 
 	@Post(":id/submit")
 	@HttpCode(HttpStatus.OK)
 	@RequireAny(Permission.ORDERS_ACTION_SUBMIT)
 	@OrderDetailResponse()
-	async submit(@OrderIdParam() id: OrderId, @Request() req: AuthRequest) {
-		return this.ordersService.submit(id, req.user);
+	async submit(
+		@OrderNumberParam() number: OrderNumber,
+		@Request() req: AuthRequest,
+	) {
+		return this.ordersService.submit(
+			await this.ordersService.resolveOrderId(number),
+			req.user,
+		);
 	}
 
 	@Post(":id/approve")
 	@HttpCode(HttpStatus.OK)
 	@RequireAny(Permission.ORDERS_ACTION_APPROVE)
 	@OrderDetailResponse()
-	async approve(@OrderIdParam() id: OrderId, @Request() req: AuthRequest) {
-		return this.ordersService.approve(id, req.user);
+	async approve(
+		@OrderNumberParam() number: OrderNumber,
+		@Request() req: AuthRequest,
+	) {
+		return this.ordersService.approve(
+			await this.ordersService.resolveOrderId(number),
+			req.user,
+		);
 	}
 
 	@Post(":id/reject")
@@ -126,33 +143,51 @@ export class OrdersController {
 	@RequireAny(Permission.ORDERS_ACTION_REJECT)
 	@OrderDetailResponse()
 	async reject(
-		@OrderIdParam() id: OrderId,
+		@OrderNumberParam() number: OrderNumber,
 		@Body() body: RejectOrderDto,
 		@Request() req: AuthRequest,
 	) {
-		return this.ordersService.reject(id, body.reason, req.user);
+		return this.ordersService.reject(
+			await this.ordersService.resolveOrderId(number),
+			body.reason,
+			req.user,
+		);
 	}
 
 	@Post(":id/cancel")
 	@HttpCode(HttpStatus.OK)
 	@RequireAny(Permission.ORDERS_ACTION_CANCEL)
 	@OrderDetailResponse()
-	async cancel(@OrderIdParam() id: OrderId, @Request() req: AuthRequest) {
-		return this.ordersService.cancel(id, req.user);
+	async cancel(
+		@OrderNumberParam() number: OrderNumber,
+		@Request() req: AuthRequest,
+	) {
+		return this.ordersService.cancel(
+			await this.ordersService.resolveOrderId(number),
+			req.user,
+		);
 	}
 
 	@Post(":id/send-to-dtm")
 	@HttpCode(HttpStatus.OK)
 	@RequireAny(Permission.ORDERS_ACTION_SEND_TO_DTM)
 	@OrderDetailResponse()
-	async sendToDtm(@OrderIdParam() id: OrderId, @Request() req: AuthRequest) {
-		return this.ordersService.sendToDtm(id, req.user);
+	async sendToDtm(
+		@OrderNumberParam() number: OrderNumber,
+		@Request() req: AuthRequest,
+	) {
+		return this.ordersService.sendToDtm(
+			await this.ordersService.resolveOrderId(number),
+			req.user,
+		);
 	}
 
 	@Delete(":id")
 	@RequireAny(Permission.ORDERS_DELETE)
 	@OrderDeleteResponse()
-	async remove(@OrderIdParam() id: OrderId) {
-		return this.ordersService.remove(id);
+	async remove(@OrderNumberParam() number: OrderNumber) {
+		return this.ordersService.remove(
+			await this.ordersService.resolveOrderId(number),
+		);
 	}
 }

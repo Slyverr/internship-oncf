@@ -24,11 +24,15 @@ import {
 import type { AuthRequest } from "@/auth/auth.types";
 import { RequireAny } from "@/auth/permissions.decorator";
 import { createCrudResponses } from "@/common/decorators/api-crud-responses.decorator";
-import { ApiPathParam } from "@/common/decorators/api-path-param.decorator";
+import {
+	ApiPathParam,
+	ApiStringPathParam,
+} from "@/common/decorators/api-path-param.decorator";
 import { MessageResponseDto } from "@/common/responses/message.dto";
 import { OrderOwnershipGuard } from "@/orders/guards/order-ownership.guard";
-import type { OrderId } from "@/orders/orders.types";
-import { OrderIdPipe } from "@/orders/pipes/order-id.pipe";
+import { OrdersService } from "@/orders/orders.service";
+import type { OrderNumber } from "@/orders/orders.types";
+import { OrderNumberPipe } from "@/orders/pipes/order-number.pipe";
 import { UploadedFileParam } from "@/storage/decorators/uploaded-file.decorator";
 import type { UploadedFile } from "@/storage/storage.types";
 import { FilesService } from "./files.service";
@@ -36,7 +40,7 @@ import { FileIdPipe } from "./pipes/file-id.pipe";
 import { UploadFileDto } from "./requests/upload-file.dto";
 import { FileDto } from "./responses/file.dto";
 
-const OrderIdParam = () => ApiPathParam("id", OrderIdPipe);
+const OrderNumberParam = () => ApiStringPathParam("id", OrderNumberPipe);
 const FileIdParam = () => ApiPathParam("fileId", FileIdPipe);
 
 const {
@@ -53,7 +57,10 @@ const {
 @Controller("orders/:id/files")
 @UseGuards(OrderOwnershipGuard)
 export class FilesController {
-	constructor(private readonly filesService: FilesService) {}
+	constructor(
+		private readonly filesService: FilesService,
+		private readonly ordersService: OrdersService,
+	) {}
 
 	@Post()
 	@RequireAny(Permission.ORDERS_UPDATE)
@@ -62,7 +69,7 @@ export class FilesController {
 	@FileCreateResponse()
 	@ApiUnprocessableEntityResponse()
 	async uploadFile(
-		@OrderIdParam() id: OrderId,
+		@OrderNumberParam() number: OrderNumber,
 		@UploadedFileParam(
 			new ParseFilePipe({
 				validators: [
@@ -76,24 +83,34 @@ export class FilesController {
 		@Body() dto: UploadFileDto,
 		@Request() req: AuthRequest,
 	) {
-		return this.filesService.uploadFile(id, file, dto, req.user.id);
+		return this.filesService.uploadFile(
+			await this.ordersService.resolveOrderId(number),
+			file,
+			dto,
+			req.user.id,
+		);
 	}
 
 	@Get()
 	@RequireAny(Permission.ORDERS_READ)
 	@FileListResponse()
-	async listFiles(@OrderIdParam() id: OrderId) {
-		return this.filesService.listFiles(id);
+	async listFiles(@OrderNumberParam() number: OrderNumber) {
+		return this.filesService.listFiles(
+			await this.ordersService.resolveOrderId(number),
+		);
 	}
 
 	@Get(":fileId/download")
 	@RequireAny(Permission.ORDERS_READ)
 	async downloadFile(
-		@OrderIdParam() id: OrderId,
+		@OrderNumberParam() number: OrderNumber,
 		@FileIdParam() fileId: number,
 		@Res() res: Response,
 	) {
-		const file = await this.filesService.downloadFile(id, fileId);
+		const file = await this.filesService.downloadFile(
+			await this.ordersService.resolveOrderId(number),
+			fileId,
+		);
 
 		res.setHeader("Content-Type", file.mimeType);
 		const safeFileName = [...file.fileName]
@@ -123,8 +140,14 @@ export class FilesController {
 	@Delete(":fileId")
 	@RequireAny(Permission.ORDERS_UPDATE)
 	@FileDeleteResponse()
-	async deleteFile(@OrderIdParam() id: OrderId, @FileIdParam() fileId: number) {
-		await this.filesService.deleteFile(id, fileId);
+	async deleteFile(
+		@OrderNumberParam() number: OrderNumber,
+		@FileIdParam() fileId: number,
+	) {
+		await this.filesService.deleteFile(
+			await this.ordersService.resolveOrderId(number),
+			fileId,
+		);
 
 		return { message: "File deleted successfully" };
 	}

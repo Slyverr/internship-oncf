@@ -173,12 +173,33 @@ export class ProgramsQuery {
 		});
 	}
 
+	async findProgramIdByNumber(programNumber: string) {
+		return this.drizzle.db.query.forecastPrograms.findFirst({
+			where: { programNumber },
+			columns: { id: true },
+		});
+	}
+
 	async findProgramForOwnership(id: ProgramId) {
 		return this.drizzle.db.query.forecastPrograms.findFirst({
 			where: { id },
 			columns: {
 				createdByUserId: true,
 			},
+			with: {
+				order: {
+					columns: {
+						customerId: true,
+					},
+				},
+			},
+		});
+	}
+
+	async findProgramForOwnershipByNumber(programNumber: string) {
+		return this.drizzle.db.query.forecastPrograms.findFirst({
+			where: { programNumber },
+			columns: { createdByUserId: true },
 			with: {
 				order: {
 					columns: {

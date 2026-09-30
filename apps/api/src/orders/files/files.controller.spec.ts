@@ -5,7 +5,7 @@ jest.mock("@nestjs/platform-express", () => ({
 import { Permission } from "@ecommand/shared";
 import { PERMISSIONS_ANY_KEY } from "@/auth/permissions.decorator";
 import { OrderOwnershipGuard } from "@/orders/guards/order-ownership.guard";
-import type { OrderId } from "@/orders/orders.types";
+import type { OrdersService } from "@/orders/orders.service";
 import type { UploadedFile } from "@/storage/storage.types";
 import { FilesController } from "./files.controller";
 import type { FilesService } from "./files.service";
@@ -24,10 +24,15 @@ describe("FilesController", () => {
 		downloadFile: jest.fn(),
 		deleteFile: jest.fn(),
 	};
-	const controller = new FilesController(service as unknown as FilesService);
+	const ordersService = { resolveOrderId: jest.fn().mockResolvedValue(17) };
+	const controller = new FilesController(
+		service as unknown as FilesService,
+		ordersService as unknown as OrdersService,
+	);
 
 	beforeEach(() => {
 		for (const method of Object.values(service)) method.mockReset();
+		ordersService.resolveOrderId.mockReset().mockResolvedValue(17);
 	});
 
 	it("applies order ownership protection to the entire route group", () => {
@@ -49,7 +54,7 @@ describe("FilesController", () => {
 	);
 
 	it("forwards upload data and the authenticated uploader", async () => {
-		const orderId = 17 as OrderId;
+		const orderNumber = "ORD-ABCDEFGHIJ";
 		const file: UploadedFile = {
 			originalName: "manifest.pdf",
 			mimetype: "application/pdf",
@@ -60,10 +65,13 @@ describe("FilesController", () => {
 		const request = { user: { id: 9 } } as never;
 		service.uploadFile.mockResolvedValue({ id: 31 });
 
-		expect(await controller.uploadFile(orderId, file, dto, request)).toEqual({
+		expect(
+			await controller.uploadFile(orderNumber, file, dto, request),
+		).toEqual({
 			id: 31,
 		});
-		expect(service.uploadFile).toHaveBeenCalledWith(orderId, file, dto, 9);
+		expect(ordersService.resolveOrderId).toHaveBeenCalledWith(orderNumber);
+		expect(service.uploadFile).toHaveBeenCalledWith(17, file, dto, 9);
 	});
 
 	it("sets safe content-disposition headers for hostile and non-ASCII filenames", async () => {
@@ -74,7 +82,7 @@ describe("FilesController", () => {
 			mimeType: "application/pdf",
 		});
 
-		await controller.downloadFile(17 as OrderId, 31, response as never);
+		await controller.downloadFile("ORD-ABCDEFGHIJ", 31, response as never);
 
 		expect(response.setHeader).toHaveBeenCalledWith(
 			"Content-Type",

@@ -1,5 +1,5 @@
 import { OrderStatus } from "@ecommand/shared";
-import { ConflictException } from "@nestjs/common";
+import { ConflictException, NotFoundException } from "@nestjs/common";
 import { OrdersQuery } from "./orders.query";
 import { OrdersService } from "./orders.service";
 import type { OrderId } from "./orders.types";
@@ -36,4 +36,28 @@ describe("OrdersService deletion", () => {
 			expect(deleteOrder).not.toHaveBeenCalled();
 		},
 	);
+});
+
+describe("OrdersService public code resolution", () => {
+	const findOrderIdByNumber = jest.fn();
+	const service = new OrdersService(
+		{} as never,
+		{ findOrderIdByNumber } as unknown as OrdersQuery,
+		{} as never,
+	);
+
+	beforeEach(() => findOrderIdByNumber.mockReset());
+
+	it("resolves a public order number to its internal relation ID", async () => {
+		findOrderIdByNumber.mockResolvedValue({ id: 42 });
+		await expect(service.resolveOrderId("ORD-ABCDEFGHIJ")).resolves.toBe(42);
+		expect(findOrderIdByNumber).toHaveBeenCalledWith("ORD-ABCDEFGHIJ");
+	});
+
+	it("rejects an unknown public order number", async () => {
+		findOrderIdByNumber.mockResolvedValue(undefined);
+		await expect(
+			service.resolveOrderId("ORD-ABCDEFGHIJ"),
+		).rejects.toBeInstanceOf(NotFoundException);
+	});
 });

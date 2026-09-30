@@ -39,8 +39,9 @@ import { ConfirmDialog } from "../common/confirm-dialog";
 
 export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 	const { hasPermission } = useAuth();
-	const updateProgramCache = useUpdateDetailCache<ProgramDetailDto>(
+	const updateProgramCache = useUpdateDetailCache<ProgramDetailDto, string>(
 		getProgramsControllerFindOneQueryKey,
+		(program) => program.programNumber,
 	);
 	const router = useRouter();
 
@@ -71,7 +72,7 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 
 	const handleCancel = () => {
 		cancelMutation.mutate(
-			{ id: program.id },
+			{ id: program.programNumber },
 			{
 				onSuccess: (updatedProgram) => {
 					updateProgramCache(updatedProgram);
@@ -83,7 +84,7 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 
 	const handleDelete = () => {
 		removeMutation.mutate(
-			{ id: program.id },
+			{ id: program.programNumber },
 			{
 				onSuccess: () => {
 					setDeleteDialogOpen(false);
@@ -103,7 +104,7 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 							disabled={isPending}
 							onClick={() =>
 								submitMutation.mutate(
-									{ id: program.id },
+									{ id: program.programNumber },
 									{ onSuccess: updateProgramCache },
 								)
 							}
@@ -120,7 +121,7 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 							disabled={isPending}
 							onClick={() =>
 								approveMutation.mutate(
-									{ id: program.id },
+									{ id: program.programNumber },
 									{ onSuccess: updateProgramCache },
 								)
 							}
@@ -137,7 +138,7 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 							disabled={isPending}
 							onClick={() =>
 								confirmMutation.mutate(
-									{ id: program.id },
+									{ id: program.programNumber },
 									{ onSuccess: updateProgramCache },
 								)
 							}
@@ -154,7 +155,7 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 							disabled={isPending}
 							onClick={() =>
 								sendToDtmMutation.mutate(
-									{ id: program.id },
+									{ id: program.programNumber },
 									{ onSuccess: updateProgramCache },
 								)
 							}
@@ -197,7 +198,9 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 							{canEdit && (
 								<DropdownMenuItem
 									onClick={() =>
-										router.push(`/dashboard/programs/${program.id}/edit`)
+										router.push(
+											`/dashboard/programs/${program.programNumber}/edit`,
+										)
 									}
 								>
 									Edit

@@ -1,6 +1,5 @@
 import { BadRequestException } from "@nestjs/common";
 import { FileIdPipe } from "@/orders/files/pipes/file-id.pipe";
-import { OrderIdPipe } from "@/orders/pipes/order-id.pipe";
 import { parsePositiveInteger } from "./parse-positive-integer";
 
 describe("parsePositiveInteger", () => {
@@ -17,10 +16,7 @@ describe("parsePositiveInteger", () => {
 		},
 	);
 
-	it("keeps the resource label in both route pipes", () => {
-		expect(() => new OrderIdPipe().transform("bad")).toThrow(
-			new BadRequestException("Invalid order ID"),
-		);
+	it("keeps the resource label in the file route pipe", () => {
 		expect(() => new FileIdPipe().transform("bad")).toThrow(
 			new BadRequestException("Invalid file ID"),
 		);

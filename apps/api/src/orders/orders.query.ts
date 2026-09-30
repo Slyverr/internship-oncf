@@ -219,6 +219,13 @@ export class OrdersQuery {
 		});
 	}
 
+	async findOrderIdByNumber(orderNumber: string) {
+		return this.drizzle.db.query.orders.findFirst({
+			where: { orderNumber },
+			columns: { id: true },
+		});
+	}
+
 	async findOrderForOwnership(id: OrderId) {
 		return this.drizzle.db.query.orders.findFirst({
 			where: { id },
@@ -228,9 +235,27 @@ export class OrdersQuery {
 		});
 	}
 
+	async findOrderForOwnershipByNumber(orderNumber: string) {
+		return this.drizzle.db.query.orders.findFirst({
+			where: { orderNumber },
+			columns: { createdByUserId: true },
+		});
+	}
+
 	async findOrderForAccess(id: OrderId) {
 		return this.drizzle.db.query.orders.findFirst({
 			where: { id },
+			columns: {
+				id: true,
+				customerId: true,
+				createdByUserId: true,
+			},
+		});
+	}
+
+	async findOrderForAccessByNumber(orderNumber: string) {
+		return this.drizzle.db.query.orders.findFirst({
+			where: { orderNumber },
 			columns: {
 				id: true,
 				customerId: true,

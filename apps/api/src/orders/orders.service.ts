@@ -20,7 +20,7 @@ import {
 } from "./orders.constants";
 import { OrdersMapper } from "./orders.mapper";
 import { OrdersQuery } from "./orders.query";
-import type { OrderId } from "./orders.types";
+import type { OrderId, OrderIdentifier, OrderNumber } from "./orders.types";
 import { CreateOrderDto } from "./requests/create-order.dto";
 import { OrderListQueryDto } from "./requests/order-list-query.dto";
 import { UpdateOrderDto } from "./requests/update-order.dto";
@@ -51,14 +51,28 @@ export class OrdersService {
 		return this.ensure(await this.ordersQuery.findOrder(id), id);
 	}
 
-	async findOneForOwnership(id: OrderId) {
-		const order = await this.ordersQuery.findOrderForOwnership(id);
-		return this.ensure(order, id);
+	async findOneForOwnership(identifier: OrderIdentifier) {
+		const order =
+			typeof identifier === "number"
+				? await this.ordersQuery.findOrderForOwnership(identifier)
+				: await this.ordersQuery.findOrderForOwnershipByNumber(identifier);
+		return this.ensure(order, identifier);
 	}
 
-	async findOneForAccess(id: OrderId) {
-		const order = await this.ordersQuery.findOrderForAccess(id);
-		return this.ensure(order, id);
+	async findOneForAccess(identifier: OrderIdentifier) {
+		const order =
+			typeof identifier === "number"
+				? await this.ordersQuery.findOrderForAccess(identifier)
+				: await this.ordersQuery.findOrderForAccessByNumber(identifier);
+		return this.ensure(order, identifier);
+	}
+
+	async resolveOrderId(identifier: OrderIdentifier): Promise<OrderId> {
+		if (typeof identifier === "number") return identifier;
+		const order = await this.ordersQuery.findOrderIdByNumber(
+			identifier as OrderNumber,
+		);
+		return this.ensure(order, identifier).id;
 	}
 
 	async update(id: OrderId, dto: UpdateOrderDto, user: AuthUser) {
@@ -186,7 +200,7 @@ export class OrdersService {
 		return updated;
 	}
 
-	private ensure<T>(value: T | undefined, id: OrderId): T {
+	private ensure<T>(value: T | undefined, id: OrderIdentifier): T {
 		if (!value) {
 			throw new NotFoundException(`Order ${id} not found`);
 		}

@@ -17,6 +17,7 @@ describe("ProgramsService lifecycle", () => {
 		findOrderCustomer: jest.fn(),
 		findProgramForOrder: jest.fn(),
 		findProgram: jest.fn(),
+		findProgramIdByNumber: jest.fn(),
 		findProgramStatus: jest.fn(),
 		updateProgram: jest.fn(),
 	};
@@ -41,10 +42,17 @@ describe("ProgramsService lifecycle", () => {
 		});
 		query.findProgramForOrder.mockReset();
 		query.findProgram.mockReset();
+		query.findProgramIdByNumber.mockReset();
 		query.findProgramStatus.mockReset();
 		query.updateProgram.mockReset();
 		notifyChange.mockReset();
 		toCreate.mockReset();
+	});
+
+	it("resolves a public program number to its internal relation ID", async () => {
+		query.findProgramIdByNumber.mockResolvedValue({ id: 27 });
+		await expect(service.resolveProgramId("PRG-ABCDEFGHIJ")).resolves.toBe(27);
+		expect(query.findProgramIdByNumber).toHaveBeenCalledWith("PRG-ABCDEFGHIJ");
 	});
 
 	it("creates the first forecast program for an order", async () => {
