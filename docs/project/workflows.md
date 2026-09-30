@@ -56,6 +56,14 @@ Checked the running local web/API stack against the project SDF using the seeded
 - Turbo build tasks now declare `dist/**` as an output alongside Next.js build files, ensuring shared and API compiled artifacts are restored on cache hits. A stale shared artifact caused the API watcher to fail at runtime; rebuilding it and restarting the development stack restored API `/health` to HTTP 200.
 - The screenshot helper was attempted for the program detail route but could not connect to Chrome DevTools at `localhost:9235`; the local web and API health endpoints were still HTTP 200.
 
+### Claim conversation browser check — 2026-09-30
+
+- Using the supplied client and agent test accounts, the client created a QA claim and sent a message. The agent read it and replied; the first response moved the claim into progress. The agent started treatment and resolved it through the UI. The client then closed the resolved claim.
+- The final client view showed `CLOSED`, the resolution summary, the closing representative, and four status-history entries. This confirms the browser conversation and client-close steps that the earlier 2026-09-29 journal listed as pending.
+- Current captures are temporary under `/tmp/ecommand-ui-review-current`; final state: `client-claim-close-1440x900.png`. No screenshots were added to the repository.
+- Claim display codes are currently derived from numeric IDs (`CLM-0000000002` was visible during this QA run). The public-ID checklist now requires random persisted codes and code-based detail/workflow URLs while retaining existing ownership and permission checks.
+- The new GitHub Actions workflow runs `bun run verify` and isolated API E2E on pushes and pull requests. The YAML parsed locally; a hosted GitHub Actions result remains unverified until the branch is pushed.
+
 ### Historical QA records from the earlier local check
 
 The earlier live workflow check recorded these QA records:

@@ -7,7 +7,7 @@ This is the milestone journal for finishing the ECommand MVP. Read it with [work
 - **Completed chapters:** 1 — API E2E foundation and core workflows; 2 — admin portfolio management; 3 — SDF-aligned role authorization; 4 — role-aware preview review and dashboard next steps; 5 — browser checks for dashboard, client orders, programs, and registration review; 6 — program lifecycle audit history and a working verification gate.
 - **Active chapter:** 7 — close the remaining explicit SDF capability gaps and finish the highest-priority user workflows.
 - **Current checkout:** `develop`; local commits remain unpublished. Review the task-focused history before any further cleanup; do not rewrite published commits.
-- **Local app:** `bun run dev` is running at `http://localhost:3000`; API `/health` returns HTTP 200. The ignored API `.env` points to the freshly initialized `ecommand_preview` database. The pre-existing `ecommand` database was left untouched.
+- **Local app:** `bun run dev` is running at `http://localhost:3000`; web `/login` and API `http://localhost:8000/health` return HTTP 200. The ignored API `.env` points to the isolated `ecommand_preview` database. The pre-existing `ecommand` database was left untouched.
 
 ## Completed chapter 1 — API E2E and core workflows
 
@@ -77,10 +77,10 @@ Coverage includes:
 | Priority | Area | Remaining work / evidence |
 | --- | --- | --- |
 | P0 | Admin role/access management | Explicit SDF Story 5.2 is not implemented. Decide whether pilot admins edit grants only for the three fixed roles or can create roles; then build guarded API/UI, prevent privilege lockout/escalation, and add audit/tests. The current `Role` enum and reference-seeded role table are fixed; do not start a custom-role schema before resolving this model. |
-| P1 | Browser workflow verification | Done for client order submission, agent approval, order-to-program creation, and admin registration review. Re-run a fresh program lifecycle to verify the new history timeline; still check claim conversation/closure in the preview browser. |
-| P1 | Browser E2E and CI | Add isolated Playwright journeys for critical client/agent/admin workflows, then wire static checks, unit tests, API E2E, and browser E2E into CI. |
-| P1 | Workflow reliability | Test notification failure/retry behavior, authorization failure paths, and any confirmed gaps in transition validation. Durable retry and assignment alerts need separate design. |
-| P1 | Dashboard | Confirm metrics and next actions are useful for each role and scoped data does not leak. Recent cards/eligible-order and registration links already exist. |
+| P1 | Public identifiers and URLs | Order/program display codes are already random, but their API and web detail/action URLs still use numeric database IDs. Claim codes still derive from sequential IDs. Persist random `AAA-XXXXXXXXXX`-style codes for each routed entity, use them in web routes and related API action/file endpoints, preserve numeric IDs for relations, and keep ownership/permission guards active. |
+| P1 | Browser E2E and CI | Manual browser checks now cover client order submission, agent approval, order-to-program creation, admin registration review, and claim conversation/closure. GitHub Actions now runs `bun run verify` and isolated API E2E; its first hosted run is pending. Automated browser journeys remain to be added. |
+| P1 | Workflow reliability | Test notification failure/retry behavior, authorization failure paths, and confirmed gaps in transition validation. Durable retry and assignment alerts need separate design. |
+| P1 | Dashboard | Confirm metrics and next actions are useful for each role and scoped data does not leak. Recent cards and next-step links already exist. |
 | P1 | Data and deployment | Confirm ownership/lifecycle rules, stabilize Drizzle schema, then choose migrations and define backup/restore, secrets, HTTPS, object storage, and monitoring. |
 | P2 | Product finish | Complete branding/page metadata, ICE ownership, i18n planning, and route-level visual consistency checks. |
 | Blocked on external contracts | Integrations | Real DTM/GSCWF handoff, durable external notification delivery, and production email provider require ONCF/provider contracts. Current local status changes and mailbox fallback are not external integrations. |
@@ -93,3 +93,12 @@ Coverage includes:
 - Do not create migrations while the model is intentionally unstable. `db:push` is for disposable local or E2E databases only.
 - Use the screenshot helper against a current browser session; old images are not evidence for current rendering. Keep captures outside the repository unless they become maintained documentation.
 - At the final gate run `bun run verify`, review role workflows, and record failed/skipped checks. Keep the development server available to the user.
+
+## Chapter 7 progress — 2026-09-30
+
+- Fresh authenticated browser testing completed the claim conversation workflow: the client created a QA claim and sent a message; the agent read and replied, started treatment, and resolved the claim; the client closed it. The final state showed `CLOSED`, the resolution summary, the closing user, and four status-history entries. Screenshots are temporary under `/tmp/ecommand-ui-review-current` (`client-claim-close-1440x900.png` and the matching agent conversation/status captures).
+- Recent dashboard activity was rechecked with current screenshots at 390px and 1440px. The shared `RecentSection` renders order, program, and claim rows with `gap-4` and no separator. The earlier separator issue is not present in the current source or capture.
+- The public-code gap is confirmed: order/program numbers use ten random characters, but API and web detail/action URLs still use numeric IDs. Claim numbers are derived from sequential IDs. See [MVP readiness](project/readiness.md) for the required code format and full route scope; URL opacity is defense in depth and does not replace ownership checks.
+- Added `.github/workflows/verify.yml`, which runs workspace verification and isolated API E2E on pushes and pull requests. YAML parsing and whitespace validation passed locally; the first hosted run is pending because these commits have not been pushed.
+- Restarted `bun run dev` from the current `develop` checkout. Web `/login` and API `/health` returned HTTP 200. Keep the process running for browser review.
+- Commits for this milestone: `0ee0803 docs(project): specify opaque public codes` and `79d13bf chore(config): run verification in ci`.
