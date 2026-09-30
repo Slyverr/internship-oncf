@@ -35,6 +35,7 @@ const cdpUrl = readOption("--cdp") ?? "http://localhost:9235";
 const freshContext = args.includes("--fresh-context");
 const actionsFirstViewportOnly = args.includes("--actions-first-viewport");
 const settleMs = Number(readOption("--settle-ms") ?? "500");
+const clickBeforeFillSelectors = readOptions("--click-before-fill");
 const clickSelectors = readOptions("--click");
 const fillFields = readAssignments("--fill");
 const waitSelector = readOption("--wait-for");
@@ -55,6 +56,7 @@ Usage: bun run ui:review -- [options]
   --url <path-or-url>    Route to capture; defaults to the current browser URL
   --fresh-context        Use an isolated browser profile without saved app login
   --fill <selector=value> Set a form field and dispatch input/change events (repeatable)
+  --click-before-fill <selector> Click before filling fields (repeatable)
   --label <name>         Screenshot filename prefix
   --click <selector>     Click a non-submitting control before capture (repeatable)
   --wait-for <selector>  Wait for a UI element after the route and clicks
@@ -311,6 +313,16 @@ try {
 		const runActions = !actionsFirstViewportOnly || results.length === 0;
 		const missingClickTargets: string[] = [];
 		const missingFillTargets: string[] = [];
+		for (const selector of runActions ? clickBeforeFillSelectors : []) {
+			const clicked = await evaluate<boolean>(`(() => {
+				const target = document.querySelector(${JSON.stringify(selector)});
+				if (!target) return false;
+				target.click();
+				return true;
+			})()`);
+			if (!clicked) missingClickTargets.push(selector);
+			if (settleMs > 0) await Bun.sleep(settleMs);
+		}
 		for (const { selector, value } of runActions ? fillFields : []) {
 			const filled = await evaluate<boolean>(`(() => {
 				const target = document.querySelector(${JSON.stringify(selector)});
