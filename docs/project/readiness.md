@@ -32,6 +32,7 @@ This status describes the current repository against the project SDF and report.
 
 ## Incomplete for a usable MVP
 
+- **Public identifiers and detail URLs:** orders and programs already have random `ORD-` / `PRG-` references, but claims derive `CLM-` from a sequential database ID, and detail routes (including `/dashboard/claims/2`) still expose numeric IDs. Audit every routed entity, reuse suitable random references, add persisted random public codes where needed, and route detail, edit, and workflow actions by those codes. Keep database IDs for internal relations and retain permission and ownership checks; opaque URLs are defense in depth, not authorization. Do not add migrations before the schema is stabilized.
 - **ICE data ownership:** signup compares the submitted customer code and ICE with the locally maintained customer record; it does not query an external ONCF registry. Confirm who maintains customer ICE values and how they are kept current before production use.
 - **OpenAPI generation runtime:** the Bun development API returns empty properties for DTO schemas, but the production-style API started with real Node returns typed schemas. Current Node verification found 41 properties on `OrderDetailDto` and no generic `Object` references. Generate the client from the Node runtime documented in the [development workflow](../development/workflow.md#local-setup), then review the generated diff before accepting it. This is a developer workflow constraint, not a blocked user flow.
 
