@@ -74,6 +74,7 @@ export function NotificationInbox() {
 			<div className="flex flex-wrap items-center justify-between gap-3">
 				<div className="flex gap-2">
 					<Button
+						size="sm"
 						variant={unreadOnly ? "outline" : "default"}
 						aria-pressed={!unreadOnly}
 						onClick={() => setUnreadOnly(false)}
@@ -81,6 +82,7 @@ export function NotificationInbox() {
 						All
 					</Button>
 					<Button
+						size="sm"
 						variant={unreadOnly ? "default" : "outline"}
 						aria-pressed={unreadOnly}
 						onClick={() => setUnreadOnly(true)}
