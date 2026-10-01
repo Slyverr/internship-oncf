@@ -4,7 +4,9 @@
 	"private": true,
 	"scripts": {
 		"dev": "concurrently --kill-others --names next,typecheck \"next dev\" \"tsc --noEmit --watch --preserveWatchOutput\"",
+		"dev:light": "next dev",
 		"typecheck": "tsc --noEmit",
+		"typecheck:watch": "tsc --noEmit --watch --preserveWatchOutput",
 		"build": "next build",
 		"start": "next start",
 		"generate:api": "bun ./scripts/generate-api.ts",

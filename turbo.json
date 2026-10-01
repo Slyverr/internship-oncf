@@ -28,3 +28,7 @@
 		}
 	}
 }
+		"dev:light": {
+			"cache": false,
+			"persistent": true
+		},

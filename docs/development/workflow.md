@@ -14,6 +14,8 @@ bun run build
 bun run format-and-lint
 ```
 
+The default `bun run dev` keeps the web TypeScript watcher running alongside Next.js, so type errors appear during development. This watcher can use substantial memory. For a lighter server startup, run `bun run dev:light`; it starts the same API and web servers without the TypeScript watcher. Run `bun run typecheck` for a one-time check, or start `bun run --filter ecommand-web typecheck:watch` separately when continuous feedback is useful.
+
 For a repeatable responsive screenshot pass, start `bun run dev` and open the app in a Chrome session with the DevTools endpoint enabled at `http://localhost:9235`. Then run:
 
 ```sh
