@@ -55,6 +55,10 @@ const sections = [
 	"roleProfiles",
 	"referenceData",
 	"dashboard",
+	"units",
+	"goods",
+	"attachments",
+	"orders",
 ] as const;
 let translatedMessageCount = 0;
 
