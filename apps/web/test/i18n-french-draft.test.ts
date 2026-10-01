@@ -49,11 +49,19 @@ function collectMessages(
 	return result;
 }
 
-const sections = ["common", "navigation", "roleProfiles"] as const;
+const sections = [
+	"common",
+	"navigation",
+	"roleProfiles",
+	"referenceData",
+	"dashboard",
+] as const;
+let translatedMessageCount = 0;
 
 for (const section of sections) {
 	const englishMessages = collectMessages(en[section]);
 	const frenchMessages = collectMessages(frDraft[section]);
+	translatedMessageCount += frenchMessages.size;
 	assert.deepEqual(
 		[...frenchMessages.keys()].sort(),
 		[...englishMessages.keys()].sort(),
@@ -69,4 +77,6 @@ for (const section of sections) {
 	}
 }
 
-console.log("French draft sections preserve English keys and placeholders.");
+console.log(
+	`French draft covers ${translatedMessageCount} keys with English key and placeholder parity.`,
+);

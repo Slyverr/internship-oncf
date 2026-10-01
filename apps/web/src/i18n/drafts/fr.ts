@@ -203,4 +203,115 @@ export const frDraft = {
 		restoreDescription:
 			"Ce profil pourra de nouveau être attribué aux utilisateurs.",
 	},
+	referenceData: {
+		pageTitle: "Données de référence",
+		description:
+			"Ajoutez des options aux listes utilisées pour les demandes de transport et les réclamations.",
+		chooseCategory: "Catégorie du catalogue",
+		add: "Ajouter",
+		edit: "Modifier",
+		actions: "Actions",
+		addTitle: "Ajouter {resource}",
+		editTitle: "Modifier {resource}",
+		dialogDescription: "Saisissez les informations pour {resource}.",
+		goodsTypeRequired:
+			"Ajoutez un type de marchandise actif avant d’ajouter des marchandises.",
+		active: "Actif",
+		archived: "Archivé",
+		name: "Nom",
+		namePlaceholder: "Saisissez un nom",
+		goodsCode: "Code marchandise",
+		goodsCodePlaceholder: "Saisissez un code marchandise",
+		goodsType: "Type de marchandise",
+		empty: "Aucune entrée pour le moment.",
+		loadFailed: "Impossible de charger les données de référence.",
+		noAccess: "Vous n’êtes pas autorisé à gérer les données de référence.",
+		sections: {
+			units: "Unités de mesure",
+			goodsTypes: "Types de marchandises",
+			goods: "Marchandises",
+			accessoryOperations: "Prestations accessoires",
+			rejectionReasons: "Motifs de rejet",
+		},
+	},
+	dashboard: {
+		pageTitle: "Tableau de bord",
+		metadataDescription:
+			"Activité récente des demandes de transport, des programmes et des réclamations.",
+		welcome: "Bon retour, {firstName}",
+		description: "Aperçu de l’activité récente dans votre espace de travail.",
+		quickActions: {
+			createOrder: "Créer une demande de transport",
+			createClaim: "Créer une réclamation",
+		},
+		recent: {
+			viewAll: "Tout afficher : {section}",
+			viewAllLabel: "Tout afficher",
+			loading: "Chargement des éléments récents…",
+			loadFailed:
+				"Impossible de charger cette liste. Ouvrez la rubrique pour réessayer.",
+		},
+		orders: {
+			title: "Demandes de transport récentes",
+			description: "Demandes de transport récentes des clients.",
+			empty: "Aucune demande de transport récente à afficher.",
+			create: "Créer une demande de transport",
+			itemDescription: "{customer} · {good} · {quantity} {unit}",
+		},
+		programs: {
+			title: "Programmes récents",
+			description: "Programmes récents",
+			empty: "Aucun programme récent à afficher.",
+			emptyWithEligibleOrders:
+				"Aucun programme récent. Les demandes admissibles apparaîtront ci-dessus lorsqu’elles seront prêtes.",
+			itemDescription: "Demande {orderCode} · {quantity} prévue(s)",
+		},
+		claims: {
+			title: "Réclamations récentes",
+			description: "Réclamations récentes des clients.",
+			empty: "Aucune réclamation récente à afficher.",
+			create: "Créer une réclamation",
+			itemDescription: "{customer} · {type}",
+		},
+		readyOrders: {
+			title: "Demandes de transport prêtes pour un programme",
+			description:
+				"Poursuivez directement à partir d’une demande de transport admissible à la planification.",
+			browse: "Parcourir les demandes admissibles",
+			checking: "Vérification des demandes admissibles…",
+			checkFailed: "Impossible de vérifier quelles demandes sont prêtes.",
+			tryAgain: "Réessayer",
+			createProgramForOrder: "Créer un programme pour la demande {orderCode}",
+		},
+		registrations: {
+			title: "Demandes d’inscription",
+			description: "Comptes client en attente de votre examen.",
+			pending: "{count} en attente",
+			viewAll: "Tout afficher",
+			review: "Examiner l’inscription de {name}",
+		},
+		activity: {
+			title: "Activité des demandes de transport",
+			description: "Demandes de transport des six derniers mois.",
+			total: "Total sur 6 mois",
+			loading: "Chargement de l’activité des demandes de transport…",
+			loadFailed: "Impossible de charger l’activité des demandes de transport.",
+			retrying: "Nouvelle tentative…",
+			retry: "Réessayer",
+			empty: "Aucune demande de transport sur cette période.",
+			chartLabel:
+				"Nombre mensuel de demandes de transport sur les six derniers mois : {months}",
+			monthCount: "{month} {count}",
+		},
+		insightsLabel: "Indicateurs du tableau de bord",
+		insightScrollHint:
+			"Balayez ou utilisez les touches fléchées pour afficher d’autres indicateurs du tableau de bord.",
+		recentActivityLabel: "Activité récente",
+		recentScrollHint:
+			"Faites défiler horizontalement pour afficher plus d’activité récente.",
+		noListsTitle: "Aucune liste opérationnelle disponible",
+		noListsDescription: "Choisissez une rubrique disponible pour continuer.",
+		viewReports: "Afficher les rapports",
+		manageUsers: "Gérer les utilisateurs",
+	},
 } as const;
