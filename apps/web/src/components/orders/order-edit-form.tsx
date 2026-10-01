@@ -2,6 +2,7 @@
 
 import { OrderStatus, Permission } from "@ecommand/shared";
 import { useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import {
@@ -10,13 +11,17 @@ import {
 } from "@/components/common/guided-form";
 import { PageHeader } from "@/components/common/page-header";
 import { GoodSelect } from "@/components/goods/good-select";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { UnitSelect } from "@/components/units/unit-select";
+import { useFormErrorMessage } from "@/hooks/use-form-error-message";
 import { useUpdateDetailCache } from "@/hooks/use-update-detail-cache";
+import { Messages } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
 import type {
 	OrderDetailDto,
 	UpdateOrderDto,
@@ -26,16 +31,25 @@ import {
 	useOrdersControllerUpdate,
 } from "@/lib/api/orders";
 import { toDateInputValue } from "@/lib/date-utils";
-import { getFormErrorMessage } from "@/lib/form-utils";
 import { useAuth } from "@/providers/auth-provider";
 
 const ORDER_QUANTITY_PATTERN = /^\d+(\.\d{1,3})?$/;
-const orderEditSteps = [
-	{ title: "Order details", description: "Goods, unit, and quantity" },
-	{ title: "Schedule", description: "Dates and handling details" },
-];
+function getOrderEditSteps(t: ReturnType<typeof useTranslate>) {
+	return [
+		{
+			title: t(Messages.orders.editForm.steps.details),
+			description: t(Messages.orders.editForm.steps.goodsUnitQuantity),
+		},
+		{
+			title: t(Messages.orders.editForm.steps.schedule),
+			description: t(Messages.orders.editForm.steps.datesHandling),
+		},
+	];
+}
 
 export function OrderEditForm({ order }: { order: OrderDetailDto }) {
+	const t = useTranslate();
+	const getErrorMessage = useFormErrorMessage();
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const updateDetailCache = useUpdateDetailCache<OrderDetailDto, string>(
@@ -58,6 +72,7 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 		endDate: toDateInputValue(order.endDate),
 	});
 	const [savedValues, setSavedValues] = useState(values);
+	const orderEditSteps = getOrderEditSteps(t);
 
 	const hasChanges =
 		values.goodsId !== savedValues.goodsId ||
@@ -85,9 +100,7 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 			!ORDER_QUANTITY_PATTERN.test(quantity) ||
 			Number(quantity) <= 0
 		) {
-			setError(
-				"Select goods and a unit, and enter a positive quantity with at most three decimal places.",
-			);
+			setError(t(Messages.orders.editForm.selectGoods));
 			return false;
 		}
 
@@ -120,7 +133,7 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 			(savedValues.startDate && !values.startDate) ||
 			(savedValues.endDate && !values.endDate)
 		) {
-			setError("The order date and any previously saved dates are required.");
+			setError(t(Messages.orders.editForm.dateRequired));
 			return;
 		}
 
@@ -129,7 +142,7 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 			values.endDate &&
 			values.startDate > values.endDate
 		) {
-			setError("The completion date must be on or after the start date.");
+			setError(t(Messages.orders.editForm.dateRange));
 			return;
 		}
 
@@ -167,16 +180,17 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 
 			toast.add({
 				type: "success",
-				title: "Order saved",
-				description: "Your changes have been saved successfully.",
+				title: t(Messages.orders.editForm.saved),
+				description: t(Messages.orders.editForm.savedDescription),
 			});
 
 			router.refresh();
 		} catch (error) {
 			toast.add({
 				type: "error",
-				title: "Could not save order",
-				description: getFormErrorMessage(error) ?? "Please try again.",
+				title: t(Messages.orders.editForm.saveFailed),
+				description:
+					getErrorMessage(error) ?? t(Messages.orders.editForm.tryAgain),
 			});
 		}
 	}
@@ -186,23 +200,38 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 		order.orderStatus.name !== OrderStatus.DRAFT
 	) {
 		return (
-			<p role="alert">
-				Only draft orders you have permission to update can be edited.
-			</p>
+			<div role="alert" className="workspace-form">
+				<PageHeader
+					title={t(Messages.orders.editForm.pageTitle, {
+						orderCode: order.orderNumber,
+					})}
+					description={t(Messages.orders.editForm.editDenied)}
+				>
+					<Button
+						variant="outline"
+						nativeButton={false}
+						render={<Link href={`/dashboard/orders/${order.orderNumber}`} />}
+					>
+						{t(Messages.common.actions.back)}
+					</Button>
+				</PageHeader>
+			</div>
 		);
 	}
 
 	return (
 		<form onSubmit={submit} className="workspace-form">
 			<PageHeader
-				title={`Edit ${order.orderNumber}`}
-				description="Update this order’s details and schedule."
+				title={t(Messages.orders.editForm.pageTitle, {
+					orderCode: order.orderNumber,
+				})}
+				description={t(Messages.orders.editForm.description)}
 			/>
 			<GuidedFormProgress steps={orderEditSteps} currentStep={step} />
 
 			<Card>
 				<CardHeader>
-					<CardTitle>Order details</CardTitle>
+					<CardTitle>{t(Messages.orders.createForm.steps.details)}</CardTitle>
 					<p>{order.customer.companyName}</p>
 				</CardHeader>
 
@@ -213,7 +242,9 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 						className={`grid gap-4 @3xl/workspace:grid-cols-2 ${step === 0 ? "page-enter" : ""}`}
 					>
 						<div className="oncf-field">
-							<Label htmlFor="goodsId">Goods / Commodity</Label>
+							<Label htmlFor="goodsId">
+								{t(Messages.orders.editForm.goods)}
+							</Label>
 							<GoodSelect
 								id="goodsId"
 								value={values.goodsId}
@@ -222,7 +253,7 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 						</div>
 
 						<div className="oncf-field">
-							<Label htmlFor="unitId">Unit of Measurement</Label>
+							<Label htmlFor="unitId">{t(Messages.orders.editForm.unit)}</Label>
 							<UnitSelect
 								id="unitId"
 								value={values.unitId}
@@ -231,11 +262,13 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 						</div>
 
 						<div className="oncf-field">
-							<Label htmlFor="quantityDemanded">Quantity Demanded *</Label>
+							<Label htmlFor="quantityDemanded">
+								{t(Messages.orders.editForm.quantity)}
+							</Label>
 							<Input
 								id="quantityDemanded"
 								inputMode="decimal"
-								placeholder="e.g. 500"
+								placeholder={t(Messages.orders.editForm.quantityPlaceholder)}
 								required
 								value={values.quantityDemanded}
 								onChange={(event) =>
@@ -251,11 +284,13 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 						className={`grid gap-4 @3xl/workspace:grid-cols-2 ${step === 1 ? "page-enter" : ""}`}
 					>
 						<div className="oncf-field">
-							<Label htmlFor="supervisor">Supervisor</Label>
+							<Label htmlFor="supervisor">
+								{t(Messages.orders.editForm.supervisor)}
+							</Label>
 							<Input
 								id="supervisor"
 								maxLength={200}
-								placeholder="Name of supervisor"
+								placeholder={t(Messages.orders.editForm.supervisorPlaceholder)}
 								value={values.supervisor}
 								onChange={(event) => change("supervisor", event.target.value)}
 							/>
@@ -263,9 +298,9 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 
 						{(
 							[
-								["orderDate", "Order Date"],
-								["startDate", "Planned Transport Start"],
-								["endDate", "Planned Completion Target"],
+								["orderDate", t(Messages.orders.editForm.orderDate)],
+								["startDate", t(Messages.orders.editForm.transportStart)],
+								["endDate", t(Messages.orders.editForm.completionTarget)],
 							] as const
 						).map(([key, label]) => (
 							<div key={key} className="oncf-field">
@@ -286,10 +321,12 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 						))}
 
 						<div className="oncf-field @3xl/workspace:col-span-2">
-							<Label htmlFor="remarks">Remarks</Label>
+							<Label htmlFor="remarks">
+								{t(Messages.orders.editForm.remarks)}
+							</Label>
 							<Textarea
 								id="remarks"
-								placeholder="Add any delivery or handling instructions."
+								placeholder={t(Messages.orders.editForm.remarksPlaceholder)}
 								value={values.remarks}
 								onChange={(event) => change("remarks", event.target.value)}
 							/>
@@ -310,8 +347,8 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 				onCancel={() => router.push(`/dashboard/orders/${order.orderNumber}`)}
 				onPrevious={() => setStep(0)}
 				onContinue={continueToSchedule}
-				submitLabel="Save Changes"
-				pendingLabel="Saving..."
+				submitLabel={t(Messages.orders.editForm.save)}
+				pendingLabel={t(Messages.orders.editForm.saving)}
 				isSubmitting={false}
 				isPending={mutation.isPending}
 				isSubmitDisabled={!hasChanges}
