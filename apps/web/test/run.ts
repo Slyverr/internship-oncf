@@ -1,5 +1,6 @@
 import "./form-utils.test";
 import "./i18n.test";
+import "./i18n-french-draft.test";
 import "./openapi-validation.test";
 import "./action-visibility.test";
 import "./claim-conversation-utils.test";
