@@ -25,6 +25,7 @@ const defaultViewports: Viewport[] = [
 
 const args = process.argv.slice(2);
 const route = readOption("--url");
+const expectedRoute = readOption("--expect-route");
 const outputDirectory = resolve(
 	readOption("--out") ?? "/tmp/ecommand-ui-review",
 );
@@ -64,6 +65,7 @@ Usage: bun run ui:review -- [options]
   --click <selector>     Click a non-submitting control before capture (repeatable)
   --click-text <text>    Click a visible control by exact text (repeatable)
   --wait-for <selector>  Wait for a UI element after the route and clicks
+  --expect-route <path>  Expected final route when a UI action changes the URL
   --actions-first-viewport Run fill/click actions only for the first viewport
   --widths <list>        Comma-separated widths; defaults to 320..3840px
   --out <directory>     Output directory (default: /tmp/ecommand-ui-review)
@@ -386,7 +388,7 @@ try {
 			pageHeight: document.documentElement.scrollHeight,
 			actualRoute: location.href,
 		})`);
-		const expectedPath = new URL(baseUrl).pathname;
+		const expectedPath = new URL(expectedRoute ?? baseUrl, baseUrl).pathname;
 		const actualPath = new URL(dimensions.actualRoute).pathname;
 		const file = resolve(
 			outputDirectory,
