@@ -58,8 +58,6 @@ async function findComposeCommand() {
 	);
 }
 
-const compose = await findComposeCommand();
-const composeArgs = [...compose, "-f", composeFile, "-p", "ecommand-e2e"];
 const nodeExecutable = process.env.ECOMMAND_E2E_NODE ?? Bun.which("node");
 
 if (!nodeExecutable) {
@@ -67,6 +65,21 @@ if (!nodeExecutable) {
 		"Node.js is required to run Jest E2E tests. Put node on PATH or set ECOMMAND_E2E_NODE to its executable path.",
 	);
 }
+
+if (
+	await commandWorks([
+		nodeExecutable,
+		"-e",
+		"process.exit(process.versions.bun ? 0 : 1)",
+	])
+) {
+	throw new Error(
+		"A real Node.js runtime is required for Jest E2E tests; the detected executable is Bun's Node.js compatibility shim. Set ECOMMAND_E2E_NODE to a Node.js binary.",
+	);
+}
+
+const compose = await findComposeCommand();
+const composeArgs = [...compose, "-f", composeFile, "-p", "ecommand-e2e"];
 
 try {
 	await run([...composeArgs, "down", "--volumes", "--remove-orphans"]);
