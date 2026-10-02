@@ -101,7 +101,7 @@ Use the same semantic roles in all themes. Cards should separate from the canvas
 - Text inputs, select triggers, and searchable comboboxes use the same semantic `background` surface and border. For composed fields, apply the surface to the outer control group and keep its inner input transparent so the whole control reads as one field.
 - Standard primary and secondary actions keep at least 12px horizontal and 8px vertical padding. Icon glyphs are generally 16px or 20px inside a larger hit area.
 - Keep the keyboard focus ring visible and distinct from hover. Give icon-only controls an accessible name; a tooltip supplements that name but does not replace it.
-- Keep form label-to-control spacing at 8px. Keep related fields 16px apart. Error text sits directly below the field and uses the destructive semantic color.
+- Keep form label-to-control spacing at 8px. Keep related fields 16px apart. Place inline validation below its label and above the control so long errors never compete for horizontal space with labels; use the destructive semantic color.
 - Keep an invalid custom selector visibly marked after focus moves away. Use `oncf-invalid-control` on its field wrapper so nested input groups and select triggers receive the destructive border.
 - Put labels above controls and helper/error copy directly below them. Pair fields only when both columns remain readable; stack them below tablet width. Textareas should show enough lines to communicate that they accept longer text.
 - Guided forms state the current step, the information needed at that step, and the next action. Back, Cancel, and submit placement must stay consistent between entity forms.
