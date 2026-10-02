@@ -292,8 +292,6 @@ export const en = {
 			monthCount: "{month} {count}",
 		},
 		insightsLabel: "Dashboard insights",
-		insightScrollHint:
-			"Swipe or use the arrow keys to view more dashboard insights.",
 		recentActivityLabel: "Recent activity",
 		recentScrollHint: "Scroll horizontally to view more recent activity.",
 		noListsTitle: "No operational lists available",

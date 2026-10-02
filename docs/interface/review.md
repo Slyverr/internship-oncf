@@ -1,5 +1,13 @@
 # UI/UX review and work list
 
+## Mobile dashboard insight spacing — 2026-10-02
+
+- A fresh Admin/Agent/Client report capture exposed an oversized empty strip under the Agent's eligible-order card on phones. The order-activity chart was the offscreen second slide and set the horizontal flex rail's height.
+- Replaced the mobile insight carousel with a vertical stack. The eligible-order card now stays at its natural height and is followed by the activity chart; the two cards return to a balanced two-column layout from `@4xl/workspace` upward. Removed the carousel-only scroll cue and its now-unused message entry. Updated the shared rule in `system.md` to document the observed behavior.
+- Inspected fresh Agent dashboard captures at 320×568, 390×844, 768×1024, and 1920×1080. The mobile cards stack without the blank band; the wide layouts remain balanced; all captures report no horizontal overflow. Images: `/tmp/ecommand-final-pass/dashboard-agent-stacked-*`.
+- Refreshed the Agent dashboard report images at 390×844 and 1920×1080 in `/tmp/ecommand-report-final-20261002`; the full report selection now contains six distinct pages with desktop/phone pairs.
+- `bun run verify` passed after the layout and message-catalog changes: Biome, workspace typechecks, 69 API suites / 527 tests, web checks, and all builds.
+
 ## User detail row alignment — 2026-10-02
 
 - A screenshot review caught the role badge floating beside the label in the User detail “Role and access” card. The role row used a two-column grid whose second column was left-aligned, while all subsequent detail values were right-aligned. It now uses the shared label/value flex alignment and constrains long role names to the value side.

@@ -284,7 +284,6 @@ export const Messages = {
 			monthCount: "dashboard.activity.monthCount",
 		},
 		insightsLabel: "dashboard.insightsLabel",
-		insightScrollHint: "dashboard.insightScrollHint",
 		recentActivityLabel: "dashboard.recentActivityLabel",
 		recentScrollHint: "dashboard.recentScrollHint",
 		noListsTitle: "dashboard.noListsTitle",

@@ -493,7 +493,6 @@ export function DashboardOverview() {
 		(readyOrdersQuery.isLoading ||
 			readyOrdersQuery.isError ||
 			(readyOrdersQuery.data?.length ?? 0) > 0);
-	const showInsightRail = showReadyOrdersCard && canReadReports;
 	const programsQuery = useProgramsControllerFindAll(
 		{ sortBy: "createdAt", sortOrder: "desc" },
 		{ query: { enabled: canReadPrograms } },
@@ -628,8 +627,7 @@ export function DashboardOverview() {
 			{(showReadyOrdersCard || canReadReports) && (
 				<section
 					aria-label={t(Messages.dashboard.insightsLabel)}
-					tabIndex={showInsightRail ? 0 : undefined}
-					className={`min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${showInsightRail ? "workspace-insight-rail @4xl/workspace:grid-cols-2" : "grid gap-6"}`}
+					className="grid min-w-0 gap-6 @4xl/workspace:grid-cols-2"
 				>
 					{showReadyOrdersCard && (
 						<ReadyOrdersSection
@@ -641,11 +639,6 @@ export function DashboardOverview() {
 					)}
 					{canReadReports && <OrderActivitySection />}
 				</section>
-			)}
-			{showInsightRail && (
-				<p className="workspace-scroll-hint text-meta text-muted-foreground">
-					{t(Messages.dashboard.insightScrollHint)}
-				</p>
 			)}
 
 			{sections.length > 0 ? (

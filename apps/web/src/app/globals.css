@@ -158,29 +158,6 @@
 	}
 }
 
-@utility workspace-insight-rail {
-	display: grid;
-	gap: calc(var(--spacing) * 4);
-
-	@container workspace (width < 28rem) {
-		display: flex;
-		align-items: flex-start;
-		overflow-x: auto;
-		scrollbar-width: none;
-		padding-bottom: var(--spacing-control);
-		scroll-snap-type: x mandatory;
-
-		&::-webkit-scrollbar {
-			display: none;
-		}
-
-		& > * {
-			flex: 0 0 100%;
-			scroll-snap-align: start;
-		}
-	}
-}
-
 @utility workspace-insight-heading {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) auto;

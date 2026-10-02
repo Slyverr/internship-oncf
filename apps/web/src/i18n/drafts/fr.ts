@@ -301,8 +301,6 @@ export const frDraft = {
 			monthCount: "{month} {count}",
 		},
 		insightsLabel: "Indicateurs du tableau de bord",
-		insightScrollHint:
-			"Balayez ou utilisez les touches fléchées pour afficher d’autres indicateurs du tableau de bord.",
 		recentActivityLabel: "Activité récente",
 		recentScrollHint:
 			"Faites défiler horizontalement pour afficher plus d’activité récente.",
