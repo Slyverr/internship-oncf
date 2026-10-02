@@ -172,7 +172,7 @@ function ReadyOrdersSection({
 	return (
 		<Card size="sm">
 			<CardHeader>
-				<div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-x-control gap-y-compact">
+				<div className="workspace-insight-heading min-w-0">
 					<CardTitle>{t(Messages.dashboard.readyOrders.title)}</CardTitle>
 					{!isLoading && !isError && orders.length > 0 && (
 						<ActionLink
@@ -183,7 +183,7 @@ function ReadyOrdersSection({
 							<ArrowRightIcon aria-hidden="true" className="size-4" />
 						</ActionLink>
 					)}
-					<CardDescription className="col-span-2">
+					<CardDescription>
 						{t(Messages.dashboard.readyOrders.description)}
 					</CardDescription>
 				</div>

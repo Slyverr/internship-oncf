@@ -152,7 +152,7 @@
 		}
 
 		& > * {
-			flex: 0 0 calc(100cqw - 5rem);
+			flex: 0 0 100%;
 			scroll-snap-align: start;
 		}
 	}
@@ -175,8 +175,32 @@
 		}
 
 		& > * {
-			flex: 0 0 calc(100cqw - 5rem);
+			flex: 0 0 100%;
 			scroll-snap-align: start;
+		}
+	}
+}
+
+@utility workspace-insight-heading {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: start;
+	column-gap: calc(var(--spacing) * 2);
+	row-gap: var(--spacing);
+
+	& > :nth-child(3) {
+		grid-column: 1 / -1;
+	}
+
+	@container workspace (width < 28rem) {
+		grid-template-columns: minmax(0, 1fr);
+
+		& > :nth-child(2) {
+			justify-self: start;
+		}
+
+		& > :nth-child(3) {
+			grid-column: 1;
 		}
 	}
 }
