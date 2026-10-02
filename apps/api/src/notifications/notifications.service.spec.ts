@@ -94,6 +94,7 @@ describe("in-app notification delivery", () => {
 
 	it("does not expose legacy English notification text in the API response", async () => {
 		const query = {
+			findRelatedRecordCodes: jest.fn().mockResolvedValue([]),
 			findNotification: jest.fn().mockResolvedValue({
 				id: 3,
 				title: "Claim updated",
@@ -115,5 +116,37 @@ describe("in-app notification delivery", () => {
 		expect(result).not.toHaveProperty("title");
 		expect(result).not.toHaveProperty("message");
 		expect(result).not.toHaveProperty("errorMessage");
+	});
+
+	it("uses the current related record code in existing notification messages", async () => {
+		const query = {
+			findNotification: jest.fn().mockResolvedValue({
+				id: 3,
+				title: null,
+				message: null,
+				messageCode: NotificationMessageCode.CLAIM_COMMENT_ADDED,
+				messageParameters: { recordCode: "CLM-0000000002" },
+				relatedEntityType: "claims",
+				relatedEntityId: 2,
+			}),
+			findRelatedRecordCodes: jest.fn().mockResolvedValue([
+				{
+					relatedEntityType: "claims",
+					relatedEntityId: 2,
+					recordCode: "CLM-084FC1BFA9",
+				},
+			]),
+		};
+		const service = new NotificationsService(
+			query as unknown as NotificationsQuery,
+			mapper,
+		);
+
+		await expect(service.findOne(3 as never)).resolves.toMatchObject({
+			messageParameters: { recordCode: "CLM-084FC1BFA9" },
+		});
+		expect(query.findRelatedRecordCodes).toHaveBeenCalledWith([
+			{ relatedEntityType: "claims", relatedEntityId: 2 },
+		]);
 	});
 });

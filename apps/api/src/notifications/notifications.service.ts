@@ -25,14 +25,16 @@ export class NotificationsService {
 	}
 
 	async findAll(user: AuthUser) {
-		return (await this.notificationsQuery.findNotifications(user.id)).map(
-			(notification) => this.toPresentation(notification),
+		return this.toPresentations(
+			await this.notificationsQuery.findNotifications(user.id),
 		);
 	}
 
 	async findOne(id: NotificationId) {
 		const notification = await this.notificationsQuery.findNotification(id);
-		return this.toPresentation(this.ensure(notification));
+		return this.toPresentations([this.ensure(notification)]).then(
+			([presented]) => presented,
+		);
 	}
 
 	async findOneForOwnership(id: NotificationId) {
@@ -93,6 +95,52 @@ export class NotificationsService {
 		);
 	}
 
+	private async toPresentations<
+		NotificationRecord extends {
+			title?: string | null;
+			message: string | null;
+			messageCode: NotificationMessageCode | null;
+			messageParameters: Record<string, string> | null;
+			errorMessage?: string | null;
+			relatedEntityType?: string | null;
+			relatedEntityId?: number | null;
+		},
+	>(
+		notifications: NotificationRecord[],
+	): Promise<
+		Array<
+			Omit<
+				NotificationRecord,
+				| "title"
+				| "message"
+				| "messageCode"
+				| "messageParameters"
+				| "errorMessage"
+			> & {
+				messageCode: NotificationMessageCode;
+				messageParameters: Record<string, string>;
+			}
+		>
+	> {
+		const recordCodes = await this.notificationsQuery.findRelatedRecordCodes(
+			notifications.map(({ relatedEntityId, relatedEntityType }) => ({
+				relatedEntityId: relatedEntityId ?? null,
+				relatedEntityType: relatedEntityType ?? null,
+			})),
+		);
+		const recordCodeByReference = new Map(
+			recordCodes.map((item) => [
+				`${item.relatedEntityType}:${item.relatedEntityId}`,
+				item.recordCode,
+			]),
+		);
+
+		return notifications.map((notification) => {
+			const key = `${notification.relatedEntityType}:${notification.relatedEntityId}`;
+			return this.toPresentation(notification, recordCodeByReference.get(key));
+		});
+	}
+
 	private toPresentation<
 		NotificationRecord extends {
 			title?: string | null;
@@ -103,6 +151,7 @@ export class NotificationsService {
 		},
 	>(
 		notification: NotificationRecord,
+		canonicalRecordCode?: string,
 	): Omit<
 		NotificationRecord,
 		"title" | "message" | "messageCode" | "messageParameters" | "errorMessage"
@@ -129,6 +178,7 @@ export class NotificationsService {
 				: legacyComment
 					? { recordCode: legacyComment[1] }
 					: {};
+		if (canonicalRecordCode) parameters.recordCode = canonicalRecordCode;
 
 		return {
 			...details,

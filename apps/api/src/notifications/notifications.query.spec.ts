@@ -39,6 +39,56 @@ describe("NotificationsQuery recipient scope", () => {
 		);
 	});
 
+	it("resolves current business codes for referenced records in batches", async () => {
+		const claimsFindMany = jest
+			.fn()
+			.mockResolvedValue([{ id: 2, claimNumber: "CLM-084FC1BFA9" }]);
+		const ordersFindMany = jest
+			.fn()
+			.mockResolvedValue([{ id: 5, orderNumber: "ORD-ABCDEFGHJK" }]);
+		const programsFindMany = jest
+			.fn()
+			.mockResolvedValue([{ id: 8, programNumber: "PRG-ABCDEFGHJK" }]);
+		const relatedQuery = new NotificationsQuery({
+			db: {
+				query: {
+					claims: { findMany: claimsFindMany },
+					orders: { findMany: ordersFindMany },
+					forecastPrograms: { findMany: programsFindMany },
+				},
+			},
+		} as never);
+
+		await expect(
+			relatedQuery.findRelatedRecordCodes([
+				{ relatedEntityType: "claims", relatedEntityId: 2 },
+				{ relatedEntityType: "orders", relatedEntityId: 5 },
+				{ relatedEntityType: "programs", relatedEntityId: 8 },
+				{ relatedEntityType: "claims", relatedEntityId: 2 },
+			]),
+		).resolves.toEqual([
+			{
+				relatedEntityType: "claims",
+				relatedEntityId: 2,
+				recordCode: "CLM-084FC1BFA9",
+			},
+			{
+				relatedEntityType: "orders",
+				relatedEntityId: 5,
+				recordCode: "ORD-ABCDEFGHJK",
+			},
+			{
+				relatedEntityType: "programs",
+				relatedEntityId: 8,
+				recordCode: "PRG-ABCDEFGHJK",
+			},
+		]);
+		expect(claimsFindMany).toHaveBeenCalledWith({
+			where: { id: { in: [2] } },
+			columns: { id: true, claimNumber: true },
+		});
+	});
+
 	it("scopes read updates by both notification and recipient IDs", async () => {
 		const returning = jest.fn().mockResolvedValue([{ id: 7 }]);
 		const where = jest.fn().mockReturnValue({ returning });

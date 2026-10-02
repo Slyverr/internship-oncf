@@ -10,6 +10,16 @@ import type { NotificationId, NotificationInsert } from "./notifications.types";
 
 type NotificationsColumns = QueryColumns<"notifications">;
 type NotificationsRelations = QueryRelations<"notifications">;
+type RelatedRecordReference = {
+	relatedEntityType: string | null;
+	relatedEntityId: number | null;
+};
+
+export type RelatedRecordCode = {
+	relatedEntityType: "claims" | "orders" | "programs";
+	relatedEntityId: number;
+	recordCode: string;
+};
 
 const notificationListColumns = {
 	id: true,
@@ -81,6 +91,75 @@ export class NotificationsQuery {
 			with: notificationListRelations,
 			orderBy: (notifications, { desc }) => [desc(notifications.createdAt)],
 		});
+	}
+
+	async findRelatedRecordCodes(
+		references: RelatedRecordReference[],
+	): Promise<RelatedRecordCode[]> {
+		const idsByType = {
+			claims: [
+				...new Set(
+					references
+						.filter((item) => item.relatedEntityType === "claims")
+						.map((item) => item.relatedEntityId)
+						.filter((id): id is number => id !== null),
+				),
+			],
+			orders: [
+				...new Set(
+					references
+						.filter((item) => item.relatedEntityType === "orders")
+						.map((item) => item.relatedEntityId)
+						.filter((id): id is number => id !== null),
+				),
+			],
+			programs: [
+				...new Set(
+					references
+						.filter((item) => item.relatedEntityType === "programs")
+						.map((item) => item.relatedEntityId)
+						.filter((id): id is number => id !== null),
+				),
+			],
+		};
+		const [claims, orders, programs] = await Promise.all([
+			idsByType.claims.length
+				? this.drizzle.db.query.claims.findMany({
+						where: { id: { in: idsByType.claims } },
+						columns: { id: true, claimNumber: true },
+					})
+				: Promise.resolve([]),
+			idsByType.orders.length
+				? this.drizzle.db.query.orders.findMany({
+						where: { id: { in: idsByType.orders } },
+						columns: { id: true, orderNumber: true },
+					})
+				: Promise.resolve([]),
+			idsByType.programs.length
+				? this.drizzle.db.query.forecastPrograms.findMany({
+						where: { id: { in: idsByType.programs } },
+						columns: { id: true, programNumber: true },
+					})
+				: Promise.resolve([]),
+		]);
+
+		return [
+			...claims.map(({ id, claimNumber }) => ({
+				relatedEntityType: "claims" as const,
+				relatedEntityId: id,
+				recordCode: claimNumber,
+			})),
+			...orders.map(({ id, orderNumber }) => ({
+				relatedEntityType: "orders" as const,
+				relatedEntityId: id,
+				recordCode: orderNumber,
+			})),
+			...programs.map(({ id, programNumber }) => ({
+				relatedEntityType: "programs" as const,
+				relatedEntityId: id,
+				recordCode: programNumber,
+			})),
+		];
 	}
 
 	async findNotification(id: NotificationId) {
