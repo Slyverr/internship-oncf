@@ -17,7 +17,7 @@ export function PageHeader({ title, description, children }: PageHeaderProps) {
 					{title}
 				</h1>
 				{description && (
-					<p className="max-w-3xl text-sm leading-6 text-muted-foreground">
+					<p className="max-w-3xl text-sm leading-6 text-muted-foreground wrap-anywhere">
 						{description}
 					</p>
 				)}

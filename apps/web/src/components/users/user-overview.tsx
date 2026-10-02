@@ -35,6 +35,7 @@ export function UserOverview({ user }: { user: UserDetailDto }) {
 					<RecordDetail
 						label={t(Messages.users.detail.email)}
 						value={user.email}
+						wideValue
 					/>
 					<RecordDetail
 						label={t(Messages.users.detail.employeeCode)}

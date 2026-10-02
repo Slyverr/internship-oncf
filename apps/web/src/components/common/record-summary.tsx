@@ -3,11 +3,18 @@ import type { ReactNode } from "react";
 interface RecordDetailProps {
 	label: string;
 	value: ReactNode;
+	wideValue?: boolean;
 }
 
-export function RecordDetail({ label, value }: RecordDetailProps) {
+export function RecordDetail({
+	label,
+	value,
+	wideValue = false,
+}: RecordDetailProps) {
 	return (
-		<div className="grid min-w-0 grid-cols-2 items-baseline gap-2">
+		<div
+			className={`grid min-w-0 items-baseline gap-2 ${wideValue ? "grid-cols-[max-content_minmax(0,1fr)] @xl/workspace:grid-cols-2" : "grid-cols-2"}`}
+		>
 			<span className="text-meta text-muted-foreground">{label}</span>
 			<span className="min-w-0 break-words text-right text-sm font-medium sm:text-base">
 				{value}
