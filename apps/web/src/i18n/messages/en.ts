@@ -1073,7 +1073,7 @@ export const en = {
 			brandLink: "ECommand sign in",
 			title: "Sign in",
 			username: "Email or employee code",
-			usernamePlaceholder: "email@example.com or employee code",
+			usernamePlaceholder: "you@example.com",
 			usernameRequired: "Enter your email or employee code.",
 			password: "Password",
 			passwordPlaceholder: "Password",
