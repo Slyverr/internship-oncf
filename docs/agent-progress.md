@@ -251,6 +251,17 @@ The security follow-up for preventing administrator lockout is completed in Chap
 
 **Next:** improve remaining user-facing workflows and UI consistency, then run focused verification that covers each affected role and state.
 
+## Chapter 23 — role workflows and responsive access-profile review — 2026-10-02
+
+- Added direct query tests for case-insensitive email-existence lookup, active-role-only assignment, and user existence by internal ID. All 69 API unit suites / 527 tests pass.
+- Re-ran the isolated API E2E suite: 2 suites / 27 tests passed.
+- Re-ran all eight browser workflows against the isolated database using the repository's Chrome CDP path: Admin navigation and access, registration review, custom permission assignment/enforcement, reference-data lifecycle, agent claim/program creation, client order submission, and client access denial passed.
+- The first browser attempt established that the host's Playwright-managed Chromium lacks `libnspr4.so`; the available system Chromium via CDP completed the suite. The runner removed the disposable E2E database and services afterward.
+- Captured and inspected the Access profiles screen at ten widths (320px–3840px). There was no horizontal overflow; the small-container card view and wide-container shared table view both aligned correctly. No speculative UI change was made.
+- `bun run verify` passed after the query-test additions: Biome, all workspace typechecks, 69 API suites / 527 tests, web checks, and all builds.
+
+**Next:** continue the route-by-route visual and workflow audit, fixing only evidenced inconsistencies; return to French locale enablement after the higher-priority UI and workflow gaps are closed.
+
 ## Chapter 22 continuation — product consistency and verification — 2026-10-02
 
 - Kept centered navigation on one row from tablet widths upward and aligned built-in/custom access-profile status treatment. Fresh captures across 320–3840px showed no horizontal overflow.
