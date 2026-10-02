@@ -1,9 +1,5 @@
-import { Permission } from "@ecommand/shared";
-import {
-	type ExecutionContext,
-	ForbiddenException,
-	type PipeTransform,
-} from "@nestjs/common";
+import { API_ERROR_CODES, Permission } from "@ecommand/shared";
+import { type ExecutionContext, type PipeTransform } from "@nestjs/common";
 import type { AuthUser } from "@/auth/auth.types";
 import { createOwnershipGuard } from "./ownership.factory";
 
@@ -61,9 +57,9 @@ describe("createOwnershipGuard", () => {
 
 	it("blocks another user from accessing the resource", async () => {
 		const { guard, context } = createGuard({ ownerId: 77 });
-		await expect(guard.canActivate(context)).rejects.toThrow(
-			new ForbiddenException("You can only access your own resources"),
-		);
+		await expect(guard.canActivate(context)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.ACCESS_DENIED },
+		});
 	});
 
 	it("lets the route handler return its not-found response when the resource does not exist", async () => {

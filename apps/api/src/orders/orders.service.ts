@@ -1,4 +1,9 @@
-import { OrderStatus, Permission } from "@ecommand/shared";
+import {
+	API_ERROR_CODES,
+	NotificationMessageCode,
+	OrderStatus,
+	Permission,
+} from "@ecommand/shared";
 import {
 	BadRequestException,
 	ConflictException,
@@ -48,7 +53,7 @@ export class OrdersService {
 	}
 
 	async findOne(id: OrderId) {
-		return this.ensure(await this.ordersQuery.findOrder(id), id);
+		return this.ensure(await this.ordersQuery.findOrder(id));
 	}
 
 	async findOneForOwnership(identifier: OrderIdentifier) {
@@ -56,7 +61,7 @@ export class OrdersService {
 			typeof identifier === "number"
 				? await this.ordersQuery.findOrderForOwnership(identifier)
 				: await this.ordersQuery.findOrderForOwnershipByNumber(identifier);
-		return this.ensure(order, identifier);
+		return this.ensure(order);
 	}
 
 	async findOneForAccess(identifier: OrderIdentifier) {
@@ -64,7 +69,7 @@ export class OrdersService {
 			typeof identifier === "number"
 				? await this.ordersQuery.findOrderForAccess(identifier)
 				: await this.ordersQuery.findOrderForAccessByNumber(identifier);
-		return this.ensure(order, identifier);
+		return this.ensure(order);
 	}
 
 	async resolveOrderId(identifier: OrderIdentifier): Promise<OrderId> {
@@ -72,7 +77,7 @@ export class OrdersService {
 		const order = await this.ordersQuery.findOrderIdByNumber(
 			identifier as OrderNumber,
 		);
-		return this.ensure(order, identifier).id;
+		return this.ensure(order).id;
 	}
 
 	async update(id: OrderId, dto: UpdateOrderDto, user: AuthUser) {
@@ -85,14 +90,18 @@ export class OrdersService {
 			dto.customerId !== undefined && dto.customerId !== order.customerId;
 
 		if (editsDetails && order.orderStatus?.name !== OrderStatus.DRAFT) {
-			throw new ConflictException("Only draft orders can be edited");
+			throw new ConflictException({
+				code: API_ERROR_CODES.ORDER_MUST_BE_DRAFT,
+			});
 		}
 
 		if (
 			changesCustomer &&
 			!hasOnePermission(user, Permission.ORDERS_MANAGE_OWNERSHIP)
 		) {
-			throw new ForbiddenException("Cannot change order ownership");
+			throw new ForbiddenException({
+				code: API_ERROR_CODES.ORDER_OWNERSHIP_CHANGE_FORBIDDEN,
+			});
 		}
 
 		const quantity = dto.quantityDemanded;
@@ -100,18 +109,18 @@ export class OrdersService {
 			quantity !== undefined &&
 			(!ORDER_QUANTITY_PATTERN.test(quantity) || Number(quantity) <= 0)
 		) {
-			throw new BadRequestException(
-				"Quantity must be positive with at most three decimal places",
-			);
+			throw new BadRequestException({
+				code: API_ERROR_CODES.ORDER_QUANTITY_INVALID,
+			});
 		}
 
 		const start = dto.startDate === undefined ? order.startDate : dto.startDate;
 		const end = dto.endDate === undefined ? order.endDate : dto.endDate;
 
 		if (start && end && new Date(start) > new Date(end)) {
-			throw new BadRequestException(
-				"The completion date must be on or after the start date",
-			);
+			throw new BadRequestException({
+				code: API_ERROR_CODES.ORDER_DATE_RANGE_INVALID,
+			});
 		}
 
 		const values = this.ordersMapper.toUpdate(dto, user);
@@ -147,11 +156,13 @@ export class OrdersService {
 	async remove(id: OrderId) {
 		const order = await this.findOne(id);
 		if (order.orderStatus?.name !== OrderStatus.DRAFT) {
-			throw new ConflictException("Only draft orders can be deleted");
+			throw new ConflictException({
+				code: API_ERROR_CODES.ORDER_MUST_BE_DRAFT,
+			});
 		}
 
 		const deleted = await this.ordersQuery.deleteOrder(id);
-		return this.ensure(deleted, id);
+		return this.ensure(deleted);
 	}
 
 	private async transition(
@@ -160,23 +171,33 @@ export class OrdersService {
 		toStatus: OrderStatus,
 		comment?: string,
 	) {
-		const order = this.ensure(await this.ordersQuery.findOrderStatus(id), id);
+		const order = this.ensure(await this.ordersQuery.findOrderStatus(id));
 
 		const fromStatus = ORDER_STATUS_BY_ID[order.statusId];
 		if (!fromStatus) {
-			throw new ConflictException(
-				`Invalid status ${order.statusId} for order ${id}`,
-			);
+			throw new ConflictException({
+				code: API_ERROR_CODES.ORDER_TRANSITION_INVALID,
+			});
 		}
 
 		const allowed = ORDER_TRANSITION[fromStatus] ?? [];
 		if (!allowed.includes(toStatus)) {
-			throw new ConflictException(
-				`Cannot transition from ${fromStatus} to ${toStatus}`,
-			);
+			throw new ConflictException({
+				code: API_ERROR_CODES.ORDER_TRANSITION_INVALID,
+			});
 		}
 
 		const statusId = ORDER_STATUSES[toStatus].id;
+		const notification = this.notifications.createChangeRecord(
+			order.createdByUserId,
+			user.id,
+			"orders",
+			id,
+			{
+				code: NotificationMessageCode.ORDER_STATUS_CHANGED,
+				parameters: { recordCode: order.orderNumber, status: toStatus },
+			},
+		);
 		await this.ordersQuery.updateOrder(
 			id,
 			{ statusId },
@@ -186,23 +207,16 @@ export class OrdersService {
 					userId: user.id,
 					comment,
 				},
+				notification,
 			},
 		);
 
-		const updated = await this.findOne(id);
-		await this.notifications.notifyChange(
-			updated.createdByUserId,
-			user.id,
-			"orders",
-			id,
-			`Order #${id} is now ${toStatus.toLowerCase().replaceAll("_", " ")}.`,
-		);
-		return updated;
+		return this.findOne(id);
 	}
 
-	private ensure<T>(value: T | undefined, id: OrderIdentifier): T {
+	private ensure<T>(value: T | undefined): T {
 		if (!value) {
-			throw new NotFoundException(`Order ${id} not found`);
+			throw new NotFoundException({ code: API_ERROR_CODES.ORDER_NOT_FOUND });
 		}
 		return value;
 	}

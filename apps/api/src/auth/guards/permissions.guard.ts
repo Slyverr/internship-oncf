@@ -1,4 +1,4 @@
-import { Permission } from "@ecommand/shared";
+import { API_ERROR_CODES, Permission } from "@ecommand/shared";
 import {
 	CanActivate,
 	ExecutionContext,
@@ -35,13 +35,15 @@ export class PermissionsGuard implements CanActivate {
 			user?: import("../auth.types").AuthUser;
 		}>();
 
-		if (!user) throw new ForbiddenException();
+		if (!user) {
+			throw new ForbiddenException({ code: API_ERROR_CODES.ACCESS_DENIED });
+		}
 
 		if (any && !hasAnyPermission(user, ...any))
-			throw new ForbiddenException("User lacks any required permission");
+			throw new ForbiddenException({ code: API_ERROR_CODES.ACCESS_DENIED });
 
 		if (all && !hasAllPermissions(user, ...all))
-			throw new ForbiddenException("User lacks required permissions");
+			throw new ForbiddenException({ code: API_ERROR_CODES.ACCESS_DENIED });
 
 		return true;
 	}

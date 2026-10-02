@@ -1,4 +1,4 @@
-import { ClaimType, Permission, Role } from "@ecommand/shared";
+import { API_ERROR_CODES, ClaimType, Permission, Role } from "@ecommand/shared";
 import { ForbiddenException } from "@nestjs/common";
 import { ClaimsMapper } from "./claims.mapper";
 import type { CreateClaimDto } from "./requests/create-claim.dto";
@@ -31,9 +31,16 @@ describe("ClaimsMapper customer scope", () => {
 	});
 
 	it("rejects a customer user trying to create a claim for another customer", () => {
-		expect(() => mapper.toCreate(dto(43), customerUser)).toThrow(
-			ForbiddenException,
-		);
+		let error: unknown;
+		try {
+			mapper.toCreate(dto(43), customerUser);
+		} catch (caught) {
+			error = caught;
+		}
+		expect(error).toBeInstanceOf(ForbiddenException);
+		expect((error as ForbiddenException).getResponse()).toEqual({
+			code: API_ERROR_CODES.ACCESS_DENIED,
+		});
 	});
 
 	it("rejects an unassigned commercial agent creating a claim", () => {
@@ -77,6 +84,7 @@ describe("ClaimsMapper customer scope", () => {
 			permissions: new Set([
 				Permission.CLAIMS_CREATE,
 				Permission.CLAIMS_MANAGE_OTHER,
+				Permission.CUSTOMERS_MANAGE_OTHER,
 			]),
 		};
 		expect(mapper.toCreate(dto(43), manager).customerId).toBe(43);
@@ -88,13 +96,16 @@ describe("ClaimsMapper customer scope", () => {
 		).toThrow(ForbiddenException);
 	});
 
-	it("lets an agent change a claim only to an assigned customer", () => {
+	it("requires claim and customer scope permissions to change a claim customer", () => {
 		const agent = {
 			...customerUser,
 			role: Role.AGENT_COMMERCIAL,
 			customerId: null,
 			assignedCustomerIds: [42, 43],
-			permissions: new Set([Permission.CLAIMS_MANAGE_OTHER]),
+			permissions: new Set([
+				Permission.CLAIMS_MANAGE_OTHER,
+				Permission.CUSTOMERS_MANAGE_OTHER,
+			]),
 		};
 
 		expect(

@@ -1,9 +1,11 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { type AppLocale, DEFAULT_LOCALE } from "@ecommand/shared";
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import nodemailer from "nodemailer";
+import { emailMessages } from "./messages/en";
 
 @Injectable()
 export class EmailService {
@@ -14,15 +16,17 @@ export class EmailService {
 	async sendResetPasswordEmail(
 		email: string,
 		resetLink: string,
+		locale: AppLocale = DEFAULT_LOCALE,
 	): Promise<void> {
+		const messages = emailMessages[locale];
 		const smtp = this.getSmtpConfig();
 		if (smtp) {
 			const transport = nodemailer.createTransport(smtp.transport);
 			await transport.sendMail({
 				from: smtp.from,
 				to: email,
-				subject: "Reset your ECommand password",
-				text: `Use this link to reset your password. It expires in one hour.\n\n${resetLink}\n`,
+				subject: messages.passwordReset.subject,
+				text: messages.passwordReset.text(resetLink),
 			});
 			this.logger.log(`Password reset email sent to ${email}`);
 			return;
@@ -37,13 +41,11 @@ export class EmailService {
 		const message = [
 			"From: ECommand Local Mailbox <ecommand@localhost>",
 			`To: ${safeEmail}`,
-			"Subject: Reset your ECommand password",
+			`Subject: ${messages.passwordReset.subject}`,
 			"MIME-Version: 1.0",
 			"Content-Type: text/plain; charset=UTF-8",
 			"",
-			"Use this link to reset your password. It expires in one hour.",
-			"",
-			resetLink,
+			messages.passwordReset.text(resetLink).trimEnd().replaceAll("\n", "\r\n"),
 			"",
 		].join("\r\n");
 		const messagePath = path.join(

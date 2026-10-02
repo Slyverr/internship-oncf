@@ -1,5 +1,4 @@
 import {
-	STRONG_PASSWORD_HINT,
 	STRONG_PASSWORD_MAX_LENGTH,
 	STRONG_PASSWORD_PATTERN,
 } from "@ecommand/shared";
@@ -21,7 +20,7 @@ export class RegisterClientDto {
 	email: string;
 
 	@IsString()
-	@Matches(STRONG_PASSWORD_PATTERN, { message: STRONG_PASSWORD_HINT })
+	@Matches(STRONG_PASSWORD_PATTERN)
 	@MaxLength(STRONG_PASSWORD_MAX_LENGTH)
 	password: string;
 
@@ -44,6 +43,6 @@ export class RegisterClientDto {
 	customerCode: string;
 
 	@IsString()
-	@Matches(/^\d{15}$/, { message: "ICE must contain exactly 15 digits" })
+	@Matches(/^\d{15}$/)
 	ice: string;
 }

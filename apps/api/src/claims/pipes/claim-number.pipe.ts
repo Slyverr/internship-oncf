@@ -1,3 +1,4 @@
+import { API_ERROR_CODES } from "@ecommand/shared";
 import { BadRequestException, Injectable, PipeTransform } from "@nestjs/common";
 import type { ClaimNumber } from "../claims.types";
 
@@ -5,7 +6,9 @@ import type { ClaimNumber } from "../claims.types";
 export class ClaimNumberPipe implements PipeTransform<string, ClaimNumber> {
 	transform(value: string): ClaimNumber {
 		if (!/^CLM-[A-Z0-9]{10}$/.test(value)) {
-			throw new BadRequestException("Invalid claim number");
+			throw new BadRequestException({
+				code: API_ERROR_CODES.INVALID_IDENTIFIER,
+			});
 		}
 		return value as ClaimNumber;
 	}

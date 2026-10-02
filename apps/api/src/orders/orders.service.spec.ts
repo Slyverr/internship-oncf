@@ -1,5 +1,5 @@
-import { OrderStatus } from "@ecommand/shared";
-import { ConflictException, NotFoundException } from "@nestjs/common";
+import { API_ERROR_CODES, OrderStatus } from "@ecommand/shared";
+import { ConflictException } from "@nestjs/common";
 import { OrdersQuery } from "./orders.query";
 import { OrdersService } from "./orders.service";
 import type { OrderId } from "./orders.types";
@@ -58,6 +58,8 @@ describe("OrdersService public code resolution", () => {
 		findOrderIdByNumber.mockResolvedValue(undefined);
 		await expect(
 			service.resolveOrderId("ORD-ABCDEFGHIJ"),
-		).rejects.toBeInstanceOf(NotFoundException);
+		).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.ORDER_NOT_FOUND },
+		});
 	});
 });

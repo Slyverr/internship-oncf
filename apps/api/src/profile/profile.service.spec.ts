@@ -1,7 +1,4 @@
-import {
-	InternalServerErrorException,
-	NotFoundException,
-} from "@nestjs/common";
+import { API_ERROR_CODES } from "@ecommand/shared";
 import type { ProfileQuery } from "./profile.query";
 import { ProfileService } from "./profile.service";
 import type { UpdateAppearancePreferencesDto } from "./requests/update-appearance-preferences.dto";
@@ -52,16 +49,16 @@ describe("ProfileService", () => {
 
 	it("throws when the requested user does not exist", async () => {
 		query.findProfile.mockResolvedValue(undefined);
-		await expect(service.findOne(404 as never)).rejects.toThrow(
-			new NotFoundException("User with id 404 not found"),
-		);
+		await expect(service.findOne(404 as never)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.USER_NOT_FOUND },
+		});
 	});
 
 	it("rejects profiles without an assigned role", async () => {
 		query.findProfile.mockResolvedValue({ ...profile, role: null } as never);
-		await expect(service.findOne(9 as never)).rejects.toThrow(
-			new InternalServerErrorException("User 9 has no role assigned"),
-		);
+		await expect(service.findOne(9 as never)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.INTERNAL_ERROR },
+		});
 	});
 
 	it("updates editable fields and returns the refreshed profile", async () => {

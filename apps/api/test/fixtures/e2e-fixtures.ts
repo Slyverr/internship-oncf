@@ -1,5 +1,10 @@
 export const E2E_PASSWORD = "e2e-password-123";
 
+export const E2E_PASSWORD_RESET = {
+	valid: "e2e-password-reset-valid-token",
+	expired: "e2e-password-reset-expired-token",
+} as const;
+
 export const E2E_CUSTOMERS = {
 	assignedA: "E2E-CUST-A",
 	assignedB: "E2E-CUST-B",
@@ -57,6 +62,10 @@ export const E2E_USERS = {
 	},
 	clientOutside: {
 		email: "e2e.client.outside@example.test",
+		employeeCode: null,
+	},
+	passwordReset: {
+		email: "e2e.password.reset@example.test",
 		employeeCode: null,
 	},
 } as const;

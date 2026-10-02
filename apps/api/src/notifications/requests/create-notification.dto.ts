@@ -1,12 +1,16 @@
-import { NotificationChannel, NotificationType } from "@ecommand/shared";
+import {
+	NotificationChannel,
+	NotificationMessageCode,
+	NotificationType,
+} from "@ecommand/shared";
 import { Type } from "class-transformer";
 import {
 	IsEnum,
 	IsInt,
 	IsNotEmpty,
+	IsObject,
 	IsOptional,
 	IsString,
-	MaxLength,
 } from "class-validator";
 
 export class CreateNotificationDto {
@@ -21,14 +25,11 @@ export class CreateNotificationDto {
 	@IsEnum(NotificationChannel)
 	channel: NotificationChannel;
 
-	@IsString()
-	@MaxLength(200)
-	@IsNotEmpty()
-	title: string;
+	@IsEnum(NotificationMessageCode)
+	messageCode: NotificationMessageCode;
 
-	@IsString()
-	@IsNotEmpty()
-	message: string;
+	@IsObject()
+	messageParameters: Record<string, string>;
 
 	@IsOptional()
 	@IsString()

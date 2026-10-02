@@ -2,6 +2,7 @@ import {
 	DEFAULT_ROLE_PERMISSIONS,
 	PERMISSION_DEFINITIONS,
 	Role,
+	RolePersona,
 } from "@ecommand/shared";
 import {
 	createReferenceId,
@@ -20,7 +21,15 @@ export const ROLES = createReferenceMap(
 		[Role.AGENT_COMMERCIAL]:
 			"Commercial agent with full order lifecycle and customer management",
 	},
-	defaultReferenceMapper(ROLES_SCOPE),
+	(name, description) => ({
+		...defaultReferenceMapper(ROLES_SCOPE)(name, description),
+		isSystem: true,
+		persona: {
+			[Role.ADMIN]: RolePersona.ADMIN,
+			[Role.AGENT_COMMERCIAL]: RolePersona.AGENT_COMMERCIAL,
+			[Role.CLIENT_REPRESENTATIVE]: RolePersona.CLIENT_REPRESENTATIVE,
+		}[name as Role],
+	}),
 );
 
 export const PERMISSIONS = createReferenceMap(

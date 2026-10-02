@@ -13,5 +13,4 @@ export const NotificationOwnershipGuard = createOwnershipGuard<
 		return notification?.recipientUserId;
 	},
 	pipe: new NotificationIdPipe(),
-	errorMessage: "You can only access your own notifications",
 });

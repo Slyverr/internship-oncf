@@ -1,30 +1,24 @@
-import {
-	ACCESSORY_OPERATIONS_SCOPE,
-	GOODS_TYPES_SCOPE,
-	REJECTION_REASONS_SCOPE,
-	UNITS_SCOPE,
-} from "@/database/reference-data";
-import { createReferenceId } from "@/database/reference-data/reference-data.utils";
 import { CatalogMapper } from "./catalog.mapper";
 
 describe("CatalogMapper", () => {
 	const mapper = new CatalogMapper();
 
-	it("creates stable unit ids from normalized reference values", () => {
+	it("creates unique UUIDs for user-managed units", () => {
 		const dto = { name: "TON" };
-		expect(mapper.toCreateUnit(dto)).toEqual({
-			id: createReferenceId(UNITS_SCOPE, dto.name),
-			name: dto.name,
-		});
-		expect(mapper.toCreateUnit(dto).id).toBe(mapper.toCreateUnit(dto).id);
+		const first = mapper.toCreateUnit(dto);
+		const second = mapper.toCreateUnit(dto);
+		expect(first).toMatchObject({ name: dto.name });
+		expect(first.id).toMatch(/^[0-9a-f-]{36}$/i);
+		expect(first.id).not.toBe(second.id);
 	});
 
-	it("creates stable goods-type ids", () => {
+	it("creates unique UUIDs for user-managed goods types", () => {
 		const dto = { name: "Bulk" };
-		expect(mapper.toCreateGoodsType(dto)).toEqual({
-			id: createReferenceId(GOODS_TYPES_SCOPE, dto.name),
-			name: dto.name,
-		});
+		const first = mapper.toCreateGoodsType(dto);
+		const second = mapper.toCreateGoodsType(dto);
+		expect(first).toMatchObject({ name: dto.name });
+		expect(first.id).toMatch(/^[0-9a-f-]{36}$/i);
+		expect(first.id).not.toBe(second.id);
 	});
 
 	it("preserves a good's code and goods-type relationship", () => {
@@ -32,19 +26,21 @@ describe("CatalogMapper", () => {
 		expect(mapper.toCreateGood(dto)).toEqual(dto);
 	});
 
-	it("creates stable accessory-operation ids", () => {
+	it("creates unique UUIDs for user-managed accessory operations", () => {
 		const dto = { name: "Weighing" };
-		expect(mapper.toCreateAccessoryOperation(dto)).toEqual({
-			id: createReferenceId(ACCESSORY_OPERATIONS_SCOPE, dto.name),
-			name: dto.name,
-		});
+		const first = mapper.toCreateAccessoryOperation(dto);
+		const second = mapper.toCreateAccessoryOperation(dto);
+		expect(first).toMatchObject({ name: dto.name });
+		expect(first.id).toMatch(/^[0-9a-f-]{36}$/i);
+		expect(first.id).not.toBe(second.id);
 	});
 
-	it("creates stable rejection-reason ids", () => {
+	it("creates unique UUIDs for user-managed rejection reasons", () => {
 		const dto = { name: "Damaged" };
-		expect(mapper.toCreateRejectionReason(dto)).toEqual({
-			id: createReferenceId(REJECTION_REASONS_SCOPE, dto.name),
-			name: dto.name,
-		});
+		const first = mapper.toCreateRejectionReason(dto);
+		const second = mapper.toCreateRejectionReason(dto);
+		expect(first).toMatchObject({ name: dto.name });
+		expect(first.id).toMatch(/^[0-9a-f-]{36}$/i);
+		expect(first.id).not.toBe(second.id);
 	});
 });

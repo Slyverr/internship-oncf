@@ -41,8 +41,10 @@ describe("UsersMapper registration", () => {
 				employeeCode: "  emp-000042  ",
 			},
 			{ email: "admin@oncf.ma" } as never,
+			ROLES[Role.AGENT_COMMERCIAL].id,
 		);
 
 		expect(values.employeeCode).toBe("EMP-000042");
+		expect(values.roleId).toBe(ROLES[Role.AGENT_COMMERCIAL].id);
 	});
 });

@@ -1,4 +1,4 @@
-import { OrderStatus, Permission } from "@ecommand/shared";
+import { API_ERROR_CODES, OrderStatus, Permission } from "@ecommand/shared";
 import {
 	BadRequestException,
 	ForbiddenException,
@@ -18,11 +18,15 @@ export class OrdersMapper {
 	toCreate(dto: CreateOrderDto, user: AuthUser): OrderInsert {
 		const customerId = dto.customerId ?? user.customerId;
 		if (!customerId) {
-			throw new BadRequestException("A valid customerId must be provided");
+			throw new BadRequestException({
+				code: API_ERROR_CODES.ORDER_CUSTOMER_REQUIRED,
+			});
 		}
 
 		if (!canAccessCustomer(user, customerId)) {
-			throw new ForbiddenException("Cannot create orders for other customers");
+			throw new ForbiddenException({
+				code: API_ERROR_CODES.ORDER_CUSTOMER_ACCESS_DENIED,
+			});
 		}
 
 		const canManageStatus = hasOnePermission(
@@ -49,7 +53,9 @@ export class OrdersMapper {
 		let statusId: OrderUpdate["statusId"];
 		if (dto.status !== undefined) {
 			if (!hasOnePermission(user, Permission.ORDERS_MANAGE_STATUS)) {
-				throw new ForbiddenException("Cannot change order status");
+				throw new ForbiddenException({
+					code: API_ERROR_CODES.ORDER_STATUS_CHANGE_FORBIDDEN,
+				});
 			}
 			statusId = ORDER_STATUSES[dto.status].id;
 		}

@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { passwordResetTokens, userSessions, users } from "drizzle/schema";
-import { eq } from "drizzle-orm";
+import { and, eq, gte } from "drizzle-orm";
 import { DrizzleService } from "@/database/drizzle.service";
 import type { UserId } from "@/users/users.types";
 
@@ -34,20 +34,15 @@ export class AuthQuery {
 			.where(eq(userSessions.sessionToken, sessionToken));
 	}
 
-	async revokeAllUserSessions(userId: UserId) {
-		await this.drizzle.db
-			.update(userSessions)
-			.set({
-				logoutAt: new Date().toISOString(),
-			})
-			.where(eq(userSessions.userId, userId));
-	}
-
-	async updateUserPassword(id: UserId, password: string) {
-		await this.drizzle.db
-			.update(users)
-			.set({ password })
-			.where(eq(users.id, id));
+	async updatePasswordAndRevokeSessions(userId: UserId, password: string) {
+		await this.drizzle.db.transaction(async (tx) => {
+			const now = new Date().toISOString();
+			await tx.update(users).set({ password }).where(eq(users.id, userId));
+			await tx
+				.update(userSessions)
+				.set({ logoutAt: now })
+				.where(eq(userSessions.userId, userId));
+		});
 	}
 
 	async findUserByEmail(email: string) {
@@ -73,19 +68,56 @@ export class AuthQuery {
 		});
 	}
 
-	async findValidResetToken(token: string) {
+	async findPasswordResetToken(token: string) {
 		return this.drizzle.db.query.passwordResetTokens.findFirst({
-			where: {
-				token,
-				used: false,
-			},
+			where: { token },
 		});
 	}
 
-	async markResetTokenAsUsed(id: number) {
-		await this.drizzle.db
-			.update(passwordResetTokens)
-			.set({ used: true })
-			.where(eq(passwordResetTokens.id, id));
+	async resetPassword(token: string, password: string) {
+		return this.drizzle.db.transaction(async (tx) => {
+			const resetToken = await tx.query.passwordResetTokens.findFirst({
+				where: { token },
+			});
+			const now = new Date();
+
+			if (!resetToken || resetToken.used) return "invalid" as const;
+			if (new Date(resetToken.expiresAt) < now) return "expired" as const;
+
+			const [consumedToken] = await tx
+				.update(passwordResetTokens)
+				.set({ used: true })
+				.where(
+					and(
+						eq(passwordResetTokens.id, resetToken.id),
+						eq(passwordResetTokens.token, token),
+						eq(passwordResetTokens.used, false),
+						gte(passwordResetTokens.expiresAt, now.toISOString()),
+					),
+				)
+				.returning({ userId: passwordResetTokens.userId });
+
+			if (!consumedToken) {
+				const currentToken = await tx.query.passwordResetTokens.findFirst({
+					where: { token },
+				});
+				return currentToken &&
+					!currentToken.used &&
+					new Date(currentToken.expiresAt) < now
+					? ("expired" as const)
+					: ("invalid" as const);
+			}
+
+			await tx
+				.update(users)
+				.set({ password })
+				.where(eq(users.id, consumedToken.userId));
+			await tx
+				.update(userSessions)
+				.set({ logoutAt: now.toISOString() })
+				.where(eq(userSessions.userId, consumedToken.userId));
+
+			return "success" as const;
+		});
 	}
 }

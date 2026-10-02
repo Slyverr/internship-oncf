@@ -1,4 +1,4 @@
-import { Permission, Role } from "@ecommand/shared";
+import { API_ERROR_CODES, Permission } from "@ecommand/shared";
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { customers, goods, orderStatus, orders } from "drizzle/schema";
 import { and, desc, eq, gte, inArray, lt, sql } from "drizzle-orm";
@@ -14,7 +14,9 @@ function dateStart(value: string) {
 		Number.isNaN(date.getTime()) ||
 		date.toISOString().slice(0, 10) !== value
 	) {
-		throw new BadRequestException("Invalid report date");
+		throw new BadRequestException({
+			code: API_ERROR_CODES.REPORT_DATE_INVALID,
+		});
 	}
 	return `${value} 00:00:00`;
 }
@@ -27,21 +29,20 @@ export class ReportsService {
 		const from = query.from ? dateStart(query.from) : undefined;
 		const to = query.to ? dateStart(query.to) : undefined;
 		if (from && to && from > to) {
-			throw new BadRequestException(
-				"From date must be before or equal to to date",
-			);
+			throw new BadRequestException({
+				code: API_ERROR_CODES.REPORT_DATE_RANGE_INVALID,
+			});
 		}
 		const nextDay = to ? new Date(`${query.to}T00:00:00.000Z`) : undefined;
 		nextDay?.setUTCDate(nextDay.getUTCDate() + 1);
 		const customerScope = getCustomerScope(user);
-		const dataScope =
-			user.role === Role.ADMIN
-				? undefined
-				: customerScope !== null
-					? inArray(orders.customerId, [...customerScope])
-					: hasOnePermission(user, Permission.ORDERS_MANAGE_OTHER)
-						? undefined
-						: eq(orders.createdByUserId, user.id);
+		const dataScope = hasOnePermission(user, Permission.REPORTS_MANAGE_OTHER)
+			? undefined
+			: customerScope !== null
+				? inArray(orders.customerId, [...customerScope])
+				: hasOnePermission(user, Permission.ORDERS_MANAGE_OTHER)
+					? undefined
+					: eq(orders.createdByUserId, user.id);
 		const where = and(
 			dataScope,
 			from ? gte(orders.orderDate, from) : undefined,

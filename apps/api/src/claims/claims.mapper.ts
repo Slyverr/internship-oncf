@@ -1,4 +1,4 @@
-import { ClaimStatus, Permission, Role } from "@ecommand/shared";
+import { API_ERROR_CODES, ClaimStatus, Permission } from "@ecommand/shared";
 import { ForbiddenException, Injectable } from "@nestjs/common";
 import { AuthUser } from "@/auth/auth.types";
 import { hasAnyPermission } from "@/auth/auth.utils";
@@ -13,19 +13,15 @@ import { UpdateClaimDto } from "./requests/update-claim.dto";
 export class ClaimsMapper {
 	toCreate(dto: CreateClaimDto, user: AuthUser): ClaimInsert {
 		const userId = dto.userId ?? user.id;
-		if (
-			!canAccessCustomer(user, dto.customerId) &&
-			(user.role === Role.AGENT_COMMERCIAL ||
-				!hasAnyPermission(user, Permission.CLAIMS_MANAGE_OTHER))
-		) {
-			throw new ForbiddenException("Cannot create claims for other customers");
+		if (!canAccessCustomer(user, dto.customerId)) {
+			throw new ForbiddenException({ code: API_ERROR_CODES.ACCESS_DENIED });
 		}
 
 		if (
 			userId !== user.id &&
 			!hasAnyPermission(user, Permission.CLAIMS_MANAGE_OTHER)
 		) {
-			throw new ForbiddenException("Cannot assign claims to other users");
+			throw new ForbiddenException({ code: API_ERROR_CODES.ACCESS_DENIED });
 		}
 
 		const status = hasAnyPermission(user, Permission.CLAIMS_MANAGE_STATUS)
@@ -47,29 +43,28 @@ export class ClaimsMapper {
 		if (
 			dto.customerId !== undefined &&
 			(!hasAnyPermission(user, Permission.CLAIMS_MANAGE_OTHER) ||
-				(user.role === Role.AGENT_COMMERCIAL &&
-					!canAccessCustomer(user, dto.customerId)))
+				!canAccessCustomer(user, dto.customerId))
 		) {
-			throw new ForbiddenException("Cannot change claim customer");
+			throw new ForbiddenException({ code: API_ERROR_CODES.ACCESS_DENIED });
 		}
 
 		if (dto.userId !== undefined && dto.userId !== user.id) {
 			if (!hasAnyPermission(user, Permission.CLAIMS_MANAGE_OTHER)) {
-				throw new ForbiddenException("Cannot reassign claims to other users");
+				throw new ForbiddenException({ code: API_ERROR_CODES.ACCESS_DENIED });
 			}
 			result.createdByUserId = dto.userId;
 		}
 
 		if (dto.type !== undefined) {
 			if (!hasAnyPermission(user, Permission.CLAIMS_UPDATE)) {
-				throw new ForbiddenException("Cannot change claim type");
+				throw new ForbiddenException({ code: API_ERROR_CODES.ACCESS_DENIED });
 			}
 			result.typeId = CLAIM_TYPES[dto.type].id;
 		}
 
 		if (dto.status !== undefined) {
 			if (!hasAnyPermission(user, Permission.CLAIMS_MANAGE_STATUS)) {
-				throw new ForbiddenException("Cannot change claim status");
+				throw new ForbiddenException({ code: API_ERROR_CODES.ACCESS_DENIED });
 			}
 			result.statusId = CLAIM_STATUSES[dto.status].id;
 		}

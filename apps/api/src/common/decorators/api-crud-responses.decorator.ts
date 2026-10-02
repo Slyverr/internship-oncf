@@ -1,5 +1,6 @@
 import { applyDecorators, HttpStatus, Type } from "@nestjs/common";
 import { ApiResponse } from "@nestjs/swagger";
+import { ApiErrorResponseDto } from "../responses/api-error-response.dto";
 
 type ResponseType = Type<unknown> | [Type<unknown>];
 
@@ -31,7 +32,9 @@ function withApiResponses(
 ) {
 	return applyDecorators(
 		ApiResponse({ status, type }),
-		...errors.map((status) => ApiResponse({ status })),
+		...errors.map((status) =>
+			ApiResponse({ status, type: ApiErrorResponseDto }),
+		),
 	);
 }
 

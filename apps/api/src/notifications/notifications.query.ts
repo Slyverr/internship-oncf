@@ -18,6 +18,8 @@ const notificationListColumns = {
 	channelId: true,
 	title: true,
 	message: true,
+	messageCode: true,
+	messageParameters: true,
 	status: true,
 	readAt: true,
 	sentAt: true,
@@ -41,11 +43,6 @@ const notificationListRelations = {
 		},
 	},
 } satisfies NotificationsRelations;
-
-const notificationDetailColumns = {
-	...notificationListColumns,
-	errorMessage: true,
-} satisfies NotificationsColumns;
 
 const notificationDetailRelations = {
 	...notificationListRelations,
@@ -89,7 +86,7 @@ export class NotificationsQuery {
 	async findNotification(id: NotificationId) {
 		return this.drizzle.db.query.notifications.findFirst({
 			where: { id },
-			columns: notificationDetailColumns,
+			columns: notificationListColumns,
 			with: notificationDetailRelations,
 		});
 	}

@@ -1,3 +1,4 @@
+import { API_ERROR_CODES } from "@ecommand/shared";
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { AttachmentsService } from "@/attachments/attachments.service";
 import type { OrderId } from "@/orders/orders.types";
@@ -48,9 +49,9 @@ export class FilesService {
 	async downloadFile(orderId: OrderId, fileId: number) {
 		const link = await this.filesQuery.findFileForDownload(orderId, fileId);
 		if (!link) {
-			throw new NotFoundException(
-				`File ${fileId} not found for order ${orderId}`,
-			);
+			throw new NotFoundException({
+				code: API_ERROR_CODES.ORDER_FILE_NOT_FOUND,
+			});
 		}
 
 		const buffer = await this.attachmentsService.download(link.attachmentId);
@@ -65,9 +66,9 @@ export class FilesService {
 	async deleteFile(orderId: OrderId, fileId: number) {
 		const link = await this.filesQuery.findFileForDelete(orderId, fileId);
 		if (!link) {
-			throw new NotFoundException(
-				`File ${fileId} not found for order ${orderId}`,
-			);
+			throw new NotFoundException({
+				code: API_ERROR_CODES.ORDER_FILE_NOT_FOUND,
+			});
 		}
 
 		await this.filesQuery.softDelete(orderId, fileId);

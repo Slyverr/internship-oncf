@@ -1,4 +1,4 @@
-import { Permission, ProgramStatus } from "@ecommand/shared";
+import { API_ERROR_CODES, Permission, ProgramStatus } from "@ecommand/shared";
 import { ForbiddenException, Injectable } from "@nestjs/common";
 import { AuthUser } from "@/auth/auth.types";
 import { hasOnePermission } from "@/auth/auth.utils";
@@ -16,7 +16,9 @@ export class ProgramsMapper {
 			createdByUserId !== user.id &&
 			!hasOnePermission(user, Permission.PROGRAMS_MANAGE_OWNERSHIP)
 		) {
-			throw new ForbiddenException("Cannot assign programs to other users");
+			throw new ForbiddenException({
+				code: API_ERROR_CODES.PROGRAM_OWNERSHIP_CHANGE_FORBIDDEN,
+			});
 		}
 
 		const status = hasOnePermission(user, Permission.PROGRAMS_MANAGE_STATUS)
@@ -36,14 +38,18 @@ export class ProgramsMapper {
 	toUpdate(dto: UpdateProgramDto, user: AuthUser): ProgramUpdate {
 		if (dto.userId !== undefined && dto.userId !== user.id) {
 			if (!hasOnePermission(user, Permission.PROGRAMS_MANAGE_OWNERSHIP)) {
-				throw new ForbiddenException("Cannot assign programs to other users");
+				throw new ForbiddenException({
+					code: API_ERROR_CODES.PROGRAM_OWNERSHIP_CHANGE_FORBIDDEN,
+				});
 			}
 		}
 
 		let statusId: ProgramUpdate["statusId"];
 		if (dto.status !== undefined) {
 			if (!hasOnePermission(user, Permission.PROGRAMS_MANAGE_STATUS)) {
-				throw new ForbiddenException("Cannot change program status");
+				throw new ForbiddenException({
+					code: API_ERROR_CODES.PROGRAM_STATUS_CHANGE_FORBIDDEN,
+				});
 			}
 			statusId = PROGRAM_STATUSES[dto.status].id;
 		}

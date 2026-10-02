@@ -1,3 +1,4 @@
+import { API_ERROR_CODES } from "@ecommand/shared";
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { UpdateTrainPositionDto } from "./requests/update-train-position.dto";
 import { UpdateWagonPositionDto } from "./requests/update-wagon-position.dto";
@@ -11,7 +12,9 @@ export class TrackingService {
 	async trackWagon(wagonNumber: string) {
 		const wagon = await this.trackingQuery.findTrackedWagon(wagonNumber);
 		if (!wagon) {
-			throw new NotFoundException(`Wagon ${wagonNumber} not found`);
+			throw new NotFoundException({
+				code: API_ERROR_CODES.TRACKED_WAGON_NOT_FOUND,
+			});
 		}
 		return wagon;
 	}
@@ -19,7 +22,9 @@ export class TrackingService {
 	async trackTrain(trainNumber: string) {
 		const train = await this.trackingQuery.findTrackedTrain(trainNumber);
 		if (!train) {
-			throw new NotFoundException(`Train ${trainNumber} not found`);
+			throw new NotFoundException({
+				code: API_ERROR_CODES.TRACKED_TRAIN_NOT_FOUND,
+			});
 		}
 		return train;
 	}
@@ -31,7 +36,9 @@ export class TrackingService {
 	async updateWagonPosition(id: WagonId, dto: UpdateWagonPositionDto) {
 		const wagon = await this.trackingQuery.findWagonExists(id);
 		if (!wagon) {
-			throw new NotFoundException(`Wagon ${id} not found`);
+			throw new NotFoundException({
+				code: API_ERROR_CODES.TRACKED_WAGON_NOT_FOUND,
+			});
 		}
 
 		return this.trackingQuery.createWagonTracking({
@@ -45,7 +52,9 @@ export class TrackingService {
 	async updateTrainPosition(id: TrainId, dto: UpdateTrainPositionDto) {
 		const train = await this.trackingQuery.findTrainExists(id);
 		if (!train) {
-			throw new NotFoundException(`Train ${id} not found`);
+			throw new NotFoundException({
+				code: API_ERROR_CODES.TRACKED_TRAIN_NOT_FOUND,
+			});
 		}
 
 		return this.trackingQuery.updateTrainPosition(id, {

@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import type { Readable } from "node:stream";
+import { API_ERROR_CODES } from "@ecommand/shared";
 import {
 	Injectable,
 	InternalServerErrorException,
@@ -49,7 +50,9 @@ export class StorageService implements OnModuleInit {
 			});
 		} catch (error) {
 			this.logger.error(`Upload failed for ${file.originalName}`, error);
-			throw new InternalServerErrorException("Failed to store file");
+			throw new InternalServerErrorException({
+				code: API_ERROR_CODES.INTERNAL_ERROR,
+			});
 		}
 
 		return { hash, path };
@@ -61,10 +64,14 @@ export class StorageService implements OnModuleInit {
 			return await this.streamToBuffer(stream);
 		} catch (error) {
 			if (this.isNotFound(error)) {
-				throw new NotFoundException(`File not found: ${path}`);
+				throw new NotFoundException({
+					code: API_ERROR_CODES.RESOURCE_NOT_FOUND,
+				});
 			}
 			this.logger.error(`Download failed for ${path}`, error);
-			throw new InternalServerErrorException("Failed to retrieve file");
+			throw new InternalServerErrorException({
+				code: API_ERROR_CODES.INTERNAL_ERROR,
+			});
 		}
 	}
 
@@ -77,12 +84,14 @@ export class StorageService implements OnModuleInit {
 			);
 		} catch (error) {
 			if (this.isNotFound(error)) {
-				throw new NotFoundException(`File not found: ${path}`);
+				throw new NotFoundException({
+					code: API_ERROR_CODES.RESOURCE_NOT_FOUND,
+				});
 			}
 			this.logger.error(`Presign failed for ${path}`, error);
-			throw new InternalServerErrorException(
-				"Failed to generate download link",
-			);
+			throw new InternalServerErrorException({
+				code: API_ERROR_CODES.INTERNAL_ERROR,
+			});
 		}
 	}
 
@@ -92,7 +101,9 @@ export class StorageService implements OnModuleInit {
 		} catch (error) {
 			if (this.isNotFound(error)) return;
 			this.logger.error(`Delete failed for ${path}`, error);
-			throw new InternalServerErrorException("Failed to delete file");
+			throw new InternalServerErrorException({
+				code: API_ERROR_CODES.INTERNAL_ERROR,
+			});
 		}
 	}
 
@@ -104,7 +115,9 @@ export class StorageService implements OnModuleInit {
 			this.logger.log(`Bucket "${this.bucket}" created`);
 		} catch (error) {
 			this.logger.error("Bucket initialization failed", error);
-			throw new InternalServerErrorException("Storage initialization failed");
+			throw new InternalServerErrorException({
+				code: API_ERROR_CODES.INTERNAL_ERROR,
+			});
 		}
 	}
 

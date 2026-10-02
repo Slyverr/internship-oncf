@@ -2,6 +2,7 @@ import { NestFactory } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
 import { configureApp } from "./app.setup";
+import { documentDefaultCodedApiErrors } from "./common/swagger/document-coded-api-errors";
 import { stripSwaggerInternalMetadata } from "./common/swagger/strip-swagger-internal-metadata";
 
 async function bootstrap() {
@@ -19,6 +20,7 @@ async function bootstrap() {
 
 	const documentFactory = () => {
 		const document = SwaggerModule.createDocument(app, config);
+		documentDefaultCodedApiErrors(document);
 		stripSwaggerInternalMetadata(document);
 
 		return document;

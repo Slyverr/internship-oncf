@@ -4,6 +4,7 @@ import {
 	Controller,
 	Delete,
 	Get,
+	HttpStatus,
 	Post,
 	Put,
 	Request,
@@ -33,6 +34,12 @@ const {
 	list: UserListDto,
 	detail: UserDetailDto,
 	remove: UserDeleteDto,
+	removeErrors: [
+		HttpStatus.UNAUTHORIZED,
+		HttpStatus.FORBIDDEN,
+		HttpStatus.NOT_FOUND,
+		HttpStatus.CONFLICT,
+	],
 });
 
 @Controller("users")

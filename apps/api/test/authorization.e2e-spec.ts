@@ -383,6 +383,24 @@ describe("customer portfolio authorization (e2e)", () => {
 			persona: RolePersona.AGENT_COMMERCIAL,
 			permissionNames: [Permission.ORDERS_READ],
 		});
+		const invalidPortfolioEmail = `invalid-${randomUUID()}@example.test`;
+		await request(app.getHttpServer())
+			.post("/users")
+			.set("Authorization", `Bearer ${adminToken}`)
+			.send({
+				email: invalidPortfolioEmail,
+				password: "StrongPass1!",
+				firstName: "Invalid",
+				lastName: "Portfolio",
+				roleId: created.body.id,
+				customerIds: [2_147_483_647],
+			})
+			.expect(422);
+		await request(app.getHttpServer())
+			.post("/auth/login")
+			.send({ email: invalidPortfolioEmail, password: "StrongPass1!" })
+			.expect(401);
+
 		const customUserEmail = `custom-${randomUUID()}@example.test`;
 		const customUser = await request(app.getHttpServer())
 			.post("/users")
@@ -462,6 +480,24 @@ describe("customer portfolio authorization (e2e)", () => {
 			})
 			.expect(200);
 		expect(assigned.body.userCustomers).toEqual([
+			{ customerId: customerIds[E2E_CUSTOMERS.assignedA] },
+		]);
+
+		await request(app.getHttpServer())
+			.put(`/users/${unassignedAgent.id}`)
+			.set("Authorization", `Bearer ${adminToken}`)
+			.send({
+				firstName: "Should Roll Back",
+				role: Role.AGENT_COMMERCIAL,
+				customerIds: [2_147_483_647],
+			})
+			.expect(422);
+		const afterFailedUpdate = await request(app.getHttpServer())
+			.get(`/users/${unassignedAgent.id}`)
+			.set("Authorization", `Bearer ${adminToken}`)
+			.expect(200);
+		expect(afterFailedUpdate.body.firstName).toBe(unassignedAgent.firstName);
+		expect(afterFailedUpdate.body.userCustomers).toEqual([
 			{ customerId: customerIds[E2E_CUSTOMERS.assignedA] },
 		]);
 

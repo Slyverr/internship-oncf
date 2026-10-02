@@ -1,5 +1,11 @@
-import { Permission, RegistrationStatus, Role } from "@ecommand/shared";
-import { BadRequestException, UnauthorizedException } from "@nestjs/common";
+import {
+	API_ERROR_CODES,
+	API_RESPONSE_CODES,
+	Permission,
+	RegistrationStatus,
+	Role,
+} from "@ecommand/shared";
+import { UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import bcrypt from "bcryptjs";
@@ -33,12 +39,11 @@ describe("AuthService", () => {
 			createSession: jest.fn(),
 			findSession: jest.fn(),
 			logoutSession: jest.fn(),
-			updateUserPassword: jest.fn(),
-			revokeAllUserSessions: jest.fn(),
+			updatePasswordAndRevokeSessions: jest.fn(),
 			findUserByEmail: jest.fn(),
 			createPasswordResetToken: jest.fn(),
-			findValidResetToken: jest.fn(),
-			markResetTokenAsUsed: jest.fn(),
+			findPasswordResetToken: jest.fn(),
+			resetPassword: jest.fn(),
 		};
 		email = { sendResetPasswordEmail: jest.fn() };
 		jwt = {
@@ -115,7 +120,7 @@ describe("AuthService", () => {
 	it("verifies customer code and ICE before submitting registration", async () => {
 		customers.findActiveCustomerForRegistration.mockResolvedValue({ id: 31 });
 		users.registerClient.mockResolvedValue({
-			message: "Registration submitted for admin review.",
+			code: API_RESPONSE_CODES.REGISTRATION_SUBMITTED_FOR_REVIEW,
 		});
 		const dto = {
 			email: "client@example.test",
@@ -127,7 +132,7 @@ describe("AuthService", () => {
 		} as never;
 
 		await expect(service.register(dto)).resolves.toEqual({
-			message: "Registration submitted for admin review.",
+			code: API_RESPONSE_CODES.REGISTRATION_SUBMITTED_FOR_REVIEW,
 		});
 		expect(customers.findActiveCustomerForRegistration).toHaveBeenCalledWith(
 			"CLI009",
@@ -149,7 +154,9 @@ describe("AuthService", () => {
 				customerCode: "CLI009",
 				ice: "000000000000000",
 			} as never),
-		).rejects.toBeInstanceOf(BadRequestException);
+		).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.CUSTOMER_IDENTITY_INVALID },
+		});
 		expect(users.registerClient).not.toHaveBeenCalled();
 	});
 
@@ -186,7 +193,9 @@ describe("AuthService", () => {
 		query.findSession.mockResolvedValue(session);
 		await expect(
 			service.validateSession(7, "session-id"),
-		).rejects.toBeInstanceOf(UnauthorizedException);
+		).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.AUTHENTICATION_REQUIRED },
+		});
 		expect(users.findOneForAuth).not.toHaveBeenCalled();
 	});
 
@@ -241,7 +250,7 @@ describe("AuthService", () => {
 		).rejects.toBeInstanceOf(UnauthorizedException);
 	});
 
-	it("revokes every session after a successful password change", async () => {
+	it("updates the password and revokes sessions through one atomic query", async () => {
 		users.findOneForAuth.mockResolvedValue({
 			password: await bcrypt.hash("old password", 4),
 		});
@@ -249,11 +258,10 @@ describe("AuthService", () => {
 			currentPassword: "old password",
 			newPassword: "new password",
 		} as never);
-		expect(query.updateUserPassword).toHaveBeenCalledWith(
+		expect(query.updatePasswordAndRevokeSessions).toHaveBeenCalledWith(
 			7,
 			expect.any(String),
 		);
-		expect(query.revokeAllUserSessions).toHaveBeenCalledWith(7);
 	});
 
 	it("does not update credentials when the current password is wrong", async () => {
@@ -265,9 +273,10 @@ describe("AuthService", () => {
 				currentPassword: "incorrect",
 				newPassword: "new password",
 			} as never),
-		).rejects.toBeInstanceOf(BadRequestException);
-		expect(query.updateUserPassword).not.toHaveBeenCalled();
-		expect(query.revokeAllUserSessions).not.toHaveBeenCalled();
+		).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.CURRENT_PASSWORD_INVALID },
+		});
+		expect(query.updatePasswordAndRevokeSessions).not.toHaveBeenCalled();
 	});
 
 	it("keeps forgot-password responses neutral for unknown email addresses", async () => {
@@ -300,33 +309,58 @@ describe("AuthService", () => {
 	});
 
 	it("rejects missing and expired reset tokens without changing the password", async () => {
-		query.findValidResetToken.mockResolvedValue(undefined);
+		query.findPasswordResetToken.mockResolvedValue(undefined);
 		await expect(
 			service.resetPassword("invalid", "new password"),
-		).rejects.toBeInstanceOf(BadRequestException);
-		query.findValidResetToken.mockResolvedValue({
+		).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.RESET_TOKEN_INVALID },
+		});
+		query.findPasswordResetToken.mockResolvedValue({
 			id: 8,
 			userId: 7,
 			expiresAt: new Date(Date.now() - 60_000).toISOString(),
+			used: false,
 		});
 		await expect(
 			service.resetPassword("expired", "new password"),
-		).rejects.toThrow("Token has expired");
-		expect(query.updateUserPassword).not.toHaveBeenCalled();
+		).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.RESET_TOKEN_EXPIRED },
+		});
+		expect(query.updatePasswordAndRevokeSessions).not.toHaveBeenCalled();
 	});
 
-	it("marks a valid reset token as used and revokes existing sessions", async () => {
-		query.findValidResetToken.mockResolvedValue({
+	it("persists a reset through the atomic token-consumption query", async () => {
+		query.findPasswordResetToken.mockResolvedValue({
 			id: 8,
 			userId: 7,
 			expiresAt: new Date(Date.now() + 60_000).toISOString(),
+			used: false,
 		});
+		query.resetPassword.mockResolvedValue("success");
 		await service.resetPassword("valid", "new password");
-		expect(query.updateUserPassword).toHaveBeenCalledWith(
-			7,
+		expect(query.resetPassword).toHaveBeenCalledWith(
+			"valid",
 			expect.any(String),
 		);
-		expect(query.markResetTokenAsUsed).toHaveBeenCalledWith(8);
-		expect(query.revokeAllUserSessions).toHaveBeenCalledWith(7);
+		expect(query.updatePasswordAndRevokeSessions).not.toHaveBeenCalled();
 	});
+
+	it.each([
+		["expired", API_ERROR_CODES.RESET_TOKEN_EXPIRED],
+		["invalid", API_ERROR_CODES.RESET_TOKEN_INVALID],
+	] as const)(
+		"maps a reset race result of %s to its API code",
+		async (result, code) => {
+			query.findPasswordResetToken.mockResolvedValue({
+				id: 8,
+				userId: 7,
+				expiresAt: new Date(Date.now() + 60_000).toISOString(),
+				used: false,
+			});
+			query.resetPassword.mockResolvedValue(result);
+			await expect(
+				service.resetPassword("valid", "new password"),
+			).rejects.toMatchObject({ response: { code } });
+		},
+	);
 });

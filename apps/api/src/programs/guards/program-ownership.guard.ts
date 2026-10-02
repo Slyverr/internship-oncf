@@ -14,5 +14,4 @@ export const ProgramOwnershipGuard = createOwnershipGuard<
 		return canAccessProgram(program, user);
 	},
 	pipe: new ProgramNumberPipe(),
-	errorMessage: "You can only access your own programs",
 });

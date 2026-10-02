@@ -4,6 +4,6 @@ import { parsePositiveInteger } from "@/common/utils/parse-positive-integer";
 @Injectable()
 export class NotificationIdPipe implements PipeTransform<string> {
 	transform(value: string) {
-		return parsePositiveInteger(value, "notification");
+		return parsePositiveInteger(value);
 	}
 }

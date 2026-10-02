@@ -8,6 +8,7 @@ import {
 	IsInt,
 	IsOptional,
 	IsString,
+	IsUUID,
 	MaxLength,
 	Min,
 	MinLength,
@@ -31,8 +32,13 @@ export class CreateUserDto {
 	@MaxLength(100)
 	lastName: string;
 
+	@IsOptional()
 	@IsEnum(Role)
-	role: Role;
+	role?: Role;
+
+	@IsOptional()
+	@IsUUID()
+	roleId?: string;
 
 	@IsOptional()
 	@IsString()

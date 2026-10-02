@@ -16,8 +16,10 @@ import {
 	users,
 	vessels,
 } from "drizzle/schema";
+import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
+import { generateDocumentNumber } from "../../src/common/utils/document-number";
 
 async function seed() {
 	dotenv.config();
@@ -240,12 +242,38 @@ async function seed() {
 		// Default goods per type
 		const goodsTypeList = await db.query.goodsTypes.findMany();
 		for (const gt of goodsTypeList) {
+			const legacyCode = `MRC-${gt.id}`;
+			const [legacyDefaultGood] = await db
+				.select({ id: goods.id })
+				.from(goods)
+				.where(
+					and(eq(goods.goodsTypeId, gt.id), eq(goods.goodsCode, legacyCode)),
+				)
+				.limit(1);
+
+			if (legacyDefaultGood) {
+				await db
+					.update(goods)
+					.set({ goodsCode: generateDocumentNumber("MRC") })
+					.where(eq(goods.id, legacyDefaultGood.id));
+				continue;
+			}
+
+			const defaultName = `${gt.name} (default)`;
+			const [existingDefaultGood] = await db
+				.select({ id: goods.id })
+				.from(goods)
+				.where(and(eq(goods.goodsTypeId, gt.id), eq(goods.name, defaultName)))
+				.limit(1);
+
+			if (existingDefaultGood) continue;
+
 			await db
 				.insert(goods)
 				.values({
-					name: `${gt.name} (default)`,
+					name: defaultName,
 					goodsTypeId: gt.id,
-					goodsCode: `MRC-${gt.id}`,
+					goodsCode: generateDocumentNumber("MRC"),
 					isActive: true,
 				})
 				.onConflictDoNothing({ target: goods.goodsCode });

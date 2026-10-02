@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { RegistrationStatus } from "@ecommand/shared";
+import { API_ERROR_CODES, RegistrationStatus } from "@ecommand/shared";
 import {
 	BadRequestException,
 	Injectable,
@@ -68,9 +68,9 @@ export class AuthService {
 				dto.ice,
 			);
 		if (!customer) {
-			throw new BadRequestException(
-				"Customer code and ICE could not be verified. Check the values or contact your account administrator.",
-			);
+			throw new BadRequestException({
+				code: API_ERROR_CODES.CUSTOMER_IDENTITY_INVALID,
+			});
 		}
 
 		return this.usersService.registerClient({
@@ -113,7 +113,9 @@ export class AuthService {
 			session.logoutAt ||
 			new Date(session.expiredAt) <= new Date()
 		) {
-			throw new UnauthorizedException();
+			throw new UnauthorizedException({
+				code: API_ERROR_CODES.AUTHENTICATION_REQUIRED,
+			});
 		}
 
 		const user = await this.usersService.findOneForAuth(userId);
@@ -122,13 +124,16 @@ export class AuthService {
 			!user.isActive ||
 			user.registrationStatus !== RegistrationStatus.APPROVED
 		) {
-			throw new UnauthorizedException();
+			throw new UnauthorizedException({
+				code: API_ERROR_CODES.AUTHENTICATION_REQUIRED,
+			});
 		}
 
 		return {
 			id: user.id,
 			email: user.email,
 			role: user.role,
+			persona: user.persona,
 			permissions: new Set(user.permissions),
 			sessionId,
 			customerId: user.customerId,
@@ -145,13 +150,14 @@ export class AuthService {
 		const user = await this.usersService.findOneForAuth(id);
 
 		if (!(await bcrypt.compare(dto.currentPassword, user.password))) {
-			throw new BadRequestException("Current password is incorrect");
+			throw new BadRequestException({
+				code: API_ERROR_CODES.CURRENT_PASSWORD_INVALID,
+			});
 		}
 
 		const password = await bcrypt.hash(dto.newPassword, 10);
 
-		await this.authQuery.updateUserPassword(id, password);
-		await this.authQuery.revokeAllUserSessions(id);
+		await this.authQuery.updatePasswordAndRevokeSessions(id, password);
 	}
 
 	async forgotPassword(email: string) {
@@ -178,20 +184,32 @@ export class AuthService {
 	}
 
 	async resetPassword(token: string, newPassword: string) {
-		const resetToken = await this.authQuery.findValidResetToken(token);
+		const resetToken = await this.authQuery.findPasswordResetToken(token);
 
-		if (!resetToken) {
-			throw new BadRequestException("Invalid or expired token");
+		if (!resetToken || resetToken.used) {
+			throw new BadRequestException({
+				code: API_ERROR_CODES.RESET_TOKEN_INVALID,
+			});
 		}
 
 		if (new Date(resetToken.expiresAt) < new Date()) {
-			throw new BadRequestException("Token has expired");
+			throw new BadRequestException({
+				code: API_ERROR_CODES.RESET_TOKEN_EXPIRED,
+			});
 		}
 
 		const password = await bcrypt.hash(newPassword, 10);
+		const resetResult = await this.authQuery.resetPassword(token, password);
 
-		await this.authQuery.updateUserPassword(resetToken.userId, password);
-		await this.authQuery.markResetTokenAsUsed(resetToken.id);
-		await this.authQuery.revokeAllUserSessions(resetToken.userId);
+		if (resetResult === "expired") {
+			throw new BadRequestException({
+				code: API_ERROR_CODES.RESET_TOKEN_EXPIRED,
+			});
+		}
+		if (resetResult !== "success") {
+			throw new BadRequestException({
+				code: API_ERROR_CODES.RESET_TOKEN_INVALID,
+			});
+		}
 	}
 }

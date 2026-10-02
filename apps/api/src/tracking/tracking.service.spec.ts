@@ -1,4 +1,4 @@
-import { NotFoundException } from "@nestjs/common";
+import { API_ERROR_CODES } from "@ecommand/shared";
 import type { TrackingQuery } from "./tracking.query";
 import { TrackingService } from "./tracking.service";
 
@@ -25,9 +25,9 @@ describe("TrackingService", () => {
 	});
 	it("reports missing wagons", async () => {
 		query.findTrackedWagon.mockResolvedValue(undefined);
-		await expect(service.trackWagon("W-404")).rejects.toThrow(
-			new NotFoundException("Wagon W-404 not found"),
-		);
+		await expect(service.trackWagon("W-404")).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.TRACKED_WAGON_NOT_FOUND },
+		});
 	});
 	it("returns matching train tracking data", async () => {
 		query.findTrackedTrain.mockResolvedValue({ id: 4 } as never);
@@ -36,9 +36,9 @@ describe("TrackingService", () => {
 	});
 	it("reports missing trains", async () => {
 		query.findTrackedTrain.mockResolvedValue(undefined);
-		await expect(service.trackTrain("T-404")).rejects.toThrow(
-			new NotFoundException("Train T-404 not found"),
-		);
+		await expect(service.trackTrain("T-404")).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.TRACKED_TRAIN_NOT_FOUND },
+		});
 	});
 	it("returns order tracking results", async () => {
 		query.findTrackedOrder.mockResolvedValue([{ wagonId: 2 }] as never);
@@ -49,7 +49,9 @@ describe("TrackingService", () => {
 		query.findWagonExists.mockResolvedValue(undefined);
 		await expect(
 			service.updateWagonPosition(2 as never, { latitude: 1, longitude: 2 }),
-		).rejects.toThrow(new NotFoundException("Wagon 2 not found"));
+		).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.TRACKED_WAGON_NOT_FOUND },
+		});
 		expect(query.createWagonTracking).not.toHaveBeenCalled();
 	});
 	it("persists wagon coordinates as strings with the default status", async () => {
@@ -87,7 +89,9 @@ describe("TrackingService", () => {
 		query.findTrainExists.mockResolvedValue(undefined);
 		await expect(
 			service.updateTrainPosition(4 as never, { latitude: 1, longitude: 2 }),
-		).rejects.toThrow(new NotFoundException("Train 4 not found"));
+		).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.TRACKED_TRAIN_NOT_FOUND },
+		});
 		expect(query.updateTrainPosition).not.toHaveBeenCalled();
 	});
 	it("persists train coordinates and the default status", async () => {

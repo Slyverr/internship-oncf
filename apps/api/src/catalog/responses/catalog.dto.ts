@@ -1,6 +1,7 @@
 import { Assert, Equals } from "@/common/utils/type-assertions";
 import {
 	AccessoryOperation,
+	CustomerType,
 	Good,
 	GoodsType,
 	RejectionReason,
@@ -8,6 +9,7 @@ import {
 } from "../catalog.types";
 
 type _UnitAssertion = Assert<Equals<UnitDto, Unit>>;
+type _CustomerTypeAssertion = Assert<Equals<CustomerTypeDto, CustomerType>>;
 type _GoodsTypeAssertion = Assert<Equals<GoodsTypeDto, GoodsType>>;
 type _GoodAssertion = Assert<Equals<GoodDto, Good>>;
 type _AccessoryOperationAssertion = Assert<
@@ -18,6 +20,13 @@ type _RejectionReasonAssertion = Assert<
 >;
 
 export class UnitDto implements Unit {
+	id: string;
+	name: string;
+	isActive: boolean;
+	createdAt: string;
+}
+
+export class CustomerTypeDto implements CustomerType {
 	id: string;
 	name: string;
 	isActive: boolean;

@@ -1,3 +1,4 @@
+import { API_ERROR_CODES } from "@ecommand/shared";
 import {
 	Injectable,
 	InternalServerErrorException,
@@ -15,11 +16,13 @@ export class ProfileService {
 	async findOne(id: UserId) {
 		const user = await this.profileQuery.findProfile(id);
 		if (!user) {
-			throw new NotFoundException(`User with id ${id} not found`);
+			throw new NotFoundException({ code: API_ERROR_CODES.USER_NOT_FOUND });
 		}
 
 		if (!user.role) {
-			throw new InternalServerErrorException(`User ${id} has no role assigned`);
+			throw new InternalServerErrorException({
+				code: API_ERROR_CODES.INTERNAL_ERROR,
+			});
 		}
 
 		const { customer, ...profile } = user;

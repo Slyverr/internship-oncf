@@ -27,27 +27,41 @@ export class UsersMapper {
 		};
 	}
 
-	async toCreate(dto: CreateUserDto, user: AuthUser): Promise<UserInsert> {
-		const { role, password, customerIds: _, ...values } = dto;
+	async toCreate(
+		dto: CreateUserDto,
+		user: AuthUser,
+		roleId: string,
+	): Promise<UserInsert> {
+		const { password, ...values } = dto;
+		delete values.role;
+		delete values.roleId;
+		delete values.customerIds;
 
 		return {
 			...values,
 			employeeCode: this.normalizeEmployeeCode(values.employeeCode),
 			password: await bcrypt.hash(password, 10),
 			createdBy: user.email,
-			roleId: ROLES[role].id,
+			roleId,
 		};
 	}
 
-	async toUpdate(dto: UpdateUserDto, user: AuthUser): Promise<UserUpdate> {
-		const { role, customerIds: _, ...values } = dto;
+	async toUpdate(
+		dto: UpdateUserDto,
+		user: AuthUser,
+		roleId?: string,
+	): Promise<UserUpdate> {
+		const values = { ...dto };
+		delete values.role;
+		delete values.roleId;
+		delete values.customerIds;
 
 		return {
 			...values,
 			...(values.employeeCode !== undefined && {
 				employeeCode: this.normalizeEmployeeCode(values.employeeCode),
 			}),
-			...(role && { roleId: ROLES[role].id }),
+			...(roleId && { roleId }),
 			updatedBy: user.email,
 		};
 	}

@@ -1,6 +1,6 @@
-import { OrderStatus, Permission, Role } from "@ecommand/shared";
+import { API_ERROR_CODES, OrderStatus, Permission } from "@ecommand/shared";
 import { ConflictException, Injectable } from "@nestjs/common";
-import { orderStatusHistory, orders } from "drizzle/schema";
+import { notifications, orderStatusHistory, orders } from "drizzle/schema";
 import { eq, type SQL } from "drizzle-orm";
 import { AuthUser } from "@/auth/auth.types";
 import { hasOnePermission } from "@/auth/auth.utils";
@@ -13,6 +13,7 @@ import {
 	QueryRelations,
 } from "@/database/drizzle.types";
 import { withDbErrorHandling } from "@/database/drizzle.util";
+import type { NotificationInsert } from "@/notifications/notifications.types";
 import type { UserId } from "@/users/users.types";
 import type { OrderId, OrderInsert, OrderUpdate } from "./orders.types";
 import { OrderListQueryDto } from "./requests/order-list-query.dto";
@@ -123,7 +124,7 @@ export class OrdersQuery {
 		const scopedCustomerIds =
 			customerScope === null
 				? null
-				: user.role === Role.AGENT_COMMERCIAL && customerId !== undefined
+				: customerId !== undefined
 					? customerScope.includes(customerId)
 						? [customerId]
 						: []
@@ -317,6 +318,8 @@ export class OrdersQuery {
 			where: { id },
 			columns: {
 				statusId: true,
+				orderNumber: true,
+				createdByUserId: true,
 			},
 		});
 	}
@@ -330,6 +333,7 @@ export class OrdersQuery {
 				userId: UserId;
 				comment?: string;
 			};
+			notification?: NotificationInsert;
 		},
 	) {
 		return this.drizzle.db.transaction(async (tx) => {
@@ -351,9 +355,9 @@ export class OrdersQuery {
 			);
 
 			if (!updated) {
-				throw new ConflictException(
-					`Order ${id} was modified or does not exist`,
-				);
+				throw new ConflictException({
+					code: API_ERROR_CODES.ORDER_UPDATE_CONFLICT,
+				});
 			}
 
 			if (
@@ -367,6 +371,13 @@ export class OrdersQuery {
 					userId: options.history.userId,
 					comment: options.history.comment,
 				});
+				if (options.notification) {
+					const notification = options.notification;
+					await withDbErrorHandling(
+						() => tx.insert(notifications).values(notification),
+						notification,
+					);
+				}
 			}
 
 			return updated;

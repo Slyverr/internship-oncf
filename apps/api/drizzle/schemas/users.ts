@@ -4,11 +4,13 @@ import type {
 	AppearanceTextSize,
 	AppearanceTheme,
 	AppearanceWorkspaceLayout,
+	RolePersona,
 } from "@ecommand/shared";
 import {
 	APPEARANCE_FONT_FAMILIES,
 	APPEARANCE_WORKSPACE_LAYOUTS,
 	RegistrationStatus,
+	RolePersona as RolePersonaValues,
 } from "@ecommand/shared";
 import { sql } from "drizzle-orm";
 import {
@@ -36,6 +38,10 @@ export const roles = pgTable(
 		id: uuid("id").primaryKey(),
 		name: varchar("name", { length: 100 }).notNull(),
 		description: varchar("description", { length: 500 }),
+		// System roles keep the seeded identities; custom roles are managed separately.
+		isSystem: boolean("is_system").default(true).notNull(),
+		// Persona drives operational ownership/workflow behavior, never authorization.
+		persona: varchar("persona", { length: 32 }).$type<RolePersona>(),
 		createdAt: timestamp("created_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
 			.notNull(),
@@ -46,6 +52,16 @@ export const roles = pgTable(
 	},
 	(table) => [
 		unique("roles_name_key").on(table.name),
+		uniqueIndex("roles_system_persona_key")
+			.on(table.persona)
+			.where(sql`${table.isSystem} = true`),
+		check(
+			"roles_persona_check",
+			sql`${table.persona} IS NULL OR ${table.persona} IN (${sql.join(
+				Object.values(RolePersonaValues).map((persona) => sql`${persona}`),
+				sql`, `,
+			)})`,
+		),
 		index("idx_roles_name").on(table.name),
 		index("idx_roles_active").on(table.isActive),
 	],

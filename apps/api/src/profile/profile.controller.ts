@@ -1,13 +1,16 @@
 import { Permission } from "@ecommand/shared";
-import { Body, Controller, Get, Put, Request } from "@nestjs/common";
 import {
-	ApiExtraModels,
-	ApiOkResponse,
-	ApiUnauthorizedResponse,
-	getSchemaPath,
-} from "@nestjs/swagger";
+	Body,
+	Controller,
+	Get,
+	HttpStatus,
+	Put,
+	Request,
+} from "@nestjs/common";
+import { ApiExtraModels, ApiOkResponse, getSchemaPath } from "@nestjs/swagger";
 import type { AuthRequest } from "@/auth/auth.types";
 import { RequireAny } from "@/auth/permissions.decorator";
+import { ApiCodedErrorResponse } from "@/common/decorators/api-coded-error-response.decorator";
 import { ProfileService } from "./profile.service";
 import { UpdateAppearancePreferencesDto } from "./requests/update-appearance-preferences.dto";
 import { UpdateProfileDto } from "./requests/update-profile.dto";
@@ -20,7 +23,7 @@ export class ProfileController {
 
 	@Get()
 	@ApiOkResponse({ type: ProfileDto })
-	@ApiUnauthorizedResponse()
+	@ApiCodedErrorResponse(HttpStatus.UNAUTHORIZED)
 	async getCurrent(@Request() req: AuthRequest) {
 		return this.profileService.findOne(req.user.id);
 	}
@@ -33,7 +36,7 @@ export class ProfileController {
 			nullable: true,
 		},
 	})
-	@ApiUnauthorizedResponse()
+	@ApiCodedErrorResponse(HttpStatus.UNAUTHORIZED)
 	async getPreferences(@Request() req: AuthRequest) {
 		return this.profileService.findPreferences(req.user.id);
 	}
@@ -41,7 +44,7 @@ export class ProfileController {
 	@Put("preferences")
 	@RequireAny(Permission.PROFILE_UPDATE)
 	@ApiOkResponse({ type: AppearancePreferencesDto })
-	@ApiUnauthorizedResponse()
+	@ApiCodedErrorResponse(HttpStatus.UNAUTHORIZED)
 	async updatePreferences(
 		@Body() dto: UpdateAppearancePreferencesDto,
 		@Request() req: AuthRequest,
@@ -52,7 +55,7 @@ export class ProfileController {
 	@Put()
 	@RequireAny(Permission.PROFILE_UPDATE)
 	@ApiOkResponse({ type: ProfileDto })
-	@ApiUnauthorizedResponse()
+	@ApiCodedErrorResponse(HttpStatus.UNAUTHORIZED)
 	async update(@Body() dto: UpdateProfileDto, @Request() req: AuthRequest) {
 		return this.profileService.update(req.user.id, dto);
 	}

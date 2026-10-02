@@ -1,6 +1,10 @@
 import { Permission } from "@ecommand/shared";
 import { Injectable } from "@nestjs/common";
-import { forecastProgramHistory, forecastPrograms } from "drizzle/schema";
+import {
+	forecastProgramHistory,
+	forecastPrograms,
+	notifications,
+} from "drizzle/schema";
 import { eq, type SQL } from "drizzle-orm";
 import { AuthUser } from "@/auth/auth.types";
 import { hasOnePermission } from "@/auth/auth.utils";
@@ -8,6 +12,7 @@ import { getCustomerScope } from "@/auth/customer-scope";
 import { DrizzleService } from "@/database/drizzle.service";
 import { QueryColumns, QueryRelations } from "@/database/drizzle.types";
 import { withDbErrorHandling } from "@/database/drizzle.util";
+import type { NotificationInsert } from "@/notifications/notifications.types";
 import type { ProgramId, ProgramInsert, ProgramUpdate } from "./programs.types";
 import { ListProgramQueryDto } from "./requests/list-program.dto";
 
@@ -215,6 +220,7 @@ export class ProgramsQuery {
 		values: ProgramUpdate,
 		where: SQL = eq(forecastPrograms.id, id),
 		history?: { userId: number; userName: string },
+		notification?: NotificationInsert,
 	) {
 		return this.drizzle.db.transaction(async (tx) => {
 			const previous = history
@@ -246,6 +252,16 @@ export class ProgramsQuery {
 					await withDbErrorHandling(
 						() => tx.insert(forecastProgramHistory).values(event),
 						event,
+					);
+				}
+				if (
+					notification &&
+					values.statusId !== undefined &&
+					values.statusId !== previous.statusId
+				) {
+					await withDbErrorHandling(
+						() => tx.insert(notifications).values(notification),
+						notification,
 					);
 				}
 			}
@@ -368,6 +384,8 @@ export class ProgramsQuery {
 			where: { id },
 			columns: {
 				statusId: true,
+				programNumber: true,
+				createdByUserId: true,
 			},
 		});
 	}

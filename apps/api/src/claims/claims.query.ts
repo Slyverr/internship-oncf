@@ -1,10 +1,16 @@
-import { Role } from "@ecommand/shared";
+import { Permission } from "@ecommand/shared";
 import { Injectable } from "@nestjs/common";
-import { claimComments, claimStatusHistory, claims } from "drizzle/schema";
+import {
+	claimComments,
+	claimStatusHistory,
+	claims,
+	notifications,
+} from "drizzle/schema";
 import { and, eq, type SQL } from "drizzle-orm";
 import { DrizzleService } from "@/database/drizzle.service";
 import { QueryColumns, QueryRelations } from "@/database/drizzle.types";
 import { withDbErrorHandling } from "@/database/drizzle.util";
+import type { NotificationInsert } from "@/notifications/notifications.types";
 import type {
 	ClaimId,
 	ClaimInsert,
@@ -232,15 +238,21 @@ export class ClaimsQuery {
 			where: { id },
 			columns: {
 				statusId: true,
+				claimNumber: true,
+				createdByUserId: true,
 			},
 		});
 	}
 
-	async findCommercialAgentIds(customerId: number) {
+	async findClaimReadersForCustomer(customerId: number) {
 		const agents = await this.drizzle.db.query.users.findMany({
 			where: {
 				isActive: true,
-				role: { name: Role.AGENT_COMMERCIAL },
+				role: {
+					rolePermissions: {
+						permission: { name: Permission.CLAIMS_READ },
+					},
+				},
 				userCustomers: { customerId },
 			},
 			columns: { id: true },
@@ -257,28 +269,34 @@ export class ClaimsQuery {
 				userId: number;
 				comment?: string;
 			};
+			notification?: NotificationInsert;
 		},
 	) {
-		const [updated] = await withDbErrorHandling(
+		const updated = await withDbErrorHandling(
 			() =>
-				this.drizzle.db
-					.update(claims)
-					.set(values)
-					.where(options?.where ?? eq(claims.id, id))
-					.returning({
-						id: claims.id,
-					}),
+				this.drizzle.db.transaction(async (tx) => {
+					const [updatedClaim] = await tx
+						.update(claims)
+						.set(values)
+						.where(options?.where ?? eq(claims.id, id))
+						.returning({ id: claims.id });
+					if (!updatedClaim) return undefined;
+
+					if (values.statusId !== undefined && options?.history) {
+						await tx.insert(claimStatusHistory).values({
+							claimId: id,
+							statusId: values.statusId,
+							changedByUserId: options.history.userId,
+							comment: options.history.comment ?? null,
+						});
+						if (options.notification) {
+							await tx.insert(notifications).values(options.notification);
+						}
+					}
+					return updatedClaim;
+				}),
 			values,
 		);
-
-		if (updated && values.statusId !== undefined && options?.history) {
-			await this.drizzle.db.insert(claimStatusHistory).values({
-				claimId: id,
-				statusId: values.statusId,
-				changedByUserId: options.history.userId,
-				comment: options.history.comment ?? null,
-			});
-		}
 
 		return updated;
 	}
@@ -302,8 +320,9 @@ export class ClaimsQuery {
 				fromStatusId: string;
 				toStatusId: string;
 				changedByUserId: number;
-				comment: string;
+				comment?: string;
 			};
+			notifications?: NotificationInsert[];
 		},
 	) {
 		const [comment] = await withDbErrorHandling(
@@ -337,9 +356,13 @@ export class ClaimsQuery {
 								claimId,
 								statusId: toStatusId,
 								changedByUserId,
-								comment,
+								comment: comment ?? null,
 							});
 						}
+					}
+
+					if (options?.notifications?.length) {
+						await tx.insert(notifications).values(options.notifications);
 					}
 
 					return [createdComment];

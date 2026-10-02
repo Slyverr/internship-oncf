@@ -1,9 +1,11 @@
-import { OrderStatus, ProgramStatus, Role } from "@ecommand/shared";
 import {
-	ConflictException,
-	ForbiddenException,
-	NotFoundException,
-} from "@nestjs/common";
+	API_ERROR_CODES,
+	NotificationMessageCode,
+	OrderStatus,
+	Permission,
+	ProgramStatus,
+	Role,
+} from "@ecommand/shared";
 import { PROGRAM_STATUSES } from "@/database/reference-data";
 import { ProgramsQuery } from "./programs.query";
 import { ProgramsService } from "./programs.service";
@@ -11,6 +13,7 @@ import type { ProgramId } from "./programs.types";
 
 describe("ProgramsService lifecycle", () => {
 	const notifyChange = jest.fn();
+	const createChangeRecord = jest.fn().mockReturnValue({ id: "notification" });
 	const toCreate = jest.fn();
 	const query = {
 		createProgram: jest.fn(),
@@ -22,7 +25,7 @@ describe("ProgramsService lifecycle", () => {
 		updateProgram: jest.fn(),
 	};
 	const service = new ProgramsService(
-		{ notifyChange } as never,
+		{ notifyChange, createChangeRecord } as never,
 		query as unknown as ProgramsQuery,
 		{ toCreate } as never,
 	);
@@ -31,7 +34,9 @@ describe("ProgramsService lifecycle", () => {
 		id: 7,
 		email: "admin@example.test",
 		role: Role.ADMIN,
+		permissions: new Set([Permission.CUSTOMERS_MANAGE_OTHER]),
 		customerId: null,
+		assignedCustomerIds: [],
 	} as never;
 
 	beforeEach(() => {
@@ -46,6 +51,7 @@ describe("ProgramsService lifecycle", () => {
 		query.findProgramStatus.mockReset();
 		query.updateProgram.mockReset();
 		notifyChange.mockReset();
+		createChangeRecord.mockClear();
 		toCreate.mockReset();
 	});
 
@@ -81,7 +87,9 @@ describe("ProgramsService lifecycle", () => {
 
 		await expect(
 			service.create({ orderId: 12 } as never, user),
-		).rejects.toThrow(new NotFoundException("Order 12 not found"));
+		).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.ORDER_NOT_FOUND },
+		});
 		expect(query.findProgramForOrder).not.toHaveBeenCalled();
 		expect(query.createProgram).not.toHaveBeenCalled();
 	});
@@ -94,9 +102,9 @@ describe("ProgramsService lifecycle", () => {
 
 		await expect(
 			service.create({ orderId: 12 } as never, user),
-		).rejects.toThrow(
-			new ConflictException("Order is not eligible for program creation"),
-		);
+		).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.ORDER_NOT_ELIGIBLE_FOR_PROGRAM },
+		});
 		expect(query.findProgramForOrder).not.toHaveBeenCalled();
 		expect(query.createProgram).not.toHaveBeenCalled();
 	});
@@ -130,13 +138,16 @@ describe("ProgramsService lifecycle", () => {
 		const agent = {
 			id: 7,
 			role: Role.AGENT_COMMERCIAL,
+			permissions: new Set(),
 			customerId: null,
 			assignedCustomerIds: [],
 		} as never;
 
 		await expect(
 			service.create({ orderId: 12 } as never, agent),
-		).rejects.toBeInstanceOf(ForbiddenException);
+		).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.PROGRAM_CUSTOMER_ACCESS_DENIED },
+		});
 		expect(query.findProgramForOrder).not.toHaveBeenCalled();
 		expect(query.createProgram).not.toHaveBeenCalled();
 	});
@@ -152,7 +163,9 @@ describe("ProgramsService lifecycle", () => {
 
 		await expect(
 			service.create({ orderId: 12 } as never, agent),
-		).rejects.toBeInstanceOf(ForbiddenException);
+		).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.PROGRAM_CUSTOMER_ACCESS_DENIED },
+		});
 		expect(query.findProgramForOrder).not.toHaveBeenCalled();
 		expect(query.createProgram).not.toHaveBeenCalled();
 	});
@@ -166,7 +179,9 @@ describe("ProgramsService lifecycle", () => {
 
 		await expect(
 			service.create({ orderId: 12 } as never, user),
-		).rejects.toThrow("This order already has a forecast program");
+		).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.ORDER_ALREADY_PROGRAMMED },
+		});
 		expect(toCreate).not.toHaveBeenCalled();
 		expect(query.createProgram).not.toHaveBeenCalled();
 	});
@@ -174,10 +189,13 @@ describe("ProgramsService lifecycle", () => {
 	it("submits a draft program with a conditional status update and notification", async () => {
 		query.findProgramStatus.mockResolvedValue({
 			statusId: PROGRAM_STATUSES[ProgramStatus.DRAFT].id,
+			programNumber: "PRG-ABCDEFGHJK",
+			createdByUserId: 20,
 		});
 		query.updateProgram.mockResolvedValue({ id });
 		const result = {
 			id,
+			programNumber: "PRG-ABCDEFGHJK",
 			createdByUserId: 20,
 			programStatus: { name: ProgramStatus.PENDING_APPROVAL },
 		};
@@ -188,38 +206,41 @@ describe("ProgramsService lifecycle", () => {
 			{ statusId: PROGRAM_STATUSES[ProgramStatus.PENDING_APPROVAL].id },
 			expect.anything(),
 			{ userId: 7, userName: "admin@example.test" },
+			{ id: "notification" },
 		);
-		expect(notifyChange).toHaveBeenCalledWith(
-			20,
-			7,
-			"programs",
-			id,
-			expect.stringContaining("pending approval"),
-		);
+		expect(createChangeRecord).toHaveBeenCalledWith(20, 7, "programs", id, {
+			code: NotificationMessageCode.PROGRAM_STATUS_CHANGED,
+			parameters: {
+				recordCode: result.programNumber,
+				status: ProgramStatus.PENDING_APPROVAL,
+			},
+		});
 	});
 
 	it("rejects transitions that are not valid from the current state", async () => {
 		query.findProgramStatus.mockResolvedValue({
 			statusId: PROGRAM_STATUSES[ProgramStatus.SENT_TO_DTM].id,
 		});
-		await expect(service.submit(id, user)).rejects.toBeInstanceOf(
-			ConflictException,
-		);
+		await expect(service.submit(id, user)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.PROGRAM_TRANSITION_INVALID },
+		});
 		expect(query.updateProgram).not.toHaveBeenCalled();
 		expect(notifyChange).not.toHaveBeenCalled();
 	});
 
 	it("rejects an unknown status reference", async () => {
 		query.findProgramStatus.mockResolvedValue({ statusId: "missing-status" });
-		await expect(service.submit(id, user)).rejects.toThrow("Invalid status");
+		await expect(service.submit(id, user)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.PROGRAM_TRANSITION_INVALID },
+		});
 		expect(query.updateProgram).not.toHaveBeenCalled();
 	});
 
 	it("returns not found when the program does not exist", async () => {
 		query.findProgramStatus.mockResolvedValue(undefined);
-		await expect(service.submit(id, user)).rejects.toBeInstanceOf(
-			NotFoundException,
-		);
+		await expect(service.submit(id, user)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.PROGRAM_NOT_FOUND },
+		});
 	});
 
 	it("reports a conflict if another request changes the program first", async () => {
@@ -227,9 +248,9 @@ describe("ProgramsService lifecycle", () => {
 			statusId: PROGRAM_STATUSES[ProgramStatus.DRAFT].id,
 		});
 		query.updateProgram.mockResolvedValue(undefined);
-		await expect(service.submit(id, user)).rejects.toBeInstanceOf(
-			ConflictException,
-		);
+		await expect(service.submit(id, user)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.PROGRAM_TRANSITION_INVALID },
+		});
 		expect(query.findProgram).not.toHaveBeenCalled();
 		expect(notifyChange).not.toHaveBeenCalled();
 	});

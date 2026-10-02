@@ -1,9 +1,10 @@
-import { ClaimStatus, Permission, Role } from "@ecommand/shared";
 import {
-	BadRequestException,
-	ConflictException,
-	NotFoundException,
-} from "@nestjs/common";
+	API_ERROR_CODES,
+	ClaimStatus,
+	NotificationMessageCode,
+	Permission,
+	Role,
+} from "@ecommand/shared";
 import type { AuthUser } from "@/auth/auth.types";
 import { CLAIM_STATUSES } from "@/database/reference-data";
 import type { ClaimsMapper } from "./claims.mapper";
@@ -38,7 +39,10 @@ describe("ClaimsService workflows", () => {
 	let service: ClaimsService;
 	let query: jest.Mocked<ClaimsQuery>;
 	let mapper: jest.Mocked<ClaimsMapper>;
-	let notifications: { notifyChange: jest.Mock };
+	let notifications: {
+		notifyChange: jest.Mock;
+		createChangeRecord: jest.Mock;
+	};
 
 	beforeEach(() => {
 		query = {
@@ -56,13 +60,16 @@ describe("ClaimsService workflows", () => {
 			addClaimComment: jest.fn(),
 			findClaimComments: jest.fn(),
 			findClaimStatus: jest.fn(),
-			findCommercialAgentIds: jest.fn().mockResolvedValue([]),
+			findClaimReadersForCustomer: jest.fn().mockResolvedValue([]),
 		} as unknown as jest.Mocked<ClaimsQuery>;
 		mapper = {
 			toCreate: jest.fn(),
 			toUpdate: jest.fn(),
 		} as unknown as jest.Mocked<ClaimsMapper>;
-		notifications = { notifyChange: jest.fn().mockResolvedValue(undefined) };
+		notifications = {
+			notifyChange: jest.fn().mockResolvedValue(undefined),
+			createChangeRecord: jest.fn().mockReturnValue({ id: "notification" }),
+		};
 		service = new ClaimsService(notifications as never, query, mapper);
 		query.updateClaim.mockResolvedValue({ id } as never);
 		query.findClaim.mockResolvedValue(claim as never);
@@ -97,11 +104,9 @@ describe("ClaimsService workflows", () => {
 		const dto = { customerId: 42, orderId: 91, description: "Broken cargo" };
 		query.findOrderCustomer.mockResolvedValue({ customerId: 43 } as never);
 
-		await expect(service.create(dto as never, agent)).rejects.toThrow(
-			new BadRequestException(
-				"The associated order must belong to the selected customer.",
-			),
-		);
+		await expect(service.create(dto as never, agent)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.CLAIM_ORDER_CUSTOMER_MISMATCH },
+		});
 		expect(mapper.toCreate).not.toHaveBeenCalled();
 		expect(query.createClaim).not.toHaveBeenCalled();
 	});
@@ -110,11 +115,9 @@ describe("ClaimsService workflows", () => {
 		const dto = { customerId: 42, orderId: 91, description: "Broken cargo" };
 		query.findOrderCustomer.mockResolvedValue(undefined as never);
 
-		await expect(service.create(dto as never, agent)).rejects.toThrow(
-			new BadRequestException(
-				"The associated order must belong to the selected customer.",
-			),
-		);
+		await expect(service.create(dto as never, agent)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.CLAIM_ORDER_CUSTOMER_MISMATCH },
+		});
 		expect(query.createClaim).not.toHaveBeenCalled();
 	});
 
@@ -134,23 +137,21 @@ describe("ClaimsService workflows", () => {
 					Permission.CLAIMS_MANAGE_OTHER,
 				]),
 			}),
-		).rejects.toThrow(
-			new BadRequestException(
-				"The associated order must belong to the selected customer.",
-			),
-		);
+		).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.CLAIM_ORDER_CUSTOMER_MISMATCH },
+		});
 		expect(query.updateClaim).not.toHaveBeenCalled();
 	});
 
 	it("reports a missing claim for detail and ownership lookups", async () => {
 		query.findClaim.mockResolvedValue(undefined);
-		await expect(service.findOne(id)).rejects.toThrow(
-			new NotFoundException("Claim 23 not found"),
-		);
+		await expect(service.findOne(id)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.CLAIM_NOT_FOUND },
+		});
 		query.findClaimForOwnership.mockResolvedValue(undefined);
-		await expect(service.findOneForOwnership(id)).rejects.toThrow(
-			new NotFoundException("Claim 23 not found"),
-		);
+		await expect(service.findOneForOwnership(id)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.CLAIM_NOT_FOUND },
+		});
 	});
 
 	it("resolves a public claim number for detail lookups", async () => {
@@ -164,6 +165,8 @@ describe("ClaimsService workflows", () => {
 		query.findClaimIdByNumber.mockResolvedValue({ id } as never);
 		query.findClaimStatus.mockResolvedValue({
 			statusId: CLAIM_STATUSES[ClaimStatus.NEW].id,
+			claimNumber: claim.claimNumber,
+			createdByUserId: claim.createdByUserId,
 		} as never);
 
 		await service.startProgress(claim.claimNumber, agent);
@@ -195,9 +198,9 @@ describe("ClaimsService workflows", () => {
 		query.updateClaim.mockResolvedValue(undefined as never);
 		await expect(
 			service.update(id, { description: "updated" }, agent),
-		).rejects.toThrow(
-			new ConflictException("Claim 23 was modified or does not exist"),
-		);
+		).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.CLAIM_TRANSITION_INVALID },
+		});
 	});
 
 	it("deletes an existing claim", async () => {
@@ -208,14 +211,16 @@ describe("ClaimsService workflows", () => {
 
 	it("reports a missing claim during deletion", async () => {
 		query.deleteClaim.mockResolvedValue(undefined as never);
-		await expect(service.remove(id)).rejects.toThrow(
-			new NotFoundException("Claim 23 not found"),
-		);
+		await expect(service.remove(id)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.CLAIM_NOT_FOUND },
+		});
 	});
 
 	it("starts progress and notifies the claim creator", async () => {
 		query.findClaimStatus.mockResolvedValue({
 			statusId: CLAIM_STATUSES[ClaimStatus.NEW].id,
+			claimNumber: claim.claimNumber,
+			createdByUserId: claim.createdByUserId,
 		} as never);
 		query.findClaim.mockResolvedValue({
 			...claim,
@@ -229,14 +234,21 @@ describe("ClaimsService workflows", () => {
 			{ statusId: CLAIM_STATUSES[ClaimStatus.IN_PROGRESS].id },
 			expect.objectContaining({
 				history: { userId: agent.id, comment: undefined },
+				notification: { id: "notification" },
 			}),
 		);
-		expect(notifications.notifyChange).toHaveBeenCalledWith(
+		expect(notifications.createChangeRecord).toHaveBeenCalledWith(
 			claim.createdByUserId,
 			agent.id,
 			"claims",
 			id,
-			`Claim ${claim.claimNumber} is now in progress.`,
+			{
+				code: NotificationMessageCode.CLAIM_STATUS_CHANGED,
+				parameters: {
+					recordCode: claim.claimNumber,
+					status: ClaimStatus.IN_PROGRESS,
+				},
+			},
 		);
 	});
 
@@ -244,36 +256,36 @@ describe("ClaimsService workflows", () => {
 		query.findClaimStatus.mockResolvedValue({
 			statusId: "unknown-status",
 		} as never);
-		await expect(service.startProgress(id, agent)).rejects.toThrow(
-			new Error("Invalid status for claim 23"),
-		);
+		await expect(service.startProgress(id, agent)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.CLAIM_TRANSITION_INVALID },
+		});
 		query.findClaimStatus.mockResolvedValue(undefined);
-		await expect(service.startProgress(id, agent)).rejects.toThrow(
-			new NotFoundException("Claim 23 not found"),
-		);
+		await expect(service.startProgress(id, agent)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.CLAIM_NOT_FOUND },
+		});
 	});
 
 	it("rejects duplicate and disallowed transitions", async () => {
 		query.findClaimStatus.mockResolvedValue({
 			statusId: CLAIM_STATUSES[ClaimStatus.IN_PROGRESS].id,
 		} as never);
-		await expect(service.startProgress(id, agent)).rejects.toThrow(
-			new ConflictException("Claim is already IN_PROGRESS"),
-		);
+		await expect(service.startProgress(id, agent)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.CLAIM_TRANSITION_INVALID },
+		});
 		query.findClaimStatus.mockResolvedValue({
 			statusId: CLAIM_STATUSES[ClaimStatus.NEW].id,
 		} as never);
-		await expect(service.close(id, agent)).rejects.toThrow(
-			new ConflictException("Cannot transition from NEW to CLOSED"),
-		);
+		await expect(service.close(id, agent)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.CLAIM_TRANSITION_INVALID },
+		});
 		expect(query.updateClaim).not.toHaveBeenCalled();
 	});
 
 	it("requires a resolution before resolving an unresolved claim", async () => {
 		query.findClaim.mockResolvedValue({ ...claim, resolution: null } as never);
-		await expect(service.resolve(id, agent)).rejects.toThrow(
-			new ConflictException("Resolution required to resolve claim"),
-		);
+		await expect(service.resolve(id, agent)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.CLAIM_RESOLUTION_REQUIRED },
+		});
 		expect(query.updateClaim).not.toHaveBeenCalled();
 	});
 
@@ -318,24 +330,32 @@ describe("ClaimsService workflows", () => {
 		query.findClaimForOwnership.mockResolvedValue({
 			createdByUserId: 12,
 			claimNumber: claim.claimNumber,
+			customerId: 42,
 		} as never);
 
 		expect(
 			await service.addComment(id, "We are investigating", agent),
 		).toMatchObject({ id: 88, authorName: "Ari Singh" });
-		expect(query.addClaimComment).toHaveBeenCalledWith(
-			id,
-			"We are investigating",
-			agent.id,
-			expect.objectContaining({ statusTransition: expect.any(Object) }),
-		);
-		expect(notifications.notifyChange).toHaveBeenCalledWith(
+		const [, , , options] = query.addClaimComment.mock.calls[0];
+		expect(options?.statusTransition).toMatchObject({
+			fromStatusId: CLAIM_STATUSES[ClaimStatus.NEW].id,
+			toStatusId: CLAIM_STATUSES[ClaimStatus.IN_PROGRESS].id,
+			changedByUserId: agent.id,
+		});
+		expect(options?.statusTransition).not.toHaveProperty("comment");
+		expect(notifications.createChangeRecord).toHaveBeenCalledWith(
 			12,
 			agent.id,
 			"claims",
 			id,
-			`A new comment was added to claim ${claim.claimNumber}.`,
+			{
+				code: NotificationMessageCode.CLAIM_COMMENT_ADDED,
+				parameters: { recordCode: claim.claimNumber },
+			},
 		);
+		expect(query.addClaimComment.mock.calls[0][3]?.notifications).toEqual([
+			{ id: "notification" },
+		]);
 	});
 
 	it("does not start progress for a commenter without transition permission", async () => {
@@ -350,18 +370,19 @@ describe("ClaimsService workflows", () => {
 		query.findClaimForOwnership.mockResolvedValue({
 			createdByUserId: 12,
 			claimNumber: claim.claimNumber,
+			customerId: 42,
 		} as never);
 
 		expect(
 			await service.addComment(id, "Customer reply", customer),
 		).toMatchObject({
-			authorName: "Former user",
+			authorName: null,
 		});
 		expect(query.addClaimComment).toHaveBeenCalledWith(
 			id,
 			"Customer reply",
 			customer.id,
-			{},
+			{ notifications: [{ id: "notification" }] },
 		);
 	});
 
@@ -385,29 +406,59 @@ describe("ClaimsService workflows", () => {
 		query.findClaimForOwnership.mockResolvedValue({
 			createdByUserId: client.id,
 			claimNumber: claim.claimNumber,
+			customerId: 42,
 		} as never);
-		query.findCommercialAgentIds.mockResolvedValue([7, 8]);
+		query.findClaimReadersForCustomer.mockResolvedValue([7, 8]);
 
 		await service.addComment(id, "Please provide an update", client);
 
-		expect(notifications.notifyChange).toHaveBeenCalledTimes(2);
+		expect(notifications.createChangeRecord).toHaveBeenCalledTimes(2);
 		for (const agentId of [7, 8]) {
-			expect(notifications.notifyChange).toHaveBeenCalledWith(
+			expect(notifications.createChangeRecord).toHaveBeenCalledWith(
 				agentId,
 				client.id,
 				"claims",
 				id,
-				`A new comment was added to claim ${claim.claimNumber}.`,
+				{
+					code: NotificationMessageCode.CLAIM_COMMENT_ADDED,
+					parameters: { recordCode: claim.claimNumber },
+				},
 			);
 		}
+		expect(query.addClaimComment.mock.calls[0][3]?.notifications).toEqual([
+			{ id: "notification" },
+			{ id: "notification" },
+		]);
+	});
+
+	it("does not save a comment when its notification recipients cannot be resolved", async () => {
+		const recipientLookupError = new Error("Database unavailable");
+		query.findClaimForOwnership.mockResolvedValue({
+			createdByUserId: 12,
+			claimNumber: claim.claimNumber,
+			customerId: 42,
+		} as never);
+		query.findClaimReadersForCustomer.mockRejectedValue(recipientLookupError);
+
+		await expect(
+			service.addComment(id, "Please provide an update", agent),
+		).rejects.toBe(recipientLookupError);
+
+		expect(notifications.createChangeRecord).not.toHaveBeenCalled();
+		expect(query.addClaimComment).not.toHaveBeenCalled();
 	});
 
 	it("reports when a newly added comment cannot be read back", async () => {
 		query.addClaimComment.mockResolvedValue({ id: 90 } as never);
 		query.findClaimComments.mockResolvedValue([]);
-		await expect(service.addComment(id, "Reply", agent)).rejects.toThrow(
-			new NotFoundException("Comment no longer exists"),
-		);
-		expect(query.findClaimForOwnership).not.toHaveBeenCalled();
+		query.findClaimForOwnership.mockResolvedValue({
+			createdByUserId: 12,
+			claimNumber: claim.claimNumber,
+			customerId: 42,
+		} as never);
+		await expect(service.addComment(id, "Reply", agent)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.CLAIM_COMMENT_NOT_FOUND },
+		});
+		expect(query.findClaimForOwnership).toHaveBeenCalledWith(id);
 	});
 });

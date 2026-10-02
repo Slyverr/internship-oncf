@@ -1,4 +1,4 @@
-import { Permission } from "@ecommand/shared";
+import { API_RESPONSE_CODES, Permission } from "@ecommand/shared";
 import {
 	Body,
 	Controller,
@@ -15,7 +15,7 @@ import {
 	UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { ApiConsumes, ApiUnprocessableEntityResponse } from "@nestjs/swagger";
+import { ApiConsumes } from "@nestjs/swagger";
 import type { Response } from "express";
 import {
 	ALLOWED_ATTACHMENT_MIME_TYPES,
@@ -23,12 +23,13 @@ import {
 } from "@/attachments/attachments.constants";
 import type { AuthRequest } from "@/auth/auth.types";
 import { RequireAny } from "@/auth/permissions.decorator";
+import { ApiCodedErrorResponse } from "@/common/decorators/api-coded-error-response.decorator";
 import { createCrudResponses } from "@/common/decorators/api-crud-responses.decorator";
 import {
 	ApiPathParam,
 	ApiStringPathParam,
 } from "@/common/decorators/api-path-param.decorator";
-import { MessageResponseDto } from "@/common/responses/message.dto";
+import { SuccessResponseDto } from "@/common/responses/success-response.dto";
 import { OrderOwnershipGuard } from "@/orders/guards/order-ownership.guard";
 import { OrdersService } from "@/orders/orders.service";
 import type { OrderNumber } from "@/orders/orders.types";
@@ -51,7 +52,7 @@ const {
 	list: FileDto,
 	detail: FileDto,
 	create: FileDto,
-	remove: MessageResponseDto,
+	remove: SuccessResponseDto,
 });
 
 @Controller("orders/:id/files")
@@ -67,7 +68,7 @@ export class FilesController {
 	@UseInterceptors(FileInterceptor("file"))
 	@ApiConsumes("multipart/form-data")
 	@FileCreateResponse()
-	@ApiUnprocessableEntityResponse()
+	@ApiCodedErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY)
 	async uploadFile(
 		@OrderNumberParam() number: OrderNumber,
 		@UploadedFileParam(
@@ -149,6 +150,6 @@ export class FilesController {
 			fileId,
 		);
 
-		return { message: "File deleted successfully" };
+		return { code: API_RESPONSE_CODES.ORDER_ATTACHMENT_DELETED };
 	}
 }

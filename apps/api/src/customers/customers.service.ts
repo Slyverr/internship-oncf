@@ -1,11 +1,10 @@
-import { API_ERROR_CODES, Permission } from "@ecommand/shared";
+import { API_ERROR_CODES } from "@ecommand/shared";
 import {
 	ForbiddenException,
 	Injectable,
 	NotFoundException,
 } from "@nestjs/common";
 import type { AuthUser } from "@/auth/auth.types";
-import { hasOnePermission } from "@/auth/auth.utils";
 import { canAccessCustomer, getCustomerScope } from "@/auth/customer-scope";
 import { CustomersMapper } from "./customers.mapper";
 import { CustomersQuery } from "./customers.query";
@@ -25,11 +24,12 @@ export class CustomersService {
 		const scope = getCustomerScope(user);
 		return this.customersQuery.findCustomers(
 			query,
-			scope === null ||
-				hasOnePermission(user, Permission.CUSTOMERS_ACTION_ASSIGN_PORTFOLIO)
-				? undefined
-				: scope,
+			scope === null ? undefined : scope,
 		);
+	}
+
+	async findPortfolioOptions() {
+		return this.customersQuery.findPortfolioOptions();
 	}
 
 	async findOne(id: CustomerId, user?: AuthUser) {

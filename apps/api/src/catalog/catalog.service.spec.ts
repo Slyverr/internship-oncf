@@ -1,3 +1,5 @@
+import { API_ERROR_CODES } from "@ecommand/shared";
+import { ConflictException, NotFoundException } from "@nestjs/common";
 import { CatalogMapper } from "./catalog.mapper";
 import { CatalogQuery } from "./catalog.query";
 import { CatalogService } from "./catalog.service";
@@ -59,6 +61,7 @@ describe("CatalogService", () => {
 			"createGoodsType",
 			"findGoods",
 			"createGood",
+			"isActiveGoodsType",
 			"findAccessoryOperations",
 			"createAccessoryOperation",
 			"findRejectionReasons",
@@ -87,6 +90,7 @@ describe("CatalogService", () => {
 		for (const mock of [...Object.values(query), ...Object.values(mapper)]) {
 			mock.mockReset();
 		}
+		query.isActiveGoodsType.mockResolvedValue(true);
 	});
 
 	it.each(operationCases)(
@@ -110,4 +114,72 @@ describe("CatalogService", () => {
 			expect(query[queryCreateMethod]).toHaveBeenCalledWith(values);
 		},
 	);
+});
+
+describe("CatalogService management", () => {
+	const query = {
+		createGood: jest.fn(),
+		hasActiveGoodsForType: jest.fn(),
+		isActiveGoodsType: jest.fn(),
+		updateGood: jest.fn(),
+		updateGoodsType: jest.fn(),
+		updateUnit: jest.fn(),
+	} as unknown as jest.Mocked<CatalogQuery>;
+	const service = new CatalogService(query, new CatalogMapper());
+
+	beforeEach(() => jest.clearAllMocks());
+
+	it("blocks archiving a goods type that still has active goods", async () => {
+		jest.mocked(query.hasActiveGoodsForType).mockResolvedValue(true);
+
+		await expect(
+			service.updateGoodsType("type-id", { name: "Freight", isActive: false }),
+		).rejects.toBeInstanceOf(ConflictException);
+		expect(query.updateGoodsType).not.toHaveBeenCalled();
+	});
+
+	it("allows archiving a goods type with no active goods", async () => {
+		const updated = { id: "type-id", name: "Freight", isActive: false };
+		jest.mocked(query.hasActiveGoodsForType).mockResolvedValue(false);
+		jest.mocked(query.updateGoodsType).mockResolvedValue(updated as never);
+
+		await expect(
+			service.updateGoodsType("type-id", { name: "Freight", isActive: false }),
+		).resolves.toBe(updated);
+	});
+
+	it("rejects creating goods under an inactive goods type", async () => {
+		jest.mocked(query.isActiveGoodsType).mockResolvedValue(false);
+
+		const error = await service
+			.createGood({ name: "Rails", goodsCode: "RAIL", goodsTypeId: "type-id" })
+			.catch((cause: unknown) => cause);
+		expect(error).toBeInstanceOf(ConflictException);
+		expect((error as ConflictException).getResponse()).toEqual({
+			code: API_ERROR_CODES.CATALOG_GOODS_TYPE_INACTIVE,
+		});
+		expect(query.createGood).not.toHaveBeenCalled();
+	});
+
+	it("rejects reactivating goods while its goods type is inactive", async () => {
+		jest.mocked(query.isActiveGoodsType).mockResolvedValue(false);
+
+		await expect(
+			service.updateGood(1, {
+				name: "Rails",
+				goodsCode: "RAIL",
+				goodsTypeId: "type-id",
+				isActive: true,
+			}),
+		).rejects.toBeInstanceOf(ConflictException);
+		expect(query.updateGood).not.toHaveBeenCalled();
+	});
+
+	it("returns not found when an update targets a missing unit", async () => {
+		jest.mocked(query.updateUnit).mockResolvedValue(undefined as never);
+
+		await expect(
+			service.updateUnit("missing-id", { name: "Tonnes", isActive: true }),
+		).rejects.toBeInstanceOf(NotFoundException);
+	});
 });

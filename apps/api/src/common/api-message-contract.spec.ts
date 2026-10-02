@@ -80,6 +80,28 @@ function findLiteralHttpExceptionMessages(source: string): string[] {
 	return messages;
 }
 
+function findResponseMessageFields(source: string): string[] {
+	const file = ts.createSourceFile(
+		"api-response-source.ts",
+		source,
+		ts.ScriptTarget.Latest,
+		true,
+	);
+	const fields: string[] = [];
+	function visit(node: ts.Node) {
+		const isMessageProperty =
+			(ts.isPropertyAssignment(node) || ts.isPropertyDeclaration(node)) &&
+			node.name.getText(file).replaceAll(/["']/g, "") === "message";
+		if (isMessageProperty) {
+			const { line } = file.getLineAndCharacterOfPosition(node.getStart(file));
+			fields.push(`${line + 1}: ${node.getText(file)}`);
+		}
+		ts.forEachChild(node, visit);
+	}
+	visit(file);
+	return fields;
+}
+
 describe("API message contract", () => {
 	it("detects English exception prose passed directly to Nest HTTP exceptions", () => {
 		expect(
@@ -106,6 +128,18 @@ describe("API message contract", () => {
 		const violations = collectProductionFiles(apiSource).flatMap((file) =>
 			findLiteralHttpExceptionMessages(readFileSync(file, "utf8")).map(
 				(message) => `${file}: ${message}`,
+			),
+		);
+		expect(violations).toEqual([]);
+	});
+
+	it("keeps controller and response DTO message fields out of API responses", () => {
+		const responseFiles = collectProductionFiles(apiSource).filter(
+			(file) => file.endsWith(".controller.ts") || file.includes("/responses/"),
+		);
+		const violations = responseFiles.flatMap((file) =>
+			findResponseMessageFields(readFileSync(file, "utf8")).map(
+				(field) => `${file}: ${field}`,
 			),
 		);
 		expect(violations).toEqual([]);

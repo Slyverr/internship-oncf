@@ -27,7 +27,8 @@ describe("ClaimsService access scoping", () => {
 		const query = { userId: 99, customerId: 43 } as ListClaimQueryDto;
 		await service.findAll(client, query);
 		expect(findClaims).toHaveBeenCalledWith(
-			expect.objectContaining({ userId: 12, customerId: 42 }),
+			expect.objectContaining({ userId: 12 }),
+			[42],
 		);
 	});
 
@@ -71,11 +72,15 @@ describe("ClaimsService access scoping", () => {
 		expect(findClaims).toHaveBeenCalledWith(query, [42, 44]);
 	});
 
-	it("preserves broad claims scope for users with manage-other permission", async () => {
+	it("preserves broad claims scope only with both claim and customer-scope permissions", async () => {
 		const admin = {
 			...client,
 			role: Role.ADMIN,
-			permissions: new Set([Permission.CLAIMS_MANAGE_OTHER]),
+			assignedCustomerIds: [],
+			permissions: new Set([
+				Permission.CLAIMS_MANAGE_OTHER,
+				Permission.CUSTOMERS_MANAGE_OTHER,
+			]),
 		};
 		const query = { customerId: 43 } as ListClaimQueryDto;
 		await service.findAll(admin, query);

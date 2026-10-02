@@ -1,5 +1,4 @@
-import { Role } from "@ecommand/shared";
-import { NotFoundException } from "@nestjs/common";
+import { API_ERROR_CODES, Permission, Role } from "@ecommand/shared";
 import type { AuthUser } from "@/auth/auth.types";
 import { CustomersMapper } from "./customers.mapper";
 import { CustomersQuery } from "./customers.query";
@@ -11,6 +10,7 @@ describe("CustomersService", () => {
 		findCustomers: jest.fn(),
 		findCustomer: jest.fn(),
 		findActiveCustomerForRegistration: jest.fn(),
+		findPortfolioOptions: jest.fn(),
 		createCustomer: jest.fn(),
 		updateCustomer: jest.fn(),
 	};
@@ -28,7 +28,7 @@ describe("CustomersService", () => {
 		id: 1,
 		email: "admin@oncf.ma",
 		role: Role.ADMIN,
-		permissions: new Set(),
+		permissions: new Set([Permission.CUSTOMERS_MANAGE_OTHER]),
 		sessionId: "test-session",
 		customerId: null,
 		agencyId: null,
@@ -49,11 +49,26 @@ describe("CustomersService", () => {
 		expect(query.findCustomers).toHaveBeenCalledWith(filters, undefined);
 	});
 
-	it("returns a customer and reports a missing record", async () => {
+	it("returns a customer and reports a missing record with a stable code", async () => {
 		query.findCustomer.mockResolvedValue(customer);
 		await expect(service.findOne(id)).resolves.toBe(customer);
 		query.findCustomer.mockResolvedValue(undefined);
-		await expect(service.findOne(id)).rejects.toBeInstanceOf(NotFoundException);
+		await expect(service.findOne(id)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.CUSTOMER_NOT_FOUND },
+		});
+	});
+
+	it("rejects customers outside the user's portfolio with a stable code", async () => {
+		const scopedUser = {
+			...adminUser,
+			role: Role.CLIENT_REPRESENTATIVE,
+			customerId: 9,
+			assignedCustomerIds: [9],
+		};
+		await expect(service.findOne(id, scopedUser)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.CUSTOMER_OUTSIDE_PORTFOLIO },
+		});
+		expect(query.findCustomer).not.toHaveBeenCalled();
 	});
 
 	it("looks up only a customer with the exact signup identifiers", async () => {
@@ -65,6 +80,15 @@ describe("CustomersService", () => {
 			"CLI009",
 			"123456789012345",
 		);
+	});
+
+	it("returns minimal active customer options for user assignment", async () => {
+		const options = [
+			{ id, companyName: "Example Ltd", customerCode: "CUS-123" },
+		];
+		query.findPortfolioOptions.mockResolvedValue(options);
+		await expect(service.findPortfolioOptions()).resolves.toEqual(options);
+		expect(query.findPortfolioOptions).toHaveBeenCalledTimes(1);
 	});
 
 	it("maps and persists a new customer, then returns its detail", async () => {
@@ -96,8 +120,8 @@ describe("CustomersService", () => {
 		});
 		expect(query.updateCustomer).toHaveBeenCalledWith(id, { isActive: false });
 		query.updateCustomer.mockResolvedValue(undefined);
-		await expect(service.deactivate(id)).rejects.toBeInstanceOf(
-			NotFoundException,
-		);
+		await expect(service.deactivate(id)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.CUSTOMER_NOT_FOUND },
+		});
 	});
 });

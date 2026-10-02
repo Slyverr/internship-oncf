@@ -44,7 +44,7 @@ export class CreateCustomerDto {
 
 	@IsOptional()
 	@IsString()
-	@Matches(/^\d{15}$/, { message: "ICE must contain exactly 15 digits" })
+	@Matches(/^\d{15}$/)
 	ice?: string;
 
 	@IsOptional()

@@ -1,4 +1,4 @@
-import { NotFoundException } from "@nestjs/common";
+import { API_ERROR_CODES } from "@ecommand/shared";
 import type { OrderId } from "@/orders/orders.types";
 import type { UploadedFile } from "@/storage/storage.types";
 import { FilesQuery } from "./files.query";
@@ -120,9 +120,9 @@ describe("FilesService", () => {
 
 	it("does not download a file linked to another order or already deleted", async () => {
 		query.findFileForDownload.mockResolvedValue(undefined as never);
-		await expect(service.downloadFile(orderId, fileId)).rejects.toThrow(
-			new NotFoundException("File 31 not found for order 17"),
-		);
+		await expect(service.downloadFile(orderId, fileId)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.ORDER_FILE_NOT_FOUND },
+		});
 		expect(attachments.download).not.toHaveBeenCalled();
 	});
 
@@ -134,9 +134,9 @@ describe("FilesService", () => {
 
 	it("does not delete a file linked to another order or already deleted", async () => {
 		query.findFileForDelete.mockResolvedValue(undefined as never);
-		await expect(service.deleteFile(orderId, fileId)).rejects.toThrow(
-			new NotFoundException("File 31 not found for order 17"),
-		);
+		await expect(service.deleteFile(orderId, fileId)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.ORDER_FILE_NOT_FOUND },
+		});
 		expect(query.softDelete).not.toHaveBeenCalled();
 	});
 });

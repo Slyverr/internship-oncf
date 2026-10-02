@@ -11,7 +11,7 @@ describe("default role permission matrix", () => {
 		return hasOnePermission(new Set(assigned), permission);
 	}
 
-	it("grants administrators the customer reads needed for user portfolio assignment", () => {
+	it("limits administrators to user-managed functions and reference data", () => {
 		expect(new Set(DEFAULT_ROLE_PERMISSIONS[Role.ADMIN])).toEqual(
 			new Set([
 				Permission.USERS_CREATE,
@@ -22,8 +22,6 @@ describe("default role permission matrix", () => {
 				Permission.USERS_MANAGE_OTHER,
 				Permission.ROLES_MANAGE,
 				Permission.PERMISSIONS_MANAGE,
-				Permission.CUSTOMERS_READ,
-				Permission.CUSTOMERS_ACTION_ASSIGN_PORTFOLIO,
 				Permission.REPORTS_READ,
 				Permission.REPORTS_MANAGE_OTHER,
 				Permission.REPORTS_ACTION_EXPORT,

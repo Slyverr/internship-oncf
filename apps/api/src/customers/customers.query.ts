@@ -82,6 +82,9 @@ export class CustomersQuery {
 				}),
 			},
 			columns: customerListColumns,
+			with: {
+				customerType: { columns: { name: true } },
+			},
 			orderBy: {
 				[sortBy]: sortOrder,
 			},
@@ -94,6 +97,21 @@ export class CustomersQuery {
 		return this.drizzle.db.query.customers.findFirst({
 			where: { id },
 			columns: customerListColumns,
+			with: {
+				customerType: { columns: { name: true } },
+			},
+		});
+	}
+
+	async findPortfolioOptions() {
+		return this.drizzle.db.query.customers.findMany({
+			where: { isActive: true },
+			columns: {
+				id: true,
+				companyName: true,
+				customerCode: true,
+			},
+			orderBy: { companyName: "asc" },
 		});
 	}
 

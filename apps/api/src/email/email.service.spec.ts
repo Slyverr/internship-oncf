@@ -1,6 +1,7 @@
 import { mkdtemp, readdir, readFile, rm, stat } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { DEFAULT_LOCALE } from "@ecommand/shared";
 import { ConfigService } from "@nestjs/config";
 import nodemailer from "nodemailer";
 import { EmailService } from "./email.service";
@@ -46,7 +47,11 @@ describe("EmailService password reset delivery", () => {
 		);
 		const resetLink = "http://localhost:3000/reset-password?token=secret";
 
-		await service.sendResetPasswordEmail("client@example.test", resetLink);
+		await service.sendResetPasswordEmail(
+			"client@example.test",
+			resetLink,
+			DEFAULT_LOCALE,
+		);
 
 		const message = await readLocalMessage();
 		expect(message.content).toContain("To: client@example.test");

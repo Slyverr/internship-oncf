@@ -1,7 +1,4 @@
-import {
-	InternalServerErrorException,
-	NotFoundException,
-} from "@nestjs/common";
+import { API_ERROR_CODES } from "@ecommand/shared";
 import type { UploadedFile } from "@/storage/storage.types";
 import { AttachmentsQuery } from "./attachments.query";
 import { AttachmentsService } from "./attachments.service";
@@ -82,9 +79,9 @@ describe("AttachmentsService", () => {
 		query.createIfAbsent.mockResolvedValue(undefined as never);
 		query.findByHash.mockResolvedValue(undefined);
 
-		await expect(service.upsert(file)).rejects.toThrow(
-			new InternalServerErrorException("Failed to persist attachment"),
-		);
+		await expect(service.upsert(file)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.INTERNAL_ERROR },
+		});
 	});
 
 	it("returns an attachment by id", async () => {
@@ -95,9 +92,9 @@ describe("AttachmentsService", () => {
 
 	it("reports missing attachments", async () => {
 		query.findById.mockResolvedValue(undefined);
-		await expect(service.findById(999)).rejects.toThrow(
-			new NotFoundException("Attachment 999 not found"),
-		);
+		await expect(service.findById(999)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.ATTACHMENT_NOT_FOUND },
+		});
 	});
 
 	it("downloads stored bytes by the persisted path", async () => {

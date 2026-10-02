@@ -1,5 +1,15 @@
-import { Body, Controller, Post, Request, UseGuards } from "@nestjs/common";
-import { ApiOkResponse, ApiUnauthorizedResponse } from "@nestjs/swagger";
+import { API_RESPONSE_CODES } from "@ecommand/shared";
+import {
+	Body,
+	Controller,
+	HttpStatus,
+	Post,
+	Request,
+	UseGuards,
+} from "@nestjs/common";
+import { ApiOkResponse } from "@nestjs/swagger";
+import { ApiCodedErrorResponse } from "@/common/decorators/api-coded-error-response.decorator";
+import { SuccessResponseDto } from "@/common/responses/success-response.dto";
 import { AuthService } from "./auth.service";
 import type { AuthRequest, LocalAuthRequest } from "./auth.types";
 import { LocalAuthGuard } from "./guards/local-auth.guard";
@@ -20,7 +30,7 @@ export class AuthController {
 	@Post("login")
 	@UseGuards(LocalAuthGuard)
 	@ApiOkResponse({ type: LoginDetailDto })
-	@ApiUnauthorizedResponse()
+	@ApiCodedErrorResponse(HttpStatus.UNAUTHORIZED)
 	async login(@Request() req: LocalAuthRequest, @Body() _dto: LoginDto) {
 		return this.authService.login(req.user);
 	}
@@ -33,6 +43,7 @@ export class AuthController {
 	}
 
 	@Post("change-password")
+	@ApiOkResponse({ type: SuccessResponseDto })
 	async changePassword(
 		@Body() dto: ChangePasswordDto,
 		@Request() req: AuthRequest,
@@ -40,37 +51,39 @@ export class AuthController {
 		await this.authService.changePassword(req.user.id, dto);
 
 		return {
-			message: "Password changed successfully",
+			code: API_RESPONSE_CODES.AUTH_PASSWORD_CHANGED,
 		};
 	}
 
 	@Post("logout")
+	@ApiOkResponse({ type: SuccessResponseDto })
 	async logout(@Request() req: AuthRequest) {
 		await this.authService.logout(req.user);
 
 		return {
-			message: "Logged out successfully",
+			code: API_RESPONSE_CODES.AUTH_LOGGED_OUT,
 		};
 	}
 
 	@Public()
 	@Post("forgot-password")
+	@ApiOkResponse({ type: SuccessResponseDto })
 	async forgotPassword(@Body() dto: ForgotPasswordDto) {
 		await this.authService.forgotPassword(dto.email);
 
 		return {
-			message:
-				"If an account exists with this email, a reset link has been sent.",
+			code: API_RESPONSE_CODES.AUTH_PASSWORD_RESET_REQUEST_ACCEPTED,
 		};
 	}
 
 	@Public()
 	@Post("reset-password")
+	@ApiOkResponse({ type: SuccessResponseDto })
 	async resetPassword(@Body() dto: ResetPasswordDto) {
 		await this.authService.resetPassword(dto.token, dto.newPassword);
 
 		return {
-			message: "Password has been reset successfully",
+			code: API_RESPONSE_CODES.AUTH_PASSWORD_RESET,
 		};
 	}
 }

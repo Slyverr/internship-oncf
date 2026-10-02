@@ -1,3 +1,4 @@
+import { NotificationMessageCode } from "@ecommand/shared";
 import { sql } from "drizzle-orm";
 import {
 	bigint,
@@ -7,6 +8,7 @@ import {
 	foreignKey,
 	index,
 	integer,
+	jsonb,
 	pgTable,
 	text,
 	timestamp,
@@ -58,8 +60,15 @@ export const notifications = pgTable(
 		recipientUserId: bigint("recipient_user_id", { mode: "number" }).notNull(),
 		typeId: uuid("type_id").notNull(),
 		channelId: uuid("channel_id").notNull(),
-		title: varchar("title", { length: 200 }).notNull(),
-		message: text("message").notNull(),
+		title: varchar("title", { length: 200 }),
+		message: text("message"),
+		messageCode: varchar("message_code", {
+			length: 100,
+		}).$type<NotificationMessageCode>(),
+		messageParameters: jsonb("message_parameters")
+			.$type<Record<string, string>>()
+			.default({})
+			.notNull(),
 		relatedEntityType: varchar("related_entity_type", { length: 50 }),
 		relatedEntityId: bigint("related_entity_id", { mode: "number" }),
 		status: varchar("status", { length: 20 }).notNull(),

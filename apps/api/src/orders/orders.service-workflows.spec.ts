@@ -1,10 +1,10 @@
-import { OrderStatus, Permission, Role } from "@ecommand/shared";
 import {
-	BadRequestException,
-	ConflictException,
-	ForbiddenException,
-	NotFoundException,
-} from "@nestjs/common";
+	API_ERROR_CODES,
+	NotificationMessageCode,
+	OrderStatus,
+	Permission,
+	Role,
+} from "@ecommand/shared";
 import type { AuthUser } from "@/auth/auth.types";
 import { ORDER_STATUSES } from "@/database/reference-data";
 import type { OrdersMapper } from "./orders.mapper";
@@ -24,6 +24,7 @@ const user: AuthUser = {
 };
 const draftOrder = {
 	id,
+	orderNumber: "ORD-ABCDEFGHJK",
 	createdByUserId: user.id,
 	customerId: 42,
 	statusId: ORDER_STATUSES[OrderStatus.DRAFT].id,
@@ -36,7 +37,10 @@ describe("OrdersService workflows", () => {
 	let service: OrdersService;
 	let query: jest.Mocked<OrdersQuery>;
 	let mapper: jest.Mocked<OrdersMapper>;
-	let notifications: { notifyChange: jest.Mock };
+	let notifications: {
+		notifyChange: jest.Mock;
+		createChangeRecord: jest.Mock;
+	};
 
 	beforeEach(() => {
 		query = {
@@ -45,7 +49,10 @@ describe("OrdersService workflows", () => {
 			updateOrder: jest.fn(),
 		} as unknown as jest.Mocked<OrdersQuery>;
 		mapper = { toUpdate: jest.fn() } as unknown as jest.Mocked<OrdersMapper>;
-		notifications = { notifyChange: jest.fn().mockResolvedValue(undefined) };
+		notifications = {
+			notifyChange: jest.fn().mockResolvedValue(undefined),
+			createChangeRecord: jest.fn().mockReturnValue({ id: "notification" }),
+		};
 		service = new OrdersService(notifications as never, query, mapper);
 		query.findOrder.mockResolvedValue(draftOrder as never);
 		query.updateOrder.mockResolvedValue(undefined as never);
@@ -75,14 +82,18 @@ describe("OrdersService workflows", () => {
 		} as never);
 		await expect(
 			service.update(id, { supervisor: "New supervisor" }, user),
-		).rejects.toBeInstanceOf(ConflictException);
+		).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.ORDER_MUST_BE_DRAFT },
+		});
 		expect(query.updateOrder).not.toHaveBeenCalled();
 	});
 
 	it("rejects customer changes without ownership permission", async () => {
-		await expect(service.update(id, { customerId: 99 }, user)).rejects.toThrow(
-			new ForbiddenException("Cannot change order ownership"),
-		);
+		await expect(
+			service.update(id, { customerId: 99 }, user),
+		).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.ORDER_OWNERSHIP_CHANGE_FORBIDDEN },
+		});
 		expect(mapper.toUpdate).not.toHaveBeenCalled();
 	});
 
@@ -108,7 +119,9 @@ describe("OrdersService workflows", () => {
 		async (quantityDemanded) => {
 			await expect(
 				service.update(id, { quantityDemanded }, user),
-			).rejects.toBeInstanceOf(BadRequestException);
+			).rejects.toMatchObject({
+				response: { code: API_ERROR_CODES.ORDER_QUANTITY_INVALID },
+			});
 			expect(mapper.toUpdate).not.toHaveBeenCalled();
 		},
 	);
@@ -120,26 +133,29 @@ describe("OrdersService workflows", () => {
 		} as never);
 		await expect(
 			service.update(id, { endDate: "2025-03-09T00:00:00.000Z" }, user),
-		).rejects.toThrow(
-			new BadRequestException(
-				"The completion date must be on or after the start date",
-			),
-		);
+		).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.ORDER_DATE_RANGE_INVALID },
+		});
 	});
 
 	it("reports a missing order during update", async () => {
 		query.findOrder.mockResolvedValue(undefined);
 		await expect(
 			service.update(id, { supervisor: "New" }, user),
-		).rejects.toThrow(new NotFoundException("Order 31 not found"));
+		).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.ORDER_NOT_FOUND },
+		});
 	});
 
 	it("submits an order and notifies its creator after persistence", async () => {
 		query.findOrderStatus.mockResolvedValue({
 			statusId: ORDER_STATUSES[OrderStatus.DRAFT].id,
+			orderNumber: draftOrder.orderNumber,
+			createdByUserId: 20,
 		} as never);
 		query.findOrder.mockResolvedValue({
 			...draftOrder,
+			createdByUserId: 20,
 			orderStatus: { name: OrderStatus.SUBMITTED },
 		} as never);
 
@@ -150,14 +166,21 @@ describe("OrdersService workflows", () => {
 			{ statusId: ORDER_STATUSES[OrderStatus.SUBMITTED].id },
 			expect.objectContaining({
 				history: { userId: user.id, comment: undefined },
+				notification: { id: "notification" },
 			}),
 		);
-		expect(notifications.notifyChange).toHaveBeenCalledWith(
-			draftOrder.createdByUserId,
+		expect(notifications.createChangeRecord).toHaveBeenCalledWith(
+			20,
 			user.id,
 			"orders",
 			id,
-			"Order #31 is now submitted.",
+			{
+				code: NotificationMessageCode.ORDER_STATUS_CHANGED,
+				parameters: {
+					recordCode: draftOrder.orderNumber,
+					status: OrderStatus.SUBMITTED,
+				},
+			},
 		);
 	});
 
@@ -165,9 +188,9 @@ describe("OrdersService workflows", () => {
 		query.findOrderStatus.mockResolvedValue({
 			statusId: "unknown-status",
 		} as never);
-		await expect(service.submit(id, user)).rejects.toThrow(
-			new ConflictException("Invalid status unknown-status for order 31"),
-		);
+		await expect(service.submit(id, user)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.ORDER_TRANSITION_INVALID },
+		});
 		expect(query.updateOrder).not.toHaveBeenCalled();
 	});
 
@@ -175,16 +198,16 @@ describe("OrdersService workflows", () => {
 		query.findOrderStatus.mockResolvedValue({
 			statusId: ORDER_STATUSES[OrderStatus.DRAFT].id,
 		} as never);
-		await expect(service.approve(id, user)).rejects.toThrow(
-			new ConflictException("Cannot transition from DRAFT to APPROVED"),
-		);
+		await expect(service.approve(id, user)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.ORDER_TRANSITION_INVALID },
+		});
 		expect(query.updateOrder).not.toHaveBeenCalled();
 	});
 
 	it("reports a missing order during a transition", async () => {
 		query.findOrderStatus.mockResolvedValue(undefined);
-		await expect(service.submit(id, user)).rejects.toThrow(
-			new NotFoundException("Order 31 not found"),
-		);
+		await expect(service.submit(id, user)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.ORDER_NOT_FOUND },
+		});
 	});
 });

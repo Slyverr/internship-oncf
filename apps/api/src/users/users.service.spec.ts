@@ -1,9 +1,11 @@
-import { Permission, RegistrationStatus, Role } from "@ecommand/shared";
 import {
-	BadRequestException,
-	ConflictException,
-	NotFoundException,
-} from "@nestjs/common";
+	API_ERROR_CODES,
+	API_RESPONSE_CODES,
+	Permission,
+	RegistrationStatus,
+	Role,
+	RolePersona,
+} from "@ecommand/shared";
 import type { AuthUser } from "@/auth/auth.types";
 import { UsersMapper } from "./users.mapper";
 import { UsersQuery } from "./users.query";
@@ -34,9 +36,11 @@ describe("UsersService", () => {
 			findUserByLoginIdentifier: jest.fn(),
 			findUserEmailExists: jest.fn(),
 			findUserForAuth: jest.fn(),
+			findAssignableRole: jest.fn(),
 			createUser: jest.fn(),
-			updateUser: jest.fn(),
-			replaceCustomerAssignments: jest.fn(),
+			updateUserAndAssignments: jest.fn(),
+			deactivateUser: jest.fn(),
+
 			reviewRegistration: jest.fn(),
 			findUserExists: jest.fn(),
 		} as unknown as jest.Mocked<UsersQuery>;
@@ -62,9 +66,9 @@ describe("UsersService", () => {
 
 	it("reports a missing user by id", async () => {
 		query.findUser.mockResolvedValue(undefined);
-		await expect(service.findOne(12)).rejects.toThrow(
-			new NotFoundException("User with id 12 not found"),
-		);
+		await expect(service.findOne(12)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.USER_NOT_FOUND },
+		});
 	});
 
 	it("finds a user by email", async () => {
@@ -75,9 +79,9 @@ describe("UsersService", () => {
 
 	it("reports a missing user by email", async () => {
 		query.findUserByEmail.mockResolvedValue(undefined);
-		await expect(service.findOneByEmail(user.email)).rejects.toThrow(
-			new NotFoundException("User with email 'person@example.test' not found"),
-		);
+		await expect(service.findOneByEmail(user.email)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.USER_NOT_FOUND },
+		});
 	});
 
 	it("returns a matching email or employee code", async () => {
@@ -130,46 +134,56 @@ describe("UsersService", () => {
 
 	it("rejects auth lookup when the user is missing", async () => {
 		query.findUserForAuth.mockResolvedValue(undefined);
-		await expect(service.findOneForAuth(12)).rejects.toThrow(
-			new NotFoundException("User with id 12 not found"),
-		);
+		await expect(service.findOneForAuth(12)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.USER_NOT_FOUND },
+		});
 	});
 
 	it("rejects auth lookup when the user's role is missing", async () => {
 		query.findUserForAuth.mockResolvedValue({ id: 12, role: null } as never);
-		await expect(service.findOneForAuth(12)).rejects.toThrow(
-			new NotFoundException("Role not found for user 12"),
-		);
+		await expect(service.findOneForAuth(12)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.USER_ROLE_NOT_FOUND },
+		});
 	});
 
 	it("maps and creates a user, then returns the created record", async () => {
 		const values = { email: user.email, password: "hashed" };
+		query.findAssignableRole.mockResolvedValue({
+			id: "role-id",
+			persona: RolePersona.AGENT_COMMERCIAL,
+		} as never);
 		mapper.toCreate.mockResolvedValue(values as never);
 		query.createUser.mockResolvedValue({ id: 12 } as never);
 		query.findUser.mockResolvedValue(user as never);
 
 		expect(
-			await service.create({ email: user.email } as never, authUser),
+			await service.create(
+				{ email: user.email, roleId: "role-id" } as never,
+				authUser,
+			),
 		).toEqual(user);
 		expect(mapper.toCreate).toHaveBeenCalledWith(
-			{ email: user.email },
+			{ email: user.email, roleId: "role-id" },
 			authUser,
+			"role-id",
 		);
-		expect(query.createUser).toHaveBeenCalledWith(values);
+		expect(query.createUser).toHaveBeenCalledWith(values, []);
 		expect(query.findUser).toHaveBeenCalledWith(12);
 	});
 
 	it("requires a customer when creating a client representative", async () => {
+		query.findAssignableRole.mockResolvedValue({
+			id: "client-role-id",
+			persona: RolePersona.CLIENT_REPRESENTATIVE,
+		} as never);
 		await expect(
 			service.create(
 				{ email: user.email, role: Role.CLIENT_REPRESENTATIVE } as never,
 				authUser,
 			),
-		).rejects.toThrow(
-			new BadRequestException(
-				"A customer must be assigned to client representatives",
-			),
-		);
+		).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.CUSTOMER_ASSIGNMENT_REQUIRED },
+		});
 		expect(mapper.toCreate).not.toHaveBeenCalled();
 	});
 
@@ -190,7 +204,9 @@ describe("UsersService", () => {
 				lastName: " Example ",
 				customerId: 9,
 			}),
-		).resolves.toEqual({ message: "Registration submitted for admin review." });
+		).resolves.toEqual({
+			code: API_RESPONSE_CODES.REGISTRATION_SUBMITTED_FOR_REVIEW,
+		});
 		expect(query.findUserEmailExists).toHaveBeenCalledWith(
 			"client@example.test",
 		);
@@ -219,7 +235,9 @@ describe("UsersService", () => {
 				lastName: "Example",
 				customerId: 9,
 			}),
-		).rejects.toBeInstanceOf(ConflictException);
+		).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.USER_EMAIL_ALREADY_EXISTS },
+		});
 		expect(mapper.toRegistration).not.toHaveBeenCalled();
 		expect(query.createUser).not.toHaveBeenCalled();
 	});
@@ -230,6 +248,13 @@ describe("UsersService", () => {
 	])(
 		"rejects review when the account is not a pending client representative",
 		async (registrationStatus, roleName) => {
+			query.findAssignableRole.mockResolvedValue({
+				id: "role-id",
+				persona:
+					roleName === Role.CLIENT_REPRESENTATIVE
+						? RolePersona.CLIENT_REPRESENTATIVE
+						: RolePersona.AGENT_COMMERCIAL,
+			} as never);
 			query.findUser.mockResolvedValue({
 				id: 24,
 				registrationStatus,
@@ -238,7 +263,9 @@ describe("UsersService", () => {
 			} as never);
 			await expect(
 				service.reviewRegistration(24, RegistrationStatus.APPROVED),
-			).rejects.toBeInstanceOf(ConflictException);
+			).rejects.toMatchObject({
+				response: { code: API_ERROR_CODES.ACCOUNT_REGISTRATION_NOT_PENDING },
+			});
 			expect(query.reviewRegistration).not.toHaveBeenCalled();
 		},
 	);
@@ -258,6 +285,10 @@ describe("UsersService", () => {
 			registrationStatus: status,
 			isActive,
 		};
+		query.findAssignableRole.mockResolvedValue({
+			id: "client-role-id",
+			persona: RolePersona.CLIENT_REPRESENTATIVE,
+		} as never);
 		query.findUser.mockResolvedValueOnce(pending as never);
 		query.reviewRegistration.mockResolvedValue({ id: 24 } as never);
 		query.findUser.mockResolvedValueOnce(reviewed as never);
@@ -275,49 +306,72 @@ describe("UsersService", () => {
 	it("maps updates and returns the updated user", async () => {
 		const values = { firstName: "Updated" };
 		mapper.toUpdate.mockResolvedValue(values as never);
-		query.updateUser.mockResolvedValue({ id: 12 } as never);
+		query.updateUserAndAssignments.mockResolvedValue({ id: 12 } as never);
 		query.findUser.mockResolvedValue({
 			...user,
+			roleId: "agent-role-id",
 			firstName: "Updated",
+		} as never);
+		query.findAssignableRole.mockResolvedValue({
+			id: "agent-role-id",
+			persona: RolePersona.AGENT_COMMERCIAL,
 		} as never);
 
 		expect(
 			await service.update(12, { firstName: "Updated" } as never, authUser),
-		).toEqual({ ...user, firstName: "Updated" });
+		).toEqual({ ...user, roleId: "agent-role-id", firstName: "Updated" });
 		expect(mapper.toUpdate).toHaveBeenCalledWith(
 			{ firstName: "Updated" },
 			authUser,
+			undefined,
 		);
-		expect(query.updateUser).toHaveBeenCalledWith(12, values);
+		expect(query.updateUserAndAssignments).toHaveBeenCalledWith(
+			12,
+			values,
+			undefined,
+		);
 	});
 
 	it("requires a customer when changing a user to client representative", async () => {
-		query.findUser.mockResolvedValue(user as never);
+		query.findUser.mockResolvedValue({
+			...user,
+			roleId: "agent-role-id",
+		} as never);
+		query.findAssignableRole.mockResolvedValue({
+			id: "client-role-id",
+			persona: RolePersona.CLIENT_REPRESENTATIVE,
+		} as never);
 		await expect(
 			service.update(
 				12,
 				{ role: Role.CLIENT_REPRESENTATIVE } as never,
 				authUser,
 			),
-		).rejects.toThrow(
-			new BadRequestException(
-				"A customer must be assigned to client representatives",
-			),
-		);
+		).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.CUSTOMER_ASSIGNMENT_REQUIRED },
+		});
 		expect(mapper.toUpdate).not.toHaveBeenCalled();
 	});
 
 	it("deactivates a user", async () => {
-		query.updateUser.mockResolvedValue({ ...user, isActive: false } as never);
-		expect(await service.deactivate(12)).toEqual({ ...user, isActive: false });
-		expect(query.updateUser).toHaveBeenCalledWith(12, { isActive: false });
+		query.deactivateUser.mockResolvedValue({ id: 12 } as never);
+		expect(await service.deactivate(12)).toEqual({ id: 12 });
+		expect(query.deactivateUser).toHaveBeenCalledWith(12);
+	});
+
+	it("prevents deactivating the last active administrator", async () => {
+		query.deactivateUser.mockResolvedValue("LAST_ACTIVE_ADMIN" as never);
+
+		await expect(service.deactivate(12)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.LAST_ACTIVE_ADMIN },
+		});
 	});
 
 	it("reports a missing user during deactivation", async () => {
-		query.updateUser.mockResolvedValue(undefined as never);
-		await expect(service.deactivate(12)).rejects.toThrow(
-			new NotFoundException("User with id 12 not found"),
-		);
+		query.deactivateUser.mockResolvedValue(undefined as never);
+		await expect(service.deactivate(12)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.USER_NOT_FOUND },
+		});
 	});
 
 	it("delegates existence checks", async () => {

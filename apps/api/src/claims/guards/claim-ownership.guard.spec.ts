@@ -1,4 +1,4 @@
-import { Permission, Role } from "@ecommand/shared";
+import { API_ERROR_CODES, Permission, Role } from "@ecommand/shared";
 import { type ExecutionContext, ForbiddenException } from "@nestjs/common";
 import type { AuthUser } from "@/auth/auth.types";
 import { ClaimOwnershipGuard } from "./claim-ownership.guard";
@@ -56,11 +56,9 @@ describe("ClaimOwnershipGuard customer scope", () => {
 		});
 		const { guard, service, context } = createGuard(user, claim(12, 99));
 
-		await expect(guard.canActivate(context)).rejects.toThrow(
-			new ForbiddenException(
-				"You can only access your own or assigned-customer claims",
-			),
-		);
+		await expect(guard.canActivate(context)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.ACCESS_DENIED },
+		});
 		expect(service.findOneForOwnership).toHaveBeenCalled();
 	});
 
@@ -73,11 +71,14 @@ describe("ClaimOwnershipGuard customer scope", () => {
 		);
 	});
 
-	it("allows a user with broad manage-other permission outside the agent role", async () => {
+	it("allows cross-customer claim access only with explicit customer-scope permission", async () => {
 		const user = createUser({
-			role: Role.ADMIN,
+			role: Role.CLIENT_REPRESENTATIVE,
 			customerId: null,
-			permissions: new Set([Permission.CLAIMS_MANAGE_OTHER]),
+			permissions: new Set([
+				Permission.CLAIMS_MANAGE_OTHER,
+				Permission.CUSTOMERS_MANAGE_OTHER,
+			]),
 		});
 		const { guard, context } = createGuard(user, claim(77, 99));
 

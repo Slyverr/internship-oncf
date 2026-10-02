@@ -4,6 +4,6 @@ import { parsePositiveInteger } from "@/common/utils/parse-positive-integer";
 @Injectable()
 export class TrainIdPipe implements PipeTransform<string> {
 	transform(value: string) {
-		return parsePositiveInteger(value, "train");
+		return parsePositiveInteger(value);
 	}
 }

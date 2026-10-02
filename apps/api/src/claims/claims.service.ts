@@ -1,9 +1,13 @@
-import { ClaimStatus, Permission, Role } from "@ecommand/shared";
+import {
+	API_ERROR_CODES,
+	ClaimStatus,
+	NotificationMessageCode,
+	Permission,
+} from "@ecommand/shared";
 import {
 	BadRequestException,
 	ConflictException,
 	Injectable,
-	Logger,
 	NotFoundException,
 } from "@nestjs/common";
 import { claims } from "drizzle/schema";
@@ -23,8 +27,6 @@ import { UpdateClaimDto } from "./requests/update-claim.dto";
 
 @Injectable()
 export class ClaimsService {
-	private readonly logger = new Logger(ClaimsService.name);
-
 	constructor(
 		private readonly notifications: NotificationsService,
 		private readonly claimsQuery: ClaimsQuery,
@@ -39,22 +41,18 @@ export class ClaimsService {
 	}
 
 	async findAll(user: AuthUser, query: ListClaimQueryDto) {
-		if (user.role === Role.CLIENT_REPRESENTATIVE && user.customerId !== null) {
-			query.userId = user.id;
-			query.customerId = user.customerId;
-			return this.claimsQuery.findClaims(query);
-		}
-
-		if (user.role === Role.AGENT_COMMERCIAL) {
-			return this.claimsQuery.findClaims(query, getCustomerScope(user) ?? []);
-		}
-
-		if (hasOnePermission(user, Permission.CLAIMS_MANAGE_OTHER)) {
-			return this.claimsQuery.findClaims(query);
-		}
-
 		const customerScope = getCustomerScope(user);
+		const canReadOtherClaims = hasOnePermission(
+			user,
+			Permission.CLAIMS_MANAGE_OTHER,
+		);
+
+		if (customerScope === null && canReadOtherClaims) {
+			return this.claimsQuery.findClaims(query);
+		}
+
 		if (customerScope !== null) {
+			if (!canReadOtherClaims) query.userId = user.id;
 			return this.claimsQuery.findClaims(query, customerScope);
 		}
 
@@ -67,7 +65,7 @@ export class ClaimsService {
 			typeof identifier === "number"
 				? await this.claimsQuery.findClaim(identifier)
 				: await this.claimsQuery.findClaimByNumber(identifier);
-		const found = this.ensure(claim, identifier);
+		const found = this.ensure(claim);
 		return found;
 	}
 
@@ -76,7 +74,7 @@ export class ClaimsService {
 			typeof identifier === "number"
 				? await this.claimsQuery.findClaimForOwnership(identifier)
 				: await this.claimsQuery.findClaimForOwnershipByNumber(identifier);
-		return this.ensure(claim, identifier);
+		return this.ensure(claim);
 	}
 
 	async update(
@@ -89,7 +87,6 @@ export class ClaimsService {
 		if (dto.customerId !== undefined || dto.orderId !== undefined) {
 			const claim = this.ensure(
 				await this.claimsQuery.findClaimAssociation(id),
-				id,
 			);
 			await this.ensureOrderCustomer(
 				dto.customerId ?? claim.customerId,
@@ -107,7 +104,7 @@ export class ClaimsService {
 	async remove(identifier: ClaimIdentifier) {
 		const id = await this.resolveClaimId(identifier);
 		const deleted = await this.claimsQuery.deleteClaim(id);
-		return this.ensure(deleted, id);
+		return this.ensure(deleted);
 	}
 
 	async addComment(
@@ -116,10 +113,37 @@ export class ClaimsService {
 		user: AuthUser,
 	) {
 		const claimId = await this.resolveClaimId(identifier);
+		const claim = await this.findOneForOwnership(claimId);
 		const startsProgress = hasOnePermission(
 			user,
 			Permission.CLAIMS_ACTION_START_PROGRESS,
 		);
+		const recipients = new Set<number>();
+		if (claim.createdByUserId !== user.id) {
+			recipients.add(claim.createdByUserId);
+		}
+
+		if (!hasOnePermission(user, Permission.CLAIMS_MANAGE_OTHER)) {
+			for (const agentId of await this.claimsQuery.findClaimReadersForCustomer(
+				claim.customerId,
+			)) {
+				if (agentId !== user.id) recipients.add(agentId);
+			}
+		}
+
+		const notificationRecords = [...recipients].flatMap((recipientId) => {
+			const record = this.notifications.createChangeRecord(
+				recipientId,
+				user.id,
+				"claims",
+				claimId,
+				{
+					code: NotificationMessageCode.CLAIM_COMMENT_ADDED,
+					parameters: { recordCode: claim.claimNumber },
+				},
+			);
+			return record ? [record] : [];
+		});
 
 		const comment = await this.claimsQuery.addClaimComment(
 			claimId,
@@ -131,46 +155,17 @@ export class ClaimsService {
 						fromStatusId: CLAIM_STATUSES[ClaimStatus.NEW].id,
 						toStatusId: CLAIM_STATUSES[ClaimStatus.IN_PROGRESS].id,
 						changedByUserId: user.id,
-						comment:
-							"Claim moved to in progress after the first agent response.",
 					},
 				}),
+				notifications: notificationRecords,
 			},
 		);
 		const [created] = await this.getComments(claimId, comment.id);
-		if (!created) throw new NotFoundException("Comment no longer exists");
-		const claim = await this.findOneForOwnership(claimId);
-		const recipients = new Set<number>();
-		if (claim.createdByUserId !== user.id) {
-			recipients.add(claim.createdByUserId);
+		if (!created) {
+			throw new NotFoundException({
+				code: API_ERROR_CODES.CLAIM_COMMENT_NOT_FOUND,
+			});
 		}
-
-		if (user.role !== Role.AGENT_COMMERCIAL) {
-			try {
-				for (const agentId of await this.claimsQuery.findCommercialAgentIds(
-					claim.customerId,
-				)) {
-					if (agentId !== user.id) recipients.add(agentId);
-				}
-			} catch (error) {
-				this.logger.error(
-					`Could not find commercial agents to notify about claim #${claimId}`,
-					error instanceof Error ? error.stack : String(error),
-				);
-			}
-		}
-
-		await Promise.all(
-			[...recipients].map((recipientId) =>
-				this.notifications.notifyChange(
-					recipientId,
-					user.id,
-					"claims",
-					claimId,
-					`A new comment was added to claim ${claim.claimNumber}.`,
-				),
-			),
-		);
 		return created;
 	}
 
@@ -184,7 +179,7 @@ export class ClaimsService {
 			...comment,
 			authorName: authorUser
 				? `${authorUser.firstName} ${authorUser.lastName}`
-				: "Former user",
+				: null,
 		}));
 	}
 
@@ -207,7 +202,9 @@ export class ClaimsService {
 	) {
 		const claim = await this.findOne(identifier);
 		if (!resolution && !claim.resolution) {
-			throw new ConflictException("Resolution required to resolve claim");
+			throw new ConflictException({
+				code: API_ERROR_CODES.CLAIM_RESOLUTION_REQUIRED,
+			});
 		}
 
 		return this.transition(
@@ -250,7 +247,9 @@ export class ClaimsService {
 	) {
 		const updated = await this.claimsQuery.updateClaim(id, values, options);
 		if (!updated) {
-			throw new ConflictException(`Claim ${id} was modified or does not exist`);
+			throw new ConflictException({
+				code: API_ERROR_CODES.CLAIM_TRANSITION_INVALID,
+			});
 		}
 		return updated;
 	}
@@ -263,9 +262,9 @@ export class ClaimsService {
 
 		const order = await this.claimsQuery.findOrderCustomer(orderId);
 		if (!order || order.customerId !== customerId) {
-			throw new BadRequestException(
-				"The associated order must belong to the selected customer.",
-			);
+			throw new BadRequestException({
+				code: API_ERROR_CODES.CLAIM_ORDER_CUSTOMER_MISMATCH,
+			});
 		}
 	}
 
@@ -277,26 +276,38 @@ export class ClaimsService {
 		extraValues: Record<string, unknown> = {},
 	) {
 		const claimId = await this.resolveClaimId(identifier);
-		const claim = this.ensure(
-			await this.claimsQuery.findClaimStatus(claimId),
-			claimId,
-		);
+		const claim = this.ensure(await this.claimsQuery.findClaimStatus(claimId));
 
 		const fromStatus = CLAIM_STATUS_BY_ID[claim.statusId];
 		if (!fromStatus) {
-			throw new BadRequestException(`Invalid status for claim ${claimId}`);
+			throw new BadRequestException({
+				code: API_ERROR_CODES.CLAIM_TRANSITION_INVALID,
+			});
 		}
 
 		if (fromStatus === toStatus) {
-			throw new ConflictException(`Claim is already ${toStatus}`);
+			throw new ConflictException({
+				code: API_ERROR_CODES.CLAIM_TRANSITION_INVALID,
+			});
 		}
 
 		const allowed = CLAIM_TRANSITION[fromStatus] ?? [];
 		if (!allowed.includes(toStatus)) {
-			throw new ConflictException(
-				`Cannot transition from ${fromStatus} to ${toStatus}`,
-			);
+			throw new ConflictException({
+				code: API_ERROR_CODES.CLAIM_TRANSITION_INVALID,
+			});
 		}
+
+		const notification = this.notifications.createChangeRecord(
+			claim.createdByUserId,
+			userId,
+			"claims",
+			claimId,
+			{
+				code: NotificationMessageCode.CLAIM_STATUS_CHANGED,
+				parameters: { recordCode: claim.claimNumber, status: toStatus },
+			},
+		);
 
 		await this.persistUpdate(
 			claimId,
@@ -310,18 +321,11 @@ export class ClaimsService {
 					userId,
 					comment,
 				},
+				notification,
 			},
 		);
 
-		const updated = await this.findOne(claimId);
-		await this.notifications.notifyChange(
-			updated.createdByUserId,
-			userId,
-			"claims",
-			claimId,
-			`Claim ${updated.claimNumber} is now ${toStatus.toLowerCase().replaceAll("_", " ")}.`,
-		);
-		return updated;
+		return this.findOne(claimId);
 	}
 
 	private async resolveClaimId(identifier: ClaimIdentifier): Promise<ClaimId> {
@@ -329,12 +333,14 @@ export class ClaimsService {
 		const claim = await this.claimsQuery.findClaimIdByNumber(
 			identifier as ClaimNumber,
 		);
-		return this.ensure(claim, identifier).id;
+		return this.ensure(claim).id;
 	}
 
-	private ensure<T>(value: T | undefined, id: ClaimIdentifier): T {
+	private ensure<T>(value: T | undefined): T {
 		if (!value) {
-			throw new NotFoundException(`Claim ${id} not found`);
+			throw new NotFoundException({
+				code: API_ERROR_CODES.CLAIM_NOT_FOUND,
+			});
 		}
 		return value;
 	}

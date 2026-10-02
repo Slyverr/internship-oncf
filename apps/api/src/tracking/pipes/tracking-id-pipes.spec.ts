@@ -3,9 +3,9 @@ import { TrainIdPipe } from "./train-id.pipe";
 import { WagonIdPipe } from "./wagon-id.pipe";
 
 describe.each([
-	["train", new TrainIdPipe(), "Invalid train ID"],
-	["wagon", new WagonIdPipe(), "Invalid wagon ID"],
-] as const)("%s ID pipe", (_name, pipe, errorMessage) => {
+	["train", new TrainIdPipe()],
+	["wagon", new WagonIdPipe()],
+] as const)("%s ID pipe", (_name, pipe) => {
 	it("accepts positive integer IDs", () => {
 		expect(pipe.transform("42")).toBe(42);
 	});
@@ -13,7 +13,7 @@ describe.each([
 		"rejects invalid ID %s",
 		(value) => {
 			expect(() => pipe.transform(value)).toThrow(
-				new BadRequestException(errorMessage),
+				new BadRequestException({ code: "INVALID_IDENTIFIER" }),
 			);
 		},
 	);

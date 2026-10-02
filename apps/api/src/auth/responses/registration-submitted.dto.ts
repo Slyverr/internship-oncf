@@ -1,6 +1,7 @@
+import { API_RESPONSE_CODES } from "@ecommand/shared";
 import { ApiProperty } from "@nestjs/swagger";
 
 export class RegistrationSubmittedDto {
-	@ApiProperty({ example: "Registration submitted for admin review." })
-	message: string;
+	@ApiProperty({ enum: [API_RESPONSE_CODES.REGISTRATION_SUBMITTED_FOR_REVIEW] })
+	code: string;
 }

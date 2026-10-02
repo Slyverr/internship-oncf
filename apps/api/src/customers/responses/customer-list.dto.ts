@@ -1,5 +1,6 @@
 import { Assert, Equals } from "@/common/utils/type-assertions";
 import { CustomerList } from "../customers.types";
+import { CustomerTypeReferenceDto } from "./customer-type-reference.dto";
 
 type _Assertion = Assert<Equals<CustomerListDto, CustomerList>>;
 
@@ -14,6 +15,7 @@ export class CustomerListDto implements CustomerList {
 	phone: string | null;
 	email: string | null;
 	typeId: string | null;
+	customerType: CustomerTypeReferenceDto | null;
 	customerCode: string | null;
 	ice: string | null;
 }

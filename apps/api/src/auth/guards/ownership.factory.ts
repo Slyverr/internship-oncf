@@ -1,4 +1,4 @@
-import { Permission } from "@ecommand/shared";
+import { API_ERROR_CODES, Permission } from "@ecommand/shared";
 import {
 	CanActivate,
 	ExecutionContext,
@@ -28,7 +28,6 @@ export interface OwnershipGuardOptions<TService, TId> {
 
 	pipe: PipeTransform<string, TId>;
 	permission?: Permission;
-	errorMessage?: string;
 	param?: string;
 }
 
@@ -39,7 +38,6 @@ export function createOwnershipGuard<TService, TId>(
 		service,
 		pipe,
 		permission,
-		errorMessage = "You can only access your own resources",
 		param = "id",
 		resolveOwnerId,
 		canAccess,
@@ -81,7 +79,7 @@ export function createOwnershipGuard<TService, TId>(
 			if (accessGranted === undefined) return true;
 
 			if (!accessGranted) {
-				throw new ForbiddenException(errorMessage);
+				throw new ForbiddenException({ code: API_ERROR_CODES.ACCESS_DENIED });
 			}
 
 			return true;

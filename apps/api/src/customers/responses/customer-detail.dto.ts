@@ -1,5 +1,6 @@
 import { Assert, Equals } from "@/common/utils/type-assertions";
 import { CustomerDetail } from "../customers.types";
+import { CustomerTypeReferenceDto } from "./customer-type-reference.dto";
 
 type _Assertion = Assert<Equals<CustomerDetailDto, CustomerDetail>>;
 
@@ -11,6 +12,7 @@ export class CustomerDetailDto implements CustomerDetail {
 	phone: string | null;
 	email: string | null;
 	typeId: string | null;
+	customerType: CustomerTypeReferenceDto | null;
 	createdAt: string;
 	updatedAt: string;
 	isActive: boolean;

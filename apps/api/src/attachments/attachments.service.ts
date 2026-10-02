@@ -1,3 +1,4 @@
+import { API_ERROR_CODES } from "@ecommand/shared";
 import {
 	Injectable,
 	InternalServerErrorException,
@@ -31,7 +32,9 @@ export class AttachmentsService {
 
 		const existing = await this.attachmentsQuery.findByHash(stored.hash);
 		if (!existing) {
-			throw new InternalServerErrorException("Failed to persist attachment");
+			throw new InternalServerErrorException({
+				code: API_ERROR_CODES.INTERNAL_ERROR,
+			});
 		}
 
 		return existing;
@@ -40,7 +43,9 @@ export class AttachmentsService {
 	async findById(id: AttachmentId): Promise<Attachment> {
 		const attachment = await this.attachmentsQuery.findById(id);
 		if (!attachment) {
-			throw new NotFoundException(`Attachment ${id} not found`);
+			throw new NotFoundException({
+				code: API_ERROR_CODES.ATTACHMENT_NOT_FOUND,
+			});
 		}
 		return attachment;
 	}

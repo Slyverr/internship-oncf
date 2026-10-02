@@ -12,7 +12,7 @@ const cases = [
 	["user", new UserIdPipe()],
 ] as const;
 
-describe.each(cases)("%s route ID", (label, pipe) => {
+describe.each(cases)("%s route ID", (_label, pipe) => {
 	it("accepts a valid positive integer", () => {
 		expect(pipe.transform("42")).toBe(42);
 	});
@@ -20,7 +20,7 @@ describe.each(cases)("%s route ID", (label, pipe) => {
 		"rejects malformed ID %s",
 		(value) => {
 			expect(() => pipe.transform(value)).toThrow(
-				new BadRequestException(`Invalid ${label} ID`),
+				new BadRequestException({ code: "INVALID_IDENTIFIER" }),
 			);
 		},
 	);
@@ -38,7 +38,7 @@ describe("claim public-code route parameter", () => {
 		"rejects malformed claim code %s",
 		(value) => {
 			expect(() => pipe.transform(value)).toThrow(
-				new BadRequestException("Invalid claim number"),
+				new BadRequestException({ code: "INVALID_IDENTIFIER" }),
 			);
 		},
 	);
@@ -55,7 +55,7 @@ describe.each([
 		"rejects malformed public code %s",
 		(value) => {
 			expect(() => pipe.transform(value)).toThrow(
-				new BadRequestException(`Invalid ${label} number`),
+				new BadRequestException({ code: "INVALID_IDENTIFIER" }),
 			);
 		},
 	);

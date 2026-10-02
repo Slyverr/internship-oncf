@@ -1,5 +1,10 @@
-import { NotificationChannel, NotificationType } from "@ecommand/shared";
-import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import {
+	API_ERROR_CODES,
+	API_RESPONSE_CODES,
+	type NotificationMessage,
+	NotificationMessageCode,
+} from "@ecommand/shared";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { AuthUser } from "@/auth/auth.types";
 import { NotificationsMapper } from "./notifications.mapper";
 import { NotificationsQuery } from "./notifications.query";
@@ -8,7 +13,6 @@ import { CreateNotificationDto } from "./requests/create-notification.dto";
 
 @Injectable()
 export class NotificationsService {
-	private readonly logger = new Logger(NotificationsService.name);
 	constructor(
 		private readonly notificationsQuery: NotificationsQuery,
 		private readonly notificationsMapper: NotificationsMapper,
@@ -21,18 +25,20 @@ export class NotificationsService {
 	}
 
 	async findAll(user: AuthUser) {
-		return this.notificationsQuery.findNotifications(user.id);
+		return (await this.notificationsQuery.findNotifications(user.id)).map(
+			(notification) => this.toPresentation(notification),
+		);
 	}
 
 	async findOne(id: NotificationId) {
 		const notification = await this.notificationsQuery.findNotification(id);
-		return this.ensure(notification, id);
+		return this.toPresentation(this.ensure(notification));
 	}
 
 	async findOneForOwnership(id: NotificationId) {
 		const notification =
 			await this.notificationsQuery.findNotificationForOwnership(id);
-		return this.ensure(notification, id);
+		return this.ensure(notification);
 	}
 
 	async getUnreadCount(userId: number) {
@@ -47,7 +53,9 @@ export class NotificationsService {
 			userId,
 		);
 		if (!updated) {
-			throw new NotFoundException(`Notification ${id} not found`);
+			throw new NotFoundException({
+				code: API_ERROR_CODES.NOTIFICATION_NOT_FOUND,
+			});
 		}
 		return this.findOne(id);
 	}
@@ -57,7 +65,7 @@ export class NotificationsService {
 			await this.notificationsQuery.updateAllNotificationsRead(userId);
 		return {
 			count: updated.length,
-			message: "Notifications marked as read",
+			code: API_RESPONSE_CODES.NOTIFICATIONS_MARKED_READ,
 		};
 	}
 
@@ -69,41 +77,81 @@ export class NotificationsService {
 		return this.notificationsQuery.markNotificationAsFailed(id, error);
 	}
 
-	/** Notification failure must not report a successfully saved workflow as failed. */
-	async notifyChange(
-		ownerId: number,
+	createChangeRecord(
+		recipientId: number,
 		actorId: number,
 		entity: "orders" | "programs" | "claims",
 		entityId: number,
-		message: string,
+		content: NotificationMessage,
 	) {
-		if (ownerId === actorId) return;
-		const types = {
-			orders: NotificationType.ORDER_STATUS_CHANGE,
-			programs: NotificationType.PROGRAM_PREVISIONNEL,
-			claims: NotificationType.CLAIM_UPDATED,
-		};
-		try {
-			await this.create({
-				userId: ownerId,
-				type: types[entity],
-				channel: NotificationChannel.IN_APP,
-				title: `${entity === "orders" ? "Order" : entity === "programs" ? "Program" : "Claim"} updated`,
-				message,
-				relatedEntityType: entity,
-				relatedEntityId: entityId,
-			});
-		} catch (error) {
-			this.logger.error(
-				`Could not notify user ${ownerId} about ${entity}/${entityId}`,
-				error instanceof Error ? error.stack : String(error),
-			);
-		}
+		return this.notificationsMapper.toChange(
+			recipientId,
+			actorId,
+			entity,
+			entityId,
+			content,
+		);
 	}
 
-	private ensure<T>(notification: T | undefined, id: NotificationId): T {
+	private toPresentation<
+		NotificationRecord extends {
+			title?: string | null;
+			message: string | null;
+			messageCode: NotificationMessageCode | null;
+			messageParameters: Record<string, string> | null;
+			errorMessage?: string | null;
+		},
+	>(
+		notification: NotificationRecord,
+	): Omit<
+		NotificationRecord,
+		"title" | "message" | "messageCode" | "messageParameters" | "errorMessage"
+	> & {
+		messageCode: NotificationMessageCode;
+		messageParameters: Record<string, string>;
+	} {
+		const publicNotification = { ...notification };
+		delete (publicNotification as { errorMessage?: string | null })
+			.errorMessage;
+		const {
+			title: _title,
+			message,
+			messageCode,
+			messageParameters,
+			...details
+		} = publicNotification;
+		const legacyComment = message?.match(
+			/^A new comment was added to claim (.+?)\.?$/,
+		);
+		const parameters =
+			messageParameters && Object.keys(messageParameters).length > 0
+				? messageParameters
+				: legacyComment
+					? { recordCode: legacyComment[1] }
+					: {};
+
+		return {
+			...details,
+			messageCode:
+				messageCode ??
+				(legacyComment
+					? NotificationMessageCode.CLAIM_COMMENT_ADDED
+					: NotificationMessageCode.LEGACY_UPDATE),
+			messageParameters: parameters,
+		} as Omit<
+			NotificationRecord,
+			"title" | "message" | "messageCode" | "messageParameters" | "errorMessage"
+		> & {
+			messageCode: NotificationMessageCode;
+			messageParameters: Record<string, string>;
+		};
+	}
+
+	private ensure<T>(notification: T | undefined): T {
 		if (!notification) {
-			throw new NotFoundException(`Notification ${id} not found`);
+			throw new NotFoundException({
+				code: API_ERROR_CODES.NOTIFICATION_NOT_FOUND,
+			});
 		}
 		return notification;
 	}

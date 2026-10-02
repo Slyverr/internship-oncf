@@ -14,8 +14,8 @@ export async function withDbErrorHandling<T>(
 		const handler = constraintHandlers[constraint];
 
 		if (handler) {
-			const { statusCode, code, message } = handler(context);
-			throw new HttpException({ code, message }, statusCode);
+			const { statusCode, code } = handler(context);
+			throw new HttpException({ code }, statusCode);
 		}
 
 		throw err;

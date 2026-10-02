@@ -14,5 +14,4 @@ export const OrderOwnershipGuard = createOwnershipGuard<
 		canAccessOrder(await service.findOneForAccess(id), user),
 
 	pipe: new OrderNumberPipe(),
-	errorMessage: "You can only access your own orders",
 });

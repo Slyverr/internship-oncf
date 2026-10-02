@@ -1,5 +1,10 @@
-import { NotificationChannel, NotificationType } from "@ecommand/shared";
-import { Logger } from "@nestjs/common";
+import {
+	API_ERROR_CODES,
+	ClaimStatus,
+	NotificationChannel,
+	NotificationMessageCode,
+	NotificationType,
+} from "@ecommand/shared";
 import { NotificationsMapper } from "./notifications.mapper";
 import { NotificationsQuery } from "./notifications.query";
 import { NotificationsService } from "./notifications.service";
@@ -12,8 +17,11 @@ describe("in-app notification delivery", () => {
 		userId: 12,
 		type: NotificationType.CLAIM_UPDATED,
 		channel: NotificationChannel.IN_APP,
-		title: "Claim updated",
-		message: "Your claim was resolved.",
+		messageCode: NotificationMessageCode.CLAIM_STATUS_CHANGED,
+		messageParameters: {
+			recordCode: "CLM-0123456789",
+			status: ClaimStatus.RESOLVED,
+		},
 	};
 
 	it("makes in-app messages readable immediately while email remains pending", () => {
@@ -36,48 +44,76 @@ describe("in-app notification delivery", () => {
 		expect(query.findUnreadCount).toHaveBeenCalledWith(12);
 	});
 
-	it("notifies the resource owner only when another user acts", async () => {
+	it("returns a stable code when a notification does not exist", async () => {
+		const query = { findNotification: jest.fn().mockResolvedValue(undefined) };
+		const service = new NotificationsService(
+			query as unknown as NotificationsQuery,
+			mapper,
+		);
+		await expect(service.findOne(23 as never)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.NOTIFICATION_NOT_FOUND },
+		});
+	});
+
+	it("returns the same stable code when mark-as-read cannot find a notification", async () => {
 		const query = {
-			createNotification: jest.fn().mockResolvedValue({ id: 1 }),
-			findNotification: jest.fn().mockResolvedValue({ id: 1 }),
+			updateNotificationRead: jest.fn().mockResolvedValue(undefined),
 		};
 		const service = new NotificationsService(
 			query as unknown as NotificationsQuery,
 			mapper,
 		);
-		await service.notifyChange(12, 12, "claims", 4, "Changed");
-		expect(query.createNotification).not.toHaveBeenCalled();
-		await service.notifyChange(12, 20, "claims", 4, "Changed");
-		expect(query.createNotification).toHaveBeenCalledWith(
-			expect.objectContaining({
-				recipientUserId: 12,
-				relatedEntityType: "claims",
-				relatedEntityId: 4,
-				status: "SENT",
-			}),
-		);
+		await expect(service.markAsRead(23 as never, 12)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.NOTIFICATION_NOT_FOUND },
+		});
 	});
 
-	it("does not turn a saved workflow into a failed response when notification storage fails", async () => {
-		const log = jest
-			.spyOn(Logger.prototype, "error")
-			.mockImplementation(() => undefined);
-		try {
-			const query = {
-				createNotification: jest
-					.fn()
-					.mockRejectedValue(new Error("unavailable")),
-			};
-			const service = new NotificationsService(
-				query as unknown as NotificationsQuery,
-				mapper,
-			);
-			await expect(
-				service.notifyChange(12, 20, "orders", 4, "Changed"),
-			).resolves.toBeUndefined();
-			expect(log).toHaveBeenCalled();
-		} finally {
-			log.mockRestore();
-		}
+	it("creates change records only for recipients other than the actor", () => {
+		const service = new NotificationsService({} as NotificationsQuery, mapper);
+		const content = {
+			code: NotificationMessageCode.CLAIM_STATUS_CHANGED,
+			parameters: {
+				recordCode: "CLM-0123456789",
+				status: ClaimStatus.RESOLVED,
+			},
+		} as const;
+		expect(service.createChangeRecord(12, 12, "claims", 4, content)).toBe(
+			undefined,
+		);
+		expect(
+			service.createChangeRecord(12, 20, "claims", 4, content),
+		).toMatchObject({
+			recipientUserId: 12,
+			relatedEntityType: "claims",
+			relatedEntityId: 4,
+			status: "SENT",
+			messageCode: NotificationMessageCode.CLAIM_STATUS_CHANGED,
+			messageParameters: content.parameters,
+		});
+	});
+
+	it("does not expose legacy English notification text in the API response", async () => {
+		const query = {
+			findNotification: jest.fn().mockResolvedValue({
+				id: 3,
+				title: "Claim updated",
+				message: "A new comment was added to claim CLM-0123456789.",
+				messageCode: null,
+				messageParameters: {},
+				errorMessage: "SMTP provider rejected the recipient address",
+			}),
+		};
+		const service = new NotificationsService(
+			query as unknown as NotificationsQuery,
+			mapper,
+		);
+		const result = await service.findOne(3 as never);
+		expect(result).toMatchObject({
+			messageCode: NotificationMessageCode.CLAIM_COMMENT_ADDED,
+			messageParameters: { recordCode: "CLM-0123456789" },
+		});
+		expect(result).not.toHaveProperty("title");
+		expect(result).not.toHaveProperty("message");
+		expect(result).not.toHaveProperty("errorMessage");
 	});
 });

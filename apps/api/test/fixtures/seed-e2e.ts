@@ -14,6 +14,7 @@ import {
 	forecastPrograms,
 	goods,
 	orders,
+	passwordResetTokens,
 	userCustomers,
 	users,
 } from "drizzle/schema";
@@ -34,6 +35,7 @@ import {
 	E2E_CUSTOMERS,
 	E2E_ORDERS,
 	E2E_PASSWORD,
+	E2E_PASSWORD_RESET,
 	E2E_PROGRAMS,
 	E2E_USERS,
 } from "./e2e-fixtures";
@@ -161,6 +163,17 @@ async function seed() {
 				registrationStatus: RegistrationStatus.APPROVED,
 				isActive: true,
 			},
+			{
+				email: E2E_USERS.passwordReset.email,
+				password,
+				firstName: "Password",
+				lastName: "Reset",
+				type: "external",
+				roleId: ROLES[Role.CLIENT_REPRESENTATIVE].id,
+				customerId: customerId(E2E_CUSTOMERS.assignedA),
+				registrationStatus: RegistrationStatus.APPROVED,
+				isActive: true,
+			},
 		])
 		.returning({ id: users.id, email: users.email });
 
@@ -183,6 +196,19 @@ async function seed() {
 		{
 			userId: userId(E2E_USERS.agentOutside.email),
 			customerId: customerId(E2E_CUSTOMERS.outside),
+		},
+	]);
+
+	await db.insert(passwordResetTokens).values([
+		{
+			userId: userId(E2E_USERS.passwordReset.email),
+			token: E2E_PASSWORD_RESET.valid,
+			expiresAt: new Date(Date.now() + 60 * 60_000).toISOString(),
+		},
+		{
+			userId: userId(E2E_USERS.passwordReset.email),
+			token: E2E_PASSWORD_RESET.expired,
+			expiresAt: new Date(Date.now() - 60 * 60_000).toISOString(),
 		},
 	]);
 

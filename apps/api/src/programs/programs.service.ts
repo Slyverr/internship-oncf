@@ -1,4 +1,9 @@
-import { OrderStatus, ProgramStatus } from "@ecommand/shared";
+import {
+	API_ERROR_CODES,
+	NotificationMessageCode,
+	OrderStatus,
+	ProgramStatus,
+} from "@ecommand/shared";
 import {
 	ConflictException,
 	ForbiddenException,
@@ -34,12 +39,14 @@ export class ProgramsService {
 	async create(dto: CreateProgramDto, user: AuthUser) {
 		const order = await this.programsQuery.findOrderCustomer(dto.orderId);
 		if (!order) {
-			throw new NotFoundException(`Order ${dto.orderId} not found`);
+			throw new NotFoundException({
+				code: API_ERROR_CODES.ORDER_NOT_FOUND,
+			});
 		}
 		if (!canAccessCustomer(user, order.customerId)) {
-			throw new ForbiddenException(
-				"Cannot create programs for orders outside your assigned portfolio",
-			);
+			throw new ForbiddenException({
+				code: API_ERROR_CODES.PROGRAM_CUSTOMER_ACCESS_DENIED,
+			});
 		}
 		if (
 			![
@@ -48,14 +55,18 @@ export class ProgramsService {
 				OrderStatus.IN_PROGRESS,
 			].includes(order.orderStatus?.name as OrderStatus)
 		) {
-			throw new ConflictException("Order is not eligible for program creation");
+			throw new ConflictException({
+				code: API_ERROR_CODES.ORDER_NOT_ELIGIBLE_FOR_PROGRAM,
+			});
 		}
 
 		const existingProgram = await this.programsQuery.findProgramForOrder(
 			dto.orderId,
 		);
 		if (existingProgram) {
-			throw new ConflictException("This order already has a forecast program");
+			throw new ConflictException({
+				code: API_ERROR_CODES.ORDER_ALREADY_PROGRAMMED,
+			});
 		}
 
 		const values = this.programsMapper.toCreate(dto, user);
@@ -72,7 +83,7 @@ export class ProgramsService {
 
 	async findOne(id: ProgramId) {
 		const program = await this.programsQuery.findProgram(id);
-		return this.ensure(program, id);
+		return this.ensure(program);
 	}
 
 	async findOneForOwnership(identifier: ProgramIdentifier) {
@@ -80,7 +91,7 @@ export class ProgramsService {
 			typeof identifier === "number"
 				? await this.programsQuery.findProgramForOwnership(identifier)
 				: await this.programsQuery.findProgramForOwnershipByNumber(identifier);
-		return this.ensure(program, identifier);
+		return this.ensure(program);
 	}
 
 	async resolveProgramId(identifier: ProgramIdentifier): Promise<ProgramId> {
@@ -88,7 +99,7 @@ export class ProgramsService {
 		const program = await this.programsQuery.findProgramIdByNumber(
 			identifier as ProgramNumber,
 		);
-		return this.ensure(program, identifier).id;
+		return this.ensure(program).id;
 	}
 
 	async update(id: ProgramId, dto: UpdateProgramDto, user: AuthUser) {
@@ -123,19 +134,23 @@ export class ProgramsService {
 	async remove(id: ProgramId, user: AuthUser) {
 		const program = await this.findOne(id);
 		if (program.programStatus?.name !== ProgramStatus.DRAFT) {
-			throw new ConflictException("Only draft programs can be deleted");
+			throw new ConflictException({
+				code: API_ERROR_CODES.PROGRAM_MUST_BE_DRAFT,
+			});
 		}
 
 		const deleted = await this.programsQuery.removeProgram(id, {
 			userId: user.id,
 			userName: user.email,
 		});
-		return this.ensure(deleted, id);
+		return this.ensure(deleted);
 	}
 
-	private ensure<T>(program: T | undefined, id: ProgramIdentifier): T {
+	private ensure<T>(program: T | undefined): T {
 		if (!program) {
-			throw new NotFoundException(`Program ${id} not found`);
+			throw new NotFoundException({
+				code: API_ERROR_CODES.PROGRAM_NOT_FOUND,
+			});
 		}
 		return program;
 	}
@@ -145,25 +160,32 @@ export class ProgramsService {
 		user: AuthUser,
 		toStatus: ProgramStatus,
 	) {
-		const program = this.ensure(
-			await this.programsQuery.findProgramStatus(id),
-			id,
-		);
+		const program = this.ensure(await this.programsQuery.findProgramStatus(id));
 
 		const fromStatus = PROGRAM_STATUS_BY_ID[program.statusId];
 		if (!fromStatus) {
-			throw new ConflictException(
-				`Invalid status ${program.statusId} for program ${id}`,
-			);
+			throw new ConflictException({
+				code: API_ERROR_CODES.PROGRAM_TRANSITION_INVALID,
+			});
 		}
 
 		const allowed = PROGRAM_TRANSITION[fromStatus] ?? [];
 		if (!allowed.includes(toStatus)) {
-			throw new ConflictException(
-				`Cannot transition from ${fromStatus} to ${toStatus}`,
-			);
+			throw new ConflictException({
+				code: API_ERROR_CODES.PROGRAM_TRANSITION_INVALID,
+			});
 		}
 
+		const notification = this.notifications.createChangeRecord(
+			program.createdByUserId,
+			user.id,
+			"programs",
+			id,
+			{
+				code: NotificationMessageCode.PROGRAM_STATUS_CHANGED,
+				parameters: { recordCode: program.programNumber, status: toStatus },
+			},
+		);
 		const updatedProgram = await this.programsQuery.updateProgram(
 			id,
 			{
@@ -174,21 +196,14 @@ export class ProgramsService {
 				eq(forecastPrograms.statusId, program.statusId),
 			),
 			{ userId: user.id, userName: user.email },
+			notification,
 		);
 		if (!updatedProgram) {
-			throw new ConflictException(
-				`Program ${id} was modified or does not exist`,
-			);
+			throw new ConflictException({
+				code: API_ERROR_CODES.PROGRAM_TRANSITION_INVALID,
+			});
 		}
 
-		const updated = await this.findOne(id);
-		await this.notifications.notifyChange(
-			updated.createdByUserId,
-			user.id,
-			"programs",
-			id,
-			`Program #${id} is now ${toStatus.toLowerCase().replaceAll("_", " ")}.`,
-		);
-		return updated;
+		return this.findOne(id);
 	}
 }

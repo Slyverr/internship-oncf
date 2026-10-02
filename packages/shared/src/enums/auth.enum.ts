@@ -45,7 +45,6 @@ export enum Permission {
 	CUSTOMERS_DELETE = "customers:delete",
 	CUSTOMERS_MANAGE = "customers:manage",
 	CUSTOMERS_MANAGE_OTHER = "customers:manage:other",
-	CUSTOMERS_ACTION_ASSIGN_PORTFOLIO = "customers:action:assign-portfolio",
 
 	PROGRAMS_CREATE = "programs:create",
 	PROGRAMS_READ = "programs:read",

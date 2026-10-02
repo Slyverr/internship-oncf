@@ -55,7 +55,6 @@ const referenceTables = [
 	{ table: roles, data: ROLES, key: roles.name },
 	{ table: permissions, data: PERMISSIONS, key: permissions.name },
 	{ table: customerTypes, data: CUSTOMER_TYPES, key: customerTypes.name },
-	{ table: goodsTypes, data: GOODS_TYPES, key: goodsTypes.name },
 	{ table: attributes, data: ATTRIBUTES, key: attributes.name },
 	{ table: orderStatus, data: ORDER_STATUSES, key: orderStatus.name },
 	{ table: programStatus, data: PROGRAM_STATUSES, key: programStatus.name },
@@ -68,11 +67,6 @@ const referenceTables = [
 		key: pickupLocationTypes.name,
 	},
 	{ table: dispatchTypes, data: DISPATCH_TYPES, key: dispatchTypes.name },
-	{
-		table: rejectionReasons,
-		data: REJECTION_REASONS,
-		key: rejectionReasons.name,
-	},
 	{
 		table: notificationTypes,
 		data: NOTIFICATION_TYPES,
@@ -88,12 +82,13 @@ const referenceTables = [
 		data: DTM_REQUEST_TYPES,
 		key: dtmRequestTypes.name,
 	},
-	{
-		table: accessoryOperations,
-		data: ACCESSORY_OPERATIONS,
-		key: accessoryOperations.name,
-	},
-	{ table: units, data: UNITS, key: units.name },
+] as const;
+
+const adminManagedCatalogTables = [
+	{ table: goodsTypes, data: GOODS_TYPES },
+	{ table: rejectionReasons, data: REJECTION_REASONS },
+	{ table: accessoryOperations, data: ACCESSORY_OPERATIONS },
+	{ table: units, data: UNITS },
 ] as const;
 
 export async function seedReferenceData(db: DatabaseClient) {
@@ -121,6 +116,18 @@ async function seedReferenceTables(tx: DatabaseClient) {
 						isActive: true,
 					},
 				});
+		}
+	}
+
+	for (const { table, data } of adminManagedCatalogTables) {
+		for (const item of Object.values(data)) {
+			await tx
+				.insert(table)
+				.values({
+					...item,
+					isActive: true,
+				})
+				.onConflictDoNothing();
 		}
 	}
 }

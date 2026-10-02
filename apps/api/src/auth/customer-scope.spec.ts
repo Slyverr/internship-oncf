@@ -1,4 +1,4 @@
-import { Role } from "@ecommand/shared";
+import { Permission, Role } from "@ecommand/shared";
 import type { AuthUser } from "./auth.types";
 import { canAccessCustomer, getCustomerScope } from "./customer-scope";
 
@@ -11,6 +11,7 @@ const user = (values: Partial<AuthUser>): AuthUser =>
 		sessionId: "session",
 		customerId: null,
 		agencyId: null,
+		assignedCustomerIds: [],
 		...values,
 	}) as AuthUser;
 
@@ -40,7 +41,20 @@ describe("customer scope", () => {
 		).toEqual([42]);
 	});
 
-	it("keeps administrators unscoped", () => {
-		expect(getCustomerScope(user({ role: Role.ADMIN }))).toBeNull();
+	it("does not grant a customer scope from the administrator role", () => {
+		expect(
+			getCustomerScope({
+				...user({ role: Role.ADMIN }),
+				assignedCustomerIds: [],
+			}),
+		).toEqual([]);
+	});
+
+	it("grants an unscoped customer portfolio only through its permission", () => {
+		expect(
+			getCustomerScope(
+				user({ permissions: new Set([Permission.CUSTOMERS_MANAGE_OTHER]) }),
+			),
+		).toBeNull();
 	});
 });

@@ -1,4 +1,4 @@
-import { Permission, Role } from "@ecommand/shared";
+import { API_ERROR_CODES, Permission, Role } from "@ecommand/shared";
 import { PgDialect } from "drizzle-orm/pg-core";
 import type { AuthUser } from "@/auth/auth.types";
 import { ReportsService } from "./reports.service";
@@ -85,22 +85,37 @@ describe("ReportsService", () => {
 		});
 	});
 
-	it("allows administrators to consult the full report without order access", async () => {
+	it("uses reports:manage:other for full report scope independent of role", async () => {
 		const { service, captures } = setup([[], [], [], [], []]);
 		await service.getOrders(
-			{ ...user([Permission.REPORTS_READ]), role: Role.ADMIN },
+			{
+				...user([Permission.REPORTS_READ, Permission.REPORTS_MANAGE_OTHER]),
+				role: Role.CLIENT_REPRESENTATIVE,
+			},
 			{},
 		);
 
 		expect(captures[0]?.where).toBeUndefined();
 	});
 
+	it("does not grant full report scope to an administrator without the permission", async () => {
+		const { service, captures } = setup([[], [], [], [], []]);
+		await service.getOrders(
+			{ ...user([Permission.REPORTS_READ]), role: Role.ADMIN },
+			{},
+		);
+
+		expect(captures[0]?.where).toBeDefined();
+	});
+
 	it.each(["2025-02-29", "not-a-date"])(
 		"rejects an invalid from date: %s",
 		async (from) => {
 			const { service, db } = setup([]);
-			await expect(service.getOrders(user([]), { from })).rejects.toThrow(
-				"Invalid report date",
+			await expect(service.getOrders(user([]), { from })).rejects.toMatchObject(
+				{
+					response: { code: API_ERROR_CODES.REPORT_DATE_INVALID },
+				},
 			);
 			expect(db.select).not.toHaveBeenCalled();
 		},
@@ -110,7 +125,9 @@ describe("ReportsService", () => {
 		const { service, db } = setup([]);
 		await expect(
 			service.getOrders(user([]), { to: "2025-13-01" }),
-		).rejects.toThrow("Invalid report date");
+		).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.REPORT_DATE_INVALID },
+		});
 		expect(db.select).not.toHaveBeenCalled();
 	});
 
@@ -118,7 +135,9 @@ describe("ReportsService", () => {
 		const { service, db } = setup([]);
 		await expect(
 			service.getOrders(user([]), { from: "2025-04-02", to: "2025-04-01" }),
-		).rejects.toThrow("From date must be before or equal to to date");
+		).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.REPORT_DATE_RANGE_INVALID },
+		});
 		expect(db.select).not.toHaveBeenCalled();
 	});
 

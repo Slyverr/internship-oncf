@@ -48,7 +48,7 @@ describe("OrdersQuery authorization scope", () => {
 		expect(options.limit).toBe(20);
 	});
 
-	it("scopes customer-assigned users to their customer despite query filters", async () => {
+	it("intersects customer filters with the assigned customer scope", async () => {
 		const user = createUser(23, [], 42);
 		await query.findOrders(user, {
 			page: 1,
@@ -56,7 +56,9 @@ describe("OrdersQuery authorization scope", () => {
 			customerId: 99,
 		} as never);
 
-		expect(findMany.mock.calls[0][0].where).toEqual({ customerId: 42 });
+		expect(findMany.mock.calls[0][0].where).toEqual({
+			customerId: { in: [] },
+		});
 	});
 
 	it("scopes commercial-agent order lists to their full portfolio by default", async () => {

@@ -9,6 +9,7 @@ import {
 	Query,
 	Request,
 } from "@nestjs/common";
+import { ApiOkResponse } from "@nestjs/swagger";
 import type { AuthRequest } from "@/auth/auth.types";
 import { RequireAny } from "@/auth/permissions.decorator";
 import { createCrudResponses } from "@/common/decorators/api-crud-responses.decorator";
@@ -22,6 +23,7 @@ import { UpdateCustomerDto } from "./requests/update-customer.dto";
 import { CustomerDeleteDto } from "./responses/customer-delete.dto";
 import { CustomerDetailDto } from "./responses/customer-detail.dto";
 import { CustomerListDto } from "./responses/customer-list.dto";
+import { CustomerPortfolioOptionDto } from "./responses/customer-portfolio-option.dto";
 
 const CustomerIdParam = () => ApiPathParam("id", CustomerIdPipe);
 
@@ -39,6 +41,13 @@ const {
 @Controller("customers")
 export class CustomersController {
 	constructor(private readonly customersService: CustomersService) {}
+
+	@Get("portfolio-options")
+	@RequireAny(Permission.USERS_CREATE, Permission.USERS_UPDATE)
+	@ApiOkResponse({ type: CustomerPortfolioOptionDto, isArray: true })
+	async findPortfolioOptions() {
+		return this.customersService.findPortfolioOptions();
+	}
 
 	@Get()
 	@RequireAny(Permission.CUSTOMERS_READ)

@@ -1,4 +1,4 @@
-import { Permission, Role } from "@ecommand/shared";
+import { API_ERROR_CODES, Permission, Role } from "@ecommand/shared";
 import { ExecutionContext, ForbiddenException } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { AuthUser } from "../auth.types";
@@ -66,6 +66,13 @@ describe("PermissionsGuard", () => {
 		];
 		user = authenticatedUser([Permission.CATALOG_READ]);
 		expect(() => guard.canActivate(context())).toThrow(ForbiddenException);
+		try {
+			guard.canActivate(context());
+		} catch (error) {
+			expect((error as ForbiddenException).getResponse()).toEqual({
+				code: API_ERROR_CODES.ACCESS_DENIED,
+			});
+		}
 	});
 
 	it("requires every permission declared with RequireAll", () => {

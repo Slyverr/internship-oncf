@@ -1,11 +1,5 @@
+import { randomUUID } from "node:crypto";
 import { Injectable } from "@nestjs/common";
-import {
-	ACCESSORY_OPERATIONS_SCOPE,
-	GOODS_TYPES_SCOPE,
-	REJECTION_REASONS_SCOPE,
-	UNITS_SCOPE,
-} from "@/database/reference-data";
-import { createReferenceId } from "@/database/reference-data/reference-data.utils";
 import {
 	AccessoryOperationInsert,
 	GoodInsert,
@@ -20,21 +14,36 @@ import {
 	CreateRejectionReasonDto,
 	CreateUnitDto,
 } from "./requests/create-catalog.dto";
+import {
+	UpdateAccessoryOperationDto,
+	UpdateGoodDto,
+	UpdateGoodsTypeDto,
+	UpdateRejectionReasonDto,
+	UpdateUnitDto,
+} from "./requests/update-catalog.dto";
 
 @Injectable()
 export class CatalogMapper {
 	toCreateUnit(dto: CreateUnitDto): UnitInsert {
 		return {
-			id: createReferenceId(UNITS_SCOPE, dto.name),
+			id: randomUUID(),
 			name: dto.name,
 		};
 	}
 
+	toUpdateUnit(dto: UpdateUnitDto) {
+		return { name: dto.name.trim(), isActive: dto.isActive };
+	}
+
 	toCreateGoodsType(dto: CreateGoodsTypeDto): GoodsTypeInsert {
 		return {
-			id: createReferenceId(GOODS_TYPES_SCOPE, dto.name),
+			id: randomUUID(),
 			name: dto.name,
 		};
+	}
+
+	toUpdateGoodsType(dto: UpdateGoodsTypeDto) {
+		return { name: dto.name.trim(), isActive: dto.isActive };
 	}
 
 	toCreateGood(dto: CreateGoodDto): GoodInsert {
@@ -45,21 +54,38 @@ export class CatalogMapper {
 		};
 	}
 
+	toUpdateGood(dto: UpdateGoodDto) {
+		return {
+			name: dto.name.trim(),
+			goodsCode: dto.goodsCode.trim(),
+			goodsTypeId: dto.goodsTypeId,
+			isActive: dto.isActive,
+		};
+	}
+
 	toCreateAccessoryOperation(
 		dto: CreateAccessoryOperationDto,
 	): AccessoryOperationInsert {
 		return {
-			id: createReferenceId(ACCESSORY_OPERATIONS_SCOPE, dto.name),
+			id: randomUUID(),
 			name: dto.name,
 		};
+	}
+
+	toUpdateAccessoryOperation(dto: UpdateAccessoryOperationDto) {
+		return { name: dto.name.trim(), isActive: dto.isActive };
 	}
 
 	toCreateRejectionReason(
 		dto: CreateRejectionReasonDto,
 	): RejectionReasonInsert {
 		return {
-			id: createReferenceId(REJECTION_REASONS_SCOPE, dto.name),
+			id: randomUUID(),
 			name: dto.name,
 		};
+	}
+
+	toUpdateRejectionReason(dto: UpdateRejectionReasonDto) {
+		return { name: dto.name.trim(), isActive: dto.isActive };
 	}
 }

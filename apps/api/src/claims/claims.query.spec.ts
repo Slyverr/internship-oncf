@@ -1,18 +1,61 @@
-import { Role } from "@ecommand/shared";
+import { Permission } from "@ecommand/shared";
+import { claimComments, notifications } from "drizzle/schema";
 import { ClaimsQuery } from "./claims.query";
 
+describe("ClaimsQuery comment transaction", () => {
+	it("inserts the comment and notifications in the same transaction", async () => {
+		const comment = { id: 88 };
+		const commentReturning = jest.fn().mockResolvedValue([comment]);
+		const commentValues = jest
+			.fn()
+			.mockReturnValue({ returning: commentReturning });
+		const notificationValues = jest.fn().mockResolvedValue(undefined);
+		const transactionContext = {
+			insert: jest.fn((table: unknown) =>
+				table === claimComments
+					? { values: commentValues }
+					: { values: notificationValues },
+			),
+		};
+		const transaction = jest
+			.fn()
+			.mockImplementation(
+				(callback: (tx: typeof transactionContext) => unknown) =>
+					callback(transactionContext),
+			);
+		const query = new ClaimsQuery({ db: { transaction } } as never);
+
+		await expect(
+			query.addClaimComment(23 as never, "Reply", 7, {
+				notifications: [{ recipientUserId: 12 } as never],
+			}),
+		).resolves.toEqual(comment);
+
+		expect(transaction).toHaveBeenCalledTimes(1);
+		expect(transactionContext.insert).toHaveBeenNthCalledWith(1, claimComments);
+		expect(transactionContext.insert).toHaveBeenNthCalledWith(2, notifications);
+		expect(notificationValues).toHaveBeenCalledWith([{ recipientUserId: 12 }]);
+	});
+});
+
 describe("ClaimsQuery comment notification recipients", () => {
-	it("returns active commercial agent user IDs", async () => {
+	it("returns active users with claim-read permission assigned to the customer", async () => {
 		const findMany = jest.fn().mockResolvedValue([{ id: 7 }, { id: 8 }]);
 		const query = new ClaimsQuery({
 			db: { query: { users: { findMany } } },
 		} as never);
 
-		await expect(query.findCommercialAgentIds(42)).resolves.toEqual([7, 8]);
+		await expect(query.findClaimReadersForCustomer(42)).resolves.toEqual([
+			7, 8,
+		]);
 		expect(findMany).toHaveBeenCalledWith({
 			where: {
 				isActive: true,
-				role: { name: Role.AGENT_COMMERCIAL },
+				role: {
+					rolePermissions: {
+						permission: { name: Permission.CLAIMS_READ },
+					},
+				},
 				userCustomers: { customerId: 42 },
 			},
 			columns: { id: true },
