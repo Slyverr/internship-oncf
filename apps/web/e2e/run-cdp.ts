@@ -6,6 +6,7 @@ import {
 	verifyAdminDashboard,
 	verifyAdminNavigation,
 	verifyAdminRegistrationReview,
+	verifyAdminReportCsvExport,
 	verifyAgentDashboard,
 	verifyAgentNavigation,
 	verifyAgentOperationalCreation,
@@ -19,6 +20,7 @@ const endpoint = process.env.PLAYWRIGHT_CDP_ENDPOINT;
 const workflows: [string, (page: Page) => Promise<void>][] = [
 	["admin navigation and access", verifyAdminNavigation],
 	["admin dashboard visibility follows permissions", verifyAdminDashboard],
+	["admin report CSV download", verifyAdminReportCsvExport],
 	["admin registration review", verifyAdminRegistrationReview],
 	[
 		"admin custom role assignment and authorization",

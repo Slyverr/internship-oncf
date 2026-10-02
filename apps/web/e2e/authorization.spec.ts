@@ -5,6 +5,7 @@ import {
 	verifyAdminDashboard,
 	verifyAdminNavigation,
 	verifyAdminRegistrationReview,
+	verifyAdminReportCsvExport,
 	verifyAdminReportPrintLayout,
 	verifyAgentDashboard,
 	verifyAgentNavigation,
@@ -80,4 +81,8 @@ test("admin report print view generates a readable themed PDF", async ({
 	page,
 }) => {
 	await verifyAdminReportPrintLayout(page);
+});
+
+test("admin can download an order report as CSV", async ({ page }) => {
+	await verifyAdminReportCsvExport(page);
 });

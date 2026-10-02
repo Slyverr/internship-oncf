@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import { API_ERROR_CODES } from "@ecommand/shared";
 import { expect, type Page } from "@playwright/test";
 import {
@@ -148,6 +149,28 @@ export async function verifyClientDashboard(page: Page) {
 		false,
 		false,
 	);
+}
+
+export async function verifyAdminReportCsvExport(page: Page) {
+	await signIn(page, E2E_USERS.admin.email);
+	await page.goto("/dashboard/reports");
+	const exportButton = page.getByRole("button", {
+		name: translate(Messages.reports.exportCsv),
+		exact: true,
+	});
+	await expect(exportButton).toBeEnabled();
+
+	const downloadPromise = page.waitForEvent("download");
+	await exportButton.click();
+	const download = await downloadPromise;
+	expect(download.suggestedFilename()).toMatch(
+		/^ecommand-order-report(?:-.*)?\.csv$/,
+	);
+	const filePath = await download.path();
+	expect(filePath).toBeTruthy();
+	const csv = await readFile(filePath as string, "utf8");
+	expect(csv).toContain(translate(Messages.reports.byStatus));
+	expect(csv).toContain(translate(Messages.reports.byCustomer));
 }
 
 export async function verifyAdminCatalogLifecycle(page: Page) {
