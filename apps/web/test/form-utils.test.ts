@@ -116,11 +116,15 @@ assert.equal(
 	"Something went wrong. Please try again.",
 	"unstructured server messages are not displayed to users",
 );
-assert.equal(getFormErrorMessage("Invalid form"), "Invalid form");
+assert.equal(
+	getFormErrorMessage("Invalid form"),
+	"The request could not be completed. Please try again.",
+	"unstructured string errors never bypass the catalog",
+);
 assert.equal(
 	getFormErrorMessage(["Email is invalid", "Name is required"]),
-	"Email is invalid. Name is required",
-	"local validation messages remain available for field feedback",
+	"The request could not be completed. Please try again.",
+	"unstructured string arrays never bypass the catalog",
 );
 assert.equal(getFormErrorMessage(undefined), undefined);
 assert.equal(getFormErrorMessage(null), undefined);

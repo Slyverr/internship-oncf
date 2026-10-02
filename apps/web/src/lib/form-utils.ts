@@ -10,17 +10,6 @@ import {
 } from "@/i18n";
 import { sanitizeApiError } from "@/lib/safe-api-error";
 
-function getMessage(value: unknown): string | undefined {
-	if (typeof value === "string") return value;
-	if (Array.isArray(value)) {
-		const messages = value.filter(
-			(item): item is string => typeof item === "string",
-		);
-		return messages.length > 0 ? messages.join(". ") : undefined;
-	}
-	return undefined;
-}
-
 function getProperty(value: unknown, key: string): unknown {
 	if (typeof value !== "object" || value === null || !(key in value)) {
 		return undefined;
@@ -96,12 +85,6 @@ export function getFormErrorMessage(
 			responseCode,
 			typeof responseStatus === "number" ? responseStatus : undefined,
 			locale,
-		);
-	}
-	if (typeof safeError === "string" || Array.isArray(safeError)) {
-		return (
-			getMessage(safeError) ??
-			translate(Messages.apiError.requestFailed, {}, locale)
 		);
 	}
 	if (getProperty(safeError, "isAxiosError") === true) {
