@@ -281,3 +281,13 @@ The security follow-up for preventing administrator lockout is completed in Chap
 - Fresh dashboard captures at 390px, 768px, and 1440px showed the Admin's registration review, six-month activity, and permission-appropriate links without page overflow.
 - Full `bun run verify` passed: Biome, workspace typechecks, web checks, 69 API suites / 521 tests, and all builds. Isolated API E2E passed 2 suites / 27 tests with the configured real Node runtime; disposable containers were removed.
 - Product changes were committed locally as `d9c2469` and `bbd592e`; roadmap and verification-tooling updates were committed separately as `29953f2` and `ff12f4b`.
+
+## Chapter 25 — dashboard insights and navigation permission matrix — 2026-10-02
+
+- Added permission-scoped order breakdowns by customer and product to the Admin dashboard using the existing report response. The dashboard still does not grant Admin direct operational-list access. English UI labels and accessible chart descriptions use the shared message catalog; the French draft retains key/placeholder parity.
+- Captured and inspected the authenticated Admin dashboard at 1920×1080 and 390×844, plus normal phone viewport captures at the top, middle, and bottom. The page has no horizontal overflow; the fixed phone navigation remains attached to the viewport. Fresh evidence is in `/tmp/ecommand-admin-dashboard-1920x1080.png` and `/tmp/ecommand-admin-dashboard-phone-{top,middle,bottom}.png`.
+- Sidebar and centered navigation now share one permission-filtered route helper. Unit checks cover all three default permission bundles and a custom permission set. Expanded the browser role checks for visible and hidden routes across Admin, Agent, and Client; the CDP browser run exposed and fixed duplicate responsive navigation matches in the test selector.
+- Verification passed: full `bun run verify`, isolated API E2E (2 suites / 27 tests), all eight browser workflows, and focused web test/typecheck/Biome checks. The test hooks also passed during both commits.
+- Commits: `7283595 feat(web/dashboard): add customer and product insights`, `eeca067 refactor(web/navigation): centralize route permissions`.
+
+**Next:** continue the product closeout, not test-only work: review create/edit forms, settings/dialog states, role-specific empty/error states, and the permission matrix at route level. Record a defect only from inspected screenshots or a reproduced workflow, then fix and retake the affected evidence. Customer ICE ownership remains unresolved; French and production deployment remain deferred.
