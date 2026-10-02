@@ -1,6 +1,5 @@
 import { API_ERROR_CODES, Permission, RolePersona } from "@ecommand/shared";
-import { BadRequestException } from "@nestjs/common";
-import { rolePermissions, roles, userActivityLog } from "drizzle/schema";
+import { rolePermissions, roles } from "drizzle/schema";
 import type { DrizzleService } from "@/database/drizzle.service";
 import { RolesQuery } from "./roles.query";
 
