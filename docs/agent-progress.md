@@ -4,8 +4,8 @@ This is the milestone journal for finishing the ECommand MVP. Read it with [work
 
 ## Current position
 
-- **Completed chapters:** 1–19 — API and browser workflow coverage, permission/ownership enforcement, Admin reference-data and custom permission profiles, workflow identifiers/history, English i18n/API message contracts, and prior UX/print work; 20 — isolated API and browser workflow verification across all three user personas, plus report responsive review; 21 — coded workflow notifications persisted atomically, including claim-comment recipient-failure handling.
-- **Active chapter:** 22 — finish product gaps and improve workflow reliability, UI consistency, and maintainability. French rollout remains deferred. See [MVP readiness](project/readiness.md) for the ranked continuation plan.
+- **Completed chapters:** 1–23 — API/browser workflows, permission/ownership enforcement, Admin reference data and custom profiles, English i18n/API message contracts, UX/print work, notification transactions, and transactional user assignments.
+- **Active chapter:** 24 — finish role-aware product review and the highest-impact workflow/UI gaps. French rollout remains deferred. See [MVP readiness](project/readiness.md) for the ranked continuation plan.
 - **Current checkout:** `develop`; product changes are committed locally and have not been pushed. Do not rewrite published commits.
 - **Local app:** `bun run dev` is running at `http://localhost:3000`; web `/login` and API `http://localhost:8000/health` return HTTP 200. The ignored API `.env` points to the isolated `ecommand_preview` database. The pre-existing `ecommand` database was left untouched.
 
@@ -261,6 +261,17 @@ The security follow-up for preventing administrator lockout is completed in Chap
 - `bun run verify` passed after the query-test additions: Biome, all workspace typechecks, 69 API suites / 527 tests, web checks, and all builds.
 
 **Next:** continue the route-by-route visual and workflow audit, fixing only evidenced inconsistencies; return to French locale enablement after the higher-priority UI and workflow gaps are closed.
+
+## Chapter 24 — Admin dashboard and claims query coverage — 2026-10-02
+
+- Expanded the Admin dashboard with mutually exclusive user-account totals, an order-status chart fed by the existing report query, and shortcuts to access profiles and reference data. Each section is gated by its effective permission; no operational-record access was added to Admin.
+- Captured and visually inspected the authenticated Admin dashboard at 390, 768, 1440, and 1920px. The phone page scrolls normally, the management actions remain reachable above bottom navigation, and every capture reported no horizontal overflow. Current images are under `/tmp/ecommand-admin-dashboard-final`.
+- Extended `ClaimsQuery` tests across portfolio/list filters, code lookups, create/delete helpers, comment ordering, conditional status transitions, status history, and transactional notifications. Focused query coverage is 100% for statements, lines, and functions, with 92.59% branch coverage.
+- Removed two stale imports from the access-profile query spec after the full lint gate exposed them.
+- `bun run verify` passed: Biome checked 607 files, all workspace typechecks passed, 72 API suites / 600 tests passed, web checks passed, and all workspace builds completed. API aggregate coverage is 75.93% statements, 72.84% branches, 57.66% functions, and 76.06% lines.
+- Commits: `4e960e9 feat(web/dashboard): add admin account insights`, `9298542 test(api/claims): cover query transactions`.
+
+**Next:** complete the outstanding route/state/role visual audit, prioritizing create/edit forms, settings/dialog states, and permission-specific empty/error states; verify the documented authorization matrix against current effective permissions and E2E workflows. Then review route titles and the remaining customer ICE ownership question. French and production deployment remain out of scope for this chapter.
 
 ## Chapter 22 continuation — product consistency and verification — 2026-10-02
 
