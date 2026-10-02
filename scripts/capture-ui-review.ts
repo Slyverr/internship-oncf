@@ -50,6 +50,7 @@ const clickText = readOptions("--click-text");
 const clickAfterUrlSelectors = readOptions("--click-after-url");
 const clickTextAfterUrl = readOptions("--click-text-after-url");
 const fillFields = readAssignments("--fill");
+const fillAfterUrlFields = readAssignments("--fill-after-url");
 const waitSelector = readOption("--wait-for");
 const requestedWidths = readOption("--widths")?.split(",").map(Number);
 const viewports = requestedWidths
@@ -76,6 +77,7 @@ Usage: bun run ui:review -- [options]
   --click-text <text>    Click a visible control by exact text (repeatable)
   --click-after-url <selector> Click a control after --then-url navigation (repeatable)
   --click-text-after-url <text> Click a visible control by exact text after --then-url
+  --fill-after-url <selector=value> Fill a field after --then-url (repeatable)
   --wait-for <selector>  Wait for a UI element after the route and clicks
   --then-url <url>       Navigate to a route after form/click actions, before capture
   --expect-route <path>  Expected final route when a UI action changes the URL
@@ -432,6 +434,26 @@ try {
 			if (settleMs > 0) await Bun.sleep(settleMs);
 		}
 		if (thenUrl) await navigate(new URL(thenUrl, baseUrl).href);
+		for (const { selector, value } of runActions ? fillAfterUrlFields : []) {
+			const filled = await evaluate<boolean>(`(() => {
+				const target = document.querySelector(${JSON.stringify(selector)});
+				if (!(target instanceof HTMLInputElement) &&
+					!(target instanceof HTMLTextAreaElement) &&
+					!(target instanceof HTMLSelectElement)) return false;
+				const prototype = target instanceof HTMLInputElement
+					? HTMLInputElement.prototype
+					: target instanceof HTMLTextAreaElement
+						? HTMLTextAreaElement.prototype
+						: HTMLSelectElement.prototype;
+				const setter = Object.getOwnPropertyDescriptor(prototype, "value")?.set;
+				if (!setter) return false;
+				setter.call(target, ${JSON.stringify(value)});
+				target.dispatchEvent(new Event("input", { bubbles: true }));
+				target.dispatchEvent(new Event("change", { bubbles: true }));
+				return true;
+			})()`);
+			if (!filled) missingFillTargets.push(`after-url:${selector}`);
+		}
 		for (const selector of runActions ? clickAfterUrlSelectors : []) {
 			const clicked = await evaluate<boolean>(`(() => {
 				const target = document.querySelector(${JSON.stringify(selector)});
