@@ -13,8 +13,9 @@ export function translateNotificationMessage(
 ) {
 	const parameters = notification.messageParameters ?? {};
 	const recordCode = parameters.recordCode ?? "";
+	const messageCode = notification.messageCode as NotificationMessageCode;
 
-	switch (notification.messageCode) {
+	switch (messageCode) {
 		case NotificationMessageCode.ORDER_STATUS_CHANGED:
 			return {
 				title: translate(
@@ -81,7 +82,7 @@ export function translateNotificationMessage(
 					locale,
 				),
 			};
-		default:
+		case NotificationMessageCode.LEGACY_UPDATE:
 			return {
 				title: translate(
 					Messages.notifications.messages.legacyUpdate.title,
@@ -94,5 +95,23 @@ export function translateNotificationMessage(
 					locale,
 				),
 			};
+		default: {
+			// Known codes must all have a localized case above. Keep a runtime
+			// fallback for an API that has been updated ahead of this web client.
+			const unhandledCode: never = messageCode;
+			void unhandledCode;
+			return {
+				title: translate(
+					Messages.notifications.messages.legacyUpdate.title,
+					{},
+					locale,
+				),
+				body: translate(
+					Messages.notifications.messages.legacyUpdate.body,
+					{},
+					locale,
+				),
+			};
+		}
 	}
 }
