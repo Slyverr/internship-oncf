@@ -601,7 +601,7 @@ export function DashboardOverview() {
 		<section className="mx-auto grid w-full max-w-screen-2xl min-w-0 gap-6">
 			<PageHeader
 				title={t(Messages.dashboard.welcome, {
-					firstName: profile.firstName,
+					name: `${profile.firstName} ${profile.lastName}`,
 				})}
 				description={t(Messages.dashboard.description)}
 			>

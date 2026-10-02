@@ -180,11 +180,11 @@ assert.deepEqual(
 assert.equal(translate("common.actions.continue"), "Continue");
 
 function assertInterpolationTypeContract() {
-	translate(Messages.dashboard.welcome, { firstName: "Samira" });
+	translate(Messages.dashboard.welcome, { name: "Samira Admin" });
 	// @ts-expect-error Interpolated messages require every named value.
 	translate(Messages.dashboard.welcome);
 	// @ts-expect-error Values must use the placeholder names in the catalog.
-	translate(Messages.dashboard.welcome, { name: "Samira" });
+	translate(Messages.dashboard.welcome, { firstName: "Samira" });
 	translate(Messages.orders.pageTitle);
 }
 
@@ -241,8 +241,8 @@ assert.equal(
 	"This page is being built. Check back soon.",
 );
 assert.equal(
-	translate("dashboard.welcome", { firstName: "Safa" }),
-	"Welcome back, Safa",
+	translate("dashboard.welcome", { name: "Safa Admin" }),
+	"Welcome back, Safa Admin",
 );
 assert.equal(
 	translate("dashboard.registrations.pending", { count: 2 }),

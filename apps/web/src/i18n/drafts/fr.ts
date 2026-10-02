@@ -235,7 +235,7 @@ export const frDraft = {
 		pageTitle: "Tableau de bord",
 		metadataDescription:
 			"Activité récente des demandes de transport, des programmes et des réclamations.",
-		welcome: "Bon retour, {firstName}",
+		welcome: "Bon retour, {name}",
 		description: "Aperçu de l’activité récente dans votre espace de travail.",
 		quickActions: {
 			createOrder: "Créer une demande de transport",

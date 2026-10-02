@@ -228,7 +228,7 @@ export const en = {
 	dashboard: {
 		pageTitle: "Dashboard",
 		metadataDescription: "Recent order, program, and claim activity.",
-		welcome: "Welcome back, {firstName}",
+		welcome: "Welcome back, {name}",
 		description: "A snapshot of recent activity across your workspace.",
 		quickActions: {
 			createOrder: "Create order",
