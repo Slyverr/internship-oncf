@@ -236,7 +236,12 @@ function call(method: string, params: Record<string, unknown> = {}) {
 		}, 15_000);
 		pending.set(id, (message) => {
 			clearTimeout(timer);
-			if (message.error) rejectCall(new Error(message.error.message ?? method));
+			if (message.error)
+				rejectCall(
+					new Error(
+						`${method}: ${message.error.message ?? "Chrome DevTools command failed."}`,
+					),
+				);
 			else resolveCall(message);
 		});
 		socket.send(JSON.stringify({ id, method, params }));
