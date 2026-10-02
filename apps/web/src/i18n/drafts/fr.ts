@@ -293,7 +293,6 @@ export const frDraft = {
 				"Vue d’ensemble des accès et des états d’inscription des comptes.",
 			total: "Comptes au total",
 			active: "Actifs",
-			pending: "En attente de validation",
 			inactive: "Inactifs",
 			byAccessProfile: "Comptes par profil d’accès",
 			roleChartLabel: "Comptes par profil d’accès : {roles}",

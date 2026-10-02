@@ -239,78 +239,15 @@ function ReadyOrdersSection({
 	);
 }
 
-function PendingRegistrationsSection({
-	users,
-}: {
-	users: ReturnType<typeof getPendingClientRegistrations>;
-}) {
-	const t = useTranslate();
-	if (users.length === 0) return null;
-
-	return (
-		<Card size="sm">
-			<CardHeader>
-				<div className="flex min-w-0 flex-wrap items-start justify-between gap-control">
-					<div className="grid min-w-0 gap-compact">
-						<CardTitle>{t(Messages.dashboard.registrations.title)}</CardTitle>
-						<CardDescription>
-							{t(Messages.dashboard.registrations.description)}
-						</CardDescription>
-					</div>
-					<div className="flex shrink-0 items-center gap-control">
-						<Badge variant="outline" className="tabular-nums">
-							{t(Messages.dashboard.registrations.pending, {
-								count: users.length,
-							})}
-						</Badge>
-						<ActionLink
-							href="/dashboard/users?registrationStatus=PENDING&role=CLIENT_REPRESENTATIVE"
-							className="gap-compact"
-						>
-							{t(Messages.dashboard.registrations.viewAll)}
-							<ArrowRightIcon aria-hidden="true" className="size-4" />
-						</ActionLink>
-					</div>
-				</div>
-			</CardHeader>
-			<CardContent>
-				<ul className="grid gap-control">
-					{users.slice(0, 3).map((user) => (
-						<li key={user.id}>
-							<Link
-								href={`/dashboard/users/${user.id}`}
-								aria-label={t(Messages.dashboard.registrations.review, {
-									name: `${user.firstName} ${user.lastName}`,
-								})}
-								className="flex min-h-11 min-w-0 items-center justify-between gap-control rounded-md border px-control py-compact text-sm transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-							>
-								<span className="grid min-w-0 gap-compact">
-									<span className="truncate font-medium">
-										{user.firstName} {user.lastName}
-									</span>
-									<span className="truncate text-xs text-muted-foreground">
-										{user.email}
-									</span>
-								</span>
-								<span className="shrink-0 text-muted-foreground">
-									<ArrowRightIcon aria-hidden="true" className="size-4" />
-								</span>
-							</Link>
-						</li>
-					))}
-				</ul>
-			</CardContent>
-		</Card>
-	);
-}
-
 function UserAccountsSection({
 	users,
+	pendingUsers,
 	canReviewUsers,
 	isLoading,
 	isError,
 }: {
 	users: UserListDto[];
+	pendingUsers: ReturnType<typeof getPendingClientRegistrations>;
 	canReviewUsers: boolean;
 	isLoading: boolean;
 	isError: boolean;
@@ -331,9 +268,6 @@ function UserAccountsSection({
 	const metrics = [
 		{ label: Messages.dashboard.accounts.total, value: summary.total },
 		{ label: Messages.dashboard.accounts.active, value: summary.active },
-		...(canReviewUsers
-			? [{ label: Messages.dashboard.accounts.pending, value: summary.pending }]
-			: []),
 		{ label: Messages.dashboard.accounts.inactive, value: summary.inactive },
 	];
 	return (
@@ -362,14 +296,12 @@ function UserAccountsSection({
 						{t(Messages.dashboard.accounts.loadFailed)}
 					</p>
 				) : (
-					<div className="grid min-w-0 gap-6 @3xl/workspace:grid-cols-2">
-						<dl className="grid grid-cols-2 gap-y-4">
+					<div className="grid min-w-0 gap-6 @3xl/workspace:grid-cols-2 @6xl/workspace:grid-cols-3">
+						<dl className="grid grid-cols-3 gap-control">
 							{metrics.map(({ label, value }, index) => (
 								<div
 									key={label}
-									className={`grid content-center gap-compact border-border/70 ${
-										index % 2 === 1 ? "border-l px-control" : "border-l-0 px-0"
-									}`}
+									className={`grid content-center gap-compact border-border/70 ${index > 0 ? "border-l px-control" : "border-l-0 px-0"}`}
 								>
 									<dt className="text-meta text-muted-foreground">
 										{t(label)}
@@ -412,6 +344,64 @@ function UserAccountsSection({
 										</div>
 									))}
 								</div>
+							</section>
+						)}
+						{canReviewUsers && (
+							<section className="grid min-w-0 content-start gap-control border-t border-border/70 pt-4 @3xl/workspace:col-span-2 @3xl/workspace:border-t @6xl/workspace:col-span-1 @6xl/workspace:border-l @6xl/workspace:border-t-0 @6xl/workspace:pl-6 @6xl/workspace:pt-0">
+								<div className="grid min-w-0 gap-control @6xl/workspace:flex @6xl/workspace:items-center @6xl/workspace:justify-between">
+									<h3 className="text-sm font-medium">
+										{t(Messages.dashboard.registrations.title)}
+									</h3>
+									<div className="flex shrink-0 items-center gap-compact">
+										<Badge variant="outline" className="tabular-nums">
+											{t(Messages.dashboard.registrations.pending, {
+												count: pendingUsers.length,
+											})}
+										</Badge>
+										<ActionLink
+											href="/dashboard/users?registrationStatus=PENDING&role=CLIENT_REPRESENTATIVE"
+											className="min-h-11 shrink-0 gap-compact"
+										>
+											{t(Messages.dashboard.registrations.viewAll)}
+											<ArrowRightIcon aria-hidden="true" className="size-4" />
+										</ActionLink>
+									</div>
+								</div>
+								{pendingUsers.length > 0 ? (
+									<ul className="grid gap-control">
+										{pendingUsers.slice(0, 3).map((user) => (
+											<li key={user.id}>
+												<Link
+													href={`/dashboard/users/${user.id}`}
+													aria-label={t(
+														Messages.dashboard.registrations.review,
+														{
+															name: `${user.firstName} ${user.lastName}`,
+														},
+													)}
+													className="flex min-h-11 min-w-0 items-center justify-between gap-control rounded-md border px-control py-compact text-sm transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+												>
+													<span className="grid min-w-0 gap-compact">
+														<span className="truncate font-medium">
+															{user.firstName} {user.lastName}
+														</span>
+														<span className="truncate text-xs text-muted-foreground">
+															{user.email}
+														</span>
+													</span>
+													<ArrowRightIcon
+														aria-hidden="true"
+														className="size-4 shrink-0 text-muted-foreground"
+													/>
+												</Link>
+											</li>
+										))}
+									</ul>
+								) : (
+									<p className="text-sm text-muted-foreground">
+										{t(Messages.dashboard.registrations.description)}
+									</p>
+								)}
 							</section>
 						)}
 					</div>
@@ -890,25 +880,37 @@ export function DashboardOverview() {
 				))}
 			</PageHeader>
 
-			<PendingRegistrationsSection users={pendingRegistrations} />
 			{canReadUsers && (
-				<section className="grid min-w-0 gap-6 @4xl/workspace:grid-cols-2">
-					<UserAccountsSection
-						users={usersQuery.data ?? []}
-						canReviewUsers={canReviewUsers}
-						isLoading={usersQuery.isLoading}
-						isError={usersQuery.isError}
-					/>
-					{!usersQuery.isLoading && !usersQuery.isError && (
+				<UserAccountsSection
+					users={usersQuery.data ?? []}
+					pendingUsers={pendingRegistrations}
+					canReviewUsers={canReviewUsers}
+					isLoading={usersQuery.isLoading}
+					isError={usersQuery.isError}
+				/>
+			)}
+
+			{(canReadUsers || canReadReports) && (
+				<section
+					aria-label={t(Messages.dashboard.insightsLabel)}
+					className={`grid min-w-0 gap-6 ${canReadUsers && canReadReports ? "@6xl/workspace:grid-cols-2" : "grid-cols-1"}`}
+				>
+					{canReadUsers && !usersQuery.isLoading && !usersQuery.isError && (
 						<UserRegistrationActivitySection users={usersQuery.data ?? []} />
+					)}
+					{canReadReports && canReadUsers && (
+						<OrderOverviewSection
+							report={orderReport}
+							from={activityPeriod.from}
+						/>
 					)}
 				</section>
 			)}
 
-			{(showReadyOrdersCard || canReadReports) && (
+			{(showReadyOrdersCard || (canReadReports && !canReadUsers)) && (
 				<section
 					aria-label={t(Messages.dashboard.insightsLabel)}
-					className="grid min-w-0 gap-6"
+					className={`grid min-w-0 gap-6 ${showReadyOrdersCard && canReadReports ? "@4xl/workspace:grid-cols-2" : "grid-cols-1"}`}
 				>
 					{showReadyOrdersCard && (
 						<ReadyOrdersSection
@@ -918,7 +920,7 @@ export function DashboardOverview() {
 							onRetry={() => void readyOrdersQuery.refetch()}
 						/>
 					)}
-					{canReadReports && (
+					{canReadReports && !canReadUsers && (
 						<OrderOverviewSection
 							report={orderReport}
 							from={activityPeriod.from}
@@ -942,7 +944,7 @@ export function DashboardOverview() {
 						</p>
 					)}
 				</>
-			) : (
+			) : canReadUsers || canReadReports || showReadyOrders ? null : (
 				<Card>
 					<CardContent className="flex flex-col items-start justify-between gap-4 py-control sm:flex-row sm:items-center">
 						<div className="flex min-w-0 items-start gap-control">
