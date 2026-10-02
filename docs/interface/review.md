@@ -228,3 +228,10 @@ The checked-in capture utility makes responsive screenshots repeatable, but it d
 - The Agent sees Create order, Create claim, eligible-order-to-program actions, scoped order activity, and recent orders/programs/claims. The available actions match the Agent workflow. At 390px, a second capture at scroll end confirmed the activity chart and recent orders are fully reachable above the fixed bottom navigation; the horizontal recent-activity hint is visible.
 - The shared content cap remains consistent at ultrawide widths. No layout or action visibility defect was found in this dashboard state. This pass used light theme and populated preview data; empty-data and dark-theme states remain open for the full visual matrix.
 - Screenshots are available in `/tmp/ecommand-agent-dashboard-review/` as `agent-dashboard-review-*` and `agent-dashboard-phone-scroll-end-390x844.png`.
+
+## Client dashboard review — 2026-10-02
+
+- Captured the dashboard at 390×844, 768×1024, 1024×768, 1440×900, 2560×1440, and 3840×2160. The browser displayed `Representative Client`; all captures reported no horizontal viewport overflow. Each screenshot was inspected.
+- The Client sees Create order, Create claim, customer-scoped order activity, and recent orders/programs/claims. No Agent-only eligible-program action or Admin management control is shown. On phone, a scroll-end capture confirmed the chart and recent orders remain fully visible above the fixed bottom navigation; the horizontal recent-activity hint is unobstructed.
+- The shared content cap remains consistent at ultrawide widths. No layout or action visibility defect was found in this dashboard state. This pass used light theme and populated preview data; empty-data and dark-theme states remain open for the full visual matrix.
+- Screenshots are available in `/tmp/ecommand-client-dashboard-review/` as `client-dashboard-review-*` and `client-dashboard-phone-scroll-end-390x844.png`.
