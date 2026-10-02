@@ -258,4 +258,4 @@ The security follow-up for preventing administrator lockout is completed in Chap
 - Updated the screenshot helper's text action to include accessible listbox options, allowing browser checks to select theme options and similar controls.
 - Fresh dashboard captures at 390px, 768px, and 1440px showed the Admin's registration review, six-month activity, and permission-appropriate links without page overflow.
 - Full `bun run verify` passed: Biome, workspace typechecks, web checks, 69 API suites / 521 tests, and all builds. Isolated API E2E passed 2 suites / 27 tests with the configured real Node runtime; disposable containers were removed.
-- Product changes were committed locally as `d9c2469` and `bbd592e`; screenshot/tooling and documentation changes are being committed separately after review.
+- Product changes were committed locally as `d9c2469` and `bbd592e`; roadmap and verification-tooling updates were committed separately as `29953f2` and `ff12f4b`.
