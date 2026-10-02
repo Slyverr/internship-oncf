@@ -86,6 +86,94 @@ function getCopyText(node: ts.Expression): string | undefined {
 	return undefined;
 }
 
+function getConditionalRenderCopy(node: ts.Expression): string[] {
+	if (ts.isParenthesizedExpression(node)) {
+		return getConditionalRenderCopy(node.expression);
+	}
+	if (ts.isConditionalExpression(node)) {
+		return [node.whenTrue, node.whenFalse].flatMap(getConditionalRenderCopy);
+	}
+	if (
+		ts.isBinaryExpression(node) &&
+		(node.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken ||
+			node.operatorToken.kind === ts.SyntaxKind.BarBarToken ||
+			node.operatorToken.kind === ts.SyntaxKind.QuestionQuestionToken)
+	) {
+		return getConditionalRenderCopy(node.right);
+	}
+	const copy = getCopyText(node);
+	return copy === undefined ? [] : [copy];
+}
+
+function isUserFacingMessageCall(node: ts.CallExpression) {
+	const target = node.expression;
+	if (ts.isIdentifier(target)) {
+		return /^(?:alert|confirm|prompt|notify|showToast|addToast|setError|setSuccess|setNotice|setMessage|setToast|setFeedback)$/i.test(
+			target.text,
+		);
+	}
+	if (!ts.isPropertyAccessExpression(target)) {
+		return false;
+	}
+	const receiver = target.expression;
+	const method = target.name.text;
+	return (
+		((ts.isIdentifier(receiver) && receiver.text === "toast") ||
+			(ts.isIdentifier(receiver) && receiver.text === "window")) &&
+		[
+			"success",
+			"error",
+			"warning",
+			"info",
+			"alert",
+			"confirm",
+			"prompt",
+		].includes(method)
+	);
+}
+
+function getRawCopyArguments(node: ts.Expression): string[] {
+	const copy = getCopyText(node);
+	if (copy !== undefined) {
+		return [copy];
+	}
+	const copies: string[] = [];
+	ts.forEachChild(node, (child) => {
+		if (ts.isExpression(child)) copies.push(...getRawCopyArguments(child));
+	});
+	return copies;
+}
+
+function getUserFacingCallCopy(node: ts.Node): string[] {
+	if (!ts.isCallExpression(node) || !isUserFacingMessageCall(node)) {
+		return [];
+	}
+	const firstArgument = node.arguments[0];
+	return firstArgument ? getRawCopyArguments(firstArgument) : [];
+}
+
+const helperCallFixture = ts.createSourceFile(
+	"helper-call-copy.ts",
+	`toast.success("Saved");
+setError(isOffline ? "Check the connection" : "Try again");
+setMessage(customer.name);
+setError(translate(Messages.common.saved));
+logger.error("developer diagnostic");`,
+	ts.ScriptTarget.Latest,
+	true,
+);
+const helperCallCopies: string[] = [];
+function findHelperCallCopies(node: ts.Node) {
+	helperCallCopies.push(...getUserFacingCallCopy(node));
+	ts.forEachChild(node, findHelperCallCopies);
+}
+findHelperCallCopies(helperCallFixture);
+assert.deepEqual(helperCallCopies, [
+	"Saved",
+	"Check the connection",
+	"Try again",
+]);
+
 const interpolatedCopyFixture = ts.createSourceFile(
 	"interpolated-copy.ts",
 	"const ariaLabel = `Open ${" + "recordCode}`;",
@@ -98,6 +186,33 @@ const fixtureInitializer =
 	fixtureStatement.declarationList.declarations[0]?.initializer;
 assert.ok(fixtureInitializer && ts.isTemplateExpression(fixtureInitializer));
 assert.equal(getCopyText(fixtureInitializer), "Open");
+
+const conditionalJsxFixture = ts.createSourceFile(
+	"conditional-jsx-copy.tsx",
+	'function Example({ active, label }) { return <><span>{active ? "Enabled" : "Disabled"}</span><span>{label ?? "Missing label"}</span><span>{active && "Ready"}</span></>; }',
+	ts.ScriptTarget.Latest,
+	true,
+	ts.ScriptKind.TSX,
+);
+const conditionalJsxCopies: string[] = [];
+function findConditionalJsxCopies(node: ts.Node) {
+	if (
+		ts.isJsxExpression(node) &&
+		node.expression &&
+		node.parent &&
+		(ts.isJsxElement(node.parent) || ts.isJsxFragment(node.parent))
+	) {
+		conditionalJsxCopies.push(...getConditionalRenderCopy(node.expression));
+	}
+	ts.forEachChild(node, findConditionalJsxCopies);
+}
+findConditionalJsxCopies(conditionalJsxFixture);
+assert.deepEqual(conditionalJsxCopies, [
+	"Enabled",
+	"Disabled",
+	"Missing label",
+	"Ready",
+]);
 
 collectFiles(sourceRoot);
 const violations: string[] = [];
@@ -139,6 +254,78 @@ const userFacingProperties = new Set([
 const copyVariableName =
 	/(?:title|description|label|placeholder|helperText|tooltip|emptyMessage|errorMessage|successMessage|ariaLabel|ariaDescription|message|copy|hint|notice|prompt|text)$/i;
 
+const localeSensitiveFormatters = new Set([
+	"formatDisplayDate",
+	"formatMediumDate",
+	"formatDisplayDateTime",
+	"formatMessageTime",
+	"formatFullMessageTime",
+	"formatMonthDay",
+	"formatMonthLabel",
+	"formatMonthYear",
+	"formatRelativeTime",
+	"formatFileSize",
+	"formatNumber",
+	"formatUserRole",
+	"formatUserType",
+	"formatRegistrationStatus",
+	"getClaimTypeLabel",
+	"getClaimPriorityLabel",
+	"getClaimStatusLabel",
+	"getOrderStatusLabel",
+	"getProgramStatusLabel",
+]);
+
+function getCopyNamedBindingDefault(
+	node: ts.Node,
+): { name: string; text: string } | undefined {
+	if (
+		!ts.isBindingElement(node) ||
+		!ts.isIdentifier(node.name) ||
+		!copyVariableName.test(node.name.text) ||
+		!node.initializer
+	) {
+		return undefined;
+	}
+	const text =
+		getCopyText(node.initializer) ??
+		getConditionalRenderCopy(node.initializer).find((copy) =>
+			/[A-Za-z]{2}/.test(copy),
+		);
+	return text ? { name: node.name.text, text } : undefined;
+}
+
+const parameterDefaultFixture = ts.createSourceFile(
+	"parameter-default-copy.ts",
+	'function render({ title = "Open record", description = show ? "Edit record" : "Create record" }) {}',
+	ts.ScriptTarget.Latest,
+	true,
+);
+let parameterDefaultFixtureCopy: ReturnType<typeof getCopyNamedBindingDefault>;
+function findParameterDefaultCopy(node: ts.Node) {
+	parameterDefaultFixtureCopy ??= getCopyNamedBindingDefault(node);
+	ts.forEachChild(node, findParameterDefaultCopy);
+}
+findParameterDefaultCopy(parameterDefaultFixture);
+assert.deepEqual(parameterDefaultFixtureCopy, {
+	name: "title",
+	text: "Open record",
+});
+let conditionalParameterDefaultFixtureCopy:
+	| ReturnType<typeof getCopyNamedBindingDefault>
+	| undefined;
+function findConditionalParameterDefaultCopy(node: ts.Node) {
+	const copy = getCopyNamedBindingDefault(node);
+	if (copy?.name === "description")
+		conditionalParameterDefaultFixtureCopy = copy;
+	ts.forEachChild(node, findConditionalParameterDefaultCopy);
+}
+findConditionalParameterDefaultCopy(parameterDefaultFixture);
+assert.deepEqual(conditionalParameterDefaultFixtureCopy, {
+	name: "description",
+	text: "Edit record",
+});
+
 for (const file of files) {
 	const source = readFileSync(file, "utf8");
 	const sourceFile = ts.createSourceFile(
@@ -149,6 +336,43 @@ for (const file of files) {
 		file.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
 	);
 	function visit(node: ts.Node) {
+		if (
+			file.includes("/components/") &&
+			ts.isCallExpression(node) &&
+			ts.isIdentifier(node.expression)
+		) {
+			const functionName = node.expression.text;
+			const hasExplicitLocale = node.arguments.some(
+				(argument) => ts.isIdentifier(argument) && argument.text === "locale",
+			);
+			if (functionName === "translate" && node.arguments.length < 3) {
+				const line =
+					sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile))
+						.line + 1;
+				violations.push(
+					`${file}:${line}: component translations must use the active locale translator or pass an explicit locale`,
+				);
+			}
+			if (localeSensitiveFormatters.has(functionName) && !hasExplicitLocale) {
+				const line =
+					sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile))
+						.line + 1;
+				violations.push(
+					`${file}:${line}: ${functionName} must receive the active locale`,
+				);
+			}
+		}
+		const helperCallCopy = getUserFacingCallCopy(node).find((copy) =>
+			/[A-Za-z]{2}/.test(copy),
+		);
+		if (helperCallCopy) {
+			const line =
+				sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile))
+					.line + 1;
+			violations.push(
+				`${file}:${line}: user-facing helper copy must use the message catalog: ${JSON.stringify(helperCallCopy)}`,
+			);
+		}
 		const isVisibleText =
 			ts.isJsxText(node) ||
 			((ts.isStringLiteral(node) ||
@@ -176,6 +400,23 @@ for (const file of files) {
 			);
 		}
 		if (
+			ts.isJsxExpression(node) &&
+			node.expression &&
+			node.parent &&
+			(ts.isJsxElement(node.parent) || ts.isJsxFragment(node.parent))
+		) {
+			for (const copy of getConditionalRenderCopy(node.expression).filter(
+				(value) => /[A-Za-z]{2}/.test(value),
+			)) {
+				const line =
+					sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile))
+						.line + 1;
+				violations.push(
+					`${file}:${line}: conditional JSX copy must use the message catalog: ${JSON.stringify(copy)}`,
+				);
+			}
+		}
+		if (
 			ts.isJsxAttribute(node) &&
 			userFacingAttributes.has(node.name.getText(sourceFile)) &&
 			node.initializer
@@ -183,12 +424,17 @@ for (const file of files) {
 			const expression = ts.isJsxExpression(node.initializer)
 				? node.initializer.expression
 				: undefined;
-			const value = ts.isStringLiteral(node.initializer)
-				? node.initializer.text
-				: expression
-					? getCopyText(expression)
-					: undefined;
-			if (value && /[A-Za-z]{2}/.test(value)) {
+			const values = [
+				ts.isStringLiteral(node.initializer)
+					? node.initializer.text
+					: expression
+						? getCopyText(expression)
+						: undefined,
+				...(expression ? getConditionalRenderCopy(expression) : []),
+			].filter((value): value is string => Boolean(value));
+			for (const value of values.filter((candidate) =>
+				/[A-Za-z]{2}/.test(candidate),
+			)) {
 				const line =
 					sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile))
 						.line + 1;
@@ -197,40 +443,58 @@ for (const file of files) {
 				);
 			}
 		}
-		const propertyCopy = ts.isPropertyAssignment(node)
-			? getCopyText(node.initializer)
-			: undefined;
+		const propertyCopies = ts.isPropertyAssignment(node)
+			? [
+					getCopyText(node.initializer),
+					...getConditionalRenderCopy(node.initializer),
+				].filter((value): value is string => Boolean(value))
+			: [];
 		if (
 			ts.isPropertyAssignment(node) &&
 			userFacingProperties.has(
 				node.name.getText(sourceFile).replaceAll('"', ""),
-			) &&
-			propertyCopy &&
-			/[A-Za-z]{2}/.test(propertyCopy)
+			)
 		) {
-			const line =
-				sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile))
-					.line + 1;
-			violations.push(
-				`${file}:${line}: ${node.name.getText(sourceFile)} copy must use the message catalog: ${JSON.stringify(propertyCopy)}`,
-			);
+			for (const propertyCopy of propertyCopies.filter((value) =>
+				/[A-Za-z]{2}/.test(value),
+			)) {
+				const line =
+					sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile))
+						.line + 1;
+				violations.push(
+					`${file}:${line}: ${node.name.getText(sourceFile)} copy must use the message catalog: ${JSON.stringify(propertyCopy)}`,
+				);
+			}
 		}
-		const variableCopy = ts.isVariableDeclaration(node)
-			? node.initializer
-				? getCopyText(node.initializer)
-				: undefined
-			: undefined;
+		const variableCopies =
+			ts.isVariableDeclaration(node) && node.initializer
+				? [
+						getCopyText(node.initializer),
+						...getConditionalRenderCopy(node.initializer),
+					].filter((value): value is string => Boolean(value))
+				: [];
+		const parameterDefaultCopy = getCopyNamedBindingDefault(node);
 		if (
 			ts.isVariableDeclaration(node) &&
-			copyVariableName.test(node.name.getText(sourceFile)) &&
-			variableCopy &&
-			/[A-Za-z]{2}/.test(variableCopy)
+			copyVariableName.test(node.name.getText(sourceFile))
 		) {
+			for (const variableCopy of variableCopies.filter((value) =>
+				/[A-Za-z]{2}/.test(value),
+			)) {
+				const line =
+					sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile))
+						.line + 1;
+				violations.push(
+					`${file}:${line}: ${node.name.getText(sourceFile)} copy must use the message catalog: ${JSON.stringify(variableCopy)}`,
+				);
+			}
+		}
+		if (parameterDefaultCopy && /[A-Za-z]{2}/.test(parameterDefaultCopy.text)) {
 			const line =
 				sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile))
 					.line + 1;
 			violations.push(
-				`${file}:${line}: ${node.name.getText(sourceFile)} copy must use the message catalog: ${JSON.stringify(variableCopy)}`,
+				`${file}:${line}: ${parameterDefaultCopy.name} default copy must use the message catalog: ${JSON.stringify(parameterDefaultCopy.text)}`,
 			);
 		}
 		ts.forEachChild(node, visit);
