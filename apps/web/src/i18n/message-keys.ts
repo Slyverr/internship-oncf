@@ -750,6 +750,7 @@ export const Messages = {
 			metadata: "customers.detail.metadata",
 			createdDate: "customers.detail.createdDate",
 			lastUpdated: "customers.detail.lastUpdated",
+			signupVerificationNeeds: "customers.detail.signupVerificationNeeds",
 			edit: "customers.detail.edit",
 			moreActions: "customers.detail.moreActions",
 			deactivate: "customers.detail.deactivate",

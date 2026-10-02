@@ -1,7 +1,13 @@
 "use client";
 
 import { RecordDetail, RecordMetric } from "@/components/common/record-summary";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import { Messages } from "@/i18n";
 import { useLocale, useTranslate } from "@/i18n/locale-provider";
 import type { CustomerDetailDto } from "@/lib/api/generated.schemas";
@@ -15,11 +21,22 @@ export function CustomerOverview({
 }) {
 	const t = useTranslate();
 	const locale = useLocale();
+	const missingSignupFields = [
+		!customer.customerCode && t(Messages.customers.detail.customerCode),
+		!customer.ice && t(Messages.customers.form.ice),
+	].filter(Boolean);
 	return (
 		<div className="grid gap-4 @3xl/workspace:grid-cols-2">
 			<Card>
 				<CardHeader>
 					<CardTitle>{t(Messages.customers.detail.companyDetails)}</CardTitle>
+					{missingSignupFields.length > 0 && (
+						<CardDescription>
+							{t(Messages.customers.detail.signupVerificationNeeds, {
+								fields: missingSignupFields.join(", "),
+							})}
+						</CardDescription>
+					)}
 				</CardHeader>
 				<CardContent className="space-y-4">
 					<RecordDetail

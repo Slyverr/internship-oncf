@@ -772,6 +772,8 @@ export const en = {
 			metadata: "Metadata",
 			createdDate: "Created date",
 			lastUpdated: "Last updated",
+			signupVerificationNeeds:
+				"Add {fields} to allow client signup verification.",
 			edit: "Edit customer",
 			moreActions: "More actions",
 			deactivate: "Deactivate customer",

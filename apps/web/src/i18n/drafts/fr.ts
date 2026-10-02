@@ -796,6 +796,8 @@ export const frDraft = {
 			metadata: "Métadonnées",
 			createdDate: "Date de création",
 			lastUpdated: "Dernière mise à jour",
+			signupVerificationNeeds:
+				"Ajoutez {fields} pour permettre la vérification des inscriptions client.",
 			edit: "Modifier le client",
 			moreActions: "Autres actions",
 			deactivate: "Désactiver le client",
