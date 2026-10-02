@@ -244,12 +244,20 @@ export async function verifyAdminRegistrationReview(page: Page) {
 			exact: true,
 		}),
 	).toBeVisible();
+	const reviewResponse = page.waitForResponse(
+		(response) =>
+			response.request().method() === "PUT" &&
+			/\/api\/proxy\/users\/\d+\/registration-status$/.test(
+				new URL(response.url()).pathname,
+			),
+	);
 	await page
 		.getByRole("button", {
 			name: translate(Messages.users.actions.approve),
 			exact: true,
 		})
 		.click();
+	expect((await reviewResponse).status()).toBe(200);
 	const usersResponse = await page.request.get(
 		new URL("/api/proxy/users", page.url()).href,
 	);
