@@ -18,6 +18,7 @@ import "./claim-labels.test";
 import "./customer-form-schema.test";
 import "./customer-type-label.test";
 import "./date-utils.test";
+import "./dashboard-insights.test";
 import "./program-creation-selection.test";
 import "./safe-api-error.test";
 import "./status-labels.test";

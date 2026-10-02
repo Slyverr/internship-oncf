@@ -43,9 +43,11 @@ import {
 } from "@/lib/api/orders";
 import { useProgramsControllerFindAll } from "@/lib/api/programs";
 import { useUsersControllerFindAll } from "@/lib/api/users";
+import { getDashboardRoleCounts } from "@/lib/dashboard-insights";
 import { formatMediumDate, formatMonthLabel } from "@/lib/date-utils";
 import type { OrderReport, ReportCount } from "@/lib/reports";
 import { getOrderReport } from "@/lib/reports";
+import { formatUserRole } from "@/lib/user-labels";
 import { useAuth } from "@/providers/auth-provider";
 
 interface DashboardItem {
@@ -311,7 +313,18 @@ function UserAccountsSection({
 	isError: boolean;
 }) {
 	const t = useTranslate();
+	const locale = useLocale();
 	const summary = getUserAccountOverview(users);
+	const roleCounts = getDashboardRoleCounts(users);
+	const maxRoleCount = Math.max(1, ...roleCounts.map(({ count }) => count));
+	const roleChartLabel = roleCounts
+		.map(({ name, count }) =>
+			t(Messages.dashboard.accounts.roleCount, {
+				role: formatUserRole(name, locale),
+				count,
+			}),
+		)
+		.join(", ");
 	const metrics = [
 		{ label: Messages.dashboard.accounts.total, value: summary.total },
 		{ label: Messages.dashboard.accounts.active, value: summary.active },
@@ -320,11 +333,6 @@ function UserAccountsSection({
 			: []),
 		{ label: Messages.dashboard.accounts.inactive, value: summary.inactive },
 	];
-	const columns =
-		metrics.length === 4
-			? "@2xl/workspace:grid-cols-4"
-			: "@2xl/workspace:grid-cols-3";
-
 	return (
 		<Card size="sm">
 			<CardHeader>
@@ -351,23 +359,59 @@ function UserAccountsSection({
 						{t(Messages.dashboard.accounts.loadFailed)}
 					</p>
 				) : (
-					<dl className={`grid grid-cols-2 gap-y-4 ${columns}`}>
-						{metrics.map(({ label, value }, index) => (
-							<div
-								key={label}
-								className={`grid content-center gap-compact border-border/70 ${
-									index % 2 === 1 ? "border-l px-control" : "border-l-0 px-0"
-								} ${
-									index === 0
-										? "@2xl/workspace:border-l-0 @2xl/workspace:px-0"
-										: "@2xl/workspace:border-l @2xl/workspace:px-control"
-								}`}
-							>
-								<dt className="text-meta text-muted-foreground">{t(label)}</dt>
-								<dd className="text-2xl font-semibold tabular-nums">{value}</dd>
-							</div>
-						))}
-					</dl>
+					<div className="grid min-w-0 gap-6 @3xl/workspace:grid-cols-2">
+						<dl className="grid grid-cols-2 gap-y-4">
+							{metrics.map(({ label, value }, index) => (
+								<div
+									key={label}
+									className={`grid content-center gap-compact border-border/70 ${
+										index % 2 === 1 ? "border-l px-control" : "border-l-0 px-0"
+									}`}
+								>
+									<dt className="text-meta text-muted-foreground">
+										{t(label)}
+									</dt>
+									<dd className="text-2xl font-semibold tabular-nums">
+										{value}
+									</dd>
+								</div>
+							))}
+						</dl>
+						{roleCounts.length > 0 && (
+							<section className="grid min-w-0 content-start gap-control border-t border-border/70 pt-4 @3xl/workspace:border-l @3xl/workspace:border-t-0 @3xl/workspace:pl-6 @3xl/workspace:pt-0">
+								<h3 className="text-sm font-medium">
+									{t(Messages.dashboard.accounts.byAccessProfile)}
+								</h3>
+								<div
+									role="img"
+									aria-label={t(Messages.dashboard.accounts.roleChartLabel, {
+										roles: roleChartLabel,
+									})}
+									className="grid gap-control"
+								>
+									{roleCounts.map(({ name, count }) => (
+										<div key={name} className="grid gap-compact">
+											<div className="flex min-w-0 items-center justify-between gap-control text-sm">
+												<span className="truncate">
+													{formatUserRole(name, locale)}
+												</span>
+												<span className="shrink-0 tabular-nums text-muted-foreground">
+													{count}
+												</span>
+											</div>
+											<div className="h-2 overflow-hidden rounded-full bg-muted">
+												<div
+													aria-hidden="true"
+													className="h-full rounded-full bg-primary/75"
+													style={{ width: `${(count / maxRoleCount) * 100}%` }}
+												/>
+											</div>
+										</div>
+									))}
+								</div>
+							</section>
+						)}
+					</div>
 				)}
 			</CardContent>
 		</Card>
