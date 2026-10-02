@@ -214,3 +214,10 @@ The checked-in capture utility makes responsive screenshots repeatable, but it d
 - The detail exposed the conversation entry point. No claim lifecycle controls were offered for the sample's `NEW` status. In source, lifecycle controls require their matching `claims:action:*` permission and valid status; API routes independently require the same permission. Edit/delete controls are also permission-gated.
 - At 320px, the table is below the initial fold and scrolls horizontally within its own region; the viewport itself does not overflow. At larger widths the table uses the available width within the shared workspace content cap. No claim or conversation state was changed during this review.
 - Screenshots are available in `/tmp/ecommand-client-claim-review/` as `client-claims-list-current-*` and `client-claim-detail-readonly-*`. This pass checked the current light theme; it did not retest claim creation, conversation sending, or other roles.
+
+## Admin dashboard review — 2026-10-02
+
+- Captured the dashboard as `System Admin` at 390×844, 768×1024, 1024×768, 1440×900, 2560×1440, and 3840×2160. The capture reported no horizontal viewport overflow. The 390px and 1440px images were inspected; tablet and ultrawide captures were also inspected.
+- The admin sees account totals, access-profile distribution, pending registration review, and report-backed activity charts. Admin navigation remains limited to its management/report permissions; operational Create order and Create claim actions are absent. On phone, the account overview and pending request fit the first screen; activity charts begin at tablet width.
+- The content cap and centered alignment remain consistent with the interface system at ultrawide widths. No UI change was warranted by this pass. It used light theme and current preview data; dark-theme and empty-data dashboard states remain open for the full visual matrix.
+- Screenshots are available in `/tmp/ecommand-admin-dashboard-review/` as `admin-dashboard-review-*`. The login switch was confirmed by the rendered `System Admin` identity before accepting the captures.
