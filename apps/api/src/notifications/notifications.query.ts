@@ -26,8 +26,6 @@ const notificationListColumns = {
 	recipientUserId: true,
 	typeId: true,
 	channelId: true,
-	title: true,
-	message: true,
 	messageCode: true,
 	messageParameters: true,
 	status: true,

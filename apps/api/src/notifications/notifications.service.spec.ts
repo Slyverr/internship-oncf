@@ -92,7 +92,7 @@ describe("in-app notification delivery", () => {
 		});
 	});
 
-	it("does not expose legacy English notification text in the API response", async () => {
+	it("uses the generic code for legacy notifications without parsing English prose", async () => {
 		const query = {
 			findRelatedRecordCodes: jest.fn().mockResolvedValue([]),
 			findNotification: jest.fn().mockResolvedValue({
@@ -110,8 +110,8 @@ describe("in-app notification delivery", () => {
 		);
 		const result = await service.findOne(3 as never);
 		expect(result).toMatchObject({
-			messageCode: NotificationMessageCode.CLAIM_COMMENT_ADDED,
-			messageParameters: { recordCode: "CLM-0123456789" },
+			messageCode: NotificationMessageCode.LEGACY_UPDATE,
+			messageParameters: {},
 		});
 		expect(result).not.toHaveProperty("title");
 		expect(result).not.toHaveProperty("message");

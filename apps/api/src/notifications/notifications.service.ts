@@ -98,7 +98,7 @@ export class NotificationsService {
 	private async toPresentations<
 		NotificationRecord extends {
 			title?: string | null;
-			message: string | null;
+			message?: string | null;
 			messageCode: NotificationMessageCode | null;
 			messageParameters: Record<string, string> | null;
 			errorMessage?: string | null;
@@ -144,7 +144,7 @@ export class NotificationsService {
 	private toPresentation<
 		NotificationRecord extends {
 			title?: string | null;
-			message: string | null;
+			message?: string | null;
 			messageCode: NotificationMessageCode | null;
 			messageParameters: Record<string, string> | null;
 			errorMessage?: string | null;
@@ -164,29 +164,17 @@ export class NotificationsService {
 			.errorMessage;
 		const {
 			title: _title,
-			message,
+			message: _message,
 			messageCode,
 			messageParameters,
 			...details
 		} = publicNotification;
-		const legacyComment = message?.match(
-			/^A new comment was added to claim (.+?)\.?$/,
-		);
-		const parameters =
-			messageParameters && Object.keys(messageParameters).length > 0
-				? messageParameters
-				: legacyComment
-					? { recordCode: legacyComment[1] }
-					: {};
+		const parameters = { ...(messageParameters ?? {}) };
 		if (canonicalRecordCode) parameters.recordCode = canonicalRecordCode;
 
 		return {
 			...details,
-			messageCode:
-				messageCode ??
-				(legacyComment
-					? NotificationMessageCode.CLAIM_COMMENT_ADDED
-					: NotificationMessageCode.LEGACY_UPDATE),
+			messageCode: messageCode ?? NotificationMessageCode.LEGACY_UPDATE,
 			messageParameters: parameters,
 		} as Omit<
 			NotificationRecord,
