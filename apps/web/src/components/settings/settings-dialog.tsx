@@ -156,7 +156,7 @@ export function SettingsDialog({
 			}}
 		>
 			<DialogContent size="settings" className="gap-0 overflow-hidden p-0">
-				<DialogHeader className="h-14 flex-row border-b px-4 py-0 pb-0">
+				<DialogHeader className="h-14 flex-row items-center border-b px-4 py-0 pb-0">
 					<div className="flex min-w-0 items-center gap-3">
 						<DialogTitle className="shrink-0 text-base">
 							{t(Messages.settings.dialogTitle)}
