@@ -8,6 +8,7 @@ import {
 	ChevronUpIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 import { TableEmptyStateRow } from "@/components/common/table-empty-state-row";
 import { TableLoadingState } from "@/components/common/table-loading-state";
 import { TableRowLink } from "@/components/common/table-row-link";
@@ -21,7 +22,10 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { useTableQueryState } from "@/hooks/use-table-query-state";
+import { Messages } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
 import type { CustomerListDto } from "@/lib/api/generated.schemas";
+import { getCustomerTypeLabel } from "@/lib/customer-type-label";
 
 interface CustomersTableProps {
 	data: CustomerListDto[];
@@ -33,46 +37,52 @@ interface CustomersTableProps {
 
 const features = tableFeatures({});
 
-const columns: ColumnDef<typeof features, CustomerListDto>[] = [
-	{
-		accessorKey: "customerCode",
-		header: "Code",
-		cell: (info) => (
-			<span className="font-medium text-primary">
-				{info.getValue<string | null>() ?? "—"}
-			</span>
-		),
-	},
-	{
-		accessorKey: "companyName",
-		header: "Company Name",
-		cell: (info) => (
-			<TableRowLink href={`/dashboard/customers/${info.row.original.id}`}>
-				{info.getValue<string>()}
-			</TableRowLink>
-		),
-	},
-	{
-		accessorKey: "typeId",
-		header: "Type",
-		cell: (info) => info.getValue<string | null>() ?? "—",
-	},
-	{
-		accessorKey: "email",
-		header: "Email",
-		cell: (info) => info.getValue<string | null>() ?? "—",
-	},
-	{
-		accessorKey: "phone",
-		header: "Phone",
-		cell: (info) => info.getValue<string | null>() ?? "—",
-	},
-	{
-		accessorKey: "city",
-		header: "City",
-		cell: (info) => info.getValue<string | null>() ?? "—",
-	},
-];
+function createColumns(
+	t: ReturnType<typeof useTranslate>,
+): ColumnDef<typeof features, CustomerListDto>[] {
+	return [
+		{
+			accessorKey: "customerCode",
+			header: t(Messages.customers.list.code),
+			cell: (info) => (
+				<span className="font-medium text-primary">
+					{info.getValue<string | null>() ?? "—"}
+				</span>
+			),
+		},
+		{
+			accessorKey: "companyName",
+			header: t(Messages.customers.list.company),
+			cell: (info) => (
+				<TableRowLink href={`/dashboard/customers/${info.row.original.id}`}>
+					{info.getValue<string>()}
+				</TableRowLink>
+			),
+		},
+		{
+			id: "customerType",
+			accessorFn: (customer) =>
+				getCustomerTypeLabel(customer.customerType?.name, t) ?? null,
+			header: t(Messages.customers.list.type),
+			cell: (info) => info.getValue<string | null>() ?? "—",
+		},
+		{
+			accessorKey: "email",
+			header: t(Messages.customers.list.email),
+			cell: (info) => info.getValue<string | null>() ?? "—",
+		},
+		{
+			accessorKey: "phone",
+			header: t(Messages.customers.list.phone),
+			cell: (info) => info.getValue<string | null>() ?? "—",
+		},
+		{
+			accessorKey: "city",
+			header: t(Messages.customers.list.city),
+			cell: (info) => info.getValue<string | null>() ?? "—",
+		},
+	];
+}
 
 export function CustomersTable({
 	data,
@@ -81,6 +91,8 @@ export function CustomersTable({
 	sortOrder,
 	isLoading,
 }: CustomersTableProps) {
+	const t = useTranslate();
+	const columns = useMemo(() => createColumns(t), [t]);
 	const router = useRouter();
 	const { searchValue, setSearchValue, updateSort } = useTableQueryState({
 		search,
@@ -103,7 +115,7 @@ export function CustomersTable({
 		<div className="space-y-4">
 			<div className="flex flex-wrap items-center gap-4">
 				<Input
-					placeholder="Search customers..."
+					placeholder={t(Messages.customers.list.search)}
 					value={searchValue}
 					onChange={(e) => setSearchValue(e.target.value)}
 					className="w-full max-w-sm"
@@ -165,7 +177,7 @@ export function CustomersTable({
 						) : (
 							<TableEmptyStateRow
 								colSpan={columns.length}
-								message="No customers found."
+								message={t(Messages.customers.list.noResults)}
 							/>
 						)}
 					</TableBody>

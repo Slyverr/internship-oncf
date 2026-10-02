@@ -4,6 +4,8 @@ import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { XIcon } from "lucide-react";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
+import { Messages } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
 import { cn } from "@/lib/utils";
 
 function Dialog({ ...props }: DialogPrimitive.Root.Props) {
@@ -78,6 +80,7 @@ function DialogHeader({
 	children,
 	...props
 }: React.ComponentProps<"div"> & { showCloseButton?: boolean }) {
+	const t = useTranslate();
 	return (
 		<div
 			data-slot="dialog-header"
@@ -94,7 +97,9 @@ function DialogHeader({
 					render={<Button variant="ghost" size="icon" className="shrink-0" />}
 				>
 					<XIcon />
-					<span className="sr-only">Close</span>
+					<span className="sr-only">
+						{t(Messages.common.accessibility.close)}
+					</span>
 				</DialogPrimitive.Close>
 			)}
 		</div>
@@ -109,6 +114,7 @@ function DialogFooter({
 }: React.ComponentProps<"div"> & {
 	showCloseButton?: boolean;
 }) {
+	const t = useTranslate();
 	return (
 		<div
 			data-slot="dialog-footer"
@@ -121,7 +127,7 @@ function DialogFooter({
 			{children}
 			{showCloseButton && (
 				<DialogPrimitive.Close render={<Button variant="outline" />}>
-					Close
+					{t(Messages.common.dialog.close)}
 				</DialogPrimitive.Close>
 			)}
 		</div>

@@ -1,10 +1,13 @@
 "use server";
 
+import type { ApiResponseCode } from "@ecommand/shared";
+import { type MessageKey, Messages } from "@/i18n";
+import type { SuccessResponseDto } from "@/lib/api/generated.schemas";
 import { customFetch } from "@/lib/axios";
 
 export type ForgotPasswordState = {
-	success?: boolean;
-	error?: string;
+	successCode?: ApiResponseCode;
+	errorKey?: MessageKey;
 };
 
 export async function forgotPasswordAction(
@@ -13,18 +16,18 @@ export async function forgotPasswordAction(
 ): Promise<ForgotPasswordState> {
 	const email = String(formData.get("email") ?? "").trim();
 	if (!/^\S+@\S+\.\S+$/.test(email)) {
-		return { error: "Enter a valid email address." };
+		return { errorKey: Messages.auth.recovery.emailInvalid };
 	}
 
 	try {
-		await customFetch({
+		const response = await customFetch<SuccessResponseDto>({
 			url: "/auth/forgot-password",
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			data: { email },
 		});
-		return { success: true };
+		return { successCode: response.code };
 	} catch {
-		return { error: "We could not process your request. Please try again." };
+		return { errorKey: Messages.auth.recovery.requestFailed };
 	}
 }

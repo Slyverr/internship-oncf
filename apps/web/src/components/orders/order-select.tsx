@@ -9,6 +9,8 @@ import {
 	ComboboxItem,
 	ComboboxList,
 } from "@/components/ui/combobox";
+import { Messages } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
 import type { OrderDetailDto } from "@/lib/api/generated.schemas";
 
 type Order = Pick<OrderDetailDto, "id" | "orderNumber">;
@@ -34,9 +36,11 @@ export function OrderSelect({
 	isLoading,
 	isError,
 	isFetching = false,
-	emptyMessage = "No orders found.",
+	emptyMessage,
 	onRetry,
 }: OrderSelectProps) {
+	const t = useTranslate();
+	const resolvedEmptyMessage = emptyMessage ?? t(Messages.orders.select.empty);
 	const selected = orders.find((order) => order.id === value);
 
 	return (
@@ -46,18 +50,25 @@ export function OrderSelect({
 				disabled={isLoading || (isError && orders.length === 0)}
 				value={selected ?? null}
 				onValueChange={(order) => order && onChange(order.id)}
-				itemToStringLabel={(order) => order.orderNumber ?? `Order #${order.id}`}
+				itemToStringLabel={(order) =>
+					order.orderNumber ??
+					t(Messages.orders.numberFallback, { id: order.id })
+				}
 				itemToStringValue={(order) => String(order.id)}
 			>
-				<ComboboxInput id={id} placeholder="Select order" />
+				<ComboboxInput
+					id={id}
+					placeholder={t(Messages.orders.select.placeholder)}
+				/>
 
 				<ComboboxContent>
-					<ComboboxEmpty>{emptyMessage}</ComboboxEmpty>
+					<ComboboxEmpty>{resolvedEmptyMessage}</ComboboxEmpty>
 
 					<ComboboxList>
 						{(order) => (
 							<ComboboxItem key={order.id} value={order}>
-								{order.orderNumber ?? `Order #${order.id}`}
+								{order.orderNumber ??
+									t(Messages.orders.numberFallback, { id: order.id })}
 							</ComboboxItem>
 						)}
 					</ComboboxList>
@@ -65,8 +76,8 @@ export function OrderSelect({
 			</Combobox>
 			{isError && onRetry && (
 				<InlineQueryRetry
-					message="Could not load orders. Check your connection."
-					retryLabel="Retry orders"
+					message={t(Messages.orders.select.loadFailed)}
+					retryLabel={t(Messages.orders.select.retry)}
 					isFetching={isFetching}
 					onRetry={onRetry}
 				/>

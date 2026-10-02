@@ -8,10 +8,12 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useTranslate } from "@/i18n/locale-provider";
 import { useAuth } from "@/providers/auth-provider";
 import { sidebarRoutes } from "./sidebar-routes";
 
 export function SidebarNav() {
+	const t = useTranslate();
 	const pathname = usePathname();
 	const { hasPermission } = useAuth();
 	const visibleRoutes = sidebarRoutes.filter(
@@ -31,11 +33,11 @@ export function SidebarNav() {
 					: "group-hover/button:text-sidebar-primary";
 
 				return (
-					<SidebarMenuItem key={route.title}>
+					<SidebarMenuItem key={route.url}>
 						<SidebarMenuButton
 							render={<Link href={route.url} />}
 							isActive={isActive}
-							tooltip={route.title}
+							tooltip={t(route.titleKey)}
 							className={`group/button relative w-full px-4 py-2 rounded-none transition-colors ${
 								isActive
 									? "bg-sidebar-primary/10 font-semibold dark:bg-sidebar-primary/20"
@@ -53,7 +55,7 @@ export function SidebarNav() {
 							<span
 								className={`min-w-0 max-w-48 overflow-hidden whitespace-nowrap transition-[max-width,opacity,color] duration-200 ease-linear motion-reduce:transition-none group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:max-w-0 group-data-[collapsible=icon]:opacity-0 ${textColor}`}
 							>
-								{route.title}
+								{t(route.titleKey)}
 							</span>
 						</SidebarMenuButton>
 					</SidebarMenuItem>

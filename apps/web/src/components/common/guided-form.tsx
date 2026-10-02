@@ -1,6 +1,12 @@
+"use client";
+
+"use client";
+
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Messages } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
 
 export type GuidedFormStep = {
 	title: string;
@@ -14,6 +20,7 @@ export function GuidedFormProgress({
 	steps: GuidedFormStep[];
 	currentStep: number;
 }) {
+	const t = useTranslate();
 	const current = steps[currentStep];
 	const progress =
 		steps.length > 1 ? (currentStep / (steps.length - 1)) * 100 : 0;
@@ -21,7 +28,11 @@ export function GuidedFormProgress({
 	return (
 		<div className="grid gap-3">
 			<p className="sr-only" aria-live="polite" aria-atomic="true">
-				Step {currentStep + 1} of {steps.length}: {current?.title}
+				{t(Messages.common.formSteps.stepOf, {
+					current: currentStep + 1,
+					total: steps.length,
+					title: current?.title ?? "",
+				})}
 			</p>
 			<div className="relative">
 				<div
@@ -38,7 +49,7 @@ export function GuidedFormProgress({
 					/>
 				</div>
 				<ol
-					aria-label="Form steps"
+					aria-label={t(Messages.common.formSteps.ariaLabel)}
 					className="relative flex w-full items-start justify-between"
 				>
 					{steps.map((step, index) => (
@@ -100,6 +111,7 @@ export function GuidedFormActions({
 	isPending: boolean;
 	isSubmitDisabled?: boolean;
 }) {
+	const t = useTranslate();
 	const isLastStep = currentStep === stepCount - 1;
 	const isBusy = isPending || isSubmitting;
 
@@ -112,7 +124,7 @@ export function GuidedFormActions({
 				disabled={isBusy}
 				onClick={onCancel}
 			>
-				Cancel
+				{t(Messages.common.actions.cancel)}
 			</Button>
 			<div className="grid w-full grid-cols-[auto_1fr] gap-4 sm:ml-auto sm:flex sm:w-auto sm:justify-end">
 				{currentStep > 0 ? (
@@ -124,7 +136,7 @@ export function GuidedFormActions({
 						onClick={onPrevious}
 					>
 						<ArrowLeft />
-						Back
+						{t(Messages.common.actions.back)}
 					</Button>
 				) : null}
 				{isLastStep ? (
@@ -154,7 +166,7 @@ export function GuidedFormActions({
 							onContinue();
 						}}
 					>
-						Continue
+						{t(Messages.common.actions.continue)}
 						<ArrowRight />
 					</Button>
 				)}

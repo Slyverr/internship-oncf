@@ -9,6 +9,7 @@ import {
 	ChevronUpIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 import { TableEmptyStateRow } from "@/components/common/table-empty-state-row";
 import { TableLoadingState } from "@/components/common/table-loading-state";
 import { TableRowLink } from "@/components/common/table-row-link";
@@ -29,9 +30,11 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { useTableQueryState } from "@/hooks/use-table-query-state";
+import { Messages } from "@/i18n";
+import { useLocale, useTranslate } from "@/i18n/locale-provider";
+import { getOrderStatusLabel } from "@/i18n/status-labels";
 import { OrderListDto } from "@/lib/api/generated.schemas";
 import { formatDisplayDate } from "@/lib/date-utils";
-import { formatEnumLabel } from "@/lib/enum-labels";
 
 interface OrdersTableProps {
 	data: OrderListDto[];
@@ -44,49 +47,59 @@ interface OrdersTableProps {
 
 const features = tableFeatures({});
 
-const columns: ColumnDef<typeof features, OrderListDto>[] = [
-	{
-		accessorKey: "orderNumber",
-		header: "Order #",
-		cell: (info) => (
-			<TableRowLink href={`/dashboard/orders/${info.row.original.orderNumber}`}>
-				{info.getValue<string | null>() ?? `Order #${info.row.original.id}`}
-			</TableRowLink>
-		),
-	},
-	{
-		accessorFn: (row) => row.customer.companyName,
-		id: "customer",
-		header: "Customer",
-		cell: (info) => info.getValue<string>(),
-	},
-	{
-		accessorFn: (row) => row.good.name,
-		id: "good",
-		header: "Good",
-		cell: (info) => info.getValue<string>(),
-	},
-	{
-		accessorKey: "quantityDemanded",
-		header: "Qty",
-		cell: (info) => info.getValue<string>(),
-	},
-	{
-		accessorFn: (row) => row.orderStatus.name,
-		id: "status",
-		header: "Status",
-		cell: (info) => formatEnumLabel(String(info.getValue())),
-	},
-	{
-		accessorKey: "orderDate",
-		header: "Order Date",
-		cell: (info) => {
-			const value = info.getValue<string | null>();
-
-			return formatDisplayDate(value);
+function createColumns(
+	t: ReturnType<typeof useTranslate>,
+	locale: ReturnType<typeof useLocale>,
+): ColumnDef<typeof features, OrderListDto>[] {
+	return [
+		{
+			accessorKey: "orderNumber",
+			header: t(Messages.orders.list.orderNumber),
+			cell: (info) => (
+				<TableRowLink
+					href={`/dashboard/orders/${info.row.original.orderNumber}`}
+				>
+					{info.getValue<string | null>() ??
+						t(Messages.orders.numberFallback, {
+							id: info.row.original.id,
+						})}
+				</TableRowLink>
+			),
 		},
-	},
-];
+		{
+			accessorFn: (row) => row.customer.companyName,
+			id: "customer",
+			header: t(Messages.orders.list.customer),
+			cell: (info) => info.getValue<string>(),
+		},
+		{
+			accessorFn: (row) => row.good.name,
+			id: "good",
+			header: t(Messages.orders.list.good),
+			cell: (info) => info.getValue<string>(),
+		},
+		{
+			accessorKey: "quantityDemanded",
+			header: t(Messages.orders.list.quantity),
+			cell: (info) => info.getValue<string>(),
+		},
+		{
+			accessorFn: (row) => row.orderStatus.name,
+			id: "status",
+			header: t(Messages.orders.list.status),
+			cell: (info) => getOrderStatusLabel(String(info.getValue()), locale),
+		},
+		{
+			accessorKey: "orderDate",
+			header: t(Messages.orders.list.date),
+			cell: (info) => {
+				const value = info.getValue<string | null>();
+
+				return formatDisplayDate(value, locale);
+			},
+		},
+	];
+}
 
 export function OrdersTable({
 	data,
@@ -96,6 +109,9 @@ export function OrdersTable({
 	sortOrder,
 	isLoading,
 }: OrdersTableProps) {
+	const t = useTranslate();
+	const locale = useLocale();
+	const columns = useMemo(() => createColumns(t, locale), [locale, t]);
 	const router = useRouter();
 	const { searchValue, setSearchValue, updateQuery, updateSort } =
 		useTableQueryState({ search, sortBy, sortOrder });
@@ -115,7 +131,7 @@ export function OrdersTable({
 		<div className="space-y-4">
 			<div className="flex flex-wrap items-center gap-4">
 				<Input
-					placeholder="Search orders..."
+					placeholder={t(Messages.orders.list.search)}
 					value={searchValue}
 					onChange={(event) => setSearchValue(event.target.value)}
 					className="w-full max-w-sm"
@@ -127,16 +143,20 @@ export function OrdersTable({
 				>
 					<SelectTrigger className="w-full max-w-48">
 						<SelectValue>
-							{status ? formatEnumLabel(status) : "All statuses"}
+							{status
+								? getOrderStatusLabel(status, locale)
+								: t(Messages.orders.list.allStatuses)}
 						</SelectValue>
 					</SelectTrigger>
 
 					<SelectContent>
-						<SelectItem value="ALL">All statuses</SelectItem>
+						<SelectItem value="ALL">
+							{t(Messages.orders.list.allStatuses)}
+						</SelectItem>
 
 						{Object.values(OrderStatus).map((value) => (
 							<SelectItem key={value} value={value}>
-								{formatEnumLabel(value)}
+								{getOrderStatusLabel(value, locale)}
 							</SelectItem>
 						))}
 					</SelectContent>
@@ -202,7 +222,7 @@ export function OrdersTable({
 						) : (
 							<TableEmptyStateRow
 								colSpan={columns.length}
-								message="No orders found."
+								message={t(Messages.orders.list.noResults)}
 							/>
 						)}
 					</TableBody>

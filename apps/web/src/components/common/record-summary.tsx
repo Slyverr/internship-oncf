@@ -1,6 +1,8 @@
+import type { ReactNode } from "react";
+
 interface RecordDetailProps {
 	label: string;
-	value: string;
+	value: ReactNode;
 }
 
 export function RecordDetail({ label, value }: RecordDetailProps) {

@@ -47,6 +47,182 @@ export interface UserListDto {
   lastLogin: string | null;
 }
 
+export type ApiErrorCode = typeof ApiErrorCode[keyof typeof ApiErrorCode];
+
+
+export const ApiErrorCode = {
+  CUSTOMER_TYPE_NOT_FOUND: 'CUSTOMER_TYPE_NOT_FOUND',
+  AGENCY_NOT_FOUND: 'AGENCY_NOT_FOUND',
+  USER_NOT_FOUND: 'USER_NOT_FOUND',
+  ROLE_NOT_FOUND: 'ROLE_NOT_FOUND',
+  CUSTOMER_NOT_FOUND: 'CUSTOMER_NOT_FOUND',
+  GOODS_TYPE_NOT_FOUND: 'GOODS_TYPE_NOT_FOUND',
+  GOODS_NOT_FOUND: 'GOODS_NOT_FOUND',
+  STATION_NOT_FOUND: 'STATION_NOT_FOUND',
+  PORT_NOT_FOUND: 'PORT_NOT_FOUND',
+  BERTH_NOT_FOUND: 'BERTH_NOT_FOUND',
+  SIDING_NOT_FOUND: 'SIDING_NOT_FOUND',
+  ORDER_NOT_FOUND: 'ORDER_NOT_FOUND',
+  ORDER_STATUS_NOT_FOUND: 'ORDER_STATUS_NOT_FOUND',
+  MOVEMENT_TYPE_NOT_FOUND: 'MOVEMENT_TYPE_NOT_FOUND',
+  UNIT_NOT_FOUND: 'UNIT_NOT_FOUND',
+  PICKUP_LOCATION_TYPE_NOT_FOUND: 'PICKUP_LOCATION_TYPE_NOT_FOUND',
+  DISPATCH_TYPE_NOT_FOUND: 'DISPATCH_TYPE_NOT_FOUND',
+  PROGRAM_STATUS_NOT_FOUND: 'PROGRAM_STATUS_NOT_FOUND',
+  FORECAST_PROGRAM_NOT_FOUND: 'FORECAST_PROGRAM_NOT_FOUND',
+  ATTRIBUTE_NOT_FOUND: 'ATTRIBUTE_NOT_FOUND',
+  ACCESSORY_OPERATION_NOT_FOUND: 'ACCESSORY_OPERATION_NOT_FOUND',
+  REJECTION_REASON_NOT_FOUND: 'REJECTION_REASON_NOT_FOUND',
+  CLAIM_NOT_FOUND: 'CLAIM_NOT_FOUND',
+  CLAIM_TYPE_NOT_FOUND: 'CLAIM_TYPE_NOT_FOUND',
+  CLAIM_STATUS_NOT_FOUND: 'CLAIM_STATUS_NOT_FOUND',
+  TRAIN_NOT_FOUND: 'TRAIN_NOT_FOUND',
+  WAGON_NOT_FOUND: 'WAGON_NOT_FOUND',
+  NOTIFICATION_TYPE_NOT_FOUND: 'NOTIFICATION_TYPE_NOT_FOUND',
+  NOTIFICATION_CHANNEL_NOT_FOUND: 'NOTIFICATION_CHANNEL_NOT_FOUND',
+  DTM_REQUEST_TYPE_NOT_FOUND: 'DTM_REQUEST_TYPE_NOT_FOUND',
+  PARENT_ORDER_NOT_FOUND: 'PARENT_ORDER_NOT_FOUND',
+  PERMISSION_NOT_FOUND: 'PERMISSION_NOT_FOUND',
+  DUPLICATE_AGENCY_NAME: 'DUPLICATE_AGENCY_NAME',
+  DUPLICATE_USER_EMAIL: 'DUPLICATE_USER_EMAIL',
+  DUPLICATE_USER_EMPLOYEE_CODE: 'DUPLICATE_USER_EMPLOYEE_CODE',
+  DUPLICATE_CUSTOMER_CODE: 'DUPLICATE_CUSTOMER_CODE',
+  DUPLICATE_CUSTOMER_TYPE_NAME: 'DUPLICATE_CUSTOMER_TYPE_NAME',
+  DUPLICATE_ROLE_NAME: 'DUPLICATE_ROLE_NAME',
+  DUPLICATE_PERMISSION_NAME: 'DUPLICATE_PERMISSION_NAME',
+  DUPLICATE_GOODS_TYPE_NAME: 'DUPLICATE_GOODS_TYPE_NAME',
+  DUPLICATE_GOODS_CODE: 'DUPLICATE_GOODS_CODE',
+  DUPLICATE_STATION_NAME: 'DUPLICATE_STATION_NAME',
+  DUPLICATE_STATION_CODE: 'DUPLICATE_STATION_CODE',
+  DUPLICATE_PORT_NAME: 'DUPLICATE_PORT_NAME',
+  DUPLICATE_SIDING_NAME: 'DUPLICATE_SIDING_NAME',
+  DUPLICATE_ATTRIBUTE_NAME: 'DUPLICATE_ATTRIBUTE_NAME',
+  DUPLICATE_ORDER_NUMBER: 'DUPLICATE_ORDER_NUMBER',
+  DUPLICATE_ORDER_STATUS_NAME: 'DUPLICATE_ORDER_STATUS_NAME',
+  DUPLICATE_MOVEMENT_TYPE_NAME: 'DUPLICATE_MOVEMENT_TYPE_NAME',
+  DUPLICATE_UNIT_NAME: 'DUPLICATE_UNIT_NAME',
+  DUPLICATE_PICKUP_LOCATION_TYPE_NAME: 'DUPLICATE_PICKUP_LOCATION_TYPE_NAME',
+  DUPLICATE_DISPATCH_TYPE_NAME: 'DUPLICATE_DISPATCH_TYPE_NAME',
+  DUPLICATE_PROGRAM_STATUS_NAME: 'DUPLICATE_PROGRAM_STATUS_NAME',
+  DUPLICATE_PROGRAM_NUMBER: 'DUPLICATE_PROGRAM_NUMBER',
+  DUPLICATE_ACCESSORY_OPERATION_NAME: 'DUPLICATE_ACCESSORY_OPERATION_NAME',
+  DUPLICATE_REJECTION_REASON_NAME: 'DUPLICATE_REJECTION_REASON_NAME',
+  DUPLICATE_SHIPPING_COMPANY_NAME: 'DUPLICATE_SHIPPING_COMPANY_NAME',
+  DUPLICATE_VESSEL_NAME: 'DUPLICATE_VESSEL_NAME',
+  DUPLICATE_IMPORTER_NAME: 'DUPLICATE_IMPORTER_NAME',
+  DUPLICATE_REPRESENTATIVE_NAME: 'DUPLICATE_REPRESENTATIVE_NAME',
+  DUPLICATE_CLAIM_TYPE_NAME: 'DUPLICATE_CLAIM_TYPE_NAME',
+  DUPLICATE_CLAIM_STATUS_NAME: 'DUPLICATE_CLAIM_STATUS_NAME',
+  DUPLICATE_TRAIN_NUMBER: 'DUPLICATE_TRAIN_NUMBER',
+  DUPLICATE_TRAIN_EXTERNAL_ID: 'DUPLICATE_TRAIN_EXTERNAL_ID',
+  DUPLICATE_WAGON_NUMBER: 'DUPLICATE_WAGON_NUMBER',
+  DUPLICATE_WAGON_EXTERNAL_ID: 'DUPLICATE_WAGON_EXTERNAL_ID',
+  DUPLICATE_NOTIFICATION_TYPE_NAME: 'DUPLICATE_NOTIFICATION_TYPE_NAME',
+  DUPLICATE_NOTIFICATION_CHANNEL_NAME: 'DUPLICATE_NOTIFICATION_CHANNEL_NAME',
+  DUPLICATE_DTM_REQUEST_TYPE_NAME: 'DUPLICATE_DTM_REQUEST_TYPE_NAME',
+  DUPLICATE_PASSWORD_RESET_TOKEN: 'DUPLICATE_PASSWORD_RESET_TOKEN',
+  DUPLICATE_SESSION_TOKEN: 'DUPLICATE_SESSION_TOKEN',
+  DUPLICATE_ORDER_ATTRIBUTE: 'DUPLICATE_ORDER_ATTRIBUTE',
+  DUPLICATE_PARAMETRIZATION: 'DUPLICATE_PARAMETRIZATION',
+  DUPLICATE_CUSTOMER_PARAMETRIZATION: 'DUPLICATE_CUSTOMER_PARAMETRIZATION',
+  DUPLICATE_ORDER_SHARE: 'DUPLICATE_ORDER_SHARE',
+  DUPLICATE_PROGRAM_CONVOI: 'DUPLICATE_PROGRAM_CONVOI',
+  ACCOUNT_REGISTRATION_NOT_PENDING: 'ACCOUNT_REGISTRATION_NOT_PENDING',
+  ACCESS_DENIED: 'ACCESS_DENIED',
+  CLAIM_COMMENT_NOT_FOUND: 'CLAIM_COMMENT_NOT_FOUND',
+  CLAIM_ORDER_CUSTOMER_MISMATCH: 'CLAIM_ORDER_CUSTOMER_MISMATCH',
+  CLAIM_RESOLUTION_REQUIRED: 'CLAIM_RESOLUTION_REQUIRED',
+  CLAIM_TRANSITION_INVALID: 'CLAIM_TRANSITION_INVALID',
+  CATALOG_GOODS_TYPE_HAS_ACTIVE_GOODS: 'CATALOG_GOODS_TYPE_HAS_ACTIVE_GOODS',
+  CATALOG_GOODS_TYPE_INACTIVE: 'CATALOG_GOODS_TYPE_INACTIVE',
+  CURRENT_PASSWORD_INVALID: 'CURRENT_PASSWORD_INVALID',
+  CUSTOMER_IDENTITY_INVALID: 'CUSTOMER_IDENTITY_INVALID',
+  AUTHENTICATION_REQUIRED: 'AUTHENTICATION_REQUIRED',
+  CONFLICT: 'CONFLICT',
+  INTERNAL_ERROR: 'INTERNAL_ERROR',
+  INVALID_IDENTIFIER: 'INVALID_IDENTIFIER',
+  LAST_ACTIVE_ADMIN: 'LAST_ACTIVE_ADMIN',
+  ORDER_ALREADY_PROGRAMMED: 'ORDER_ALREADY_PROGRAMMED',
+  ORDER_DATE_RANGE_INVALID: 'ORDER_DATE_RANGE_INVALID',
+  ORDER_MUST_BE_DRAFT: 'ORDER_MUST_BE_DRAFT',
+  ORDER_NOT_ELIGIBLE_FOR_PROGRAM: 'ORDER_NOT_ELIGIBLE_FOR_PROGRAM',
+  ORDER_QUANTITY_INVALID: 'ORDER_QUANTITY_INVALID',
+  ORDER_TRANSITION_INVALID: 'ORDER_TRANSITION_INVALID',
+  ORDER_UPDATE_CONFLICT: 'ORDER_UPDATE_CONFLICT',
+  PROGRAM_MUST_BE_DRAFT: 'PROGRAM_MUST_BE_DRAFT',
+  PROGRAM_NOT_FOUND: 'PROGRAM_NOT_FOUND',
+  PROGRAM_TRANSITION_INVALID: 'PROGRAM_TRANSITION_INVALID',
+  RATE_LIMITED: 'RATE_LIMITED',
+  REQUEST_FAILED: 'REQUEST_FAILED',
+  RESOURCE_NOT_FOUND: 'RESOURCE_NOT_FOUND',
+  ROLE_PERMISSION_UNAVAILABLE: 'ROLE_PERMISSION_UNAVAILABLE',
+  ROLE_PROFILE_IN_USE: 'ROLE_PROFILE_IN_USE',
+  RESET_TOKEN_EXPIRED: 'RESET_TOKEN_EXPIRED',
+  RESET_TOKEN_INVALID: 'RESET_TOKEN_INVALID',
+  VALIDATION_FAILED: 'VALIDATION_FAILED',
+  USER_EMAIL_ALREADY_EXISTS: 'USER_EMAIL_ALREADY_EXISTS',
+  USER_ROLE_NOT_FOUND: 'USER_ROLE_NOT_FOUND',
+  CUSTOMER_ASSIGNMENT_REQUIRED: 'CUSTOMER_ASSIGNMENT_REQUIRED',
+  CUSTOMER_OUTSIDE_PORTFOLIO: 'CUSTOMER_OUTSIDE_PORTFOLIO',
+  TRACKED_TRAIN_NOT_FOUND: 'TRACKED_TRAIN_NOT_FOUND',
+  TRACKED_WAGON_NOT_FOUND: 'TRACKED_WAGON_NOT_FOUND',
+  ATTACHMENT_NOT_FOUND: 'ATTACHMENT_NOT_FOUND',
+  ORDER_FILE_NOT_FOUND: 'ORDER_FILE_NOT_FOUND',
+  REPORT_DATE_INVALID: 'REPORT_DATE_INVALID',
+  REPORT_DATE_RANGE_INVALID: 'REPORT_DATE_RANGE_INVALID',
+  ORDER_CUSTOMER_REQUIRED: 'ORDER_CUSTOMER_REQUIRED',
+  ORDER_CUSTOMER_ACCESS_DENIED: 'ORDER_CUSTOMER_ACCESS_DENIED',
+  ORDER_STATUS_CHANGE_FORBIDDEN: 'ORDER_STATUS_CHANGE_FORBIDDEN',
+  ORDER_OWNERSHIP_CHANGE_FORBIDDEN: 'ORDER_OWNERSHIP_CHANGE_FORBIDDEN',
+  PROGRAM_CUSTOMER_ACCESS_DENIED: 'PROGRAM_CUSTOMER_ACCESS_DENIED',
+  PROGRAM_OWNERSHIP_CHANGE_FORBIDDEN: 'PROGRAM_OWNERSHIP_CHANGE_FORBIDDEN',
+  PROGRAM_STATUS_CHANGE_FORBIDDEN: 'PROGRAM_STATUS_CHANGE_FORBIDDEN',
+  NOTIFICATION_NOT_FOUND: 'NOTIFICATION_NOT_FOUND',
+} as const;
+
+export type ApiErrorDetailsDtoFieldsItem = typeof ApiErrorDetailsDtoFieldsItem[keyof typeof ApiErrorDetailsDtoFieldsItem];
+
+
+export const ApiErrorDetailsDtoFieldsItem = {
+  ARRAY_UNIQUE: 'ARRAY_UNIQUE',
+  IS_ARRAY: 'IS_ARRAY',
+  IS_BOOLEAN: 'IS_BOOLEAN',
+  IS_DATE_STRING: 'IS_DATE_STRING',
+  IS_EMAIL: 'IS_EMAIL',
+  IS_ENUM: 'IS_ENUM',
+  IS_IN: 'IS_IN',
+  IS_INT: 'IS_INT',
+  IS_NOT_EMPTY: 'IS_NOT_EMPTY',
+  IS_NUMBER: 'IS_NUMBER',
+  IS_NUMBER_STRING: 'IS_NUMBER_STRING',
+  IS_OBJECT: 'IS_OBJECT',
+  IS_STRING: 'IS_STRING',
+  IS_UUID: 'IS_UUID',
+  MATCHES: 'MATCHES',
+  MAX: 'MAX',
+  MAX_LENGTH: 'MAX_LENGTH',
+  MIN: 'MIN',
+  MIN_LENGTH: 'MIN_LENGTH',
+  UNKNOWN: 'UNKNOWN',
+} as const;
+
+export type ApiErrorDetailsDtoFields = {[key: string]: ApiErrorDetailsDtoFieldsItem[]};
+
+export interface ApiErrorDetailsDto {
+  fields?: ApiErrorDetailsDtoFields;
+  permissions?: string[];
+}
+
+export interface ApiErrorResponseDto {
+  code: ApiErrorCode;
+  /**
+     * @minimum 400
+     * @maximum 599
+     */
+  statusCode: number;
+  details?: ApiErrorDetailsDto;
+}
+
 export type UserDetailDtoRole = {
   id: string;
   name: string;
@@ -112,7 +288,8 @@ export interface CreateUserDto {
   firstName: string;
   /** @maxLength 100 */
   lastName: string;
-  role: CreateUserDtoRole;
+  role?: CreateUserDtoRole;
+  roleId?: string;
   /** @maxLength 50 */
   employeeCode?: string;
   /** @maxLength 20 */
@@ -153,6 +330,7 @@ export interface UpdateUserDto {
   /** @maxLength 100 */
   lastName?: string;
   role?: UpdateUserDtoRole;
+  roleId?: string;
   /** @maxLength 50 */
   employeeCode?: string;
   /** @maxLength 20 */
@@ -220,13 +398,37 @@ export interface RegisterClientDto {
   ice: string;
 }
 
+export type RegistrationSubmittedDtoCode = typeof RegistrationSubmittedDtoCode[keyof typeof RegistrationSubmittedDtoCode];
+
+
+export const RegistrationSubmittedDtoCode = {
+  REGISTRATION_SUBMITTED_FOR_REVIEW: 'REGISTRATION_SUBMITTED_FOR_REVIEW',
+} as const;
+
 export interface RegistrationSubmittedDto {
-  message: string;
+  code: RegistrationSubmittedDtoCode;
 }
 
 export interface ChangePasswordDto {
   currentPassword: string;
   newPassword: string;
+}
+
+export type SuccessResponseDtoCode = typeof SuccessResponseDtoCode[keyof typeof SuccessResponseDtoCode];
+
+
+export const SuccessResponseDtoCode = {
+  AUTH_LOGGED_OUT: 'AUTH_LOGGED_OUT',
+  AUTH_PASSWORD_CHANGED: 'AUTH_PASSWORD_CHANGED',
+  AUTH_PASSWORD_RESET: 'AUTH_PASSWORD_RESET',
+  AUTH_PASSWORD_RESET_REQUEST_ACCEPTED: 'AUTH_PASSWORD_RESET_REQUEST_ACCEPTED',
+  NOTIFICATIONS_MARKED_READ: 'NOTIFICATIONS_MARKED_READ',
+  ORDER_ATTACHMENT_DELETED: 'ORDER_ATTACHMENT_DELETED',
+  REGISTRATION_SUBMITTED_FOR_REVIEW: 'REGISTRATION_SUBMITTED_FOR_REVIEW',
+} as const;
+
+export interface SuccessResponseDto {
+  code: SuccessResponseDtoCode;
 }
 
 export interface ForgotPasswordDto {
@@ -236,6 +438,17 @@ export interface ForgotPasswordDto {
 export interface ResetPasswordDto {
   token: string;
   newPassword: string;
+}
+
+export interface CustomerPortfolioOptionDto {
+  id: number;
+  companyName: string;
+  /** @nullable */
+  customerCode: string | null;
+}
+
+export interface CustomerTypeReferenceDto {
+  name: string;
 }
 
 export interface CustomerListDto {
@@ -255,6 +468,8 @@ export interface CustomerListDto {
   /** @nullable */
   typeId: string | null;
   /** @nullable */
+  customerType: CustomerTypeReferenceDto | null;
+  /** @nullable */
   customerCode: string | null;
   /** @nullable */
   ice: string | null;
@@ -273,6 +488,8 @@ export interface CustomerDetailDto {
   email: string | null;
   /** @nullable */
   typeId: string | null;
+  /** @nullable */
+  customerType: CustomerTypeReferenceDto | null;
   createdAt: string;
   updatedAt: string;
   isActive: boolean;
@@ -429,7 +646,6 @@ export type OrderDetailDtoOrderFilesItem = {
 
 export type OrderDetailDtoClaimsItem = {
   id: number;
-  /** Temporary until the live OpenAPI document reflects inferred claim fields. */
   claimNumber: string;
   customerId: number;
   createdByUserId: number;
@@ -667,19 +883,28 @@ export interface FileDto {
   uploadedAt: string;
 }
 
-export interface MessageResponseDto {
-  message: string;
+export type NotificationMessageCode = typeof NotificationMessageCode[keyof typeof NotificationMessageCode];
+
+
+export const NotificationMessageCode = {
+  ORDER_STATUS_CHANGED: 'ORDER_STATUS_CHANGED',
+  PROGRAM_STATUS_CHANGED: 'PROGRAM_STATUS_CHANGED',
+  CLAIM_STATUS_CHANGED: 'CLAIM_STATUS_CHANGED',
+  CLAIM_COMMENT_ADDED: 'CLAIM_COMMENT_ADDED',
+  LEGACY_UPDATE: 'LEGACY_UPDATE',
+} as const;
+
+export interface NotificationTypeDto {
+  id: string;
+  name: string;
 }
 
-export type NotificationListDtoNotificationType = {
+export interface NotificationChannelDto {
   id: string;
   name: string;
-};
+}
 
-export type NotificationListDtoNotificationChannel = {
-  id: string;
-  name: string;
-};
+export type NotificationListDtoMessageParameters = {[key: string]: string};
 
 export interface NotificationListDto {
   id: number;
@@ -688,8 +913,8 @@ export interface NotificationListDto {
   recipientUserId: number;
   status: string;
   channelId: string;
-  title: string;
-  message: string;
+  messageCode: NotificationMessageCode;
+  messageParameters: NotificationListDtoMessageParameters;
   /** @nullable */
   relatedEntityType: string | null;
   /** @nullable */
@@ -700,37 +925,31 @@ export interface NotificationListDto {
   readAt: string | null;
   /** @nullable */
   retryCount: number | null;
-  notificationType: NotificationListDtoNotificationType;
-  notificationChannel: NotificationListDtoNotificationChannel;
+  /** @nullable */
+  notificationType: NotificationTypeDto | null;
+  /** @nullable */
+  notificationChannel: NotificationChannelDto | null;
 }
 
 export interface NotificationUnreadCountDto {
   count: number;
 }
 
-export type NotificationDetailDtoRecipientUser = {
+export interface NotificationRecipientDto {
   id: number;
   lastName: string;
   firstName: string;
-};
+}
 
-export type NotificationDetailDtoNotificationType = {
-  id: string;
-  name: string;
-};
-
-export type NotificationDetailDtoNotificationChannel = {
-  id: string;
-  name: string;
-};
+export type NotificationDetailDtoMessageParameters = {[key: string]: string};
 
 export interface NotificationDetailDto {
   id: number;
   recipientUserId: number;
   typeId: string;
   channelId: string;
-  title: string;
-  message: string;
+  messageCode: NotificationMessageCode;
+  messageParameters: NotificationDetailDtoMessageParameters;
   /** @nullable */
   relatedEntityType: string | null;
   /** @nullable */
@@ -741,13 +960,26 @@ export interface NotificationDetailDto {
   /** @nullable */
   readAt: string | null;
   /** @nullable */
-  errorMessage: string | null;
-  /** @nullable */
   retryCount: number | null;
   createdAt: string;
-  recipientUser: NotificationDetailDtoRecipientUser;
-  notificationType: NotificationDetailDtoNotificationType;
-  notificationChannel: NotificationDetailDtoNotificationChannel;
+  /** @nullable */
+  recipientUser: NotificationRecipientDto | null;
+  /** @nullable */
+  notificationType: NotificationTypeDto | null;
+  /** @nullable */
+  notificationChannel: NotificationChannelDto | null;
+}
+
+export type NotificationsMarkedReadDtoCode = typeof NotificationsMarkedReadDtoCode[keyof typeof NotificationsMarkedReadDtoCode];
+
+
+export const NotificationsMarkedReadDtoCode = {
+  NOTIFICATIONS_MARKED_READ: 'NOTIFICATIONS_MARKED_READ',
+} as const;
+
+export interface NotificationsMarkedReadDto {
+  code: NotificationsMarkedReadDtoCode;
+  count: number;
 }
 
 export type CreateProgramDtoStatus = typeof CreateProgramDtoStatus[keyof typeof CreateProgramDtoStatus];
@@ -1065,7 +1297,6 @@ export type ClaimDetailDtoClosedByUser = {
 
 export interface ClaimDetailDto {
   id: number;
-  /** Temporary until the live OpenAPI document reflects inferred claim fields. */
   claimNumber: string;
   customerId: number;
   createdByUserId: number;
@@ -1130,7 +1361,6 @@ export type ClaimListDtoClaimType = {
 
 export interface ClaimListDto {
   id: number;
-  /** Temporary until the live OpenAPI document reflects inferred claim fields. */
   claimNumber: string;
   description: string;
   createdAt: string;
@@ -1220,7 +1450,8 @@ export interface CreateClaimCommentDto {
 }
 
 export interface ClaimCommentDto {
-  authorName: string;
+  /** @nullable */
+  authorName: string | null;
   id: number;
   claimId: number;
   authorUserId: number;
@@ -1385,6 +1616,13 @@ export interface UpdateProfileDto {
   lastName?: string;
 }
 
+export interface CustomerTypeDto {
+  id: string;
+  name: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
 export interface UnitDto {
   id: string;
   name: string;
@@ -1396,6 +1634,12 @@ export interface CreateUnitDto {
   name: string;
 }
 
+export interface UpdateUnitDto {
+  /** @maxLength 50 */
+  name: string;
+  isActive: boolean;
+}
+
 export interface GoodsTypeDto {
   id: string;
   name: string;
@@ -1405,6 +1649,12 @@ export interface GoodsTypeDto {
 
 export interface CreateGoodsTypeDto {
   name: string;
+}
+
+export interface UpdateGoodsTypeDto {
+  /** @maxLength 100 */
+  name: string;
+  isActive: boolean;
 }
 
 export interface GoodDto {
@@ -1423,6 +1673,15 @@ export interface CreateGoodDto {
   goodsTypeId: string;
 }
 
+export interface UpdateGoodDto {
+  /** @maxLength 200 */
+  name: string;
+  /** @maxLength 50 */
+  goodsCode: string;
+  goodsTypeId: string;
+  isActive: boolean;
+}
+
 export interface AccessoryOperationDto {
   id: string;
   name: string;
@@ -1434,6 +1693,12 @@ export interface CreateAccessoryOperationDto {
   name: string;
 }
 
+export interface UpdateAccessoryOperationDto {
+  /** @maxLength 200 */
+  name: string;
+  isActive: boolean;
+}
+
 export interface RejectionReasonDto {
   id: string;
   name: string;
@@ -1443,6 +1708,247 @@ export interface RejectionReasonDto {
 
 export interface CreateRejectionReasonDto {
   name: string;
+}
+
+export interface UpdateRejectionReasonDto {
+  /** @maxLength 300 */
+  name: string;
+  isActive: boolean;
+}
+
+export type RolePersona = typeof RolePersona[keyof typeof RolePersona];
+
+
+export const RolePersona = {
+  ADMIN: 'ADMIN',
+  AGENT_COMMERCIAL: 'AGENT_COMMERCIAL',
+  CLIENT_REPRESENTATIVE: 'CLIENT_REPRESENTATIVE',
+} as const;
+
+export interface RoleProfileDto {
+  persona: RolePersona | null;
+  id: string;
+  name: string;
+  /** @nullable */
+  description: string | null;
+  isSystem: boolean;
+  isActive: boolean;
+  permissionNames: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PermissionDefinitionDto {
+  parent?: string;
+  name: string;
+  assignable: boolean;
+}
+
+export type CreateRoleProfileDtoPersona = typeof CreateRoleProfileDtoPersona[keyof typeof CreateRoleProfileDtoPersona];
+
+
+export const CreateRoleProfileDtoPersona = {
+  AGENT_COMMERCIAL: 'AGENT_COMMERCIAL',
+  CLIENT_REPRESENTATIVE: 'CLIENT_REPRESENTATIVE',
+} as const;
+
+export type CreateRoleProfileDtoPermissionNamesItem = typeof CreateRoleProfileDtoPermissionNamesItem[keyof typeof CreateRoleProfileDtoPermissionNamesItem];
+
+
+export const CreateRoleProfileDtoPermissionNamesItem = {
+  'users:create': 'users:create',
+  'users:read': 'users:read',
+  'users:update': 'users:update',
+  'users:delete': 'users:delete',
+  'users:manage': 'users:manage',
+  'users:manage:other': 'users:manage:other',
+  'orders:create': 'orders:create',
+  'orders:read': 'orders:read',
+  'orders:update': 'orders:update',
+  'orders:delete': 'orders:delete',
+  'orders:manage': 'orders:manage',
+  'orders:manage:other': 'orders:manage:other',
+  'orders:manage:ownership': 'orders:manage:ownership',
+  'orders:manage:status': 'orders:manage:status',
+  'orders:action': 'orders:action',
+  'orders:action:submit': 'orders:action:submit',
+  'orders:action:approve': 'orders:action:approve',
+  'orders:action:reject': 'orders:action:reject',
+  'orders:action:cancel': 'orders:action:cancel',
+  'orders:action:send-to-dtm': 'orders:action:send-to-dtm',
+  'customers:create': 'customers:create',
+  'customers:read': 'customers:read',
+  'customers:update': 'customers:update',
+  'customers:delete': 'customers:delete',
+  'customers:manage': 'customers:manage',
+  'customers:manage:other': 'customers:manage:other',
+  'programs:create': 'programs:create',
+  'programs:read': 'programs:read',
+  'programs:update': 'programs:update',
+  'programs:delete': 'programs:delete',
+  'programs:manage': 'programs:manage',
+  'programs:manage:other': 'programs:manage:other',
+  'programs:manage:ownership': 'programs:manage:ownership',
+  'programs:manage:status': 'programs:manage:status',
+  'programs:action': 'programs:action',
+  'programs:action:submit': 'programs:action:submit',
+  'programs:action:approve': 'programs:action:approve',
+  'programs:action:confirm': 'programs:action:confirm',
+  'programs:action:cancel': 'programs:action:cancel',
+  'programs:action:send': 'programs:action:send',
+  'programs:action:execute': 'programs:action:execute',
+  'claims:create': 'claims:create',
+  'claims:read': 'claims:read',
+  'claims:update': 'claims:update',
+  'claims:delete': 'claims:delete',
+  'claims:manage': 'claims:manage',
+  'claims:manage:other': 'claims:manage:other',
+  'claims:manage:status': 'claims:manage:status',
+  'claims:action': 'claims:action',
+  'claims:action:comment': 'claims:action:comment',
+  'claims:action:start-progress': 'claims:action:start-progress',
+  'claims:action:await-info': 'claims:action:await-info',
+  'claims:action:start-treatment': 'claims:action:start-treatment',
+  'claims:action:resolve': 'claims:action:resolve',
+  'claims:action:reject': 'claims:action:reject',
+  'claims:action:send-to-dtm': 'claims:action:send-to-dtm',
+  'claims:action:close': 'claims:action:close',
+  'catalog:read': 'catalog:read',
+  'catalog:manage': 'catalog:manage',
+  'catalog:manage:units': 'catalog:manage:units',
+  'catalog:manage:goods': 'catalog:manage:goods',
+  'catalog:manage:goods-types': 'catalog:manage:goods-types',
+  'catalog:manage:accessory-operations': 'catalog:manage:accessory-operations',
+  'catalog:manage:rejection-reasons': 'catalog:manage:rejection-reasons',
+  'tracking:read': 'tracking:read',
+  'tracking:update': 'tracking:update',
+  'tracking:manage': 'tracking:manage',
+  'reports:read': 'reports:read',
+  'reports:manage:other': 'reports:manage:other',
+  'reports:action': 'reports:action',
+  'reports:action:export': 'reports:action:export',
+  'roles:manage': 'roles:manage',
+  'permissions:manage': 'permissions:manage',
+  'logs:read': 'logs:read',
+  'profile:update': 'profile:update',
+  'archival:read': 'archival:read',
+  'archival:manage': 'archival:manage',
+} as const;
+
+export interface CreateRoleProfileDto {
+  /** @maxLength 100 */
+  name: string;
+  /**
+     * @maxLength 500
+     * @nullable
+     */
+  description?: string | null;
+  persona: CreateRoleProfileDtoPersona;
+  permissionNames: CreateRoleProfileDtoPermissionNamesItem[];
+}
+
+export type UpdateRoleProfileDtoPersona = typeof UpdateRoleProfileDtoPersona[keyof typeof UpdateRoleProfileDtoPersona];
+
+
+export const UpdateRoleProfileDtoPersona = {
+  AGENT_COMMERCIAL: 'AGENT_COMMERCIAL',
+  CLIENT_REPRESENTATIVE: 'CLIENT_REPRESENTATIVE',
+} as const;
+
+export type UpdateRoleProfileDtoPermissionNamesItem = typeof UpdateRoleProfileDtoPermissionNamesItem[keyof typeof UpdateRoleProfileDtoPermissionNamesItem];
+
+
+export const UpdateRoleProfileDtoPermissionNamesItem = {
+  'users:create': 'users:create',
+  'users:read': 'users:read',
+  'users:update': 'users:update',
+  'users:delete': 'users:delete',
+  'users:manage': 'users:manage',
+  'users:manage:other': 'users:manage:other',
+  'orders:create': 'orders:create',
+  'orders:read': 'orders:read',
+  'orders:update': 'orders:update',
+  'orders:delete': 'orders:delete',
+  'orders:manage': 'orders:manage',
+  'orders:manage:other': 'orders:manage:other',
+  'orders:manage:ownership': 'orders:manage:ownership',
+  'orders:manage:status': 'orders:manage:status',
+  'orders:action': 'orders:action',
+  'orders:action:submit': 'orders:action:submit',
+  'orders:action:approve': 'orders:action:approve',
+  'orders:action:reject': 'orders:action:reject',
+  'orders:action:cancel': 'orders:action:cancel',
+  'orders:action:send-to-dtm': 'orders:action:send-to-dtm',
+  'customers:create': 'customers:create',
+  'customers:read': 'customers:read',
+  'customers:update': 'customers:update',
+  'customers:delete': 'customers:delete',
+  'customers:manage': 'customers:manage',
+  'customers:manage:other': 'customers:manage:other',
+  'programs:create': 'programs:create',
+  'programs:read': 'programs:read',
+  'programs:update': 'programs:update',
+  'programs:delete': 'programs:delete',
+  'programs:manage': 'programs:manage',
+  'programs:manage:other': 'programs:manage:other',
+  'programs:manage:ownership': 'programs:manage:ownership',
+  'programs:manage:status': 'programs:manage:status',
+  'programs:action': 'programs:action',
+  'programs:action:submit': 'programs:action:submit',
+  'programs:action:approve': 'programs:action:approve',
+  'programs:action:confirm': 'programs:action:confirm',
+  'programs:action:cancel': 'programs:action:cancel',
+  'programs:action:send': 'programs:action:send',
+  'programs:action:execute': 'programs:action:execute',
+  'claims:create': 'claims:create',
+  'claims:read': 'claims:read',
+  'claims:update': 'claims:update',
+  'claims:delete': 'claims:delete',
+  'claims:manage': 'claims:manage',
+  'claims:manage:other': 'claims:manage:other',
+  'claims:manage:status': 'claims:manage:status',
+  'claims:action': 'claims:action',
+  'claims:action:comment': 'claims:action:comment',
+  'claims:action:start-progress': 'claims:action:start-progress',
+  'claims:action:await-info': 'claims:action:await-info',
+  'claims:action:start-treatment': 'claims:action:start-treatment',
+  'claims:action:resolve': 'claims:action:resolve',
+  'claims:action:reject': 'claims:action:reject',
+  'claims:action:send-to-dtm': 'claims:action:send-to-dtm',
+  'claims:action:close': 'claims:action:close',
+  'catalog:read': 'catalog:read',
+  'catalog:manage': 'catalog:manage',
+  'catalog:manage:units': 'catalog:manage:units',
+  'catalog:manage:goods': 'catalog:manage:goods',
+  'catalog:manage:goods-types': 'catalog:manage:goods-types',
+  'catalog:manage:accessory-operations': 'catalog:manage:accessory-operations',
+  'catalog:manage:rejection-reasons': 'catalog:manage:rejection-reasons',
+  'tracking:read': 'tracking:read',
+  'tracking:update': 'tracking:update',
+  'tracking:manage': 'tracking:manage',
+  'reports:read': 'reports:read',
+  'reports:manage:other': 'reports:manage:other',
+  'reports:action': 'reports:action',
+  'reports:action:export': 'reports:action:export',
+  'roles:manage': 'roles:manage',
+  'permissions:manage': 'permissions:manage',
+  'logs:read': 'logs:read',
+  'profile:update': 'profile:update',
+  'archival:read': 'archival:read',
+  'archival:manage': 'archival:manage',
+} as const;
+
+export interface UpdateRoleProfileDto {
+  /** @maxLength 100 */
+  name?: string;
+  /**
+     * @maxLength 500
+     * @nullable
+     */
+  description?: string | null;
+  persona?: UpdateRoleProfileDtoPersona;
+  permissionNames?: UpdateRoleProfileDtoPermissionNamesItem[];
+  isActive?: boolean;
 }
 
 export type TrackWagonDtoWagonTrackingsItem = {

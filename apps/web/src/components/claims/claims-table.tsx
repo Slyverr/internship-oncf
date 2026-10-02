@@ -9,8 +9,9 @@ import {
 	ChevronUpIcon,
 	PlusIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useMemo } from "react";
+import { ActionLink } from "@/components/common/action-link";
 import { TableEmptyStateRow } from "@/components/common/table-empty-state-row";
 import { TableLoadingState } from "@/components/common/table-loading-state";
 import { TableRowLink } from "@/components/common/table-row-link";
@@ -32,9 +33,15 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { useTableQueryState } from "@/hooks/use-table-query-state";
+import { type AppLocale, Messages } from "@/i18n";
+import {
+	getClaimPriorityLabel,
+	getClaimStatusLabel,
+	getClaimTypeLabel,
+} from "@/i18n/claim-labels";
+import { useLocale, useTranslate } from "@/i18n/locale-provider";
 import { ClaimListDto } from "@/lib/api/generated.schemas";
 import { formatDisplayDate } from "@/lib/date-utils";
-import { formatEnumLabel } from "@/lib/enum-labels";
 
 interface ClaimsTableProps {
 	data: ClaimListDto[];
@@ -49,57 +56,68 @@ interface ClaimsTableProps {
 
 const features = tableFeatures({});
 
-const columns: ColumnDef<typeof features, ClaimListDto>[] = [
-	{
-		accessorKey: "claimNumber",
-		header: "Claim #",
-		cell: (info) => (
-			<TableRowLink href={`/dashboard/claims/${info.row.original.claimNumber}`}>
-				{info.getValue<string>()}
-			</TableRowLink>
-		),
-	},
-	{
-		accessorFn: (row) => row.customer.companyName,
-		id: "customer",
-		header: "Customer",
-		cell: (info) => info.getValue<string>(),
-	},
-	{
-		accessorFn: (row) => row.claimType.name,
-		id: "type",
-		header: "Type",
-		cell: (info) => formatEnumLabel(info.getValue<string>()),
-	},
-	{
-		accessorFn: (row) => row.order?.orderNumber ?? "—",
-		id: "orderNumber",
-		header: "Order #",
-		cell: (info) => info.getValue<string>(),
-	},
-	{
-		accessorKey: "priority",
-		header: "Priority",
-		cell: (info) => {
-			const value = info.getValue<string | null>();
-			return value ? <span>{formatEnumLabel(value)}</span> : "—";
+function buildClaimsColumns(
+	locale: AppLocale,
+	t: ReturnType<typeof useTranslate>,
+): ColumnDef<typeof features, ClaimListDto>[] {
+	return [
+		{
+			accessorKey: "claimNumber",
+			header: () => t(Messages.claims.list.claimCode),
+			cell: (info) => (
+				<TableRowLink
+					href={`/dashboard/claims/${info.row.original.claimNumber}`}
+				>
+					{info.getValue<string>()}
+				</TableRowLink>
+			),
 		},
-	},
-	{
-		accessorFn: (row) => row.claimStatus.name,
-		id: "status",
-		header: "Status",
-		cell: (info) => formatEnumLabel(String(info.getValue())),
-	},
-	{
-		accessorKey: "createdAt",
-		header: "Created At",
-		cell: (info) => {
-			const value = info.getValue<string>();
-			return formatDisplayDate(value);
+		{
+			accessorFn: (row) => row.customer.companyName,
+			id: "customer",
+			header: () => t(Messages.claims.list.customer),
+			cell: (info) => info.getValue<string>(),
 		},
-	},
-];
+		{
+			accessorFn: (row) => row.claimType.name,
+			id: "type",
+			header: () => t(Messages.claims.list.type),
+			cell: (info) => getClaimTypeLabel(info.getValue<string>(), locale),
+		},
+		{
+			accessorFn: (row) => row.order?.orderNumber ?? "—",
+			id: "orderNumber",
+			header: () => t(Messages.claims.list.orderCode),
+			cell: (info) => info.getValue<string>(),
+		},
+		{
+			accessorKey: "priority",
+			header: () => t(Messages.claims.list.priority),
+			cell: (info) => {
+				const value = info.getValue<string | null>();
+				return value ? (
+					<span>{getClaimPriorityLabel(value, locale)}</span>
+				) : (
+					"—"
+				);
+			},
+		},
+		{
+			accessorFn: (row) => row.claimStatus.name,
+			id: "status",
+			header: () => t(Messages.claims.list.status),
+			cell: (info) => getClaimStatusLabel(String(info.getValue()), locale),
+		},
+		{
+			accessorKey: "createdAt",
+			header: () => t(Messages.claims.list.createdAt),
+			cell: (info) => {
+				const value = info.getValue<string>();
+				return formatDisplayDate(value, locale);
+			},
+		},
+	];
+}
 
 export function ClaimsTable({
 	data,
@@ -111,6 +129,9 @@ export function ClaimsTable({
 	sortOrder,
 	isLoading,
 }: ClaimsTableProps) {
+	const locale = useLocale();
+	const t = useTranslate();
+	const columns = useMemo(() => buildClaimsColumns(locale, t), [locale, t]);
 	const router = useRouter();
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
@@ -155,7 +176,7 @@ export function ClaimsTable({
 		<div className="space-y-4">
 			<div className="flex flex-wrap items-center gap-4">
 				<Input
-					placeholder="Search claims..."
+					placeholder={t(Messages.claims.list.search)}
 					value={searchValue}
 					onChange={(event) => setSearchValue(event.target.value)}
 					className="w-full max-w-sm"
@@ -168,16 +189,18 @@ export function ClaimsTable({
 					<SelectTrigger className="w-full max-w-44">
 						<SelectValue>
 							{currentStatus === "ALL"
-								? "All statuses"
-								: formatEnumLabel(currentStatus)}
+								? t(Messages.claims.list.allStatuses)
+								: getClaimStatusLabel(currentStatus, locale)}
 						</SelectValue>
 					</SelectTrigger>
 
 					<SelectContent>
-						<SelectItem value="ALL">All statuses</SelectItem>
+						<SelectItem value="ALL">
+							{t(Messages.claims.list.allStatuses)}
+						</SelectItem>
 						{Object.values(ClaimStatus).map((val) => (
 							<SelectItem key={val} value={val}>
-								{formatEnumLabel(val)}
+								{getClaimStatusLabel(val, locale)}
 							</SelectItem>
 						))}
 					</SelectContent>
@@ -190,16 +213,18 @@ export function ClaimsTable({
 					<SelectTrigger className="w-full max-w-48">
 						<SelectValue>
 							{currentType === "ALL"
-								? "All types"
-								: formatEnumLabel(currentType)}
+								? t(Messages.claims.list.allTypes)
+								: getClaimTypeLabel(currentType, locale)}
 						</SelectValue>
 					</SelectTrigger>
 
 					<SelectContent>
-						<SelectItem value="ALL">All types</SelectItem>
+						<SelectItem value="ALL">
+							{t(Messages.claims.list.allTypes)}
+						</SelectItem>
 						{Object.values(ClaimType).map((val) => (
 							<SelectItem key={val} value={val}>
-								{formatEnumLabel(val)}
+								{getClaimTypeLabel(val, locale)}
 							</SelectItem>
 						))}
 					</SelectContent>
@@ -212,16 +237,18 @@ export function ClaimsTable({
 					<SelectTrigger className="w-full max-w-36">
 						<SelectValue>
 							{currentPriority === "ALL"
-								? "All priorities"
-								: formatEnumLabel(currentPriority)}
+								? t(Messages.claims.list.allPriorities)
+								: getClaimPriorityLabel(currentPriority, locale)}
 						</SelectValue>
 					</SelectTrigger>
 
 					<SelectContent>
-						<SelectItem value="ALL">All priorities</SelectItem>
+						<SelectItem value="ALL">
+							{t(Messages.claims.list.allPriorities)}
+						</SelectItem>
 						{Object.values(ClaimPriority).map((val) => (
 							<SelectItem key={val} value={val}>
-								{formatEnumLabel(val)}
+								{getClaimPriorityLabel(val, locale)}
 							</SelectItem>
 						))}
 					</SelectContent>
@@ -289,27 +316,24 @@ export function ClaimsTable({
 								colSpan={columns.length}
 								message={
 									hasActiveFilters
-										? "No claims match these filters."
-										: "No claims yet."
+										? t(Messages.claims.list.noMatchTitle)
+										: t(Messages.claims.list.emptyTitle)
 								}
 								description={
 									hasActiveFilters
-										? "Change or clear the selected filters to see more claims."
-										: "Customer issues and their progress will appear here."
+										? t(Messages.claims.list.noMatchDescription)
+										: t(Messages.claims.list.emptyDescription)
 								}
 								action={
 									hasActiveFilters ? (
 										<Button variant="outline" onClick={clearFilters}>
-											Clear filters
+											{t(Messages.claims.list.clearFilters)}
 										</Button>
 									) : (
-										<Link
-											href="/dashboard/claims/new"
-											className="inline-flex min-h-11 items-center gap-2 rounded-md px-4 text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-										>
+										<ActionLink href="/dashboard/claims/new">
 											<PlusIcon aria-hidden="true" className="size-4" />
-											Create a claim
-										</Link>
+											{t(Messages.claims.list.create)}
+										</ActionLink>
 									)
 								}
 							/>

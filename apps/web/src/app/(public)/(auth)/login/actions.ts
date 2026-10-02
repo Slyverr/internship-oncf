@@ -1,14 +1,15 @@
 "use server";
 
-import { isAxiosError } from "axios";
 import { cookies } from "next/headers";
+import { type MessageKey, Messages } from "@/i18n";
 import { authControllerLogin } from "@/lib/api/auth";
+import { getLoginErrorKey } from "@/lib/login-error";
 
 export type LoginState = {
 	errors?: {
-		username?: string;
-		password?: string;
-		form?: string;
+		username?: MessageKey;
+		password?: MessageKey;
+		form?: MessageKey;
 	};
 	success?: boolean;
 	data?: {
@@ -28,11 +29,13 @@ export async function loginAction(
 	const errors: LoginState["errors"] = {};
 
 	if (!username) {
-		errors.username = "Enter your email or employee code.";
+		errors.username = Messages.auth.login.usernameRequired;
 	}
 
 	if (!password || password.length < 8) {
-		errors.password = "Password must be at least 8 characters";
+		errors.password = password
+			? Messages.auth.login.passwordTooShort
+			: Messages.auth.login.passwordRequired;
 	}
 
 	if (errors.username || errors.password) {
@@ -53,7 +56,7 @@ export async function loginAction(
 		if (!accessToken) {
 			return {
 				errors: {
-					form: "Invalid email or employee code, or password",
+					form: Messages.auth.login.invalidCredentials,
 				},
 				success: false,
 				data: { username, remember },
@@ -74,20 +77,9 @@ export async function loginAction(
 			data: { username, remember },
 		};
 	} catch (error: unknown) {
-		let formError = "Network error. Please check your connection.";
-		const status = isAxiosError(error) ? error.response?.status : undefined;
-
-		if (status === 401) {
-			formError = "Invalid email or employee code, or password";
-		} else if (status === 429) {
-			formError = "Too many attempts. Please try again later";
-		} else if (status !== undefined && status >= 500) {
-			formError = "Server error. Please try again later";
-		}
-
 		return {
 			errors: {
-				form: formError,
+				form: getLoginErrorKey(error),
 			},
 			success: false,
 			data: { username, remember },

@@ -39,17 +39,53 @@ type MessagePaths<Value> = {
 }[keyof Value & string];
 
 export type MessageKey = MessagePaths<typeof en>;
-export type MessageTranslator = (
-	key: MessageKey,
-	values?: Record<string, string | number>,
+type MessageAtPath<
+	Path extends string,
+	Value = typeof en,
+> = Path extends `${infer Head}.${infer Tail}`
+	? Head extends keyof Value
+		? MessageAtPath<Tail, Value[Head]>
+		: never
+	: Path extends keyof Value
+		? Value[Path]
+		: never;
+
+type MessageText<Value> = Value extends string
+	? Value
+	: Value extends PluralMessage
+		? Value["plural"][keyof Value["plural"]]
+		: never;
+type PlaceholderNames<Text extends string> =
+	Text extends `${string}{${infer Name}}${infer Rest}`
+		? Name | PlaceholderNames<Rest>
+		: never;
+type MessagePlaceholders<Key extends MessageKey> = PlaceholderNames<
+	MessageText<MessageAtPath<Key>> & string
+>;
+export type MessageKeyWithoutPlaceholders = {
+	[Key in MessageKey]: [MessagePlaceholders<Key>] extends [never] ? Key : never;
+}[MessageKey];
+type TranslationValues<Key extends MessageKey> = Key extends MessageKey
+	? [MessagePlaceholders<Key>] extends [never]
+		? [values?: Record<string, string | number>]
+		: [values: Record<MessagePlaceholders<Key>, string | number>]
+	: never;
+type TranslationArguments<Key extends MessageKey> = [
+	...TranslationValues<Key>,
+	locale?: AppLocale,
+];
+
+export type TypedMessageTranslator = <Key extends MessageKey>(
+	key: Key,
+	...args: TranslationValues<Key>
 ) => string;
 
 const catalogs = { en } satisfies Record<AppLocale, typeof en>;
 
-export function translate(
+function resolveMessage(
 	key: MessageKey,
-	values: Record<string, string | number> = {},
-	locale: AppLocale = DEFAULT_LOCALE,
+	values: Record<string, string | number>,
+	locale: AppLocale,
 ): string {
 	const resolved = key.split(".").reduce<unknown>((current, part) => {
 		if (typeof current !== "object" || current === null) return undefined;
@@ -76,6 +112,28 @@ export function translate(
 	return message.replace(/\{(\w+)\}/g, (placeholder, name: string) =>
 		String(values[name] ?? placeholder),
 	);
+}
+
+export function createTranslator(locale: AppLocale): TypedMessageTranslator {
+	return <Key extends MessageKey>(key: Key, ...args: TranslationValues<Key>) =>
+		resolveMessage(key, args[0] ?? {}, locale);
+}
+
+export function translate<Key extends MessageKey>(
+	key: Key,
+	...args: TranslationArguments<Key>
+): string;
+export function translate(
+	key: MessageKeyWithoutPlaceholders,
+	values?: Record<string, string | number>,
+	locale?: AppLocale,
+): string;
+export function translate(
+	key: MessageKey,
+	values: Record<string, string | number> = {},
+	locale: AppLocale = DEFAULT_LOCALE,
+): string {
+	return resolveMessage(key, values, locale);
 }
 
 export function translateApiResponse(

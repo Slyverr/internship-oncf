@@ -8,15 +8,20 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Messages } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
 import { cn } from "@/lib/utils";
 import { useAppearance } from "@/providers/appearance-provider";
 
 export function WorkspaceLayoutSwitch({ className }: { className?: string }) {
+	const t = useTranslate();
 	const { preferences, setWorkspaceLayout } = useAppearance();
 	const toCenteredHeader = preferences.workspaceLayout === "sidebar";
-	const label = toCenteredHeader
-		? "Switch to centered header navigation"
-		: "Switch to sidebar navigation";
+	const label = t(
+		toCenteredHeader
+			? Messages.navigation.switchToCentered
+			: Messages.navigation.switchToSidebar,
+	);
 	const Icon = toCenteredHeader ? PanelTopIcon : PanelLeftIcon;
 
 	return (

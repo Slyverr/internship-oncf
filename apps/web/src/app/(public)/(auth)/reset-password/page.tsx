@@ -1,10 +1,15 @@
 import { Metadata } from "next";
 import { ResetPasswordForm } from "@/components/auth/reset-password-form";
+import { Messages } from "@/i18n";
+import { getRequestTranslator } from "@/i18n/server";
 
-export const metadata: Metadata = {
-	title: "Reset password",
-	description: "Set a new password for your ECommand account.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+	const t = await getRequestTranslator();
+	return {
+		title: t(Messages.auth.recovery.resetPageTitle),
+		description: t(Messages.auth.recovery.resetPageDescription),
+	};
+}
 
 interface PageProps {
 	searchParams: Promise<{ token?: string }>;

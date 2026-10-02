@@ -9,6 +9,8 @@ import {
 	ComboboxItem,
 	ComboboxList,
 } from "@/components/ui/combobox";
+import { Messages } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
 import { useCatalogControllerFindUnits } from "@/lib/api/catalog";
 import { UnitDto } from "@/lib/api/generated.schemas";
 
@@ -30,8 +32,11 @@ export function UnitSelect({
 	id,
 	value,
 	onChange,
-	placeholder = "Select unit",
+	placeholder,
 }: UnitSelectProps) {
+	const t = useTranslate();
+	const resolvedPlaceholder =
+		placeholder ?? t(Messages.units.select.placeholder);
 	const {
 		data: fetchedUnits,
 		isLoading,
@@ -63,15 +68,15 @@ export function UnitSelect({
 					id={id}
 					placeholder={
 						isLoading && !providedUnits
-							? "Loading units…"
+							? t(Messages.units.select.loading)
 							: isError && !providedUnits
-								? "Units unavailable"
-								: placeholder
+								? t(Messages.units.select.unavailable)
+								: resolvedPlaceholder
 					}
 				/>
 
 				<ComboboxContent>
-					<ComboboxEmpty>No units found.</ComboboxEmpty>
+					<ComboboxEmpty>{t(Messages.units.select.empty)}</ComboboxEmpty>
 
 					<ComboboxList>
 						{(unit) => (
@@ -84,15 +89,15 @@ export function UnitSelect({
 			</Combobox>
 			{isError && !providedUnits && (
 				<InlineQueryRetry
-					message="Could not load units. Check your connection."
-					retryLabel="Retry units"
+					message={t(Messages.units.select.loadFailed)}
+					retryLabel={t(Messages.units.select.retry)}
 					isFetching={isFetching}
 					onRetry={() => void refetch()}
 				/>
 			)}
 			{!isLoading && !isError && units.length === 0 && !providedUnits && (
 				<p role="status" className="text-sm text-muted-foreground">
-					No units are available.
+					{t(Messages.units.select.noneAvailable)}
 				</p>
 			)}
 		</div>

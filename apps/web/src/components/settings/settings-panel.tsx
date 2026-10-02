@@ -1,8 +1,14 @@
 "use client";
 
-import { isStrongPassword, STRONG_PASSWORD_HINT } from "@ecommand/shared";
-import { type FormEvent, useEffect, useState } from "react";
-
+import { isStrongPassword } from "@ecommand/shared";
+import {
+	type FormEvent,
+	type ReactNode,
+	useEffect,
+	useMemo,
+	useState,
+} from "react";
+import { ThemePreview } from "@/components/common/theme-preview";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -20,116 +26,269 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import {
+	Messages,
+	type TypedMessageTranslator,
+	translateApiResponse,
+} from "@/i18n";
+import { useLocale, useTranslate } from "@/i18n/locale-provider";
 import { useAuthControllerChangePassword } from "@/lib/api/auth";
 import { useProfileControllerUpdate } from "@/lib/api/profile";
 import { getFormErrorMessage } from "@/lib/form-utils";
 import {
 	type FontFamily,
-	type MotionPreference,
 	type TextSize,
-	type ThemeMode,
 	useAppearance,
-	type WorkspaceLayout,
 } from "@/providers/appearance-provider";
 import { useAuth } from "@/providers/auth-provider";
 
-const themeOptions: {
-	value: ThemeMode;
-	label: string;
-	description: string;
-}[] = [
-	{
-		value: "system",
-		label: "System",
-		description: "Follow your device setting",
-	},
-	{
-		value: "light",
-		label: "Warm light",
-		description: "Warm neutral surfaces with orange accents",
-	},
-	{
-		value: "dark",
-		label: "Charcoal dark",
-		description: "Low-glare charcoal surfaces and soft accents",
-	},
-	{
-		value: "mono-light",
-		label: "Monochrome light",
-		description: "White surfaces, black text, and gray details",
-	},
-	{
-		value: "mono-dark",
-		label: "Monochrome dark",
-		description: "Black surfaces, white text, and gray details",
-	},
-];
-
-const fontOptions: { value: FontFamily; label: string; description: string }[] =
-	[
-		{ value: "inter", label: "Inter", description: "Crisp and familiar" },
-		{ value: "geist", label: "Geist", description: "Clean and compact" },
+function getThemeOptions(t: TypedMessageTranslator) {
+	return [
 		{
-			value: "system",
-			label: "System UI",
-			description: "Use your device font",
+			value: "system" as const,
+			label: t(Messages.settings.appearance.options.theme.system.label),
+			description: t(
+				Messages.settings.appearance.options.theme.system.description,
+			),
+			preview: <ThemePreview theme="system" size="compact" />,
 		},
-		{ value: "arial", label: "Arial", description: "Neutral sans serif" },
-		{ value: "serif", label: "Georgia", description: "Traditional serif" },
 		{
-			value: "monospace",
-			label: "Monospace",
-			description: "Fixed-width lettering",
+			value: "light" as const,
+			label: t(Messages.settings.appearance.options.theme.light.label),
+			description: t(
+				Messages.settings.appearance.options.theme.light.description,
+			),
+			preview: <ThemePreview theme="light" size="compact" />,
+		},
+		{
+			value: "dark" as const,
+			label: t(Messages.settings.appearance.options.theme.dark.label),
+			description: t(
+				Messages.settings.appearance.options.theme.dark.description,
+			),
+			preview: <ThemePreview theme="dark" size="compact" />,
+		},
+		{
+			value: "mono-light" as const,
+			label: t(Messages.settings.appearance.options.theme.monoLight.label),
+			description: t(
+				Messages.settings.appearance.options.theme.monoLight.description,
+			),
+			preview: <ThemePreview theme="mono-light" size="compact" />,
+		},
+		{
+			value: "mono-dark" as const,
+			label: t(Messages.settings.appearance.options.theme.monoDark.label),
+			description: t(
+				Messages.settings.appearance.options.theme.monoDark.description,
+			),
+			preview: <ThemePreview theme="mono-dark" size="compact" />,
 		},
 	];
+}
 
-const textSizeOptions: {
-	value: TextSize;
-	label: string;
-	description: string;
-}[] = [
-	{ value: "small", label: "Small", description: "Slightly smaller text" },
-	{
-		value: "default",
-		label: "Default",
-		description: "Recommended reading size",
-	},
-	{ value: "large", label: "Large", description: "Larger text throughout" },
-];
+function getFontOptions(t: TypedMessageTranslator) {
+	return [
+		{
+			value: "inter" as const,
+			label: t(Messages.settings.appearance.options.font.inter.label),
+			description: t(
+				Messages.settings.appearance.options.font.inter.description,
+			),
+			preview: <FontPreview font="inter" />,
+		},
+		{
+			value: "geist" as const,
+			label: t(Messages.settings.appearance.options.font.geist.label),
+			description: t(
+				Messages.settings.appearance.options.font.geist.description,
+			),
+			preview: <FontPreview font="geist" />,
+		},
+		{
+			value: "system" as const,
+			label: t(Messages.settings.appearance.options.font.system.label),
+			description: t(
+				Messages.settings.appearance.options.font.system.description,
+			),
+			preview: <FontPreview font="system" />,
+		},
+		{
+			value: "arial" as const,
+			label: t(Messages.settings.appearance.options.font.arial.label),
+			description: t(
+				Messages.settings.appearance.options.font.arial.description,
+			),
+			preview: <FontPreview font="arial" />,
+		},
+		{
+			value: "serif" as const,
+			label: t(Messages.settings.appearance.options.font.serif.label),
+			description: t(
+				Messages.settings.appearance.options.font.serif.description,
+			),
+			preview: <FontPreview font="serif" />,
+		},
+		{
+			value: "monospace" as const,
+			label: t(Messages.settings.appearance.options.font.monospace.label),
+			description: t(
+				Messages.settings.appearance.options.font.monospace.description,
+			),
+			preview: <FontPreview font="monospace" />,
+		},
+	];
+}
 
-const motionOptions: {
-	value: MotionPreference;
-	label: string;
-	description: string;
-}[] = [
-	{
-		value: "system",
-		label: "Follow system",
-		description: "Follow your device setting",
-	},
-	{
-		value: "reduced",
-		label: "Reduce motion",
-		description: "Limit animation and transitions",
-	},
-];
+function getTextSizeOptions(t: TypedMessageTranslator) {
+	return [
+		{
+			value: "small" as const,
+			label: t(Messages.settings.appearance.options.textSize.small.label),
+			description: t(
+				Messages.settings.appearance.options.textSize.small.description,
+			),
+			preview: <TextSizePreview size="small" />,
+		},
+		{
+			value: "default" as const,
+			label: t(Messages.settings.appearance.options.textSize.default.label),
+			description: t(
+				Messages.settings.appearance.options.textSize.default.description,
+			),
+			preview: <TextSizePreview size="default" />,
+		},
+		{
+			value: "large" as const,
+			label: t(Messages.settings.appearance.options.textSize.large.label),
+			description: t(
+				Messages.settings.appearance.options.textSize.large.description,
+			),
+			preview: <TextSizePreview size="large" />,
+		},
+	];
+}
 
-const workspaceLayoutOptions: {
-	value: WorkspaceLayout;
-	label: string;
-	description: string;
-}[] = [
-	{
-		value: "sidebar",
-		label: "Sidebar",
-		description: "Keep navigation in the side rail",
-	},
-	{
-		value: "centered-header",
-		label: "Centered icon bar",
-		description: "Place icon navigation above centered content",
-	},
-];
+function getMotionOptions(t: TypedMessageTranslator) {
+	return [
+		{
+			value: "system" as const,
+			label: t(Messages.settings.appearance.options.motion.system.label),
+			description: t(
+				Messages.settings.appearance.options.motion.system.description,
+			),
+			preview: <MotionPreview reduced={false} />,
+		},
+		{
+			value: "reduced" as const,
+			label: t(Messages.settings.appearance.options.motion.reduced.label),
+			description: t(
+				Messages.settings.appearance.options.motion.reduced.description,
+			),
+			preview: <MotionPreview reduced />,
+		},
+	];
+}
+
+function getWorkspaceLayoutOptions(t: TypedMessageTranslator) {
+	return [
+		{
+			value: "sidebar" as const,
+			label: t(Messages.settings.appearance.options.layout.sidebar.label),
+			description: t(
+				Messages.settings.appearance.options.layout.sidebar.description,
+			),
+			preview: <SidebarLayoutPreview />,
+		},
+		{
+			value: "centered-header" as const,
+			label: t(
+				Messages.settings.appearance.options.layout.centeredHeader.label,
+			),
+			description: t(
+				Messages.settings.appearance.options.layout.centeredHeader.description,
+			),
+			preview: <CenteredLayoutPreview />,
+		},
+	];
+}
+
+function SidebarLayoutPreview() {
+	return (
+		<span
+			aria-hidden="true"
+			className="grid size-8 shrink-0 grid-cols-[8px_1fr] gap-compact rounded-md border border-border bg-background p-compact"
+		>
+			<span className="rounded-sm bg-sidebar" />
+			<span className="rounded-sm bg-muted" />
+		</span>
+	);
+}
+
+function CenteredLayoutPreview() {
+	return (
+		<span
+			aria-hidden="true"
+			className="grid size-8 shrink-0 content-start gap-compact rounded-md border border-border bg-background p-compact"
+		>
+			<span className="h-2 rounded-full bg-sidebar" />
+			<span className="mx-auto mt-compact h-3 w-5 rounded-sm bg-muted" />
+		</span>
+	);
+}
+
+const fontPreviewFamily: Record<FontFamily, string> = {
+	inter: "var(--font-inter), ui-sans-serif, sans-serif",
+	geist: "var(--font-geist-sans), ui-sans-serif, sans-serif",
+	system: "system-ui, sans-serif",
+	arial: "Arial, Helvetica, sans-serif",
+	serif: "Georgia, serif",
+	monospace: "ui-monospace, monospace",
+};
+
+function FontPreview({ font }: { font: FontFamily }) {
+	return (
+		<span
+			aria-hidden="true"
+			className="grid size-8 shrink-0 place-items-center rounded-md border border-border bg-muted text-sm font-semibold text-foreground"
+			style={{ fontFamily: fontPreviewFamily[font] }}
+		>
+			Aa
+		</span>
+	);
+}
+
+function TextSizePreview({ size }: { size: TextSize }) {
+	const scale = {
+		small: "text-xs",
+		default: "text-sm",
+		large: "text-base",
+	}[size];
+	return (
+		<span
+			aria-hidden="true"
+			className={`grid size-8 shrink-0 place-items-center rounded-md border border-border bg-muted font-semibold text-foreground ${scale}`}
+		>
+			Ag
+		</span>
+	);
+}
+
+function MotionPreview({ reduced }: { reduced: boolean }) {
+	return (
+		<span
+			aria-hidden="true"
+			className="grid size-8 shrink-0 place-items-center rounded-md border border-border bg-muted"
+		>
+			<span className="grid w-4 gap-compact">
+				<span className="h-1 rounded-full bg-muted-foreground" />
+				<span
+					className={`h-1 w-2 rounded-full bg-primary ${reduced ? "ml-2" : ""}`}
+				/>
+			</span>
+		</span>
+	);
+}
 
 function PreferenceSelect<Value extends string>({
 	id,
@@ -141,7 +300,12 @@ function PreferenceSelect<Value extends string>({
 	id: string;
 	label: string;
 	value: Value;
-	options: { value: Value; label: string; description: string }[];
+	options: {
+		value: Value;
+		label: string;
+		description: string;
+		preview?: ReactNode;
+	}[];
 	onChange: (value: Value) => void;
 }) {
 	const selected = options.find((option) => option.value === value);
@@ -157,11 +321,19 @@ function PreferenceSelect<Value extends string>({
 				}}
 			>
 				<SelectTrigger id={id} className="w-full min-w-0">
-					<SelectValue>{selected?.label}</SelectValue>
+					<SelectValue>
+						{selected?.preview}
+						<span className="truncate">{selected?.label}</span>
+					</SelectValue>
 				</SelectTrigger>
-				<SelectContent align="start" className="max-w-[calc(100vw-2rem)]">
+				<SelectContent
+					align="start"
+					alignItemWithTrigger={false}
+					className="max-w-[calc(100vw-2rem)]"
+				>
 					{options.map((option) => (
 						<SelectItem key={option.value} value={option.value}>
+							{option.preview}
 							{option.label}
 						</SelectItem>
 					))}
@@ -177,6 +349,8 @@ function PreferenceSelect<Value extends string>({
 export type SettingsSection = "appearance" | "profile" | "security";
 
 export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
+	const t = useTranslate();
+	const locale = useLocale();
 	const { profile, setProfile } = useAuth();
 	const {
 		preferences,
@@ -188,6 +362,14 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 	} = useAppearance();
 	const profileMutation = useProfileControllerUpdate();
 	const passwordMutation = useAuthControllerChangePassword();
+	const themeOptions = useMemo(() => getThemeOptions(t), [t]);
+	const fontOptions = useMemo(() => getFontOptions(t), [t]);
+	const textSizeOptions = useMemo(() => getTextSizeOptions(t), [t]);
+	const motionOptions = useMemo(() => getMotionOptions(t), [t]);
+	const workspaceLayoutOptions = useMemo(
+		() => getWorkspaceLayoutOptions(t),
+		[t],
+	);
 	const [firstName, setFirstName] = useState(profile.firstName);
 	const [lastName, setLastName] = useState(profile.lastName);
 	const [email, setEmail] = useState(profile.email);
@@ -231,11 +413,12 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 			{
 				onSuccess: (updatedProfile) => {
 					setProfile(updatedProfile);
-					setProfileMessage("Your profile has been updated.");
+					setProfileMessage(t(Messages.settings.profile.saved));
 				},
 				onError: (error) =>
 					setProfileError(
-						getFormErrorMessage(error) ?? "Something went wrong. Try again.",
+						getFormErrorMessage(error, locale) ??
+							t(Messages.settings.feedback.requestFailed),
 					),
 			},
 		);
@@ -247,7 +430,7 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 		setPasswordError("");
 		setPasswordMismatch(false);
 		if (!isStrongPassword(newPassword)) {
-			setPasswordError(STRONG_PASSWORD_HINT);
+			setPasswordError(t(Messages.auth.passwordHint));
 			document.getElementById("new-password")?.focus();
 			return;
 		}
@@ -259,15 +442,19 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 		passwordMutation.mutate(
 			{ data: { currentPassword, newPassword } },
 			{
-				onSuccess: () => {
+				onSuccess: ({ code }) => {
 					setCurrentPassword("");
 					setNewPassword("");
 					setConfirmNewPassword("");
-					setPasswordMessage("Your password has been changed.");
+					setPasswordMessage(
+						translateApiResponse(code, locale) ??
+							t(Messages.settings.security.passwordChanged),
+					);
 				},
 				onError: (error) =>
 					setPasswordError(
-						getFormErrorMessage(error) ?? "Something went wrong. Try again.",
+						getFormErrorMessage(error, locale) ??
+							t(Messages.settings.feedback.requestFailed),
 					),
 			},
 		);
@@ -277,26 +464,26 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 		<div className="grid max-w-5xl gap-6">
 			{!section && (
 				<nav
-					aria-label="Settings sections"
-					className="flex flex-wrap gap-4 pb-4"
+					aria-label={t(Messages.settings.sections.label)}
+					className="flex flex-wrap gap-control pb-4"
 				>
 					<a
-						className="shrink-0 rounded-md border px-4 py-4 text-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+						className="flex min-h-11 shrink-0 items-center rounded-md border px-control text-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 						href="#appearance"
 					>
-						Appearance
+						{t(Messages.settings.sections.appearance)}
 					</a>
 					<a
-						className="shrink-0 rounded-md border px-4 py-4 text-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+						className="flex min-h-11 shrink-0 items-center rounded-md border px-control text-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 						href="#account"
 					>
-						Account details
+						{t(Messages.settings.sections.profile)}
 					</a>
 					<a
-						className="shrink-0 rounded-md border px-4 py-4 text-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+						className="flex min-h-11 shrink-0 items-center rounded-md border px-control text-sm transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 						href="#security"
 					>
-						Security
+						{t(Messages.settings.sections.security)}
 					</a>
 				</nav>
 			)}
@@ -306,47 +493,47 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 					className={`scroll-mt-8 ${section ? "border-0 bg-transparent py-0 shadow-none ring-0 [--card-spacing:0px]" : ""}`}
 				>
 					<CardHeader>
-						<CardTitle>Appearance</CardTitle>
+						<CardTitle>{t(Messages.settings.appearance.title)}</CardTitle>
 						<CardDescription>
-							Set up colors, text, and motion for a comfortable workspace.
+							{t(Messages.settings.appearance.description)}
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="grid gap-4">
 						<div className="grid gap-4 @2xl/settings:grid-cols-2">
 							<div className="grid content-start gap-4">
 								<PreferenceSelect
-									id="appearance-workspace-layout"
-									label="Workspace layout"
-									value={preferences.workspaceLayout}
-									options={workspaceLayoutOptions}
-									onChange={setWorkspaceLayout}
-								/>
-								<PreferenceSelect
 									id="appearance-theme"
-									label="Color theme"
+									label={t(Messages.settings.appearance.theme)}
 									value={preferences.theme}
 									options={themeOptions}
 									onChange={setTheme}
+								/>
+								<PreferenceSelect
+									id="appearance-workspace-layout"
+									label={t(Messages.settings.appearance.layout)}
+									value={preferences.workspaceLayout}
+									options={workspaceLayoutOptions}
+									onChange={setWorkspaceLayout}
 								/>
 							</div>
 							<div className="grid content-start gap-4">
 								<PreferenceSelect
 									id="appearance-font"
-									label="Font"
+									label={t(Messages.settings.appearance.font)}
 									value={preferences.fontFamily}
 									options={fontOptions}
 									onChange={setFontFamily}
 								/>
 								<PreferenceSelect
 									id="appearance-text-size"
-									label="Text size"
+									label={t(Messages.settings.appearance.textSize)}
 									value={preferences.textSize}
 									options={textSizeOptions}
 									onChange={setTextSize}
 								/>
 								<PreferenceSelect
 									id="appearance-motion"
-									label="Motion"
+									label={t(Messages.settings.appearance.motion)}
 									value={preferences.motion}
 									options={motionOptions}
 									onChange={setMotion}
@@ -363,35 +550,48 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 					className={`scroll-mt-8 ${section ? "border-0 bg-transparent py-0 shadow-none ring-0 [--card-spacing:0px]" : ""}`}
 				>
 					<CardHeader>
-						<CardTitle>Account details</CardTitle>
+						<CardTitle>{t(Messages.settings.profile.title)}</CardTitle>
 						<CardDescription>
-							Update the name and email used for your ECommand account.
+							{t(Messages.settings.profile.description)}
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<form onSubmit={saveProfile} className="grid gap-4 sm:grid-cols-2">
 							{profile.customerId !== null && (
 								<div className="oncf-field min-w-0 sm:col-span-2">
-									<p className="text-sm font-medium">Customer account</p>
+									<p className="text-sm font-medium">
+										{t(Messages.settings.profile.customerAccount)}
+									</p>
 									<div className="grid min-h-11 min-w-0 gap-1 rounded-md border border-input bg-background px-field py-control shadow-xs">
 										<span className="truncate text-sm font-medium">
 											{profile.customerName ??
-												`Customer account #${profile.customerId}`}
+												t(
+													Messages.settings.profile.customerAccountCodeFallback,
+													{
+														id: profile.customerId,
+													},
+												)}
 										</span>
 										{profile.customerCode && (
 											<span className="text-meta text-muted-foreground">
-												Customer code: {profile.customerCode}
+												{t(Messages.settings.profile.customerCode, {
+													code: profile.customerCode,
+												})}
 											</span>
 										)}
 									</div>
 								</div>
 							)}
 							<div className="oncf-field">
-								<Label htmlFor="settings-first-name">First name</Label>
+								<Label htmlFor="settings-first-name">
+									{t(Messages.settings.profile.firstName)}
+								</Label>
 								<Input
 									id="settings-first-name"
 									value={firstName}
-									placeholder="e.g. Samira"
+									placeholder={t(
+										Messages.settings.profile.firstNamePlaceholder,
+									)}
 									autoComplete="given-name"
 									required
 									onChange={(event) => {
@@ -401,11 +601,13 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 								/>
 							</div>
 							<div className="oncf-field">
-								<Label htmlFor="settings-last-name">Last name</Label>
+								<Label htmlFor="settings-last-name">
+									{t(Messages.settings.profile.lastName)}
+								</Label>
 								<Input
 									id="settings-last-name"
 									value={lastName}
-									placeholder="e.g. El Amrani"
+									placeholder={t(Messages.settings.profile.lastNamePlaceholder)}
 									autoComplete="family-name"
 									required
 									onChange={(event) => {
@@ -415,12 +617,14 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 								/>
 							</div>
 							<div className="oncf-field sm:col-span-2">
-								<Label htmlFor="settings-email">Email address</Label>
+								<Label htmlFor="settings-email">
+									{t(Messages.settings.profile.email)}
+								</Label>
 								<Input
 									id="settings-email"
 									type="email"
 									value={email}
-									placeholder="name@company.com"
+									placeholder={t(Messages.settings.profile.emailPlaceholder)}
 									autoComplete="email"
 									required
 									onChange={(event) => {
@@ -434,7 +638,9 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 									type="submit"
 									disabled={!profileIsDirty || profileMutation.isPending}
 								>
-									{profileMutation.isPending ? "Saving..." : "Save profile"}
+									{profileMutation.isPending
+										? t(Messages.settings.profile.saving)
+										: t(Messages.settings.profile.save)}
 								</Button>
 								<Button
 									type="button"
@@ -448,7 +654,7 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 										setProfileError("");
 									}}
 								>
-									Discard changes
+									{t(Messages.settings.profile.discard)}
 								</Button>
 								{profileMessage && (
 									<p role="status" className="text-sm text-primary">
@@ -472,18 +678,21 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 					className={`scroll-mt-8 ${section ? "border-0 bg-transparent py-0 shadow-none ring-0 [--card-spacing:0px]" : ""}`}
 				>
 					<CardHeader>
-						<CardTitle>Security</CardTitle>
+						<CardTitle>{t(Messages.settings.security.title)}</CardTitle>
 						<CardDescription>
-							Change your password to keep your account secure.
+							{t(Messages.settings.security.description)}
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<form onSubmit={changePassword} className="grid max-w-xl gap-4">
 							<div className="oncf-field">
-								<Label htmlFor="current-password">Current password</Label>
+								<Label htmlFor="current-password">
+									{t(Messages.settings.security.currentPassword)}
+								</Label>
 								<Input
 									id="current-password"
 									type="password"
+									placeholder={t(Messages.settings.security.currentPassword)}
 									autoComplete="current-password"
 									value={currentPassword}
 									required
@@ -491,10 +700,13 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 								/>
 							</div>
 							<div className="oncf-field">
-								<Label htmlFor="new-password">New password</Label>
+								<Label htmlFor="new-password">
+									{t(Messages.settings.security.newPassword)}
+								</Label>
 								<Input
 									id="new-password"
 									type="password"
+									placeholder={t(Messages.settings.security.newPassword)}
 									aria-describedby="new-password-help"
 									autoComplete="new-password"
 									minLength={8}
@@ -509,16 +721,17 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 									id="new-password-help"
 									className="text-sm text-muted-foreground"
 								>
-									{STRONG_PASSWORD_HINT}
+									{t(Messages.auth.passwordHint)}
 								</p>
 							</div>
 							<div className="oncf-field">
 								<Label htmlFor="confirm-new-password">
-									Confirm new password
+									{t(Messages.settings.security.confirmPassword)}
 								</Label>
 								<Input
 									id="confirm-new-password"
 									type="password"
+									placeholder={t(Messages.settings.security.confirmPassword)}
 									autoComplete="new-password"
 									value={confirmNewPassword}
 									aria-invalid={passwordMismatch}
@@ -537,19 +750,15 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 										className="text-sm text-destructive"
 										role="alert"
 									>
-										New passwords do not match.
+										{t(Messages.settings.security.passwordMismatch)}
 									</p>
 								)}
 							</div>
 							<div className="flex flex-wrap items-center gap-4">
-								<Button
-									type="submit"
-									variant="outline"
-									disabled={passwordMutation.isPending}
-								>
+								<Button type="submit" disabled={passwordMutation.isPending}>
 									{passwordMutation.isPending
-										? "Updating..."
-										: "Change password"}
+										? t(Messages.settings.security.updating)
+										: t(Messages.settings.security.changePassword)}
 								</Button>
 								{passwordMessage && (
 									<p role="status" className="text-sm text-primary">

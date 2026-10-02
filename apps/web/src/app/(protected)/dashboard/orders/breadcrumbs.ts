@@ -1,35 +1,9 @@
-const orders = {
-	resource: "Orders",
+import { Messages } from "@/i18n";
+import { createEntityBreadcrumbs } from "@/lib/entity-breadcrumbs";
+
+export const ordersBreadcrumbs = createEntityBreadcrumbs({
+	resourceKey: Messages.orders.pageTitle,
 	baseUrl: "/dashboard/orders",
-};
-
-export const ordersBreadcrumbs = {
-	home: () => [
-		{
-			label: orders.resource,
-			href: orders.baseUrl,
-		},
-	],
-
-	create: () => [
-		...ordersBreadcrumbs.home(),
-		{
-			label: "New Order",
-		},
-	],
-
-	detail: (id: string, label?: string) => [
-		...ordersBreadcrumbs.home(),
-		{
-			label: label ?? id,
-			href: `${orders.baseUrl}/${id}`,
-		},
-	],
-
-	edit: (id: string, label?: string) => [
-		...ordersBreadcrumbs.detail(id, label),
-		{
-			label: "Edit",
-		},
-	],
-};
+	createKey: Messages.orders.createForm.title,
+	editKey: Messages.orders.actions.edit,
+});

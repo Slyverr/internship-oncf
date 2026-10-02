@@ -8,6 +8,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { Messages } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
 import { useCustomersControllerFindAll } from "@/lib/api/customers";
 
 interface CustomerSelectProps {
@@ -17,6 +19,7 @@ interface CustomerSelectProps {
 }
 
 export function CustomerSelect({ id, value, onChange }: CustomerSelectProps) {
+	const t = useTranslate();
 	const {
 		data: customers = [],
 		isLoading,
@@ -38,10 +41,10 @@ export function CustomerSelect({ id, value, onChange }: CustomerSelectProps) {
 					<SelectValue>
 						{selectedCustomer?.companyName ??
 							(isLoading
-								? "Loading customers…"
+								? t(Messages.customers.select.loading)
 								: customers.length === 0
-									? "No customers available"
-									: "Select customer")}
+									? t(Messages.customers.select.none)
+									: t(Messages.customers.select.placeholder))}
 					</SelectValue>
 				</SelectTrigger>
 
@@ -55,15 +58,15 @@ export function CustomerSelect({ id, value, onChange }: CustomerSelectProps) {
 			</Select>
 			{isError && (
 				<InlineQueryRetry
-					message="Could not load customers. Check your connection."
-					retryLabel="Retry customers"
+					message={t(Messages.customers.select.loadFailed)}
+					retryLabel={t(Messages.customers.select.retry)}
 					isFetching={isFetching}
 					onRetry={() => void refetch()}
 				/>
 			)}
 			{!isLoading && !isError && customers.length === 0 && (
 				<p role="status" className="text-sm text-muted-foreground">
-					No customers are available.
+					{t(Messages.customers.select.unavailable)}
 				</p>
 			)}
 		</div>

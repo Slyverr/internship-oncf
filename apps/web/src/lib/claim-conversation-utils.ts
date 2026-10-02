@@ -1,3 +1,4 @@
+import { NotificationMessageCode } from "@ecommand/shared";
 import type { NotificationListDto } from "@/lib/api/generated.schemas";
 
 export function isUnreadClaimCommentNotification(
@@ -8,6 +9,6 @@ export function isUnreadClaimCommentNotification(
 		!notification.readAt &&
 		notification.relatedEntityType === "claims" &&
 		notification.relatedEntityId === claimId &&
-		notification.message.startsWith("A new comment was added to claim #")
+		notification.messageCode === NotificationMessageCode.CLAIM_COMMENT_ADDED
 	);
 }

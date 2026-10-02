@@ -9,7 +9,9 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { formatEnumLabel } from "@/lib/enum-labels";
+import { Messages } from "@/i18n";
+import { getClaimPriorityLabel } from "@/i18n/claim-labels";
+import { useLocale, useTranslate } from "@/i18n/locale-provider";
 
 interface ClaimPrioritySelectProps {
 	value?: ClaimPriority;
@@ -20,6 +22,8 @@ export function ClaimPrioritySelect({
 	value,
 	onChange,
 }: ClaimPrioritySelectProps) {
+	const locale = useLocale();
+	const t = useTranslate();
 	return (
 		<Select
 			value={value}
@@ -27,14 +31,16 @@ export function ClaimPrioritySelect({
 		>
 			<SelectTrigger className="w-full">
 				<SelectValue>
-					{value ? formatEnumLabel(value) : "Select priority"}
+					{value
+						? getClaimPriorityLabel(value, locale)
+						: t(Messages.claims.selectPriority)}
 				</SelectValue>
 			</SelectTrigger>
 
 			<SelectContent>
 				{Object.values(ClaimPriority).map((priority) => (
 					<SelectItem key={priority} value={priority}>
-						{formatEnumLabel(priority)}
+						{getClaimPriorityLabel(priority, locale)}
 					</SelectItem>
 				))}
 			</SelectContent>

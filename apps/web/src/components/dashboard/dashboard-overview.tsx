@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { ActionLink } from "@/components/common/action-link";
 import { PageHeader } from "@/components/common/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -21,6 +22,14 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Messages } from "@/i18n";
+import { getClaimTypeLabel } from "@/i18n/claim-labels";
+import { useLocale, useTranslate } from "@/i18n/locale-provider";
+import {
+	getClaimStatusLabel,
+	getOrderStatusLabel,
+	getProgramStatusLabel,
+} from "@/i18n/status-labels";
 import {
 	getDashboardQuickActions,
 	getPendingClientRegistrations,
@@ -33,7 +42,6 @@ import {
 import { useProgramsControllerFindAll } from "@/lib/api/programs";
 import { useUsersControllerFindAll } from "@/lib/api/users";
 import { formatMediumDate, formatMonthLabel } from "@/lib/date-utils";
-import { formatEnumLabel } from "@/lib/enum-labels";
 import { getOrderReport } from "@/lib/reports";
 import { useAuth } from "@/providers/auth-provider";
 
@@ -67,6 +75,8 @@ function RecentSection({
 	isLoading,
 	isError,
 }: RecentSectionProps) {
+	const t = useTranslate();
+	const locale = useLocale();
 	return (
 		<Card className="h-56">
 			<CardHeader>
@@ -75,33 +85,35 @@ function RecentSection({
 						<CardTitle>{title}</CardTitle>
 						<CardDescription>{description}</CardDescription>
 					</div>
-					<Link
+					<ActionLink
 						href={href}
-						className="inline-flex min-h-11 shrink-0 items-center gap-compact text-sm text-primary hover:underline"
-						aria-label={`View all ${title.toLowerCase()}`}
+						className="shrink-0 gap-compact"
+						aria-label={t(Messages.dashboard.recent.viewAll, {
+							section: title.toLowerCase(),
+						})}
 					>
-						View all <ArrowRightIcon className="size-4" />
-					</Link>
+						{t(Messages.dashboard.recent.viewAllLabel)}{" "}
+						<ArrowRightIcon className="size-4" />
+					</ActionLink>
 				</div>
 			</CardHeader>
 			<CardContent>
 				{isLoading ? (
-					<p className="text-sm text-muted-foreground">Loading recent items…</p>
+					<p className="text-sm text-muted-foreground">
+						{t(Messages.dashboard.recent.loading)}
+					</p>
 				) : isError ? (
 					<p className="text-sm text-destructive">
-						Could not load this list. Open the section to try again.
+						{t(Messages.dashboard.recent.loadFailed)}
 					</p>
 				) : items.length === 0 ? (
 					<div className="grid gap-control">
 						<p className="text-sm text-muted-foreground">{emptyMessage}</p>
 						{emptyAction && (
-							<Link
-								href={emptyAction.href}
-								className="inline-flex min-h-11 items-center gap-compact text-sm text-primary hover:underline"
-							>
+							<ActionLink href={emptyAction.href} className="gap-compact">
 								{emptyAction.label}
 								<ArrowRightIcon aria-hidden="true" className="size-4" />
-							</Link>
+							</ActionLink>
 						)}
 					</div>
 				) : (
@@ -118,7 +130,7 @@ function RecentSection({
 										</span>
 										{item.status && (
 											<Badge variant="outline" className="shrink-0">
-												{formatEnumLabel(item.status)}
+												{item.status}
 											</Badge>
 										)}
 									</span>
@@ -130,7 +142,7 @@ function RecentSection({
 											dateTime={item.date}
 											className="shrink-0 text-meta text-muted-foreground"
 										>
-											{formatMediumDate(item.date)}
+											{formatMediumDate(item.date, locale)}
 										</time>
 									</span>
 								</Link>
@@ -154,39 +166,40 @@ function ReadyOrdersSection({
 	isError: boolean;
 	onRetry: () => void;
 }) {
+	const t = useTranslate();
 	if (!isLoading && !isError && orders.length === 0) return null;
 
 	return (
 		<Card size="sm">
 			<CardHeader>
 				<div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-x-control gap-y-compact">
-					<CardTitle>Orders ready for a program</CardTitle>
+					<CardTitle>{t(Messages.dashboard.readyOrders.title)}</CardTitle>
 					{!isLoading && !isError && orders.length > 0 && (
-						<Link
+						<ActionLink
 							href="/dashboard/orders?eligibleForProgram=true"
-							className="inline-flex min-h-11 shrink-0 items-center gap-compact text-sm text-primary hover:underline"
+							className="shrink-0 gap-compact"
 						>
-							Browse eligible orders
+							{t(Messages.dashboard.readyOrders.browse)}
 							<ArrowRightIcon aria-hidden="true" className="size-4" />
-						</Link>
+						</ActionLink>
 					)}
 					<CardDescription className="col-span-2">
-						Continue directly from an order that is eligible for planning.
+						{t(Messages.dashboard.readyOrders.description)}
 					</CardDescription>
 				</div>
 			</CardHeader>
 			<CardContent>
 				{isLoading ? (
 					<p className="text-sm text-muted-foreground">
-						Checking eligible orders…
+						{t(Messages.dashboard.readyOrders.checking)}
 					</p>
 				) : isError ? (
 					<div className="flex flex-wrap items-center justify-between gap-control">
 						<p className="text-sm text-destructive">
-							Could not check which orders are ready.
+							{t(Messages.dashboard.readyOrders.checkFailed)}
 						</p>
 						<Button type="button" variant="outline" onClick={onRetry}>
-							Try again
+							{t(Messages.dashboard.readyOrders.tryAgain)}
 						</Button>
 					</div>
 				) : (
@@ -197,7 +210,10 @@ function ReadyOrdersSection({
 							<Link
 								key={order.id}
 								href={`/dashboard/programs/new?orderNumber=${order.orderNumber}&search=${encodeURIComponent(order.orderNumber)}`}
-								aria-label={`Create a program for order ${order.orderNumber}`}
+								aria-label={t(
+									Messages.dashboard.readyOrders.createProgramForOrder,
+									{ orderCode: order.orderNumber },
+								)}
 								className="flex min-h-11 min-w-0 items-center justify-between gap-control rounded-md border px-control py-compact text-sm transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 							>
 								<span className="min-w-0 truncate font-medium">
@@ -220,6 +236,7 @@ function PendingRegistrationsSection({
 }: {
 	users: ReturnType<typeof getPendingClientRegistrations>;
 }) {
+	const t = useTranslate();
 	if (users.length === 0) return null;
 
 	return (
@@ -227,22 +244,24 @@ function PendingRegistrationsSection({
 			<CardHeader>
 				<div className="flex min-w-0 flex-wrap items-start justify-between gap-control">
 					<div className="grid min-w-0 gap-compact">
-						<CardTitle>Registration requests</CardTitle>
+						<CardTitle>{t(Messages.dashboard.registrations.title)}</CardTitle>
 						<CardDescription>
-							Client accounts awaiting your review.
+							{t(Messages.dashboard.registrations.description)}
 						</CardDescription>
 					</div>
 					<div className="flex shrink-0 items-center gap-control">
 						<Badge variant="outline" className="tabular-nums">
-							{users.length} pending
+							{t(Messages.dashboard.registrations.pending, {
+								count: users.length,
+							})}
 						</Badge>
-						<Link
+						<ActionLink
 							href="/dashboard/users?registrationStatus=PENDING&role=CLIENT_REPRESENTATIVE"
-							className="inline-flex min-h-11 items-center gap-compact text-sm text-primary hover:underline"
+							className="gap-compact"
 						>
-							View all
+							{t(Messages.dashboard.registrations.viewAll)}
 							<ArrowRightIcon aria-hidden="true" className="size-4" />
-						</Link>
+						</ActionLink>
 					</div>
 				</div>
 			</CardHeader>
@@ -252,7 +271,9 @@ function PendingRegistrationsSection({
 						<li key={user.id}>
 							<Link
 								href={`/dashboard/users/${user.id}`}
-								aria-label={`Review registration for ${user.firstName} ${user.lastName}`}
+								aria-label={t(Messages.dashboard.registrations.review, {
+									name: `${user.firstName} ${user.lastName}`,
+								})}
 								className="flex min-h-11 min-w-0 items-center justify-between gap-control rounded-md border px-control py-compact text-sm transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 							>
 								<span className="grid min-w-0 gap-compact">
@@ -290,6 +311,7 @@ function getRecentOrderPeriod() {
 function getRecentOrderMonths(
 	from: string,
 	byMonth: { month: string; count: number }[],
+	locale: ReturnType<typeof useLocale>,
 ) {
 	const firstMonth = new Date(`${from.slice(0, 7)}-01T00:00:00.000Z`);
 	const counts = new Map(byMonth.map(({ month, count }) => [month, count]));
@@ -306,19 +328,25 @@ function getRecentOrderMonths(
 
 		return {
 			key,
-			label: formatMonthLabel(month),
+			label: formatMonthLabel(month, locale),
 			count: counts.get(key) ?? 0,
 		};
 	});
 }
 
 function OrderActivitySection() {
+	const t = useTranslate();
+	const locale = useLocale();
 	const [period] = useState(getRecentOrderPeriod);
 	const report = useQuery({
 		queryKey: ["dashboard-order-activity", period],
 		queryFn: () => getOrderReport(period),
 	});
-	const months = getRecentOrderMonths(period.from, report.data?.byMonth ?? []);
+	const months = getRecentOrderMonths(
+		period.from,
+		report.data?.byMonth ?? [],
+		locale,
+	);
 	const maxCount = Math.max(1, ...months.map(({ count }) => count));
 
 	return (
@@ -326,12 +354,14 @@ function OrderActivitySection() {
 			<CardHeader>
 				<div className="flex flex-wrap items-center justify-between gap-control">
 					<div className="grid min-w-0 gap-compact">
-						<CardTitle>Order activity</CardTitle>
-						<CardDescription>Orders from the past six months.</CardDescription>
+						<CardTitle>{t(Messages.dashboard.activity.title)}</CardTitle>
+						<CardDescription>
+							{t(Messages.dashboard.activity.description)}
+						</CardDescription>
 					</div>
 					<div className="grid shrink-0 text-right">
 						<span className="text-meta text-muted-foreground">
-							6-month total
+							{t(Messages.dashboard.activity.total)}
 						</span>
 						<span className="text-3xl font-semibold tabular-nums">
 							{report.data?.totalOrders ?? "—"}
@@ -349,7 +379,7 @@ function OrderActivitySection() {
 							aria-hidden="true"
 							className="size-4 animate-spin motion-reduce:animate-none"
 						/>
-						Loading order activity…
+						{t(Messages.dashboard.activity.loading)}
 					</div>
 				) : report.isError ? (
 					<div
@@ -357,7 +387,7 @@ function OrderActivitySection() {
 						className="flex min-h-32 flex-wrap items-center justify-between gap-control"
 					>
 						<p className="text-sm text-destructive">
-							Could not load order activity.
+							{t(Messages.dashboard.activity.loadFailed)}
 						</p>
 						<Button
 							variant="outline"
@@ -372,17 +402,30 @@ function OrderActivitySection() {
 							) : (
 								<RefreshCwIcon aria-hidden="true" />
 							)}
-							{report.isFetching ? "Retrying…" : "Retry"}
+							{t(
+								report.isFetching
+									? Messages.dashboard.activity.retrying
+									: Messages.dashboard.activity.retry,
+							)}
 						</Button>
 					</div>
 				) : report.data.totalOrders === 0 ? (
 					<div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
-						No orders in this period.
+						{t(Messages.dashboard.activity.empty)}
 					</div>
 				) : (
 					<div
 						role="img"
-						aria-label={`Monthly order counts for the past six months: ${months.map(({ label, count }) => `${label} ${count}`).join(", ")}`}
+						aria-label={t(Messages.dashboard.activity.chartLabel, {
+							months: months
+								.map(({ label, count }) =>
+									t(Messages.dashboard.activity.monthCount, {
+										month: label,
+										count,
+									}),
+								)
+								.join(", "),
+						})}
 						className="grid grid-cols-6 items-end gap-control"
 					>
 						{months.map(({ key, label, count }) => (
@@ -408,6 +451,8 @@ function OrderActivitySection() {
 }
 
 export function DashboardOverview() {
+	const t = useTranslate();
+	const locale = useLocale();
 	const { profile, hasPermission } = useAuth();
 	const quickActions = getDashboardQuickActions(hasPermission);
 	const canReadOrders = hasPermission(Permission.ORDERS_READ);
@@ -469,13 +514,13 @@ export function DashboardOverview() {
 		canReadOrders && (
 			<RecentSection
 				key="orders"
-				title="Recent orders"
-				description="Latest customer orders."
+				title={t(Messages.dashboard.orders.title)}
+				description={t(Messages.dashboard.orders.description)}
 				href="/dashboard/orders"
-				emptyMessage="No recent orders to show."
+				emptyMessage={t(Messages.dashboard.orders.empty)}
 				{...(canCreateOrders && {
 					emptyAction: {
-						label: "Create an order",
+						label: t(Messages.dashboard.orders.create),
 						href: "/dashboard/orders/new",
 					},
 				})}
@@ -484,8 +529,13 @@ export function DashboardOverview() {
 				items={(ordersQuery.data ?? []).slice(0, 2).map((order) => ({
 					id: order.id,
 					title: order.orderNumber,
-					description: `${order.customer.companyName} · ${order.good.name} · ${order.quantityDemanded} ${order.unit.name}`,
-					status: order.orderStatus.name,
+					description: t(Messages.dashboard.orders.itemDescription, {
+						customer: order.customer.companyName,
+						good: order.good.name,
+						quantity: order.quantityDemanded,
+						unit: order.unit.name,
+					}),
+					status: getOrderStatusLabel(order.orderStatus.name, locale),
 					date: order.createdAt,
 					href: `/dashboard/orders/${order.orderNumber}`,
 				}))}
@@ -494,21 +544,24 @@ export function DashboardOverview() {
 		canReadPrograms && (
 			<RecentSection
 				key="programs"
-				title="Recent programs"
-				description="Latest forecast programs."
+				title={t(Messages.dashboard.programs.title)}
+				description={t(Messages.dashboard.programs.description)}
 				href="/dashboard/programs"
 				emptyMessage={
 					canReadOrders && canCreatePrograms
-						? "No recent forecast programs. Eligible orders appear above when they are ready."
-						: "No recent forecast programs to show."
+						? t(Messages.dashboard.programs.emptyWithEligibleOrders)
+						: t(Messages.dashboard.programs.empty)
 				}
 				isLoading={programsQuery.isLoading}
 				isError={programsQuery.isError}
 				items={(programsQuery.data ?? []).slice(0, 2).map((program) => ({
 					id: program.id,
 					title: program.programNumber,
-					description: `Order ${program.order.orderNumber} · ${program.quantityPlanned} planned`,
-					status: program.programStatus.name,
+					description: t(Messages.dashboard.programs.itemDescription, {
+						orderCode: program.order.orderNumber,
+						quantity: program.quantityPlanned,
+					}),
+					status: getProgramStatusLabel(program.programStatus.name, locale),
 					date: program.createdAt,
 					href: `/dashboard/programs/${program.programNumber}`,
 				}))}
@@ -517,13 +570,13 @@ export function DashboardOverview() {
 		canReadClaims && (
 			<RecentSection
 				key="claims"
-				title="Recent claims"
-				description="Latest customer claims."
+				title={t(Messages.dashboard.claims.title)}
+				description={t(Messages.dashboard.claims.description)}
 				href="/dashboard/claims"
-				emptyMessage="No recent claims to show."
+				emptyMessage={t(Messages.dashboard.claims.empty)}
 				{...(canCreateClaims && {
 					emptyAction: {
-						label: "Create a claim",
+						label: t(Messages.dashboard.claims.create),
 						href: "/dashboard/claims/new",
 					},
 				})}
@@ -532,8 +585,11 @@ export function DashboardOverview() {
 				items={(claimsQuery.data ?? []).slice(0, 2).map((claim) => ({
 					id: claim.id,
 					title: claim.claimNumber,
-					description: `${claim.customer.companyName} · ${claim.claimType.name}`,
-					status: claim.claimStatus.name,
+					description: t(Messages.dashboard.claims.itemDescription, {
+						customer: claim.customer.companyName,
+						type: getClaimTypeLabel(claim.claimType.name, locale),
+					}),
+					status: getClaimStatusLabel(claim.claimStatus.name, locale),
 					date: claim.createdAt,
 					href: `/dashboard/claims/${claim.claimNumber}`,
 				}))}
@@ -544,8 +600,10 @@ export function DashboardOverview() {
 	return (
 		<section className="mx-auto grid w-full max-w-screen-2xl min-w-0 gap-6">
 			<PageHeader
-				title={`Welcome back, ${profile.firstName}`}
-				description="A snapshot of recent activity across your workspace."
+				title={t(Messages.dashboard.welcome, {
+					firstName: profile.firstName,
+				})}
+				description={t(Messages.dashboard.description)}
 			>
 				{quickActions.map((action, index) => (
 					<Link
@@ -556,7 +614,11 @@ export function DashboardOverview() {
 						href={action.href}
 					>
 						<PlusIcon aria-hidden="true" />
-						{action.label}
+						{t(
+							action.type === "order"
+								? Messages.dashboard.quickActions.createOrder
+								: Messages.dashboard.quickActions.createClaim,
+						)}
 					</Link>
 				))}
 			</PageHeader>
@@ -565,7 +627,7 @@ export function DashboardOverview() {
 
 			{(showReadyOrdersCard || canReadReports) && (
 				<section
-					aria-label="Dashboard insights"
+					aria-label={t(Messages.dashboard.insightsLabel)}
 					tabIndex={showInsightRail ? 0 : undefined}
 					className={`min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${showInsightRail ? "workspace-insight-rail @4xl/workspace:grid-cols-2" : "grid gap-6"}`}
 				>
@@ -582,14 +644,14 @@ export function DashboardOverview() {
 			)}
 			{showInsightRail && (
 				<p className="workspace-scroll-hint text-meta text-muted-foreground">
-					Swipe or use the arrow keys to view more dashboard insights.
+					{t(Messages.dashboard.insightScrollHint)}
 				</p>
 			)}
 
 			{sections.length > 0 ? (
 				<>
 					<section
-						aria-label="Recent activity"
+						aria-label={t(Messages.dashboard.recentActivityLabel)}
 						tabIndex={recentSectionCount > 1 ? 0 : undefined}
 						className={`${recentRailClassName} ${recentGridColumns} focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
 					>
@@ -597,7 +659,7 @@ export function DashboardOverview() {
 					</section>
 					{recentSectionCount > 1 && (
 						<p className="workspace-scroll-hint text-meta text-muted-foreground">
-							Scroll horizontally to view more recent activity.
+							{t(Messages.dashboard.recentScrollHint)}
 						</p>
 					)}
 				</>
@@ -610,9 +672,11 @@ export function DashboardOverview() {
 								className="mt-1 size-5 shrink-0 text-muted-foreground"
 							/>
 							<div className="grid min-w-0 gap-compact">
-								<p className="font-medium">No operational lists available</p>
+								<p className="font-medium">
+									{t(Messages.dashboard.noListsTitle)}
+								</p>
 								<p className="text-sm text-muted-foreground">
-									Choose an available section to continue.
+									{t(Messages.dashboard.noListsDescription)}
 								</p>
 							</div>
 						</div>
@@ -622,7 +686,7 @@ export function DashboardOverview() {
 									href="/dashboard/reports"
 									className={buttonVariants({ variant: "outline" })}
 								>
-									View reports
+									{t(Messages.dashboard.viewReports)}
 								</Link>
 							)}
 							{canReadUsers && (
@@ -632,7 +696,7 @@ export function DashboardOverview() {
 										variant: canReadReports ? "outline" : "default",
 									})}
 								>
-									Manage users
+									{t(Messages.dashboard.manageUsers)}
 								</Link>
 							)}
 						</div>

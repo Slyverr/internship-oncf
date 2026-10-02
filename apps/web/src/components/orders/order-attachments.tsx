@@ -7,6 +7,8 @@ import {
 	AttachmentUploadDialog,
 	type AttachmentUploadInput,
 } from "@/components/attachments/attachment-upload-dialog";
+import { Messages } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
 import {
 	getFilesControllerListFilesQueryKey,
 	useFilesControllerDeleteFile,
@@ -21,6 +23,7 @@ interface OrderAttachmentsProps {
 }
 
 export function OrderAttachments({ orderNumber }: OrderAttachmentsProps) {
+	const t = useTranslate();
 	const queryClient = useQueryClient();
 	const { hasPermission } = useAuth();
 
@@ -89,7 +92,7 @@ export function OrderAttachments({ orderNumber }: OrderAttachmentsProps) {
 			files={files}
 			isLoading={isLoading}
 			canDelete={canManage}
-			description="Documents and files attached to this order."
+			description={t(Messages.orders.attachments)}
 			uploadAction={
 				canManage ? (
 					<AttachmentUploadDialog onUpload={handleUpload} />

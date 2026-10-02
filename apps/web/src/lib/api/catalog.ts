@@ -26,15 +26,22 @@ import type {
 
 import type {
   AccessoryOperationDto,
+  ApiErrorResponseDto,
   CreateAccessoryOperationDto,
   CreateGoodDto,
   CreateGoodsTypeDto,
   CreateRejectionReasonDto,
   CreateUnitDto,
+  CustomerTypeDto,
   GoodDto,
   GoodsTypeDto,
   RejectionReasonDto,
-  UnitDto
+  UnitDto,
+  UpdateAccessoryOperationDto,
+  UpdateGoodDto,
+  UpdateGoodsTypeDto,
+  UpdateRejectionReasonDto,
+  UpdateUnitDto
 } from './generated.schemas';
 
 import { customFetch } from '../axios';
@@ -60,6 +67,92 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
+export const catalogControllerFindCustomerTypes = (
+
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<CustomerTypeDto[]>(
+      {url: `/catalog/customer-types`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getCatalogControllerFindCustomerTypesQueryKey = () => {
+    return [
+    `/catalog/customer-types`
+    ] as const;
+    }
+
+
+export const getCatalogControllerFindCustomerTypesQueryOptions = <TData = Awaited<ReturnType<typeof catalogControllerFindCustomerTypes>>, TError = ApiErrorResponseDto>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindCustomerTypes>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getCatalogControllerFindCustomerTypesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof catalogControllerFindCustomerTypes>>> = ({ signal }) => catalogControllerFindCustomerTypes(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindCustomerTypes>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type CatalogControllerFindCustomerTypesQueryResult = NonNullable<Awaited<ReturnType<typeof catalogControllerFindCustomerTypes>>>
+export type CatalogControllerFindCustomerTypesQueryError = ApiErrorResponseDto
+
+
+export function useCatalogControllerFindCustomerTypes<TData = Awaited<ReturnType<typeof catalogControllerFindCustomerTypes>>, TError = ApiErrorResponseDto>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindCustomerTypes>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof catalogControllerFindCustomerTypes>>,
+          TError,
+          Awaited<ReturnType<typeof catalogControllerFindCustomerTypes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCatalogControllerFindCustomerTypes<TData = Awaited<ReturnType<typeof catalogControllerFindCustomerTypes>>, TError = ApiErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindCustomerTypes>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof catalogControllerFindCustomerTypes>>,
+          TError,
+          Awaited<ReturnType<typeof catalogControllerFindCustomerTypes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCatalogControllerFindCustomerTypes<TData = Awaited<ReturnType<typeof catalogControllerFindCustomerTypes>>, TError = ApiErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindCustomerTypes>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useCatalogControllerFindCustomerTypes<TData = Awaited<ReturnType<typeof catalogControllerFindCustomerTypes>>, TError = ApiErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindCustomerTypes>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getCatalogControllerFindCustomerTypesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 export const catalogControllerFindUnits = (
 
  options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
@@ -82,7 +175,7 @@ export const getCatalogControllerFindUnitsQueryKey = () => {
     }
 
 
-export const getCatalogControllerFindUnitsQueryOptions = <TData = Awaited<ReturnType<typeof catalogControllerFindUnits>>, TError = void>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindUnits>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getCatalogControllerFindUnitsQueryOptions = <TData = Awaited<ReturnType<typeof catalogControllerFindUnits>>, TError = ApiErrorResponseDto>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindUnits>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -101,10 +194,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type CatalogControllerFindUnitsQueryResult = NonNullable<Awaited<ReturnType<typeof catalogControllerFindUnits>>>
-export type CatalogControllerFindUnitsQueryError = void
+export type CatalogControllerFindUnitsQueryError = ApiErrorResponseDto
 
 
-export function useCatalogControllerFindUnits<TData = Awaited<ReturnType<typeof catalogControllerFindUnits>>, TError = void>(
+export function useCatalogControllerFindUnits<TData = Awaited<ReturnType<typeof catalogControllerFindUnits>>, TError = ApiErrorResponseDto>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindUnits>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof catalogControllerFindUnits>>,
@@ -114,7 +207,7 @@ export function useCatalogControllerFindUnits<TData = Awaited<ReturnType<typeof 
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCatalogControllerFindUnits<TData = Awaited<ReturnType<typeof catalogControllerFindUnits>>, TError = void>(
+export function useCatalogControllerFindUnits<TData = Awaited<ReturnType<typeof catalogControllerFindUnits>>, TError = ApiErrorResponseDto>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindUnits>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof catalogControllerFindUnits>>,
@@ -124,12 +217,12 @@ export function useCatalogControllerFindUnits<TData = Awaited<ReturnType<typeof 
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCatalogControllerFindUnits<TData = Awaited<ReturnType<typeof catalogControllerFindUnits>>, TError = void>(
+export function useCatalogControllerFindUnits<TData = Awaited<ReturnType<typeof catalogControllerFindUnits>>, TError = ApiErrorResponseDto>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindUnits>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useCatalogControllerFindUnits<TData = Awaited<ReturnType<typeof catalogControllerFindUnits>>, TError = void>(
+export function useCatalogControllerFindUnits<TData = Awaited<ReturnType<typeof catalogControllerFindUnits>>, TError = ApiErrorResponseDto>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindUnits>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -163,7 +256,7 @@ export const catalogControllerCreateUnit = (
 
 
 
-export const getCatalogControllerCreateUnitMutationOptions = <TError = void,
+export const getCatalogControllerCreateUnitMutationOptions = <TError = ApiErrorResponseDto,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof catalogControllerCreateUnit>>, TError,{data: CreateUnitDto}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof catalogControllerCreateUnit>>, TError,{data: CreateUnitDto}, TContext> => {
 
@@ -192,9 +285,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type CatalogControllerCreateUnitMutationResult = NonNullable<Awaited<ReturnType<typeof catalogControllerCreateUnit>>>
     export type CatalogControllerCreateUnitMutationBody = CreateUnitDto
-    export type CatalogControllerCreateUnitMutationError = void
+    export type CatalogControllerCreateUnitMutationError = ApiErrorResponseDto
 
-    export const useCatalogControllerCreateUnit = <TError = void,
+    export const useCatalogControllerCreateUnit = <TError = ApiErrorResponseDto,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof catalogControllerCreateUnit>>, TError,{data: CreateUnitDto}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof catalogControllerCreateUnit>>,
@@ -203,6 +296,151 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getCatalogControllerCreateUnitMutationOptions(options), queryClient);
+    }
+    export const catalogControllerFindManageUnits = (
+
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<UnitDto[]>(
+      {url: `/catalog/manage/units`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getCatalogControllerFindManageUnitsQueryKey = () => {
+    return [
+    `/catalog/manage/units`
+    ] as const;
+    }
+
+
+export const getCatalogControllerFindManageUnitsQueryOptions = <TData = Awaited<ReturnType<typeof catalogControllerFindManageUnits>>, TError = ApiErrorResponseDto>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageUnits>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getCatalogControllerFindManageUnitsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof catalogControllerFindManageUnits>>> = ({ signal }) => catalogControllerFindManageUnits(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageUnits>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type CatalogControllerFindManageUnitsQueryResult = NonNullable<Awaited<ReturnType<typeof catalogControllerFindManageUnits>>>
+export type CatalogControllerFindManageUnitsQueryError = ApiErrorResponseDto
+
+
+export function useCatalogControllerFindManageUnits<TData = Awaited<ReturnType<typeof catalogControllerFindManageUnits>>, TError = ApiErrorResponseDto>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageUnits>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof catalogControllerFindManageUnits>>,
+          TError,
+          Awaited<ReturnType<typeof catalogControllerFindManageUnits>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCatalogControllerFindManageUnits<TData = Awaited<ReturnType<typeof catalogControllerFindManageUnits>>, TError = ApiErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageUnits>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof catalogControllerFindManageUnits>>,
+          TError,
+          Awaited<ReturnType<typeof catalogControllerFindManageUnits>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCatalogControllerFindManageUnits<TData = Awaited<ReturnType<typeof catalogControllerFindManageUnits>>, TError = ApiErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageUnits>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useCatalogControllerFindManageUnits<TData = Awaited<ReturnType<typeof catalogControllerFindManageUnits>>, TError = ApiErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageUnits>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getCatalogControllerFindManageUnitsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const catalogControllerUpdateUnit = (
+    id: string,
+    updateUnitDto: UpdateUnitDto,
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<UnitDto>(
+      {url: `/catalog/manage/units/${id}`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: updateUnitDto, signal
+    },
+      options);
+    }
+
+
+
+
+export const getCatalogControllerUpdateUnitMutationOptions = <TError = ApiErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof catalogControllerUpdateUnit>>, TError,{id: string;data: UpdateUnitDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof catalogControllerUpdateUnit>>, TError,{id: string;data: UpdateUnitDto}, TContext> => {
+
+const mutationKey = ['catalogControllerUpdateUnit'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof catalogControllerUpdateUnit>>, {id: string;data: UpdateUnitDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  catalogControllerUpdateUnit(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CatalogControllerUpdateUnitMutationResult = NonNullable<Awaited<ReturnType<typeof catalogControllerUpdateUnit>>>
+    export type CatalogControllerUpdateUnitMutationBody = UpdateUnitDto
+    export type CatalogControllerUpdateUnitMutationError = ApiErrorResponseDto
+
+    export const useCatalogControllerUpdateUnit = <TError = ApiErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof catalogControllerUpdateUnit>>, TError,{id: string;data: UpdateUnitDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof catalogControllerUpdateUnit>>,
+        TError,
+        {id: string;data: UpdateUnitDto},
+        TContext
+      > => {
+      return useMutation(getCatalogControllerUpdateUnitMutationOptions(options), queryClient);
     }
     export const catalogControllerFindGoodsTypes = (
 
@@ -226,7 +464,7 @@ export const getCatalogControllerFindGoodsTypesQueryKey = () => {
     }
 
 
-export const getCatalogControllerFindGoodsTypesQueryOptions = <TData = Awaited<ReturnType<typeof catalogControllerFindGoodsTypes>>, TError = void>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindGoodsTypes>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getCatalogControllerFindGoodsTypesQueryOptions = <TData = Awaited<ReturnType<typeof catalogControllerFindGoodsTypes>>, TError = ApiErrorResponseDto>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindGoodsTypes>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -245,10 +483,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type CatalogControllerFindGoodsTypesQueryResult = NonNullable<Awaited<ReturnType<typeof catalogControllerFindGoodsTypes>>>
-export type CatalogControllerFindGoodsTypesQueryError = void
+export type CatalogControllerFindGoodsTypesQueryError = ApiErrorResponseDto
 
 
-export function useCatalogControllerFindGoodsTypes<TData = Awaited<ReturnType<typeof catalogControllerFindGoodsTypes>>, TError = void>(
+export function useCatalogControllerFindGoodsTypes<TData = Awaited<ReturnType<typeof catalogControllerFindGoodsTypes>>, TError = ApiErrorResponseDto>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindGoodsTypes>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof catalogControllerFindGoodsTypes>>,
@@ -258,7 +496,7 @@ export function useCatalogControllerFindGoodsTypes<TData = Awaited<ReturnType<ty
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCatalogControllerFindGoodsTypes<TData = Awaited<ReturnType<typeof catalogControllerFindGoodsTypes>>, TError = void>(
+export function useCatalogControllerFindGoodsTypes<TData = Awaited<ReturnType<typeof catalogControllerFindGoodsTypes>>, TError = ApiErrorResponseDto>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindGoodsTypes>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof catalogControllerFindGoodsTypes>>,
@@ -268,12 +506,12 @@ export function useCatalogControllerFindGoodsTypes<TData = Awaited<ReturnType<ty
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCatalogControllerFindGoodsTypes<TData = Awaited<ReturnType<typeof catalogControllerFindGoodsTypes>>, TError = void>(
+export function useCatalogControllerFindGoodsTypes<TData = Awaited<ReturnType<typeof catalogControllerFindGoodsTypes>>, TError = ApiErrorResponseDto>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindGoodsTypes>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useCatalogControllerFindGoodsTypes<TData = Awaited<ReturnType<typeof catalogControllerFindGoodsTypes>>, TError = void>(
+export function useCatalogControllerFindGoodsTypes<TData = Awaited<ReturnType<typeof catalogControllerFindGoodsTypes>>, TError = ApiErrorResponseDto>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindGoodsTypes>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -307,7 +545,7 @@ export const catalogControllerCreateGoodsType = (
 
 
 
-export const getCatalogControllerCreateGoodsTypeMutationOptions = <TError = void,
+export const getCatalogControllerCreateGoodsTypeMutationOptions = <TError = ApiErrorResponseDto,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof catalogControllerCreateGoodsType>>, TError,{data: CreateGoodsTypeDto}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof catalogControllerCreateGoodsType>>, TError,{data: CreateGoodsTypeDto}, TContext> => {
 
@@ -336,9 +574,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type CatalogControllerCreateGoodsTypeMutationResult = NonNullable<Awaited<ReturnType<typeof catalogControllerCreateGoodsType>>>
     export type CatalogControllerCreateGoodsTypeMutationBody = CreateGoodsTypeDto
-    export type CatalogControllerCreateGoodsTypeMutationError = void
+    export type CatalogControllerCreateGoodsTypeMutationError = ApiErrorResponseDto
 
-    export const useCatalogControllerCreateGoodsType = <TError = void,
+    export const useCatalogControllerCreateGoodsType = <TError = ApiErrorResponseDto,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof catalogControllerCreateGoodsType>>, TError,{data: CreateGoodsTypeDto}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof catalogControllerCreateGoodsType>>,
@@ -347,6 +585,151 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getCatalogControllerCreateGoodsTypeMutationOptions(options), queryClient);
+    }
+    export const catalogControllerFindManageGoodsTypes = (
+
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<GoodsTypeDto[]>(
+      {url: `/catalog/manage/goods-types`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getCatalogControllerFindManageGoodsTypesQueryKey = () => {
+    return [
+    `/catalog/manage/goods-types`
+    ] as const;
+    }
+
+
+export const getCatalogControllerFindManageGoodsTypesQueryOptions = <TData = Awaited<ReturnType<typeof catalogControllerFindManageGoodsTypes>>, TError = ApiErrorResponseDto>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageGoodsTypes>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getCatalogControllerFindManageGoodsTypesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof catalogControllerFindManageGoodsTypes>>> = ({ signal }) => catalogControllerFindManageGoodsTypes(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageGoodsTypes>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type CatalogControllerFindManageGoodsTypesQueryResult = NonNullable<Awaited<ReturnType<typeof catalogControllerFindManageGoodsTypes>>>
+export type CatalogControllerFindManageGoodsTypesQueryError = ApiErrorResponseDto
+
+
+export function useCatalogControllerFindManageGoodsTypes<TData = Awaited<ReturnType<typeof catalogControllerFindManageGoodsTypes>>, TError = ApiErrorResponseDto>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageGoodsTypes>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof catalogControllerFindManageGoodsTypes>>,
+          TError,
+          Awaited<ReturnType<typeof catalogControllerFindManageGoodsTypes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCatalogControllerFindManageGoodsTypes<TData = Awaited<ReturnType<typeof catalogControllerFindManageGoodsTypes>>, TError = ApiErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageGoodsTypes>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof catalogControllerFindManageGoodsTypes>>,
+          TError,
+          Awaited<ReturnType<typeof catalogControllerFindManageGoodsTypes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCatalogControllerFindManageGoodsTypes<TData = Awaited<ReturnType<typeof catalogControllerFindManageGoodsTypes>>, TError = ApiErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageGoodsTypes>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useCatalogControllerFindManageGoodsTypes<TData = Awaited<ReturnType<typeof catalogControllerFindManageGoodsTypes>>, TError = ApiErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageGoodsTypes>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getCatalogControllerFindManageGoodsTypesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const catalogControllerUpdateGoodsType = (
+    id: string,
+    updateGoodsTypeDto: UpdateGoodsTypeDto,
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<GoodsTypeDto>(
+      {url: `/catalog/manage/goods-types/${id}`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: updateGoodsTypeDto, signal
+    },
+      options);
+    }
+
+
+
+
+export const getCatalogControllerUpdateGoodsTypeMutationOptions = <TError = ApiErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof catalogControllerUpdateGoodsType>>, TError,{id: string;data: UpdateGoodsTypeDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof catalogControllerUpdateGoodsType>>, TError,{id: string;data: UpdateGoodsTypeDto}, TContext> => {
+
+const mutationKey = ['catalogControllerUpdateGoodsType'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof catalogControllerUpdateGoodsType>>, {id: string;data: UpdateGoodsTypeDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  catalogControllerUpdateGoodsType(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CatalogControllerUpdateGoodsTypeMutationResult = NonNullable<Awaited<ReturnType<typeof catalogControllerUpdateGoodsType>>>
+    export type CatalogControllerUpdateGoodsTypeMutationBody = UpdateGoodsTypeDto
+    export type CatalogControllerUpdateGoodsTypeMutationError = ApiErrorResponseDto
+
+    export const useCatalogControllerUpdateGoodsType = <TError = ApiErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof catalogControllerUpdateGoodsType>>, TError,{id: string;data: UpdateGoodsTypeDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof catalogControllerUpdateGoodsType>>,
+        TError,
+        {id: string;data: UpdateGoodsTypeDto},
+        TContext
+      > => {
+      return useMutation(getCatalogControllerUpdateGoodsTypeMutationOptions(options), queryClient);
     }
     export const catalogControllerFindGoods = (
 
@@ -370,7 +753,7 @@ export const getCatalogControllerFindGoodsQueryKey = () => {
     }
 
 
-export const getCatalogControllerFindGoodsQueryOptions = <TData = Awaited<ReturnType<typeof catalogControllerFindGoods>>, TError = void>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindGoods>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getCatalogControllerFindGoodsQueryOptions = <TData = Awaited<ReturnType<typeof catalogControllerFindGoods>>, TError = ApiErrorResponseDto>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindGoods>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -389,10 +772,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type CatalogControllerFindGoodsQueryResult = NonNullable<Awaited<ReturnType<typeof catalogControllerFindGoods>>>
-export type CatalogControllerFindGoodsQueryError = void
+export type CatalogControllerFindGoodsQueryError = ApiErrorResponseDto
 
 
-export function useCatalogControllerFindGoods<TData = Awaited<ReturnType<typeof catalogControllerFindGoods>>, TError = void>(
+export function useCatalogControllerFindGoods<TData = Awaited<ReturnType<typeof catalogControllerFindGoods>>, TError = ApiErrorResponseDto>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindGoods>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof catalogControllerFindGoods>>,
@@ -402,7 +785,7 @@ export function useCatalogControllerFindGoods<TData = Awaited<ReturnType<typeof 
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCatalogControllerFindGoods<TData = Awaited<ReturnType<typeof catalogControllerFindGoods>>, TError = void>(
+export function useCatalogControllerFindGoods<TData = Awaited<ReturnType<typeof catalogControllerFindGoods>>, TError = ApiErrorResponseDto>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindGoods>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof catalogControllerFindGoods>>,
@@ -412,12 +795,12 @@ export function useCatalogControllerFindGoods<TData = Awaited<ReturnType<typeof 
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCatalogControllerFindGoods<TData = Awaited<ReturnType<typeof catalogControllerFindGoods>>, TError = void>(
+export function useCatalogControllerFindGoods<TData = Awaited<ReturnType<typeof catalogControllerFindGoods>>, TError = ApiErrorResponseDto>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindGoods>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useCatalogControllerFindGoods<TData = Awaited<ReturnType<typeof catalogControllerFindGoods>>, TError = void>(
+export function useCatalogControllerFindGoods<TData = Awaited<ReturnType<typeof catalogControllerFindGoods>>, TError = ApiErrorResponseDto>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindGoods>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -451,7 +834,7 @@ export const catalogControllerCreateGood = (
 
 
 
-export const getCatalogControllerCreateGoodMutationOptions = <TError = void,
+export const getCatalogControllerCreateGoodMutationOptions = <TError = ApiErrorResponseDto,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof catalogControllerCreateGood>>, TError,{data: CreateGoodDto}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof catalogControllerCreateGood>>, TError,{data: CreateGoodDto}, TContext> => {
 
@@ -480,9 +863,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type CatalogControllerCreateGoodMutationResult = NonNullable<Awaited<ReturnType<typeof catalogControllerCreateGood>>>
     export type CatalogControllerCreateGoodMutationBody = CreateGoodDto
-    export type CatalogControllerCreateGoodMutationError = void
+    export type CatalogControllerCreateGoodMutationError = ApiErrorResponseDto
 
-    export const useCatalogControllerCreateGood = <TError = void,
+    export const useCatalogControllerCreateGood = <TError = ApiErrorResponseDto,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof catalogControllerCreateGood>>, TError,{data: CreateGoodDto}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof catalogControllerCreateGood>>,
@@ -491,6 +874,151 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getCatalogControllerCreateGoodMutationOptions(options), queryClient);
+    }
+    export const catalogControllerFindManageGoods = (
+
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<GoodDto[]>(
+      {url: `/catalog/manage/goods`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getCatalogControllerFindManageGoodsQueryKey = () => {
+    return [
+    `/catalog/manage/goods`
+    ] as const;
+    }
+
+
+export const getCatalogControllerFindManageGoodsQueryOptions = <TData = Awaited<ReturnType<typeof catalogControllerFindManageGoods>>, TError = ApiErrorResponseDto>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageGoods>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getCatalogControllerFindManageGoodsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof catalogControllerFindManageGoods>>> = ({ signal }) => catalogControllerFindManageGoods(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageGoods>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type CatalogControllerFindManageGoodsQueryResult = NonNullable<Awaited<ReturnType<typeof catalogControllerFindManageGoods>>>
+export type CatalogControllerFindManageGoodsQueryError = ApiErrorResponseDto
+
+
+export function useCatalogControllerFindManageGoods<TData = Awaited<ReturnType<typeof catalogControllerFindManageGoods>>, TError = ApiErrorResponseDto>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageGoods>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof catalogControllerFindManageGoods>>,
+          TError,
+          Awaited<ReturnType<typeof catalogControllerFindManageGoods>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCatalogControllerFindManageGoods<TData = Awaited<ReturnType<typeof catalogControllerFindManageGoods>>, TError = ApiErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageGoods>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof catalogControllerFindManageGoods>>,
+          TError,
+          Awaited<ReturnType<typeof catalogControllerFindManageGoods>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCatalogControllerFindManageGoods<TData = Awaited<ReturnType<typeof catalogControllerFindManageGoods>>, TError = ApiErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageGoods>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useCatalogControllerFindManageGoods<TData = Awaited<ReturnType<typeof catalogControllerFindManageGoods>>, TError = ApiErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageGoods>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getCatalogControllerFindManageGoodsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const catalogControllerUpdateGood = (
+    id: number,
+    updateGoodDto: UpdateGoodDto,
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<GoodDto>(
+      {url: `/catalog/manage/goods/${id}`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: updateGoodDto, signal
+    },
+      options);
+    }
+
+
+
+
+export const getCatalogControllerUpdateGoodMutationOptions = <TError = ApiErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof catalogControllerUpdateGood>>, TError,{id: number;data: UpdateGoodDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof catalogControllerUpdateGood>>, TError,{id: number;data: UpdateGoodDto}, TContext> => {
+
+const mutationKey = ['catalogControllerUpdateGood'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof catalogControllerUpdateGood>>, {id: number;data: UpdateGoodDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  catalogControllerUpdateGood(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CatalogControllerUpdateGoodMutationResult = NonNullable<Awaited<ReturnType<typeof catalogControllerUpdateGood>>>
+    export type CatalogControllerUpdateGoodMutationBody = UpdateGoodDto
+    export type CatalogControllerUpdateGoodMutationError = ApiErrorResponseDto
+
+    export const useCatalogControllerUpdateGood = <TError = ApiErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof catalogControllerUpdateGood>>, TError,{id: number;data: UpdateGoodDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof catalogControllerUpdateGood>>,
+        TError,
+        {id: number;data: UpdateGoodDto},
+        TContext
+      > => {
+      return useMutation(getCatalogControllerUpdateGoodMutationOptions(options), queryClient);
     }
     export const catalogControllerFindAccessoryOperations = (
 
@@ -514,7 +1042,7 @@ export const getCatalogControllerFindAccessoryOperationsQueryKey = () => {
     }
 
 
-export const getCatalogControllerFindAccessoryOperationsQueryOptions = <TData = Awaited<ReturnType<typeof catalogControllerFindAccessoryOperations>>, TError = void>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindAccessoryOperations>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getCatalogControllerFindAccessoryOperationsQueryOptions = <TData = Awaited<ReturnType<typeof catalogControllerFindAccessoryOperations>>, TError = ApiErrorResponseDto>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindAccessoryOperations>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -533,10 +1061,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type CatalogControllerFindAccessoryOperationsQueryResult = NonNullable<Awaited<ReturnType<typeof catalogControllerFindAccessoryOperations>>>
-export type CatalogControllerFindAccessoryOperationsQueryError = void
+export type CatalogControllerFindAccessoryOperationsQueryError = ApiErrorResponseDto
 
 
-export function useCatalogControllerFindAccessoryOperations<TData = Awaited<ReturnType<typeof catalogControllerFindAccessoryOperations>>, TError = void>(
+export function useCatalogControllerFindAccessoryOperations<TData = Awaited<ReturnType<typeof catalogControllerFindAccessoryOperations>>, TError = ApiErrorResponseDto>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindAccessoryOperations>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof catalogControllerFindAccessoryOperations>>,
@@ -546,7 +1074,7 @@ export function useCatalogControllerFindAccessoryOperations<TData = Awaited<Retu
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCatalogControllerFindAccessoryOperations<TData = Awaited<ReturnType<typeof catalogControllerFindAccessoryOperations>>, TError = void>(
+export function useCatalogControllerFindAccessoryOperations<TData = Awaited<ReturnType<typeof catalogControllerFindAccessoryOperations>>, TError = ApiErrorResponseDto>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindAccessoryOperations>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof catalogControllerFindAccessoryOperations>>,
@@ -556,12 +1084,12 @@ export function useCatalogControllerFindAccessoryOperations<TData = Awaited<Retu
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCatalogControllerFindAccessoryOperations<TData = Awaited<ReturnType<typeof catalogControllerFindAccessoryOperations>>, TError = void>(
+export function useCatalogControllerFindAccessoryOperations<TData = Awaited<ReturnType<typeof catalogControllerFindAccessoryOperations>>, TError = ApiErrorResponseDto>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindAccessoryOperations>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useCatalogControllerFindAccessoryOperations<TData = Awaited<ReturnType<typeof catalogControllerFindAccessoryOperations>>, TError = void>(
+export function useCatalogControllerFindAccessoryOperations<TData = Awaited<ReturnType<typeof catalogControllerFindAccessoryOperations>>, TError = ApiErrorResponseDto>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindAccessoryOperations>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -595,7 +1123,7 @@ export const catalogControllerCreateAccessoryOperation = (
 
 
 
-export const getCatalogControllerCreateAccessoryOperationMutationOptions = <TError = void,
+export const getCatalogControllerCreateAccessoryOperationMutationOptions = <TError = ApiErrorResponseDto,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof catalogControllerCreateAccessoryOperation>>, TError,{data: CreateAccessoryOperationDto}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof catalogControllerCreateAccessoryOperation>>, TError,{data: CreateAccessoryOperationDto}, TContext> => {
 
@@ -624,9 +1152,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type CatalogControllerCreateAccessoryOperationMutationResult = NonNullable<Awaited<ReturnType<typeof catalogControllerCreateAccessoryOperation>>>
     export type CatalogControllerCreateAccessoryOperationMutationBody = CreateAccessoryOperationDto
-    export type CatalogControllerCreateAccessoryOperationMutationError = void
+    export type CatalogControllerCreateAccessoryOperationMutationError = ApiErrorResponseDto
 
-    export const useCatalogControllerCreateAccessoryOperation = <TError = void,
+    export const useCatalogControllerCreateAccessoryOperation = <TError = ApiErrorResponseDto,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof catalogControllerCreateAccessoryOperation>>, TError,{data: CreateAccessoryOperationDto}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof catalogControllerCreateAccessoryOperation>>,
@@ -635,6 +1163,151 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getCatalogControllerCreateAccessoryOperationMutationOptions(options), queryClient);
+    }
+    export const catalogControllerFindManageAccessoryOperations = (
+
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<AccessoryOperationDto[]>(
+      {url: `/catalog/manage/accessory-operations`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getCatalogControllerFindManageAccessoryOperationsQueryKey = () => {
+    return [
+    `/catalog/manage/accessory-operations`
+    ] as const;
+    }
+
+
+export const getCatalogControllerFindManageAccessoryOperationsQueryOptions = <TData = Awaited<ReturnType<typeof catalogControllerFindManageAccessoryOperations>>, TError = ApiErrorResponseDto>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageAccessoryOperations>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getCatalogControllerFindManageAccessoryOperationsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof catalogControllerFindManageAccessoryOperations>>> = ({ signal }) => catalogControllerFindManageAccessoryOperations(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageAccessoryOperations>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type CatalogControllerFindManageAccessoryOperationsQueryResult = NonNullable<Awaited<ReturnType<typeof catalogControllerFindManageAccessoryOperations>>>
+export type CatalogControllerFindManageAccessoryOperationsQueryError = ApiErrorResponseDto
+
+
+export function useCatalogControllerFindManageAccessoryOperations<TData = Awaited<ReturnType<typeof catalogControllerFindManageAccessoryOperations>>, TError = ApiErrorResponseDto>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageAccessoryOperations>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof catalogControllerFindManageAccessoryOperations>>,
+          TError,
+          Awaited<ReturnType<typeof catalogControllerFindManageAccessoryOperations>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCatalogControllerFindManageAccessoryOperations<TData = Awaited<ReturnType<typeof catalogControllerFindManageAccessoryOperations>>, TError = ApiErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageAccessoryOperations>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof catalogControllerFindManageAccessoryOperations>>,
+          TError,
+          Awaited<ReturnType<typeof catalogControllerFindManageAccessoryOperations>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCatalogControllerFindManageAccessoryOperations<TData = Awaited<ReturnType<typeof catalogControllerFindManageAccessoryOperations>>, TError = ApiErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageAccessoryOperations>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useCatalogControllerFindManageAccessoryOperations<TData = Awaited<ReturnType<typeof catalogControllerFindManageAccessoryOperations>>, TError = ApiErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageAccessoryOperations>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getCatalogControllerFindManageAccessoryOperationsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const catalogControllerUpdateAccessoryOperation = (
+    id: string,
+    updateAccessoryOperationDto: UpdateAccessoryOperationDto,
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<AccessoryOperationDto>(
+      {url: `/catalog/manage/accessory-operations/${id}`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: updateAccessoryOperationDto, signal
+    },
+      options);
+    }
+
+
+
+
+export const getCatalogControllerUpdateAccessoryOperationMutationOptions = <TError = ApiErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof catalogControllerUpdateAccessoryOperation>>, TError,{id: string;data: UpdateAccessoryOperationDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof catalogControllerUpdateAccessoryOperation>>, TError,{id: string;data: UpdateAccessoryOperationDto}, TContext> => {
+
+const mutationKey = ['catalogControllerUpdateAccessoryOperation'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof catalogControllerUpdateAccessoryOperation>>, {id: string;data: UpdateAccessoryOperationDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  catalogControllerUpdateAccessoryOperation(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CatalogControllerUpdateAccessoryOperationMutationResult = NonNullable<Awaited<ReturnType<typeof catalogControllerUpdateAccessoryOperation>>>
+    export type CatalogControllerUpdateAccessoryOperationMutationBody = UpdateAccessoryOperationDto
+    export type CatalogControllerUpdateAccessoryOperationMutationError = ApiErrorResponseDto
+
+    export const useCatalogControllerUpdateAccessoryOperation = <TError = ApiErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof catalogControllerUpdateAccessoryOperation>>, TError,{id: string;data: UpdateAccessoryOperationDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof catalogControllerUpdateAccessoryOperation>>,
+        TError,
+        {id: string;data: UpdateAccessoryOperationDto},
+        TContext
+      > => {
+      return useMutation(getCatalogControllerUpdateAccessoryOperationMutationOptions(options), queryClient);
     }
     export const catalogControllerFindRejectionReasons = (
 
@@ -658,7 +1331,7 @@ export const getCatalogControllerFindRejectionReasonsQueryKey = () => {
     }
 
 
-export const getCatalogControllerFindRejectionReasonsQueryOptions = <TData = Awaited<ReturnType<typeof catalogControllerFindRejectionReasons>>, TError = void>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindRejectionReasons>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getCatalogControllerFindRejectionReasonsQueryOptions = <TData = Awaited<ReturnType<typeof catalogControllerFindRejectionReasons>>, TError = ApiErrorResponseDto>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindRejectionReasons>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -677,10 +1350,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type CatalogControllerFindRejectionReasonsQueryResult = NonNullable<Awaited<ReturnType<typeof catalogControllerFindRejectionReasons>>>
-export type CatalogControllerFindRejectionReasonsQueryError = void
+export type CatalogControllerFindRejectionReasonsQueryError = ApiErrorResponseDto
 
 
-export function useCatalogControllerFindRejectionReasons<TData = Awaited<ReturnType<typeof catalogControllerFindRejectionReasons>>, TError = void>(
+export function useCatalogControllerFindRejectionReasons<TData = Awaited<ReturnType<typeof catalogControllerFindRejectionReasons>>, TError = ApiErrorResponseDto>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindRejectionReasons>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof catalogControllerFindRejectionReasons>>,
@@ -690,7 +1363,7 @@ export function useCatalogControllerFindRejectionReasons<TData = Awaited<ReturnT
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCatalogControllerFindRejectionReasons<TData = Awaited<ReturnType<typeof catalogControllerFindRejectionReasons>>, TError = void>(
+export function useCatalogControllerFindRejectionReasons<TData = Awaited<ReturnType<typeof catalogControllerFindRejectionReasons>>, TError = ApiErrorResponseDto>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindRejectionReasons>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof catalogControllerFindRejectionReasons>>,
@@ -700,12 +1373,12 @@ export function useCatalogControllerFindRejectionReasons<TData = Awaited<ReturnT
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCatalogControllerFindRejectionReasons<TData = Awaited<ReturnType<typeof catalogControllerFindRejectionReasons>>, TError = void>(
+export function useCatalogControllerFindRejectionReasons<TData = Awaited<ReturnType<typeof catalogControllerFindRejectionReasons>>, TError = ApiErrorResponseDto>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindRejectionReasons>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useCatalogControllerFindRejectionReasons<TData = Awaited<ReturnType<typeof catalogControllerFindRejectionReasons>>, TError = void>(
+export function useCatalogControllerFindRejectionReasons<TData = Awaited<ReturnType<typeof catalogControllerFindRejectionReasons>>, TError = ApiErrorResponseDto>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindRejectionReasons>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -739,7 +1412,7 @@ export const catalogControllerCreateRejectionReason = (
 
 
 
-export const getCatalogControllerCreateRejectionReasonMutationOptions = <TError = void,
+export const getCatalogControllerCreateRejectionReasonMutationOptions = <TError = ApiErrorResponseDto,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof catalogControllerCreateRejectionReason>>, TError,{data: CreateRejectionReasonDto}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof catalogControllerCreateRejectionReason>>, TError,{data: CreateRejectionReasonDto}, TContext> => {
 
@@ -768,9 +1441,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type CatalogControllerCreateRejectionReasonMutationResult = NonNullable<Awaited<ReturnType<typeof catalogControllerCreateRejectionReason>>>
     export type CatalogControllerCreateRejectionReasonMutationBody = CreateRejectionReasonDto
-    export type CatalogControllerCreateRejectionReasonMutationError = void
+    export type CatalogControllerCreateRejectionReasonMutationError = ApiErrorResponseDto
 
-    export const useCatalogControllerCreateRejectionReason = <TError = void,
+    export const useCatalogControllerCreateRejectionReason = <TError = ApiErrorResponseDto,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof catalogControllerCreateRejectionReason>>, TError,{data: CreateRejectionReasonDto}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof catalogControllerCreateRejectionReason>>,
@@ -779,4 +1452,149 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getCatalogControllerCreateRejectionReasonMutationOptions(options), queryClient);
+    }
+    export const catalogControllerFindManageRejectionReasons = (
+
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<RejectionReasonDto[]>(
+      {url: `/catalog/manage/rejection-reasons`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getCatalogControllerFindManageRejectionReasonsQueryKey = () => {
+    return [
+    `/catalog/manage/rejection-reasons`
+    ] as const;
+    }
+
+
+export const getCatalogControllerFindManageRejectionReasonsQueryOptions = <TData = Awaited<ReturnType<typeof catalogControllerFindManageRejectionReasons>>, TError = ApiErrorResponseDto>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageRejectionReasons>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getCatalogControllerFindManageRejectionReasonsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof catalogControllerFindManageRejectionReasons>>> = ({ signal }) => catalogControllerFindManageRejectionReasons(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageRejectionReasons>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type CatalogControllerFindManageRejectionReasonsQueryResult = NonNullable<Awaited<ReturnType<typeof catalogControllerFindManageRejectionReasons>>>
+export type CatalogControllerFindManageRejectionReasonsQueryError = ApiErrorResponseDto
+
+
+export function useCatalogControllerFindManageRejectionReasons<TData = Awaited<ReturnType<typeof catalogControllerFindManageRejectionReasons>>, TError = ApiErrorResponseDto>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageRejectionReasons>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof catalogControllerFindManageRejectionReasons>>,
+          TError,
+          Awaited<ReturnType<typeof catalogControllerFindManageRejectionReasons>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCatalogControllerFindManageRejectionReasons<TData = Awaited<ReturnType<typeof catalogControllerFindManageRejectionReasons>>, TError = ApiErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageRejectionReasons>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof catalogControllerFindManageRejectionReasons>>,
+          TError,
+          Awaited<ReturnType<typeof catalogControllerFindManageRejectionReasons>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCatalogControllerFindManageRejectionReasons<TData = Awaited<ReturnType<typeof catalogControllerFindManageRejectionReasons>>, TError = ApiErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageRejectionReasons>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useCatalogControllerFindManageRejectionReasons<TData = Awaited<ReturnType<typeof catalogControllerFindManageRejectionReasons>>, TError = ApiErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof catalogControllerFindManageRejectionReasons>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getCatalogControllerFindManageRejectionReasonsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const catalogControllerUpdateRejectionReason = (
+    id: string,
+    updateRejectionReasonDto: UpdateRejectionReasonDto,
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<RejectionReasonDto>(
+      {url: `/catalog/manage/rejection-reasons/${id}`, method: 'PATCH',
+      headers: {'Content-Type': 'application/json', },
+      data: updateRejectionReasonDto, signal
+    },
+      options);
+    }
+
+
+
+
+export const getCatalogControllerUpdateRejectionReasonMutationOptions = <TError = ApiErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof catalogControllerUpdateRejectionReason>>, TError,{id: string;data: UpdateRejectionReasonDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof catalogControllerUpdateRejectionReason>>, TError,{id: string;data: UpdateRejectionReasonDto}, TContext> => {
+
+const mutationKey = ['catalogControllerUpdateRejectionReason'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof catalogControllerUpdateRejectionReason>>, {id: string;data: UpdateRejectionReasonDto}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  catalogControllerUpdateRejectionReason(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CatalogControllerUpdateRejectionReasonMutationResult = NonNullable<Awaited<ReturnType<typeof catalogControllerUpdateRejectionReason>>>
+    export type CatalogControllerUpdateRejectionReasonMutationBody = UpdateRejectionReasonDto
+    export type CatalogControllerUpdateRejectionReasonMutationError = ApiErrorResponseDto
+
+    export const useCatalogControllerUpdateRejectionReason = <TError = ApiErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof catalogControllerUpdateRejectionReason>>, TError,{id: string;data: UpdateRejectionReasonDto}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof catalogControllerUpdateRejectionReason>>,
+        TError,
+        {id: string;data: UpdateRejectionReasonDto},
+        TContext
+      > => {
+      return useMutation(getCatalogControllerUpdateRejectionReasonMutationOptions(options), queryClient);
     }

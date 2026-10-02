@@ -1,10 +1,12 @@
 "use client";
 
 import * as React from "react";
-
+import { Messages } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
 import { cn } from "@/lib/utils";
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
+	const t = useTranslate();
 	const scrollAreaRef = React.useRef<HTMLDivElement>(null);
 	const tableRef = React.useRef<HTMLTableElement>(null);
 	const hintId = React.useId();
@@ -56,12 +58,12 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
 					className="flex items-center gap-control border-b px-control py-control text-xs text-muted-foreground"
 				>
 					<span aria-hidden="true">↔</span>
-					<span>Scroll to see the remaining columns</span>
+					<span>{t(Messages.common.accessibility.tableScrollHint)}</span>
 				</div>
 			)}
 			<section
 				ref={scrollAreaRef}
-				aria-label="Scrollable table content"
+				aria-label={t(Messages.common.accessibility.scrollableTable)}
 				aria-describedby={
 					hasHorizontalOverflow && canScrollFurther ? hintId : undefined
 				}

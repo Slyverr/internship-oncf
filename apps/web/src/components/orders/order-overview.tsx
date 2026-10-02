@@ -1,41 +1,51 @@
 import { RecordDetail, RecordMetric } from "@/components/common/record-summary";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Messages } from "@/i18n";
+import { useLocale, useTranslate } from "@/i18n/locale-provider";
+import { getOrderStatusLabel } from "@/i18n/status-labels";
 import type { OrderDetailDto } from "@/lib/api/generated.schemas";
 import { formatDisplayDate } from "@/lib/date-utils";
-import { formatEnumLabel } from "@/lib/enum-labels";
 import { OrderAttachments } from "./order-attachments";
 
 export function OrderOverview({ order }: { order: OrderDetailDto }) {
+	const locale = useLocale();
+	const t = useTranslate();
 	return (
 		<div className="flex flex-col gap-8">
 			<div className="grid gap-4 @3xl/workspace:grid-cols-2">
 				<Card>
 					<CardHeader>
-						<CardTitle>Order Information</CardTitle>
+						<CardTitle>{t(Messages.orders.detail.information)}</CardTitle>
 					</CardHeader>
 
 					<CardContent className="flex flex-col gap-4">
 						<RecordDetail
-							label="Order Number"
+							label={t(Messages.orders.detail.orderNumber)}
 							value={order.orderNumber ?? "—"}
 						/>
 
-						<RecordDetail label="Customer" value={order.customer.companyName} />
-
 						<RecordDetail
-							label="Status"
-							value={formatEnumLabel(order.orderStatus.name)}
+							label={t(Messages.orders.detail.customer)}
+							value={order.customer.companyName}
 						/>
 
-						<RecordDetail label="Supervisor" value={order.supervisor ?? "—"} />
+						<RecordDetail
+							label={t(Messages.orders.detail.status)}
+							value={getOrderStatusLabel(order.orderStatus.name, locale)}
+						/>
 
 						<RecordDetail
-							label="Quantity Demanded"
+							label={t(Messages.orders.detail.supervisor)}
+							value={order.supervisor ?? "—"}
+						/>
+
+						<RecordDetail
+							label={t(Messages.orders.detail.quantityDemanded)}
 							value={`${order.quantityDemanded} ${order.unit.name}`}
 						/>
 
 						<RecordDetail
-							label="Quantity Achieved"
+							label={t(Messages.orders.detail.quantityAchieved)}
 							value={
 								order.quantityAchieved
 									? `${order.quantityAchieved} ${order.unit.name}`
@@ -44,88 +54,97 @@ export function OrderOverview({ order }: { order: OrderDetailDto }) {
 						/>
 
 						<RecordDetail
-							label="Order Date"
-							value={formatDisplayDate(order.orderDate)}
+							label={t(Messages.orders.detail.orderDate)}
+							value={formatDisplayDate(order.orderDate, locale)}
 						/>
 
 						<RecordDetail
-							label="Created"
-							value={formatDisplayDate(order.createdAt)}
+							label={t(Messages.orders.detail.created)}
+							value={formatDisplayDate(order.createdAt, locale)}
 						/>
 					</CardContent>
 				</Card>
 
 				<Card>
 					<CardHeader>
-						<CardTitle>Transport</CardTitle>
+						<CardTitle>{t(Messages.orders.detail.transport)}</CardTitle>
 					</CardHeader>
 
 					<CardContent className="flex flex-col gap-4">
-						<RecordDetail label="Good" value={order.good.name} />
+						<RecordDetail
+							label={t(Messages.orders.detail.good)}
+							value={order.good.name}
+						/>
 
 						<RecordDetail
-							label="Departure Station"
+							label={t(Messages.orders.detail.departureStation)}
 							value={order.departureStationId?.toString() ?? "—"}
 						/>
 
 						<RecordDetail
-							label="Arrival Station"
+							label={t(Messages.orders.detail.arrivalStation)}
 							value={order.arrivalStationId?.toString() ?? "—"}
 						/>
 
 						<RecordDetail
-							label="Pickup Port"
+							label={t(Messages.orders.detail.pickupPort)}
 							value={order.pickupPortId?.toString() ?? "—"}
 						/>
 
 						<RecordDetail
-							label="Delivery Port"
+							label={t(Messages.orders.detail.deliveryPort)}
 							value={order.deliveryPortId?.toString() ?? "—"}
 						/>
 
-						<RecordDetail label="Remarks" value={order.remarks ?? "—"} />
+						<RecordDetail
+							label={t(Messages.orders.detail.remarks)}
+							value={order.remarks ?? "—"}
+						/>
 					</CardContent>
 				</Card>
 
 				<Card>
 					<CardHeader>
-						<CardTitle>Execution</CardTitle>
+						<CardTitle>{t(Messages.orders.detail.execution)}</CardTitle>
 					</CardHeader>
 
 					<CardContent className="grid gap-4 sm:grid-cols-2">
 						<RecordMetric
-							label="Forecast Programs"
+							label={t(Messages.orders.detail.forecastPrograms)}
 							value={order.forecastPrograms.length}
 						/>
 
 						<RecordMetric
-							label="Executions"
+							label={t(Messages.orders.detail.executions)}
 							value={order.orderExecutions.length}
 						/>
 
-						<RecordMetric label="Claims" value={order.claims.length} />
+						<RecordMetric
+							label={t(Messages.orders.detail.claims)}
+							value={order.claims.length}
+						/>
 					</CardContent>
 				</Card>
 
 				<Card>
 					<CardHeader>
-						<CardTitle>Dates</CardTitle>
+						<CardTitle>{t(Messages.orders.detail.dates)}</CardTitle>
 					</CardHeader>
 
 					<CardContent className="flex flex-col gap-4">
 						<RecordDetail
-							label="Start Date"
-							value={formatDisplayDate(order.startDate)}
+							label={t(Messages.orders.detail.startDate)}
+							value={formatDisplayDate(order.startDate, locale)}
 						/>
 
 						<RecordDetail
-							label="End Date"
-							value={formatDisplayDate(order.endDate)}
+							label={t(Messages.orders.detail.endDate)}
+							value={formatDisplayDate(order.endDate, locale)}
 						/>
 
 						<RecordDetail
-							label="Updated"
-							value={formatDisplayDate(order.updatedAt)}
+							label={t(Messages.orders.detail.updated)}
+							value={formatDisplayDate(order.updatedAt, locale)}
 						/>
 					</CardContent>
 				</Card>

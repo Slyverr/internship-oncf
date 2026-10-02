@@ -1,9 +1,11 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
+import { Messages } from "@/i18n";
+import { getRequestTranslator } from "@/i18n/server";
 
-export const metadata: Metadata = {
-	title: "Login",
-	description: "",
-};
+export async function generateMetadata(): Promise<Metadata> {
+	const t = await getRequestTranslator();
+	return { title: t(Messages.auth.login.pageTitle) };
+}
 
 export default function Layout({
 	children,

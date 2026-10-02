@@ -2,10 +2,10 @@
 
 import { Permission, ProgramStatus } from "@ecommand/shared";
 import { useForm } from "@tanstack/react-form-nextjs";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type JSX, useEffect, useState } from "react";
+import { type JSX, useEffect, useMemo, useState } from "react";
 import { z } from "zod";
+import { ActionLink } from "@/components/common/action-link";
 import { FormFieldHeader } from "@/components/common/form-field-header";
 import {
 	GuidedFormActions,
@@ -23,53 +23,75 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UserSelect } from "@/components/users/user-select";
+import { useFormErrorMessage } from "@/hooks/use-form-error-message";
 import { useGuidedFormState } from "@/hooks/use-guided-form-state";
+import { Messages, type TypedMessageTranslator } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
 import type { ProgramDetailDto } from "@/lib/api/generated.schemas";
 import { useOrdersControllerFindEligibleForPrograms } from "@/lib/api/orders";
 import { useProgramsControllerCreate } from "@/lib/api/programs";
 import { useUsersControllerFindAll } from "@/lib/api/users";
-import { getFormErrorMessage } from "@/lib/form-utils";
 import { getEligibleOrderId } from "@/lib/program-creation-eligibility";
 import { useAuth } from "@/providers/auth-provider";
 import { ProgramStatusSelect } from "./program-status-select";
 
-const createProgramSchema = z.object({
-	orderId: z.number().int().positive("Order is required"),
-	userId: z.number().int().positive("User is required").optional(),
-	status: z
-		.enum(Object.values(ProgramStatus) as [ProgramStatus, ...ProgramStatus[]])
-		.optional(),
-	plannedDate: z.string().min(1, "Planned date is required"),
-	quantityPlanned: z
-		.string()
-		.trim()
-		.min(1, "Planned quantity is required")
-		.refine((value) => !Number.isNaN(Number(value)) && Number(value) > 0, {
-			message: "Quantity must be a positive number",
-		}),
-	quantityRealized: z
-		.string()
-		.optional()
-		.refine(
-			(value) => !value || (!Number.isNaN(Number(value)) && Number(value) >= 0),
-			{
-				message: "Quantity must be a non-negative number",
-			},
-		),
-	dtmStatus: z.string().optional(),
-});
+function createProgramSchema(t: TypedMessageTranslator) {
+	return z.object({
+		orderId: z
+			.number()
+			.int()
+			.positive(t(Messages.programs.createForm.validation.orderRequired)),
+		userId: z
+			.number()
+			.int()
+			.positive(t(Messages.programs.createForm.validation.userRequired))
+			.optional(),
+		status: z
+			.enum(Object.values(ProgramStatus) as [ProgramStatus, ...ProgramStatus[]])
+			.optional(),
+		plannedDate: z
+			.string()
+			.min(1, t(Messages.programs.createForm.validation.plannedDateRequired)),
+		quantityPlanned: z
+			.string()
+			.trim()
+			.min(
+				1,
+				t(Messages.programs.createForm.validation.plannedQuantityRequired),
+			)
+			.refine((value) => !Number.isNaN(Number(value)) && Number(value) > 0, {
+				message: t(Messages.programs.createForm.validation.quantityPositive),
+			}),
+		quantityRealized: z
+			.string()
+			.optional()
+			.refine(
+				(value) =>
+					!value || (!Number.isNaN(Number(value)) && Number(value) >= 0),
+				{
+					message: t(
+						Messages.programs.createForm.validation.quantityNonNegative,
+					),
+				},
+			),
+		dtmStatus: z.string().optional(),
+	});
+}
 
-type CreateProgramFormValues = z.infer<typeof createProgramSchema>;
+function getProgramSteps(t: TypedMessageTranslator) {
+	return [
+		{
+			title: t(Messages.programs.steps.plan),
+			description: t(Messages.programs.steps.orderQuantity),
+		},
+		{
+			title: t(Messages.programs.steps.execution),
+			description: t(Messages.programs.steps.progress),
+		},
+	];
+}
 
-const programPlanningSchema = createProgramSchema.pick({
-	orderId: true,
-	plannedDate: true,
-	quantityPlanned: true,
-});
-const programSteps = [
-	{ title: "Plan", description: "Order and planned quantity" },
-	{ title: "Execution", description: "Initial progress details" },
-];
+type CreateProgramFormValues = z.infer<ReturnType<typeof createProgramSchema>>;
 
 export function ProgramCreateForm({
 	initialOrderNumber,
@@ -81,6 +103,20 @@ export function ProgramCreateForm({
 	const router = useRouter();
 	const { profile, hasPermission } = useAuth();
 	const mutation = useProgramsControllerCreate();
+	const t = useTranslate();
+	const getErrorMessage = useFormErrorMessage();
+	const { schema, planningSchema, steps } = useMemo(() => {
+		const schema = createProgramSchema(t);
+		return {
+			schema,
+			planningSchema: schema.pick({
+				orderId: true,
+				plannedDate: true,
+				quantityPlanned: true,
+			}),
+			steps: getProgramSteps(t),
+		};
+	}, [t]);
 	const [initialOrderResolved, setInitialOrderResolved] = useState(false);
 
 	const canCreateOrders = hasPermission(Permission.ORDERS_CREATE);
@@ -108,7 +144,7 @@ export function ProgramCreateForm({
 	const form = useForm({
 		defaultValues,
 		onSubmit: async ({ value }) => {
-			if (!validate(createProgramSchema.safeParse(value))) {
+			if (!validate(schema.safeParse(value))) {
 				return;
 			}
 
@@ -138,7 +174,7 @@ export function ProgramCreateForm({
 	});
 
 	function continueToExecution() {
-		const result = programPlanningSchema.safeParse(form.state.values);
+		const result = planningSchema.safeParse(form.state.values);
 		advanceIfValid(result);
 	}
 
@@ -199,20 +235,19 @@ export function ProgramCreateForm({
 			className="workspace-form"
 		>
 			<PageHeader
-				title="New program"
-				description="Plan the work for an eligible order, then record its execution."
+				title={t(Messages.programs.createTitle)}
+				description={t(Messages.programs.createDescription)}
 			/>
-			<GuidedFormProgress steps={programSteps} currentStep={step} />
+			<GuidedFormProgress steps={steps} currentStep={step} />
 
 			<Card
 				hidden={step !== 0}
 				className={step === 0 ? "page-enter" : undefined}
 			>
 				<CardHeader>
-					<CardTitle>Program Information</CardTitle>
+					<CardTitle>{t(Messages.programs.createForm.information)}</CardTitle>
 					<CardDescription>
-						Specify the order, responsible user, planned date, and planned
-						quantity for the program.
+						{t(Messages.programs.createForm.description)}
 					</CardDescription>
 				</CardHeader>
 
@@ -221,13 +256,13 @@ export function ProgramCreateForm({
 						{(field) => {
 							const errorMsg =
 								stepErrors.orderId ??
-								getFormErrorMessage(field.state.meta.errors[0]);
+								getErrorMessage(field.state.meta.errors[0]);
 
 							return (
 								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="orderId"
-										label="Order"
+										label={t(Messages.programs.createForm.order)}
 										required
 										error={errorMsg}
 									/>
@@ -235,7 +270,9 @@ export function ProgramCreateForm({
 										<OrderSelect
 											id="orderId"
 											orders={orders}
-											emptyMessage="No eligible orders are ready for planning."
+											emptyMessage={t(
+												Messages.programs.createForm.noEligibleOrders,
+											)}
 											value={
 												field.state.value > 0 ? field.state.value : undefined
 											}
@@ -257,24 +294,18 @@ export function ProgramCreateForm({
 													role="status"
 													className="text-sm text-muted-foreground"
 												>
-													No orders are currently eligible for program planning.
-													A program can be created once an order reaches an
-													eligible status.
+													{t(
+														Messages.programs.createForm.noEligibleDescription,
+													)}
 												</p>
 												<div className="flex flex-wrap gap-2">
-													<Link
-														href="/dashboard/orders"
-														className="inline-flex min-h-11 items-center rounded-md px-4 text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-													>
-														Review orders
-													</Link>
+													<ActionLink href="/dashboard/orders">
+														{t(Messages.programs.createForm.reviewOrders)}
+													</ActionLink>
 													{canCreateOrders && (
-														<Link
-															href="/dashboard/orders/new"
-															className="inline-flex min-h-11 items-center rounded-md px-4 text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-														>
-															Create an order
-														</Link>
+														<ActionLink href="/dashboard/orders/new">
+															{t(Messages.programs.createForm.createOrder)}
+														</ActionLink>
 													)}
 												</div>
 											</div>
@@ -289,13 +320,13 @@ export function ProgramCreateForm({
 							{(field) => {
 								const errorMsg =
 									stepErrors.userId ??
-									getFormErrorMessage(field.state.meta.errors[0]);
+									getErrorMessage(field.state.meta.errors[0]);
 
 								return (
 									<div className="oncf-field">
 										<FormFieldHeader
 											htmlFor="userId"
-											label="Responsible User"
+											label={t(Messages.programs.createForm.responsibleUser)}
 											error={errorMsg}
 										/>
 										<div className={errorMsg ? "oncf-invalid-control" : ""}>
@@ -321,13 +352,13 @@ export function ProgramCreateForm({
 							{(field) => {
 								const errorMsg =
 									stepErrors.status ??
-									getFormErrorMessage(field.state.meta.errors[0]);
+									getErrorMessage(field.state.meta.errors[0]);
 
 								return (
 									<div className="oncf-field">
 										<FormFieldHeader
 											htmlFor="status"
-											label="Initial Status Override"
+											label={t(Messages.programs.createForm.initialStatus)}
 											error={errorMsg}
 										/>
 										<div className={errorMsg ? "oncf-invalid-control" : ""}>
@@ -347,13 +378,13 @@ export function ProgramCreateForm({
 						{(field) => {
 							const errorMsg =
 								stepErrors.plannedDate ??
-								getFormErrorMessage(field.state.meta.errors[0]);
+								getErrorMessage(field.state.meta.errors[0]);
 
 							return (
 								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="plannedDate"
-										label="Planned Date"
+										label={t(Messages.programs.createForm.plannedDate)}
 										required
 										error={errorMsg}
 									/>
@@ -380,19 +411,21 @@ export function ProgramCreateForm({
 						{(field) => {
 							const errorMsg =
 								stepErrors.quantityPlanned ??
-								getFormErrorMessage(field.state.meta.errors[0]);
+								getErrorMessage(field.state.meta.errors[0]);
 
 							return (
 								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="quantityPlanned"
-										label="Quantity Planned"
+										label={t(Messages.programs.createForm.quantityPlanned)}
 										required
 										error={errorMsg}
 									/>
 									<Input
 										id="quantityPlanned"
-										placeholder="e.g. 500"
+										placeholder={t(
+											Messages.programs.createForm.quantityPlannedPlaceholder,
+										)}
 										className={
 											errorMsg
 												? "border-destructive focus-visible:ring-destructive/20"
@@ -416,9 +449,9 @@ export function ProgramCreateForm({
 				className={step === 1 ? "page-enter" : undefined}
 			>
 				<CardHeader>
-					<CardTitle>Execution</CardTitle>
+					<CardTitle>{t(Messages.programs.createForm.execution)}</CardTitle>
 					<CardDescription>
-						Record realized quantity and the current DTM status when applicable.
+						{t(Messages.programs.createForm.executionDescription)}
 					</CardDescription>
 				</CardHeader>
 
@@ -427,18 +460,20 @@ export function ProgramCreateForm({
 						{(field) => {
 							const errorMsg =
 								stepErrors.quantityRealized ??
-								getFormErrorMessage(field.state.meta.errors[0]);
+								getErrorMessage(field.state.meta.errors[0]);
 
 							return (
 								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="quantityRealized"
-										label="Quantity Realized"
+										label={t(Messages.programs.createForm.quantityRealized)}
 										error={errorMsg}
 									/>
 									<Input
 										id="quantityRealized"
-										placeholder="e.g. 450"
+										placeholder={t(
+											Messages.programs.createForm.quantityRealizedPlaceholder,
+										)}
 										className={
 											errorMsg
 												? "border-destructive focus-visible:ring-destructive/20"
@@ -455,10 +490,14 @@ export function ProgramCreateForm({
 					<form.Field name="dtmStatus">
 						{(field) => (
 							<div className="oncf-field">
-								<Label htmlFor="dtmStatus">DTM Status</Label>
+								<Label htmlFor="dtmStatus">
+									{t(Messages.programs.createForm.dtmStatus)}
+								</Label>
 								<Input
 									id="dtmStatus"
-									placeholder="DTM status"
+									placeholder={t(
+										Messages.programs.createForm.dtmStatusPlaceholder,
+									)}
 									value={field.state.value ?? ""}
 									onChange={(event) => field.handleChange(event.target.value)}
 								/>
@@ -472,7 +511,7 @@ export function ProgramCreateForm({
 				{(state: typeof form.state) => (
 					<GuidedFormActions
 						currentStep={step}
-						stepCount={programSteps.length}
+						stepCount={steps.length}
 						onCancel={() =>
 							initialOrderNumber
 								? router.push(`/dashboard/orders/${initialOrderNumber}`)
@@ -480,8 +519,8 @@ export function ProgramCreateForm({
 						}
 						onPrevious={() => setStep(0)}
 						onContinue={continueToExecution}
-						submitLabel="Create Program"
-						pendingLabel="Creating Program..."
+						submitLabel={t(Messages.programs.createForm.create)}
+						pendingLabel={t(Messages.programs.createForm.creating)}
 						isSubmitting={state.isSubmitting}
 						isPending={mutation.isPending}
 						isSubmitDisabled={!state.canSubmit}

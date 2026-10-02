@@ -8,6 +8,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { Messages } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
 import { useCatalogControllerFindGoods } from "@/lib/api/catalog";
 
 interface GoodSelectProps {
@@ -17,6 +19,7 @@ interface GoodSelectProps {
 }
 
 export function GoodSelect({ id, value, onChange }: GoodSelectProps) {
+	const t = useTranslate();
 	const {
 		data: catalogGoods,
 		isLoading,
@@ -40,7 +43,9 @@ export function GoodSelect({ id, value, onChange }: GoodSelectProps) {
 				<SelectTrigger id={id} className="w-full">
 					<SelectValue>
 						{selectedGood?.name ??
-							(isLoading ? "Loading goods..." : "Select good")}
+							(isLoading
+								? t(Messages.goods.select.loading)
+								: t(Messages.goods.select.placeholder))}
 					</SelectValue>
 				</SelectTrigger>
 
@@ -55,15 +60,15 @@ export function GoodSelect({ id, value, onChange }: GoodSelectProps) {
 
 			{isError && (
 				<InlineQueryRetry
-					message="Could not load goods. Check your connection."
-					retryLabel="Retry goods"
+					message={t(Messages.goods.select.loadFailed)}
+					retryLabel={t(Messages.goods.select.retry)}
 					isFetching={isFetching}
 					onRetry={() => void refetch()}
 				/>
 			)}
 			{!isLoading && !isError && goods.length === 0 && (
 				<p role="status" className="text-sm text-muted-foreground">
-					No active goods are available.
+					{t(Messages.goods.select.noneAvailable)}
 				</p>
 			)}
 		</div>

@@ -1,3 +1,5 @@
+"use client";
+
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -9,6 +11,8 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Messages } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
 
 interface ConfirmDialogProps {
 	open: boolean;
@@ -27,12 +31,16 @@ export function ConfirmDialog({
 	onOpenChange,
 	title,
 	description,
-	confirmLabel = "Confirm",
-	cancelLabel = "Cancel",
+	confirmLabel,
+	cancelLabel,
 	variant = "default",
 	disabled = false,
 	onConfirm,
 }: ConfirmDialogProps) {
+	const t = useTranslate();
+	const resolvedConfirmLabel =
+		confirmLabel ?? t(Messages.common.actions.confirm);
+	const resolvedCancelLabel = cancelLabel ?? t(Messages.common.actions.cancel);
 	return (
 		<AlertDialog open={open} onOpenChange={onOpenChange}>
 			<AlertDialogContent>
@@ -45,7 +53,7 @@ export function ConfirmDialog({
 
 				<AlertDialogFooter>
 					<AlertDialogCancel disabled={disabled}>
-						{cancelLabel}
+						{resolvedCancelLabel}
 					</AlertDialogCancel>
 
 					<AlertDialogAction
@@ -53,7 +61,7 @@ export function ConfirmDialog({
 						variant={variant}
 						onClick={onConfirm}
 					>
-						{confirmLabel}
+						{resolvedConfirmLabel}
 					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>

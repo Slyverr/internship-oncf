@@ -12,6 +12,8 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Messages } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
 
 export default function ErrorPage({
 	error,
@@ -20,6 +22,7 @@ export default function ErrorPage({
 	error: Error & { digest?: string };
 	reset: () => void;
 }) {
+	const t = useTranslate();
 	useEffect(() => {
 		console.error(error);
 	}, [error]);
@@ -32,17 +35,15 @@ export default function ErrorPage({
 						<CircleAlertIcon aria-hidden="true" className="size-6" />
 					</span>
 					<CardTitle className="text-xl">
-						This page ran into a problem
+						{t(Messages.errorPage.title)}
 					</CardTitle>
 					<CardDescription role="alert">
-						Try loading it again. If the problem continues, sign in again or
-						come back in a moment.
+						{t(Messages.errorPage.description)}
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="items-center">
 					<p className="text-center text-sm text-muted-foreground">
-						If you were submitting a form, check whether it completed before
-						trying again.
+						{t(Messages.errorPage.formSubmitted)}
 					</p>
 				</CardContent>
 				<CardFooter className="flex-col-reverse gap-3 sm:flex-row sm:justify-center">
@@ -53,11 +54,11 @@ export default function ErrorPage({
 						render={<Link href="/login" />}
 						className="w-full sm:w-auto"
 					>
-						Go to sign in
+						{t(Messages.errorPage.signIn)}
 					</Button>
 					<Button type="button" onClick={reset} className="w-full sm:w-auto">
 						<RefreshCwIcon aria-hidden="true" />
-						Try again
+						{t(Messages.errorPage.retry)}
 					</Button>
 				</CardFooter>
 			</Card>

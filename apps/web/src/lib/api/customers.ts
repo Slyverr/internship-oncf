@@ -25,10 +25,12 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  ApiErrorResponseDto,
   CreateCustomerDto,
   CustomerDeleteDto,
   CustomerDetailDto,
   CustomerListDto,
+  CustomerPortfolioOptionDto,
   CustomersControllerFindAllParams,
   UpdateCustomerDto
 } from './generated.schemas';
@@ -56,6 +58,92 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
+export const customersControllerFindPortfolioOptions = (
+
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<CustomerPortfolioOptionDto[]>(
+      {url: `/customers/portfolio-options`, method: 'GET', signal
+    },
+      options);
+    }
+
+
+
+
+export const getCustomersControllerFindPortfolioOptionsQueryKey = () => {
+    return [
+    `/customers/portfolio-options`
+    ] as const;
+    }
+
+
+export const getCustomersControllerFindPortfolioOptionsQueryOptions = <TData = Awaited<ReturnType<typeof customersControllerFindPortfolioOptions>>, TError = ApiErrorResponseDto>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindPortfolioOptions>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getCustomersControllerFindPortfolioOptionsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof customersControllerFindPortfolioOptions>>> = ({ signal }) => customersControllerFindPortfolioOptions(requestOptions, signal);
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindPortfolioOptions>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type CustomersControllerFindPortfolioOptionsQueryResult = NonNullable<Awaited<ReturnType<typeof customersControllerFindPortfolioOptions>>>
+export type CustomersControllerFindPortfolioOptionsQueryError = ApiErrorResponseDto
+
+
+export function useCustomersControllerFindPortfolioOptions<TData = Awaited<ReturnType<typeof customersControllerFindPortfolioOptions>>, TError = ApiErrorResponseDto>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindPortfolioOptions>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof customersControllerFindPortfolioOptions>>,
+          TError,
+          Awaited<ReturnType<typeof customersControllerFindPortfolioOptions>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCustomersControllerFindPortfolioOptions<TData = Awaited<ReturnType<typeof customersControllerFindPortfolioOptions>>, TError = ApiErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindPortfolioOptions>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof customersControllerFindPortfolioOptions>>,
+          TError,
+          Awaited<ReturnType<typeof customersControllerFindPortfolioOptions>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useCustomersControllerFindPortfolioOptions<TData = Awaited<ReturnType<typeof customersControllerFindPortfolioOptions>>, TError = ApiErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindPortfolioOptions>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useCustomersControllerFindPortfolioOptions<TData = Awaited<ReturnType<typeof customersControllerFindPortfolioOptions>>, TError = ApiErrorResponseDto>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindPortfolioOptions>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getCustomersControllerFindPortfolioOptionsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 export const customersControllerFindAll = (
     params?: CustomersControllerFindAllParams,
  options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
@@ -79,7 +167,7 @@ export const getCustomersControllerFindAllQueryKey = (params?: CustomersControll
     }
 
 
-export const getCustomersControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof customersControllerFindAll>>, TError = void>(params?: CustomersControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getCustomersControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof customersControllerFindAll>>, TError = ApiErrorResponseDto>(params?: CustomersControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -98,10 +186,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type CustomersControllerFindAllQueryResult = NonNullable<Awaited<ReturnType<typeof customersControllerFindAll>>>
-export type CustomersControllerFindAllQueryError = void
+export type CustomersControllerFindAllQueryError = ApiErrorResponseDto
 
 
-export function useCustomersControllerFindAll<TData = Awaited<ReturnType<typeof customersControllerFindAll>>, TError = void>(
+export function useCustomersControllerFindAll<TData = Awaited<ReturnType<typeof customersControllerFindAll>>, TError = ApiErrorResponseDto>(
  params: undefined |  CustomersControllerFindAllParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindAll>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof customersControllerFindAll>>,
@@ -111,7 +199,7 @@ export function useCustomersControllerFindAll<TData = Awaited<ReturnType<typeof 
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCustomersControllerFindAll<TData = Awaited<ReturnType<typeof customersControllerFindAll>>, TError = void>(
+export function useCustomersControllerFindAll<TData = Awaited<ReturnType<typeof customersControllerFindAll>>, TError = ApiErrorResponseDto>(
  params?: CustomersControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindAll>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof customersControllerFindAll>>,
@@ -121,12 +209,12 @@ export function useCustomersControllerFindAll<TData = Awaited<ReturnType<typeof 
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCustomersControllerFindAll<TData = Awaited<ReturnType<typeof customersControllerFindAll>>, TError = void>(
+export function useCustomersControllerFindAll<TData = Awaited<ReturnType<typeof customersControllerFindAll>>, TError = ApiErrorResponseDto>(
  params?: CustomersControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useCustomersControllerFindAll<TData = Awaited<ReturnType<typeof customersControllerFindAll>>, TError = void>(
+export function useCustomersControllerFindAll<TData = Awaited<ReturnType<typeof customersControllerFindAll>>, TError = ApiErrorResponseDto>(
  params?: CustomersControllerFindAllParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -160,7 +248,7 @@ export const customersControllerCreate = (
 
 
 
-export const getCustomersControllerCreateMutationOptions = <TError = void,
+export const getCustomersControllerCreateMutationOptions = <TError = ApiErrorResponseDto,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof customersControllerCreate>>, TError,{data: CreateCustomerDto}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof customersControllerCreate>>, TError,{data: CreateCustomerDto}, TContext> => {
 
@@ -189,9 +277,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type CustomersControllerCreateMutationResult = NonNullable<Awaited<ReturnType<typeof customersControllerCreate>>>
     export type CustomersControllerCreateMutationBody = CreateCustomerDto
-    export type CustomersControllerCreateMutationError = void
+    export type CustomersControllerCreateMutationError = ApiErrorResponseDto
 
-    export const useCustomersControllerCreate = <TError = void,
+    export const useCustomersControllerCreate = <TError = ApiErrorResponseDto,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof customersControllerCreate>>, TError,{data: CreateCustomerDto}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof customersControllerCreate>>,
@@ -223,7 +311,7 @@ export const getCustomersControllerFindOneQueryKey = (id: number,) => {
     }
 
 
-export const getCustomersControllerFindOneQueryOptions = <TData = Awaited<ReturnType<typeof customersControllerFindOne>>, TError = void>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getCustomersControllerFindOneQueryOptions = <TData = Awaited<ReturnType<typeof customersControllerFindOne>>, TError = ApiErrorResponseDto>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -242,10 +330,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type CustomersControllerFindOneQueryResult = NonNullable<Awaited<ReturnType<typeof customersControllerFindOne>>>
-export type CustomersControllerFindOneQueryError = void
+export type CustomersControllerFindOneQueryError = ApiErrorResponseDto
 
 
-export function useCustomersControllerFindOne<TData = Awaited<ReturnType<typeof customersControllerFindOne>>, TError = void>(
+export function useCustomersControllerFindOne<TData = Awaited<ReturnType<typeof customersControllerFindOne>>, TError = ApiErrorResponseDto>(
  id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindOne>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof customersControllerFindOne>>,
@@ -255,7 +343,7 @@ export function useCustomersControllerFindOne<TData = Awaited<ReturnType<typeof 
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCustomersControllerFindOne<TData = Awaited<ReturnType<typeof customersControllerFindOne>>, TError = void>(
+export function useCustomersControllerFindOne<TData = Awaited<ReturnType<typeof customersControllerFindOne>>, TError = ApiErrorResponseDto>(
  id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindOne>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof customersControllerFindOne>>,
@@ -265,12 +353,12 @@ export function useCustomersControllerFindOne<TData = Awaited<ReturnType<typeof 
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useCustomersControllerFindOne<TData = Awaited<ReturnType<typeof customersControllerFindOne>>, TError = void>(
+export function useCustomersControllerFindOne<TData = Awaited<ReturnType<typeof customersControllerFindOne>>, TError = ApiErrorResponseDto>(
  id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useCustomersControllerFindOne<TData = Awaited<ReturnType<typeof customersControllerFindOne>>, TError = void>(
+export function useCustomersControllerFindOne<TData = Awaited<ReturnType<typeof customersControllerFindOne>>, TError = ApiErrorResponseDto>(
  id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof customersControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -305,7 +393,7 @@ export const customersControllerUpdate = (
 
 
 
-export const getCustomersControllerUpdateMutationOptions = <TError = void,
+export const getCustomersControllerUpdateMutationOptions = <TError = ApiErrorResponseDto,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof customersControllerUpdate>>, TError,{id: number;data: UpdateCustomerDto}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof customersControllerUpdate>>, TError,{id: number;data: UpdateCustomerDto}, TContext> => {
 
@@ -334,9 +422,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type CustomersControllerUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof customersControllerUpdate>>>
     export type CustomersControllerUpdateMutationBody = UpdateCustomerDto
-    export type CustomersControllerUpdateMutationError = void
+    export type CustomersControllerUpdateMutationError = ApiErrorResponseDto
 
-    export const useCustomersControllerUpdate = <TError = void,
+    export const useCustomersControllerUpdate = <TError = ApiErrorResponseDto,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof customersControllerUpdate>>, TError,{id: number;data: UpdateCustomerDto}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof customersControllerUpdate>>,
@@ -361,7 +449,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-export const getCustomersControllerDeactivateMutationOptions = <TError = void,
+export const getCustomersControllerDeactivateMutationOptions = <TError = ApiErrorResponseDto,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof customersControllerDeactivate>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof customersControllerDeactivate>>, TError,{id: number}, TContext> => {
 
@@ -390,9 +478,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type CustomersControllerDeactivateMutationResult = NonNullable<Awaited<ReturnType<typeof customersControllerDeactivate>>>
 
-    export type CustomersControllerDeactivateMutationError = void
+    export type CustomersControllerDeactivateMutationError = ApiErrorResponseDto
 
-    export const useCustomersControllerDeactivate = <TError = void,
+    export const useCustomersControllerDeactivate = <TError = ApiErrorResponseDto,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof customersControllerDeactivate>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof customersControllerDeactivate>>,

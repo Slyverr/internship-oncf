@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { NotificationMessageCode } from "@ecommand/shared";
 import type { NotificationListDto } from "../src/lib/api/generated.schemas";
 import { isUnreadClaimCommentNotification } from "../src/lib/claim-conversation-utils";
 
@@ -9,8 +10,8 @@ const notification: NotificationListDto = {
 	recipientUserId: 12,
 	status: "SENT",
 	channelId: "in-app",
-	title: "Claim updated",
-	message: "A new comment was added to claim #7.",
+	messageCode: NotificationMessageCode.CLAIM_COMMENT_ADDED,
+	messageParameters: { recordCode: "CLM-ABCDEFGHJK" },
 	relatedEntityType: "claims",
 	relatedEntityId: 7,
 	sentAt: "2026-09-28T12:00:00.000Z",
@@ -40,7 +41,10 @@ assert.equal(
 );
 assert.equal(
 	isUnreadClaimCommentNotification(
-		{ ...notification, message: "Claim #7 is now resolved." },
+		{
+			...notification,
+			messageCode: NotificationMessageCode.CLAIM_STATUS_CHANGED,
+		},
 		7,
 	),
 	false,

@@ -2,7 +2,6 @@
 
 import {
 	isStrongPassword,
-	STRONG_PASSWORD_HINT,
 	STRONG_PASSWORD_MAX_LENGTH,
 	STRONG_PASSWORD_REQUIREMENTS,
 } from "@ecommand/shared";
@@ -15,18 +14,31 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useFormErrorMessage } from "@/hooks/use-form-error-message";
+import { type MessageKey, Messages, translateApiResponse } from "@/i18n";
+import { useLocale, useTranslate } from "@/i18n/locale-provider";
 import { useAuthControllerRegister } from "@/lib/api/auth";
-import { getFormErrorMessage } from "@/lib/form-utils";
 import { AuthPageLayout } from "./auth-page-layout";
 
-const registrationSteps: GuidedFormStep[] = [
-	{ title: "Company details", description: "Your name and company code" },
-	{ title: "Sign-in details", description: "Email and password" },
-];
+const requirementLabels: Record<
+	(typeof STRONG_PASSWORD_REQUIREMENTS)[number]["id"],
+	MessageKey
+> = {
+	"minimum-length": Messages.auth.signup.passwordRequirements.minimumLength,
+	lowercase: Messages.auth.signup.passwordRequirements.lowercase,
+	uppercase: Messages.auth.signup.passwordRequirements.uppercase,
+	number: Messages.auth.signup.passwordRequirements.number,
+	symbol: Messages.auth.signup.passwordRequirements.symbol,
+	"maximum-length": Messages.auth.signup.passwordRequirements.maximumLength,
+};
 
 export function ClientRegistrationForm() {
+	const t = useTranslate();
+	const getErrorMessage = useFormErrorMessage();
+	const locale = useLocale();
 	const register = useAuthControllerRegister();
 	const [submitted, setSubmitted] = useState(false);
+	const [submittedCode, setSubmittedCode] = useState<string>();
 	const [step, setStep] = useState(0);
 	const [firstName, setFirstName] = useState("");
 	const [lastName, setLastName] = useState("");
@@ -40,13 +52,25 @@ export function ClientRegistrationForm() {
 	const confirmationRef = useRef<HTMLInputElement>(null);
 	const missingPasswordRequirements = STRONG_PASSWORD_REQUIREMENTS.filter(
 		(requirement) => !requirement.isMet(password),
-	).map((requirement) => requirement.label);
+	).map((requirement) => t(requirementLabels[requirement.id]));
 	const passwordStatus =
 		password.length === 0
-			? STRONG_PASSWORD_HINT
+			? t(Messages.auth.passwordHint)
 			: missingPasswordRequirements.length === 0
-				? "Password meets the requirements."
-				: `Add ${missingPasswordRequirements.join(", ")}.`;
+				? t(Messages.auth.signup.passwordMeetsRequirements)
+				: t(Messages.auth.signup.passwordAddRequirements, {
+						requirements: missingPasswordRequirements.join(", "),
+					});
+	const registrationSteps: GuidedFormStep[] = [
+		{
+			title: t(Messages.auth.signup.stepCompany),
+			description: t(Messages.auth.signup.stepCompanyDescription),
+		},
+		{
+			title: t(Messages.auth.signup.stepSignIn),
+			description: t(Messages.auth.signup.stepSignInDescription),
+		},
+	];
 
 	function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -56,12 +80,12 @@ export function ClientRegistrationForm() {
 			return;
 		}
 		if (!isStrongPassword(password)) {
-			setFormError(STRONG_PASSWORD_HINT);
+			setFormError(t(Messages.auth.passwordHint));
 			window.requestAnimationFrame(() => passwordRef.current?.focus());
 			return;
 		}
 		if (password !== confirmPassword) {
-			setFormError("Passwords do not match.");
+			setFormError(t(Messages.auth.signup.passwordMismatch));
 			window.requestAnimationFrame(() => confirmationRef.current?.focus());
 			return;
 		}
@@ -78,11 +102,13 @@ export function ClientRegistrationForm() {
 				},
 			},
 			{
-				onSuccess: () => setSubmitted(true),
+				onSuccess: ({ code }) => {
+					setSubmittedCode(code);
+					setSubmitted(true);
+				},
 				onError: (error) =>
 					setFormError(
-						getFormErrorMessage(error) ??
-							"We could not submit your request. Check your details and try again.",
+						getErrorMessage(error) ?? t(Messages.auth.signup.requestFailed),
 					),
 			},
 		);
@@ -93,10 +119,10 @@ export function ClientRegistrationForm() {
 			<form onSubmit={submit} className="mx-auto grid w-full max-w-md gap-4">
 				<header className="grid gap-control px-4">
 					<h1 className="text-2xl font-bold tracking-tight">
-						Create your account
+						{t(Messages.auth.signup.title)}
 					</h1>
 					<p className="text-sm text-muted-foreground">
-						Company access starts after administrator approval.
+						{t(Messages.auth.signup.description)}
 					</p>
 				</header>
 				{submitted ? (
@@ -104,10 +130,14 @@ export function ClientRegistrationForm() {
 						role="status"
 						className="grid min-h-96 content-center gap-2 px-4"
 					>
-						<p className="font-medium">Request received</p>
+						<p className="font-medium">
+							{submittedCode
+								? (translateApiResponse(submittedCode, locale) ??
+									t(Messages.auth.signup.requestReceived))
+								: t(Messages.auth.signup.requestReceived)}
+						</p>
 						<p className="text-sm text-muted-foreground">
-							An administrator will review your company details. You can sign in
-							after your request is approved.
+							{t(Messages.auth.signup.requestReview)}
 						</p>
 					</div>
 				) : (
@@ -130,11 +160,13 @@ export function ClientRegistrationForm() {
 							{step === 0 ? (
 								<div className="grid items-start gap-4 sm:grid-cols-2">
 									<div className="oncf-field">
-										<Label htmlFor="registration-first-name">First name</Label>
+										<Label htmlFor="registration-first-name">
+											{t(Messages.auth.signup.firstName)}
+										</Label>
 										<Input
 											id="registration-first-name"
 											value={firstName}
-											placeholder="e.g. Samira"
+											placeholder={t(Messages.auth.signup.firstNamePlaceholder)}
 											autoComplete="given-name"
 											required
 											maxLength={100}
@@ -142,11 +174,13 @@ export function ClientRegistrationForm() {
 										/>
 									</div>
 									<div className="oncf-field">
-										<Label htmlFor="registration-last-name">Last name</Label>
+										<Label htmlFor="registration-last-name">
+											{t(Messages.auth.signup.lastName)}
+										</Label>
 										<Input
 											id="registration-last-name"
 											value={lastName}
-											placeholder="e.g. El Amrani"
+											placeholder={t(Messages.auth.signup.lastNamePlaceholder)}
 											autoComplete="family-name"
 											required
 											maxLength={100}
@@ -155,7 +189,7 @@ export function ClientRegistrationForm() {
 									</div>
 									<div className="oncf-field">
 										<Label htmlFor="registration-customer-code">
-											Customer code
+											{t(Messages.auth.signup.customerCode)}
 										</Label>
 										<Input
 											id="registration-customer-code"
@@ -163,13 +197,15 @@ export function ClientRegistrationForm() {
 											autoComplete="off"
 											required
 											maxLength={50}
-											placeholder="Company code"
+											placeholder={t(
+												Messages.auth.signup.customerCodePlaceholder,
+											)}
 											onChange={(event) => setCustomerCode(event.target.value)}
 										/>
 									</div>
 									<div className="oncf-field">
 										<Label htmlFor="registration-ice">
-											Company identifier (ICE)
+											{t(Messages.auth.signup.ice)}
 										</Label>
 										<Input
 											id="registration-ice"
@@ -180,26 +216,28 @@ export function ClientRegistrationForm() {
 											maxLength={15}
 											pattern="[0-9]{15}"
 											aria-describedby="registration-ice-help"
-											placeholder="15 digits"
+											placeholder={t(Messages.auth.signup.icePlaceholder)}
 											onChange={(event) => setIce(event.target.value)}
 										/>
 										<p
 											id="registration-ice-help"
 											className="text-meta text-muted-foreground"
 										>
-											Enter the company's 15-digit identifier.
+											{t(Messages.auth.signup.iceHelp)}
 										</p>
 									</div>
 								</div>
 							) : (
 								<div className="grid items-start gap-4">
 									<div className="oncf-field">
-										<Label htmlFor="registration-email">Email address</Label>
+										<Label htmlFor="registration-email">
+											{t(Messages.auth.signup.email)}
+										</Label>
 										<Input
 											id="registration-email"
 											value={email}
 											type="email"
-											placeholder="name@company.com"
+											placeholder={t(Messages.auth.signup.emailPlaceholder)}
 											autoComplete="email"
 											required
 											maxLength={100}
@@ -208,7 +246,9 @@ export function ClientRegistrationForm() {
 									</div>
 									<div className="grid items-start gap-4 sm:grid-cols-2">
 										<div className="oncf-field">
-											<Label htmlFor="registration-password">Password</Label>
+											<Label htmlFor="registration-password">
+												{t(Messages.auth.signup.password)}
+											</Label>
 											<Input
 												id="registration-password"
 												ref={passwordRef}
@@ -221,13 +261,15 @@ export function ClientRegistrationForm() {
 												aria-describedby="registration-password-status"
 												required
 												maxLength={STRONG_PASSWORD_MAX_LENGTH}
-												placeholder="Create a password"
+												placeholder={t(
+													Messages.auth.signup.passwordPlaceholder,
+												)}
 												onChange={(event) => setPassword(event.target.value)}
 											/>
 										</div>
 										<div className="oncf-field">
 											<Label htmlFor="registration-password-confirmation">
-												Confirm password
+												{t(Messages.auth.signup.confirmPassword)}
 											</Label>
 											<Input
 												id="registration-password-confirmation"
@@ -242,7 +284,9 @@ export function ClientRegistrationForm() {
 												aria-describedby="registration-confirmation-status"
 												required
 												maxLength={STRONG_PASSWORD_MAX_LENGTH}
-												placeholder="Repeat your password"
+												placeholder={t(
+													Messages.auth.signup.confirmPasswordPlaceholder,
+												)}
 												onChange={(event) =>
 													setConfirmPassword(event.target.value)
 												}
@@ -260,8 +304,8 @@ export function ClientRegistrationForm() {
 												{confirmPassword.length === 0
 													? null
 													: confirmPassword === password
-														? "Passwords match."
-														: "Passwords do not match."}
+														? t(Messages.auth.signup.passwordMatch)
+														: t(Messages.auth.signup.passwordMismatch)}
 											</p>
 										</div>
 									</div>
@@ -287,24 +331,24 @@ export function ClientRegistrationForm() {
 											setStep(0);
 										}}
 									>
-										Back
+										{t(Messages.auth.signup.back)}
 									</Button>
 								)}
 								<Button type="submit" disabled={register.isPending}>
 									{step === 0
-										? "Continue"
+										? t(Messages.auth.signup.continue)
 										: register.isPending
-											? "Submitting request…"
-											: "Request access"}
+											? t(Messages.auth.signup.submitting)
+											: t(Messages.auth.signup.requestAccess)}
 								</Button>
 							</div>
 							<p className="text-center text-sm text-muted-foreground">
-								Already have an account?{" "}
+								{t(Messages.auth.signup.haveAccount)}{" "}
 								<Link
 									href="/login"
 									className="underline underline-offset-4 hover:text-primary"
 								>
-									Sign in
+									{t(Messages.auth.login.title)}
 								</Link>
 							</p>
 						</footer>

@@ -3,29 +3,28 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
+import { PageHeader } from "@/components/common/page-header";
 import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/toast";
+import { useFormErrorMessage } from "@/hooks/use-form-error-message";
 import { useUpdateDetailCache } from "@/hooks/use-update-detail-cache";
+import { Messages } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
 import type { ProgramDetailDto } from "@/lib/api/generated.schemas";
 import {
 	getProgramsControllerFindOneQueryKey,
 	useProgramsControllerUpdate,
 } from "@/lib/api/programs";
 import { toDateInputValue } from "@/lib/date-utils";
-import { getFormErrorMessage } from "@/lib/form-utils";
 
 const QUANTITY_PATTERN = /^\d+(\.\d{1,3})?$/;
 
 export function ProgramEditForm({ program }: { program: ProgramDetailDto }) {
+	const t = useTranslate();
+	const getErrorMessage = useFormErrorMessage();
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const updateDetailCache = useUpdateDetailCache<ProgramDetailDto, string>(
@@ -54,9 +53,8 @@ export function ProgramEditForm({ program }: { program: ProgramDetailDto }) {
 		) {
 			toast.add({
 				type: "error",
-				title: "Check the program details",
-				description:
-					"Choose a planned date and enter a positive quantity with at most three decimal places.",
+				title: t(Messages.programs.editForm.checkDetails),
+				description: t(Messages.programs.editForm.validation),
 			});
 			return;
 		}
@@ -70,33 +68,34 @@ export function ProgramEditForm({ program }: { program: ProgramDetailDto }) {
 			void queryClient.invalidateQueries({ queryKey: ["/programs"] });
 			toast.add({
 				type: "success",
-				title: "Program saved",
-				description: "The planned date and quantity have been updated.",
+				title: t(Messages.programs.editForm.saved),
+				description: t(Messages.programs.editForm.savedDescription),
 			});
 			router.push(`/dashboard/programs/${program.programNumber}`);
 			router.refresh();
 		} catch (error) {
 			toast.add({
 				type: "error",
-				title: "Could not save program",
-				description: getFormErrorMessage(error),
+				title: t(Messages.programs.editForm.saveFailed),
+				description: getErrorMessage(error),
 			});
 		}
 	}
 
 	return (
 		<form onSubmit={submit} className="workspace-form">
+			<PageHeader
+				title={t(Messages.programs.editTitle, {
+					programCode: program.programNumber,
+				})}
+				description={t(Messages.programs.editDescription)}
+			/>
 			<Card>
-				<CardHeader>
-					<CardTitle>Edit {program.programNumber}</CardTitle>
-					<CardDescription>
-						Update the planned date and quantity. Workflow status is managed
-						with the program actions.
-					</CardDescription>
-				</CardHeader>
 				<CardContent className="grid gap-4 @3xl/workspace:grid-cols-2">
 					<div className="oncf-field">
-						<Label htmlFor="plannedDate">Planned date</Label>
+						<Label htmlFor="plannedDate">
+							{t(Messages.programs.editForm.plannedDate)}
+						</Label>
 						<Input
 							id="plannedDate"
 							type="date"
@@ -106,11 +105,13 @@ export function ProgramEditForm({ program }: { program: ProgramDetailDto }) {
 						/>
 					</div>
 					<div className="oncf-field">
-						<Label htmlFor="quantityPlanned">Planned quantity</Label>
+						<Label htmlFor="quantityPlanned">
+							{t(Messages.programs.editForm.quantityPlanned)}
+						</Label>
 						<Input
 							id="quantityPlanned"
 							inputMode="decimal"
-							placeholder="e.g. 500"
+							placeholder={t(Messages.programs.editForm.quantityPlaceholder)}
 							value={quantityPlanned}
 							onChange={(event) => setQuantityPlanned(event.target.value)}
 							required
@@ -128,10 +129,14 @@ export function ProgramEditForm({ program }: { program: ProgramDetailDto }) {
 						router.push(`/dashboard/programs/${program.programNumber}`)
 					}
 				>
-					Cancel
+					{t(Messages.programs.editForm.cancel)}
 				</Button>
 				<Button type="submit" disabled={mutation.isPending || !hasChanges}>
-					{mutation.isPending ? "Saving…" : "Save changes"}
+					{t(
+						mutation.isPending
+							? Messages.programs.editForm.saving
+							: Messages.programs.editForm.save,
+					)}
 				</Button>
 			</div>
 		</form>

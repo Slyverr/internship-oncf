@@ -1,12 +1,11 @@
 "use client";
 
-import { createContext, type ReactNode, useCallback, useContext } from "react";
+import { createContext, type ReactNode, useContext, useMemo } from "react";
 import {
 	type AppLocale,
+	createTranslator,
 	DEFAULT_LOCALE,
-	type MessageKey,
 	SUPPORTED_LOCALES,
-	translate,
 } from ".";
 
 const LocaleContext = createContext<AppLocale>(DEFAULT_LOCALE);
@@ -34,9 +33,5 @@ export function useLocale(): AppLocale {
 
 export function useTranslate() {
 	const locale = useLocale();
-	return useCallback(
-		(key: MessageKey, values: Record<string, string | number> = {}) =>
-			translate(key, values, locale),
-		[locale],
-	);
+	return useMemo(() => createTranslator(locale), [locale]);
 }

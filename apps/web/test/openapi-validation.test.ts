@@ -5,11 +5,24 @@ const completeSchema = {
 		Array.from({ length: 12 }, (_, index) => [`field${index}`, {}]),
 	),
 };
+const codedErrorOperation = {
+	responses: {
+		default: {
+			content: {
+				"application/json": {
+					schema: { $ref: "#/components/schemas/ApiErrorResponseDto" },
+				},
+			},
+		},
+	},
+};
 
 const issues = validateOpenApiForGeneration({
-	paths: { "/orders": {} },
+	paths: { "/orders": { get: codedErrorOperation } },
 	components: {
 		schemas: {
+			ApiErrorCode: { enum: ["ACCESS_DENIED"] },
+			ApiErrorResponseDto: { properties: { code: {}, statusCode: {} } },
 			CreateOrderDto: completeSchema,
 			CreateUserDto: completeSchema,
 			OrderDetailDto: completeSchema,
@@ -27,9 +40,16 @@ const incompleteIssues = validateOpenApiForGeneration({
 		schemas: { UserListDto: { properties: { registrationStatus: {} } } },
 	},
 });
-if (incompleteIssues.length !== 5) {
+if (
+	!incompleteIssues.includes(
+		"The OpenAPI document has no shared ApiErrorCode enum.",
+	) ||
+	!incompleteIssues.includes(
+		"The OpenAPI document has no coded API error response schema.",
+	)
+) {
 	throw new Error(
-		`Expected incomplete schemas to block generation, got ${incompleteIssues.length} issue(s).`,
+		`Expected incomplete error schemas to block generation: ${incompleteIssues}`,
 	);
 }
 

@@ -14,6 +14,8 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Messages } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
 import {
 	canReviewRegistration,
 	hasAvailableActions,
@@ -31,6 +33,7 @@ import {
 import { useAuth } from "@/providers/auth-provider";
 
 export function UserActions({ user }: { user: UserDetailDto }) {
+	const t = useTranslate();
 	const { hasPermission } = useAuth();
 	const queryClient = useQueryClient();
 	const router = useRouter();
@@ -98,14 +101,14 @@ export function UserActions({ user }: { user: UserDetailDto }) {
 							}
 							disabled={reviewMutation.isPending}
 						>
-							Approve access
+							{t(Messages.users.actions.approve)}
 						</Button>
 						<Button
 							variant="outline"
 							onClick={() => setRejectDialogOpen(true)}
 							disabled={reviewMutation.isPending}
 						>
-							Reject request
+							{t(Messages.users.actions.reject)}
 						</Button>
 					</>
 				)}
@@ -115,7 +118,7 @@ export function UserActions({ user }: { user: UserDetailDto }) {
 						variant="outline"
 						onClick={() => router.push(`/dashboard/users/${user.id}/edit`)}
 					>
-						Edit User
+						{t(Messages.users.actions.editUser)}
 					</Button>
 				)}
 
@@ -131,7 +134,7 @@ export function UserActions({ user }: { user: UserDetailDto }) {
 							disabled={deactivateMutation.isPending}
 						>
 							<EllipsisVerticalIcon />
-							<span className="sr-only">More actions</span>
+							<span className="sr-only">{t(Messages.users.actions.more)}</span>
 						</DropdownMenuTrigger>
 
 						<DropdownMenuContent align="end">
@@ -140,7 +143,7 @@ export function UserActions({ user }: { user: UserDetailDto }) {
 									className="text-destructive"
 									onClick={() => setDeactivateDialogOpen(true)}
 								>
-									Deactivate User
+									{t(Messages.users.actions.deactivate)}
 								</DropdownMenuItem>
 							)}
 						</DropdownMenuContent>
@@ -151,9 +154,11 @@ export function UserActions({ user }: { user: UserDetailDto }) {
 			<ConfirmDialog
 				open={rejectDialogOpen}
 				onOpenChange={setRejectDialogOpen}
-				title="Reject client access request?"
-				description={`Rejecting ${user.firstName} ${user.lastName}'s request keeps this account inactive. This decision cannot be changed from the request screen.`}
-				confirmLabel="Reject request"
+				title={t(Messages.users.actions.rejectTitle)}
+				description={t(Messages.users.actions.rejectDescription, {
+					name: `${user.firstName} ${user.lastName}`,
+				})}
+				confirmLabel={t(Messages.users.actions.reject)}
 				variant="destructive"
 				disabled={reviewMutation.isPending}
 				onConfirm={() =>
@@ -164,9 +169,11 @@ export function UserActions({ user }: { user: UserDetailDto }) {
 			<ConfirmDialog
 				open={deactivateDialogOpen}
 				onOpenChange={setDeactivateDialogOpen}
-				title="Deactivate User Account?"
-				description={`Are you sure you want to deactivate the user account for ${user.firstName} ${user.lastName}?`}
-				confirmLabel="Deactivate"
+				title={t(Messages.users.actions.deactivateTitle)}
+				description={t(Messages.users.actions.deactivateDescription, {
+					name: `${user.firstName} ${user.lastName}`,
+				})}
+				confirmLabel={t(Messages.users.actions.deactivate)}
 				variant="destructive"
 				disabled={deactivateMutation.isPending}
 				onConfirm={handleDeactivate}

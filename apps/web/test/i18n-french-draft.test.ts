@@ -49,20 +49,15 @@ function collectMessages(
 	return result;
 }
 
-const sections = [
-	"common",
-	"navigation",
-	"roleProfiles",
-	"referenceData",
-	"dashboard",
-	"units",
-	"goods",
-	"attachments",
-	"orders",
-] as const;
+const englishSections = Object.keys(en) as Array<keyof typeof en>;
+assert.deepEqual(
+	Object.keys(frDraft).sort(),
+	englishSections.map(String).sort(),
+	"French draft must cover every English catalog section",
+);
 let translatedMessageCount = 0;
 
-for (const section of sections) {
+for (const section of englishSections) {
 	const englishMessages = collectMessages(en[section]);
 	const frenchMessages = collectMessages(frDraft[section]);
 	translatedMessageCount += frenchMessages.size;

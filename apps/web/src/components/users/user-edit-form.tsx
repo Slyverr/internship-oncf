@@ -1,8 +1,9 @@
 "use client";
 
+import { RolePersona } from "@ecommand/shared";
 import { useForm } from "@tanstack/react-form-nextjs";
 import { useRouter } from "next/navigation";
-import { type JSX } from "react";
+import { type JSX, useMemo } from "react";
 import { z } from "zod";
 import { FormFieldHeader } from "@/components/common/form-field-header";
 import {
@@ -28,67 +29,81 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { CustomerPortfolioField } from "@/components/users/customer-portfolio-field";
+import { RoleProfileSelect } from "@/components/users/role-profile-select";
+import { useFormErrorMessage } from "@/hooks/use-form-error-message";
 import { useGuidedFormState } from "@/hooks/use-guided-form-state";
+import { Messages, type TypedMessageTranslator } from "@/i18n";
+import { useLocale, useTranslate } from "@/i18n/locale-provider";
 import {
-	UpdateUserDtoRole,
 	UpdateUserDtoType,
 	type UserDetailDto,
 } from "@/lib/api/generated.schemas";
+import { useRolesControllerFindProfiles } from "@/lib/api/roles";
 import { useUsersControllerUpdate } from "@/lib/api/users";
-import { getFormErrorMessage } from "@/lib/form-utils";
-import { formatUserRole, formatUserType } from "@/lib/user-labels";
+import { formatUserType } from "@/lib/user-labels";
 
-const updateUserSchemaBase = z.object({
-	email: z.string().email("Valid email is required").max(100).optional(),
-	firstName: z
-		.string()
-		.trim()
-		.min(1, "First name is required")
-		.max(100)
-		.optional(),
-	lastName: z
-		.string()
-		.trim()
-		.min(1, "Last name is required")
-		.max(100)
-		.optional(),
-	role: z.nativeEnum(UpdateUserDtoRole).optional(),
-	employeeCode: z.string().max(50).optional(),
-	type: z.nativeEnum(UpdateUserDtoType).optional(),
-	customerId: z.number().int().positive().optional(),
-	customerIds: z.array(z.number().int().positive()).optional(),
-});
+function createUpdateUserSchemaBase(t: TypedMessageTranslator) {
+	return z.object({
+		email: z
+			.string()
+			.email(t(Messages.users.form.validation.validEmail))
+			.max(100)
+			.optional(),
+		firstName: z
+			.string()
+			.trim()
+			.min(1, t(Messages.users.form.validation.firstNameRequired))
+			.max(100)
+			.optional(),
+		lastName: z
+			.string()
+			.trim()
+			.min(1, t(Messages.users.form.validation.lastNameRequired))
+			.max(100)
+			.optional(),
+		roleId: z.string().uuid().optional(),
+		employeeCode: z.string().max(50).optional(),
+		type: z.nativeEnum(UpdateUserDtoType).optional(),
+		customerId: z.number().int().positive().optional(),
+		customerIds: z.array(z.number().int().positive()).optional(),
+	});
+}
 
-const updateUserSchema = updateUserSchemaBase.superRefine(
-	({ role, customerId }, context) => {
-		if (
-			role === UpdateUserDtoRole.CLIENT_REPRESENTATIVE &&
-			(!customerId || customerId < 1)
-		) {
-			context.addIssue({
-				code: "custom",
-				path: ["customerId"],
-				message: "Select the customer this representative belongs to",
-			});
-		}
-	},
-);
+type UpdateUserFormValues = z.infer<
+	ReturnType<typeof createUpdateUserSchemaBase>
+>;
 
-type UpdateUserFormValues = z.infer<typeof updateUserSchema>;
-
-const userAccessSchema = updateUserSchemaBase.pick({
-	email: true,
-	role: true,
-	type: true,
-});
-const userEditSteps = [
-	{ title: "Access", description: "Email and role settings" },
-	{ title: "Profile", description: "Name and employee code" },
-];
+function getUserEditSteps(t: TypedMessageTranslator) {
+	return [
+		{
+			title: t(Messages.users.form.steps.access),
+			description: t(Messages.users.form.steps.accessDescription),
+		},
+		{
+			title: t(Messages.users.form.steps.profile),
+			description: t(Messages.users.form.steps.profileDescription),
+		},
+	];
+}
 
 export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 	const router = useRouter();
+	const t = useTranslate();
+	const locale = useLocale();
+	const getErrorMessage = useFormErrorMessage();
 	const mutation = useUsersControllerUpdate();
+	const roleProfilesQuery = useRolesControllerFindProfiles();
+	const roleProfiles = (roleProfilesQuery.data ?? []).filter(
+		(profile) => profile.isActive,
+	);
+	const { baseSchema, accessSchema, steps } = useMemo(() => {
+		const baseSchema = createUpdateUserSchemaBase(t);
+		return {
+			baseSchema,
+			accessSchema: baseSchema.pick({ email: true, roleId: true, type: true }),
+			steps: getUserEditSteps(t),
+		};
+	}, [t]);
 	const {
 		step,
 		setStep,
@@ -97,15 +112,30 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 		clearFieldError,
 		validate,
 	} = useGuidedFormState();
+	const updateUserSchema = useMemo(
+		() =>
+			baseSchema.superRefine(({ roleId, customerId }, context) => {
+				const selectedProfile = roleProfiles.find(({ id }) => id === roleId);
+				if (
+					selectedProfile?.persona === RolePersona.CLIENT_REPRESENTATIVE &&
+					(!customerId || customerId < 1)
+				) {
+					context.addIssue({
+						code: "custom",
+						path: ["customerId"],
+						message: t(Messages.users.form.validation.customerRequired),
+					});
+				}
+			}),
+		[baseSchema, roleProfiles, t],
+	);
 
 	const form = useForm({
 		defaultValues: {
 			email: user.email,
 			firstName: user.firstName,
 			lastName: user.lastName,
-			role:
-				(user.role?.name as UpdateUserDtoRole | undefined) ??
-				UpdateUserDtoRole.AGENT_COMMERCIAL,
+			roleId: user.roleId,
 			employeeCode: user.employeeCode ?? "",
 			type: (user.type as UpdateUserDtoType) ?? UpdateUserDtoType.internal,
 			customerId: user.customerId ?? undefined,
@@ -127,13 +157,16 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 						...(value.lastName?.trim()
 							? { lastName: value.lastName.trim() }
 							: {}),
-						...(value.role ? { role: value.role } : {}),
+						...(value.roleId && value.roleId !== user.roleId
+							? { roleId: value.roleId }
+							: {}),
 						...(value.employeeCode?.trim()
 							? { employeeCode: value.employeeCode.trim() }
 							: {}),
 						...(value.type ? { type: value.type } : {}),
 						...(value.customerId ? { customerId: value.customerId } : {}),
-						...(value.role === UpdateUserDtoRole.AGENT_COMMERCIAL
+						...(roleProfiles.find(({ id }) => id === value.roleId)?.persona ===
+						RolePersona.AGENT_COMMERCIAL
 							? { customerIds: value.customerIds ?? [] }
 							: {}),
 					},
@@ -148,7 +181,7 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 	});
 
 	function continueToProfile() {
-		const result = userAccessSchema.safeParse(form.state.values);
+		const result = accessSchema.safeParse(form.state.values);
 		advanceIfValid(result);
 	}
 
@@ -166,39 +199,38 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 			className="workspace-form"
 		>
 			<PageHeader
-				title="Edit user"
-				description="Update account access and profile information."
+				title={t(Messages.users.editTitle)}
+				description={t(Messages.users.editDescription)}
 			/>
-			<GuidedFormProgress steps={userEditSteps} currentStep={step} />
+			<GuidedFormProgress steps={steps} currentStep={step} />
 
 			<Card
 				hidden={step !== 0}
 				className={step === 0 ? "page-enter" : undefined}
 			>
 				<CardHeader>
-					<CardTitle>Account Access</CardTitle>
+					<CardTitle>{t(Messages.users.form.sections.access)}</CardTitle>
 					<CardDescription>
-						Update login email and access settings.
+						{t(Messages.users.form.sections.accessDescription)}
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="grid gap-4 @3xl/workspace:grid-cols-2">
 					<form.Field name="email">
 						{(field) => {
 							const errorMsg =
-								stepErrors.email ??
-								getFormErrorMessage(field.state.meta.errors[0]);
+								stepErrors.email ?? getErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="email"
-										label="Email Address"
+										label={t(Messages.users.form.fields.email)}
 										required
 										error={errorMsg}
 									/>
 									<Input
 										id="email"
 										type="email"
-										placeholder="name@company.com"
+										placeholder={t(Messages.users.form.fields.emailPlaceholder)}
 										value={field.state.value}
 										onChange={(e) => {
 											field.handleChange(e.target.value);
@@ -215,33 +247,23 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 						}}
 					</form.Field>
 
-					<form.Field name="role">
+					<form.Field name="roleId">
 						{(field) => (
 							<div className="oncf-field">
-								<Label htmlFor="role">User Role</Label>
-								<Select
-									value={field.state.value}
-									onValueChange={(val) =>
-										field.handleChange(val as UpdateUserDtoRole)
-									}
-								>
-									<SelectTrigger id="role">
-										<SelectValue>
-											{formatUserRole(field.state.value)}
-										</SelectValue>
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value={UpdateUserDtoRole.ADMIN}>
-											{formatUserRole(UpdateUserDtoRole.ADMIN)}
-										</SelectItem>
-										<SelectItem value={UpdateUserDtoRole.AGENT_COMMERCIAL}>
-											{formatUserRole(UpdateUserDtoRole.AGENT_COMMERCIAL)}
-										</SelectItem>
-										<SelectItem value={UpdateUserDtoRole.CLIENT_REPRESENTATIVE}>
-											{formatUserRole(UpdateUserDtoRole.CLIENT_REPRESENTATIVE)}
-										</SelectItem>
-									</SelectContent>
-								</Select>
+								<Label htmlFor="roleId">
+									{t(Messages.users.form.fields.role)}
+								</Label>
+								<RoleProfileSelect
+									profiles={roleProfiles}
+									value={field.state.value ?? ""}
+									onValueChange={field.handleChange}
+									disabled={roleProfilesQuery.isLoading}
+								/>
+								{roleProfilesQuery.isError && (
+									<p className="text-sm text-destructive">
+										{t(Messages.users.form.rolesLoadFailed)}
+									</p>
+								)}
 							</div>
 						)}
 					</form.Field>
@@ -249,7 +271,9 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 					<form.Field name="type">
 						{(field) => (
 							<div className="oncf-field">
-								<Label htmlFor="type">User Type</Label>
+								<Label htmlFor="type">
+									{t(Messages.users.form.fields.type)}
+								</Label>
 								<Select
 									value={field.state.value}
 									onValueChange={(val) =>
@@ -258,15 +282,15 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 								>
 									<SelectTrigger id="type">
 										<SelectValue>
-											{formatUserType(field.state.value)}
+											{formatUserType(field.state.value, locale)}
 										</SelectValue>
 									</SelectTrigger>
 									<SelectContent>
 										<SelectItem value={UpdateUserDtoType.internal}>
-											Internal
+											{formatUserType(UpdateUserDtoType.internal, locale)}
 										</SelectItem>
 										<SelectItem value={UpdateUserDtoType.external}>
-											External
+											{formatUserType(UpdateUserDtoType.external, locale)}
 										</SelectItem>
 									</SelectContent>
 								</Select>
@@ -281,9 +305,9 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 				className={step === 1 ? "page-enter" : undefined}
 			>
 				<CardHeader>
-					<CardTitle>Profile</CardTitle>
+					<CardTitle>{t(Messages.users.form.sections.profileEdit)}</CardTitle>
 					<CardDescription>
-						Update the user name and employee code.
+						{t(Messages.users.form.sections.profileEditDescription)}
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="grid gap-4 @3xl/workspace:grid-cols-2">
@@ -291,18 +315,20 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 						{(field) => {
 							const errorMsg =
 								stepErrors.firstName ??
-								getFormErrorMessage(field.state.meta.errors[0]);
+								getErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="firstName"
-										label="First Name"
+										label={t(Messages.users.form.fields.firstName)}
 										required
 										error={errorMsg}
 									/>
 									<Input
 										id="firstName"
-										placeholder="e.g. Samira"
+										placeholder={t(
+											Messages.users.form.fields.firstNamePlaceholder,
+										)}
 										value={field.state.value}
 										onChange={(e) => {
 											field.handleChange(e.target.value);
@@ -323,18 +349,20 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 						{(field) => {
 							const errorMsg =
 								stepErrors.lastName ??
-								getFormErrorMessage(field.state.meta.errors[0]);
+								getErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="lastName"
-										label="Last Name"
+										label={t(Messages.users.form.fields.lastName)}
 										required
 										error={errorMsg}
 									/>
 									<Input
 										id="lastName"
-										placeholder="e.g. El Amrani"
+										placeholder={t(
+											Messages.users.form.fields.lastNamePlaceholder,
+										)}
 										value={field.state.value}
 										onChange={(e) => {
 											field.handleChange(e.target.value);
@@ -351,20 +379,21 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 						}}
 					</form.Field>
 
-					<form.Subscribe selector={(state) => state.values.role}>
-						{(role) =>
-							role === UpdateUserDtoRole.CLIENT_REPRESENTATIVE && (
+					<form.Subscribe selector={(state) => state.values.roleId}>
+						{(roleId) =>
+							roleProfiles.find(({ id }) => id === roleId)?.persona ===
+								RolePersona.CLIENT_REPRESENTATIVE && (
 								<form.Field name="customerId">
 									{(field) => {
 										const errorMsg =
 											stepErrors.customerId ??
-											getFormErrorMessage(field.state.meta.errors[0]);
+											getErrorMessage(field.state.meta.errors[0]);
 
 										return (
 											<div className="oncf-field @3xl/workspace:col-span-2">
 												<FormFieldHeader
 													htmlFor="customerId"
-													label="Customer Company"
+													label={t(Messages.users.form.fields.customer)}
 													required
 													error={errorMsg}
 												/>
@@ -384,9 +413,10 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 						}
 					</form.Subscribe>
 
-					<form.Subscribe selector={(state) => state.values.role}>
-						{(role) =>
-							role === UpdateUserDtoRole.AGENT_COMMERCIAL && (
+					<form.Subscribe selector={(state) => state.values.roleId}>
+						{(roleId) =>
+							roleProfiles.find(({ id }) => id === roleId)?.persona ===
+								RolePersona.AGENT_COMMERCIAL && (
 								<form.Field name="customerIds">
 									{(field) => (
 										<CustomerPortfolioField
@@ -402,10 +432,14 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 					<form.Field name="employeeCode">
 						{(field) => (
 							<div className="oncf-field">
-								<Label htmlFor="employeeCode">Employee code</Label>
+								<Label htmlFor="employeeCode">
+									{t(Messages.users.form.fields.employeeCode)}
+								</Label>
 								<Input
 									id="employeeCode"
-									placeholder="Employee code"
+									placeholder={t(
+										Messages.users.form.fields.employeeCodePlaceholder,
+									)}
 									value={field.state.value ?? ""}
 									onChange={(e) => field.handleChange(e.target.value)}
 								/>
@@ -419,12 +453,12 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 				{(state: typeof form.state) => (
 					<GuidedFormActions
 						currentStep={step}
-						stepCount={userEditSteps.length}
+						stepCount={steps.length}
 						onCancel={() => router.push(`/dashboard/users/${user.id}`)}
 						onPrevious={() => setStep(0)}
 						onContinue={continueToProfile}
-						submitLabel="Save Changes"
-						pendingLabel="Saving..."
+						submitLabel={t(Messages.users.form.actions.save)}
+						pendingLabel={t(Messages.users.form.actions.saving)}
 						isSubmitting={state.isSubmitting}
 						isPending={mutation.isPending}
 						isSubmitDisabled={!state.canSubmit}

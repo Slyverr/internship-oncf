@@ -36,53 +36,70 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useFormErrorMessage } from "@/hooks/use-form-error-message";
 import { useGuidedFormState } from "@/hooks/use-guided-form-state";
+import { Messages } from "@/i18n";
+import { getClaimTypeLabel } from "@/i18n/claim-labels";
+import { useLocale, useTranslate } from "@/i18n/locale-provider";
 import { useClaimsControllerCreate } from "@/lib/api/claims";
 import type { ClaimDetailDto } from "@/lib/api/generated.schemas";
 import { useOrdersControllerFindAll } from "@/lib/api/orders";
-import { formatEnumLabel } from "@/lib/enum-labels";
-import { getFormErrorMessage } from "@/lib/form-utils";
 import { useAuth } from "@/providers/auth-provider";
 
-export const createClaimSchema = z.object({
-	customerId: z
-		.number()
-		.int()
-		.positive({ message: "Customer selection is required" }),
-	type: z.enum(ClaimType, { error: "Claim type is required" }),
-	description: z
-		.string()
-		.trim()
-		.min(10, { message: "Description must be at least 10 characters long" }),
-	userId: z.number().int().optional(),
-	orderId: z.number().int().optional(),
-	operationId: z
-		.uuid({ message: "Invalid operation selection" })
-		.optional()
-		.or(z.literal("")),
-	priority: z.enum(ClaimPriority).optional(),
-	status: z.enum(ClaimStatus).optional(),
-	resolution: z
-		.string()
-		.max(1000, { message: "Resolution must be at most 1000 characters" })
-		.optional(),
-});
+export function createClaimSchema(t: ReturnType<typeof useTranslate>) {
+	return z.object({
+		customerId: z
+			.number()
+			.int()
+			.positive({
+				message: t(Messages.claims.validation.customerRequired),
+			}),
+		type: z.enum(ClaimType, {
+			error: t(Messages.claims.validation.typeRequired),
+		}),
+		description: z
+			.string()
+			.trim()
+			.min(10, {
+				message: t(Messages.claims.validation.descriptionTooShort),
+			}),
+		userId: z.number().int().optional(),
+		orderId: z.number().int().optional(),
+		operationId: z
+			.uuid({ message: t(Messages.claims.validation.operationInvalid) })
+			.optional()
+			.or(z.literal("")),
+		priority: z.enum(ClaimPriority).optional(),
+		status: z.enum(ClaimStatus).optional(),
+		resolution: z
+			.string()
+			.max(1000, {
+				message: t(Messages.claims.validation.resolutionTooLong),
+			})
+			.optional(),
+	});
+}
 
-type CreateClaimFormValues = z.infer<typeof createClaimSchema>;
-
-const claimBasicsSchema = createClaimSchema.pick({
-	customerId: true,
-	type: true,
-});
-const claimSteps = [
-	{ title: "Claim details", description: "Customer and issue type" },
-	{ title: "Description", description: "Explain the issue" },
-];
-
+type CreateClaimFormValues = z.infer<ReturnType<typeof createClaimSchema>>;
 export function ClaimCreateForm(): JSX.Element {
+	const locale = useLocale();
+	const t = useTranslate();
+	const getErrorMessage = useFormErrorMessage();
+	const claimSchema = createClaimSchema(t);
+	const claimBasicsSchema = claimSchema.pick({ customerId: true, type: true });
 	const router = useRouter();
 	const { profile, hasPermission } = useAuth();
 	const mutation = useClaimsControllerCreate();
+	const claimSteps = [
+		{
+			title: t(Messages.claims.details),
+			description: t(Messages.claims.customerAndType),
+		},
+		{
+			title: t(Messages.claims.descriptionStep),
+			description: t(Messages.claims.explainIssue),
+		},
+	];
 	const [selectedCustomerId, setSelectedCustomerId] = useState(
 		profile?.customerId ?? 0,
 	);
@@ -112,7 +129,7 @@ export function ClaimCreateForm(): JSX.Element {
 	const form = useForm({
 		defaultValues,
 		onSubmit: async ({ value }) => {
-			if (!validate(createClaimSchema.safeParse(value))) {
+			if (!validate(claimSchema.safeParse(value))) {
 				return;
 			}
 
@@ -164,8 +181,7 @@ export function ClaimCreateForm(): JSX.Element {
 	if (!canCreateClaims) {
 		return (
 			<p role="alert" className="text-sm text-muted-foreground">
-				You do not have permission to create claims. Return to the claims list
-				to review existing claims.
+				{t(Messages.claims.noCreatePermission)}
 			</p>
 		);
 	}
@@ -184,8 +200,8 @@ export function ClaimCreateForm(): JSX.Element {
 			className="workspace-form"
 		>
 			<PageHeader
-				title="New claim"
-				description="Record the issue, link affected records, and describe the requested resolution."
+				title={t(Messages.claims.newTitle)}
+				description={t(Messages.claims.newDescription)}
 			/>
 			<GuidedFormProgress steps={claimSteps} currentStep={step} />
 
@@ -194,9 +210,9 @@ export function ClaimCreateForm(): JSX.Element {
 				className={step === 0 ? "page-enter" : undefined}
 			>
 				<CardHeader>
-					<CardTitle>Claim Information</CardTitle>
+					<CardTitle>{t(Messages.claims.information)}</CardTitle>
 					<CardDescription>
-						Provide the customer and issue type, and optionally link an order.
+						{t(Messages.claims.informationDescription)}
 					</CardDescription>
 				</CardHeader>
 
@@ -204,14 +220,14 @@ export function ClaimCreateForm(): JSX.Element {
 					{canManageOther && (
 						<form.Field name="customerId">
 							{(field) => {
-								const errorMsg = getFormErrorMessage(
+								const errorMsg = getErrorMessage(
 									stepErrors.customerId ?? field.state.meta.errors[0],
 								);
 								return (
 									<div className="oncf-field">
 										<FormFieldHeader
 											htmlFor="customerId"
-											label="Customer Company"
+											label={t(Messages.claims.customerCompany)}
 											required
 											error={errorMsg}
 										/>
@@ -240,13 +256,12 @@ export function ClaimCreateForm(): JSX.Element {
 					<form.Field name="type">
 						{(field) => {
 							const errorMsg =
-								stepErrors.type ??
-								getFormErrorMessage(field.state.meta.errors[0]);
+								stepErrors.type ?? getErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="type"
-										label="Claim Type"
+										label={t(Messages.claims.claimType)}
 										required
 										error={errorMsg}
 									/>
@@ -260,14 +275,14 @@ export function ClaimCreateForm(): JSX.Element {
 										<SelectTrigger className="w-full">
 											<SelectValue>
 												{field.state.value
-													? formatEnumLabel(field.state.value)
-													: "Select claim type"}
+													? getClaimTypeLabel(field.state.value, locale)
+													: t(Messages.claims.selectType)}
 											</SelectValue>
 										</SelectTrigger>
 										<SelectContent>
 											{Object.values(ClaimType).map((typeVal) => (
 												<SelectItem key={typeVal} value={typeVal}>
-													{formatEnumLabel(typeVal)}
+													{getClaimTypeLabel(typeVal, locale)}
 												</SelectItem>
 											))}
 										</SelectContent>
@@ -280,13 +295,15 @@ export function ClaimCreateForm(): JSX.Element {
 					<form.Field name="orderId">
 						{(field) => (
 							<div className="oncf-field">
-								<Label htmlFor="orderId">Associated Order (Optional)</Label>
+								<Label htmlFor="orderId">
+									{t(Messages.claims.associatedOrderOptional)}
+								</Label>
 								<OrderSelect
 									id="orderId"
 									orders={orders}
 									value={field.state.value}
 									onChange={(value) => field.handleChange(value)}
-									emptyMessage="No orders found for this customer."
+									emptyMessage={t(Messages.claims.noOrdersForCustomer)}
 									isLoading={ordersIsLoading}
 									isError={ordersIsError}
 									isFetching={ordersIsFetching}
@@ -300,12 +317,12 @@ export function ClaimCreateForm(): JSX.Element {
 						{(field) => {
 							const errorMsg =
 								stepErrors.priority ??
-								getFormErrorMessage(field.state.meta.errors[0]);
+								getErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="priority"
-										label="Priority"
+										label={t(Messages.claims.priority)}
 										error={errorMsg}
 									/>
 									<ClaimPrioritySelect
@@ -322,12 +339,12 @@ export function ClaimCreateForm(): JSX.Element {
 							{(field) => {
 								const errorMsg =
 									stepErrors.status ??
-									getFormErrorMessage(field.state.meta.errors[0]);
+									getErrorMessage(field.state.meta.errors[0]);
 								return (
 									<div className="oncf-field">
 										<FormFieldHeader
 											htmlFor="status"
-											label="Initial Status Override"
+											label={t(Messages.claims.initialStatusOverride)}
 											error={errorMsg}
 										/>
 										<ClaimStatusSelect
@@ -347,10 +364,8 @@ export function ClaimCreateForm(): JSX.Element {
 				className={step === 1 ? "page-enter" : undefined}
 			>
 				<CardHeader>
-					<CardTitle>Issue Description & Resolution</CardTitle>
-					<CardDescription>
-						Describe the claim issue details thoroughly.
-					</CardDescription>
+					<CardTitle>{t(Messages.claims.issueResolution)}</CardTitle>
+					<CardDescription>{t(Messages.claims.describeIssue)}</CardDescription>
 				</CardHeader>
 
 				<CardContent className="space-y-4">
@@ -358,18 +373,18 @@ export function ClaimCreateForm(): JSX.Element {
 						{(field) => {
 							const errorMsg =
 								stepErrors.description ??
-								getFormErrorMessage(field.state.meta.errors[0]);
+								getErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="description"
-										label="Claim Description"
+										label={t(Messages.claims.claimDescription)}
 										required
 										error={errorMsg}
 									/>
 									<Textarea
 										id="description"
-										placeholder="Detailed explanation of the problem..."
+										placeholder={t(Messages.claims.claimDescriptionPlaceholder)}
 										rows={4}
 										className={
 											errorMsg
@@ -391,17 +406,19 @@ export function ClaimCreateForm(): JSX.Element {
 						{(field) => {
 							const errorMsg =
 								stepErrors.resolution ??
-								getFormErrorMessage(field.state.meta.errors[0]);
+								getErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="resolution"
-										label="Initial Resolution Notes"
+										label={t(Messages.claims.initialResolution)}
 										error={errorMsg}
 									/>
 									<Textarea
 										id="resolution"
-										placeholder="Enter initial resolution text if resolved immediately..."
+										placeholder={t(
+											Messages.claims.initialResolutionPlaceholder,
+										)}
 										rows={3}
 										className={
 											errorMsg
@@ -429,8 +446,8 @@ export function ClaimCreateForm(): JSX.Element {
 						onCancel={() => router.push("/dashboard/claims")}
 						onPrevious={() => setStep((current) => Math.max(current - 1, 0))}
 						onContinue={continueToDescription}
-						submitLabel="Create Claim"
-						pendingLabel="Creating Claim..."
+						submitLabel={t(Messages.claims.created)}
+						pendingLabel={t(Messages.claims.createPending)}
 						isSubmitting={state.isSubmitting}
 						isPending={mutation.isPending}
 						isSubmitDisabled={!state.canSubmit}

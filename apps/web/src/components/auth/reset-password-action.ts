@@ -1,11 +1,14 @@
 "use server";
 
-import { isStrongPassword, STRONG_PASSWORD_HINT } from "@ecommand/shared";
+import type { ApiResponseCode } from "@ecommand/shared";
+import { isStrongPassword } from "@ecommand/shared";
+import { type MessageKey, Messages } from "@/i18n";
+import type { SuccessResponseDto } from "@/lib/api/generated.schemas";
 import { customFetch } from "@/lib/axios";
 
 export type ResetPasswordState = {
-	success?: boolean;
-	error?: string;
+	successCode?: ApiResponseCode;
+	errorKey?: MessageKey;
 };
 
 export async function resetPasswordAction(
@@ -17,27 +20,26 @@ export async function resetPasswordAction(
 	const confirmation = String(formData.get("confirmation") ?? "");
 
 	if (password !== confirmation) {
-		return { error: "The passwords do not match." };
+		return { errorKey: Messages.auth.recovery.passwordMismatch };
 	}
 	if (!isStrongPassword(password)) {
-		return { error: STRONG_PASSWORD_HINT };
+		return { errorKey: Messages.auth.passwordHint };
 	}
 	if (!token) {
-		return { error: "This reset link is invalid or has expired." };
+		return { errorKey: Messages.auth.recovery.invalidLink };
 	}
 
 	try {
-		await customFetch({
+		const response = await customFetch<SuccessResponseDto>({
 			url: "/auth/reset-password",
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			data: { token, newPassword: password },
 		});
-		return { success: true };
+		return { successCode: response.code };
 	} catch {
 		return {
-			error:
-				"This reset link is invalid or has expired. Request a new link and try again.",
+			errorKey: Messages.auth.recovery.invalidLinkHelp,
 		};
 	}
 }

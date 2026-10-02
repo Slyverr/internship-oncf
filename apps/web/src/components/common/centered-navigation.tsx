@@ -9,10 +9,13 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Messages } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
 import { useAuth } from "@/providers/auth-provider";
 import { sidebarRoutes } from "../sidebar/sidebar-routes";
 
 export function CenteredNavigation({ compact = false }: { compact?: boolean }) {
+	const t = useTranslate();
 	const pathname = usePathname();
 	const { hasPermission } = useAuth();
 	const navigationRef = useRef<HTMLElement>(null);
@@ -92,11 +95,11 @@ export function CenteredNavigation({ compact = false }: { compact?: boolean }) {
 				<nav
 					ref={navigationRef}
 					id={navigationId}
-					aria-label={
+					aria-label={t(
 						hasOverflow
-							? "Main navigation; scroll horizontally to see more sections"
-							: "Main navigation"
-					}
+							? Messages.navigation.mainScrollable
+							: Messages.navigation.main,
+					)}
 					className="min-w-0 flex-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:overflow-visible"
 				>
 					<div
@@ -104,6 +107,7 @@ export function CenteredNavigation({ compact = false }: { compact?: boolean }) {
 						className={`flex w-max min-w-full items-center ${compact ? "justify-center gap-2 px-4" : "justify-center gap-control px-4 lg:gap-compact lg:px-0"}`}
 					>
 						{visibleRoutes.map((route) => {
+							const label = t(route.titleKey);
 							const isActive = route.exact
 								? pathname === route.url
 								: pathname === route.url ||
@@ -111,12 +115,12 @@ export function CenteredNavigation({ compact = false }: { compact?: boolean }) {
 							const Icon = route.icon;
 
 							return (
-								<Tooltip key={route.title}>
+								<Tooltip key={route.url}>
 									<TooltipTrigger
 										render={
 											<Link
 												href={route.url}
-												aria-label={route.title}
+												aria-label={label}
 												aria-current={isActive ? "page" : undefined}
 												className={`inline-flex size-11 shrink-0 items-center justify-center rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
 													isActive
@@ -132,7 +136,7 @@ export function CenteredNavigation({ compact = false }: { compact?: boolean }) {
 										side="bottom"
 										className="rounded-md bg-popover px-control py-compact text-xs text-popover-foreground shadow-sm ring-1 ring-border"
 									>
-										{route.title}
+										{label}
 									</TooltipContent>
 								</Tooltip>
 							);

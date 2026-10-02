@@ -1,35 +1,9 @@
-const programs = {
-	resource: "Programs",
+import { Messages } from "@/i18n";
+import { createEntityBreadcrumbs } from "@/lib/entity-breadcrumbs";
+
+export const programsBreadcrumbs = createEntityBreadcrumbs({
+	resourceKey: Messages.programs.pageTitle,
 	baseUrl: "/dashboard/programs",
-};
-
-export const programsBreadcrumbs = {
-	home: () => [
-		{
-			label: programs.resource,
-			href: programs.baseUrl,
-		},
-	],
-
-	create: () => [
-		...programsBreadcrumbs.home(),
-		{
-			label: "New Program",
-		},
-	],
-
-	detail: (id: string, label?: string) => [
-		...programsBreadcrumbs.home(),
-		{
-			label: label ?? id,
-			href: `${programs.baseUrl}/${id}`,
-		},
-	],
-
-	edit: (id: string, label?: string) => [
-		...programsBreadcrumbs.detail(id, label),
-		{
-			label: "Edit",
-		},
-	],
-};
+	createKey: Messages.programs.createTitle,
+	editKey: Messages.programs.actions.edit,
+});

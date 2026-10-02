@@ -7,30 +7,20 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "@/components/ui/toast";
-import type { NotificationListDto } from "@/lib/api/generated.schemas";
+import { Messages } from "@/i18n";
+import { useLocale, useTranslate } from "@/i18n/locale-provider";
+import { translateNotificationMessage } from "@/i18n/notification-messages";
 import {
 	useNotificationsControllerFindAll,
 	useNotificationsControllerMarkAllAsRead,
 	useNotificationsControllerMarkAsRead,
 } from "@/lib/api/notifications";
 import { formatDisplayDateTime } from "@/lib/date-utils";
-
-function entityLink(notification: NotificationListDto) {
-	const routes: Record<string, string> = {
-		orders: "orders",
-		order: "orders",
-		programs: "programs",
-		program: "programs",
-		claims: "claims",
-		claim: "claims",
-	};
-	const route = routes[notification.relatedEntityType ?? ""];
-	return route && notification.relatedEntityId
-		? `/dashboard/${route}/${notification.relatedEntityId}`
-		: null;
-}
+import { getNotificationHref } from "@/lib/notification-utils";
 
 export function NotificationInbox() {
+	const locale = useLocale();
+	const t = useTranslate();
 	const client = useQueryClient();
 	const query = useNotificationsControllerFindAll({
 		query: { refetchInterval: 30000 },
@@ -54,18 +44,21 @@ export function NotificationInbox() {
 		} catch {
 			toast.add({
 				type: "error",
-				title: "Could not mark notifications as read",
-				description: "Please try again.",
+				title: t(Messages.notifications.markReadFailedTitle),
+				description: t(Messages.notifications.tryAgainDescription),
 			});
 		}
 	}
 
-	if (query.isLoading) return <p role="status">Loading notifications…</p>;
+	if (query.isLoading)
+		return <p role="status">{t(Messages.notifications.loading)}</p>;
 	if (query.isError)
 		return (
 			<div role="alert" className="space-y-3">
-				<p>Could not load notifications.</p>
-				<Button onClick={() => void query.refetch()}>Try again</Button>
+				<p>{t(Messages.notifications.loadFailed)}</p>
+				<Button onClick={() => void query.refetch()}>
+					{t(Messages.notifications.tryAgain)}
+				</Button>
 			</div>
 		);
 
@@ -79,7 +72,7 @@ export function NotificationInbox() {
 						aria-pressed={!unreadOnly}
 						onClick={() => setUnreadOnly(false)}
 					>
-						All
+						{t(Messages.notifications.allFilter)}
 					</Button>
 					<Button
 						size="sm"
@@ -87,7 +80,9 @@ export function NotificationInbox() {
 						aria-pressed={unreadOnly}
 						onClick={() => setUnreadOnly(true)}
 					>
-						Unread ({unread.length})
+						{t(Messages.notifications.unreadFilter, {
+							count: unread.length,
+						})}
 					</Button>
 				</div>
 				<Button
@@ -95,7 +90,7 @@ export function NotificationInbox() {
 					disabled={pending || unread.length === 0}
 					onClick={() => void read()}
 				>
-					Mark all as read
+					{t(Messages.notifications.markAllRead)}
 				</Button>
 			</div>
 			{visible.length === 0 ? (
@@ -107,18 +102,21 @@ export function NotificationInbox() {
 						<BellIcon className="size-5" aria-hidden="true" />
 					</span>
 					<p className="text-sm font-medium">
-						{unreadOnly ? "You’re all caught up." : "No notifications yet."}
+						{unreadOnly
+							? t(Messages.notifications.caughtUpTitle)
+							: t(Messages.notifications.noNotificationsTitle)}
 					</p>
 					<p className="text-sm text-muted-foreground">
 						{unreadOnly
-							? "There are no unread updates to review."
-							: "Updates about your orders, programs, and claims will appear here."}
+							? t(Messages.notifications.noUnreadDescription)
+							: t(Messages.notifications.emptyDescription)}
 					</p>
 				</div>
 			) : (
 				<ul className="space-y-3">
 					{visible.map((item) => {
-						const href = entityLink(item);
+						const href = getNotificationHref(item);
+						const content = translateNotificationMessage(item, locale);
 						return (
 							<li key={item.id}>
 								<Card className={item.readAt ? "" : "ring-primary/40"}>
@@ -130,16 +128,16 @@ export function NotificationInbox() {
 														<span
 															className="mr-2 inline-block size-2 rounded-full bg-primary"
 															role="img"
-															aria-label="Unread"
+															aria-label={t(Messages.notifications.unread)}
 														/>
 													)}
-													{item.title}
+													{content.title}
 												</h2>
 												<time
 													className="text-meta text-muted-foreground"
 													dateTime={item.createdAt}
 												>
-													{formatDisplayDateTime(item.createdAt)}
+													{formatDisplayDateTime(item.createdAt, locale)}
 												</time>
 											</div>
 											{!item.readAt && (
@@ -149,12 +147,12 @@ export function NotificationInbox() {
 													disabled={pending}
 													onClick={() => void read(item.id)}
 												>
-													Mark as read
+													{t(Messages.notifications.markRead)}
 												</Button>
 											)}
 										</div>
 										<p className="max-w-prose whitespace-pre-wrap break-words text-sm">
-											{item.message}
+											{content.body}
 										</p>
 										{href && (
 											<Link
@@ -164,7 +162,7 @@ export function NotificationInbox() {
 													if (!item.readAt) void read(item.id);
 												}}
 											>
-												View details
+												{t(Messages.notifications.viewDetails)}
 											</Link>
 										)}
 									</CardContent>

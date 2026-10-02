@@ -1,6 +1,9 @@
 type OpenApiDocument = {
 	components?: {
-		schemas?: Record<string, { properties?: Record<string, unknown> }>;
+		schemas?: Record<
+			string,
+			{ enum?: unknown[]; properties?: Record<string, unknown> }
+		>;
 	};
 	paths?: Record<string, unknown>;
 };
@@ -22,6 +25,56 @@ export function validateOpenApiForGeneration(document: unknown): string[] {
 	const issues: string[] = [];
 	if (!spec.paths || Object.keys(spec.paths).length === 0) {
 		issues.push("The OpenAPI document has no paths.");
+	}
+	const schemas = spec.components?.schemas;
+	if (!schemas?.ApiErrorCode?.enum?.length) {
+		issues.push("The OpenAPI document has no shared ApiErrorCode enum.");
+	}
+	if (
+		!schemas?.ApiErrorResponseDto?.properties?.code ||
+		!schemas.ApiErrorResponseDto.properties.statusCode
+	) {
+		issues.push("The OpenAPI document has no coded API error response schema.");
+	}
+
+	for (const [path, pathItem] of Object.entries(spec.paths ?? {})) {
+		if (typeof pathItem !== "object" || pathItem === null) continue;
+		for (const [method, candidate] of Object.entries(pathItem)) {
+			if (
+				typeof candidate !== "object" ||
+				candidate === null ||
+				!("responses" in candidate)
+			) {
+				continue;
+			}
+			const responses = candidate.responses;
+			const defaultResponse =
+				typeof responses === "object" && responses !== null
+					? (responses as Record<string, unknown>).default
+					: undefined;
+			const content =
+				typeof defaultResponse === "object" && defaultResponse !== null
+					? (defaultResponse as Record<string, unknown>).content
+					: undefined;
+			const jsonResponse =
+				typeof content === "object" && content !== null
+					? (content as Record<string, unknown>)["application/json"]
+					: undefined;
+			const schema =
+				typeof jsonResponse === "object" && jsonResponse !== null
+					? (jsonResponse as Record<string, unknown>).schema
+					: undefined;
+			if (
+				typeof schema !== "object" ||
+				schema === null ||
+				(schema as Record<string, unknown>).$ref !==
+					"#/components/schemas/ApiErrorResponseDto"
+			) {
+				issues.push(
+					`${method.toUpperCase()} ${path} has no default coded API error response.`,
+				);
+			}
+		}
 	}
 
 	for (const [name, minimumProperties] of Object.entries(

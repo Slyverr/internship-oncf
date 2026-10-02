@@ -7,6 +7,7 @@ import {
 	formatMediumDate,
 	formatMessageTime,
 	formatMonthLabel,
+	formatMonthYear,
 	formatRelativeTime,
 } from "../src/lib/date-utils";
 
@@ -44,9 +45,34 @@ assert.equal(
 	}).format(sampleDate),
 );
 assert.equal(formatMonthLabel(sampleDate), "Sep");
+assert.equal(formatMonthYear("2026-09"), "Sep 2026");
+assert.equal(formatMonthYear("2026-13"), "—");
 assert.equal(
 	formatRelativeTime(new Date(Date.now() - 5 * 60_000)),
 	"5 minutes ago",
 );
+
+const originalTimeZone = process.env.TZ;
+process.env.TZ = "America/Los_Angeles";
+try {
+	const dateOnly = "2026-01-01";
+	const expectedDateOnly = new Date(`${dateOnly}T00:00:00.000Z`);
+	assert.equal(
+		formatDisplayDate(dateOnly),
+		new Intl.DateTimeFormat(DEFAULT_LOCALE, { timeZone: "UTC" }).format(
+			expectedDateOnly,
+		),
+	);
+	assert.equal(
+		formatMediumDate(dateOnly),
+		new Intl.DateTimeFormat(DEFAULT_LOCALE, {
+			dateStyle: "medium",
+			timeZone: "UTC",
+		}).format(expectedDateOnly),
+	);
+} finally {
+	if (originalTimeZone === undefined) delete process.env.TZ;
+	else process.env.TZ = originalTimeZone;
+}
 
 console.log("Date and time locale checks passed.");

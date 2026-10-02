@@ -1,32 +1,46 @@
-import { Role } from "@ecommand/shared";
+import { RegistrationStatus, Role } from "@ecommand/shared";
+import { type AppLocale, type MessageKey, Messages, translate } from "@/i18n";
 
-const roleLabels: Record<Role, string> = {
-	[Role.ADMIN]: "Administrator",
-	[Role.AGENT_COMMERCIAL]: "Commercial agent",
-	[Role.CLIENT_REPRESENTATIVE]: "Client representative",
+const roleLabelKeys: Record<Role, Parameters<typeof translate>[0]> = {
+	[Role.ADMIN]: Messages.users.roles.admin,
+	[Role.AGENT_COMMERCIAL]: Messages.users.roles.agentCommercial,
+	[Role.CLIENT_REPRESENTATIVE]: Messages.users.roles.clientRepresentative,
 };
 
-const userTypeLabels = {
-	internal: "Internal",
-	external: "External",
+const userTypeLabelKeys = {
+	internal: Messages.users.types.internal,
+	external: Messages.users.types.external,
+} as const;
+
+const registrationStatusLabelKeys: Record<string, MessageKey> = {
+	[RegistrationStatus.PENDING]: Messages.users.list.awaitingReview,
+	[RegistrationStatus.APPROVED]: Messages.users.list.approved,
+	[RegistrationStatus.REJECTED]: Messages.users.list.rejected,
 };
 
-function formatUnknownLabel(value: string) {
-	return value
-		.toLowerCase()
-		.replaceAll("_", " ")
-		.replace(/\b\w/g, (letter) => letter.toUpperCase());
-}
-
-export function formatUserRole(role: string | null | undefined) {
+export function formatUserRole(
+	role: string | null | undefined,
+	locale?: AppLocale,
+) {
 	if (!role) return "—";
-	return roleLabels[role as Role] ?? formatUnknownLabel(role);
+	const key = roleLabelKeys[role as Role];
+	return key ? translate(key, {}, locale) : role;
 }
 
-export function formatUserType(type: string | null | undefined) {
+export function formatUserType(
+	type: string | null | undefined,
+	locale?: AppLocale,
+) {
 	if (!type) return "—";
-	return (
-		userTypeLabels[type as keyof typeof userTypeLabels] ??
-		formatUnknownLabel(type)
+	const key = userTypeLabelKeys[type as keyof typeof userTypeLabelKeys];
+	return translate(key ?? Messages.users.types.unknown, {}, locale);
+}
+
+export function formatRegistrationStatus(status: string, locale?: AppLocale) {
+	return translate(
+		registrationStatusLabelKeys[status] ??
+			Messages.users.list.unknownReviewStatus,
+		{},
+		locale,
 	);
 }

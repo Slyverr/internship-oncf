@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import axios from "axios";
 import { getFormErrorMessage } from "../src/lib/form-utils";
-import { sanitizeApiError } from "../src/lib/safe-api-error";
+import { loadPageData } from "../src/lib/load-page-data";
+import {
+	isAccessDeniedApiError,
+	sanitizeApiError,
+} from "../src/lib/safe-api-error";
 
 const accessToken = "local-test-access-token";
 const transportError = Object.assign(new Error("connect ECONNREFUSED"), {
@@ -35,6 +39,7 @@ const responseError = Object.assign(
 		response: {
 			status: 409,
 			data: {
+				code: "CONFLICT",
 				message: "This order already has a forecast program",
 				debug: accessToken,
 			},
@@ -50,13 +55,47 @@ assert.equal(
 );
 assert.equal(
 	getFormErrorMessage(safeResponseError),
-	"This order already has a forecast program",
-	"server validation messages remain available to forms",
+	"This action conflicts with the current record state.",
+	"API errors are mapped from stable codes instead of server messages",
+);
+assert.equal(
+	(safeResponseError as Error).message,
+	"This action conflicts with the current record state.",
+	"API response messages are ignored",
 );
 assert.equal(
 	JSON.stringify(safeResponseError).includes(accessToken),
 	false,
 	"response payloads are reduced to their user-facing message",
+);
+
+const accessDeniedError = Object.assign(new Error("forbidden"), {
+	isAxiosError: true,
+	response: {
+		status: 403,
+		data: { code: "ACCESS_DENIED" },
+	},
+});
+assert.equal(
+	isAccessDeniedApiError(sanitizeApiError(accessDeniedError)),
+	true,
+	"access-denied page states are selected from the stable API code",
+);
+assert.equal(
+	isAccessDeniedApiError(safeResponseError),
+	false,
+	"other API failures are not mistaken for access denial",
+);
+assert.equal(
+	await loadPageData(Promise.reject(sanitizeApiError(accessDeniedError))),
+	null,
+	"server-rendered routes can show an access-denied state instead of crashing",
+);
+const pageLoadError = new Error("unexpected failure");
+await assert.rejects(
+	loadPageData(Promise.reject(pageLoadError)),
+	pageLoadError,
+	"unexpected route-data failures remain visible to the error boundary",
 );
 
 const canceledError = Object.assign(new Error("canceled"), {

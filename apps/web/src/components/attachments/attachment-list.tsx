@@ -20,6 +20,8 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Messages } from "@/i18n";
+import { useLocale, useTranslate } from "@/i18n/locale-provider";
 import type { FileDto } from "@/lib/api/generated.schemas";
 import { formatRelativeTime } from "@/lib/date-utils";
 import { formatFileSize } from "@/lib/format-file-size";
@@ -57,6 +59,8 @@ function AttachmentItem({
 	onDownload: (file: FileDto) => Promise<void>;
 	onDelete?: (file: FileDto) => Promise<void>;
 }) {
+	const t = useTranslate();
+	const locale = useLocale();
 	const [isDownloading, setIsDownloading] = useState(false);
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -97,10 +101,10 @@ function AttachmentItem({
 					<p className="truncate text-sm font-medium">{file.fileName}</p>
 
 					<div className="flex flex-wrap items-center gap-4 text-meta text-muted-foreground">
-						<span>{formatFileSize(file.fileSize)}</span>
+						<span>{formatFileSize(file.fileSize, locale)}</span>
 
 						<time dateTime={file.uploadedAt}>
-							{formatRelativeTime(file.uploadedAt)}
+							{formatRelativeTime(file.uploadedAt, locale)}
 						</time>
 					</div>
 
@@ -121,7 +125,11 @@ function AttachmentItem({
 						onClick={handleDownload}
 					>
 						<DownloadIcon className="size-4" />
-						<span className="sr-only">Download {file.fileName}</span>
+						<span className="sr-only">
+							{t(Messages.attachments.downloadFile, {
+								fileName: file.fileName,
+							})}
+						</span>
 					</Button>
 
 					{canDelete && onDelete && (
@@ -134,7 +142,11 @@ function AttachmentItem({
 							onClick={() => setDeleteDialogOpen(true)}
 						>
 							<Trash2Icon className="size-4" />
-							<span className="sr-only">Delete {file.fileName}</span>
+							<span className="sr-only">
+								{t(Messages.attachments.deleteFile, {
+									fileName: file.fileName,
+								})}
+							</span>
 						</Button>
 					)}
 				</div>
@@ -143,9 +155,11 @@ function AttachmentItem({
 			<ConfirmDialog
 				open={deleteDialogOpen}
 				onOpenChange={setDeleteDialogOpen}
-				title="Delete attachment?"
-				description={`Delete "${file.fileName}"? This action cannot be undone.`}
-				confirmLabel="Delete"
+				title={t(Messages.attachments.deleteTitle)}
+				description={t(Messages.attachments.deleteDescription, {
+					fileName: file.fileName,
+				})}
+				confirmLabel={t(Messages.attachments.delete)}
 				variant="destructive"
 				disabled={isDeleting}
 				onConfirm={handleDelete}
@@ -165,6 +179,7 @@ function AttachmentListLoading() {
 }
 
 function AttachmentListEmpty() {
+	const t = useTranslate();
 	return (
 		<div className="flex flex-col items-center justify-center gap-4 px-8 py-12 text-center">
 			<div className="flex size-12 items-center justify-center rounded-full bg-muted">
@@ -172,10 +187,12 @@ function AttachmentListEmpty() {
 			</div>
 
 			<div className="flex max-w-sm flex-col gap-4">
-				<p className="text-sm font-medium">No attachments</p>
+				<p className="text-sm font-medium">
+					{t(Messages.attachments.emptyTitle)}
+				</p>
 
 				<p className="text-sm text-muted-foreground">
-					Upload documents or supporting files when needed.
+					{t(Messages.attachments.emptyDescription)}
 				</p>
 			</div>
 		</div>
@@ -187,10 +204,13 @@ export function AttachmentList({
 	isLoading = false,
 	canDelete = false,
 	uploadAction,
-	description = "Documents and files attached to this resource.",
+	description,
 	onDownload,
 	onDelete,
 }: AttachmentListProps) {
+	const t = useTranslate();
+	const resolvedDescription =
+		description ?? t(Messages.attachments.description);
 	return (
 		<Card>
 			<CardHeader className="flex flex-row items-start justify-between gap-4">
@@ -200,14 +220,14 @@ export function AttachmentList({
 							<PaperclipIcon className="size-4 text-muted-foreground" />
 						</div>
 
-						<CardTitle>Attachments</CardTitle>
+						<CardTitle>{t(Messages.attachments.title)}</CardTitle>
 
 						{!isLoading && (
 							<Badge variant="secondary">{files?.length ?? 0}</Badge>
 						)}
 					</div>
 
-					<CardDescription>{description}</CardDescription>
+					<CardDescription>{resolvedDescription}</CardDescription>
 				</div>
 
 				{uploadAction}

@@ -24,6 +24,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
 import { useUpdateDetailCache } from "@/hooks/use-update-detail-cache";
+import { Messages } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
 import {
 	getClaimsControllerFindOneQueryKey,
 	useClaimsControllerAwaitInfo,
@@ -40,6 +42,7 @@ import { useAuth } from "@/providers/auth-provider";
 import { ConfirmDialog } from "../common/confirm-dialog";
 
 export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
+	const t = useTranslate();
 	const { hasPermission } = useAuth();
 	const updateClaimCache = useUpdateDetailCache<ClaimDetailDto, string>(
 		getClaimsControllerFindOneQueryKey,
@@ -134,7 +137,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 								)
 							}
 						>
-							Start Investigation
+							{t(Messages.claims.actions.startInvestigation)}
 						</Button>
 					)}
 
@@ -151,7 +154,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 								)
 							}
 						>
-							Await Information
+							{t(Messages.claims.actions.awaitInformation)}
 						</Button>
 					)}
 
@@ -169,7 +172,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 								)
 							}
 						>
-							Start Treatment
+							{t(Messages.claims.actions.startTreatment)}
 						</Button>
 					)}
 
@@ -181,7 +184,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 							disabled={isPending}
 							onClick={() => setResolveDialogOpen(true)}
 						>
-							Resolve Claim
+							{t(Messages.claims.actions.resolve)}
 						</Button>
 					)}
 
@@ -198,7 +201,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 								)
 							}
 						>
-							Close Ticket
+							{t(Messages.claims.actions.close)}
 						</Button>
 					)}
 
@@ -212,7 +215,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 							disabled={isPending}
 							onClick={() => setRejectDialogOpen(true)}
 						>
-							Reject
+							{t(Messages.claims.actions.rejectButton)}
 						</Button>
 					)}
 
@@ -230,7 +233,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 								)
 							}
 						>
-							Send to DTM
+							{t(Messages.claims.actions.sendToDtm)}
 						</Button>
 					)}
 
@@ -248,7 +251,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 							disabled={isPending}
 						>
 							<EllipsisVerticalIcon />
-							<span className="sr-only">More actions</span>
+							<span className="sr-only">{t(Messages.claims.actions.more)}</span>
 						</DropdownMenuTrigger>
 
 						<DropdownMenuContent align="end">
@@ -258,7 +261,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 										router.push(`/dashboard/claims/${claim.claimNumber}/edit`)
 									}
 								>
-									Edit
+									{t(Messages.claims.actions.edit)}
 								</DropdownMenuItem>
 							)}
 
@@ -267,7 +270,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 									className="text-destructive"
 									onClick={() => setDeleteDialogOpen(true)}
 								>
-									Delete
+									{t(Messages.claims.actions.delete)}
 								</DropdownMenuItem>
 							)}
 						</DropdownMenuContent>
@@ -279,9 +282,11 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 			<AlertDialog open={resolveDialogOpen} onOpenChange={setResolveDialogOpen}>
 				<AlertDialogContent size="form">
 					<AlertDialogHeader>
-						<AlertDialogTitle>Resolve claim</AlertDialogTitle>
+						<AlertDialogTitle>
+							{t(Messages.claims.actions.resolve)}
+						</AlertDialogTitle>
 						<AlertDialogDescription>
-							Provide details summarizing how this complaint was resolved.
+							{t(Messages.claims.actions.resolveDescription)}
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 
@@ -289,15 +294,17 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 						<Textarea
 							value={resolutionText}
 							onChange={(event) => setResolutionText(event.target.value)}
-							placeholder="Resolution details..."
+							placeholder={t(Messages.claims.actions.resolutionPlaceholder)}
 						/>
 					</AlertDialogBody>
 
 					<AlertDialogFooter>
-						<AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+						<AlertDialogCancel disabled={isPending}>
+							{t(Messages.claims.edit.cancel)}
+						</AlertDialogCancel>
 
 						<AlertDialogAction disabled={isPending} onClick={handleResolve}>
-							Confirm Resolution
+							{t(Messages.claims.actions.confirmResolution)}
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>
@@ -307,9 +314,11 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 			<AlertDialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
 				<AlertDialogContent size="form">
 					<AlertDialogHeader>
-						<AlertDialogTitle>Reject claim</AlertDialogTitle>
+						<AlertDialogTitle>
+							{t(Messages.claims.actions.reject)}
+						</AlertDialogTitle>
 						<AlertDialogDescription>
-							Please state the reason for rejecting this claim request.
+							{t(Messages.claims.actions.rejectDescription)}
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 
@@ -317,15 +326,17 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 						<Textarea
 							value={rejectionReason}
 							onChange={(event) => setRejectionReason(event.target.value)}
-							placeholder="Rejection reason..."
+							placeholder={t(Messages.claims.actions.rejectionPlaceholder)}
 						/>
 					</AlertDialogBody>
 
 					<AlertDialogFooter>
-						<AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+						<AlertDialogCancel disabled={isPending}>
+							{t(Messages.claims.edit.cancel)}
+						</AlertDialogCancel>
 
 						<AlertDialogAction disabled={isPending} onClick={handleReject}>
-							Reject Claim
+							{t(Messages.claims.actions.confirmReject)}
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>
@@ -335,9 +346,9 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 			<ConfirmDialog
 				open={deleteDialogOpen}
 				onOpenChange={setDeleteDialogOpen}
-				title="Delete claim?"
-				description="This will permanently delete this claim ticket and its interaction history. This action cannot be undone."
-				confirmLabel="Delete"
+				title={t(Messages.claims.actions.deleteTitle)}
+				description={t(Messages.claims.actions.deleteDescription)}
+				confirmLabel={t(Messages.claims.actions.delete)}
 				variant="destructive"
 				disabled={isPending}
 				onConfirm={handleDelete}

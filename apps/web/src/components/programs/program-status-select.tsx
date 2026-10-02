@@ -8,7 +8,9 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { formatEnumLabel } from "@/lib/enum-labels";
+import { Messages } from "@/i18n";
+import { useLocale, useTranslate } from "@/i18n/locale-provider";
+import { getProgramStatusLabel } from "@/i18n/status-labels";
 
 interface ProgramStatusSelectProps {
 	id?: string;
@@ -21,6 +23,8 @@ export function ProgramStatusSelect({
 	value,
 	onChange,
 }: ProgramStatusSelectProps) {
+	const locale = useLocale();
+	const t = useTranslate();
 	const statuses = Object.values(ProgramStatus);
 
 	const selected = statuses.find((status) => status === value);
@@ -29,14 +33,16 @@ export function ProgramStatusSelect({
 		<Select value={value} onValueChange={(value) => value && onChange(value)}>
 			<SelectTrigger id={id} className="w-full">
 				<SelectValue>
-					{selected ? formatEnumLabel(selected) : "Select status"}
+					{selected
+						? getProgramStatusLabel(selected, locale)
+						: t(Messages.programs.selectStatus)}
 				</SelectValue>
 			</SelectTrigger>
 
 			<SelectContent>
 				{statuses.map((status) => (
 					<SelectItem key={status} value={status}>
-						{formatEnumLabel(status)}
+						{getProgramStatusLabel(status, locale)}
 					</SelectItem>
 				))}
 			</SelectContent>

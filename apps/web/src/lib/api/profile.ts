@@ -25,6 +25,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  ApiErrorResponseDto,
   AppearancePreferencesDto,
   ProfileDto,
   UpdateAppearancePreferencesDto,
@@ -76,7 +77,7 @@ export const getProfileControllerGetCurrentQueryKey = () => {
     }
 
 
-export const getProfileControllerGetCurrentQueryOptions = <TData = Awaited<ReturnType<typeof profileControllerGetCurrent>>, TError = void>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof profileControllerGetCurrent>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getProfileControllerGetCurrentQueryOptions = <TData = Awaited<ReturnType<typeof profileControllerGetCurrent>>, TError = ApiErrorResponseDto>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof profileControllerGetCurrent>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -95,10 +96,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ProfileControllerGetCurrentQueryResult = NonNullable<Awaited<ReturnType<typeof profileControllerGetCurrent>>>
-export type ProfileControllerGetCurrentQueryError = void
+export type ProfileControllerGetCurrentQueryError = ApiErrorResponseDto
 
 
-export function useProfileControllerGetCurrent<TData = Awaited<ReturnType<typeof profileControllerGetCurrent>>, TError = void>(
+export function useProfileControllerGetCurrent<TData = Awaited<ReturnType<typeof profileControllerGetCurrent>>, TError = ApiErrorResponseDto>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof profileControllerGetCurrent>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof profileControllerGetCurrent>>,
@@ -108,7 +109,7 @@ export function useProfileControllerGetCurrent<TData = Awaited<ReturnType<typeof
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useProfileControllerGetCurrent<TData = Awaited<ReturnType<typeof profileControllerGetCurrent>>, TError = void>(
+export function useProfileControllerGetCurrent<TData = Awaited<ReturnType<typeof profileControllerGetCurrent>>, TError = ApiErrorResponseDto>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof profileControllerGetCurrent>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof profileControllerGetCurrent>>,
@@ -118,12 +119,12 @@ export function useProfileControllerGetCurrent<TData = Awaited<ReturnType<typeof
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useProfileControllerGetCurrent<TData = Awaited<ReturnType<typeof profileControllerGetCurrent>>, TError = void>(
+export function useProfileControllerGetCurrent<TData = Awaited<ReturnType<typeof profileControllerGetCurrent>>, TError = ApiErrorResponseDto>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof profileControllerGetCurrent>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useProfileControllerGetCurrent<TData = Awaited<ReturnType<typeof profileControllerGetCurrent>>, TError = void>(
+export function useProfileControllerGetCurrent<TData = Awaited<ReturnType<typeof profileControllerGetCurrent>>, TError = ApiErrorResponseDto>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof profileControllerGetCurrent>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -157,7 +158,7 @@ export const profileControllerUpdate = (
 
 
 
-export const getProfileControllerUpdateMutationOptions = <TError = void,
+export const getProfileControllerUpdateMutationOptions = <TError = ApiErrorResponseDto,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof profileControllerUpdate>>, TError,{data: UpdateProfileDto}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof profileControllerUpdate>>, TError,{data: UpdateProfileDto}, TContext> => {
 
@@ -186,9 +187,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type ProfileControllerUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof profileControllerUpdate>>>
     export type ProfileControllerUpdateMutationBody = UpdateProfileDto
-    export type ProfileControllerUpdateMutationError = void
+    export type ProfileControllerUpdateMutationError = ApiErrorResponseDto
 
-    export const useProfileControllerUpdate = <TError = void,
+    export const useProfileControllerUpdate = <TError = ApiErrorResponseDto,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof profileControllerUpdate>>, TError,{data: UpdateProfileDto}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof profileControllerUpdate>>,
@@ -220,7 +221,7 @@ export const getProfileControllerGetPreferencesQueryKey = () => {
     }
 
 
-export const getProfileControllerGetPreferencesQueryOptions = <TData = Awaited<ReturnType<typeof profileControllerGetPreferences>>, TError = void>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof profileControllerGetPreferences>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getProfileControllerGetPreferencesQueryOptions = <TData = Awaited<ReturnType<typeof profileControllerGetPreferences>>, TError = ApiErrorResponseDto>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof profileControllerGetPreferences>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -239,10 +240,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ProfileControllerGetPreferencesQueryResult = NonNullable<Awaited<ReturnType<typeof profileControllerGetPreferences>>>
-export type ProfileControllerGetPreferencesQueryError = void
+export type ProfileControllerGetPreferencesQueryError = ApiErrorResponseDto
 
 
-export function useProfileControllerGetPreferences<TData = Awaited<ReturnType<typeof profileControllerGetPreferences>>, TError = void>(
+export function useProfileControllerGetPreferences<TData = Awaited<ReturnType<typeof profileControllerGetPreferences>>, TError = ApiErrorResponseDto>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof profileControllerGetPreferences>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof profileControllerGetPreferences>>,
@@ -252,7 +253,7 @@ export function useProfileControllerGetPreferences<TData = Awaited<ReturnType<ty
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useProfileControllerGetPreferences<TData = Awaited<ReturnType<typeof profileControllerGetPreferences>>, TError = void>(
+export function useProfileControllerGetPreferences<TData = Awaited<ReturnType<typeof profileControllerGetPreferences>>, TError = ApiErrorResponseDto>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof profileControllerGetPreferences>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof profileControllerGetPreferences>>,
@@ -262,12 +263,12 @@ export function useProfileControllerGetPreferences<TData = Awaited<ReturnType<ty
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useProfileControllerGetPreferences<TData = Awaited<ReturnType<typeof profileControllerGetPreferences>>, TError = void>(
+export function useProfileControllerGetPreferences<TData = Awaited<ReturnType<typeof profileControllerGetPreferences>>, TError = ApiErrorResponseDto>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof profileControllerGetPreferences>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useProfileControllerGetPreferences<TData = Awaited<ReturnType<typeof profileControllerGetPreferences>>, TError = void>(
+export function useProfileControllerGetPreferences<TData = Awaited<ReturnType<typeof profileControllerGetPreferences>>, TError = ApiErrorResponseDto>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof profileControllerGetPreferences>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -301,7 +302,7 @@ export const profileControllerUpdatePreferences = (
 
 
 
-export const getProfileControllerUpdatePreferencesMutationOptions = <TError = void,
+export const getProfileControllerUpdatePreferencesMutationOptions = <TError = ApiErrorResponseDto,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof profileControllerUpdatePreferences>>, TError,{data: UpdateAppearancePreferencesDto}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof profileControllerUpdatePreferences>>, TError,{data: UpdateAppearancePreferencesDto}, TContext> => {
 
@@ -330,9 +331,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type ProfileControllerUpdatePreferencesMutationResult = NonNullable<Awaited<ReturnType<typeof profileControllerUpdatePreferences>>>
     export type ProfileControllerUpdatePreferencesMutationBody = UpdateAppearancePreferencesDto
-    export type ProfileControllerUpdatePreferencesMutationError = void
+    export type ProfileControllerUpdatePreferencesMutationError = ApiErrorResponseDto
 
-    export const useProfileControllerUpdatePreferences = <TError = void,
+    export const useProfileControllerUpdatePreferences = <TError = ApiErrorResponseDto,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof profileControllerUpdatePreferences>>, TError,{data: UpdateAppearancePreferencesDto}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof profileControllerUpdatePreferences>>,

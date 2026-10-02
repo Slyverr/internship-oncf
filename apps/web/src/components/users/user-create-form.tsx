@@ -1,8 +1,9 @@
 "use client";
 
+import { RolePersona } from "@ecommand/shared";
 import { useForm } from "@tanstack/react-form-nextjs";
 import { useRouter } from "next/navigation";
-import { type JSX } from "react";
+import { type JSX, useEffect, useMemo } from "react";
 import { z } from "zod";
 import { FormFieldHeader } from "@/components/common/form-field-header";
 import {
@@ -28,60 +29,82 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { CustomerPortfolioField } from "@/components/users/customer-portfolio-field";
+import { RoleProfileSelect } from "@/components/users/role-profile-select";
+import { useFormErrorMessage } from "@/hooks/use-form-error-message";
 import { useGuidedFormState } from "@/hooks/use-guided-form-state";
+import { Messages, type TypedMessageTranslator } from "@/i18n";
+import { useLocale, useTranslate } from "@/i18n/locale-provider";
 import {
-	CreateUserDtoRole,
 	CreateUserDtoType,
 	type UserDetailDto,
 } from "@/lib/api/generated.schemas";
+import { useRolesControllerFindProfiles } from "@/lib/api/roles";
 import { useUsersControllerCreate } from "@/lib/api/users";
-import { getFormErrorMessage } from "@/lib/form-utils";
-import { formatUserRole, formatUserType } from "@/lib/user-labels";
+import { formatUserType } from "@/lib/user-labels";
 
-const createUserSchemaBase = z.object({
-	email: z.email("Valid email is required").max(100),
-	password: z
-		.string()
-		.min(8, "Password must be at least 8 characters")
-		.max(255),
-	firstName: z.string().trim().min(1, "First name is required").max(100),
-	lastName: z.string().trim().min(1, "Last name is required").max(100),
-	role: z.enum(CreateUserDtoRole, { message: "Role is required" }),
-	employeeCode: z.string().max(50).optional(),
-	type: z.enum(CreateUserDtoType).optional(),
-	customerId: z.number().optional(),
-	customerIds: z.array(z.number().int().positive()),
-	agencyId: z.number().optional(),
-});
+function createUserSchemaBase(t: TypedMessageTranslator) {
+	return z.object({
+		email: z.email(t(Messages.users.form.validation.validEmail)).max(100),
+		password: z
+			.string()
+			.min(8, t(Messages.users.form.validation.passwordMin))
+			.max(255),
+		firstName: z
+			.string()
+			.trim()
+			.min(1, t(Messages.users.form.validation.firstNameRequired))
+			.max(100),
+		lastName: z
+			.string()
+			.trim()
+			.min(1, t(Messages.users.form.validation.lastNameRequired))
+			.max(100),
+		roleId: z.string().uuid(t(Messages.users.form.validation.roleRequired)),
+		employeeCode: z.string().max(50).optional(),
+		type: z.enum(CreateUserDtoType).optional(),
+		customerId: z.number().optional(),
+		customerIds: z.array(z.number().int().positive()),
+		agencyId: z.number().optional(),
+	});
+}
 
-const createUserSchema = createUserSchemaBase.superRefine(
-	({ role, customerId }, context) => {
-		if (
-			role === CreateUserDtoRole.CLIENT_REPRESENTATIVE &&
-			(!customerId || customerId < 1)
-		) {
-			context.addIssue({
-				code: "custom",
-				path: ["customerId"],
-				message: "Select the customer this representative belongs to",
-			});
-		}
-	},
-);
+type CreateUserFormValues = z.infer<ReturnType<typeof createUserSchemaBase>>;
 
-type CreateUserFormValues = z.infer<typeof createUserSchema>;
-
-const userCredentialsSchema = createUserSchemaBase.pick({
-	email: true,
-	password: true,
-});
-const userSteps = [
-	{ title: "Credentials", description: "Email and password" },
-	{ title: "Profile", description: "Name and role" },
-];
+function getUserSteps(t: TypedMessageTranslator) {
+	return [
+		{
+			title: t(Messages.users.form.steps.credentials),
+			description: t(Messages.users.form.steps.credentialsDescription),
+		},
+		{
+			title: t(Messages.users.form.steps.profile),
+			description: t(Messages.users.form.steps.profileDescription),
+		},
+	];
+}
 export function UserCreateForm(): JSX.Element {
 	const router = useRouter();
+	const t = useTranslate();
+	const locale = useLocale();
+	const getErrorMessage = useFormErrorMessage();
 	const mutation = useUsersControllerCreate();
+	const roleProfilesQuery = useRolesControllerFindProfiles();
+	const roleProfiles = (roleProfilesQuery.data ?? []).filter(
+		(profile) => profile.isActive,
+	);
+	const defaultRole =
+		roleProfiles.find(
+			(profile) => profile.persona === RolePersona.AGENT_COMMERCIAL,
+		) ?? roleProfiles[0];
+	const defaultRoleId = defaultRole?.id;
+	const { baseSchema, credentialsSchema, steps } = useMemo(() => {
+		const baseSchema = createUserSchemaBase(t);
+		return {
+			baseSchema,
+			credentialsSchema: baseSchema.pick({ email: true, password: true }),
+			steps: getUserSteps(t),
+		};
+	}, [t]);
 	const {
 		step,
 		setStep,
@@ -90,6 +113,23 @@ export function UserCreateForm(): JSX.Element {
 		clearFieldError,
 		validate,
 	} = useGuidedFormState();
+	const createUserSchema = useMemo(
+		() =>
+			baseSchema.superRefine(({ roleId, customerId }, context) => {
+				const selectedProfile = roleProfiles.find(({ id }) => id === roleId);
+				if (
+					selectedProfile?.persona === RolePersona.CLIENT_REPRESENTATIVE &&
+					(!customerId || customerId < 1)
+				) {
+					context.addIssue({
+						code: "custom",
+						path: ["customerId"],
+						message: t(Messages.users.form.validation.customerRequired),
+					});
+				}
+			}),
+		[baseSchema, roleProfiles, t],
+	);
 
 	const form = useForm({
 		defaultValues: {
@@ -97,7 +137,7 @@ export function UserCreateForm(): JSX.Element {
 			password: "",
 			firstName: "",
 			lastName: "",
-			role: CreateUserDtoRole.AGENT_COMMERCIAL,
+			roleId: "",
 			customerId: undefined,
 			customerIds: [],
 			employeeCode: "",
@@ -115,13 +155,14 @@ export function UserCreateForm(): JSX.Element {
 						password: value.password,
 						firstName: value.firstName.trim(),
 						lastName: value.lastName.trim(),
-						role: value.role,
+						roleId: value.roleId,
 						...(value.employeeCode?.trim()
 							? { employeeCode: value.employeeCode.trim() }
 							: {}),
 						...(value.type ? { type: value.type } : {}),
 						...(value.customerId ? { customerId: value.customerId } : {}),
-						...(value.role === CreateUserDtoRole.AGENT_COMMERCIAL
+						...(roleProfiles.find(({ id }) => id === value.roleId)?.persona ===
+						RolePersona.AGENT_COMMERCIAL
 							? { customerIds: value.customerIds }
 							: {}),
 						...(value.agencyId ? { agencyId: value.agencyId } : {}),
@@ -135,9 +176,14 @@ export function UserCreateForm(): JSX.Element {
 			);
 		},
 	});
+	useEffect(() => {
+		if (!form.state.values.roleId && defaultRoleId) {
+			form.setFieldValue("roleId", defaultRoleId);
+		}
+	}, [defaultRoleId, form]);
 
 	function continueToProfile() {
-		const result = userCredentialsSchema.safeParse(form.state.values);
+		const result = credentialsSchema.safeParse(form.state.values);
 		advanceIfValid(result);
 	}
 
@@ -155,37 +201,38 @@ export function UserCreateForm(): JSX.Element {
 			className="workspace-form"
 		>
 			<PageHeader
-				title="New user"
-				description="Create an account, assign its role, and complete the user profile."
+				title={t(Messages.users.createTitle)}
+				description={t(Messages.users.createDescription)}
 			/>
-			<GuidedFormProgress steps={userSteps} currentStep={step} />
+			<GuidedFormProgress steps={steps} currentStep={step} />
 
 			<Card
 				hidden={step !== 0}
 				className={step === 0 ? "page-enter" : undefined}
 			>
 				<CardHeader>
-					<CardTitle>Account Credentials</CardTitle>
-					<CardDescription>Primary login email and password.</CardDescription>
+					<CardTitle>{t(Messages.users.form.sections.credentials)}</CardTitle>
+					<CardDescription>
+						{t(Messages.users.form.sections.credentialsDescription)}
+					</CardDescription>
 				</CardHeader>
 				<CardContent className="grid gap-4 @3xl/workspace:grid-cols-2">
 					<form.Field name="email">
 						{(field) => {
 							const errorMsg =
-								stepErrors.email ??
-								getFormErrorMessage(field.state.meta.errors[0]);
+								stepErrors.email ?? getErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="email"
-										label="Email Address"
+										label={t(Messages.users.form.fields.email)}
 										required
 										error={errorMsg}
 									/>
 									<Input
 										id="email"
 										type="email"
-										placeholder="user@oncf.ma"
+										placeholder={t(Messages.users.form.fields.emailPlaceholder)}
 										value={field.state.value}
 										onChange={(e) => {
 											field.handleChange(e.target.value);
@@ -206,19 +253,21 @@ export function UserCreateForm(): JSX.Element {
 						{(field) => {
 							const errorMsg =
 								stepErrors.password ??
-								getFormErrorMessage(field.state.meta.errors[0]);
+								getErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="password"
-										label="Password"
+										label={t(Messages.users.form.fields.password)}
 										required
 										error={errorMsg}
 									/>
 									<Input
 										id="password"
 										type="password"
-										placeholder="••••••••"
+										placeholder={t(
+											Messages.users.form.fields.passwordPlaceholder,
+										)}
 										value={field.state.value}
 										onChange={(e) => {
 											field.handleChange(e.target.value);
@@ -242,9 +291,9 @@ export function UserCreateForm(): JSX.Element {
 				className={step === 1 ? "page-enter" : undefined}
 			>
 				<CardHeader>
-					<CardTitle>Personal Information & Role</CardTitle>
+					<CardTitle>{t(Messages.users.form.sections.profile)}</CardTitle>
 					<CardDescription>
-						Name, role assignments, and identifiers.
+						{t(Messages.users.form.sections.profileDescription)}
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="grid gap-4 @3xl/workspace:grid-cols-2">
@@ -252,18 +301,20 @@ export function UserCreateForm(): JSX.Element {
 						{(field) => {
 							const errorMsg =
 								stepErrors.firstName ??
-								getFormErrorMessage(field.state.meta.errors[0]);
+								getErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="firstName"
-										label="First Name"
+										label={t(Messages.users.form.fields.firstName)}
 										required
 										error={errorMsg}
 									/>
 									<Input
 										id="firstName"
-										placeholder="John"
+										placeholder={t(
+											Messages.users.form.fields.firstNamePlaceholder,
+										)}
 										value={field.state.value}
 										onChange={(e) => {
 											field.handleChange(e.target.value);
@@ -284,18 +335,20 @@ export function UserCreateForm(): JSX.Element {
 						{(field) => {
 							const errorMsg =
 								stepErrors.lastName ??
-								getFormErrorMessage(field.state.meta.errors[0]);
+								getErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="lastName"
-										label="Last Name"
+										label={t(Messages.users.form.fields.lastName)}
 										required
 										error={errorMsg}
 									/>
 									<Input
 										id="lastName"
-										placeholder="Doe"
+										placeholder={t(
+											Messages.users.form.fields.lastNamePlaceholder,
+										)}
 										value={field.state.value}
 										onChange={(e) => {
 											field.handleChange(e.target.value);
@@ -312,51 +365,42 @@ export function UserCreateForm(): JSX.Element {
 						}}
 					</form.Field>
 
-					<form.Field name="role">
+					<form.Field name="roleId">
 						{(field) => (
 							<div className="oncf-field">
-								<Label htmlFor="role">User Role *</Label>
-								<Select
+								<Label htmlFor="roleId">
+									{t(Messages.users.form.fields.role)} *
+								</Label>
+								<RoleProfileSelect
+									profiles={roleProfiles}
 									value={field.state.value}
-									onValueChange={(val) =>
-										field.handleChange(val as CreateUserDtoRole)
-									}
-								>
-									<SelectTrigger id="role">
-										<SelectValue>
-											{formatUserRole(field.state.value)}
-										</SelectValue>
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value={CreateUserDtoRole.ADMIN}>
-											{formatUserRole(CreateUserDtoRole.ADMIN)}
-										</SelectItem>
-										<SelectItem value={CreateUserDtoRole.AGENT_COMMERCIAL}>
-											{formatUserRole(CreateUserDtoRole.AGENT_COMMERCIAL)}
-										</SelectItem>
-										<SelectItem value={CreateUserDtoRole.CLIENT_REPRESENTATIVE}>
-											{formatUserRole(CreateUserDtoRole.CLIENT_REPRESENTATIVE)}
-										</SelectItem>
-									</SelectContent>
-								</Select>
+									onValueChange={field.handleChange}
+									disabled={roleProfilesQuery.isLoading}
+								/>
+								{roleProfilesQuery.isError && (
+									<p className="text-sm text-destructive">
+										{t(Messages.users.form.rolesLoadFailed)}
+									</p>
+								)}
 							</div>
 						)}
 					</form.Field>
 
-					<form.Subscribe selector={(state) => state.values.role}>
-						{(role) =>
-							role === CreateUserDtoRole.CLIENT_REPRESENTATIVE && (
+					<form.Subscribe selector={(state) => state.values.roleId}>
+						{(roleId) =>
+							roleProfiles.find(({ id }) => id === roleId)?.persona ===
+								RolePersona.CLIENT_REPRESENTATIVE && (
 								<form.Field name="customerId">
 									{(field) => {
 										const errorMsg =
 											stepErrors.customerId ??
-											getFormErrorMessage(field.state.meta.errors[0]);
+											getErrorMessage(field.state.meta.errors[0]);
 
 										return (
 											<div className="oncf-field @3xl/workspace:col-span-2">
 												<FormFieldHeader
 													htmlFor="customerId"
-													label="Customer Company"
+													label={t(Messages.users.form.fields.customer)}
 													required
 													error={errorMsg}
 												/>
@@ -376,9 +420,10 @@ export function UserCreateForm(): JSX.Element {
 						}
 					</form.Subscribe>
 
-					<form.Subscribe selector={(state) => state.values.role}>
-						{(role) =>
-							role === CreateUserDtoRole.AGENT_COMMERCIAL && (
+					<form.Subscribe selector={(state) => state.values.roleId}>
+						{(roleId) =>
+							roleProfiles.find(({ id }) => id === roleId)?.persona ===
+								RolePersona.AGENT_COMMERCIAL && (
 								<form.Field name="customerIds">
 									{(field) => (
 										<CustomerPortfolioField
@@ -394,7 +439,9 @@ export function UserCreateForm(): JSX.Element {
 					<form.Field name="type">
 						{(field) => (
 							<div className="oncf-field">
-								<Label htmlFor="type">User Type</Label>
+								<Label htmlFor="type">
+									{t(Messages.users.form.fields.type)}
+								</Label>
 								<Select
 									value={field.state.value}
 									onValueChange={(val) =>
@@ -403,15 +450,15 @@ export function UserCreateForm(): JSX.Element {
 								>
 									<SelectTrigger id="type">
 										<SelectValue>
-											{formatUserType(field.state.value)}
+											{formatUserType(field.state.value, locale)}
 										</SelectValue>
 									</SelectTrigger>
 									<SelectContent>
 										<SelectItem value={CreateUserDtoType.internal}>
-											Internal
+											{formatUserType(CreateUserDtoType.internal, locale)}
 										</SelectItem>
 										<SelectItem value={CreateUserDtoType.external}>
-											External
+											{formatUserType(CreateUserDtoType.external, locale)}
 										</SelectItem>
 									</SelectContent>
 								</Select>
@@ -422,10 +469,14 @@ export function UserCreateForm(): JSX.Element {
 					<form.Field name="employeeCode">
 						{(field) => (
 							<div className="oncf-field">
-								<Label htmlFor="employeeCode">Employee code</Label>
+								<Label htmlFor="employeeCode">
+									{t(Messages.users.form.fields.employeeCode)}
+								</Label>
 								<Input
 									id="employeeCode"
-									placeholder="EMP-1234"
+									placeholder={t(
+										Messages.users.form.fields.employeeCodePlaceholder,
+									)}
 									value={field.state.value ?? ""}
 									onChange={(e) => field.handleChange(e.target.value)}
 								/>
@@ -439,12 +490,12 @@ export function UserCreateForm(): JSX.Element {
 				{(state: typeof form.state) => (
 					<GuidedFormActions
 						currentStep={step}
-						stepCount={userSteps.length}
+						stepCount={steps.length}
 						onCancel={() => router.push("/dashboard/users")}
 						onPrevious={() => setStep(0)}
 						onContinue={continueToProfile}
-						submitLabel="Create User"
-						pendingLabel="Creating User..."
+						submitLabel={t(Messages.users.form.actions.create)}
+						pendingLabel={t(Messages.users.form.actions.creating)}
 						isSubmitting={state.isSubmitting}
 						isPending={mutation.isPending}
 						isSubmitDisabled={!state.canSubmit}

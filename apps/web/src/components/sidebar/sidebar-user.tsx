@@ -22,6 +22,8 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Messages } from "@/i18n";
+import { useLocale, useTranslate } from "@/i18n/locale-provider";
 import { formatUserRole } from "@/lib/user-labels";
 import { useAuth } from "@/providers/auth-provider";
 
@@ -30,6 +32,8 @@ export function SidebarUser({
 }: {
 	variant?: "sidebar" | "header";
 } = {}) {
+	const t = useTranslate();
+	const locale = useLocale();
 	const {
 		profile: { firstName, lastName, role, customerId, customerName },
 	} = useAuth();
@@ -38,7 +42,10 @@ export function SidebarUser({
 	const accountName =
 		customerId === null
 			? null
-			: (customerName ?? `Customer account #${customerId}`);
+			: (customerName ??
+				t(Messages.settings.profile.customerAccountCodeFallback, {
+					id: customerId,
+				}));
 	const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`;
 	const trigger =
 		variant === "sidebar" ? (
@@ -55,7 +62,9 @@ export function SidebarUser({
 	const menu = (
 		<DropdownMenu>
 			<DropdownMenuTrigger
-				aria-label={`Account menu for ${name}`}
+				aria-label={t(Messages.common.accessibility.accountMenuFor, {
+					name,
+				})}
 				render={trigger}
 			>
 				<Avatar className="size-8 shrink-0 rounded-sm">
@@ -70,7 +79,7 @@ export function SidebarUser({
 						<div className="grid min-w-0 max-w-40 flex-1 overflow-hidden text-left text-sm leading-tight transition-[max-width,opacity] duration-200 ease-linear motion-reduce:transition-none group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:max-w-0 group-data-[collapsible=icon]:opacity-0">
 							<span className="truncate font-medium">{name}</span>
 							<span className="truncate text-meta text-muted-foreground">
-								{formatUserRole(role)}
+								{formatUserRole(role, locale)}
 							</span>
 							{accountName && (
 								<span className="truncate text-micro text-muted-foreground">
@@ -93,14 +102,14 @@ export function SidebarUser({
 					render={<Link href="/dashboard/settings?section=profile" />}
 				>
 					<UserIcon className="mr-2 size-4 text-muted-foreground" />
-					Profile
+					{t(Messages.settings.sections.profile)}
 				</DropdownMenuItem>
 
 				<DropdownMenuItem
 					render={<Link href="/dashboard/settings?section=appearance" />}
 				>
 					<SettingsIcon className="mr-2 size-4 text-muted-foreground" />
-					Settings
+					{t(Messages.settings.dialogTitle)}
 				</DropdownMenuItem>
 
 				<DropdownMenuSeparator />
@@ -110,7 +119,7 @@ export function SidebarUser({
 					className="text-destructive focus:text-destructive"
 				>
 					<LogOutIcon className="mr-2 size-4" />
-					Log out
+					{t(Messages.common.actions.logOut)}
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>

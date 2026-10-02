@@ -20,6 +20,10 @@ import type {
   UseQueryResult
 } from '@tanstack/react-query';
 
+import type {
+  ApiErrorResponseDto
+} from './generated.schemas';
+
 import { customFetch } from '../axios';
 
 
@@ -65,7 +69,7 @@ export const getAppControllerHealthQueryKey = () => {
     }
 
 
-export const getAppControllerHealthQueryOptions = <TData = Awaited<ReturnType<typeof appControllerHealth>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerHealth>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getAppControllerHealthQueryOptions = <TData = Awaited<ReturnType<typeof appControllerHealth>>, TError = ApiErrorResponseDto>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerHealth>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -84,10 +88,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type AppControllerHealthQueryResult = NonNullable<Awaited<ReturnType<typeof appControllerHealth>>>
-export type AppControllerHealthQueryError = unknown
+export type AppControllerHealthQueryError = ApiErrorResponseDto
 
 
-export function useAppControllerHealth<TData = Awaited<ReturnType<typeof appControllerHealth>>, TError = unknown>(
+export function useAppControllerHealth<TData = Awaited<ReturnType<typeof appControllerHealth>>, TError = ApiErrorResponseDto>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerHealth>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof appControllerHealth>>,
@@ -97,7 +101,7 @@ export function useAppControllerHealth<TData = Awaited<ReturnType<typeof appCont
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useAppControllerHealth<TData = Awaited<ReturnType<typeof appControllerHealth>>, TError = unknown>(
+export function useAppControllerHealth<TData = Awaited<ReturnType<typeof appControllerHealth>>, TError = ApiErrorResponseDto>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerHealth>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof appControllerHealth>>,
@@ -107,12 +111,12 @@ export function useAppControllerHealth<TData = Awaited<ReturnType<typeof appCont
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useAppControllerHealth<TData = Awaited<ReturnType<typeof appControllerHealth>>, TError = unknown>(
+export function useAppControllerHealth<TData = Awaited<ReturnType<typeof appControllerHealth>>, TError = ApiErrorResponseDto>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerHealth>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useAppControllerHealth<TData = Awaited<ReturnType<typeof appControllerHealth>>, TError = unknown>(
+export function useAppControllerHealth<TData = Awaited<ReturnType<typeof appControllerHealth>>, TError = ApiErrorResponseDto>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof appControllerHealth>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {

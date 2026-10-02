@@ -1,15 +1,37 @@
+import type { Metadata } from "next";
+import { AccessDeniedState } from "@/components/common/access-denied-state";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { UserDetailsClient } from "@/components/users/user-details-client";
+import { Messages } from "@/i18n";
+import { getRequestTranslator } from "@/i18n/server";
 import { usersControllerFindOne } from "@/lib/api/users";
+import { loadPageData } from "@/lib/load-page-data";
 import { usersBreadcrumbs } from "../breadcrumbs";
 
 interface PageProps {
 	params: Promise<{ id: string }>;
 }
 
+export async function generateMetadata(): Promise<Metadata> {
+	const t = await getRequestTranslator();
+	return {
+		title: t(Messages.users.detail.title),
+	};
+}
+
 export default async function Page({ params }: PageProps) {
+	const t = await getRequestTranslator();
 	const { id } = await params;
-	const user = await usersControllerFindOne(Number(id));
+	const user = await loadPageData(usersControllerFindOne(Number(id)));
+	if (!user) {
+		return (
+			<AccessDeniedState
+				title={t(Messages.users.pageTitle)}
+				description={t(Messages.apiError.accessDenied)}
+				breadcrumbs={usersBreadcrumbs.home(t)}
+			/>
+		);
+	}
 
 	return (
 		<>
@@ -17,6 +39,7 @@ export default async function Page({ params }: PageProps) {
 				items={usersBreadcrumbs.detail(
 					id,
 					`${user.firstName} ${user.lastName}`,
+					t,
 				)}
 			/>
 			<UserDetailsClient user={user} />

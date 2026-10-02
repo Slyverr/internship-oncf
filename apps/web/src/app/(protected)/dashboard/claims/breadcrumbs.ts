@@ -1,35 +1,9 @@
-const claims = {
-	resource: "Claims",
+import { Messages } from "@/i18n";
+import { createEntityBreadcrumbs } from "@/lib/entity-breadcrumbs";
+
+export const claimsBreadcrumbs = createEntityBreadcrumbs({
+	resourceKey: Messages.claims.title,
 	baseUrl: "/dashboard/claims",
-};
-
-export const claimsBreadcrumbs = {
-	home: () => [
-		{
-			label: claims.resource,
-			href: claims.baseUrl,
-		},
-	],
-
-	create: () => [
-		...claimsBreadcrumbs.home(),
-		{
-			label: "New Claim",
-		},
-	],
-
-	detail: (id: string, label?: string) => [
-		...claimsBreadcrumbs.home(),
-		{
-			label: label ?? id,
-			href: `${claims.baseUrl}/${id}`,
-		},
-	],
-
-	edit: (id: string, label?: string) => [
-		...claimsBreadcrumbs.detail(id, label),
-		{
-			label: "Edit",
-		},
-	],
-};
+	createKey: Messages.claims.newTitle,
+	editKey: Messages.claims.edit.breadcrumb,
+});

@@ -24,6 +24,9 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
+import { useFormErrorMessage } from "@/hooks/use-form-error-message";
+import { type AppLocale, Messages, type TypedMessageTranslator } from "@/i18n";
+import { useLocale, useTranslate } from "@/i18n/locale-provider";
 import {
 	getClaimsControllerFindOneQueryKey,
 	getClaimsControllerGetCommentsQueryKey,
@@ -37,8 +40,11 @@ import {
 	useNotificationsControllerMarkAsRead,
 } from "@/lib/api/notifications";
 import { isUnreadClaimCommentNotification } from "@/lib/claim-conversation-utils";
-import { formatFullMessageTime, formatMessageTime } from "@/lib/date-utils";
-import { getFormErrorMessage } from "@/lib/form-utils";
+import {
+	formatFullMessageTime,
+	formatMessageTime,
+	formatMonthDay,
+} from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
 
@@ -51,6 +57,8 @@ interface ClaimConversationProps {
 function CommentMessage({
 	comment,
 	currentUserId,
+	locale,
+	t,
 	grouped,
 	groupPosition,
 	startsNewDay,
@@ -60,6 +68,8 @@ function CommentMessage({
 }: {
 	comment: ClaimCommentDto;
 	currentUserId: number;
+	locale: AppLocale;
+	t: TypedMessageTranslator;
 	grouped: boolean;
 	groupPosition: "single" | "first" | "middle" | "last";
 	startsNewDay: boolean;
@@ -68,9 +78,10 @@ function CommentMessage({
 	onToggleTime: () => void;
 }) {
 	const isOwnMessage = comment.authorUserId === currentUserId;
-	const messageTime = formatMessageTime(comment.createdAt);
-	const fullMessageTime = formatFullMessageTime(comment.createdAt);
-	const authorName = comment.authorName;
+	const messageTime = formatMessageTime(comment.createdAt, locale);
+	const fullMessageTime = formatFullMessageTime(comment.createdAt, locale);
+	const authorName =
+		comment.authorName ?? t(Messages.claims.conversation.formerUser);
 	const initials = authorName
 		.split(" ")
 		.map((part) => part[0])
@@ -127,7 +138,11 @@ function CommentMessage({
 					<button
 						type="button"
 						aria-expanded={timeVisible}
-						aria-label={`${authorName}: ${comment.comment}. Sent ${fullMessageTime}.`}
+						aria-label={t(Messages.claims.conversation.messageAccessibleLabel, {
+							author: authorName,
+							message: comment.comment,
+							time: fullMessageTime,
+						})}
 						onClick={onToggleTime}
 						className={cn(
 							"grid w-fit min-w-0 max-w-full gap-0 rounded-2xl border px-3 py-1 text-left font-normal transition-colors hover:border-foreground/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring motion-reduce:transition-none",
@@ -162,11 +177,15 @@ function CommentMessage({
 	);
 }
 
-function getMessageDayLabel(value: string) {
+function getMessageDayLabel(
+	value: string,
+	locale: AppLocale,
+	t: TypedMessageTranslator,
+) {
 	const date = new Date(value);
-	if (isToday(date)) return "Today";
-	if (isYesterday(date)) return "Yesterday";
-	return format(date, "MMM d");
+	if (isToday(date)) return t(Messages.claims.conversation.today);
+	if (isYesterday(date)) return t(Messages.claims.conversation.yesterday);
+	return formatMonthDay(date, locale);
 }
 
 function getMessageDayKey(value: string) {
@@ -178,6 +197,9 @@ export function ClaimConversation({
 	claimNumber,
 	commentCount,
 }: ClaimConversationProps) {
+	const t = useTranslate();
+	const getErrorMessage = useFormErrorMessage();
+	const locale = useLocale();
 	const { profile, hasPermission } = useAuth();
 	const canComment = hasPermission(Permission.CLAIMS_ACTION_COMMENT);
 	const [open, setOpen] = useState(false);
@@ -278,12 +300,19 @@ export function ClaimConversation({
 				]);
 				toast.add({
 					type: "error",
-					title: "Could not mark conversation as read",
+					title: t(Messages.claims.conversation.markReadFailed),
 					description:
-						getFormErrorMessage(error) ?? "Please try again in a moment.",
+						getErrorMessage(error) ?? t(Messages.claims.conversation.tryAgain),
 				});
 			});
-	}, [open, unreadComments, markRead.mutateAsync, queryClient]);
+	}, [
+		open,
+		unreadComments,
+		markRead.mutateAsync,
+		queryClient,
+		t,
+		getErrorMessage,
+	]);
 
 	async function submitComment(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
@@ -307,15 +336,15 @@ export function ClaimConversation({
 			]);
 			toast.add({
 				type: "success",
-				title: "Reply sent",
-				description: "Your reply was added to the claim conversation.",
+				title: t(Messages.claims.conversation.replySent),
+				description: t(Messages.claims.conversation.replyAdded),
 			});
 		} catch (error) {
 			toast.add({
 				type: "error",
-				title: "Could not send reply",
+				title: t(Messages.claims.conversation.sendFailed),
 				description:
-					getFormErrorMessage(error) ?? "Please try again in a moment.",
+					getErrorMessage(error) ?? t(Messages.claims.conversation.tryAgain),
 			});
 		}
 	}
@@ -325,12 +354,18 @@ export function ClaimConversation({
 			<Button
 				type="button"
 				variant="outline"
-				aria-label={`Open conversation, ${commentCount} ${commentCount === 1 ? "message" : "messages"}${unreadComments.length > 0 ? ", new messages" : ""}`}
+				aria-label={t(Messages.claims.conversation.openCount, {
+					count: commentCount,
+					unreadSuffix:
+						unreadComments.length > 0
+							? t(Messages.claims.conversation.unreadSuffix)
+							: "",
+				})}
 				onClick={() => setOpen(true)}
 				className="relative"
 			>
 				<MessageCircleIcon aria-hidden="true" />
-				Conversation
+				{t(Messages.claims.conversation.button)}
 				<span className="tabular-nums text-muted-foreground">
 					{commentCount}
 				</span>
@@ -344,12 +379,14 @@ export function ClaimConversation({
 			<DialogContent size="conversation" className="gap-0 overflow-hidden p-0">
 				<DialogHeader className="px-4 py-3 sm:px-6">
 					<DialogTitle className="truncate text-base sm:text-lg">
-						{claimNumber} conversation
+						{t(Messages.claims.conversation.dialogTitle, {
+							recordCode: claimNumber,
+						})}
 					</DialogTitle>
 				</DialogHeader>
 				<DialogBody className="grid min-h-0 grid-rows-[minmax(0,1fr)_auto] overflow-hidden">
 					<section
-						aria-label="Conversation messages, oldest first"
+						aria-label={t(Messages.claims.conversation.messagesLabel)}
 						className="min-h-0 overflow-y-auto p-4 sm:p-6"
 					>
 						{commentsQuery.isLoading ? (
@@ -361,13 +398,13 @@ export function ClaimConversation({
 						) : commentsQuery.isError ? (
 							<div className="grid min-h-full content-center justify-items-center gap-4 text-center">
 								<p role="alert" className="text-sm text-destructive">
-									Could not load this conversation.
+									{t(Messages.claims.conversation.loadFailed)}
 								</p>
 								<Button
 									variant="outline"
 									onClick={() => void commentsQuery.refetch()}
 								>
-									Try again
+									{t(Messages.claims.conversation.tryAgainAction)}
 								</Button>
 							</div>
 						) : chronological.length > 0 ? (
@@ -403,7 +440,7 @@ export function ClaimConversation({
 														dateTime={getMessageDayKey(comment.createdAt)}
 														className="text-caption font-medium text-muted-foreground"
 													>
-														{getMessageDayLabel(comment.createdAt)}
+														{getMessageDayLabel(comment.createdAt, locale, t)}
 													</time>
 													<span className="h-px flex-1 bg-border" />
 												</li>
@@ -411,6 +448,8 @@ export function ClaimConversation({
 											<CommentMessage
 												comment={comment}
 												currentUserId={profile.id}
+												locale={locale}
+												t={t}
 												grouped={groupedPrevious}
 												groupPosition={groupPosition}
 												startsNewDay={startsNewDay}
@@ -437,9 +476,11 @@ export function ClaimConversation({
 									className="size-8 text-muted-foreground"
 									aria-hidden="true"
 								/>
-								<p className="font-medium">No messages yet</p>
+								<p className="font-medium">
+									{t(Messages.claims.conversation.emptyTitle)}
+								</p>
 								<p className="text-sm text-muted-foreground">
-									Start the conversation with a reply about this claim.
+									{t(Messages.claims.conversation.emptyDescription)}
 								</p>
 							</div>
 						)}
@@ -448,8 +489,8 @@ export function ClaimConversation({
 						<form className="border-t p-4 sm:p-6" onSubmit={submitComment}>
 							<div className="flex items-end gap-2 rounded-xl border bg-background p-1 transition-colors focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/30">
 								<Textarea
-									aria-label="Write a reply"
-									placeholder="Write a reply…"
+									aria-label={t(Messages.claims.conversation.writeReply)}
+									placeholder={t(Messages.claims.conversation.replyPlaceholder)}
 									value={content}
 									onChange={(event) => setContent(event.target.value)}
 									onKeyDown={(event) => {
@@ -469,7 +510,7 @@ export function ClaimConversation({
 								/>
 								<Button
 									type="submit"
-									aria-label="Send reply"
+									aria-label={t(Messages.claims.conversation.sendReply)}
 									size="icon"
 									className="size-11 shrink-0 rounded-lg"
 									disabled={addComment.isPending || !content.trim()}

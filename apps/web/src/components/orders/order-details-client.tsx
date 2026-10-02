@@ -7,6 +7,8 @@ import { PageHeader } from "@/components/common/page-header";
 import { OrderActions } from "@/components/orders/order-actions";
 import { OrderOverview } from "@/components/orders/order-overview";
 import { Button } from "@/components/ui/button";
+import { Messages } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
 import type { OrderDetailDto } from "@/lib/api/generated.schemas";
 import { useOrdersControllerFindOne } from "@/lib/api/orders";
 import { canCreateProgramForOrder } from "@/lib/program-creation-eligibility";
@@ -17,6 +19,7 @@ interface OrderDetailsClientProps {
 }
 
 export function OrderDetailsClient({ order }: OrderDetailsClientProps) {
+	const t = useTranslate();
 	const { profile, hasPermission } = useAuth();
 	const { data: currentOrder } = useOrdersControllerFindOne(order.orderNumber, {
 		query: {
@@ -31,7 +34,10 @@ export function OrderDetailsClient({ order }: OrderDetailsClientProps) {
 	return (
 		<>
 			<PageHeader
-				title={currentOrder.orderNumber ?? `Order #${currentOrder.id}`}
+				title={
+					currentOrder.orderNumber ??
+					t(Messages.orders.numberFallback, { id: currentOrder.id })
+				}
 				description={currentOrder.customer.companyName}
 			>
 				<OrderActions order={currentOrder} />
@@ -57,7 +63,7 @@ export function OrderDetailsClient({ order }: OrderDetailsClientProps) {
 						}
 					>
 						<PlusIcon aria-hidden="true" />
-						Create program
+						{t(Messages.orders.detail.createProgram)}
 					</Button>
 				)}
 			</PageHeader>

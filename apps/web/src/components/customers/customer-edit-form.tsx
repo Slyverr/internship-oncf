@@ -2,13 +2,14 @@
 
 import { useForm } from "@tanstack/react-form-nextjs";
 import { useRouter } from "next/navigation";
-import { type JSX } from "react";
+import { type JSX, useMemo } from "react";
 import { FormFieldHeader } from "@/components/common/form-field-header";
 import {
 	GuidedFormActions,
 	GuidedFormProgress,
 } from "@/components/common/guided-form";
 import { PageHeader } from "@/components/common/page-header";
+import { CustomerTypeSelect } from "@/components/customers/customer-type-select";
 import {
 	Card,
 	CardContent,
@@ -18,15 +19,15 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useFormErrorMessage } from "@/hooks/use-form-error-message";
 import { useGuidedFormState } from "@/hooks/use-guided-form-state";
+import { Messages } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
 import { useCustomersControllerUpdate } from "@/lib/api/customers";
 import type { CustomerDetailDto } from "@/lib/api/generated.schemas";
-import { getFormErrorMessage } from "@/lib/form-utils";
 import {
 	type CustomerFormValues,
-	customerFormSchema,
-	customerFormSteps,
-	customerIdentitySchema,
+	createCustomerFormSchema,
 } from "./customer-form";
 
 export function CustomerEditForm({
@@ -36,6 +37,12 @@ export function CustomerEditForm({
 }): JSX.Element {
 	const router = useRouter();
 	const mutation = useCustomersControllerUpdate();
+	const t = useTranslate();
+	const getErrorMessage = useFormErrorMessage();
+	const { schema, identitySchema, steps } = useMemo(
+		() => createCustomerFormSchema(t),
+		[t],
+	);
 	const {
 		step,
 		setStep,
@@ -57,7 +64,7 @@ export function CustomerEditForm({
 			typeId: customer.typeId ?? "",
 		} as CustomerFormValues,
 		onSubmit: async ({ value }) => {
-			if (!validate(customerFormSchema.safeParse(value))) {
+			if (!validate(schema.safeParse(value))) {
 				return;
 			}
 
@@ -87,7 +94,7 @@ export function CustomerEditForm({
 	});
 
 	function continueToContact() {
-		const result = customerIdentitySchema.safeParse(form.state.values);
+		const result = identitySchema.safeParse(form.state.values);
 		advanceIfValid(result);
 	}
 
@@ -105,19 +112,19 @@ export function CustomerEditForm({
 			className="workspace-form"
 		>
 			<PageHeader
-				title="Edit customer"
-				description="Update company, contact, and location information."
+				title={t(Messages.customers.editTitle)}
+				description={t(Messages.customers.editDescription)}
 			/>
-			<GuidedFormProgress steps={customerFormSteps} currentStep={step} />
+			<GuidedFormProgress steps={steps} currentStep={step} />
 
 			<Card
 				hidden={step !== 0}
 				className={step === 0 ? "page-enter" : undefined}
 			>
 				<CardHeader>
-					<CardTitle>Company Overview</CardTitle>
+					<CardTitle>{t(Messages.customers.form.company)}</CardTitle>
 					<CardDescription>
-						Update identifiers used to verify customer account requests.
+						{t(Messages.customers.form.companyEditDescription)}
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="grid gap-4 @3xl/workspace:grid-cols-2">
@@ -125,18 +132,20 @@ export function CustomerEditForm({
 						{(field) => {
 							const errorMsg =
 								stepErrors.companyName ??
-								getFormErrorMessage(field.state.meta.errors[0]);
+								getErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="companyName"
-										label="Company Name"
+										label={t(Messages.customers.form.companyName)}
 										required
 										error={errorMsg}
 									/>
 									<Input
 										id="companyName"
-										placeholder="Company name"
+										placeholder={t(
+											Messages.customers.form.companyNamePlaceholder,
+										)}
 										value={field.state.value}
 										onChange={(e) => {
 											field.handleChange(e.target.value);
@@ -156,10 +165,14 @@ export function CustomerEditForm({
 					<form.Field name="customerCode">
 						{(field) => (
 							<div className="oncf-field">
-								<Label htmlFor="customerCode">Customer Code</Label>
+								<Label htmlFor="customerCode">
+									{t(Messages.customers.form.customerCode)}
+								</Label>
 								<Input
 									id="customerCode"
-									placeholder="Customer code"
+									placeholder={t(
+										Messages.customers.form.customerCodePlaceholder,
+									)}
 									value={field.state.value ?? ""}
 									onChange={(e) => field.handleChange(e.target.value)}
 								/>
@@ -170,18 +183,20 @@ export function CustomerEditForm({
 					<form.Field name="ice">
 						{(field) => (
 							<div className="oncf-field">
-								<Label htmlFor="customer-ice">ICE</Label>
+								<Label htmlFor="customer-ice">
+									{t(Messages.customers.form.ice)}
+								</Label>
 								<Input
 									id="customer-ice"
 									inputMode="numeric"
 									maxLength={15}
 									pattern="[0-9]{15}"
-									placeholder="15 digits"
+									placeholder={t(Messages.customers.form.icePlaceholder)}
 									value={field.state.value ?? ""}
 									onChange={(event) => field.handleChange(event.target.value)}
 								/>
 								<p className="text-meta text-muted-foreground">
-									Required to verify customer account requests.
+									{t(Messages.customers.form.iceHint)}
 								</p>
 							</div>
 						)}
@@ -190,11 +205,16 @@ export function CustomerEditForm({
 					<form.Field name="typeId">
 						{(field) => (
 							<div className="oncf-field">
-								<Label htmlFor="typeId">Type Identifier</Label>
-								<Input
+								<Label htmlFor="typeId">
+									{t(Messages.customers.form.type)}
+								</Label>
+								<CustomerTypeSelect
 									id="typeId"
+									placeholder={t(
+										Messages.customers.form.typeSelect.placeholder,
+									)}
 									value={field.state.value ?? ""}
-									onChange={(e) => field.handleChange(e.target.value)}
+									onChange={field.handleChange}
 								/>
 							</div>
 						)}
@@ -207,28 +227,27 @@ export function CustomerEditForm({
 				className={step === 1 ? "page-enter" : undefined}
 			>
 				<CardHeader>
-					<CardTitle>Contact & Location</CardTitle>
+					<CardTitle>{t(Messages.customers.form.contact)}</CardTitle>
 					<CardDescription>
-						Address and primary communication lines.
+						{t(Messages.customers.form.contactEditDescription)}
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="grid gap-4 @3xl/workspace:grid-cols-2">
 					<form.Field name="email">
 						{(field) => {
 							const errorMsg =
-								stepErrors.email ??
-								getFormErrorMessage(field.state.meta.errors[0]);
+								stepErrors.email ?? getErrorMessage(field.state.meta.errors[0]);
 							return (
 								<div className="oncf-field">
 									<FormFieldHeader
 										htmlFor="email"
-										label="Email Address"
+										label={t(Messages.customers.form.email)}
 										error={errorMsg}
 									/>
 									<Input
 										id="email"
 										type="email"
-										placeholder="name@company.com"
+										placeholder={t(Messages.customers.form.emailPlaceholder)}
 										value={field.state.value ?? ""}
 										onChange={(e) => field.handleChange(e.target.value)}
 										className={
@@ -245,10 +264,12 @@ export function CustomerEditForm({
 					<form.Field name="phone">
 						{(field) => (
 							<div className="oncf-field">
-								<Label htmlFor="phone">Phone Number</Label>
+								<Label htmlFor="phone">
+									{t(Messages.customers.form.phone)}
+								</Label>
 								<Input
 									id="phone"
-									placeholder="e.g. +212 6 12 34 56 78"
+									placeholder={t(Messages.customers.form.phonePlaceholder)}
 									value={field.state.value ?? ""}
 									onChange={(e) => field.handleChange(e.target.value)}
 								/>
@@ -259,10 +280,12 @@ export function CustomerEditForm({
 					<form.Field name="address">
 						{(field) => (
 							<div className="oncf-field @3xl/workspace:col-span-2">
-								<Label htmlFor="address">Street Address</Label>
+								<Label htmlFor="address">
+									{t(Messages.customers.form.address)}
+								</Label>
 								<Input
 									id="address"
-									placeholder="Street address"
+									placeholder={t(Messages.customers.form.addressPlaceholder)}
 									value={field.state.value ?? ""}
 									onChange={(e) => field.handleChange(e.target.value)}
 								/>
@@ -273,10 +296,10 @@ export function CustomerEditForm({
 					<form.Field name="city">
 						{(field) => (
 							<div className="oncf-field">
-								<Label htmlFor="city">City</Label>
+								<Label htmlFor="city">{t(Messages.customers.form.city)}</Label>
 								<Input
 									id="city"
-									placeholder="e.g. Casablanca"
+									placeholder={t(Messages.customers.form.cityPlaceholder)}
 									value={field.state.value ?? ""}
 									onChange={(e) => field.handleChange(e.target.value)}
 								/>
@@ -290,12 +313,12 @@ export function CustomerEditForm({
 				{(state: typeof form.state) => (
 					<GuidedFormActions
 						currentStep={step}
-						stepCount={customerFormSteps.length}
+						stepCount={steps.length}
 						onCancel={() => router.push(`/dashboard/customers/${customer.id}`)}
 						onPrevious={() => setStep(0)}
 						onContinue={continueToContact}
-						submitLabel="Save Changes"
-						pendingLabel="Saving..."
+						submitLabel={t(Messages.customers.form.save)}
+						pendingLabel={t(Messages.customers.form.saving)}
 						isSubmitting={state.isSubmitting}
 						isPending={mutation.isPending}
 						isSubmitDisabled={!state.canSubmit}

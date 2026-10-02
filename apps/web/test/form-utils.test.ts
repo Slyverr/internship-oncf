@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { OrderStatus } from "@ecommand/shared";
+import { API_ERROR_CODES, OrderStatus } from "@ecommand/shared";
 import {
 	getFirstFormStepErrorField,
 	getFormErrorMessage,
@@ -9,26 +9,119 @@ import { canCreateProgramForOrder } from "../src/lib/program-creation-eligibilit
 assert.equal(
 	getFormErrorMessage({
 		message: "Request failed with status code 400",
-		response: { data: { message: "Customer is required" } },
+		response: {
+			status: 400,
+			data: { code: API_ERROR_CODES.VALIDATION_FAILED },
+		},
 	}),
-	"Customer is required",
-	"API validation details take precedence over transport messages",
+	"Please check the entered values and try again.",
+	"API validation codes map to localized client copy",
 );
 
 assert.equal(
 	getFormErrorMessage({
-		response: { data: { message: ["Email is invalid", "Name is required"] } },
+		message: "Request failed with status code 400",
+		response: {
+			status: 400,
+			data: {
+				code: API_ERROR_CODES.VALIDATION_FAILED,
+				details: { fields: {} },
+			},
+		},
 	}),
-	"Email is invalid. Name is required",
-	"API validation arrays are joined for display",
+	"Please check the entered values and try again.",
+	"validation feedback does not rely on server-authored strings",
+);
+
+assert.equal(
+	getFormErrorMessage({
+		message: "email must be valid",
+		response: {
+			status: 400,
+			data: {
+				code: API_ERROR_CODES.VALIDATION_FAILED,
+				details: {
+					fields: {
+						email: ["IS_EMAIL"],
+						password: ["MATCHES", "MIN_LENGTH"],
+					},
+				},
+			},
+		},
+	}),
+	"Review these fields: Email: Enter a valid email address; Password: Use the required format, The text is too short",
+	"field validation rule codes map to localized client copy",
+);
+
+assert.equal(
+	getFormErrorMessage({
+		response: {
+			status: 400,
+			data: {
+				code: API_ERROR_CODES.VALIDATION_FAILED,
+				details: { fields: { ice: ["IS_NOT_EMPTY"] } },
+			},
+		},
+	}),
+	"Review these fields: ICE: This field is required",
+	"technical API field names map to catalog labels",
+);
+
+assert.equal(
+	getFormErrorMessage({
+		response: {
+			status: 400,
+			data: {
+				code: API_ERROR_CODES.VALIDATION_FAILED,
+				details: { fields: { profile: ["UNRECOGNIZED_RULE"] } },
+			},
+		},
+	}),
+	"Please check the entered values and try again.",
+	"unknown API field names never leak as untranslated property names",
 );
 
 assert.equal(
 	getFormErrorMessage(new Error("Network unavailable")),
-	"Network unavailable",
-	"ordinary error messages are preserved",
+	"The request could not be completed. Please try again.",
+	"unknown exceptions use a catalog fallback instead of arbitrary error text",
+);
+assert.equal(
+	getFormErrorMessage({
+		isAxiosError: true,
+		code: "ERR_NETWORK",
+		message: "Network Error",
+	}),
+	"The ECommand API could not be reached.",
+	"transport errors use localized feedback instead of raw Axios text",
+);
+assert.equal(
+	getFormErrorMessage({
+		isAxiosError: true,
+		code: "ERR_CANCELED",
+		message: "Request was canceled.",
+	}),
+	"Request was canceled.",
+	"canceled requests use the catalog message after Axios sanitization",
+);
+assert.equal(
+	getFormErrorMessage({
+		isAxiosError: true,
+		message: "Request failed with status code 500",
+		response: {
+			status: 500,
+			data: { message: "Internal server failure with stack details" },
+		},
+	}),
+	"Something went wrong. Please try again.",
+	"unstructured server messages are not displayed to users",
 );
 assert.equal(getFormErrorMessage("Invalid form"), "Invalid form");
+assert.equal(
+	getFormErrorMessage(["Email is invalid", "Name is required"]),
+	"Email is invalid. Name is required",
+	"local validation messages remain available for field feedback",
+);
 assert.equal(getFormErrorMessage(undefined), undefined);
 assert.equal(getFormErrorMessage(null), undefined);
 assert.equal(

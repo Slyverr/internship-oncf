@@ -9,7 +9,9 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { formatEnumLabel } from "@/lib/enum-labels";
+import { Messages } from "@/i18n";
+import { getClaimStatusLabel } from "@/i18n/claim-labels";
+import { useLocale, useTranslate } from "@/i18n/locale-provider";
 
 interface ClaimStatusSelectProps {
 	value?: ClaimStatus;
@@ -17,18 +19,22 @@ interface ClaimStatusSelectProps {
 }
 
 export function ClaimStatusSelect({ value, onChange }: ClaimStatusSelectProps) {
+	const locale = useLocale();
+	const t = useTranslate();
 	return (
 		<Select value={value} onValueChange={(val) => onChange(val as ClaimStatus)}>
 			<SelectTrigger className="w-full">
 				<SelectValue>
-					{value ? formatEnumLabel(value) : "Select status"}
+					{value
+						? getClaimStatusLabel(value, locale)
+						: t(Messages.claims.selectStatus)}
 				</SelectValue>
 			</SelectTrigger>
 
 			<SelectContent>
 				{Object.values(ClaimStatus).map((status) => (
 					<SelectItem key={status} value={status}>
-						{formatEnumLabel(status)}
+						{getClaimStatusLabel(status, locale)}
 					</SelectItem>
 				))}
 			</SelectContent>

@@ -5,14 +5,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { ClaimPrioritySelect } from "@/components/claims/claim-priority-select";
+import { PageHeader } from "@/components/common/page-header";
 import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import {
 	Select,
@@ -24,16 +19,20 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
 import { useUpdateDetailCache } from "@/hooks/use-update-detail-cache";
+import { Messages } from "@/i18n";
+import { getClaimTypeLabel } from "@/i18n/claim-labels";
+import { useLocale, useTranslate } from "@/i18n/locale-provider";
 import {
 	getClaimsControllerFindOneQueryKey,
 	useClaimsControllerUpdate,
 } from "@/lib/api/claims";
 import type { ClaimDetailDto } from "@/lib/api/generated.schemas";
-import { formatEnumLabel } from "@/lib/enum-labels";
 import { getFormErrorMessage } from "@/lib/form-utils";
 import { useAuth } from "@/providers/auth-provider";
 
 export function ClaimEditForm({ claim }: { claim: ClaimDetailDto }) {
+	const locale = useLocale();
+	const t = useTranslate();
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const updateDetailCache = useUpdateDetailCache<ClaimDetailDto, string>(
@@ -63,8 +62,8 @@ export function ClaimEditForm({ claim }: { claim: ClaimDetailDto }) {
 		if (trimmedDescription.length < 10) {
 			toast.add({
 				type: "error",
-				title: "Description is too short",
-				description: "Use at least 10 characters to describe the claim.",
+				title: t(Messages.claims.edit.descriptionTooShortTitle),
+				description: t(Messages.claims.edit.descriptionTooShort),
 			});
 			return;
 		}
@@ -86,64 +85,69 @@ export function ClaimEditForm({ claim }: { claim: ClaimDetailDto }) {
 			void queryClient.invalidateQueries({ queryKey: ["/claims"] });
 			toast.add({
 				type: "success",
-				title: "Claim saved",
-				description: "The claim details have been updated.",
+				title: t(Messages.claims.edit.savedTitle),
+				description: t(Messages.claims.edit.savedDescription),
 			});
 			router.push(`/dashboard/claims/${claim.claimNumber}`);
 			router.refresh();
 		} catch (error) {
 			toast.add({
 				type: "error",
-				title: "Could not save claim",
-				description: getFormErrorMessage(error),
+				title: t(Messages.claims.edit.saveFailedTitle),
+				description: getFormErrorMessage(error, locale),
 			});
 		}
 	}
 
 	if (!canEdit) {
-		return <p role="alert">You do not have permission to edit this claim.</p>;
+		return <p role="alert">{t(Messages.claims.edit.noPermission)}</p>;
 	}
 
 	return (
 		<form onSubmit={submit} className="workspace-form">
+			<PageHeader
+				title={t(Messages.claims.edit.title, {
+					recordCode: claim.claimNumber,
+				})}
+				description={t(Messages.claims.edit.description)}
+			/>
 			<Card>
-				<CardHeader>
-					<CardTitle>Edit {claim.claimNumber}</CardTitle>
-					<CardDescription>
-						Update the claim description, type, and priority. Workflow status is
-						managed with the claim actions.
-					</CardDescription>
-				</CardHeader>
 				<CardContent className="space-y-4">
 					<div className="grid gap-4 @3xl/workspace:grid-cols-2">
 						<div className="oncf-field">
-							<Label htmlFor="claimType">Claim type</Label>
+							<Label htmlFor="claimType">
+								{t(Messages.claims.edit.claimType)}
+							</Label>
 							<Select
 								value={type}
 								onValueChange={(value) => value && setType(value as ClaimType)}
 							>
 								<SelectTrigger id="claimType" className="w-full">
-									<SelectValue>{formatEnumLabel(type)}</SelectValue>
+									<SelectValue>{getClaimTypeLabel(type, locale)}</SelectValue>
 								</SelectTrigger>
 								<SelectContent>
 									{Object.values(ClaimType).map((claimType) => (
 										<SelectItem key={claimType} value={claimType}>
-											{formatEnumLabel(claimType)}
+											{getClaimTypeLabel(claimType, locale)}
 										</SelectItem>
 									))}
 								</SelectContent>
 							</Select>
 						</div>
 						<div className="oncf-field">
-							<Label htmlFor="claimPriority">Priority</Label>
+							<Label htmlFor="claimPriority">
+								{t(Messages.claims.edit.priority)}
+							</Label>
 							<ClaimPrioritySelect value={priority} onChange={setPriority} />
 						</div>
 					</div>
 					<div className="oncf-field">
-						<Label htmlFor="description">Description</Label>
+						<Label htmlFor="description">
+							{t(Messages.claims.edit.details)}
+						</Label>
 						<Textarea
 							id="description"
-							placeholder="Describe the issue and its impact."
+							placeholder={t(Messages.claims.edit.placeholder)}
 							value={description}
 							onChange={(event) => setDescription(event.target.value)}
 							minLength={10}
@@ -160,10 +164,12 @@ export function ClaimEditForm({ claim }: { claim: ClaimDetailDto }) {
 					disabled={mutation.isPending}
 					onClick={() => router.push(`/dashboard/claims/${claim.claimNumber}`)}
 				>
-					Cancel
+					{t(Messages.claims.edit.cancel)}
 				</Button>
 				<Button type="submit" disabled={mutation.isPending || !hasChanges}>
-					{mutation.isPending ? "Saving…" : "Save changes"}
+					{mutation.isPending
+						? t(Messages.claims.edit.saving)
+						: t(Messages.claims.edit.save)}
 				</Button>
 			</div>
 		</form>

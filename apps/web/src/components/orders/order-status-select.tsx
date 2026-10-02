@@ -9,7 +9,9 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { formatEnumLabel } from "@/lib/enum-labels";
+import { Messages } from "@/i18n";
+import { useLocale, useTranslate } from "@/i18n/locale-provider";
+import { getOrderStatusLabel } from "@/i18n/status-labels";
 
 interface OrderStatusSelectProps {
 	value?: OrderStatus;
@@ -17,6 +19,8 @@ interface OrderStatusSelectProps {
 }
 
 export function OrderStatusSelect({ value, onChange }: OrderStatusSelectProps) {
+	const locale = useLocale();
+	const t = useTranslate();
 	return (
 		<Select
 			value={value ?? null}
@@ -24,14 +28,16 @@ export function OrderStatusSelect({ value, onChange }: OrderStatusSelectProps) {
 		>
 			<SelectTrigger className="w-full">
 				<SelectValue>
-					{value ? formatEnumLabel(value) : "Select status"}
+					{value
+						? getOrderStatusLabel(value, locale)
+						: t(Messages.orders.selectStatus)}
 				</SelectValue>
 			</SelectTrigger>
 
 			<SelectContent>
 				{Object.values(OrderStatus).map((status) => (
 					<SelectItem key={status} value={status}>
-						{formatEnumLabel(status)}
+						{getOrderStatusLabel(status, locale)}
 					</SelectItem>
 				))}
 			</SelectContent>

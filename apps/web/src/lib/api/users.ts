@@ -25,6 +25,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  ApiErrorResponseDto,
   CreateUserDto,
   ReviewUserRegistrationDto,
   UpdateUserDto,
@@ -78,7 +79,7 @@ export const getUsersControllerFindAllQueryKey = () => {
     }
 
 
-export const getUsersControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof usersControllerFindAll>>, TError = void>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getUsersControllerFindAllQueryOptions = <TData = Awaited<ReturnType<typeof usersControllerFindAll>>, TError = ApiErrorResponseDto>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -97,10 +98,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type UsersControllerFindAllQueryResult = NonNullable<Awaited<ReturnType<typeof usersControllerFindAll>>>
-export type UsersControllerFindAllQueryError = void
+export type UsersControllerFindAllQueryError = ApiErrorResponseDto
 
 
-export function useUsersControllerFindAll<TData = Awaited<ReturnType<typeof usersControllerFindAll>>, TError = void>(
+export function useUsersControllerFindAll<TData = Awaited<ReturnType<typeof usersControllerFindAll>>, TError = ApiErrorResponseDto>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindAll>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof usersControllerFindAll>>,
@@ -110,7 +111,7 @@ export function useUsersControllerFindAll<TData = Awaited<ReturnType<typeof user
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useUsersControllerFindAll<TData = Awaited<ReturnType<typeof usersControllerFindAll>>, TError = void>(
+export function useUsersControllerFindAll<TData = Awaited<ReturnType<typeof usersControllerFindAll>>, TError = ApiErrorResponseDto>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindAll>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof usersControllerFindAll>>,
@@ -120,12 +121,12 @@ export function useUsersControllerFindAll<TData = Awaited<ReturnType<typeof user
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useUsersControllerFindAll<TData = Awaited<ReturnType<typeof usersControllerFindAll>>, TError = void>(
+export function useUsersControllerFindAll<TData = Awaited<ReturnType<typeof usersControllerFindAll>>, TError = ApiErrorResponseDto>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useUsersControllerFindAll<TData = Awaited<ReturnType<typeof usersControllerFindAll>>, TError = void>(
+export function useUsersControllerFindAll<TData = Awaited<ReturnType<typeof usersControllerFindAll>>, TError = ApiErrorResponseDto>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindAll>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -159,7 +160,7 @@ export const usersControllerCreate = (
 
 
 
-export const getUsersControllerCreateMutationOptions = <TError = void,
+export const getUsersControllerCreateMutationOptions = <TError = ApiErrorResponseDto,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerCreate>>, TError,{data: CreateUserDto}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof usersControllerCreate>>, TError,{data: CreateUserDto}, TContext> => {
 
@@ -188,9 +189,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type UsersControllerCreateMutationResult = NonNullable<Awaited<ReturnType<typeof usersControllerCreate>>>
     export type UsersControllerCreateMutationBody = CreateUserDto
-    export type UsersControllerCreateMutationError = void
+    export type UsersControllerCreateMutationError = ApiErrorResponseDto
 
-    export const useUsersControllerCreate = <TError = void,
+    export const useUsersControllerCreate = <TError = ApiErrorResponseDto,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerCreate>>, TError,{data: CreateUserDto}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof usersControllerCreate>>,
@@ -222,7 +223,7 @@ export const getUsersControllerFindOneQueryKey = (id: number,) => {
     }
 
 
-export const getUsersControllerFindOneQueryOptions = <TData = Awaited<ReturnType<typeof usersControllerFindOne>>, TError = void>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getUsersControllerFindOneQueryOptions = <TData = Awaited<ReturnType<typeof usersControllerFindOne>>, TError = ApiErrorResponseDto>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -241,10 +242,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type UsersControllerFindOneQueryResult = NonNullable<Awaited<ReturnType<typeof usersControllerFindOne>>>
-export type UsersControllerFindOneQueryError = void
+export type UsersControllerFindOneQueryError = ApiErrorResponseDto
 
 
-export function useUsersControllerFindOne<TData = Awaited<ReturnType<typeof usersControllerFindOne>>, TError = void>(
+export function useUsersControllerFindOne<TData = Awaited<ReturnType<typeof usersControllerFindOne>>, TError = ApiErrorResponseDto>(
  id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindOne>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof usersControllerFindOne>>,
@@ -254,7 +255,7 @@ export function useUsersControllerFindOne<TData = Awaited<ReturnType<typeof user
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useUsersControllerFindOne<TData = Awaited<ReturnType<typeof usersControllerFindOne>>, TError = void>(
+export function useUsersControllerFindOne<TData = Awaited<ReturnType<typeof usersControllerFindOne>>, TError = ApiErrorResponseDto>(
  id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindOne>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof usersControllerFindOne>>,
@@ -264,12 +265,12 @@ export function useUsersControllerFindOne<TData = Awaited<ReturnType<typeof user
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useUsersControllerFindOne<TData = Awaited<ReturnType<typeof usersControllerFindOne>>, TError = void>(
+export function useUsersControllerFindOne<TData = Awaited<ReturnType<typeof usersControllerFindOne>>, TError = ApiErrorResponseDto>(
  id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useUsersControllerFindOne<TData = Awaited<ReturnType<typeof usersControllerFindOne>>, TError = void>(
+export function useUsersControllerFindOne<TData = Awaited<ReturnType<typeof usersControllerFindOne>>, TError = ApiErrorResponseDto>(
  id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof usersControllerFindOne>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -304,7 +305,7 @@ export const usersControllerUpdate = (
 
 
 
-export const getUsersControllerUpdateMutationOptions = <TError = void,
+export const getUsersControllerUpdateMutationOptions = <TError = ApiErrorResponseDto,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerUpdate>>, TError,{id: number;data: UpdateUserDto}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof usersControllerUpdate>>, TError,{id: number;data: UpdateUserDto}, TContext> => {
 
@@ -333,9 +334,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type UsersControllerUpdateMutationResult = NonNullable<Awaited<ReturnType<typeof usersControllerUpdate>>>
     export type UsersControllerUpdateMutationBody = UpdateUserDto
-    export type UsersControllerUpdateMutationError = void
+    export type UsersControllerUpdateMutationError = ApiErrorResponseDto
 
-    export const useUsersControllerUpdate = <TError = void,
+    export const useUsersControllerUpdate = <TError = ApiErrorResponseDto,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerUpdate>>, TError,{id: number;data: UpdateUserDto}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof usersControllerUpdate>>,
@@ -360,7 +361,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-export const getUsersControllerDeactivateMutationOptions = <TError = void,
+export const getUsersControllerDeactivateMutationOptions = <TError = ApiErrorResponseDto,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerDeactivate>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof usersControllerDeactivate>>, TError,{id: number}, TContext> => {
 
@@ -389,9 +390,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type UsersControllerDeactivateMutationResult = NonNullable<Awaited<ReturnType<typeof usersControllerDeactivate>>>
 
-    export type UsersControllerDeactivateMutationError = void
+    export type UsersControllerDeactivateMutationError = ApiErrorResponseDto
 
-    export const useUsersControllerDeactivate = <TError = void,
+    export const useUsersControllerDeactivate = <TError = ApiErrorResponseDto,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerDeactivate>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof usersControllerDeactivate>>,
@@ -419,7 +420,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-export const getUsersControllerReviewRegistrationMutationOptions = <TError = void,
+export const getUsersControllerReviewRegistrationMutationOptions = <TError = ApiErrorResponseDto,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerReviewRegistration>>, TError,{id: number;data: ReviewUserRegistrationDto}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof usersControllerReviewRegistration>>, TError,{id: number;data: ReviewUserRegistrationDto}, TContext> => {
 
@@ -448,9 +449,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type UsersControllerReviewRegistrationMutationResult = NonNullable<Awaited<ReturnType<typeof usersControllerReviewRegistration>>>
     export type UsersControllerReviewRegistrationMutationBody = ReviewUserRegistrationDto
-    export type UsersControllerReviewRegistrationMutationError = void
+    export type UsersControllerReviewRegistrationMutationError = ApiErrorResponseDto
 
-    export const useUsersControllerReviewRegistration = <TError = void,
+    export const useUsersControllerReviewRegistration = <TError = ApiErrorResponseDto,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof usersControllerReviewRegistration>>, TError,{id: number;data: ReviewUserRegistrationDto}, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof usersControllerReviewRegistration>>,

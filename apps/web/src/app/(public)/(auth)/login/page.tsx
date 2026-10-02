@@ -5,14 +5,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
 import { AuthPageLayout } from "@/components/auth/auth-page-layout";
-
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Messages } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
 import { type LoginState, loginAction } from "./actions";
 
 export default function Page() {
+	const t = useTranslate();
 	const router = useRouter();
 	const [state, action, pending] = useActionState(
 		loginAction,
@@ -30,7 +32,9 @@ export default function Page() {
 		<AuthPageLayout>
 			<form action={action} className="mx-auto grid w-full max-w-md">
 				<header className="grid gap-control px-4 pb-4">
-					<h1 className="text-2xl font-bold tracking-tight">Sign in</h1>
+					<h1 className="text-2xl font-bold tracking-tight">
+						{t(Messages.auth.login.title)}
+					</h1>
 				</header>
 				<div className="grid gap-5 px-4">
 					{state?.errors?.form && (
@@ -38,16 +42,16 @@ export default function Page() {
 							role="alert"
 							className="rounded-md border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive"
 						>
-							{state.errors.form}
+							{t(state.errors.form)}
 						</div>
 					)}
 					<div className="oncf-field">
-						<Label htmlFor="username">Email or employee code</Label>
+						<Label htmlFor="username">{t(Messages.auth.login.username)}</Label>
 						<Input
 							id="username"
 							name="username"
 							type="text"
-							placeholder="email@example.com or employee code"
+							placeholder={t(Messages.auth.login.usernamePlaceholder)}
 							autoComplete="username"
 							autoCapitalize="none"
 							spellCheck={false}
@@ -71,12 +75,14 @@ export default function Page() {
 					</div>
 					<div className="oncf-field">
 						<div className="flex items-center justify-between">
-							<Label htmlFor="password">Password</Label>
+							<Label htmlFor="password">
+								{t(Messages.auth.login.password)}
+							</Label>
 							<Link
 								href="/forgot-password"
 								className="text-sm text-muted-foreground underline-offset-4 hover:underline"
 							>
-								Forgot password?
+								{t(Messages.auth.login.forgotPassword)}
 							</Link>
 						</div>
 						<div className="relative">
@@ -85,6 +91,7 @@ export default function Page() {
 								name="password"
 								type={showPassword ? "text" : "password"}
 								autoComplete="current-password"
+								placeholder={t(Messages.auth.login.passwordPlaceholder)}
 								required
 								aria-invalid={Boolean(state?.errors?.password)}
 								aria-describedby={
@@ -100,7 +107,11 @@ export default function Page() {
 								type="button"
 								variant="ghost"
 								size="icon"
-								aria-label={showPassword ? "Hide password" : "Show password"}
+								aria-label={
+									showPassword
+										? t(Messages.auth.login.hidePassword)
+										: t(Messages.auth.login.showPassword)
+								}
 								aria-pressed={showPassword}
 								aria-controls="password"
 								className="absolute top-0.5 right-0.5 size-11"
@@ -126,7 +137,7 @@ export default function Page() {
 							defaultChecked={state?.data?.remember || false}
 						/>
 						<Label htmlFor="remember" className="text-sm font-normal">
-							Remember me
+							{t(Messages.auth.login.remember)}
 						</Label>
 					</div>
 				</div>
@@ -138,19 +149,19 @@ export default function Page() {
 									aria-hidden="true"
 									className="animate-spin motion-reduce:animate-none"
 								/>
-								Signing in...
+								{t(Messages.auth.login.signingIn)}
 							</>
 						) : (
-							"Sign in"
+							t(Messages.auth.login.title)
 						)}
 					</Button>
 					<p className="text-sm text-muted-foreground">
-						Don't have an account?{" "}
+						{t(Messages.auth.login.noAccount)}{" "}
 						<Link
 							href="/signup"
 							className="underline underline-offset-4 hover:text-primary"
 						>
-							Sign up
+							{t(Messages.auth.login.signUp)}
 						</Link>
 					</p>
 				</footer>

@@ -1,6 +1,5 @@
 "use client";
 
-import { STRONG_PASSWORD_HINT } from "@ecommand/shared";
 import Link from "next/link";
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,8 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Messages, translateApiResponse } from "@/i18n";
+import { useLocale, useTranslate } from "@/i18n/locale-provider";
 import { AuthPageLayout } from "./auth-page-layout";
 import {
 	type ResetPasswordState,
@@ -21,6 +22,8 @@ import {
 } from "./reset-password-action";
 
 export function ResetPasswordForm({ token }: { token: string }) {
+	const t = useTranslate();
+	const locale = useLocale();
 	const actionWithToken = resetPasswordAction.bind(null, token);
 	const [state, action, pending] = useActionState(
 		actionWithToken,
@@ -33,60 +36,69 @@ export function ResetPasswordForm({ token }: { token: string }) {
 				<form action={action}>
 					<CardHeader className="space-y-2 text-center">
 						<CardTitle className="text-2xl font-bold">
-							Choose a new password
+							{t(Messages.auth.recovery.resetTitle)}
 						</CardTitle>
-						<CardDescription>{STRONG_PASSWORD_HINT}</CardDescription>
+						<CardDescription>{t(Messages.auth.passwordHint)}</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
-						{state?.success ? (
+						{state?.successCode ? (
 							<p role="status" className="text-sm text-muted-foreground">
-								Your password has been changed. You can now sign in.
+								{translateApiResponse(state.successCode, locale) ??
+									t(Messages.auth.recovery.passwordUpdated)}
 							</p>
 						) : (
 							<>
 								<div className="oncf-field">
-									<Label htmlFor="password">New password</Label>
+									<Label htmlFor="password">
+										{t(Messages.auth.recovery.newPassword)}
+									</Label>
 									<Input
 										id="password"
 										name="password"
 										type="password"
+										placeholder={t(Messages.auth.recovery.newPassword)}
 										required
 										autoComplete="new-password"
 									/>
 								</div>
 								<div className="oncf-field">
-									<Label htmlFor="confirmation">Confirm password</Label>
+									<Label htmlFor="confirmation">
+										{t(Messages.auth.recovery.confirmPassword)}
+									</Label>
 									<Input
 										id="confirmation"
 										name="confirmation"
 										type="password"
+										placeholder={t(Messages.auth.recovery.confirmPassword)}
 										required
 										autoComplete="new-password"
 									/>
 								</div>
 							</>
 						)}
-						{state?.error && (
+						{state?.errorKey && (
 							<p role="alert" className="text-sm text-destructive">
-								{state.error}
+								{t(state.errorKey)}
 							</p>
 						)}
 					</CardContent>
 					<CardFooter className="flex flex-col gap-4">
-						{!state?.success && (
+						{!state?.successCode && (
 							<Button
 								className="w-full"
 								type="submit"
 								disabled={pending || !token}
 							>
-								{pending ? "Saving..." : "Set new password"}
+								{pending
+									? t(Messages.auth.recovery.saving)
+									: t(Messages.auth.recovery.setPassword)}
 							</Button>
 						)}
 						<Link
 							className="text-sm underline underline-offset-4"
 							href="/login"
 						>
-							Back to sign in
+							{t(Messages.auth.recovery.backToSignIn)}
 						</Link>
 					</CardFooter>
 				</form>

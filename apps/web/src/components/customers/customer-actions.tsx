@@ -14,6 +14,8 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Messages } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
 import { hasAvailableActions } from "@/lib/action-visibility";
 import {
 	getCustomersControllerFindOneQueryKey,
@@ -23,6 +25,7 @@ import type { CustomerDetailDto } from "@/lib/api/generated.schemas";
 import { useAuth } from "@/providers/auth-provider";
 
 export function CustomerActions({ customer }: { customer: CustomerDetailDto }) {
+	const t = useTranslate();
 	const { hasPermission } = useAuth();
 	const queryClient = useQueryClient();
 	const router = useRouter();
@@ -60,7 +63,7 @@ export function CustomerActions({ customer }: { customer: CustomerDetailDto }) {
 							router.push(`/dashboard/customers/${customer.id}/edit`)
 						}
 					>
-						Edit Customer
+						{t(Messages.customers.detail.edit)}
 					</Button>
 				)}
 
@@ -76,7 +79,9 @@ export function CustomerActions({ customer }: { customer: CustomerDetailDto }) {
 							disabled={deactivateMutation.isPending}
 						>
 							<EllipsisVerticalIcon />
-							<span className="sr-only">More actions</span>
+							<span className="sr-only">
+								{t(Messages.customers.detail.moreActions)}
+							</span>
 						</DropdownMenuTrigger>
 
 						<DropdownMenuContent align="end">
@@ -85,7 +90,7 @@ export function CustomerActions({ customer }: { customer: CustomerDetailDto }) {
 									className="text-destructive"
 									onClick={() => setDeactivateDialogOpen(true)}
 								>
-									Deactivate Customer
+									{t(Messages.customers.detail.deactivate)}
 								</DropdownMenuItem>
 							)}
 						</DropdownMenuContent>
@@ -96,9 +101,9 @@ export function CustomerActions({ customer }: { customer: CustomerDetailDto }) {
 			<ConfirmDialog
 				open={deactivateDialogOpen}
 				onOpenChange={setDeactivateDialogOpen}
-				title="Deactivate Customer?"
-				description="Are you sure you want to deactivate this customer profile?"
-				confirmLabel="Deactivate"
+				title={t(Messages.customers.detail.deactivateTitle)}
+				description={t(Messages.customers.detail.deactivateDescription)}
+				confirmLabel={t(Messages.customers.detail.deactivate)}
 				variant="destructive"
 				disabled={deactivateMutation.isPending}
 				onConfirm={handleDeactivate}

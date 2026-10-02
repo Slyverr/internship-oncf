@@ -8,6 +8,7 @@ import {
 	RegistrationStatus,
 	Role,
 } from "@ecommand/shared";
+import { sidebarRoutes } from "../src/components/sidebar/sidebar-routes";
 import {
 	canDeleteProgram,
 	canReviewRegistration,
@@ -17,6 +18,30 @@ import {
 } from "../src/lib/action-visibility";
 import type { UserListDto } from "../src/lib/api/generated.schemas";
 import { canCreateProgramForOrder } from "../src/lib/program-creation-eligibility";
+
+const referenceDataRoute = sidebarRoutes.find(
+	(route) => route.url === "/dashboard/catalog",
+);
+assert.equal(
+	referenceDataRoute?.permission,
+	Permission.CATALOG_MANAGE,
+	"reference-data navigation requires its management permission",
+);
+assert.equal(
+	roleHasPermission(Role.ADMIN, Permission.CATALOG_MANAGE),
+	true,
+	"administrators can see reference-data management from their effective grants",
+);
+assert.equal(
+	roleHasPermission(Role.AGENT_COMMERCIAL, Permission.CATALOG_MANAGE),
+	false,
+	"commercial agents cannot see reference-data management without the grant",
+);
+assert.equal(
+	roleHasPermission(Role.CLIENT_REPRESENTATIVE, Permission.CATALOG_MANAGE),
+	false,
+	"client representatives cannot see reference-data management without the grant",
+);
 
 assert.equal(
 	canReviewRegistration(RegistrationStatus.PENDING, true, true),
@@ -127,12 +152,10 @@ for (const role of [
 			: [
 					{
 						type: "order",
-						label: "Create order",
 						href: "/dashboard/orders/new",
 					},
 					{
 						type: "claim",
-						label: "Create claim",
 						href: "/dashboard/claims/new",
 					},
 				],
@@ -146,7 +169,6 @@ assert.deepEqual(
 	[
 		{
 			type: "claim",
-			label: "Create claim",
 			href: "/dashboard/claims/new",
 		},
 	],

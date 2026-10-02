@@ -1,5 +1,9 @@
+"use client";
+
 import { LoaderCircleIcon, RefreshCwIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Messages } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
 
 export function InlineQueryRetry({
 	message,
@@ -12,6 +16,7 @@ export function InlineQueryRetry({
 	isFetching: boolean;
 	onRetry: () => void;
 }) {
+	const t = useTranslate();
 	return (
 		<div
 			role="alert"
@@ -33,7 +38,7 @@ export function InlineQueryRetry({
 				) : (
 					<RefreshCwIcon aria-hidden="true" />
 				)}
-				{isFetching ? "Retrying…" : retryLabel}
+				{isFetching ? t(Messages.common.actions.retrying) : retryLabel}
 			</Button>
 		</div>
 	);

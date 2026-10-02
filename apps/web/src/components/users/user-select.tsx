@@ -9,6 +9,8 @@ import {
 	ComboboxItem,
 	ComboboxList,
 } from "@/components/ui/combobox";
+import { Messages } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
 import type { UserDetailDto } from "@/lib/api/generated.schemas";
 
 type User = Pick<UserDetailDto, "id" | "firstName" | "lastName">;
@@ -34,8 +36,11 @@ export function UserSelect({
 	isError,
 	isFetching = false,
 	onRetry,
-	placeholder = "Select user",
+	placeholder,
 }: UserSelectProps) {
+	const t = useTranslate();
+	const resolvedPlaceholder =
+		placeholder ?? t(Messages.users.select.placeholder);
 	const selectedUser = users.find((user) => user.id === value);
 
 	return (
@@ -48,10 +53,10 @@ export function UserSelect({
 				itemToStringLabel={(user) => `${user.firstName} ${user.lastName}`}
 				itemToStringValue={(user) => String(user.id)}
 			>
-				<ComboboxInput id={id} placeholder={placeholder} />
+				<ComboboxInput id={id} placeholder={resolvedPlaceholder} />
 
 				<ComboboxContent>
-					<ComboboxEmpty>No users found.</ComboboxEmpty>
+					<ComboboxEmpty>{t(Messages.users.select.empty)}</ComboboxEmpty>
 
 					<ComboboxList>
 						{(user) => (
@@ -64,8 +69,8 @@ export function UserSelect({
 			</Combobox>
 			{isError && onRetry && (
 				<InlineQueryRetry
-					message="Could not load users. Check your connection."
-					retryLabel="Retry users"
+					message={t(Messages.users.select.loadFailed)}
+					retryLabel={t(Messages.users.select.retry)}
 					isFetching={isFetching}
 					onRetry={onRetry}
 				/>

@@ -21,6 +21,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  ApiErrorResponseDto,
   ReportsControllerGetOrdersParams
 } from './generated.schemas';
 
@@ -73,7 +74,7 @@ export const getReportsControllerGetOrdersQueryKey = (params?: ReportsController
     }
 
 
-export const getReportsControllerGetOrdersQueryOptions = <TData = Awaited<ReturnType<typeof reportsControllerGetOrders>>, TError = unknown>(params?: ReportsControllerGetOrdersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof reportsControllerGetOrders>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+export const getReportsControllerGetOrdersQueryOptions = <TData = Awaited<ReturnType<typeof reportsControllerGetOrders>>, TError = ApiErrorResponseDto>(params?: ReportsControllerGetOrdersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof reportsControllerGetOrders>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -92,10 +93,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ReportsControllerGetOrdersQueryResult = NonNullable<Awaited<ReturnType<typeof reportsControllerGetOrders>>>
-export type ReportsControllerGetOrdersQueryError = unknown
+export type ReportsControllerGetOrdersQueryError = ApiErrorResponseDto
 
 
-export function useReportsControllerGetOrders<TData = Awaited<ReturnType<typeof reportsControllerGetOrders>>, TError = unknown>(
+export function useReportsControllerGetOrders<TData = Awaited<ReturnType<typeof reportsControllerGetOrders>>, TError = ApiErrorResponseDto>(
  params: undefined |  ReportsControllerGetOrdersParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof reportsControllerGetOrders>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof reportsControllerGetOrders>>,
@@ -105,7 +106,7 @@ export function useReportsControllerGetOrders<TData = Awaited<ReturnType<typeof 
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReportsControllerGetOrders<TData = Awaited<ReturnType<typeof reportsControllerGetOrders>>, TError = unknown>(
+export function useReportsControllerGetOrders<TData = Awaited<ReturnType<typeof reportsControllerGetOrders>>, TError = ApiErrorResponseDto>(
  params?: ReportsControllerGetOrdersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof reportsControllerGetOrders>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof reportsControllerGetOrders>>,
@@ -115,7 +116,7 @@ export function useReportsControllerGetOrders<TData = Awaited<ReturnType<typeof 
       >, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReportsControllerGetOrders<TData = Awaited<ReturnType<typeof reportsControllerGetOrders>>, TError = unknown>(
+export function useReportsControllerGetOrders<TData = Awaited<ReturnType<typeof reportsControllerGetOrders>>, TError = ApiErrorResponseDto>(
  params?: ReportsControllerGetOrdersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof reportsControllerGetOrders>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
@@ -123,7 +124,7 @@ export function useReportsControllerGetOrders<TData = Awaited<ReturnType<typeof 
  * @summary Summarize accessible orders by status, customer, product, and month
  */
 
-export function useReportsControllerGetOrders<TData = Awaited<ReturnType<typeof reportsControllerGetOrders>>, TError = unknown>(
+export function useReportsControllerGetOrders<TData = Awaited<ReturnType<typeof reportsControllerGetOrders>>, TError = ApiErrorResponseDto>(
  params?: ReportsControllerGetOrdersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof reportsControllerGetOrders>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {

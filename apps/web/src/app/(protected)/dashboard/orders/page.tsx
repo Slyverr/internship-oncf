@@ -1,10 +1,14 @@
 import { PlusIcon } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
+import { AccessDeniedState } from "@/components/common/access-denied-state";
 import { Breadcrumbs } from "@/components/common/breadcrumbs";
 import { PageHeader } from "@/components/common/page-header";
 import { EligibleOrdersTable } from "@/components/orders/eligible-orders-table";
 import { OrdersTable } from "@/components/orders/orders-table";
 import { buttonVariants } from "@/components/ui/button";
+import { Messages } from "@/i18n";
+import { getRequestTranslator } from "@/i18n/server";
 import {
 	OrdersControllerFindAllParams,
 	OrdersControllerFindEligibleForProgramsParams,
@@ -13,7 +17,15 @@ import {
 	ordersControllerFindAll,
 	ordersControllerFindEligibleForPrograms,
 } from "@/lib/api/orders";
+import { loadPageData } from "@/lib/load-page-data";
 import { ordersBreadcrumbs } from "./breadcrumbs";
+
+export async function generateMetadata(): Promise<Metadata> {
+	const t = await getRequestTranslator();
+	return {
+		title: t(Messages.orders.pageTitle),
+	};
+}
 
 type OrdersPageQuery = OrdersControllerFindAllParams & {
 	eligibleForProgram?: string;
@@ -24,6 +36,7 @@ interface PageProps {
 }
 
 export default async function Page({ searchParams }: PageProps) {
+	const t = await getRequestTranslator();
 	const query = await searchParams;
 	if (query.eligibleForProgram === "true") {
 		const requestedPage = Number(query.page);
@@ -37,22 +50,32 @@ export default async function Page({ searchParams }: PageProps) {
 			limit: 21,
 			...(search && { search }),
 		};
-		const eligibleOrders =
-			await ordersControllerFindEligibleForPrograms(eligibleOrdersQuery);
+		const eligibleOrders = await loadPageData(
+			ordersControllerFindEligibleForPrograms(eligibleOrdersQuery),
+		);
+
+		if (!eligibleOrders)
+			return (
+				<AccessDeniedState
+					title={t(Messages.orders.pageTitle)}
+					description={t(Messages.apiError.accessDenied)}
+					breadcrumbs={ordersBreadcrumbs.home(t)}
+				/>
+			);
 
 		return (
 			<>
-				<Breadcrumbs items={ordersBreadcrumbs.home()} />
+				<Breadcrumbs items={ordersBreadcrumbs.home(t)} />
 
 				<PageHeader
-					title="Eligible orders"
-					description="Orders ready to be added to a forecast program."
+					title={t(Messages.orders.eligible.title)}
+					description={t(Messages.orders.eligible.description)}
 				>
 					<Link
 						className={buttonVariants({ variant: "outline" })}
 						href="/dashboard/orders"
 					>
-						All orders
+						{t(Messages.orders.all)}
 					</Link>
 				</PageHeader>
 
@@ -66,16 +89,28 @@ export default async function Page({ searchParams }: PageProps) {
 		);
 	}
 
-	const orders = await ordersControllerFindAll(query);
+	const orders = await loadPageData(ordersControllerFindAll(query));
+
+	if (!orders)
+		return (
+			<AccessDeniedState
+				title={t(Messages.orders.pageTitle)}
+				description={t(Messages.apiError.accessDenied)}
+				breadcrumbs={ordersBreadcrumbs.home(t)}
+			/>
+		);
 
 	return (
 		<>
-			<Breadcrumbs items={ordersBreadcrumbs.home()} />
+			<Breadcrumbs items={ordersBreadcrumbs.home(t)} />
 
-			<PageHeader title="Orders" description="Manage and edit customer orders.">
+			<PageHeader
+				title={t(Messages.orders.pageTitle)}
+				description={t(Messages.orders.pageDescription)}
+			>
 				<Link className={buttonVariants()} href="/dashboard/orders/new">
 					<PlusIcon />
-					Create Order
+					{t(Messages.orders.create)}
 				</Link>
 			</PageHeader>
 

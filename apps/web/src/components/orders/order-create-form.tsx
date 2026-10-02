@@ -3,7 +3,7 @@
 import { OrderStatus, Permission } from "@ecommand/shared";
 import { useForm } from "@tanstack/react-form-nextjs";
 import { useRouter } from "next/navigation";
-import { type JSX } from "react";
+import { type JSX, useMemo } from "react";
 import { z } from "zod";
 import { FormFieldHeader } from "@/components/common/form-field-header";
 import {
@@ -24,57 +24,83 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { UnitSelect } from "@/components/units/unit-select";
+import { useFormErrorMessage } from "@/hooks/use-form-error-message";
 import { useGuidedFormState } from "@/hooks/use-guided-form-state";
+import { Messages, type TypedMessageTranslator } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
 import type { OrderDetailDto } from "@/lib/api/generated.schemas";
 import { useOrdersControllerCreate } from "@/lib/api/orders";
-import { getFormErrorMessage } from "@/lib/form-utils";
 import { useAuth } from "@/providers/auth-provider";
 import { OrderStatusSelect } from "./order-status-select";
 
-const createOrderSchema = z.object({
-	customerId: z.number().int().positive("Customer is required"),
-	goodsId: z.number().int().positive("Goods selection is required"),
-	unitId: z.uuid("Unit selection is required"),
-	quantityDemanded: z
-		.string()
-		.trim()
-		.min(1, "Quantity demanded is required")
-		.refine((value) => !Number.isNaN(Number(value)) && Number(value) > 0, {
-			message: "Quantity must be a positive number",
-		}),
-	status: z
-		.enum(Object.values(OrderStatus) as [OrderStatus, ...OrderStatus[]])
-		.optional(),
-	supervisor: z.string().optional(),
-	remarks: z.string().optional(),
-	orderDate: z.string().optional(),
-	startDate: z.string().optional(),
-	endDate: z.string().optional(),
-});
+function createOrderSchema(t: TypedMessageTranslator) {
+	return z.object({
+		customerId: z
+			.number()
+			.int()
+			.positive(t(Messages.orders.createForm.validation.customerRequired)),
+		goodsId: z
+			.number()
+			.int()
+			.positive(t(Messages.orders.createForm.validation.goodsRequired)),
+		unitId: z.uuid(t(Messages.orders.createForm.validation.unitRequired)),
+		quantityDemanded: z
+			.string()
+			.trim()
+			.min(1, t(Messages.orders.createForm.validation.quantityRequired))
+			.refine((value) => !Number.isNaN(Number(value)) && Number(value) > 0, {
+				message: t(Messages.orders.createForm.validation.quantityPositive),
+			}),
+		status: z
+			.enum(Object.values(OrderStatus) as [OrderStatus, ...OrderStatus[]])
+			.optional(),
+		supervisor: z.string().optional(),
+		remarks: z.string().optional(),
+		orderDate: z.string().optional(),
+		startDate: z.string().optional(),
+		endDate: z.string().optional(),
+	});
+}
 
-const orderSteps = [
-	{ title: "Order details", description: "Customer and goods" },
-	{ title: "Schedule", description: "Dates and instructions" },
-];
+function getOrderSteps(t: TypedMessageTranslator) {
+	return [
+		{
+			title: t(Messages.orders.createForm.steps.details),
+			description: t(Messages.orders.createForm.steps.customerAndGoods),
+		},
+		{
+			title: t(Messages.orders.createForm.steps.schedule),
+			description: t(Messages.orders.createForm.steps.datesAndInstructions),
+		},
+	];
+}
 
-type CreateOrderFormValues = z.infer<typeof createOrderSchema>;
-
-const orderBasicsSchema = createOrderSchema.pick({
-	goodsId: true,
-	unitId: true,
-	quantityDemanded: true,
-});
-const managedOrderBasicsSchema = createOrderSchema.pick({
-	customerId: true,
-	goodsId: true,
-	unitId: true,
-	quantityDemanded: true,
-});
+type CreateOrderFormValues = z.infer<ReturnType<typeof createOrderSchema>>;
 
 export function OrderCreateForm(): JSX.Element {
 	const router = useRouter();
 	const { profile, hasPermission } = useAuth();
 	const mutation = useOrdersControllerCreate();
+	const t = useTranslate();
+	const getErrorMessage = useFormErrorMessage();
+	const { schema, basicsSchema, managedBasicsSchema, steps } = useMemo(() => {
+		const schema = createOrderSchema(t);
+		return {
+			schema,
+			basicsSchema: schema.pick({
+				goodsId: true,
+				unitId: true,
+				quantityDemanded: true,
+			}),
+			managedBasicsSchema: schema.pick({
+				customerId: true,
+				goodsId: true,
+				unitId: true,
+				quantityDemanded: true,
+			}),
+			steps: getOrderSteps(t),
+		};
+	}, [t]);
 
 	const canManageOther = hasPermission(Permission.ORDERS_MANAGE_OTHER);
 	const canManageStatus = hasPermission(Permission.ORDERS_MANAGE_STATUS);
@@ -88,10 +114,10 @@ export function OrderCreateForm(): JSX.Element {
 	} = useGuidedFormState();
 
 	function continueToSchedule() {
-		const schema = canManageOther
-			? managedOrderBasicsSchema
-			: orderBasicsSchema;
-		const result = schema.safeParse(form.state.values);
+		const validationSchema = canManageOther
+			? managedBasicsSchema
+			: basicsSchema;
+		const result = validationSchema.safeParse(form.state.values);
 		advanceIfValid(result);
 	}
 
@@ -111,7 +137,7 @@ export function OrderCreateForm(): JSX.Element {
 	const form = useForm({
 		defaultValues,
 		onSubmit: async ({ value }) => {
-			if (!validate(createOrderSchema.safeParse(value))) {
+			if (!validate(schema.safeParse(value))) {
 				return;
 			}
 
@@ -155,10 +181,10 @@ export function OrderCreateForm(): JSX.Element {
 			className="workspace-form"
 		>
 			<PageHeader
-				title="New order"
-				description="Enter the customer, goods, quantity, and schedule for this order."
+				title={t(Messages.orders.createForm.title)}
+				description={t(Messages.orders.createForm.description)}
 			/>
-			<GuidedFormProgress steps={orderSteps} currentStep={step} />
+			<GuidedFormProgress steps={steps} currentStep={step} />
 
 			<section
 				key={step}
@@ -170,10 +196,11 @@ export function OrderCreateForm(): JSX.Element {
 				{step === 0 && (
 					<Card>
 						<CardHeader>
-							<CardTitle id="order-details-title">Order details</CardTitle>
+							<CardTitle id="order-details-title">
+								{t(Messages.orders.createForm.steps.details)}
+							</CardTitle>
 							<CardDescription>
-								Choose who the order is for, what is being transported, and the
-								requested quantity.
+								{t(Messages.orders.createForm.chooseDetails)}
 							</CardDescription>
 						</CardHeader>
 
@@ -183,12 +210,12 @@ export function OrderCreateForm(): JSX.Element {
 									{(field) => {
 										const errorMsg =
 											stepErrors.customerId ??
-											getFormErrorMessage(field.state.meta.errors[0]);
+											getErrorMessage(field.state.meta.errors[0]);
 										return (
 											<div className="oncf-field">
 												<FormFieldHeader
 													htmlFor="customerId"
-													label="Customer Company"
+													label={t(Messages.orders.createForm.customerCompany)}
 													required
 													error={errorMsg}
 												/>
@@ -216,12 +243,12 @@ export function OrderCreateForm(): JSX.Element {
 								{(field) => {
 									const errorMsg =
 										stepErrors.goodsId ??
-										getFormErrorMessage(field.state.meta.errors[0]);
+										getErrorMessage(field.state.meta.errors[0]);
 									return (
 										<div className="oncf-field">
 											<FormFieldHeader
 												htmlFor="goodsId"
-												label="Goods / Commodity"
+												label={t(Messages.orders.createForm.goods)}
 												required
 												error={errorMsg}
 											/>
@@ -248,12 +275,12 @@ export function OrderCreateForm(): JSX.Element {
 								{(field) => {
 									const errorMsg =
 										stepErrors.unitId ??
-										getFormErrorMessage(field.state.meta.errors[0]);
+										getErrorMessage(field.state.meta.errors[0]);
 									return (
 										<div className="oncf-field">
 											<FormFieldHeader
 												htmlFor="unitId"
-												label="Unit of Measurement"
+												label={t(Messages.orders.createForm.unit)}
 												required
 												error={errorMsg}
 											/>
@@ -276,18 +303,20 @@ export function OrderCreateForm(): JSX.Element {
 								{(field) => {
 									const errorMsg =
 										stepErrors.quantityDemanded ??
-										getFormErrorMessage(field.state.meta.errors[0]);
+										getErrorMessage(field.state.meta.errors[0]);
 									return (
 										<div className="oncf-field">
 											<FormFieldHeader
 												htmlFor="quantityDemanded"
-												label="Quantity Demanded"
+												label={t(Messages.orders.createForm.quantity)}
 												required
 												error={errorMsg}
 											/>
 											<Input
 												id="quantityDemanded"
-												placeholder="e.g. 500"
+												placeholder={t(
+													Messages.orders.createForm.quantityPlaceholder,
+												)}
 												className={
 													errorMsg
 														? "border-destructive focus-visible:ring-destructive/20"
@@ -312,11 +341,10 @@ export function OrderCreateForm(): JSX.Element {
 						<Card>
 							<CardHeader>
 								<CardTitle id="order-schedule-title">
-									Schedule and handling
+									{t(Messages.orders.createForm.scheduleTitle)}
 								</CardTitle>
 								<CardDescription>
-									Add optional dates and operational details. You can leave
-									fields blank and update them later.
+									{t(Messages.orders.createForm.scheduleDescription)}
 								</CardDescription>
 							</CardHeader>
 
@@ -324,10 +352,14 @@ export function OrderCreateForm(): JSX.Element {
 								<form.Field name="supervisor">
 									{(field) => (
 										<div className="oncf-field">
-											<Label htmlFor="supervisor">Supervisor Name</Label>
+											<Label htmlFor="supervisor">
+												{t(Messages.orders.createForm.supervisor)}
+											</Label>
 											<Input
 												id="supervisor"
-												placeholder="Name of supervisor"
+												placeholder={t(
+													Messages.orders.createForm.supervisorPlaceholder,
+												)}
 												value={field.state.value ?? ""}
 												onChange={(event) =>
 													field.handleChange(event.target.value)
@@ -342,12 +374,12 @@ export function OrderCreateForm(): JSX.Element {
 										{(field) => {
 											const errorMsg =
 												stepErrors.status ??
-												getFormErrorMessage(field.state.meta.errors[0]);
+												getErrorMessage(field.state.meta.errors[0]);
 											return (
 												<div className="oncf-field">
 													<FormFieldHeader
 														htmlFor="status"
-														label="Initial Status Override"
+														label={t(Messages.orders.createForm.initialStatus)}
 														error={errorMsg}
 													/>
 													<div
@@ -366,7 +398,9 @@ export function OrderCreateForm(): JSX.Element {
 								<form.Field name="orderDate">
 									{(field) => (
 										<div className="oncf-field">
-											<Label htmlFor="orderDate">Order Date</Label>
+											<Label htmlFor="orderDate">
+												{t(Messages.orders.createForm.orderDate)}
+											</Label>
 											<Input
 												id="orderDate"
 												type="date"
@@ -382,7 +416,9 @@ export function OrderCreateForm(): JSX.Element {
 								<form.Field name="startDate">
 									{(field) => (
 										<div className="oncf-field">
-											<Label htmlFor="startDate">Planned Transport Start</Label>
+											<Label htmlFor="startDate">
+												{t(Messages.orders.createForm.transportStart)}
+											</Label>
 											<Input
 												id="startDate"
 												type="date"
@@ -398,7 +434,9 @@ export function OrderCreateForm(): JSX.Element {
 								<form.Field name="endDate">
 									{(field) => (
 										<div className="oncf-field">
-											<Label htmlFor="endDate">Planned Completion Target</Label>
+											<Label htmlFor="endDate">
+												{t(Messages.orders.createForm.completionTarget)}
+											</Label>
 											<Input
 												id="endDate"
 												type="date"
@@ -415,9 +453,13 @@ export function OrderCreateForm(): JSX.Element {
 
 						<Card>
 							<CardHeader>
-								<CardTitle>Additional Information</CardTitle>
+								<CardTitle>
+									{t(Messages.orders.createForm.additionalInformation)}
+								</CardTitle>
 								<CardDescription>
-									Attach optional handling instructions or station-level notes.
+									{t(
+										Messages.orders.createForm.additionalInformationDescription,
+									)}
 								</CardDescription>
 							</CardHeader>
 
@@ -426,11 +468,13 @@ export function OrderCreateForm(): JSX.Element {
 									{(field) => (
 										<div className="oncf-field">
 											<Label htmlFor="remarks">
-												Remarks & Operational Notes
+												{t(Messages.orders.createForm.remarksAndNotes)}
 											</Label>
 											<Textarea
 												id="remarks"
-												placeholder="Enter any additional instructions or remarks..."
+												placeholder={t(
+													Messages.orders.createForm.remarksPlaceholder,
+												)}
 												value={field.state.value ?? ""}
 												onChange={(event) =>
 													field.handleChange(event.target.value)
@@ -449,12 +493,12 @@ export function OrderCreateForm(): JSX.Element {
 				{(state: typeof form.state) => (
 					<GuidedFormActions
 						currentStep={step}
-						stepCount={orderSteps.length}
+						stepCount={steps.length}
 						onCancel={() => router.push("/dashboard/orders")}
 						onPrevious={() => setStep(0)}
 						onContinue={continueToSchedule}
-						submitLabel="Create Order"
-						pendingLabel="Creating Order..."
+						submitLabel={t(Messages.orders.createForm.create)}
+						pendingLabel={t(Messages.orders.createForm.creating)}
 						isSubmitting={state.isSubmitting}
 						isPending={mutation.isPending}
 						isSubmitDisabled={!state.canSubmit}

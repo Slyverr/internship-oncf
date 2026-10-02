@@ -24,6 +24,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
 import { useUpdateDetailCache } from "@/hooks/use-update-detail-cache";
+import { Messages } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
 import type { OrderDetailDto } from "@/lib/api/generated.schemas";
 import {
 	getOrdersControllerFindOneQueryKey,
@@ -38,6 +40,7 @@ import { useAuth } from "@/providers/auth-provider";
 import { ConfirmDialog } from "../common/confirm-dialog";
 
 export function OrderActions({ order }: { order: OrderDetailDto }) {
+	const t = useTranslate();
 	const { hasPermission } = useAuth();
 	const updateOrderCache = useUpdateDetailCache<OrderDetailDto, string>(
 		getOrdersControllerFindOneQueryKey,
@@ -117,7 +120,11 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 								)
 							}
 						>
-							{submitMutation.isPending ? "Submitting..." : "Submit Order"}
+							{t(
+								submitMutation.isPending
+									? Messages.orders.actions.submitting
+									: Messages.orders.actions.submit,
+							)}
 						</Button>
 					)}
 
@@ -134,7 +141,11 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 								)
 							}
 						>
-							{approveMutation.isPending ? "Approving..." : "Approve"}
+							{t(
+								approveMutation.isPending
+									? Messages.orders.actions.approving
+									: Messages.orders.actions.approve,
+							)}
 						</Button>
 					)}
 
@@ -146,7 +157,7 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 							disabled={isPending}
 							onClick={() => setRejectDialogOpen(true)}
 						>
-							Reject
+							{t(Messages.orders.actions.reject)}
 						</Button>
 					)}
 
@@ -164,7 +175,11 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 								)
 							}
 						>
-							{cancelMutation.isPending ? "Cancelling..." : "Cancel Order"}
+							{t(
+								cancelMutation.isPending
+									? Messages.orders.actions.cancelling
+									: Messages.orders.actions.cancel,
+							)}
 						</Button>
 					)}
 
@@ -181,7 +196,11 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 								)
 							}
 						>
-							{sendToDtmMutation.isPending ? "Sending..." : "Send to DTM"}
+							{t(
+								sendToDtmMutation.isPending
+									? Messages.orders.actions.sending
+									: Messages.orders.actions.sendToDtm,
+							)}
 						</Button>
 					)}
 
@@ -198,7 +217,7 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 							disabled={isPending}
 						>
 							<EllipsisVerticalIcon />
-							<span className="sr-only">More actions</span>
+							<span className="sr-only">{t(Messages.orders.actions.more)}</span>
 						</DropdownMenuTrigger>
 
 						<DropdownMenuContent align="end">
@@ -208,7 +227,7 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 										router.push(`/dashboard/orders/${order.orderNumber}/edit`)
 									}
 								>
-									Edit
+									{t(Messages.orders.actions.edit)}
 								</DropdownMenuItem>
 							)}
 
@@ -217,7 +236,7 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 									className="text-destructive"
 									onClick={() => setDeleteDialogOpen(true)}
 								>
-									Delete
+									{t(Messages.orders.actions.delete)}
 								</DropdownMenuItem>
 							)}
 						</DropdownMenuContent>
@@ -229,9 +248,11 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 			<AlertDialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
 				<AlertDialogContent size="form">
 					<AlertDialogHeader>
-						<AlertDialogTitle>Reject order</AlertDialogTitle>
+						<AlertDialogTitle>
+							{t(Messages.orders.actions.rejectTitle)}
+						</AlertDialogTitle>
 						<AlertDialogDescription>
-							Please provide a reason for rejecting this order.
+							{t(Messages.orders.actions.rejectDescription)}
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 
@@ -239,19 +260,25 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 						<Textarea
 							value={rejectionReason}
 							onChange={(event) => setRejectionReason(event.target.value)}
-							placeholder="Rejection reason"
+							placeholder={t(Messages.orders.actions.rejectionPlaceholder)}
 							className="min-h-25"
 						/>
 					</AlertDialogBody>
 
 					<AlertDialogFooter>
-						<AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
+						<AlertDialogCancel disabled={isPending}>
+							{t(Messages.orders.actions.cancelAction)}
+						</AlertDialogCancel>
 
 						<AlertDialogAction
 							disabled={isPending || !rejectionReason.trim()}
 							onClick={handleReject}
 						>
-							{rejectMutation.isPending ? "Rejecting..." : "Reject"}
+							{t(
+								rejectMutation.isPending
+									? Messages.orders.actions.rejecting
+									: Messages.orders.actions.reject,
+							)}
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>
@@ -261,9 +288,9 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 			<ConfirmDialog
 				open={deleteDialogOpen}
 				onOpenChange={setDeleteDialogOpen}
-				title="Delete order?"
-				description="This will permanently delete this order. This action cannot be undone."
-				confirmLabel="Delete"
+				title={t(Messages.orders.actions.deleteTitle)}
+				description={t(Messages.orders.actions.deleteDescription)}
+				confirmLabel={t(Messages.orders.actions.delete)}
 				variant="destructive"
 				disabled={isPending}
 				onConfirm={handleDelete}

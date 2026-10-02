@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Messages } from "@/i18n";
+import { useLocale, useTranslate } from "@/i18n/locale-provider";
 import { formatFileSize } from "@/lib/format-file-size";
 
 export interface AttachmentUploadInput {
@@ -29,6 +31,8 @@ interface AttachmentUploadDialogProps {
 export function AttachmentUploadDialog({
 	onUpload,
 }: AttachmentUploadDialogProps) {
+	const t = useTranslate();
+	const locale = useLocale();
 	const inputRef = useRef<HTMLInputElement>(null);
 
 	const [open, setOpen] = useState(false);
@@ -89,7 +93,7 @@ export function AttachmentUploadDialog({
 			reset();
 			setOpen(false);
 		} catch {
-			setError("The file could not be uploaded. Please try again.");
+			setError(t(Messages.attachments.uploadFailed));
 		} finally {
 			setIsUploading(false);
 		}
@@ -101,7 +105,7 @@ export function AttachmentUploadDialog({
 				render={
 					<Button size="sm">
 						<UploadIcon className="size-4" />
-						Upload file
+						{t(Messages.attachments.uploadFile)}
 					</Button>
 				}
 			/>
@@ -111,15 +115,17 @@ export function AttachmentUploadDialog({
 				className="min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-6"
 			>
 				<DialogHeader>
-					<DialogTitle>Upload attachment</DialogTitle>
+					<DialogTitle>{t(Messages.attachments.uploadTitle)}</DialogTitle>
 					<DialogDescription>
-						Add a document or supporting file.
+						{t(Messages.attachments.uploadDescription)}
 					</DialogDescription>
 				</DialogHeader>
 				<form className="contents" onSubmit={handleSubmit}>
 					<DialogBody className="grid content-start gap-8 overflow-y-auto overscroll-contain">
 						<div className="flex flex-col gap-4">
-							<Label htmlFor="attachment-file">File</Label>
+							<Label htmlFor="attachment-file">
+								{t(Messages.attachments.file)}
+							</Label>
 
 							<Input
 								ref={inputRef}
@@ -140,7 +146,7 @@ export function AttachmentUploadDialog({
 									<p className="truncate text-sm font-medium">{file.name}</p>
 
 									<p className="text-meta text-muted-foreground">
-										{formatFileSize(file.size)}
+										{formatFileSize(file.size, locale)}
 									</p>
 								</div>
 
@@ -153,20 +159,22 @@ export function AttachmentUploadDialog({
 									onClick={clearFile}
 								>
 									<XIcon className="size-4" />
-									<span className="sr-only">Remove selected file</span>
+									<span className="sr-only">
+										{t(Messages.attachments.removeSelectedFile)}
+									</span>
 								</Button>
 							</div>
 						)}
 
 						<div className="flex flex-col gap-4">
 							<Label htmlFor="attachment-description">
-								Description (optional)
+								{t(Messages.attachments.descriptionOptional)}
 							</Label>
 
 							<Input
 								id="attachment-description"
 								value={description}
-								placeholder="Describe this attachment"
+								placeholder={t(Messages.attachments.descriptionPlaceholder)}
 								disabled={isUploading}
 								onChange={(event) => setDescription(event.target.value)}
 							/>
@@ -186,12 +194,16 @@ export function AttachmentUploadDialog({
 							disabled={isUploading}
 							onClick={() => handleOpenChange(false)}
 						>
-							Cancel
+							{t(Messages.attachments.cancel)}
 						</Button>
 
 						<Button type="submit" disabled={!file || isUploading}>
 							<UploadIcon className="size-4" />
-							{isUploading ? "Uploading..." : "Upload"}
+							{t(
+								isUploading
+									? Messages.attachments.uploading
+									: Messages.attachments.upload,
+							)}
 						</Button>
 					</DialogFooter>
 				</form>

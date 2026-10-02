@@ -1,35 +1,9 @@
-const customers = {
-	resource: "Customers",
+import { Messages } from "@/i18n";
+import { createEntityBreadcrumbs } from "@/lib/entity-breadcrumbs";
+
+export const customersBreadcrumbs = createEntityBreadcrumbs({
+	resourceKey: Messages.customers.pageTitle,
 	baseUrl: "/dashboard/customers",
-};
-
-export const customersBreadcrumbs = {
-	home: () => [
-		{
-			label: customers.resource,
-			href: customers.baseUrl,
-		},
-	],
-
-	create: () => [
-		...customersBreadcrumbs.home(),
-		{
-			label: "New Customer",
-		},
-	],
-
-	detail: (id: string, label?: string) => [
-		...customersBreadcrumbs.home(),
-		{
-			label: label ?? id,
-			href: `${customers.baseUrl}/${id}`,
-		},
-	],
-
-	edit: (id: string, label?: string) => [
-		...customersBreadcrumbs.detail(id, label),
-		{
-			label: "Edit",
-		},
-	],
-};
+	createKey: Messages.customers.createTitle,
+	editKey: Messages.customers.detail.edit,
+});

@@ -23,6 +23,8 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useUpdateDetailCache } from "@/hooks/use-update-detail-cache";
+import { Messages } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
 import { canDeleteProgram, hasAvailableActions } from "@/lib/action-visibility";
 import type { ProgramDetailDto } from "@/lib/api/generated.schemas";
 import {
@@ -38,6 +40,7 @@ import { useAuth } from "@/providers/auth-provider";
 import { ConfirmDialog } from "../common/confirm-dialog";
 
 export function ProgramActions({ program }: { program: ProgramDetailDto }) {
+	const t = useTranslate();
 	const { hasPermission } = useAuth();
 	const updateProgramCache = useUpdateDetailCache<ProgramDetailDto, string>(
 		getProgramsControllerFindOneQueryKey,
@@ -109,7 +112,11 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 								)
 							}
 						>
-							{submitMutation.isPending ? "Submitting..." : "Submit Program"}
+							{t(
+								submitMutation.isPending
+									? Messages.programs.actions.submitting
+									: Messages.programs.actions.submit,
+							)}
 						</Button>
 					)}
 
@@ -126,7 +133,11 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 								)
 							}
 						>
-							{approveMutation.isPending ? "Approving..." : "Approve"}
+							{t(
+								approveMutation.isPending
+									? Messages.programs.actions.approving
+									: Messages.programs.actions.approve,
+							)}
 						</Button>
 					)}
 
@@ -143,7 +154,11 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 								)
 							}
 						>
-							{confirmMutation.isPending ? "Confirming..." : "Confirm"}
+							{t(
+								confirmMutation.isPending
+									? Messages.programs.actions.confirming
+									: Messages.programs.actions.confirm,
+							)}
 						</Button>
 					)}
 
@@ -160,7 +175,11 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 								)
 							}
 						>
-							{sendToDtmMutation.isPending ? "Sending..." : "Send to DTM"}
+							{t(
+								sendToDtmMutation.isPending
+									? Messages.programs.actions.sending
+									: Messages.programs.actions.sendToDtm,
+							)}
 						</Button>
 					)}
 
@@ -174,7 +193,11 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 							disabled={isPending}
 							onClick={() => setCancelDialogOpen(true)}
 						>
-							{cancelMutation.isPending ? "Cancelling..." : "Cancel"}
+							{t(
+								cancelMutation.isPending
+									? Messages.programs.actions.cancelling
+									: Messages.programs.actions.cancel,
+							)}
 						</Button>
 					)}
 
@@ -191,7 +214,9 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 							disabled={isPending}
 						>
 							<EllipsisVerticalIcon />
-							<span className="sr-only">More actions</span>
+							<span className="sr-only">
+								{t(Messages.programs.actions.more)}
+							</span>
 						</DropdownMenuTrigger>
 
 						<DropdownMenuContent align="end">
@@ -203,7 +228,7 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 										)
 									}
 								>
-									Edit
+									{t(Messages.programs.actions.edit)}
 								</DropdownMenuItem>
 							)}
 
@@ -213,7 +238,7 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 									className="text-destructive"
 									onClick={() => setDeleteDialogOpen(true)}
 								>
-									Delete
+									{t(Messages.programs.actions.delete)}
 								</DropdownMenuItem>
 							)}
 						</DropdownMenuContent>
@@ -225,18 +250,19 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 			<AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
 				<AlertDialogContent>
 					<AlertDialogHeader>
-						<AlertDialogTitle>Cancel program</AlertDialogTitle>
+						<AlertDialogTitle>
+							{t(Messages.programs.actions.cancelTitle)}
+						</AlertDialogTitle>
 					</AlertDialogHeader>
 					<AlertDialogBody>
 						<AlertDialogDescription>
-							Are you sure you want to cancel this program? This action cannot
-							be undone.
+							{t(Messages.programs.actions.cancelDescription)}
 						</AlertDialogDescription>
 					</AlertDialogBody>
 
 					<AlertDialogFooter>
 						<AlertDialogCancel disabled={isPending}>
-							Keep Program
+							{t(Messages.programs.actions.keepProgram)}
 						</AlertDialogCancel>
 
 						<AlertDialogAction
@@ -244,7 +270,7 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 							onClick={handleCancel}
 							className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 						>
-							Cancel Program
+							{t(Messages.programs.actions.cancelProgram)}
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>
@@ -254,9 +280,9 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 			<ConfirmDialog
 				open={deleteDialogOpen}
 				onOpenChange={setDeleteDialogOpen}
-				title="Delete program?"
-				description="This will permanently delete this program. This action cannot be undone."
-				confirmLabel="Delete"
+				title={t(Messages.programs.actions.deleteTitle)}
+				description={t(Messages.programs.actions.deleteDescription)}
+				confirmLabel={t(Messages.programs.actions.delete)}
 				variant="destructive"
 				disabled={isPending}
 				onConfirm={handleDelete}

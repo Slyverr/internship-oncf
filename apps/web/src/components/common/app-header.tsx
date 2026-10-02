@@ -3,6 +3,7 @@
 import { BreadcrumbTrail } from "@/components/common/breadcrumb-trail";
 import { WorkspaceLayoutSwitch } from "@/components/common/workspace-layout-switch";
 import { NotificationLink } from "@/components/notifications/notification-link";
+import { SidebarUser } from "@/components/sidebar/sidebar-user";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useBreadcrumbs } from "@/providers/breadcrumb-provider";
@@ -16,16 +17,22 @@ export function AppHeader() {
 
 			{breadcrumbs.length > 0 && (
 				<>
-					<div className="flex h-8">
+					<div className="hidden h-8 sm:flex">
 						<Separator orientation="vertical" />
 					</div>
 
-					<BreadcrumbTrail items={breadcrumbs} className="flex-1" />
+					<BreadcrumbTrail
+						items={breadcrumbs}
+						className="hidden flex-1 sm:flex"
+					/>
 				</>
 			)}
-			<div className="ml-auto flex items-center gap-1">
+			<div className="ml-auto flex items-center gap-control">
 				<WorkspaceLayoutSwitch />
 				<NotificationLink />
+				<div className="md:hidden">
+					<SidebarUser variant="header" />
+				</div>
 			</div>
 		</header>
 	);

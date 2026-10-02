@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Messages, translateApiResponse } from "@/i18n";
+import { useLocale, useTranslate } from "@/i18n/locale-provider";
 import { AuthPageLayout } from "./auth-page-layout";
 import {
 	type ForgotPasswordState,
@@ -20,6 +22,8 @@ import {
 } from "./forgot-password-action";
 
 export function ForgotPasswordForm() {
+	const t = useTranslate();
+	const locale = useLocale();
 	const [state, action, pending] = useActionState(
 		forgotPasswordAction,
 		null as ForgotPasswordState | null,
@@ -30,46 +34,51 @@ export function ForgotPasswordForm() {
 			<Card className="w-full max-w-sm">
 				<form action={action}>
 					<CardHeader className="space-y-2 text-center">
-						<CardTitle className="text-2xl font-bold">Reset password</CardTitle>
+						<CardTitle className="text-2xl font-bold">
+							{t(Messages.auth.recovery.forgotTitle)}
+						</CardTitle>
 						<CardDescription>
-							Enter the email address associated with your account.
+							{t(Messages.auth.recovery.forgotDescription)}
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
-						{state?.success ? (
+						{state?.successCode ? (
 							<p role="status" className="text-sm text-muted-foreground">
-								If an account matches that address, a reset link will be sent.
+								{translateApiResponse(state.successCode, locale) ??
+									t(Messages.auth.recovery.requestAccepted)}
 							</p>
 						) : (
 							<div className="oncf-field">
-								<Label htmlFor="email">Email</Label>
+								<Label htmlFor="email">{t(Messages.auth.recovery.email)}</Label>
 								<Input
 									id="email"
 									name="email"
 									type="email"
-									placeholder="name@company.com"
+									placeholder={t(Messages.auth.recovery.emailPlaceholder)}
 									required
 									autoComplete="email"
 								/>
 							</div>
 						)}
-						{state?.error && (
+						{state?.errorKey && (
 							<p role="alert" className="text-sm text-destructive">
-								{state.error}
+								{t(state.errorKey)}
 							</p>
 						)}
 					</CardContent>
 					<CardFooter className="flex flex-col gap-4">
-						{!state?.success && (
+						{!state?.successCode && (
 							<Button className="w-full" type="submit" disabled={pending}>
-								{pending ? "Sending..." : "Send reset link"}
+								{pending
+									? t(Messages.auth.recovery.sending)
+									: t(Messages.auth.recovery.sendLink)}
 							</Button>
 						)}
 						<Link
 							className="text-sm underline underline-offset-4"
 							href="/login"
 						>
-							Back to sign in
+							{t(Messages.auth.recovery.backToSignIn)}
 						</Link>
 					</CardFooter>
 				</form>

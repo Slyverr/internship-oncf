@@ -8,7 +8,6 @@ import type { UserListDto } from "@/lib/api/generated.schemas";
 
 export type DashboardQuickAction = {
 	type: "order" | "claim";
-	label: string;
 	href: string;
 };
 
@@ -19,13 +18,11 @@ export function getDashboardQuickActions(
 		{
 			permission: Permission.ORDERS_CREATE,
 			type: "order",
-			label: "Create order",
 			href: "/dashboard/orders/new",
 		},
 		{
 			permission: Permission.CLAIMS_CREATE,
 			type: "claim",
-			label: "Create claim",
 			href: "/dashboard/claims/new",
 		},
 	] as const;

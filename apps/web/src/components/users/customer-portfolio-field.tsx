@@ -2,7 +2,9 @@
 
 import { InlineQueryRetry } from "@/components/common/inline-query-retry";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useCustomersControllerFindAll } from "@/lib/api/customers";
+import { Messages } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
+import { useCustomersControllerFindPortfolioOptions } from "@/lib/api/customers";
 
 interface CustomerPortfolioFieldProps {
 	value: number[];
@@ -13,33 +15,37 @@ export function CustomerPortfolioField({
 	value,
 	onChange,
 }: CustomerPortfolioFieldProps) {
+	const t = useTranslate();
 	const {
 		data: customers = [],
 		isLoading,
 		isError,
 		isFetching,
 		refetch,
-	} = useCustomersControllerFindAll({});
+	} = useCustomersControllerFindPortfolioOptions();
 
 	return (
 		<fieldset className="oncf-field @3xl/workspace:col-span-2">
-			<legend className="text-sm font-medium">Customer portfolio</legend>
+			<legend className="text-sm font-medium">
+				{t(Messages.users.portfolio.title)}
+			</legend>
 			<p className="text-meta text-muted-foreground">
-				Choose which customers this agent can manage. An empty portfolio gives
-				the agent no customer-scoped records.
+				{t(Messages.users.portfolio.description)}
 			</p>
 			{isLoading ? (
-				<p className="text-sm text-muted-foreground">Loading customers…</p>
+				<p className="text-sm text-muted-foreground">
+					{t(Messages.users.portfolio.loading)}
+				</p>
 			) : isError ? (
 				<InlineQueryRetry
-					message="Could not load customers. Check your connection."
-					retryLabel="Retry customers"
+					message={t(Messages.users.portfolio.loadFailed)}
+					retryLabel={t(Messages.users.portfolio.retry)}
 					isFetching={isFetching}
 					onRetry={() => void refetch()}
 				/>
 			) : customers.length === 0 ? (
 				<p role="status" className="text-sm text-muted-foreground">
-					No customers are available.
+					{t(Messages.users.portfolio.empty)}
 				</p>
 			) : (
 				<div className="grid max-h-64 gap-2 overflow-y-auto rounded-lg border p-3 sm:grid-cols-2">
@@ -76,7 +82,9 @@ export function CustomerPortfolioField({
 				</div>
 			)}
 			<p className="text-meta text-muted-foreground" aria-live="polite">
-				{value.length} {value.length === 1 ? "customer" : "customers"} selected
+				{t(Messages.users.portfolio.selectedCount, {
+					count: value.length,
+				})}
 			</p>
 		</fieldset>
 	);

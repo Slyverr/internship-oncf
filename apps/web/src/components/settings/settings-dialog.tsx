@@ -17,18 +17,32 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { type MessageKey, Messages } from "@/i18n";
+import { useTranslate } from "@/i18n/locale-provider";
 import { useAppearanceSyncStatus } from "@/providers/appearance-preferences-sync";
 import { useAppearance } from "@/providers/appearance-provider";
 import { SettingsPanel, type SettingsSection } from "./settings-panel";
 
 const sections: {
 	id: SettingsSection;
-	label: string;
+	labelKey: MessageKey;
 	icon: typeof SettingsIcon;
 }[] = [
-	{ id: "appearance", label: "Appearance", icon: SettingsIcon },
-	{ id: "profile", label: "Profile", icon: UserRoundIcon },
-	{ id: "security", label: "Security", icon: ShieldCheckIcon },
+	{
+		id: "appearance",
+		labelKey: Messages.settings.sections.appearance,
+		icon: SettingsIcon,
+	},
+	{
+		id: "profile",
+		labelKey: Messages.settings.sections.profile,
+		icon: UserRoundIcon,
+	},
+	{
+		id: "security",
+		labelKey: Messages.settings.sections.security,
+		icon: ShieldCheckIcon,
+	},
 ];
 
 function isSettingsSection(value: string | null): value is SettingsSection {
@@ -36,12 +50,13 @@ function isSettingsSection(value: string | null): value is SettingsSection {
 }
 
 function AppearanceSyncIndicator() {
+	const t = useTranslate();
 	const status = useAppearanceSyncStatus();
 	const statusCopy = {
-		loading: "Loading",
-		saving: "Saving",
-		saved: "Synced",
-		local: "On this device",
+		loading: t(Messages.settings.sync.loading),
+		saving: t(Messages.settings.sync.saving),
+		saved: t(Messages.settings.sync.saved),
+		local: t(Messages.settings.sync.local),
 	}[status];
 	const StatusIcon =
 		status === "loading" || status === "saving"
@@ -70,6 +85,7 @@ export function SettingsDialog({
 }: {
 	closeToDashboard?: boolean;
 } = {}) {
+	const t = useTranslate();
 	const { preferences } = useAppearance();
 	const router = useRouter();
 	const pathname = usePathname();
@@ -142,7 +158,9 @@ export function SettingsDialog({
 			<DialogContent size="settings" className="gap-0 overflow-hidden p-0">
 				<DialogHeader className="h-14 flex-row border-b px-4 py-0 pb-0">
 					<div className="flex min-w-0 items-center gap-3">
-						<DialogTitle className="shrink-0 text-base">Settings</DialogTitle>
+						<DialogTitle className="shrink-0 text-base">
+							{t(Messages.settings.dialogTitle)}
+						</DialogTitle>
 						<AppearanceSyncIndicator />
 					</div>
 				</DialogHeader>
@@ -151,10 +169,10 @@ export function SettingsDialog({
 				>
 					<div
 						role="tablist"
-						aria-label="Settings sections"
+						aria-label={t(Messages.settings.sections.label)}
 						className="flex min-w-0 gap-2 border-b px-3 py-3 lg:flex-col lg:gap-control lg:overflow-visible lg:border-r lg:border-b-0 lg:p-4"
 					>
-						{sections.map(({ id, label, icon: Icon }, index) => (
+						{sections.map(({ id, labelKey, icon: Icon }, index) => (
 							<button
 								key={id}
 								type="button"
@@ -175,7 +193,7 @@ export function SettingsDialog({
 									aria-hidden="true"
 									className="hidden size-4 shrink-0 lg:block"
 								/>
-								<span className="leading-tight lg:truncate">{label}</span>
+								<span className="leading-tight lg:truncate">{t(labelKey)}</span>
 							</button>
 						))}
 					</div>

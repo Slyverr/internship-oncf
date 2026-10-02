@@ -41,7 +41,7 @@ function CenteredHeaderWorkspace({ children, modal }: DashboardWorkspaceProps) {
 				<WorkspaceBreadcrumbs />
 				{children}
 			</main>
-			<div className="fixed inset-x-0 bottom-0 z-50 min-h-16 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] shadow-md md:hidden print:hidden">
+			<div className="fixed inset-x-0 bottom-0 z-50 min-h-16 border-t border-border bg-card pb-safe-area shadow-md md:hidden print:hidden">
 				<div className="mx-auto flex min-h-16 w-full max-w-screen-2xl items-center">
 					<CenteredNavigation compact />
 				</div>

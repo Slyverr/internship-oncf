@@ -16,9 +16,9 @@ import {
 	ChevronUpIcon,
 	PlusIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ActionLink } from "@/components/common/action-link";
 import { TableEmptyStateRow } from "@/components/common/table-empty-state-row";
 import { TableLoadingState } from "@/components/common/table-loading-state";
 import { TableRowLink } from "@/components/common/table-row-link";
@@ -39,9 +39,11 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { type AppLocale, Messages, type TypedMessageTranslator } from "@/i18n";
+import { useLocale, useTranslate } from "@/i18n/locale-provider";
+import { getProgramStatusLabel } from "@/i18n/status-labels";
 import { ProgramListDto } from "@/lib/api/generated.schemas";
 import { formatDisplayDate } from "@/lib/date-utils";
-import { formatEnumLabel } from "@/lib/enum-labels";
 
 interface ProgramsTableProps {
 	data: ProgramListDto[];
@@ -54,65 +56,73 @@ const features = tableFeatures({
 	sortFns: { datetime: sortFn_datetime },
 });
 
-const columns: ColumnDef<typeof features, ProgramListDto>[] = [
-	{
-		accessorKey: "programNumber",
-		header: "Program #",
-		cell: (info) => (
-			<TableRowLink
-				href={`/dashboard/programs/${info.row.original.programNumber}`}
-			>
-				{info.getValue<string>()}
-			</TableRowLink>
-		),
-		enableSorting: true,
-	},
-	{
-		accessorFn: (row) => row.order.orderNumber,
-		id: "orderNumber",
-		header: "Order #",
-		cell: (info) => info.getValue<string | null>() ?? "—",
-		enableSorting: true,
-	},
-	{
-		accessorKey: "quantityPlanned",
-		header: "Qty Planned",
-		cell: (info) => info.getValue<string>(),
-	},
-	{
-		accessorKey: "quantityRealized",
-		header: "Qty Realized",
-		cell: (info) => info.getValue<string | null>() ?? "—",
-	},
-	{
-		accessorFn: (row) => row.programStatus.name,
-		id: "status",
-		header: "Status",
-		cell: (info) => formatEnumLabel(String(info.getValue())),
-	},
-	{
-		accessorKey: "plannedDate",
-		header: "Planned Date",
-		cell: (info) => {
-			const value = info.getValue<string>();
-			return formatDisplayDate(value);
+function getProgramColumns(
+	t: TypedMessageTranslator,
+	locale: AppLocale,
+): ColumnDef<typeof features, ProgramListDto>[] {
+	return [
+		{
+			accessorKey: "programNumber",
+			header: t(Messages.programs.list.programNumber),
+			cell: (info) => (
+				<TableRowLink
+					href={`/dashboard/programs/${info.row.original.programNumber}`}
+				>
+					{info.getValue<string>()}
+				</TableRowLink>
+			),
+			enableSorting: true,
 		},
-		sortFn: "datetime",
-		enableSorting: true,
-	},
-	{
-		accessorFn: (row) =>
-			`${row.createdByUser.firstName} ${row.createdByUser.lastName}`,
-		id: "createdByUser",
-		header: "Created By",
-		cell: (info) => info.getValue<string>(),
-	},
-];
+		{
+			accessorFn: (row) => row.order.orderNumber,
+			id: "orderNumber",
+			header: t(Messages.programs.list.orderNumber),
+			cell: (info) => info.getValue<string | null>() ?? "—",
+			enableSorting: true,
+		},
+		{
+			accessorKey: "quantityPlanned",
+			header: t(Messages.programs.list.quantityPlanned),
+			cell: (info) => info.getValue<string>(),
+		},
+		{
+			accessorKey: "quantityRealized",
+			header: t(Messages.programs.list.quantityRealized),
+			cell: (info) => info.getValue<string | null>() ?? "—",
+		},
+		{
+			accessorFn: (row) => row.programStatus.name,
+			id: "status",
+			header: t(Messages.programs.list.status),
+			cell: (info) => getProgramStatusLabel(String(info.getValue()), locale),
+		},
+		{
+			accessorKey: "plannedDate",
+			header: t(Messages.programs.list.plannedDate),
+			cell: (info) => {
+				const value = info.getValue<string>();
+				return formatDisplayDate(value, locale);
+			},
+			sortFn: "datetime",
+			enableSorting: true,
+		},
+		{
+			accessorFn: (row) =>
+				`${row.createdByUser.firstName} ${row.createdByUser.lastName}`,
+			id: "createdByUser",
+			header: t(Messages.programs.list.createdBy),
+			cell: (info) => info.getValue<string>(),
+		},
+	];
+}
 
 export function ProgramsTable({ data, isLoading }: ProgramsTableProps) {
+	const t = useTranslate();
+	const locale = useLocale();
 	const router = useRouter();
 	const [globalFilter, setGlobalFilter] = useState("");
 	const [statusFilter, setStatusFilter] = useState("ALL");
+	const columns = getProgramColumns(t, locale);
 
 	const search = globalFilter.trim().toLowerCase();
 	const filteredData = data.filter((program) => {
@@ -148,7 +158,7 @@ export function ProgramsTable({ data, isLoading }: ProgramsTableProps) {
 		<div className="space-y-4">
 			<div className="flex flex-wrap items-center gap-4">
 				<Input
-					placeholder="Search programs..."
+					placeholder={t(Messages.programs.list.search)}
 					value={globalFilter}
 					onChange={(event) => setGlobalFilter(event.target.value)}
 					className="w-full max-w-sm"
@@ -161,17 +171,19 @@ export function ProgramsTable({ data, isLoading }: ProgramsTableProps) {
 					<SelectTrigger className="w-full max-w-48">
 						<SelectValue>
 							{statusFilter === "ALL"
-								? "All statuses"
-								: formatEnumLabel(statusFilter)}
+								? t(Messages.programs.list.allStatuses)
+								: getProgramStatusLabel(statusFilter, locale)}
 						</SelectValue>
 					</SelectTrigger>
 
 					<SelectContent>
-						<SelectItem value="ALL">All statuses</SelectItem>
+						<SelectItem value="ALL">
+							{t(Messages.programs.list.allStatuses)}
+						</SelectItem>
 
 						{Object.values(ProgramStatus).map((status) => (
 							<SelectItem key={status} value={status}>
-								{formatEnumLabel(status)}
+								{getProgramStatusLabel(status, locale)}
 							</SelectItem>
 						))}
 					</SelectContent>
@@ -242,17 +254,17 @@ export function ProgramsTable({ data, isLoading }: ProgramsTableProps) {
 								colSpan={columns.length}
 								message={
 									search || statusFilter !== "ALL"
-										? "No programs match your search or filters."
-										: "No programs yet."
+										? t(Messages.programs.list.noMatches)
+										: t(Messages.programs.list.empty)
 								}
 								description={
 									search || statusFilter !== "ALL"
 										? search && statusFilter !== "ALL"
-											? "Try another search or clear the selected status."
+											? t(Messages.programs.list.tryBoth)
 											: search
-												? "Try a different search term."
-												: "Choose a different status."
-										: "Start from an order that is eligible for planning."
+												? t(Messages.programs.list.trySearch)
+												: t(Messages.programs.list.tryStatus)
+										: t(Messages.programs.list.emptyDescription)
 								}
 								action={
 									search || statusFilter !== "ALL" ? (
@@ -263,16 +275,13 @@ export function ProgramsTable({ data, isLoading }: ProgramsTableProps) {
 												setStatusFilter("ALL");
 											}}
 										>
-											Clear filters
+											{t(Messages.programs.list.clearFilters)}
 										</Button>
 									) : (
-										<Link
-											href="/dashboard/programs/new"
-											className="inline-flex min-h-11 items-center gap-2 rounded-md px-4 text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-										>
+										<ActionLink href="/dashboard/programs/new">
 											<PlusIcon aria-hidden="true" className="size-4" />
-											Choose an eligible order
-										</Link>
+											{t(Messages.programs.list.chooseOrder)}
+										</ActionLink>
 									)
 								}
 							/>
