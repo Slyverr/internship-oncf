@@ -2,12 +2,15 @@ import { test } from "@playwright/test";
 import {
 	verifyAdminCatalogLifecycle,
 	verifyAdminCustomRoleAssignment,
+	verifyAdminDashboard,
 	verifyAdminNavigation,
 	verifyAdminRegistrationReview,
 	verifyAdminReportPrintLayout,
+	verifyAgentDashboard,
 	verifyAgentNavigation,
 	verifyAgentOperationalCreation,
 	verifyClientAuthorization,
+	verifyClientDashboard,
 	verifyClientOrderSubmission,
 } from "./authorization-flows";
 
@@ -21,6 +24,10 @@ test("admin sees account/access/report navigation, not operational records", asy
 	page,
 }) => {
 	await verifyAdminNavigation(page);
+});
+
+test("admin dashboard requests only report and user data", async ({ page }) => {
+	await verifyAdminDashboard(page);
 });
 
 test("admin can assign a custom permission profile and it controls access", async ({
@@ -41,6 +48,12 @@ test("commercial agent sees operational routes but not user administration", asy
 	await verifyAgentNavigation(page);
 });
 
+test("agent dashboard shows operational insights without user administration", async ({
+	page,
+}) => {
+	await verifyAgentDashboard(page);
+});
+
 test("agent can create a scoped claim and an eligible-order program", async ({
 	page,
 }) => {
@@ -55,6 +68,12 @@ test("client sees own operational routes while user administration stays denied"
 	page,
 }) => {
 	await verifyClientAuthorization(page);
+});
+
+test("client dashboard shows scoped records without admin or program-creation data", async ({
+	page,
+}) => {
+	await verifyClientDashboard(page);
 });
 
 test("admin report print view generates a readable themed PDF", async ({

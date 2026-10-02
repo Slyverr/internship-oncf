@@ -56,6 +56,100 @@ export async function verifyAdminNavigation(page: Page) {
 	await expectRouteVisible(page, navigation.customers, false);
 }
 
+async function verifyDashboardPersona(
+	page: Page,
+	username: string,
+	canSeeOperationalLists: boolean,
+	canSeeAccountManagement: boolean,
+	canCreatePrograms: boolean,
+) {
+	const requestedPaths = new Set<string>();
+	page.on("request", (request) => {
+		const path = new URL(request.url()).pathname;
+		if (path.startsWith("/api/proxy/")) requestedPaths.add(path);
+	});
+
+	await signIn(page, username);
+
+	await expect(
+		page.getByText(translate(Messages.dashboard.activity.title), {
+			exact: true,
+		}),
+	).toBeVisible();
+	await expect
+		.poll(() => requestedPaths.has("/api/proxy/reports/orders"))
+		.toBe(true);
+
+	for (const [key, label] of [
+		["orders", Messages.dashboard.orders.title],
+		["programs", Messages.dashboard.programs.title],
+		["claims", Messages.dashboard.claims.title],
+	] as const) {
+		const title = page.getByText(translate(label), { exact: true });
+		if (canSeeOperationalLists) {
+			await expect(title).toBeVisible();
+			await expect
+				.poll(() => requestedPaths.has(`/api/proxy/${key}`))
+				.toBe(true);
+		} else {
+			await expect(title).toHaveCount(0);
+			expect(requestedPaths.has(`/api/proxy/${key}`)).toBe(false);
+		}
+	}
+
+	const accountsTitle = page.getByText(
+		translate(Messages.dashboard.accounts.title),
+		{ exact: true },
+	);
+	if (canSeeAccountManagement) {
+		await expect(accountsTitle).toBeVisible();
+		await expect.poll(() => requestedPaths.has("/api/proxy/users")).toBe(true);
+	} else {
+		await expect(accountsTitle).toHaveCount(0);
+		expect(requestedPaths.has("/api/proxy/users")).toBe(false);
+	}
+
+	const readyOrdersTitle = page.getByText(
+		translate(Messages.dashboard.readyOrders.title),
+		{ exact: true },
+	);
+	if (canCreatePrograms) {
+		await expect(readyOrdersTitle).toBeVisible();
+		await expect
+			.poll(() => requestedPaths.has("/api/proxy/orders/eligible-for-programs"))
+			.toBe(true);
+	} else {
+		await expect(readyOrdersTitle).toHaveCount(0);
+		expect(requestedPaths.has("/api/proxy/orders/eligible-for-programs")).toBe(
+			false,
+		);
+	}
+}
+
+export async function verifyAdminDashboard(page: Page) {
+	await verifyDashboardPersona(page, E2E_USERS.admin.email, false, true, false);
+}
+
+export async function verifyAgentDashboard(page: Page) {
+	await verifyDashboardPersona(
+		page,
+		E2E_USERS.agentAssigned.employeeCode as string,
+		true,
+		false,
+		true,
+	);
+}
+
+export async function verifyClientDashboard(page: Page) {
+	await verifyDashboardPersona(
+		page,
+		E2E_USERS.clientA.email,
+		true,
+		false,
+		false,
+	);
+}
+
 export async function verifyAdminCatalogLifecycle(page: Page) {
 	await signIn(page, E2E_USERS.admin.email);
 	await page.goto("/dashboard/catalog");
@@ -252,6 +346,7 @@ export async function verifyAdminRegistrationReview(page: Page) {
 	const applicantLink = page.getByRole("link", { name: email, exact: true });
 	await expect(applicantLink).toBeVisible();
 	await applicantLink.click();
+	await expect(page).toHaveURL(/\/dashboard\/users\/\d+$/);
 	await expect(
 		page.getByRole("button", {
 			name: translate(Messages.users.actions.approve),
