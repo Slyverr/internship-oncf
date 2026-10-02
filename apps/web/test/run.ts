@@ -1,4 +1,5 @@
 import "./form-utils.test";
+import "./spacing-grid.test";
 import "./catalog-coverage.test";
 import "./i18n.test";
 import "./i18n-french-draft.test";
