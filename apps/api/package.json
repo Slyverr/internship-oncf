@@ -8,7 +8,7 @@
 	"scripts": {
 		"build": "NODE_PATH=./node_modules nest build",
 		"dev": "NODE_PATH=./node_modules TS_NODE_PROJECT=./tsconfig.runtime.json nest start --watch",
-		"dev:light": "NODE_PATH=./node_modules TS_NODE_PROJECT=./tsconfig.runtime.json nest start --watch",
+		"dev:light": "NODE_PATH=./node_modules TS_NODE_PROJECT=./tsconfig.runtime.json nest start",
 		"typecheck": "tsc --noEmit",
 		"start": "NODE_PATH=./node_modules TS_NODE_PROJECT=./tsconfig.runtime.json nest start",
 		"start:dev": "NODE_PATH=./node_modules TS_NODE_PROJECT=./tsconfig.runtime.json nest start --watch",

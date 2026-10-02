@@ -49,7 +49,7 @@ ECommand is an ONCF freight-order portal. This repository uses a Bun/Turborepo m
    bun run dev
    ```
 
-    The default command also runs the web TypeScript watcher because Next.js does not typecheck during development. To save memory, use `bun run dev:light`; it starts the same API and web servers without that watcher. You can run `bun run typecheck` for a one-time check.
+    The default command watches API and web source files and also runs the web TypeScript watcher because Next.js does not typecheck during development. To save memory, use `bun run dev:light`: Next.js still hot-reloads, while the API starts from the current source once and must be restarted manually after API changes. This avoids NestJS's memory-heavy TypeScript watch compiler. Run `bun run typecheck` for a one-time check.
 
    Web: <http://localhost:3000>
    API: <http://localhost:8000>
