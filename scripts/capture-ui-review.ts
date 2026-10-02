@@ -474,6 +474,7 @@ try {
 			`${label}-${viewport.width}x${viewport.height}.png`,
 		);
 		await evaluate<boolean>(`window.scrollTo(0, ${scrollY}); true`);
+		if (settleMs > 0) await Bun.sleep(settleMs);
 		await waitForPaint();
 		const screenshot = await call("Page.captureScreenshot", {
 			format: "png",
