@@ -221,3 +221,10 @@ The checked-in capture utility makes responsive screenshots repeatable, but it d
 - The admin sees account totals, access-profile distribution, pending registration review, and report-backed activity charts. Admin navigation remains limited to its management/report permissions; operational Create order and Create claim actions are absent. On phone, the account overview and pending request fit the first screen; activity charts begin at tablet width.
 - The content cap and centered alignment remain consistent with the interface system at ultrawide widths. No UI change was warranted by this pass. It used light theme and current preview data; dark-theme and empty-data dashboard states remain open for the full visual matrix.
 - Screenshots are available in `/tmp/ecommand-admin-dashboard-review/` as `admin-dashboard-review-*`. The login switch was confirmed by the rendered `System Admin` identity before accepting the captures.
+
+## Commercial Agent dashboard review — 2026-10-02
+
+- Captured the dashboard at 390×844, 768×1024, 1024×768, 1440×900, 2560×1440, and 3840×2160. The browser displayed `Agent Commercial`; all captures reported no horizontal viewport overflow. Each screenshot was inspected.
+- The Agent sees Create order, Create claim, eligible-order-to-program actions, scoped order activity, and recent orders/programs/claims. The available actions match the Agent workflow. At 390px, a second capture at scroll end confirmed the activity chart and recent orders are fully reachable above the fixed bottom navigation; the horizontal recent-activity hint is visible.
+- The shared content cap remains consistent at ultrawide widths. No layout or action visibility defect was found in this dashboard state. This pass used light theme and populated preview data; empty-data and dark-theme states remain open for the full visual matrix.
+- Screenshots are available in `/tmp/ecommand-agent-dashboard-review/` as `agent-dashboard-review-*` and `agent-dashboard-phone-scroll-end-390x844.png`.
