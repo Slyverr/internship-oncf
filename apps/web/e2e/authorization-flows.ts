@@ -420,12 +420,18 @@ export async function verifyAgentOperationalCreation(page: Page) {
 	await page
 		.locator("#description")
 		.fill("E2E agent claim creation workflow check.");
+	const claimCreateResponse = page.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			new URL(response.url()).pathname === "/api/proxy/claims",
+	);
 	await page
 		.getByRole("button", {
 			name: translate(Messages.claims.create),
 			exact: true,
 		})
 		.click();
+	expect((await claimCreateResponse).status()).toBe(201);
 	await expect(page).toHaveURL(/\/dashboard\/claims\/CLM-[A-Z0-9]+$/);
 	await expect(page.getByRole("heading")).toContainText(/CLM-/);
 
