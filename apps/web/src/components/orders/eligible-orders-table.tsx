@@ -81,10 +81,7 @@ export function EligibleOrdersTable({
 							data.map((order) => (
 								<TableRow key={order.id}>
 									<TableCell className="font-medium">
-										{order.orderNumber ??
-											t(Messages.orders.numberFallback, {
-												id: order.id,
-											})}
+										{order.orderNumber}
 									</TableCell>
 									<TableCell>{order.quantityDemanded}</TableCell>
 									{canCreatePrograms && (

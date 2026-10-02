@@ -36,14 +36,7 @@ export default async function Page({ params }: PageProps) {
 
 	return (
 		<>
-			<Breadcrumbs
-				items={ordersBreadcrumbs.detail(
-					id,
-					order.orderNumber ??
-						t(Messages.orders.numberFallback, { id: order.id }),
-					t,
-				)}
-			/>
+			<Breadcrumbs items={ordersBreadcrumbs.detail(id, order.orderNumber, t)} />
 
 			<OrderDetailsClient order={order} />
 		</>

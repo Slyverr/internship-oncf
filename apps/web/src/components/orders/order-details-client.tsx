@@ -34,10 +34,7 @@ export function OrderDetailsClient({ order }: OrderDetailsClientProps) {
 	return (
 		<>
 			<PageHeader
-				title={
-					currentOrder.orderNumber ??
-					t(Messages.orders.numberFallback, { id: currentOrder.id })
-				}
+				title={currentOrder.orderNumber}
 				description={currentOrder.customer.companyName}
 			>
 				<OrderActions order={currentOrder} />

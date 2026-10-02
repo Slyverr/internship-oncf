@@ -50,10 +50,7 @@ export function OrderSelect({
 				disabled={isLoading || (isError && orders.length === 0)}
 				value={selected ?? null}
 				onValueChange={(order) => order && onChange(order.id)}
-				itemToStringLabel={(order) =>
-					order.orderNumber ??
-					t(Messages.orders.numberFallback, { id: order.id })
-				}
+				itemToStringLabel={(order) => order.orderNumber}
 				itemToStringValue={(order) => String(order.id)}
 			>
 				<ComboboxInput
@@ -67,8 +64,7 @@ export function OrderSelect({
 					<ComboboxList>
 						{(order) => (
 							<ComboboxItem key={order.id} value={order}>
-								{order.orderNumber ??
-									t(Messages.orders.numberFallback, { id: order.id })}
+								{order.orderNumber}
 							</ComboboxItem>
 						)}
 					</ComboboxList>

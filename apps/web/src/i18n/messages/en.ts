@@ -304,7 +304,6 @@ export const en = {
 	orders: {
 		pageTitle: "Orders",
 		pageDescription: "Manage and edit customer orders.",
-		numberFallback: "Order #{id}",
 		create: "Create order",
 		all: "All orders",
 		selectStatus: "Select status",
@@ -512,8 +511,6 @@ export const en = {
 		upload: "Upload",
 	},
 	programs: {
-		singular: "Program",
-		numberFallback: "Program #{id}",
 		pageTitle: "Programs",
 		metadataDescription: "Browse and manage operational programs.",
 		pageDescription:

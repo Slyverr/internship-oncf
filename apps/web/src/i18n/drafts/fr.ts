@@ -359,7 +359,6 @@ export const frDraft = {
 	orders: {
 		pageTitle: "Demandes de transport",
 		pageDescription: "Gérez et modifiez les demandes de transport des clients.",
-		numberFallback: "Demande de transport n° {id}",
 		create: "Créer une demande de transport",
 		all: "Toutes les demandes",
 		selectStatus: "Sélectionner un statut",
@@ -530,8 +529,6 @@ export const frDraft = {
 		},
 	},
 	programs: {
-		singular: "Programme",
-		numberFallback: "Programme n° {id}",
 		pageTitle: "Programmes",
 		metadataDescription: "Parcourez et gérez les programmes opérationnels.",
 		pageDescription:

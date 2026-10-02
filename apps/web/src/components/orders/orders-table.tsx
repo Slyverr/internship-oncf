@@ -59,10 +59,7 @@ function createColumns(
 				<TableRowLink
 					href={`/dashboard/orders/${info.row.original.orderNumber}`}
 				>
-					{info.getValue<string | null>() ??
-						t(Messages.orders.numberFallback, {
-							id: info.row.original.id,
-						})}
+					{info.getValue<string>()}
 				</TableRowLink>
 			),
 		},

@@ -295,7 +295,6 @@ export const Messages = {
 	orders: {
 		pageTitle: "orders.pageTitle",
 		pageDescription: "orders.pageDescription",
-		numberFallback: "orders.numberFallback",
 		create: "orders.create",
 		all: "orders.all",
 		selectStatus: "orders.selectStatus",
@@ -496,8 +495,6 @@ export const Messages = {
 		upload: "attachments.upload",
 	},
 	programs: {
-		singular: "programs.singular",
-		numberFallback: "programs.numberFallback",
 		pageTitle: "programs.pageTitle",
 		metadataDescription: "programs.metadataDescription",
 		pageDescription: "programs.pageDescription",

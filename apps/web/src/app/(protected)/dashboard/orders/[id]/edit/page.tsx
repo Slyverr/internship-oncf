@@ -38,14 +38,7 @@ export default async function Page({ params }: PageProps) {
 
 	return (
 		<>
-			<Breadcrumbs
-				items={ordersBreadcrumbs.edit(
-					id,
-					order.orderNumber ??
-						t(Messages.orders.numberFallback, { id: order.id }),
-					t,
-				)}
-			/>
+			<Breadcrumbs items={ordersBreadcrumbs.edit(id, order.orderNumber, t)} />
 
 			<OrderEditForm key={order.id} order={order} />
 		</>

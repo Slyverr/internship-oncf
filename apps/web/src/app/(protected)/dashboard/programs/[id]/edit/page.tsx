@@ -39,12 +39,7 @@ export default async function Page({ params }: PageProps) {
 	return (
 		<>
 			<Breadcrumbs
-				items={programsBreadcrumbs.edit(
-					id,
-					program.programNumber ??
-						t(Messages.programs.numberFallback, { id: program.id }),
-					t,
-				)}
+				items={programsBreadcrumbs.edit(id, program.programNumber, t)}
 			/>
 
 			<ProgramEditForm program={program} />
