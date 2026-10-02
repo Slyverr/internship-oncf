@@ -23,13 +23,29 @@ function SidebarWorkspace({ children, modal }: DashboardWorkspaceProps) {
 		<SidebarProvider>
 			<AppSidebar className="print:hidden" />
 			<SidebarInset className="@container/workspace">
-				<div className="print:hidden">
+				<div className="hidden print:hidden md:block">
 					<AppHeader />
 				</div>
-				<main className={workspaceContentClassName}>{children}</main>
+				<div className="print:hidden md:hidden">
+					<CenteredAppHeader />
+				</div>
+				<main className={`${workspaceContentClassName} pb-24 md:pb-6`}>
+					{children}
+				</main>
 			</SidebarInset>
+			<MobileWorkspaceNavigation />
 			{modal}
 		</SidebarProvider>
+	);
+}
+
+function MobileWorkspaceNavigation() {
+	return (
+		<div className="fixed inset-x-0 bottom-0 z-50 min-h-16 border-t border-border bg-card pb-safe-area shadow-md md:hidden print:hidden">
+			<div className="mx-auto flex min-h-16 w-full max-w-screen-2xl items-center">
+				<CenteredNavigation compact />
+			</div>
+		</div>
 	);
 }
 
@@ -41,11 +57,7 @@ function CenteredHeaderWorkspace({ children, modal }: DashboardWorkspaceProps) {
 				<WorkspaceBreadcrumbs />
 				{children}
 			</main>
-			<div className="fixed inset-x-0 bottom-0 z-50 min-h-16 border-t border-border bg-card pb-safe-area shadow-md md:hidden print:hidden">
-				<div className="mx-auto flex min-h-16 w-full max-w-screen-2xl items-center">
-					<CenteredNavigation compact />
-				</div>
-			</div>
+			<MobileWorkspaceNavigation />
 			{modal}
 		</div>
 	);
