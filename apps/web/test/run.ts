@@ -29,3 +29,4 @@ import "./route-metadata.test";
 import "./user-labels.test";
 import "./user-filters.test";
 import "./user-customer-select.test";
+import "./user-credentials-schema.test";

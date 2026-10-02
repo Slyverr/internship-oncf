@@ -241,3 +241,9 @@ The checked-in capture utility makes responsive screenshots repeatable, but it d
 - Fresh captures at 390×844, 768×1024, 1440×900, and 2560×1440 showed the Total / Active / Inactive metrics vertically centered in a stretched grid cell, unlike the access-profile section. Changed their alignment to the top of the cell.
 - The access-profile bars used a 75% opacity primary color while the dashboard activity bars use the full primary token. Matched the bars to the shared primary token.
 - Re-inspected all four updated captures; metrics now align at the section start, bars match the dashboard primary color, and the viewport has no horizontal overflow. Images are in `/tmp/ecommand-admin-dashboard-review/` as `admin-dashboard-account-alignment-fixed-*`.
+
+## Admin user creation review — 2026-10-02
+
+- Captured the Credentials step at 320×568, 390×844, 768×1024, 1024×768, 1440×900, 1920×1080, 2560×1440, and 3840×2160; every capture matched `/dashboard/users/new` and reported no horizontal overflow. The centered page cap and two-column desktop fields remain consistent with the shared workspace form.
+- A blank Continue attempt incorrectly reported “Enter a valid email address” for an empty email, and the blank password used its length error. The credentials schema now distinguishes required fields from malformed email and short passwords; focused schema tests cover empty, malformed, short, and valid values. Updated captures at 320, 390, and 1440px show the required-field messages. At 320px, scrolling exposes both messages and both actions above the fixed navigation.
+- The non-submitting profile step was checked at 390px and 1440px. The Commercial Agent customer portfolio loaded six customer choices; at 390px, scrolling to the end exposes the user-type/employee-code fields and Create user action above bottom navigation. Captures are in `/tmp/ecommand-final-review/users-create/` as `admin-user-create-*`. No account was created.

@@ -1372,7 +1372,9 @@ export const frDraft = {
 				employeeCodePlaceholder: "EMP-1234",
 			},
 			validation: {
+				emailRequired: "L’adresse e-mail est obligatoire.",
 				validEmail: "Saisissez une adresse e-mail valide.",
+				passwordRequired: "Le mot de passe est obligatoire.",
 				passwordMin: "Le mot de passe doit comporter au moins 8 caractères.",
 				firstNameRequired: "Le prénom est obligatoire.",
 				lastNameRequired: "Le nom est obligatoire.",

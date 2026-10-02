@@ -40,15 +40,13 @@ import {
 } from "@/lib/api/generated.schemas";
 import { useRolesControllerFindProfiles } from "@/lib/api/roles";
 import { useUsersControllerCreate } from "@/lib/api/users";
+import { createUserCredentialsSchema } from "@/lib/user-credentials-schema";
 import { formatUserType } from "@/lib/user-labels";
 
 function createUserSchemaBase(t: TypedMessageTranslator) {
+	const credentials = createUserCredentialsSchema(t);
 	return z.object({
-		email: z.email(t(Messages.users.form.validation.validEmail)).max(100),
-		password: z
-			.string()
-			.min(8, t(Messages.users.form.validation.passwordMin))
-			.max(255),
+		...credentials.shape,
 		firstName: z
 			.string()
 			.trim()

@@ -812,7 +812,9 @@ export const Messages = {
 				employeeCodePlaceholder: "users.form.fields.employeeCodePlaceholder",
 			},
 			validation: {
+				emailRequired: "users.form.validation.emailRequired",
 				validEmail: "users.form.validation.validEmail",
+				passwordRequired: "users.form.validation.passwordRequired",
 				passwordMin: "users.form.validation.passwordMin",
 				firstNameRequired: "users.form.validation.firstNameRequired",
 				lastNameRequired: "users.form.validation.lastNameRequired",

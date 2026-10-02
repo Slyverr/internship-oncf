@@ -844,7 +844,9 @@ export const en = {
 				employeeCodePlaceholder: "EMP-1234",
 			},
 			validation: {
+				emailRequired: "Email address is required.",
 				validEmail: "Enter a valid email address.",
+				passwordRequired: "Password is required.",
 				passwordMin: "Password must be at least 8 characters.",
 				firstNameRequired: "First name is required.",
 				lastNameRequired: "Last name is required.",
