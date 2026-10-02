@@ -235,3 +235,9 @@ The checked-in capture utility makes responsive screenshots repeatable, but it d
 - The Client sees Create order, Create claim, customer-scoped order activity, and recent orders/programs/claims. No Agent-only eligible-program action or Admin management control is shown. On phone, a scroll-end capture confirmed the chart and recent orders remain fully visible above the fixed bottom navigation; the horizontal recent-activity hint is unobstructed.
 - The shared content cap remains consistent at ultrawide widths. No layout or action visibility defect was found in this dashboard state. This pass used light theme and populated preview data; empty-data and dark-theme states remain open for the full visual matrix.
 - Screenshots are available in `/tmp/ecommand-client-dashboard-review/` as `client-dashboard-review-*` and `client-dashboard-phone-scroll-end-390x844.png`.
+
+## Admin account metrics alignment — 2026-10-02
+
+- Fresh captures at 390×844, 768×1024, 1440×900, and 2560×1440 showed the Total / Active / Inactive metrics vertically centered in a stretched grid cell, unlike the access-profile section. Changed their alignment to the top of the cell.
+- The access-profile bars used a 75% opacity primary color while the dashboard activity bars use the full primary token. Matched the bars to the shared primary token.
+- Re-inspected all four updated captures; metrics now align at the section start, bars match the dashboard primary color, and the viewport has no horizontal overflow. Images are in `/tmp/ecommand-admin-dashboard-review/` as `admin-dashboard-account-alignment-fixed-*`.

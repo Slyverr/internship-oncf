@@ -301,7 +301,7 @@ function UserAccountsSection({
 							{metrics.map(({ label, value }, index) => (
 								<div
 									key={label}
-									className={`grid content-center gap-compact border-border/70 ${index > 0 ? "border-l px-control" : "border-l-0 px-0"}`}
+									className={`grid content-start gap-compact border-border/70 ${index > 0 ? "border-l px-control" : "border-l-0 px-0"}`}
 								>
 									<dt className="text-meta text-muted-foreground">
 										{t(label)}
@@ -337,7 +337,7 @@ function UserAccountsSection({
 											<div className="h-2 overflow-hidden rounded-full bg-muted">
 												<div
 													aria-hidden="true"
-													className="h-full rounded-full bg-primary/75"
+													className="h-full rounded-full bg-primary"
 													style={{ width: `${(count / maxRoleCount) * 100}%` }}
 												/>
 											</div>
