@@ -29,9 +29,12 @@ export function UserOverview({ user }: { user: UserDetailDto }) {
 					<CardTitle>Role & Access</CardTitle>
 				</CardHeader>
 				<CardContent className="space-y-4">
-					<div className="grid min-w-0 gap-2 sm:grid-cols-2 sm:items-baseline">
+					<div className="flex min-w-0 items-baseline justify-between gap-4">
 						<span className="text-sm text-muted-foreground">Role</span>
-						<Badge variant="outline" className="text-xs">
+						<Badge
+							variant="outline"
+							className="max-w-[min(60%,20rem)] text-right text-xs"
+						>
 							{formatUserRole(user.role.name)}
 						</Badge>
 					</div>
