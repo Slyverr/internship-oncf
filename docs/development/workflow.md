@@ -23,7 +23,17 @@ bun run ui:review -- --url /dashboard/orders --label orders
 bun run ui:review -- --url /login --fresh-context --label login
 ```
 
-The Bun script captures 320, 375, 390, 640, 768, 1024, 1440, 1920, 2560, and 3840px viewports into `/tmp/ecommand-ui-review`, reports document overflow and the route actually rendered, and restores the browser's original route afterward. Protected routes use the current authenticated browser session. Public auth routes should use `--fresh-context` to avoid the signed-in session redirecting away; that option creates and closes an isolated temporary browser profile. The tool adds no dependency. Use `--click '<selector>'` for visible controls, `--fill '<selector>=<value>'` for temporary form state, and `--wait-for '<selector>'` for the resulting state. Because clicks are real UI actions, use only known non-persisting actions such as a reviewed client-side step transition; do not click a final submit or confirmation action. `--help` lists all options. These captures are evidence for visual review, not pixel-diff tests; inspect the images and exercise stateful workflows separately. When a safe click intentionally opens an intercepted modal route, pass `--expect-route '/dashboard/settings'` so the helper validates the modal route instead of the underlying page.
+The Bun script captures 320, 375, 390, 640, 768, 1024, 1440, 1920, 2560, and 3840px viewports into `/tmp/ecommand-ui-review`, reports document overflow and the route actually rendered, and restores the browser's original route afterward. Protected routes use the current authenticated browser session. Public auth routes should use `--fresh-context` to avoid the signed-in session redirecting away; that option creates and closes an isolated temporary browser profile. `--then-url '<url>'` navigates after the supplied fill/click actions, which supports capturing a protected route after a successful login in the isolated profile. Use `--click-after-url '<selector>'` or `--click-text-after-url '<text>'` to exercise a safe UI state after that navigation, such as selecting a tab or category. For route-intercepted dialogs that intentionally change the URL, set `--expect-route '<path>'` to the final route so the route assertion checks the dialog state rather than the underlying page. The tool adds no dependency. Use `--click '<selector>'` for visible controls, `--fill '<selector>=<value>'` for temporary form state, and `--wait-for '<selector>'` for the resulting state. Because clicks are real UI actions, use only known safe actions such as login or a reviewed client-side step transition; do not click a consequential final submit or confirmation action. `--help` lists all options. These captures are evidence for visual review, not pixel-diff tests; inspect the images and exercise stateful workflows separately.
+
+For faster responsive sweeps, add `--reuse-page`. It loads the route once, resizes the same page for later captures, and runs click/fill actions only on the first viewport. Without this option, each viewport still gets a fresh route load and its actions run independently. The script waits for paint after resizing and applies `--settle-ms` only once per navigation rather than twice.
+
+## Isolated E2E workflows
+
+Run the isolated API and browser journey suites from the repository root with:
+- bun scripts/run-api-e2e.ts
+- bun scripts/run-api-e2e.ts --browser
+
+The browser option runs the API suite first, resets and reseeds the disposable ecommand_e2e database, then runs browser workflows through the Chrome CDP endpoint configured by PLAYWRIGHT_CDP_ENDPOINT. The reset helper checks the exact database name and refuses to reset another database. These flows cover role grants, reference-data lifecycle, order submission, claim/program creation, and registration review. The runner tears down its Compose services when complete.
 
 API database commands run from `apps/api`:
 
@@ -53,6 +63,14 @@ For local client-registration testing, run `bun run seed` from `apps/api`, then 
 - Use kebab-case file names, PascalCase classes/types/components, camelCase functions/variables/properties, and UPPER_SNAKE_CASE enum members.
 - Keep database column naming consistent with the existing Drizzle schema (camelCase TypeScript properties mapped to snake_case SQL columns).
 - Some French strings in `LEGACY_UNITS` are persisted legacy database values used only to deactivate old reference rows. They are compatibility identifiers, not user-facing copy; changing them can break cleanup of existing data.
+
+## Localization
+
+The web app currently ships English only. Keep every human-facing string in `apps/web/src/i18n/messages/en.ts`; reference it through the stable `Messages` tree in `apps/web/src/i18n/message-keys.ts` and `translate(Messages.section.message)`. The i18n test requires a one-to-one match between English catalog entries and stable message references. Do not add user-facing literals to components for labels, errors, empty states, or accessibility text.
+
+API responses carry stable codes, not user-facing prose. Add domain error and response codes to `packages/shared/src/api-errors.ts`, return those codes from NestJS, and map each code to a `Messages.apiError…` or `Messages.apiResponse…` key in `apps/web/src/i18n/index.ts`. Validation details carry field paths and validator rule codes; keep the UI wording in the message catalog. Never display a server-supplied message directly.
+
+When adding French, add a structurally complete catalog beside `en.ts`, add its locale to `SUPPORTED_LOCALES` and the locale catalog map, and provide any locale-specific date-fns locale in `date-utils.ts`. Keep the message-key tree derived from the canonical English catalog so keys remain stable, and run `bun run test` and `bun run typecheck` in `apps/web`. Add the language selection and persistence as a separate user-facing feature when a second complete catalog is ready; do not expose an incomplete locale.
 
 ## Code conventions
 
@@ -110,5 +128,6 @@ For disposable local development only, Drizzle `db:push` can synchronize the cur
 - To have Git run the same gate automatically before each commit, set the repository hook path once with `git config core.hooksPath .githooks`.
 - Run `bun run typecheck` after TypeScript changes.
 - Run the relevant API tests for changed business behavior when tests exist and verification is requested/needed.
+- Root `bun run test` uses Turborepo dependency builds. When running an app's tests directly after changing `packages/shared`, rebuild the package first with `bun run --filter @ecommand/shared build`; direct API/web test commands resolve the workspace package from its `dist` output.
 - Run `bun run build` to verify production compilation when a broad UI/API change warrants it.
 - Report exactly which commands passed and which checks were not run. Do not imply that a successful typecheck proves runtime integrations work.

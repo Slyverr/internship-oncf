@@ -43,7 +43,7 @@ Checked the running local web/API stack against the project SDF using the seeded
 - Web checks: 9 checks passed, including default-role action visibility.
 - Workspace typecheck passed for shared, API, and web packages.
 - Responsive dashboard screenshots were captured at the documented ten viewport sizes (320px through 3840px). The browser helper reported no horizontal overflow. The 320px and 1440px agent captures showed the new Create claim action; the 1440px recent-activity cards showed separated rows with no divider. The first agent login capture had to be isolated because successful login redirects from `/login` to `/dashboard`.
-- The isolated API E2E runner starts a disposable PostgreSQL database, applies the schema, seeds reference and deterministic E2E data, runs Jest with Node, and removes the Compose project afterward. On 2026-09-29, all 2 suites and 21 tests passed, covering customer/order/claim/program/report scope, order and claim workflows, program eligibility and lifecycle, administrator route denials, and administrator assignment/removal of agent customer portfolios.
+- The isolated API E2E runner starts a disposable PostgreSQL database, applies the schema, seeds reference and deterministic E2E data, runs Jest with Node, and removes the Compose project afterward. On 2026-10-01, all 2 suites and 24 tests passed, covering customer/order/claim/program/report scope, order and claim workflows, program eligibility and lifecycle, custom permission-profile creation/assignment and enforcement, administrator route denials, portfolio management, and concurrent last-Admin deactivation protection.
 - On 2026-09-29, fresh headless Chrome captures successfully matched requested routes. Dashboard and create forms were reviewed at phone, tablet, laptop, 2K, and 4K widths; the helper reported no horizontal overflow. Review images are under `/tmp/ecommand-ui-review` and are temporary, not repository assets.
 - Current repository verification passed on 2026-09-29: Biome, all workspace typechecks, web checks, 58 API suites / 440 tests, and production builds.
 
@@ -79,26 +79,25 @@ The order/program/claim are preserved so their resulting workflow state can be i
 
 ### P0 — Enforce operational access scope
 
-1. Agent portfolio scope and core order, claim, and program journeys are covered by 21 isolated API E2E tests. Continue with remaining role journeys and failure-path coverage.
-2. Completed: administrator grants now match the SDF; tests verify permitted account/report access and denied operational routes. Role/permission management screens and endpoints remain unimplemented even though their permissions are reserved in the matrix.
+1. Agent portfolio scope and core order, claim, and program journeys are covered by the isolated API E2E suite (27 tests passed on 2026-10-02). Continue adding failure-path cases when workflow review identifies a concrete gap.
+2. Admin reference-data management and custom permission profiles have guarded APIs and screens. Fixed base personas are protected, custom permission sets are assigned to the Commercial Agent or Client Representative persona, and tests cover privilege lockout and effective permission boundaries.
 
 ### P1 — Complete workflow identifiers and useful dashboard insights
 
 1. Completed: claims now display and search stable `CLM-` identifiers in list/detail/dashboard and related views while numeric IDs remain internal route keys.
-2. Add role-aware dashboard insights so the home page answers what needs attention and what changed, with meaningful metrics/charts, useful empty states, and links to the next action. Reuse existing scoped report/workflow data where appropriate; do not duplicate or leak cross-customer data.
+2. Role-aware dashboard metrics, activity chart, registration review, eligible-order actions, and operational links are implemented. Continue checking that each persona sees useful actions and customer-scoped values with representative data; do not duplicate or leak cross-customer data.
 3. Completed: sign-in accepts either email or employee/matricule identifier. Email and employee-code matching are case-insensitive, and the schema enforces case-insensitive employee-code uniqueness. Apply the evolving schema with `bun run db:push` only against a disposable development database, per repository policy.
 
 ### P1 — Complete integration and test readiness
 
-1. The API E2E runner invokes Jest with a discovered/configured Node runtime; the isolated suite passed 20 tests on 2026-09-29. Core order, claim, and program journeys are covered. Add browser journeys and remaining failure-path cases. See the [agent progress journal](../agent-progress.md) for milestone status and priority.
+1. The API E2E runner invokes Jest with a discovered/configured real Node runtime; the isolated suite passed 27 tests on 2026-10-02. Browser journeys also cover role access, reference-data lifecycle, client order submission, agent claim and eligible-order program creation, and Admin registration review. Extend failure-path cases where uncovered behavior is found. See the [agent progress journal](../agent-progress.md) for milestone status and priority.
 2. Treat DTM/GSCWF handoff, durable notification retry, and external email activation as integrations that need ONCF/provider contracts. The current local `Send to DTM` action is only a status change; do not report it as an external handoff.
 
 ### P2 — Branding, internationalization, and pilot operations
 
-1. Review the app's centered brand wording and page metadata. Replace any remaining generic Vercel favicon with approved ONCF/ECommand artwork, and make browser titles consistent across every route.
-2. Plan i18n before translating piecemeal: select initial locales with the product owner, centralize all UI copy, validation/API error labels, status and enum labels, date/number/plural formatting, and public/auth pages, then migrate every route and shared component. Keep business identifiers and stored enum values language-neutral.
+1. English UI copy, validation/API error labels, statuses, enum labels, date/number/plural formatting, metadata, and public/auth pages use the typed message catalog. English remains the sole enabled locale; the French draft is not part of runtime behavior.
+2. Review route titles and the complete route/state screenshot matrix across roles, themes, and phone-to-ultrawide sizes after shared layout changes. The latest focused review covered settings, dashboard, header, and access profiles, not every page.
 3. Confirm who maintains customer ICE values and how signup verifies them against an authoritative source.
-4. Run and inspect the complete route screenshot pass across desktop and phone sizes after shared layout or branding changes; the dashboard-specific pass does not cover every page.
 
 ### Dashboard polish completed
 

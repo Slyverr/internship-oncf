@@ -4,9 +4,9 @@ This is the milestone journal for finishing the ECommand MVP. Read it with [work
 
 ## Current position
 
-- **Completed chapters:** 1 — API E2E foundation and core workflows; 2 — admin portfolio management; 3 — SDF-aligned role authorization; 4 — role-aware preview review and dashboard next steps; 5 — browser checks for dashboard, client orders, programs, and registration review; 6 — program lifecycle audit history and a working verification gate; 7 — claim workflow verification; 8 — random claim codes and public-code claim routes; 9 — order/program public-code routes and attachment/tracking URLs.
-- **Active chapter:** 10 — close remaining explicit SDF capability gaps and production-readiness requirements. The ranked continuation plan is in [MVP readiness](project/readiness.md); role/access management is first, followed by automated browser journeys and the i18n foundation.
-- **Current checkout:** `develop`; local commits remain unpublished. Review the task-focused history before any further cleanup; do not rewrite published commits.
+- **Completed chapters:** 1–19 — API and browser workflow coverage, permission/ownership enforcement, Admin reference-data and custom permission profiles, workflow identifiers/history, English i18n/API message contracts, and prior UX/print work; 20 — isolated API and browser workflow verification across all three user personas, plus report responsive review; 21 — coded workflow notifications persisted atomically, including claim-comment recipient-failure handling.
+- **Active chapter:** 22 — finish product gaps and improve workflow reliability, UI consistency, and maintainability. French rollout remains deferred. See [MVP readiness](project/readiness.md) for the ranked continuation plan.
+- **Current checkout:** `develop`; product changes are committed locally and have not been pushed. Do not rewrite published commits.
 - **Local app:** `bun run dev` is running at `http://localhost:3000`; web `/login` and API `http://localhost:8000/health` return HTTP 200. The ignored API `.env` points to the isolated `ecommand_preview` database. The pre-existing `ecommand` database was left untouched.
 
 ## Completed chapter 1 — API E2E and core workflows
@@ -76,12 +76,12 @@ Coverage includes:
 
 | Priority | Area | Remaining work / evidence |
 | --- | --- | --- |
-| P0 | Admin role/access management | Explicit SDF Story 5.2 is not implemented. Decide whether pilot admins edit grants only for the three fixed roles or can create roles; then build guarded API/UI, prevent privilege lockout/escalation, and add audit/tests. The current `Role` enum and reference-seeded role table are fixed; do not start a custom-role schema before resolving this model. |
-| P1 | Browser E2E and CI | Manual browser checks now cover client order submission, agent approval, order-to-program creation, admin registration review, and claim conversation/closure. GitHub Actions now runs `bun run verify` and isolated API E2E; its first hosted run is pending. Automated browser journeys remain to be added. |
-| P1 | Workflow reliability | Test notification failure/retry behavior, authorization failure paths, and confirmed gaps in transition validation. Durable retry and assignment alerts need separate design. |
-| P1 | Dashboard | Confirm metrics and next actions are useful for each role and scoped data does not leak. Recent cards and next-step links already exist. |
-| P1 | Data and deployment | Confirm ownership/lifecycle rules, stabilize Drizzle schema, then choose migrations and define backup/restore, secrets, HTTPS, object storage, and monitoring. |
-| P2 | Product finish | Complete branding/page metadata, ICE ownership, i18n planning, and route-level visual consistency checks. |
+| P0 | Access management | Admin reference-data CRUD and custom permission profiles are implemented with guarded API/UI, fixed base personas, lockout protection, and API/browser coverage. Further work is limited to verifying edge cases as workflows change; creating arbitrary new identity roles is not part of the current schema. |
+| P1 | Product UI/UX review | Shared layouts, component styles, English copy, and responsive settings previews are implemented. Finish the fresh route/state/role/theme matrix, inspect every capture, and fix any concrete alignment, field, table, dialog, or action inconsistency found. |
+| P1 | Workflow verification | Isolated API E2E passes 27 tests; browser journeys cover Admin navigation and access profiles, reference-data lifecycle, client order submission, agent claim/program workflows, registration review, route access, and client denial. Extend failure-path coverage where a real uncovered path is found. |
+| P1 | Dashboard | Role-aware metrics, activity chart, registration-review items, eligible-order actions, and operational links exist. Confirm their value and customer scoping for each persona using representative records. |
+| P1 | Customer identity | Signup checks local customer code and ICE. Confirm who maintains ICE values and how they are refreshed; no external ONCF registry is available in this implementation. |
+| P2 | Product finish | Review titles across all rendered routes, complete the final page/state visual matrix, and keep English as the sole enabled locale. French runtime support remains deferred. |
 | Blocked on external contracts | Integrations | Real DTM/GSCWF handoff, durable external notification delivery, and production email provider require ONCF/provider contracts. Current local status changes and mailbox fallback are not external integrations. |
 
 ## Continuation notes
@@ -127,3 +127,135 @@ Coverage includes:
 - Full API coverage verification now passes 59 suites / 457 tests. Aggregate coverage is 72.35% statements, 69.32% branches, 44.94% functions, and 72.11% lines. These totals include application bootstrap, modules, and persistence queries; they are not a direct measure of user-flow coverage. High-priority query files still need focused review.
 - CI has a checked-in workflow, but its first hosted run is still pending publication. Once available, inspect the result before treating CI as verified.
 - The next implementation decision is role/access scope and security invariants. i18n can continue with the runtime/locale contract after initial locales and translation ownership are confirmed. See [MVP readiness](project/readiness.md) for the ranked sequence.
+
+## Chapter 11 — English message catalog expansion — 2026-09-30
+
+- Expanded the typed English-only catalog across users: searchable/filterable table, create/edit form validation and steps, review/deactivation actions, profile details, customer portfolio, and selectors. User filters combine query state and support the pending-registration dashboard link.
+- Centralized shared guided-form actions/announcements, confirmation/retry defaults, dialog/sheet/sidebar/breadcrumb/table accessibility copy, user navigation labels for both layouts, settings sections/sync status, toast close labels, and good/unit selector states.
+- Improved the responsive screenshot helper with `--then-url` so a disposable authenticated browser context can sign in and capture a protected route. The actual Chrome endpoint for this checkout was 9223; captures are under `/tmp/ecommand-users-filter-review-auth`, `/tmp/ecommand-user-create-review`, and `/tmp/ecommand-settings-appearance-current`.
+- Fresh authenticated user-list and create-form captures at 390px and 1440px showed no document-level horizontal overflow. Appearance selectors now preview themes, fonts, text scale, workspace layout, and motion; Inter applies through its own loaded font variable. Fresh settings captures at 390px and 1440px show no horizontal overflow.
+- Added compile-time exhaustive mappings for declared API error and response codes, plus a test that checks each has English copy. Claim workflow exceptions now return codes without backend-authored display prose; missing claim comments have a dedicated code.
+- Added an AST-backed test that rejects literal JSX text and hardcoded values in user-facing JSX attributes. It found and migrated root error-boundary copy, the construction placeholder, and internal/external user type options. Metadata, reference-data labels, email templates, assembled non-JSX strings, and backend internal messages remain outside this scan.
+- Bounded the screenshot helper's page-load wait so same-page navigation without a load event cannot leave the capture command hanging indefinitely.
+- Re-ran `bun run verify` successfully: Biome, all workspace typechecks, 60 API suites / 462 tests, web checks, and production builds. The web screenshot and copy changes are verified, but French, locale selection/persistence, reference-data label policy, and a complete hardcoded-copy audit remain.
+
+**Next:** inventory strings assembled outside JSX, reference-data labels, email templates, and backend validation/exception details; extend specific code-based error coverage across domains; then add locale preference/persistence and reviewed French catalog entries. The JSX audit is covered, but it is not a complete copy audit. Do not mark i18n complete from route-family coverage alone.
+
+## Chapter 12 — stable message references and authorization review — 2026-09-30
+
+- Added a `Messages` reference object for all 1,077 English catalog entries and migrated the web app's catalog-path literals to those stable references. The alias test checks one-to-one coverage of the catalog; the AST source scan now rejects direct `translate("path")` calls.
+- Compared the app's model with RBAC, ABAC, and relationship-based access. Documented the current hybrid: effective permission grants for actions, customer/owner relationships for record scope, and workflow state for valid transitions. Clarified that role rows still bundle permissions for provisioning even though feature code must check permissions, not role names.
+- Added PostgreSQL-backed E2E coverage for claim-comment notification recipients by customer portfolio. Corrected two stale contract assertions (out-of-scope claim filter and stable program error code); API E2E passes 22/22.
+- Full `bun run verify` now passes: Biome, all workspace typechecks, 63 API suites / 478 tests, web catalog/API contract checks, and production builds. Initial full verification exposed six unit failures caused by test users missing the effective permission set; fixtures now model the permissions the runtime hydrates.
+- Inspected the report in print media and generated a real PDF from the authenticated local app. The print preview exposed the centered app header and breadcrumb wasting report space; print rules now hide both, disable the page-entry animation, and set an A4 page with 16 mm margins. The regenerated sample is one A4 page (595 × 842 pt); a screenshot is saved at `/tmp/ecommand-report-review/print-media-preview.png`. Long-report pagination still needs review. Browser printing remains the simplest free option for now; consider a backend PDF only if consistent output or archival becomes a requirement.
+
+**Next:** finish the remaining English copy audit and locale preference/French rollout, then continue the P0 admin permission/reference-data management and automated user journeys. Validate report pagination with a large dataset during pilot closeout.
+
+## Chapter 13 — Admin reference-data entry — 2026-09-30
+
+- Added `/dashboard/catalog`, a permission-filtered Admin page for adding units, goods types, goods, accessory operations, and rejection reasons through the existing catalog API. All visible copy uses stable English `Messages.*` references; lists have loading, retry, empty, and mutation-error states.
+- Added `catalog:read` and `catalog:manage` to the Admin default permission bundle. The screen and navigation check effective permissions. Commercial agents and client representatives retain read-only catalog access.
+- A fresh isolated Admin browser session confirmed all five list requests return 200. Captured 390px and 1440px views; neither reported horizontal overflow. The 1440px screenshot with data is `/tmp/ecommand-admin-diagnostics/catalog-verified-1440x900.png`.
+- Changed the Security settings password action to the shared primary button variant; a screenshot confirmed the orange button in the Settings dialog. Full `bun run verify` passes: 63 API suites / 478 tests, web checks, typechecks, and production builds.
+- Seeded the confirmed disposable `ecommand_preview` database to refresh default permissions. `seed:ref` also restores its normal active state for seeded reference rows. The catalog interface is currently add-only; existing values still need reviewed edit/archive rules. Custom roles remain gated on schema/persona design.
+
+**Next:** define and implement safe edit/archive behavior for each business catalog set, then proceed with custom permission-role management after reviewing the evolving schema and its operational persona rules.
+
+## Chapter 14 — Admin catalog lifecycle — 2026-10-01
+
+- Reworked `/dashboard/catalog` into a single workspace with a left-side category rail. It is vertically centered/sticky on desktop and becomes a compact, labeled icon grid on phone and tablet. The selected category replaces the panel in place; phone, tablet, and desktop captures report no horizontal overflow. Captures are in `/tmp/ecommand-admin-catalog-rail` and `/tmp/ecommand-admin-catalog-switch-final`.
+- Admin can add and rename values, and archive or restore units, goods types, goods, accessory operations, and rejection reasons. Archiving a goods type with active goods returns a stable conflict code; a good cannot be created or reactivated under an inactive type. Archive remains soft and reversible.
+- New admin-created catalog rows receive UUIDs, so renaming does not detach their identity from the label. Reference seeding now inserts managed base rows only when absent, preserving admin names and active states. No schema push or migration was needed.
+- Added permission-guarded manage/list and update routes for each catalog type, regenerated Orval output from the built API using the documented real Node runtime, and added controller permission mapping plus service lifecycle tests. `bun run verify` passes: Biome, all workspace typechecks, 63 API suites, web checks, and production builds. API health is 200 on port 8000; the Admin category switch was captured after login.
+- The screenshot helper now supports post-navigation clicks, which enables browser checks that log in and then exercise a safe page control. The Security password action remains on the shared orange primary style.
+
+**Next:** verify custom-profile assignment and permission boundaries across user workflows, then continue the remaining English copy audit, locale persistence/French planning, and production-readiness checks.
+
+## Chapter 15 — Admin permission profiles — 2026-10-01
+
+- Completed the role-profile path across API, OpenAPI client, web user creation/editing, and the Admin `/dashboard/roles` screen. Administrators can create, edit, archive, and restore custom profiles; built-in profiles remain protected. Assignment uses `roleId`, effective permissions authorize API and UI actions, and the workflow persona is only used for customer/signup rules.
+- The management screen is gated by `roles:manage`, presents only assignable permission definitions, localizes built-in persona names, and reports assignment conflicts from stable API error codes. User forms now load active profiles and show persona-dependent customer/portfolio fields.
+- Captured route screenshots at 320, 390, 640, 768, 1024, 1440, 1920, 2560, and 3840px with no horizontal overflow. Narrow layouts use a full-width row list; wider workspaces use a table. The fixed-size create dialog was reviewed at 390 and 1440px.
+- Browser-tested creating an unassigned, read-only custom profile and archiving it. The test profile is archived in the disposable preview database. Biome, web catalog/API tests, and all workspace typechecks pass. A full production build/verify has not yet been rerun after this chapter.
+- Tightened shared text-button horizontal padding to the 8px control token after review of the request about excessive spacing; icon-only controls retain their target dimensions.
+
+The security follow-up for preventing administrator lockout is completed in Chapter 16.
+
+## Chapter 16 — active administrator protection — 2026-10-01
+
+- User deactivation now serializes on the active Admin rows and returns the stable `LAST_ACTIVE_ADMIN` error if the requested change would remove the final active administrator. The web maps that code through the English catalog.
+- Added service coverage and a PostgreSQL-backed E2E race test that sends two deactivation requests concurrently, asserts one succeeds and one receives the code, then restores the seeded Admin account before the isolated database is discarded.
+- Rechecked the custom permission-profile journey in the same isolated suite: API profile creation, user assignment, effective-permission allow/deny behavior, reserved-grant rejection, and protection of built-in roles all pass.
+- The first E2E attempt found port 55432 occupied, so the isolated runner was retried on port 55433. The disposable database completed and was torn down; the application and preview databases were not targeted.
+
+**Verification:** 2 API E2E suites / 24 tests passed; focused UsersService tests (24 tests), all three workspace typechecks, the full web test set, and Biome on changed files passed.
+
+**Next:** add browser-level role/profile and workflow journeys, finish the English copy audit, then proceed with locale preference/French readiness and report pagination. Run the full production verification gate before handoff.
+
+## Chapter 18 — permission assignment browser workflow — 2026-10-01
+
+- Added an isolated browser journey that creates a custom orders:read profile in the Admin interface, assigns it to a newly created account, then signs in as that account. The journey verifies the Orders route and read endpoint are allowed while user administration is hidden and order creation is denied by the API.
+- The full isolated API E2E suite passes 24/24 and all five browser journeys pass, including Admin navigation, custom profile assignment, reference-data lifecycle, agent claim access, and client denial. The disposable database is torn down after the run.
+- Web checks, TypeScript typecheck, and Biome pass. Live app health is 200 on ports 3000 and 8000.
+
+**Next:** add browser coverage for client order submission, agent program/claim workflows, and Admin registration review; complete the residual English string audit and locale persistence plan; then run full workspace verification and review production readiness gaps.
+
+## Chapter 17 — reference-data browser workflow — 2026-10-01
+
+- Added a browser E2E workflow for an administrator creating, renaming, archiving, and restoring a reference-data unit in the isolated E2E database.
+- The first run exposed that the simple reference-data dialog did not receive its edit state, so the submit action was labeled “Add” while editing. Passed `isEditing` through to the shared dialog; the same browser workflow now verifies that the action and persisted row state update correctly.
+- The API E2E suite passes 24/24 tests. Four browser workflows pass through the running Chrome CDP session: Admin navigation, Admin reference-data lifecycle, agent claim creation access, and client API denial. The E2E runner tears down its disposable database afterward.
+- Playwright’s bundled Chromium cannot launch in this Nix environment because `libnspr4.so` is unavailable. Running the same suite through the existing Chrome CDP endpoint avoids that host-library gap; no application or preview database was used.
+- Web catalog/API tests, the web TypeScript check, Biome on changed files, and `git diff --check` pass.
+
+**Next:** add browser workflows for role assignment, client order submission, agent approval/program creation and claim handling, and Admin registration review. Continue the residual English copy audit and run full workspace verification before handoff.
+
+## Chapter 19 — English i18n source audit — 2026-10-01
+
+- Audited the server-owned message paths: the NestJS exception filter returns stable error codes and structured validator-rule codes, success DTOs return response codes, and the web maps those codes to the English catalog. API-provided English exception/validation prose is stripped before it reaches the UI.
+- Checked the password-reset subject/body, notification copy, toast handlers, API error handling, and shared date/number/file-size formatters. Email copy is centralized in the API English template; notifications use message codes and parameters; toast and helper flows resolve catalog messages. Developer-only provider invariant errors remain diagnostic strings.
+- Classified mutable customer names, custom role-profile names, and admin-managed reference names as business data displayed verbatim. Fixed workflow states remain stable codes with catalog mappings. French rollout still needs a decision for system-seeded reference labels and the effect of admin renames.
+- Confirmed Settings Appearance already previews themes, workspace layouts, fonts, text size, and motion. Updated readiness and i18n documentation to record those previews and the remaining locale gaps.
+- Completed a full non-runtime French draft for all 22 English catalog sections (1,242 message keys). Focused web tests confirm key, plural-shape, and placeholder parity; web/API typechecks, the API message-contract test, and focused Biome checks pass. A French password-reset email draft is present but is not wired into delivery. French remains disabled pending copy review and locale/email integration.
+
+**Next:** review the French draft with the ONCF glossary, complete locale-aware email delivery and synced locale preference/runtime support, and test browser/API formatting with French enabled only after review. Keep user-authored and admin-editable business names verbatim; English remains the only available locale until rollout is complete.
+
+## Chapter 20 — complete isolated user-workflow verification — 2026-10-01
+
+- Ran the isolated API E2E suite with Node 24 from the repository's Nix shell: 2 suites / 24 tests passed.
+- Ran all eight browser workflows through the active Chrome CDP session: Admin navigation and access, registration review, custom permission assignment and enforcement, reference-data lifecycle, agent navigation and scoped claim/program creation, client order submission, and client access denial all passed.
+- The first browser attempt confirmed the host's Playwright Chromium is missing `libnspr4.so`. Reusing the already-running Chrome CDP browser completed the same workflows without changing dependencies.
+- The report page was freshly captured at all ten documented viewport sizes from 320px to 3840px. All routes matched, all page widths stayed within the viewport, and date filters/export controls remained visible and usable. No report UI change was warranted.
+- The E2E runner tore down its disposable database after each run. It did not target the preview database. The full repository verification had passed in the preceding work chapter; no application source was changed in this verification chapter.
+
+**Next:** keep French deferred as requested. Remaining product-closeout work is production readiness (database ownership/lifecycle review, backups, secrets, HTTPS, monitoring), an owner/process for customer ICE verification, and notification delivery reliability decisions. Check the first hosted CI result when available; the local isolated API and browser journeys now pass.
+
+## Chapter 21 — atomic coded workflow notifications — 2026-10-01–02
+
+- Claim-comment recipients are resolved before persistence: the claim creator and active users with `claims:read` in the claim customer's portfolio receive a coded in-app notification; the author never receives their own notification.
+- The comment, any first-response status/history change, and all recipient notification rows now commit or roll back together. If notification persistence fails, the comment cannot be saved without its notification records.
+- Added query coverage for the shared transaction and workflow tests for creator and customer-portfolio recipients. A new failure-path test verifies recipient lookup errors stop before comment persistence.
+- Removed the unused best-effort `notifyChange` helper, which could silently lose notifications and had no production callers. Workflow code now only prepares notification records for persistence through domain transactions.
+- Updated architecture/readiness docs to distinguish transactional in-app records from external delivery, which remains unimplemented.
+- Verification passed for this continuation: all 6 Claims API suites / 60 tests, NotificationsService tests, API typecheck, and Biome on changed source files. Earlier chapter evidence includes isolated PostgreSQL API E2E (2 suites / 24 tests) and full `bun run verify` (Biome, workspace typechecks, 69 API suites / 518 tests, web checks, and production builds).
+- The separate headless browser E2E attempt could not launch this host's Playwright Chromium because `libnspr4.so` is unavailable. No system package was installed. Earlier browser workflow evidence through Chrome CDP remains documented in Chapter 20.
+
+**Next:** finish the product review by checking every route/state/role at representative responsive sizes, resolve any evidenced workflow/UI inconsistencies, and confirm the customer ICE maintenance process. French remains deferred per product direction.
+
+## Chapter 22 — transactional user assignments — 2026-10-02
+
+- User creation and customer-portfolio insertion now share one database transaction. User profile updates and portfolio replacement/removal also share one transaction, so a failed foreign-key assignment cannot leave partial account changes.
+- Added isolated API E2E failure cases for both operations: invalid customer assignments leave no sign-in-capable account and do not partially update an existing user.
+- The isolated E2E runner now fails a successful test run if service teardown fails, and its final check confirmed no E2E containers remained.
+- Verification: API typecheck passed; all 69 API unit suites / 521 tests passed; isolated E2E passed (2 suites / 27 tests); changed-file Biome checks and `git diff --check` passed.
+
+**Next:** improve remaining user-facing workflows and UI consistency, then run focused verification that covers each affected role and state.
+
+## Chapter 22 continuation — product consistency and verification — 2026-10-02
+
+- Kept centered navigation on one row from tablet widths upward and aligned built-in/custom access-profile status treatment. Fresh captures across 320–3840px showed no horizontal overflow.
+- Verified the theme chooser at phone, tablet, and desktop widths. Its compact palette previews remain inside a select menu; selecting Charcoal dark updates the UI and survives navigation, then the original Warm light preference was restored.
+- Updated the screenshot helper's text action to include accessible listbox options, allowing browser checks to select theme options and similar controls.
+- Fresh dashboard captures at 390px, 768px, and 1440px showed the Admin's registration review, six-month activity, and permission-appropriate links without page overflow.
+- Full `bun run verify` passed: Biome, workspace typechecks, web checks, 69 API suites / 521 tests, and all builds. Isolated API E2E passed 2 suites / 27 tests with the configured real Node runtime; disposable containers were removed.
+- Product changes were committed locally as `d9c2469` and `bbd592e`; screenshot/tooling and documentation changes are being committed separately after review.
