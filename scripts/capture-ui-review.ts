@@ -27,6 +27,7 @@ const args = process.argv.slice(2);
 const route = readOption("--url");
 const thenUrl = readOption("--then-url");
 const expectedRoute = readOption("--expect-route");
+const requestedTargetId = readOption("--target-id");
 const outputDirectory = resolve(
 	readOption("--out") ?? "/tmp/ecommand-ui-review",
 );
@@ -65,6 +66,7 @@ if (args.includes("--help")) {
 
 Usage: bun run ui:review -- [options]
   --url <path-or-url>    Route to capture; defaults to the current browser URL
+  --target-id <id>       Select a specific page from the Chrome DevTools target list
   --fresh-context        Use an isolated browser profile without saved app login
   --fill <selector=value> Set a form field and dispatch input/change events (repeatable)
   --click-before-fill <selector> Click before filling fields (repeatable)
@@ -97,6 +99,7 @@ if (!targetsResponse.ok) {
 	throw new Error(`Chrome DevTools is unavailable at ${cdpUrl}.`);
 }
 const targets = (await targetsResponse.json()) as Array<{
+	id: string;
 	type: string;
 	url: string;
 	webSocketDebuggerUrl: string;
@@ -110,6 +113,9 @@ const appOrigin = route?.startsWith("http")
 		).origin;
 const requestedPath = route ? new URL(route, appOrigin).pathname : undefined;
 const originalTarget =
+	(requestedTargetId
+		? pageTargets.find((target) => target.id === requestedTargetId)
+		: undefined) ??
 	(requestedPath
 		? pageTargets.find((target) => {
 				if (!target.url.startsWith(appOrigin)) return false;
@@ -118,7 +124,11 @@ const originalTarget =
 		: undefined) ??
 	pageTargets.find((target) => target.url.startsWith(appOrigin));
 if (!originalTarget) {
-	throw new Error("No open web page was found in the Chrome session.");
+	throw new Error(
+		requestedTargetId
+			? `No Chrome page target was found with id ${requestedTargetId}.`
+			: "No open web page was found in the Chrome session.",
+	);
 }
 
 const initialUrl = originalTarget.url;
