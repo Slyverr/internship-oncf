@@ -281,6 +281,15 @@ export const Messages = {
 			byAccessProfile: "dashboard.accounts.byAccessProfile",
 			roleChartLabel: "dashboard.accounts.roleChartLabel",
 			roleCount: "dashboard.accounts.roleCount",
+			registrationActivityTitle: "dashboard.accounts.registrationActivityTitle",
+			registrationActivityDescription:
+				"dashboard.accounts.registrationActivityDescription",
+			registrationActivityTotal: "dashboard.accounts.registrationActivityTotal",
+			registrationActivityChartLabel:
+				"dashboard.accounts.registrationActivityChartLabel",
+			registrationActivityMonthCount:
+				"dashboard.accounts.registrationActivityMonthCount",
+			registrationActivityEmpty: "dashboard.accounts.registrationActivityEmpty",
 			loading: "dashboard.accounts.loading",
 			loadFailed: "dashboard.accounts.loadFailed",
 		},

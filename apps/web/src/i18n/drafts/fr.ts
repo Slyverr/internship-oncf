@@ -298,6 +298,14 @@ export const frDraft = {
 			byAccessProfile: "Comptes par profil d’accès",
 			roleChartLabel: "Comptes par profil d’accès : {roles}",
 			roleCount: "{role} : {count}",
+			registrationActivityTitle: "Nouvelles inscriptions",
+			registrationActivityDescription:
+				"Comptes créés au cours des six derniers mois.",
+			registrationActivityTotal: "Nouveaux comptes",
+			registrationActivityChartLabel:
+				"Nombre mensuel de nouveaux comptes sur les six derniers mois : {months}",
+			registrationActivityMonthCount: "{month} {count}",
+			registrationActivityEmpty: "Aucun compte n’a été créé sur cette période.",
 			loading: "Chargement des comptes…",
 			loadFailed: "Impossible de charger le nombre de comptes.",
 		},

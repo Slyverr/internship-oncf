@@ -43,7 +43,10 @@ import {
 } from "@/lib/api/orders";
 import { useProgramsControllerFindAll } from "@/lib/api/programs";
 import { useUsersControllerFindAll } from "@/lib/api/users";
-import { getDashboardRoleCounts } from "@/lib/dashboard-insights";
+import {
+	getDashboardRegistrationCounts,
+	getDashboardRoleCounts,
+} from "@/lib/dashboard-insights";
 import { formatMediumDate, formatMonthLabel } from "@/lib/date-utils";
 import type { OrderReport, ReportCount } from "@/lib/reports";
 import { getOrderReport } from "@/lib/reports";
@@ -411,6 +414,83 @@ function UserAccountsSection({
 								</div>
 							</section>
 						)}
+					</div>
+				)}
+			</CardContent>
+		</Card>
+	);
+}
+
+function UserRegistrationActivitySection({ users }: { users: UserListDto[] }) {
+	const t = useTranslate();
+	const locale = useLocale();
+	const months = getDashboardRegistrationCounts(users).map(
+		({ key, count }) => ({
+			key,
+			count,
+			label: formatMonthLabel(new Date(`${key}-01T00:00:00.000Z`), locale),
+		}),
+	);
+	const total = months.reduce((sum, month) => sum + month.count, 0);
+	const maxCount = Math.max(1, ...months.map(({ count }) => count));
+	const chartLabel = months
+		.map(({ label, count }) =>
+			t(Messages.dashboard.accounts.registrationActivityMonthCount, {
+				month: label,
+				count,
+			}),
+		)
+		.join(", ");
+
+	return (
+		<Card size="sm">
+			<CardHeader>
+				<div className="flex flex-wrap items-center justify-between gap-control">
+					<div className="grid min-w-0 gap-compact">
+						<CardTitle>
+							{t(Messages.dashboard.accounts.registrationActivityTitle)}
+						</CardTitle>
+						<CardDescription>
+							{t(Messages.dashboard.accounts.registrationActivityDescription)}
+						</CardDescription>
+					</div>
+					<div className="grid shrink-0 text-right">
+						<span className="text-meta text-muted-foreground">
+							{t(Messages.dashboard.accounts.registrationActivityTotal)}
+						</span>
+						<span className="text-3xl font-semibold tabular-nums">{total}</span>
+					</div>
+				</div>
+			</CardHeader>
+			<CardContent>
+				{total === 0 ? (
+					<div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
+						{t(Messages.dashboard.accounts.registrationActivityEmpty)}
+					</div>
+				) : (
+					<div
+						role="img"
+						aria-label={t(
+							Messages.dashboard.accounts.registrationActivityChartLabel,
+							{ months: chartLabel },
+						)}
+						className="grid grid-cols-6 items-end gap-control"
+					>
+						{months.map(({ key, label, count }) => (
+							<div key={key} className="grid min-w-0 gap-compact text-center">
+								<span className="text-meta tabular-nums text-muted-foreground">
+									{count}
+								</span>
+								<div className="flex h-24 items-end justify-center border-b border-border/70">
+									<div
+										aria-hidden="true"
+										className={`w-1/2 rounded-t-sm bg-primary ${count > 0 ? "min-h-2" : ""}`}
+										style={{ height: `${(count / maxCount) * 100}%` }}
+									/>
+								</div>
+								<span className="text-xs text-muted-foreground">{label}</span>
+							</div>
+						))}
 					</div>
 				)}
 			</CardContent>
@@ -875,12 +955,17 @@ export function DashboardOverview() {
 
 			<PendingRegistrationsSection users={pendingRegistrations} />
 			{canReadUsers && (
-				<UserAccountsSection
-					users={usersQuery.data ?? []}
-					canReviewUsers={canReviewUsers}
-					isLoading={usersQuery.isLoading}
-					isError={usersQuery.isError}
-				/>
+				<section className="grid min-w-0 items-start gap-6 @4xl/workspace:grid-cols-2">
+					<UserAccountsSection
+						users={usersQuery.data ?? []}
+						canReviewUsers={canReviewUsers}
+						isLoading={usersQuery.isLoading}
+						isError={usersQuery.isError}
+					/>
+					{!usersQuery.isLoading && !usersQuery.isError && (
+						<UserRegistrationActivitySection users={usersQuery.data ?? []} />
+					)}
+				</section>
 			)}
 
 			{(showReadyOrdersCard || canReadReports) && (

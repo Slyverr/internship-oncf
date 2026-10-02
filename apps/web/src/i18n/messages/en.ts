@@ -289,6 +289,14 @@ export const en = {
 			byAccessProfile: "Accounts by access profile",
 			roleChartLabel: "Accounts by access profile: {roles}",
 			roleCount: "{role}: {count}",
+			registrationActivityTitle: "New account activity",
+			registrationActivityDescription:
+				"New accounts created in the past six months.",
+			registrationActivityTotal: "New accounts",
+			registrationActivityChartLabel:
+				"Monthly new account counts for the past six months: {months}",
+			registrationActivityMonthCount: "{month} {count}",
+			registrationActivityEmpty: "No accounts were created in this period.",
 			loading: "Loading account overview…",
 			loadFailed: "Could not load account totals.",
 		},
