@@ -1,13 +1,22 @@
-import { resolve } from "node:path";
+import { rm } from "node:fs/promises";
+import { delimiter, resolve } from "node:path";
 
 const rootDir = resolve(import.meta.dir, "..");
 const apiDir = resolve(rootDir, "apps/api");
+const webDir = resolve(rootDir, "apps/web");
 const jestExecutable = resolve(rootDir, "node_modules/jest/bin/jest.js");
 const composeFile = resolve(rootDir, "docker-compose.e2e.yml");
 const postgresPort = Number(process.env.ECOMMAND_E2E_POSTGRES_PORT ?? "55432");
 
 const e2eEnv = {
 	...process.env,
+	PATH: [
+		resolve(rootDir, "node_modules/.bin"),
+		resolve(apiDir, "node_modules/.bin"),
+		process.env.PATH ?? "",
+	]
+		.filter(Boolean)
+		.join(delimiter),
 	DATABASE_URL: `postgresql://postgres:postgres@127.0.0.1:${postgresPort}/ecommand_e2e`,
 	JWT_SECRET: "ecommand-e2e-test-secret-not-for-production",
 	JWT_EXPIRES_IN: "30m",
@@ -59,6 +68,11 @@ async function findComposeCommand() {
 }
 
 const nodeExecutable = process.env.ECOMMAND_E2E_NODE ?? Bun.which("node");
+const tsxExecutable = resolve(rootDir, "node_modules/tsx/dist/cli.mjs");
+const drizzleKitExecutable = resolve(
+	rootDir,
+	"node_modules/drizzle-kit/bin.cjs",
+);
 
 if (!nodeExecutable) {
 	throw new Error(
@@ -81,16 +95,106 @@ if (
 const compose = await findComposeCommand();
 const composeArgs = [...compose, "-f", composeFile, "-p", "ecommand-e2e"];
 
+async function waitForServer(
+	url: string,
+	name: string,
+	process: Bun.Subprocess,
+) {
+	for (let attempt = 0; attempt < 90; attempt += 1) {
+		if (process.exitCode !== null) {
+			throw new Error(
+				`${name} exited before becoming ready (${process.exitCode})`,
+			);
+		}
+		try {
+			const response = await fetch(url);
+			if (response.ok) return;
+		} catch {
+			// The listener may need a few seconds after its process starts.
+		}
+		await Bun.sleep(1000);
+	}
+	throw new Error(`${name} did not become ready at ${url}`);
+}
+
+async function stopServer(process: Bun.Subprocess) {
+	if (process.exitCode !== null) return;
+	process.kill("SIGTERM");
+	await Promise.race([process.exited, Bun.sleep(5000)]);
+	if (process.exitCode === null) process.kill("SIGKILL");
+	await process.exited;
+}
+
+async function runBrowserWorkflows() {
+	const buildDir = ".next-e2e";
+	const browserEnv = {
+		...e2eEnv,
+		NESTJS_PORT: "8100",
+		WEB_APP_URL: "http://localhost:3100",
+		BACKEND_API_URL: "http://localhost:8100",
+		NEXT_PUBLIC_SITE_URL: "http://localhost:3100",
+		NEXT_BUILD_DIST_DIR: buildDir,
+		PORT: "3100",
+		LOCAL_MAILBOX_PATH: "/tmp/ecommand-e2e-mailbox",
+		STORAGE_PATH: "/tmp/ecommand-e2e-storage",
+	};
+	const api = Bun.spawn(["bun", "run", "start"], {
+		cwd: apiDir,
+		env: browserEnv,
+		stdin: "ignore",
+		stdout: "ignore",
+		stderr: "inherit",
+	});
+	let web: Bun.Subprocess | undefined;
+	try {
+		await rm(resolve(webDir, buildDir), { recursive: true, force: true });
+		await waitForServer("http://localhost:8100/health", "E2E API", api);
+		web = Bun.spawn(["bun", "run", "next", "dev", "--port", "3100"], {
+			cwd: webDir,
+			env: browserEnv,
+			stdin: "ignore",
+			stdout: "ignore",
+			stderr: "inherit",
+		});
+		await waitForServer("http://localhost:3100/login", "E2E web app", web);
+		if (browserEnv.PLAYWRIGHT_CDP_ENDPOINT) {
+			await run(
+				[nodeExecutable, tsxExecutable, resolve(webDir, "e2e/run-cdp.ts")],
+				{ cwd: webDir, env: browserEnv },
+			);
+		} else {
+			await run(
+				[nodeExecutable, "../../node_modules/playwright/cli.js", "test"],
+				{
+					cwd: webDir,
+					env: browserEnv,
+				},
+			);
+		}
+	} finally {
+		if (web) await stopServer(web);
+		await stopServer(api);
+		await rm(resolve(webDir, buildDir), { recursive: true, force: true });
+	}
+}
+
 try {
 	await run([...composeArgs, "down", "--volumes", "--remove-orphans"]);
 	await run([...composeArgs, "up", "-d", "postgres-e2e"]);
-	await run(["bun", "run", "wait:e2e-services"], { cwd: apiDir });
+	await run(
+		[nodeExecutable, tsxExecutable, "./test/helpers/wait-for-e2e-services.ts"],
+		{ cwd: apiDir },
+	);
 
-	await run(["bun", "run", "drizzle-kit", "push", "--force"], {
+	await run([nodeExecutable, drizzleKitExecutable, "push", "--force"], {
 		cwd: apiDir,
 	});
-	await run(["bun", "run", "seed:ref"], { cwd: apiDir });
-	await run(["bun", "run", "seed:e2e"], { cwd: apiDir });
+	await run([nodeExecutable, tsxExecutable, "./drizzle/seed/seed-ref.ts"], {
+		cwd: apiDir,
+	});
+	await run([nodeExecutable, tsxExecutable, "./test/fixtures/seed-e2e.ts"], {
+		cwd: apiDir,
+	});
 	await run(
 		[
 			nodeExecutable,
@@ -101,6 +205,24 @@ try {
 		],
 		{ cwd: apiDir },
 	);
+	if (process.argv.includes("--browser")) {
+		await run(
+			[nodeExecutable, tsxExecutable, "./test/helpers/reset-e2e-database.ts"],
+			{
+				cwd: apiDir,
+			},
+		);
+		await run([nodeExecutable, drizzleKitExecutable, "push", "--force"], {
+			cwd: apiDir,
+		});
+		await run([nodeExecutable, tsxExecutable, "./drizzle/seed/seed-ref.ts"], {
+			cwd: apiDir,
+		});
+		await run([nodeExecutable, tsxExecutable, "./test/fixtures/seed-e2e.ts"], {
+			cwd: apiDir,
+		});
+		await runBrowserWorkflows();
+	}
 } finally {
 	await run([...composeArgs, "down", "--volumes", "--remove-orphans"], {
 		env: process.env,

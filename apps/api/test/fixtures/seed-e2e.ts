@@ -30,6 +30,7 @@ import {
 } from "@/database/reference-data";
 import {
 	E2E_CLAIMS,
+	E2E_CUSTOMER_ICE,
 	E2E_CUSTOMERS,
 	E2E_ORDERS,
 	E2E_PASSWORD,
@@ -52,19 +53,19 @@ async function seed() {
 			{
 				companyName: "E2E Assigned Customer A",
 				customerCode: E2E_CUSTOMERS.assignedA,
-				ice: "100000000000001",
+				ice: E2E_CUSTOMER_ICE.assignedA,
 				isActive: true,
 			},
 			{
 				companyName: "E2E Assigned Customer B",
 				customerCode: E2E_CUSTOMERS.assignedB,
-				ice: "100000000000002",
+				ice: E2E_CUSTOMER_ICE.assignedB,
 				isActive: true,
 			},
 			{
 				companyName: "E2E Outside Customer",
 				customerCode: E2E_CUSTOMERS.outside,
-				ice: "100000000000003",
+				ice: E2E_CUSTOMER_ICE.outside,
 				isActive: true,
 			},
 		])

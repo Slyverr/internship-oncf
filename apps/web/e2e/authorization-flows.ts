@@ -1,0 +1,464 @@
+import { API_ERROR_CODES } from "@ecommand/shared";
+import { expect, type Page } from "@playwright/test";
+import {
+	E2E_CUSTOMER_ICE,
+	E2E_CUSTOMERS,
+	E2E_ORDERS,
+	E2E_PASSWORD,
+	E2E_USERS,
+} from "../../api/test/fixtures/e2e-fixtures";
+import { Messages, translate } from "../src/i18n";
+
+const navigation = {
+	claims: translate(Messages.navigation.claims),
+	customers: translate(Messages.navigation.customers),
+	orders: translate(Messages.navigation.orders),
+	programs: translate(Messages.navigation.programs),
+	reports: translate(Messages.navigation.reports),
+	roles: translate(Messages.navigation.roleProfiles),
+	users: translate(Messages.navigation.users),
+};
+
+async function signIn(page: Page, username: string) {
+	await page.goto("/login");
+	await page.getByLabel(translate(Messages.auth.login.username)).fill(username);
+	await page.locator("#password").fill(E2E_PASSWORD);
+	await page
+		.getByRole("button", { name: translate(Messages.auth.login.title) })
+		.click();
+	await expect(page).toHaveURL(/\/dashboard$/);
+}
+
+async function expectRouteVisible(page: Page, label: string, visible: boolean) {
+	const route = page.getByRole("link", { name: label, exact: true });
+	if (visible) await expect(route).toBeVisible();
+	else await expect(route).toHaveCount(0);
+}
+
+export async function verifyAdminNavigation(page: Page) {
+	await signIn(page, E2E_USERS.admin.email);
+	await expectRouteVisible(page, navigation.users, true);
+	await expectRouteVisible(page, navigation.reports, true);
+	await expectRouteVisible(page, navigation.roles, true);
+	await expectRouteVisible(page, navigation.orders, false);
+	await expectRouteVisible(page, navigation.claims, false);
+}
+
+export async function verifyAdminCatalogLifecycle(page: Page) {
+	await signIn(page, E2E_USERS.admin.email);
+	await page.goto("/dashboard/catalog");
+
+	const unitCategory = translate(Messages.referenceData.sections.units);
+	await page.getByRole("button", { name: unitCategory, exact: true }).click();
+	await expect(page.getByRole("heading", { name: unitCategory })).toBeVisible();
+
+	const originalName = `E2E unit ${Date.now()}`;
+	const renamedName = `${originalName} renamed`;
+	await page
+		.getByRole("button", {
+			name: translate(Messages.referenceData.add),
+			exact: true,
+		})
+		.click();
+
+	let dialog = page.getByRole("dialog");
+	await dialog
+		.getByLabel(translate(Messages.referenceData.name), { exact: true })
+		.fill(originalName);
+	await dialog
+		.getByRole("button", {
+			name: translate(Messages.referenceData.add),
+			exact: true,
+		})
+		.click();
+	await expect(dialog).toBeHidden();
+	await expect(page.getByRole("button", { name: originalName })).toBeVisible();
+
+	await page.getByRole("button", { name: originalName, exact: true }).click();
+	dialog = page.getByRole("dialog");
+	await dialog
+		.getByLabel(translate(Messages.referenceData.name), { exact: true })
+		.fill(renamedName);
+	await dialog
+		.getByRole("button", {
+			name: translate(Messages.common.actions.save),
+			exact: true,
+		})
+		.click();
+	await expect(dialog).toBeHidden();
+	await expect(page.getByRole("button", { name: renamedName })).toBeVisible();
+
+	await page.getByRole("button", { name: renamedName, exact: true }).click();
+	dialog = page.getByRole("dialog");
+	await dialog.getByRole("checkbox").uncheck();
+	await dialog
+		.getByRole("button", {
+			name: translate(Messages.common.actions.save),
+			exact: true,
+		})
+		.click();
+	await expect(dialog).toBeHidden();
+	const archivedRow = page
+		.getByRole("row")
+		.filter({ has: page.getByRole("button", { name: renamedName }) });
+	await expect(archivedRow).toContainText(
+		translate(Messages.referenceData.archived),
+	);
+
+	await page.getByRole("button", { name: renamedName, exact: true }).click();
+	dialog = page.getByRole("dialog");
+	await dialog.getByRole("checkbox").check();
+	await dialog
+		.getByRole("button", {
+			name: translate(Messages.common.actions.save),
+			exact: true,
+		})
+		.click();
+	await expect(dialog).toBeHidden();
+	const restoredRow = page
+		.getByRole("row")
+		.filter({ has: page.getByRole("button", { name: renamedName }) });
+	await expect(restoredRow).toContainText(
+		translate(Messages.referenceData.active),
+	);
+}
+
+export async function verifyAgentNavigation(page: Page) {
+	await signIn(page, E2E_USERS.agentAssigned.employeeCode as string);
+	await expectRouteVisible(page, navigation.orders, true);
+	await expectRouteVisible(page, navigation.programs, true);
+	await expectRouteVisible(page, navigation.claims, true);
+	await expectRouteVisible(page, navigation.customers, true);
+	await expectRouteVisible(page, navigation.users, false);
+	await page
+		.getByRole("link", { name: navigation.claims, exact: true })
+		.click();
+	await expect(page).toHaveURL(/\/dashboard\/claims$/);
+	await expect(
+		page.getByRole("link", {
+			name: translate(Messages.claims.create),
+			exact: true,
+		}),
+	).toBeVisible();
+}
+
+export async function verifyAdminCustomRoleAssignment(page: Page) {
+	await signIn(page, E2E_USERS.admin.email);
+
+	const roleName = `E2E order reader ${Date.now()}`;
+	await page.goto("/dashboard/roles");
+	await page
+		.getByRole("button", {
+			name: translate(Messages.roleProfiles.create),
+			exact: true,
+		})
+		.click();
+	const roleDialog = page.getByRole("dialog");
+	await roleDialog
+		.getByLabel(translate(Messages.roleProfiles.name), { exact: true })
+		.fill(roleName);
+	await roleDialog.locator('label[for="role-permission-orders-read"]').click();
+	await roleDialog
+		.getByRole("button", {
+			name: translate(Messages.roleProfiles.save),
+			exact: true,
+		})
+		.click();
+	await expect(roleDialog).toBeHidden();
+	await expect(page.getByRole("cell", { name: roleName })).toBeVisible();
+
+	const email = `e2e.order-reader.${Date.now()}@example.test`;
+	await page.goto("/dashboard/users/new");
+	await page.locator("#email").fill(email);
+	await page.locator("#password").fill(E2E_PASSWORD);
+	await page
+		.getByRole("button", {
+			name: translate(Messages.common.actions.continue),
+			exact: true,
+		})
+		.click();
+	await page.locator("#firstName").fill("E2E");
+	await page.locator("#lastName").fill("Order Reader");
+	await page.locator("#roleId").click();
+	await page.getByRole("option", { name: roleName, exact: true }).click();
+	await page
+		.getByRole("button", {
+			name: translate(Messages.users.form.actions.create),
+			exact: true,
+		})
+		.click();
+	await expect(page).toHaveURL(/\/dashboard\/users\/[0-9a-f-]+$/i);
+
+	await page.context().clearCookies();
+	await signIn(page, email);
+	await expectRouteVisible(page, navigation.orders, true);
+	await expectRouteVisible(page, navigation.users, false);
+	const ordersUrl = new URL("/api/proxy/orders", page.url()).href;
+	const readResponse = await page.request.get(ordersUrl);
+	expect(readResponse.status()).toBe(200);
+	const writeResponse = await page.request.post(ordersUrl, { data: {} });
+	expect(writeResponse.status()).toBe(403);
+	expect(await writeResponse.json()).toMatchObject({
+		code: API_ERROR_CODES.ACCESS_DENIED,
+	});
+}
+
+export async function verifyAdminRegistrationReview(page: Page) {
+	const email = `e2e.registration.${Date.now()}@example.test`;
+	await page.goto("/signup");
+	await page.locator("#registration-first-name").fill("Pending");
+	await page.locator("#registration-last-name").fill("Applicant");
+	await page
+		.locator("#registration-customer-code")
+		.fill(E2E_CUSTOMERS.assignedA);
+	await page.locator("#registration-ice").fill(E2E_CUSTOMER_ICE.assignedA);
+	await page
+		.getByRole("button", {
+			name: translate(Messages.auth.signup.continue),
+			exact: true,
+		})
+		.click();
+	await page.locator("#registration-email").fill(email);
+	await page.locator("#registration-password").fill("E2eStrongPass1!");
+	await page
+		.locator("#registration-password-confirmation")
+		.fill("E2eStrongPass1!");
+	await page
+		.getByRole("button", {
+			name: translate(Messages.auth.signup.requestAccess),
+			exact: true,
+		})
+		.click();
+	await expect(
+		page.getByText(translate(Messages.auth.signup.requestReview)),
+	).toBeVisible();
+
+	await signIn(page, E2E_USERS.admin.email);
+	await page.goto("/dashboard/users?registrationStatus=PENDING");
+	const applicantLink = page.getByRole("link", { name: email, exact: true });
+	await expect(applicantLink).toBeVisible();
+	await applicantLink.click();
+	await expect(
+		page.getByRole("button", {
+			name: translate(Messages.users.actions.approve),
+			exact: true,
+		}),
+	).toBeVisible();
+	await page
+		.getByRole("button", {
+			name: translate(Messages.users.actions.approve),
+			exact: true,
+		})
+		.click();
+	const usersResponse = await page.request.get(
+		new URL("/api/proxy/users", page.url()).href,
+	);
+	expect(usersResponse.status()).toBe(200);
+	const users = (await usersResponse.json()) as Array<{
+		email: string;
+		registrationStatus: string;
+		isActive: boolean;
+	}>;
+	expect(users.find((user) => user.email === email)).toMatchObject({
+		registrationStatus: "APPROVED",
+		isActive: true,
+	});
+}
+export async function verifyAgentOperationalCreation(page: Page) {
+	await signIn(page, E2E_USERS.agentAssigned.employeeCode as string);
+	await page.goto("/dashboard/claims/new");
+	await page.locator("#customerId").click();
+	await page
+		.getByRole("option", { name: "E2E Assigned Customer A", exact: true })
+		.click();
+	await page
+		.getByRole("button", {
+			name: translate(Messages.common.actions.continue),
+			exact: true,
+		})
+		.click();
+	await page
+		.locator("#description")
+		.fill("E2E agent claim creation workflow check.");
+	await page
+		.getByRole("button", {
+			name: translate(Messages.claims.create),
+			exact: true,
+		})
+		.click();
+	await expect(page).toHaveURL(/\/dashboard\/claims\/CLM-[A-Z0-9]+$/);
+	await expect(page.getByRole("heading")).toContainText(/CLM-/);
+
+	const eligibleOrdersResponse = page.waitForResponse((response) =>
+		response.url().includes("/orders/eligible-for-programs"),
+	);
+	await page.goto("/dashboard/programs/new");
+	const eligibleOrders = (await (
+		await eligibleOrdersResponse
+	).json()) as Array<{
+		orderNumber: string;
+	}>;
+	expect(eligibleOrders.map((order) => order.orderNumber)).toContain(
+		E2E_ORDERS.assignedB,
+	);
+	await expect(page.locator("#orderId")).toBeEnabled();
+	await page
+		.locator('[data-slot="input-group"]')
+		.filter({ has: page.locator("#orderId") })
+		.getByRole("button")
+		.click();
+	const eligibleOrder = page.getByRole("option", {
+		name: E2E_ORDERS.assignedB,
+		exact: true,
+	});
+	await expect(eligibleOrder).toBeVisible();
+	await eligibleOrder.click();
+	await page.locator("#plannedDate").fill("2026-10-10");
+	await page.locator("#quantityPlanned").fill("20");
+	await page
+		.getByRole("button", {
+			name: translate(Messages.common.actions.continue),
+			exact: true,
+		})
+		.click();
+	await expect(page.locator("#quantityRealized")).toBeVisible();
+	await page
+		.getByRole("button", {
+			name: translate(Messages.programs.createForm.create),
+			exact: true,
+		})
+		.click();
+	await expect(page).toHaveURL(/\/dashboard\/programs\/PRG-[A-Z0-9]+$/);
+	await expect(page.getByRole("heading")).toContainText(/PRG-/);
+}
+export async function verifyClientOrderSubmission(page: Page) {
+	await signIn(page, E2E_USERS.clientA.email);
+	await page.goto("/dashboard/orders/new");
+	await page.locator("#goodsId").click();
+	await page
+		.getByRole("option", { name: "E2E Test Cereals", exact: true })
+		.click();
+	await page.locator("#unitId").click();
+	await page.locator("#unitId").fill("Tonnes");
+	await page.locator("#unitId").press("ArrowDown");
+	await page.locator("#unitId").press("Enter");
+	await page.locator("#quantityDemanded").fill("7");
+	await page
+		.getByRole("button", {
+			name: translate(Messages.common.actions.continue),
+			exact: true,
+		})
+		.click();
+	await expect(
+		page.getByRole("region", {
+			name: translate(Messages.orders.createForm.scheduleTitle),
+		}),
+	).toBeVisible();
+	await page
+		.getByRole("button", {
+			name: translate(Messages.orders.createForm.create),
+			exact: true,
+		})
+		.click();
+	await expect(page).toHaveURL(/\/dashboard\/orders\/ORD-[A-Z0-9]+$/);
+	await expect(page.getByRole("heading")).toContainText(/ORD-/);
+}
+export async function verifyClientAuthorization(page: Page) {
+	await signIn(page, E2E_USERS.clientA.email);
+	await expectRouteVisible(page, navigation.orders, true);
+	await expectRouteVisible(page, navigation.programs, true);
+	await expectRouteVisible(page, navigation.claims, true);
+	await expectRouteVisible(page, navigation.users, false);
+
+	const response = await page.request.get(
+		new URL("/api/proxy/users", page.url()).href,
+	);
+	expect(response.status()).toBe(403);
+	expect(await response.json()).toMatchObject({
+		code: API_ERROR_CODES.ACCESS_DENIED,
+	});
+}
+
+export async function verifyAdminReportPrintLayout(page: Page) {
+	await signIn(page, E2E_USERS.admin.email);
+	let reportMocked = false;
+	await page.route("**/*", async (route) => {
+		if (!route.request().url().includes("/reports/orders")) {
+			await route.continue();
+			return;
+		}
+		reportMocked = true;
+		await route.fulfill({
+			status: 200,
+			contentType: "application/json",
+			body: JSON.stringify({
+				from: null,
+				to: null,
+				totalOrders: 720,
+				byStatus: [{ id: "APPROVED", name: "APPROVED", count: 720 }],
+				byCustomer: Array.from({ length: 36 }, (_, index) => ({
+					id: `customer-${index}`,
+					name: `Customer ${index + 1} with a long business name to check print wrapping`,
+					count: 36 - index,
+				})),
+				byProduct: Array.from({ length: 36 }, (_, index) => ({
+					id: `product-${index}`,
+					name: `Commodity ${index + 1} with a long catalog label for print wrapping`,
+					count: 36 - index,
+				})),
+				byMonth: Array.from({ length: 12 }, (_, index) => ({
+					month: `2026-${String(index + 1).padStart(2, "0")}`,
+					count: 60 - index,
+				})),
+			}),
+		});
+	});
+	await page.goto("/dashboard/reports");
+	await expect(
+		page.getByRole("heading", { name: translate(Messages.reports.title) }),
+	).toBeVisible();
+	await expect.poll(() => reportMocked).toBe(true);
+	await page.evaluate(() =>
+		document.documentElement.setAttribute("data-theme", "dark"),
+	);
+	const screenCardColor = await page
+		.locator("[data-report-print-root] [data-slot=card]")
+		.first()
+		.evaluate((element) => getComputedStyle(element).backgroundColor);
+	await page.emulateMedia({ media: "print" });
+	await expect(page.locator("#report-from")).toBeHidden();
+	await expect(
+		page.getByRole("button", { name: translate(Messages.reports.print) }),
+	).toBeHidden();
+	const printCard = page
+		.locator("[data-report-print-root] [data-slot=card]")
+		.first();
+	await expect(printCard).toBeVisible();
+	const printStyle = await printCard.evaluate((element) => ({
+		background: getComputedStyle(element).backgroundColor,
+		colorScheme: getComputedStyle(document.documentElement).colorScheme,
+	}));
+	expect(printStyle.background).not.toBe(screenCardColor);
+	expect(printStyle.colorScheme).toBe("light");
+	const longName = page.locator(".report-print-name").first();
+	await longName.evaluate((element) => {
+		element.textContent = "Long commodity name ".repeat(12);
+	});
+	const nameStyle = await longName.evaluate((element) => ({
+		whiteSpace: getComputedStyle(element).whiteSpace,
+		textOverflow: getComputedStyle(element).textOverflow,
+	}));
+	expect(nameStyle).toEqual({ whiteSpace: "normal", textOverflow: "clip" });
+	const pdf = await page.pdf({
+		format: "A4",
+		printBackground: true,
+		displayHeaderFooter: false,
+	});
+	expect(pdf.subarray(0, 4).toString()).toBe("%PDF");
+	const pdfPageCount = Number(
+		pdf
+			.toString("latin1")
+			.match(/\/Type \/Pages\b[\s\S]*?\/Count (\d+)/)?.[1] ?? "0",
+	);
+	expect(pdfPageCount).toBeGreaterThan(1);
+}

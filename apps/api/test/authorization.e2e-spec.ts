@@ -262,7 +262,7 @@ describe("customer portfolio authorization (e2e)", () => {
 			.expect(403);
 	});
 
-	it("limits administrators to user administration and grants customer reads for portfolio assignment", async () => {
+	it("limits administrators to user administration and exposes only customer portfolio options", async () => {
 		const adminToken = await login(app, E2E_USERS.admin.email);
 		await request(app.getHttpServer())
 			.get("/users")
@@ -272,15 +272,26 @@ describe("customer portfolio authorization (e2e)", () => {
 			.get("/reports/orders")
 			.set("Authorization", `Bearer ${adminToken}`)
 			.expect(200);
-		const adminCustomers = await request(app.getHttpServer())
-			.get("/customers")
+		const portfolioOptions = await request(app.getHttpServer())
+			.get("/customers/portfolio-options")
 			.set("Authorization", `Bearer ${adminToken}`)
 			.expect(200);
 		expect(
-			adminCustomers.body.map(
+			portfolioOptions.body.map(
 				(customer: { customerCode: string }) => customer.customerCode,
 			),
 		).toEqual(expect.arrayContaining(Object.values(E2E_CUSTOMERS)));
+		for (const customer of portfolioOptions.body) {
+			expect(Object.keys(customer).sort()).toEqual([
+				"companyName",
+				"customerCode",
+				"id",
+			]);
+		}
+		await request(app.getHttpServer())
+			.get("/customers")
+			.set("Authorization", `Bearer ${adminToken}`)
+			.expect(403);
 		await request(app.getHttpServer())
 			.put(`/customers/${customerIds[E2E_CUSTOMERS.assignedA]}`)
 			.set("Authorization", `Bearer ${adminToken}`)

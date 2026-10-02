@@ -6,6 +6,12 @@ export const E2E_CUSTOMERS = {
 	outside: "E2E-CUST-C",
 } as const;
 
+export const E2E_CUSTOMER_ICE = {
+	assignedA: "100000000000001",
+	assignedB: "100000000000002",
+	outside: "100000000000003",
+} as const;
+
 export const E2E_ORDERS = {
 	assignedA: "ORD-E2E0000001",
 	assignedB: "ORD-E2E0000002",
