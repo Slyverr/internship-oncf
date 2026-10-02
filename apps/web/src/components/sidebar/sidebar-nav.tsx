@@ -10,15 +10,13 @@ import {
 } from "@/components/ui/sidebar";
 import { useTranslate } from "@/i18n/locale-provider";
 import { useAuth } from "@/providers/auth-provider";
-import { sidebarRoutes } from "./sidebar-routes";
+import { getVisibleSidebarRoutes } from "./sidebar-routes";
 
 export function SidebarNav() {
 	const t = useTranslate();
 	const pathname = usePathname();
 	const { hasPermission } = useAuth();
-	const visibleRoutes = sidebarRoutes.filter(
-		(route) => !route.permission || hasPermission(route.permission),
-	);
+	const visibleRoutes = getVisibleSidebarRoutes(hasPermission);
 
 	return (
 		<SidebarMenu className="py-4 group-data-[collapsible=icon]:pt-compact">

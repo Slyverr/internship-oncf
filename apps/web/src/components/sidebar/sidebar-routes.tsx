@@ -85,3 +85,11 @@ export const sidebarRoutes: SidebarRoute[] = [
 		permission: Permission.CATALOG_MANAGE,
 	},
 ];
+
+export function getVisibleSidebarRoutes(
+	hasPermission: (permission: Permission) => boolean,
+) {
+	return sidebarRoutes.filter(
+		(route) => !route.permission || hasPermission(route.permission),
+	);
+}

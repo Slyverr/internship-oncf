@@ -8,7 +8,10 @@ import {
 	RegistrationStatus,
 	Role,
 } from "@ecommand/shared";
-import { sidebarRoutes } from "../src/components/sidebar/sidebar-routes";
+import {
+	getVisibleSidebarRoutes,
+	sidebarRoutes,
+} from "../src/components/sidebar/sidebar-routes";
 import {
 	canDeleteProgram,
 	canReviewRegistration,
@@ -168,6 +171,50 @@ for (const role of [
 		`${role} gets quick actions for workflows granted by its default permissions`,
 	);
 }
+
+const expectedSidebarRoutes: Record<Role, string[]> = {
+	[Role.ADMIN]: [
+		"/dashboard",
+		"/dashboard/reports",
+		"/dashboard/users",
+		"/dashboard/roles",
+		"/dashboard/catalog",
+	],
+	[Role.AGENT_COMMERCIAL]: [
+		"/dashboard",
+		"/dashboard/orders",
+		"/dashboard/programs",
+		"/dashboard/reports",
+		"/dashboard/claims",
+		"/dashboard/customers",
+	],
+	[Role.CLIENT_REPRESENTATIVE]: [
+		"/dashboard",
+		"/dashboard/orders",
+		"/dashboard/programs",
+		"/dashboard/reports",
+		"/dashboard/claims",
+	],
+};
+
+for (const role of Object.values(Role)) {
+	const permissions = new Set(DEFAULT_ROLE_PERMISSIONS[role]);
+	assert.deepEqual(
+		getVisibleSidebarRoutes((permission) => permissions.has(permission)).map(
+			(route) => route.url,
+		),
+		expectedSidebarRoutes[role],
+		`${role} sees only its default permission-backed navigation routes`,
+	);
+}
+
+assert.deepEqual(
+	getVisibleSidebarRoutes((permission) =>
+		[Permission.CATALOG_READ, Permission.CLAIMS_READ].includes(permission),
+	).map((route) => route.url),
+	["/dashboard", "/dashboard/claims"],
+	"custom permission sets do not gain catalog management from catalog read access",
+);
 assert.deepEqual(
 	getDashboardQuickActions(
 		(permission) => permission === Permission.CLAIMS_CREATE,

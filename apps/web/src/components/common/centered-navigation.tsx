@@ -12,7 +12,7 @@ import {
 import { Messages } from "@/i18n";
 import { useTranslate } from "@/i18n/locale-provider";
 import { useAuth } from "@/providers/auth-provider";
-import { sidebarRoutes } from "../sidebar/sidebar-routes";
+import { getVisibleSidebarRoutes } from "../sidebar/sidebar-routes";
 
 export function CenteredNavigation({ compact = false }: { compact?: boolean }) {
 	const t = useTranslate();
@@ -23,9 +23,7 @@ export function CenteredNavigation({ compact = false }: { compact?: boolean }) {
 	const navigationId = useId();
 	const [hasOverflow, setHasOverflow] = useState(false);
 	const [navigationWidth, setNavigationWidth] = useState(0);
-	const visibleRoutes = sidebarRoutes.filter(
-		(route) => !route.permission || hasPermission(route.permission),
-	);
+	const visibleRoutes = getVisibleSidebarRoutes(hasPermission);
 	const activeRoute = visibleRoutes.find((route) =>
 		route.exact
 			? pathname === route.url

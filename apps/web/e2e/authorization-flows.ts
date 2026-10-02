@@ -7,10 +7,12 @@ import {
 	E2E_PASSWORD,
 	E2E_USERS,
 } from "../../api/test/fixtures/e2e-fixtures";
+import { sidebarRoutes } from "../src/components/sidebar/sidebar-routes";
 import { Messages, translate } from "../src/i18n";
 
 const navigation = {
 	claims: translate(Messages.navigation.claims),
+	catalog: translate(Messages.navigation.referenceData),
 	customers: translate(Messages.navigation.customers),
 	orders: translate(Messages.navigation.orders),
 	programs: translate(Messages.navigation.programs),
@@ -30,9 +32,16 @@ async function signIn(page: Page, username: string) {
 }
 
 async function expectRouteVisible(page: Page, label: string, visible: boolean) {
-	const route = page.getByRole("link", { name: label, exact: true });
-	if (visible) await expect(route).toBeVisible();
-	else await expect(route).toHaveCount(0);
+	const routeDefinition = sidebarRoutes.find(
+		(route) => translate(route.titleKey) === label,
+	);
+	if (!routeDefinition) throw new Error(`Unknown navigation route: ${label}`);
+	const route = page.locator(
+		`[data-sidebar="menu-button"][href="${routeDefinition.url}"], nav[aria-label^="Main navigation"] a[href="${routeDefinition.url}"]`,
+	);
+	const visibleRoute = route.filter({ visible: true });
+	if (visible) await expect(visibleRoute).not.toHaveCount(0);
+	else await expect(visibleRoute).toHaveCount(0);
 }
 
 export async function verifyAdminNavigation(page: Page) {
@@ -40,8 +49,11 @@ export async function verifyAdminNavigation(page: Page) {
 	await expectRouteVisible(page, navigation.users, true);
 	await expectRouteVisible(page, navigation.reports, true);
 	await expectRouteVisible(page, navigation.roles, true);
+	await expectRouteVisible(page, navigation.catalog, true);
 	await expectRouteVisible(page, navigation.orders, false);
+	await expectRouteVisible(page, navigation.programs, false);
 	await expectRouteVisible(page, navigation.claims, false);
+	await expectRouteVisible(page, navigation.customers, false);
 }
 
 export async function verifyAdminCatalogLifecycle(page: Page) {
@@ -130,6 +142,8 @@ export async function verifyAgentNavigation(page: Page) {
 	await expectRouteVisible(page, navigation.claims, true);
 	await expectRouteVisible(page, navigation.customers, true);
 	await expectRouteVisible(page, navigation.users, false);
+	await expectRouteVisible(page, navigation.roles, false);
+	await expectRouteVisible(page, navigation.catalog, false);
 	await page
 		.getByRole("link", { name: navigation.claims, exact: true })
 		.click();
@@ -376,6 +390,9 @@ export async function verifyClientAuthorization(page: Page) {
 	await expectRouteVisible(page, navigation.orders, true);
 	await expectRouteVisible(page, navigation.programs, true);
 	await expectRouteVisible(page, navigation.claims, true);
+	await expectRouteVisible(page, navigation.customers, false);
+	await expectRouteVisible(page, navigation.roles, false);
+	await expectRouteVisible(page, navigation.catalog, false);
 	await expectRouteVisible(page, navigation.users, false);
 
 	const response = await page.request.get(
