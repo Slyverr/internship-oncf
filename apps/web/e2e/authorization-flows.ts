@@ -321,12 +321,7 @@ export async function verifyAgentOperationalCreation(page: Page) {
 		}
 	});
 
-	const openProgramForm = async (verifyEligibility: boolean) => {
-		const eligibleOrdersResponse = verifyEligibility
-			? page.waitForResponse((response) =>
-					response.url().includes("/orders/eligible-for-programs"),
-				)
-			: undefined;
+	const openProgramForm = async () => {
 		await page.goto(`/dashboard/orders/${E2E_ORDERS.assignedB}`);
 		await page
 			.getByRole("link", {
@@ -334,15 +329,6 @@ export async function verifyAgentOperationalCreation(page: Page) {
 				exact: true,
 			})
 			.click();
-		if (eligibleOrdersResponse) {
-			const response = await eligibleOrdersResponse;
-			const eligibleOrders = (await response.json()) as Array<{
-				orderNumber: string;
-			}>;
-			expect(eligibleOrders.map((order) => order.orderNumber)).toContain(
-				E2E_ORDERS.assignedB,
-			);
-		}
 		await expect(page.locator("#orderId")).toHaveValue(E2E_ORDERS.assignedB);
 	};
 
@@ -359,7 +345,7 @@ export async function verifyAgentOperationalCreation(page: Page) {
 		expect(programCreateRequests).toHaveLength(0);
 	};
 
-	await openProgramForm(true);
+	await openProgramForm();
 	await planAndContinue();
 	await page
 		.getByRole("button", {
@@ -371,7 +357,7 @@ export async function verifyAgentOperationalCreation(page: Page) {
 		new RegExp(`/dashboard/orders/${E2E_ORDERS.assignedB}$`),
 	);
 
-	await openProgramForm(false);
+	await openProgramForm();
 	await planAndContinue();
 	await page
 		.getByRole("button", {

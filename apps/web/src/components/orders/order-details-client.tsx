@@ -6,7 +6,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/common/page-header";
 import { OrderActions } from "@/components/orders/order-actions";
 import { OrderOverview } from "@/components/orders/order-overview";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Messages } from "@/i18n";
 import { useTranslate } from "@/i18n/locale-provider";
 import type { OrderDetailDto } from "@/lib/api/generated.schemas";
@@ -46,22 +46,18 @@ export function OrderDetailsClient({ order }: OrderDetailsClientProps) {
 					orderStatus: currentOrder.orderStatus.name,
 					programCount: currentOrder.forecastPrograms.length,
 				}) && (
-					<Button
-						nativeButton={false}
-						render={
-							<Link
-								href={
-									"/dashboard/programs/new?orderNumber=" +
-									currentOrder.orderNumber +
-									"&search=" +
-									encodeURIComponent(currentOrder.orderNumber)
-								}
-							/>
+					<Link
+						className={buttonVariants()}
+						href={
+							"/dashboard/programs/new?orderNumber=" +
+							currentOrder.orderNumber +
+							"&search=" +
+							encodeURIComponent(currentOrder.orderNumber)
 						}
 					>
 						<PlusIcon aria-hidden="true" />
 						{t(Messages.orders.detail.createProgram)}
-					</Button>
+					</Link>
 				)}
 			</PageHeader>
 
