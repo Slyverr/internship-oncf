@@ -13,7 +13,7 @@ export function RecordDetail({
 }: RecordDetailProps) {
 	return (
 		<div
-			className={`grid min-w-0 items-baseline gap-2 ${wideValue ? "grid-cols-[max-content_minmax(0,1fr)] @xl/workspace:grid-cols-2" : "grid-cols-2"}`}
+			className={`grid min-w-0 items-baseline gap-2 ${wideValue ? "grid-cols-[max-content_minmax(0,1fr)]" : "grid-cols-2"}`}
 		>
 			<span className="text-meta text-muted-foreground">{label}</span>
 			<span className="min-w-0 break-words text-right text-sm font-medium sm:text-base">

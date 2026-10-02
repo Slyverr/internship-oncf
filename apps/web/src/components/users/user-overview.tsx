@@ -17,6 +17,17 @@ import {
 export function UserOverview({ user }: { user: UserDetailDto }) {
 	const t = useTranslate();
 	const locale = useLocale();
+	const emailAt = user.email.lastIndexOf("@");
+	const emailValue =
+		emailAt > 0 ? (
+			<>
+				{user.email.slice(0, emailAt)}
+				<wbr />
+				{user.email.slice(emailAt)}
+			</>
+		) : (
+			user.email
+		);
 	return (
 		<div className="grid gap-4 @3xl/workspace:grid-cols-2">
 			<Card>
@@ -34,7 +45,7 @@ export function UserOverview({ user }: { user: UserDetailDto }) {
 					/>
 					<RecordDetail
 						label={t(Messages.users.detail.email)}
-						value={user.email}
+						value={emailValue}
 						wideValue
 					/>
 					<RecordDetail
