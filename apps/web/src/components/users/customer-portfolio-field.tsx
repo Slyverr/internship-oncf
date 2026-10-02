@@ -48,7 +48,7 @@ export function CustomerPortfolioField({
 					{t(Messages.users.portfolio.empty)}
 				</p>
 			) : (
-				<div className="grid max-h-64 gap-2 overflow-y-auto rounded-lg border p-3 sm:grid-cols-2">
+				<div className="grid max-h-96 gap-2 overflow-y-auto rounded-lg border p-3 sm:max-h-64 sm:grid-cols-2">
 					{customers.map((customer) => {
 						const checked = value.includes(customer.id);
 						return (
