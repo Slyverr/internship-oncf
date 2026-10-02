@@ -217,6 +217,10 @@ const constraintErrorMessages = Object.fromEntries(
 
 export const apiErrorMessages: Record<ApiErrorCode, MessageKey> = {
 	...constraintErrorMessages,
+	[API_ERROR_CODES.DUPLICATE_ORDER_ATTRIBUTE]: Messages.apiError.conflict,
+	[API_ERROR_CODES.DUPLICATE_PARAMETRIZATION]: Messages.apiError.conflict,
+	[API_ERROR_CODES.DUPLICATE_ORDER_SHARE]: Messages.apiError.conflict,
+	[API_ERROR_CODES.DUPLICATE_PROGRAM_CONVOI]: Messages.apiError.conflict,
 	[API_ERROR_CODES.ACCOUNT_REGISTRATION_NOT_PENDING]:
 		Messages.apiError.accountRegistrationNotPending,
 	[API_ERROR_CODES.ACCESS_DENIED]: Messages.apiError.accessDenied,
@@ -313,16 +317,6 @@ export function translateApiError(
 ): string {
 	if (code && Object.hasOwn(apiErrorMessages, code)) {
 		return translate(apiErrorMessages[code as ApiErrorCode], {}, locale);
-	}
-	if (
-		[
-			"DUPLICATE_PARAMETRIZATION",
-			"DUPLICATE_ORDER_ATTRIBUTE",
-			"DUPLICATE_ORDER_SHARE",
-			"DUPLICATE_PROGRAM_CONVOI",
-		].includes(code ?? "")
-	) {
-		return translate(Messages.apiError.conflict, {}, locale);
 	}
 	if (code?.startsWith("DUPLICATE_")) {
 		return translate(Messages.apiError.duplicate, {}, locale);

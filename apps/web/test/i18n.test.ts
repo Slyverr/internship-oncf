@@ -360,6 +360,18 @@ assert.equal(
 	translateApiError(API_ERROR_CODES.ACCESS_DENIED),
 	"You do not have permission to perform this action.",
 );
+for (const code of [
+	API_ERROR_CODES.DUPLICATE_ORDER_ATTRIBUTE,
+	API_ERROR_CODES.DUPLICATE_PARAMETRIZATION,
+	API_ERROR_CODES.DUPLICATE_ORDER_SHARE,
+	API_ERROR_CODES.DUPLICATE_PROGRAM_CONVOI,
+]) {
+	assert.equal(
+		translateApiError(code),
+		"This action conflicts with the current record state.",
+		`${code} should use conflict copy instead of duplicate-name copy`,
+	);
+}
 assert.equal(
 	translateApiError("UNMAPPED_DOMAIN_CODE"),
 	"The request could not be completed. Please try again.",
