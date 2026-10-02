@@ -99,6 +99,7 @@ Use the same semantic roles in all themes. Cards should separate from the canvas
 
 - Inputs, selects, buttons, and menu items retain a 44px minimum interaction height where practical.
 - Text inputs, select triggers, and searchable comboboxes use the same semantic `background` surface and border. For composed fields, apply the surface to the outer control group and keep its inner input transparent so the whole control reads as one field.
+- Select option lists open beside the trigger instead of aligning the selected option over the field. Let viewport collision handling flip the list when needed; only opt into item-to-trigger alignment for a reviewed interaction that benefits from it.
 - Standard primary and secondary actions keep at least 12px horizontal and 8px vertical padding. Icon glyphs are generally 16px or 20px inside a larger hit area.
 - Keep the keyboard focus ring visible and distinct from hover. Give icon-only controls an accessible name; a tooltip supplements that name but does not replace it.
 - Keep form label-to-control spacing at 8px. Keep related fields 16px apart. Place inline validation below its label and above the control so long errors never compete for horizontal space with labels; use the destructive semantic color.
