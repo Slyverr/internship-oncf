@@ -28,3 +28,4 @@ import "./report-export.test";
 import "./route-metadata.test";
 import "./user-labels.test";
 import "./user-filters.test";
+import "./user-customer-select.test";

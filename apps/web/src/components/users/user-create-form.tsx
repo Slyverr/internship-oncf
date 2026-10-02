@@ -11,7 +11,6 @@ import {
 	GuidedFormProgress,
 } from "@/components/common/guided-form";
 import { PageHeader } from "@/components/common/page-header";
-import { CustomerSelect } from "@/components/customers/customer-select";
 import {
 	Card,
 	CardContent,
@@ -30,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import { CustomerPortfolioField } from "@/components/users/customer-portfolio-field";
 import { RoleProfileSelect } from "@/components/users/role-profile-select";
+import { UserCustomerSelect } from "@/components/users/user-customer-select";
 import { useFormErrorMessage } from "@/hooks/use-form-error-message";
 import { useGuidedFormState } from "@/hooks/use-guided-form-state";
 import { Messages, type TypedMessageTranslator } from "@/i18n";
@@ -404,7 +404,7 @@ export function UserCreateForm(): JSX.Element {
 													required
 													error={errorMsg}
 												/>
-												<CustomerSelect
+												<UserCustomerSelect
 													id="customerId"
 													value={field.state.value}
 													onChange={(value) => {
