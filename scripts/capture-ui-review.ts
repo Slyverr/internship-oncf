@@ -39,6 +39,7 @@ const label = (
 const cdpUrl = readOption("--cdp") ?? "http://localhost:9235";
 const freshContext = args.includes("--fresh-context");
 const reusePage = args.includes("--reuse-page");
+const scrollY = Number(readOption("--scroll-y") ?? "0");
 const actionsFirstViewportOnly = args.includes("--actions-first-viewport");
 const settleMs = Number(readOption("--settle-ms") ?? "500");
 const clickBeforeFillSelectors = readOptions("--click-before-fill");
@@ -77,6 +78,7 @@ Usage: bun run ui:review -- [options]
   --then-url <url>       Navigate to a route after form/click actions, before capture
   --expect-route <path>  Expected final route when a UI action changes the URL
   --reuse-page           Reuse one loaded page across viewports; actions run once
+  --scroll-y <pixels>    Scroll to a document position before viewport capture
   --actions-first-viewport Run fill/click actions only for the first viewport
   --widths <list>        Comma-separated widths; defaults to 320..3840px
   --out <directory>     Output directory (default: /tmp/ecommand-ui-review)
@@ -436,6 +438,8 @@ try {
 			outputDirectory,
 			`${label}-${viewport.width}x${viewport.height}.png`,
 		);
+		await evaluate<boolean>(`window.scrollTo(0, ${scrollY}); true`);
+		await waitForPaint();
 		const screenshot = await call("Page.captureScreenshot", {
 			format: "png",
 			captureBeyondViewport: false,
@@ -479,6 +483,7 @@ console.log(
 			route: new URL(baseUrl).pathname,
 			outputDirectory,
 			freshContext,
+			scrollY,
 			results,
 		},
 		null,
