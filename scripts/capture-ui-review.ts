@@ -184,7 +184,7 @@ if (freshContext) {
 	if (!isolatedContextId)
 		throw new Error("Chrome did not create an isolated browser profile.");
 	const createdTarget = await browserCall("Target.createTarget", {
-		url: "about:blank",
+		url: baseUrl,
 		browserContextId: isolatedContextId,
 	});
 	isolatedTargetId = createdTarget.result?.targetId as string | undefined;
@@ -352,7 +352,27 @@ try {
 			mobile: viewport.width <= 640,
 		});
 		if (results.length === 0 || !reusePage) {
-			await navigate(baseUrl);
+			if (
+				freshContext &&
+				new URL(captureTarget.url).pathname === new URL(baseUrl).pathname
+			) {
+				let routeLoaded = false;
+				for (let attempt = 0; attempt < 40; attempt++) {
+					routeLoaded = await evaluate<boolean>(
+						`document.readyState === "complete" && location.pathname === ${JSON.stringify(new URL(baseUrl).pathname)}`,
+					);
+					if (routeLoaded) break;
+					await Bun.sleep(100);
+				}
+				if (!routeLoaded)
+					throw new Error(`The isolated browser tab did not load ${baseUrl}.`);
+				await evaluate<boolean>(
+					"document.fonts?.ready.then(() => true) ?? true",
+				);
+				if (settleMs > 0) await Bun.sleep(settleMs);
+			} else {
+				await navigate(baseUrl);
+			}
 		} else {
 			await waitForPaint();
 		}
