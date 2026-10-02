@@ -375,6 +375,8 @@ export interface LoginDetailDto {
 }
 
 export interface RegisterClientDto {
+  /** @pattern ^\d{15}$ */
+  ice: string;
   /** @maxLength 100 */
   email: string;
   /** @maxLength 255 */
@@ -394,8 +396,6 @@ export interface RegisterClientDto {
      * @maxLength 50
      */
   customerCode: string;
-  /** @pattern ^\d{15}$ */
-  ice: string;
 }
 
 export type RegistrationSubmittedDtoCode = typeof RegistrationSubmittedDtoCode[keyof typeof RegistrationSubmittedDtoCode];
@@ -500,6 +500,8 @@ export interface CustomerDetailDto {
 }
 
 export interface CreateCustomerDto {
+  /** @pattern ^\d{15}$ */
+  ice?: string;
   /** @maxLength 300 */
   companyName: string;
   /** @maxLength 500 */
@@ -513,12 +515,12 @@ export interface CreateCustomerDto {
   typeId?: string;
   /** @maxLength 50 */
   customerCode?: string;
-  /** @pattern ^\d{15}$ */
-  ice?: string;
   isActive?: boolean;
 }
 
 export interface UpdateCustomerDto {
+  /** @pattern ^\d{15}$ */
+  ice?: string;
   /** @maxLength 300 */
   companyName?: string;
   /** @maxLength 500 */
@@ -532,8 +534,6 @@ export interface UpdateCustomerDto {
   typeId?: string;
   /** @maxLength 50 */
   customerCode?: string;
-  /** @pattern ^\d{15}$ */
-  ice?: string;
   isActive?: boolean;
 }
 

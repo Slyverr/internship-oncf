@@ -1,5 +1,6 @@
 "use client";
 
+import { CUSTOMER_ICE_LENGTH, CUSTOMER_ICE_PATTERN } from "@ecommand/shared";
 import { useForm } from "@tanstack/react-form-nextjs";
 import { useRouter } from "next/navigation";
 import { type JSX, useMemo } from "react";
@@ -184,8 +185,8 @@ export function CustomerCreateForm(): JSX.Element {
 								<Input
 									id="customer-ice"
 									inputMode="numeric"
-									maxLength={15}
-									pattern="[0-9]{15}"
+									maxLength={CUSTOMER_ICE_LENGTH}
+									pattern={CUSTOMER_ICE_PATTERN.source}
 									placeholder={t(Messages.customers.form.icePlaceholder)}
 									value={field.state.value ?? ""}
 									onChange={(event) => field.handleChange(event.target.value)}

@@ -1,3 +1,4 @@
+import { isValidCustomerIce } from "@ecommand/shared";
 import { z } from "zod";
 import { Messages, type TypedMessageTranslator } from "@/i18n";
 
@@ -14,7 +15,7 @@ export function createCustomerFormSchema(t: TypedMessageTranslator) {
 			.optional(),
 		ice: z
 			.string()
-			.refine((value) => value === "" || /^\d{15}$/.test(value), {
+			.refine((value) => value === "" || isValidCustomerIce(value), {
 				message: t(Messages.customers.form.iceInvalid),
 			})
 			.optional(),

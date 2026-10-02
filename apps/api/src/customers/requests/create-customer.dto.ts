@@ -1,3 +1,5 @@
+import { CUSTOMER_ICE_PATTERN } from "@ecommand/shared";
+import { ApiPropertyOptional } from "@nestjs/swagger";
 import {
 	IsBoolean,
 	IsEmail,
@@ -44,7 +46,8 @@ export class CreateCustomerDto {
 
 	@IsOptional()
 	@IsString()
-	@Matches(/^\d{15}$/)
+	@Matches(CUSTOMER_ICE_PATTERN)
+	@ApiPropertyOptional({ pattern: CUSTOMER_ICE_PATTERN.source })
 	ice?: string;
 
 	@IsOptional()

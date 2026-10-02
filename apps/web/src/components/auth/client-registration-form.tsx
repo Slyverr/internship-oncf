@@ -1,6 +1,8 @@
 "use client";
 
 import {
+	CUSTOMER_ICE_LENGTH,
+	CUSTOMER_ICE_PATTERN,
 	isStrongPassword,
 	STRONG_PASSWORD_MAX_LENGTH,
 	STRONG_PASSWORD_REQUIREMENTS,
@@ -213,8 +215,8 @@ export function ClientRegistrationForm() {
 											autoComplete="off"
 											inputMode="numeric"
 											required
-											maxLength={15}
-											pattern="[0-9]{15}"
+											maxLength={CUSTOMER_ICE_LENGTH}
+											pattern={CUSTOMER_ICE_PATTERN.source}
 											aria-describedby="registration-ice-help"
 											placeholder={t(Messages.auth.signup.icePlaceholder)}
 											onChange={(event) => setIce(event.target.value)}

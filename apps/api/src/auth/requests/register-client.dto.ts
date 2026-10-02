@@ -1,7 +1,9 @@
 import {
+	CUSTOMER_ICE_PATTERN,
 	STRONG_PASSWORD_MAX_LENGTH,
 	STRONG_PASSWORD_PATTERN,
 } from "@ecommand/shared";
+import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
 import {
 	IsEmail,
@@ -43,6 +45,7 @@ export class RegisterClientDto {
 	customerCode: string;
 
 	@IsString()
-	@Matches(/^\d{15}$/)
+	@Matches(CUSTOMER_ICE_PATTERN)
+	@ApiProperty({ pattern: CUSTOMER_ICE_PATTERN.source })
 	ice: string;
 }
