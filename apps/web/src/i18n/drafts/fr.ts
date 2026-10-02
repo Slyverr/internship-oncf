@@ -322,12 +322,9 @@ export const frDraft = {
 				"Nombre mensuel de demandes de transport sur les six derniers mois : {months}",
 			monthCount: "{month} {count}",
 			statusTitle: "Demandes par statut",
-			statusDescription:
-				"Nombre de demandes des six derniers mois, par statut.",
 			statusEmpty: "Aucune donnée de statut sur cette période.",
 			statusChartLabel: "Nombre de demandes par statut : {statuses}",
 			statusCount: "{status} : {count} demandes",
-			breakdownCount: "{name} : {count} commandes",
 		},
 		insightsLabel: "Indicateurs du tableau de bord",
 		recentActivityLabel: "Activité récente",

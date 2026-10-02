@@ -48,7 +48,7 @@ import {
 	getDashboardRoleCounts,
 } from "@/lib/dashboard-insights";
 import { formatMediumDate, formatMonthLabel } from "@/lib/date-utils";
-import type { OrderReport, ReportCount } from "@/lib/reports";
+import type { OrderReport } from "@/lib/reports";
 import { getOrderReport } from "@/lib/reports";
 import { formatUserRole } from "@/lib/user-labels";
 import { useAuth } from "@/providers/auth-provider";
@@ -536,7 +536,7 @@ function getRecentOrderMonths(
 	});
 }
 
-function OrderActivitySection({
+function OrderOverviewSection({
 	report,
 	from,
 }: {
@@ -547,6 +547,18 @@ function OrderActivitySection({
 	const locale = useLocale();
 	const months = getRecentOrderMonths(from, report.data?.byMonth ?? [], locale);
 	const maxCount = Math.max(1, ...months.map(({ count }) => count));
+
+	const statuses = report.data?.byStatus ?? [];
+	const statusTotal = statuses.reduce((sum, status) => sum + status.count, 0);
+	const maxStatusCount = Math.max(1, ...statuses.map(({ count }) => count));
+	const statusLabel = statuses
+		.map(({ name, count }) =>
+			t(Messages.dashboard.activity.statusCount, {
+				status: getOrderStatusLabel(name, locale),
+				count,
+			}),
+		)
+		.join(", ");
 
 	return (
 		<Card size="sm">
@@ -613,163 +625,88 @@ function OrderActivitySection({
 						{t(Messages.dashboard.activity.empty)}
 					</div>
 				) : (
-					<div
-						role="img"
-						aria-label={t(Messages.dashboard.activity.chartLabel, {
-							months: months
-								.map(({ label, count }) =>
-									t(Messages.dashboard.activity.monthCount, {
-										month: label,
-										count,
-									}),
-								)
-								.join(", "),
-						})}
-						className="grid grid-cols-6 items-end gap-control"
-					>
-						{months.map(({ key, label, count }) => (
-							<div key={key} className="grid min-w-0 gap-compact text-center">
-								<span className="text-meta tabular-nums text-muted-foreground">
-									{count}
-								</span>
-								<div className="flex h-24 items-end justify-center border-b border-border/70">
-									<div
-										aria-hidden="true"
-										className={`w-1/2 rounded-t-sm bg-primary ${count > 0 ? "min-h-2" : ""}`}
-										style={{ height: `${(count / maxCount) * 100}%` }}
-									/>
-								</div>
-								<span className="text-xs text-muted-foreground">{label}</span>
-							</div>
-						))}
-					</div>
-				)}
-			</CardContent>
-		</Card>
-	);
-}
-
-function OrderStatusSection({
-	report,
-}: {
-	report: UseQueryResult<OrderReport, Error>;
-}) {
-	const t = useTranslate();
-	const locale = useLocale();
-	const statuses = report.data?.byStatus ?? [];
-	const total = statuses.reduce((sum, status) => sum + status.count, 0);
-	const maxCount = Math.max(1, ...statuses.map(({ count }) => count));
-	const chartLabel = statuses
-		.map(({ name, count }) =>
-			t(Messages.dashboard.activity.statusCount, {
-				status: getOrderStatusLabel(name, locale),
-				count,
-			}),
-		)
-		.join(", ");
-
-	if (report.isError) return null;
-
-	return (
-		<Card size="sm">
-			<CardHeader>
-				<div className="grid min-w-0 gap-compact">
-					<CardTitle>{t(Messages.dashboard.activity.statusTitle)}</CardTitle>
-					<CardDescription>
-						{t(Messages.dashboard.activity.statusDescription)}
-					</CardDescription>
-				</div>
-			</CardHeader>
-			<CardContent>
-				{report.isPending ? (
-					<div
-						role="status"
-						className="flex h-32 items-center justify-center gap-control text-sm text-muted-foreground"
-					>
-						<LoaderCircleIcon
-							aria-hidden="true"
-							className="size-4 animate-spin motion-reduce:animate-none"
-						/>
-						{t(Messages.dashboard.activity.loading)}
-					</div>
-				) : total === 0 ? (
-					<div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
-						{t(Messages.dashboard.activity.statusEmpty)}
-					</div>
-				) : (
-					<div
-						role="img"
-						aria-label={t(Messages.dashboard.activity.statusChartLabel, {
-							statuses: chartLabel,
-						})}
-						className="grid gap-control"
-					>
-						{statuses.map(({ id, name, count }) => (
-							<div key={id} className="grid gap-compact">
-								<div className="flex items-center justify-between gap-control text-sm">
-									<span className="truncate">
-										{getOrderStatusLabel(name, locale)}
-									</span>
-									<span className="shrink-0 tabular-nums text-muted-foreground">
-										{count}
-									</span>
-								</div>
-								<div className="h-2 overflow-hidden rounded-full bg-muted">
-									<div
-										aria-hidden="true"
-										className="h-full rounded-full bg-primary transition-[width] duration-300 motion-reduce:transition-none"
-										style={{ width: `${(count / maxCount) * 100}%` }}
-									/>
-								</div>
-							</div>
-						))}
-					</div>
-				)}
-			</CardContent>
-		</Card>
-	);
-}
-
-function OrderBreakdownSection({
-	title,
-	items,
-}: {
-	title: string;
-	items: ReportCount[];
-}) {
-	const t = useTranslate();
-	const locale = useLocale();
-	const topItems = items.slice(0, 5);
-	const maxCount = Math.max(1, ...items.map(({ count }) => count));
-	const chartLabel = topItems
-		.map(({ name, count }) =>
-			t(Messages.dashboard.activity.breakdownCount, { name, count }),
-		)
-		.join(", ");
-
-	return (
-		<section className="grid min-w-0 content-start gap-control">
-			<h3 className="text-sm font-medium">{title}</h3>
-			<div role="img" aria-label={chartLabel} className="grid gap-control">
-				{topItems.map(({ id, name, count }) => (
-					<div key={id} className="grid gap-compact">
-						<div className="flex min-w-0 items-center justify-between gap-control text-sm">
-							<span className="truncate">{name}</span>
-							<span className="shrink-0 tabular-nums text-muted-foreground">
-								{new Intl.NumberFormat(locale).format(count)}
-							</span>
-						</div>
-						<div className="h-2 overflow-hidden rounded-full bg-muted">
+					<div className="grid gap-6 @4xl/workspace:grid-cols-2">
+						<section className="grid min-w-0 content-start gap-control">
 							<div
-								aria-hidden="true"
-								className="h-full rounded-full bg-primary/75"
-								style={{ width: `${(count / maxCount) * 100}%` }}
-							/>
-						</div>
+								role="img"
+								aria-label={t(Messages.dashboard.activity.chartLabel, {
+									months: months
+										.map(({ label, count }) =>
+											t(Messages.dashboard.activity.monthCount, {
+												month: label,
+												count,
+											}),
+										)
+										.join(", "),
+								})}
+								className="grid grid-cols-6 items-end gap-control"
+							>
+								{months.map(({ key, label, count }) => (
+									<div
+										key={key}
+										className="grid min-w-0 gap-compact text-center"
+									>
+										<span className="text-meta tabular-nums text-muted-foreground">
+											{count}
+										</span>
+										<div className="flex h-24 items-end justify-center border-b border-border/70">
+											<div
+												aria-hidden="true"
+												className={`w-1/2 rounded-t-sm bg-primary ${count > 0 ? "min-h-2" : ""}`}
+												style={{ height: `${(count / maxCount) * 100}%` }}
+											/>
+										</div>
+										<span className="text-xs text-muted-foreground">
+											{label}
+										</span>
+									</div>
+								))}
+							</div>
+						</section>
+						<section className="grid min-w-0 content-start gap-control">
+							<h3 className="text-sm font-medium">
+								{t(Messages.dashboard.activity.statusTitle)}
+							</h3>
+							{statusTotal === 0 ? (
+								<p className="text-sm text-muted-foreground">
+									{t(Messages.dashboard.activity.statusEmpty)}
+								</p>
+							) : (
+								<div
+									role="img"
+									aria-label={t(Messages.dashboard.activity.statusChartLabel, {
+										statuses: statusLabel,
+									})}
+									className="grid gap-control"
+								>
+									{statuses.map(({ id, name, count }) => (
+										<div key={id} className="grid gap-compact">
+											<div className="flex items-center justify-between gap-control text-sm">
+												<span className="truncate">
+													{getOrderStatusLabel(name, locale)}
+												</span>
+												<span className="shrink-0 tabular-nums text-muted-foreground">
+													{count}
+												</span>
+											</div>
+											<div className="h-2 overflow-hidden rounded-full bg-muted">
+												<div
+													aria-hidden="true"
+													className="h-full rounded-full bg-primary transition-[width] duration-300 motion-reduce:transition-none"
+													style={{
+														width: `${(count / maxStatusCount) * 100}%`,
+													}}
+												/>
+											</div>
+										</div>
+									))}
+								</div>
+							)}
+						</section>
 					</div>
-				))}
-			</div>
-		</section>
+				)}
+			</CardContent>
+		</Card>
 	);
 }
 
@@ -955,7 +892,7 @@ export function DashboardOverview() {
 
 			<PendingRegistrationsSection users={pendingRegistrations} />
 			{canReadUsers && (
-				<section className="grid min-w-0 items-start gap-6 @4xl/workspace:grid-cols-2">
+				<section className="grid min-w-0 gap-6 @4xl/workspace:grid-cols-2">
 					<UserAccountsSection
 						users={usersQuery.data ?? []}
 						canReviewUsers={canReviewUsers}
@@ -971,11 +908,7 @@ export function DashboardOverview() {
 			{(showReadyOrdersCard || canReadReports) && (
 				<section
 					aria-label={t(Messages.dashboard.insightsLabel)}
-					className={`grid min-w-0 items-start gap-6 ${
-						showReadyOrdersCard
-							? "@4xl/workspace:grid-cols-2"
-							: "@6xl/workspace:grid-cols-3"
-					}`}
+					className="grid min-w-0 gap-6"
 				>
 					{showReadyOrdersCard && (
 						<ReadyOrdersSection
@@ -986,39 +919,10 @@ export function DashboardOverview() {
 						/>
 					)}
 					{canReadReports && (
-						<>
-							<OrderActivitySection
-								report={orderReport}
-								from={activityPeriod.from}
-							/>
-							<OrderStatusSection report={orderReport} />
-							{((orderReport.data?.byCustomer.length ?? 0) > 0 ||
-								(orderReport.data?.byProduct.length ?? 0) > 0) && (
-								<Card size="sm">
-									<CardContent
-										className={`grid gap-6 ${
-											(orderReport.data?.byCustomer.length ?? 0) > 0 &&
-											(orderReport.data?.byProduct.length ?? 0) > 0
-												? "@2xl/workspace:grid-cols-2"
-												: "grid-cols-1"
-										}`}
-									>
-										{(orderReport.data?.byCustomer.length ?? 0) > 0 && (
-											<OrderBreakdownSection
-												title={t(Messages.reports.byCustomer)}
-												items={orderReport.data?.byCustomer ?? []}
-											/>
-										)}
-										{(orderReport.data?.byProduct.length ?? 0) > 0 && (
-											<OrderBreakdownSection
-												title={t(Messages.reports.byProduct)}
-												items={orderReport.data?.byProduct ?? []}
-											/>
-										)}
-									</CardContent>
-								</Card>
-							)}
-						</>
+						<OrderOverviewSection
+							report={orderReport}
+							from={activityPeriod.from}
+						/>
 					)}
 				</section>
 			)}

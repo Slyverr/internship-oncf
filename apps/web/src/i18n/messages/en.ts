@@ -312,12 +312,9 @@ export const en = {
 			chartLabel: "Monthly order counts for the past six months: {months}",
 			monthCount: "{month} {count}",
 			statusTitle: "Orders by status",
-			statusDescription:
-				"Order counts from the past six months, grouped by status.",
 			statusEmpty: "No order status data for this period.",
 			statusChartLabel: "Order counts by status: {statuses}",
 			statusCount: "{status}: {count} orders",
-			breakdownCount: "{name}: {count} orders",
 		},
 		insightsLabel: "Dashboard insights",
 		recentActivityLabel: "Recent activity",
