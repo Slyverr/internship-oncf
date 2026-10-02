@@ -25,21 +25,28 @@ const defaultViewports: Viewport[] = [
 
 const args = process.argv.slice(2);
 const route = readOption("--url");
+const thenUrl = readOption("--then-url");
 const expectedRoute = readOption("--expect-route");
 const outputDirectory = resolve(
 	readOption("--out") ?? "/tmp/ecommand-ui-review",
 );
 const label = (
-	readOption("--label") ?? (route ? basename(route) || "home" : "current-page")
+	readOption("--label") ??
+	(route
+		? basename(new URL(thenUrl ?? route, "http://localhost").pathname) || "home"
+		: "current-page")
 ).replace(/[^a-zA-Z0-9_.-]/g, "-");
 const cdpUrl = readOption("--cdp") ?? "http://localhost:9235";
 const freshContext = args.includes("--fresh-context");
+const reusePage = args.includes("--reuse-page");
 const actionsFirstViewportOnly = args.includes("--actions-first-viewport");
 const settleMs = Number(readOption("--settle-ms") ?? "500");
 const clickBeforeFillSelectors = readOptions("--click-before-fill");
 const clickTextBeforeFill = readOptions("--click-text-before-fill");
 const clickSelectors = readOptions("--click");
 const clickText = readOptions("--click-text");
+const clickAfterUrlSelectors = readOptions("--click-after-url");
+const clickTextAfterUrl = readOptions("--click-text-after-url");
 const fillFields = readAssignments("--fill");
 const waitSelector = readOption("--wait-for");
 const requestedWidths = readOption("--widths")?.split(",").map(Number);
@@ -64,8 +71,12 @@ Usage: bun run ui:review -- [options]
   --label <name>         Screenshot filename prefix
   --click <selector>     Click a non-submitting control before capture (repeatable)
   --click-text <text>    Click a visible control by exact text (repeatable)
+  --click-after-url <selector> Click a control after --then-url navigation (repeatable)
+  --click-text-after-url <text> Click a visible control by exact text after --then-url
   --wait-for <selector>  Wait for a UI element after the route and clicks
+  --then-url <url>       Navigate to a route after form/click actions, before capture
   --expect-route <path>  Expected final route when a UI action changes the URL
+  --reuse-page           Reuse one loaded page across viewports; actions run once
   --actions-first-viewport Run fill/click actions only for the first viewport
   --widths <list>        Comma-separated widths; defaults to 320..3840px
   --out <directory>     Output directory (default: /tmp/ecommand-ui-review)
@@ -233,7 +244,9 @@ function call(method: string, params: Record<string, unknown> = {}) {
 function waitForEvent(method: string) {
 	return new Promise<void>((resolveEvent) => {
 		const listeners = eventListeners.get(method) ?? [];
+		let timeout: ReturnType<typeof setTimeout>;
 		const listener = () => {
+			clearTimeout(timeout);
 			eventListeners.set(
 				method,
 				(eventListeners.get(method) ?? []).filter(
@@ -244,6 +257,15 @@ function waitForEvent(method: string) {
 		};
 		listeners.push(listener);
 		eventListeners.set(method, listeners);
+		timeout = setTimeout(() => {
+			eventListeners.set(
+				method,
+				(eventListeners.get(method) ?? []).filter(
+					(candidate) => candidate !== listener,
+				),
+			);
+			resolveEvent();
+		}, 10_000);
 	});
 }
 
@@ -312,11 +334,14 @@ try {
 			deviceScaleFactor: 1,
 			mobile: viewport.width <= 640,
 		});
-		await waitForPaint();
-		await navigate(baseUrl);
-		if (settleMs > 0) await Bun.sleep(settleMs);
+		if (results.length === 0 || !reusePage) {
+			await navigate(baseUrl);
+		} else {
+			await waitForPaint();
+		}
 
-		const runActions = !actionsFirstViewportOnly || results.length === 0;
+		const runActions =
+			(!actionsFirstViewportOnly && !reusePage) || results.length === 0;
 		const missingClickTargets: string[] = [];
 		const missingFillTargets: string[] = [];
 		for (const selector of runActions ? clickBeforeFillSelectors : []) {
@@ -369,6 +394,22 @@ try {
 			if (!clicked) missingClickTargets.push(`text:${text}`);
 			if (settleMs > 0) await Bun.sleep(settleMs);
 		}
+		if (thenUrl) await navigate(new URL(thenUrl, baseUrl).href);
+		for (const selector of runActions ? clickAfterUrlSelectors : []) {
+			const clicked = await evaluate<boolean>(`(() => {
+				const target = document.querySelector(${JSON.stringify(selector)});
+				if (!target) return false;
+				target.click();
+				return true;
+			})()`);
+			if (!clicked) missingClickTargets.push(`after-url:${selector}`);
+			if (settleMs > 0) await Bun.sleep(settleMs);
+		}
+		for (const text of runActions ? clickTextAfterUrl : []) {
+			const clicked = await clickVisibleControlByText(text);
+			if (!clicked) missingClickTargets.push(`after-url:text:${text}`);
+			if (settleMs > 0) await Bun.sleep(settleMs);
+		}
 
 		let waitSelectorFound: boolean | null = null;
 		if (waitSelector) {
@@ -388,7 +429,8 @@ try {
 			pageHeight: document.documentElement.scrollHeight,
 			actualRoute: location.href,
 		})`);
-		const expectedPath = new URL(expectedRoute ?? baseUrl, baseUrl).pathname;
+		const expectedPath = new URL(expectedRoute ?? thenUrl ?? baseUrl, baseUrl)
+			.pathname;
 		const actualPath = new URL(dimensions.actualRoute).pathname;
 		const file = resolve(
 			outputDirectory,
@@ -482,7 +524,11 @@ function readAssignments(name: string) {
 async function clickVisibleControlByText(text: string) {
 	return evaluate<boolean>(`(() => {
 		const normalize = (value) => value.replace(/\\s+/g, " ").trim();
-		const target = Array.from(document.querySelectorAll("button, [role=button], [role=menuitem]"))
+		const target = Array.from(
+			document.querySelectorAll(
+				"button, [role=button], [role=menuitem], [role=option]",
+			),
+		)
 			.find((element) => element.getClientRects().length > 0 && normalize(element.textContent ?? "") === ${JSON.stringify(text)});
 		if (!target) return false;
 		target.click();

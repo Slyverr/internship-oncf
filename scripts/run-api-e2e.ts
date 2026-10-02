@@ -25,14 +25,18 @@ const e2eEnv = {
 
 async function run(
 	command: string[],
-	options: { cwd?: string; env?: Record<string, string | undefined> } = {},
+	options: {
+		cwd?: string;
+		env?: Record<string, string | undefined>;
+		quiet?: boolean;
+	} = {},
 ) {
 	const child = Bun.spawn(command, {
 		cwd: options.cwd ?? rootDir,
 		env: options.env ?? e2eEnv,
 		stdin: "inherit",
-		stdout: "inherit",
-		stderr: "inherit",
+		stdout: options.quiet ? "ignore" : "inherit",
+		stderr: options.quiet ? "ignore" : "inherit",
 	});
 	const exitCode = await child.exited;
 	if (exitCode !== 0) {
@@ -178,8 +182,13 @@ async function runBrowserWorkflows() {
 	}
 }
 
+let executionError: unknown;
+
 try {
-	await run([...composeArgs, "down", "--volumes", "--remove-orphans"]);
+	await run([...composeArgs, "down", "--volumes", "--remove-orphans"], {
+		env: process.env,
+		quiet: true,
+	});
 	await run([...composeArgs, "up", "-d", "postgres-e2e"]);
 	await run(
 		[nodeExecutable, tsxExecutable, "./test/helpers/wait-for-e2e-services.ts"],
@@ -223,10 +232,21 @@ try {
 		});
 		await runBrowserWorkflows();
 	}
+} catch (error) {
+	executionError = error;
 } finally {
-	await run([...composeArgs, "down", "--volumes", "--remove-orphans"], {
-		env: process.env,
-	}).catch((error) => {
-		console.error("Failed to tear down E2E services:", error);
-	});
+	try {
+		await run([...composeArgs, "down", "--volumes", "--remove-orphans"], {
+			env: process.env,
+			quiet: true,
+		});
+	} catch (cleanupError) {
+		if (executionError) {
+			console.error("Failed to tear down E2E services:", cleanupError);
+		} else {
+			executionError = cleanupError;
+		}
+	}
 }
+
+if (executionError) throw executionError;
