@@ -127,8 +127,8 @@ For disposable local development only, Drizzle `db:push` can synchronize the cur
 
 ## Verification
 
-- Before an important commit, run `bun run verify:commit`. It runs repository formatting/linting, workspace typechecks, all API and web tests, and production builds; it stops at the first failure.
-- The web production build uses the runtime configured by the app's Next.js build script. Run it separately from `next dev` if the local Next.js version shares build output between those processes.
+- Before an important commit, run `bun run verify:commit`. It runs repository formatting/linting, workspace typechecks, all API and web tests, and production builds; it stops at the first failure. The verification build writes to `apps/web/.next-verify`, so it can run while `next dev` is open without replacing its `.next` artifacts or invalidating Server Action IDs.
+- The regular `bun run build` command keeps using `.next` for normal production builds. The verification runner isolates only its build step through `NEXT_BUILD_DIST_DIR`.
 - To have Git run the same gate automatically before each commit, set the repository hook path once with `git config core.hooksPath .githooks`.
 - Run `bun run typecheck` after TypeScript changes.
 - Run the relevant API tests for changed business behavior when tests exist and verification is requested/needed.
