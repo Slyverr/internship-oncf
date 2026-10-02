@@ -63,7 +63,7 @@ export function UserOverview({ user }: { user: UserDetailDto }) {
 					<RecordDetail
 						label={t(Messages.users.form.fields.role)}
 						value={
-							<span className="flex justify-end">
+							<span className="flex w-full justify-end">
 								<Badge
 									variant="outline"
 									className="max-w-full text-right text-xs"
