@@ -169,7 +169,7 @@
 		grid-column: 1 / -1;
 	}
 
-	@container workspace (width < 28rem) {
+	@container workspace (width < 64rem) {
 		grid-template-columns: minmax(0, 1fr);
 
 		& > :nth-child(2) {
