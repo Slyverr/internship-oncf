@@ -287,6 +287,17 @@ export const frDraft = {
 			viewAll: "Tout afficher",
 			review: "Examiner l’inscription de {name}",
 		},
+		accounts: {
+			title: "Comptes utilisateurs",
+			description:
+				"Vue d’ensemble des accès et des états d’inscription des comptes.",
+			total: "Comptes au total",
+			active: "Actifs",
+			pending: "En attente de validation",
+			inactive: "Inactifs",
+			loading: "Chargement des comptes…",
+			loadFailed: "Impossible de charger le nombre de comptes.",
+		},
 		activity: {
 			title: "Activité des demandes de transport",
 			description: "Demandes de transport des six derniers mois.",
@@ -299,6 +310,12 @@ export const frDraft = {
 			chartLabel:
 				"Nombre mensuel de demandes de transport sur les six derniers mois : {months}",
 			monthCount: "{month} {count}",
+			statusTitle: "Demandes par statut",
+			statusDescription:
+				"Nombre de demandes des six derniers mois, par statut.",
+			statusEmpty: "Aucune donnée de statut sur cette période.",
+			statusChartLabel: "Nombre de demandes par statut : {statuses}",
+			statusCount: "{status} : {count} demandes",
 		},
 		insightsLabel: "Indicateurs du tableau de bord",
 		recentActivityLabel: "Activité récente",
@@ -308,6 +325,11 @@ export const frDraft = {
 		noListsDescription: "Choisissez une rubrique disponible pour continuer.",
 		viewReports: "Afficher les rapports",
 		manageUsers: "Gérer les utilisateurs",
+		manageReferenceData: "Données de référence",
+		manageAccessProfiles: "Profils d’accès",
+		workspaceTitle: "Gestion de l’espace de travail",
+		workspaceDescription:
+			"Examinez les comptes et gérez les accès et les valeurs de référence d’ECommand.",
 	},
 	units: {
 		select: {

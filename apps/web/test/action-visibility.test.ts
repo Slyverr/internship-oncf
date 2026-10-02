@@ -14,6 +14,7 @@ import {
 	canReviewRegistration,
 	getDashboardQuickActions,
 	getPendingClientRegistrations,
+	getUserAccountOverview,
 	hasAvailableActions,
 } from "../src/lib/action-visibility";
 import type { UserListDto } from "../src/lib/api/generated.schemas";
@@ -130,6 +131,11 @@ assert.deepEqual(
 	getPendingClientRegistrations(registrationUsers, false),
 	[],
 	"users without review permissions do not receive pending account details",
+);
+assert.deepEqual(
+	getUserAccountOverview(registrationUsers),
+	{ total: 4, active: 1, pending: 3, inactive: 0 },
+	"account overview counts disjoint active, pending, and inactive account states",
 );
 
 function roleHasPermission(role: Role, permission: Permission): boolean {

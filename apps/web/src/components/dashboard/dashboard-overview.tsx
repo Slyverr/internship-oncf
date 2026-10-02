@@ -1,7 +1,7 @@
 "use client";
 
 import { Permission } from "@ecommand/shared";
-import { useQuery } from "@tanstack/react-query";
+import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 import {
 	ArrowRightIcon,
 	ClipboardListIcon,
@@ -33,8 +33,10 @@ import {
 import {
 	getDashboardQuickActions,
 	getPendingClientRegistrations,
+	getUserAccountOverview,
 } from "@/lib/action-visibility";
 import { useClaimsControllerFindAll } from "@/lib/api/claims";
+import type { UserListDto } from "@/lib/api/generated.schemas";
 import {
 	useOrdersControllerFindAll,
 	useOrdersControllerFindEligibleForPrograms,
@@ -42,6 +44,7 @@ import {
 import { useProgramsControllerFindAll } from "@/lib/api/programs";
 import { useUsersControllerFindAll } from "@/lib/api/users";
 import { formatMediumDate, formatMonthLabel } from "@/lib/date-utils";
+import type { OrderReport } from "@/lib/reports";
 import { getOrderReport } from "@/lib/reports";
 import { useAuth } from "@/providers/auth-provider";
 
@@ -296,6 +299,81 @@ function PendingRegistrationsSection({
 	);
 }
 
+function UserAccountsSection({
+	users,
+	canReviewUsers,
+	isLoading,
+	isError,
+}: {
+	users: UserListDto[];
+	canReviewUsers: boolean;
+	isLoading: boolean;
+	isError: boolean;
+}) {
+	const t = useTranslate();
+	const summary = getUserAccountOverview(users);
+	const metrics = [
+		{ label: Messages.dashboard.accounts.total, value: summary.total },
+		{ label: Messages.dashboard.accounts.active, value: summary.active },
+		...(canReviewUsers
+			? [{ label: Messages.dashboard.accounts.pending, value: summary.pending }]
+			: []),
+		{ label: Messages.dashboard.accounts.inactive, value: summary.inactive },
+	];
+	const columns =
+		metrics.length === 4
+			? "@2xl/workspace:grid-cols-4"
+			: "@2xl/workspace:grid-cols-3";
+
+	return (
+		<Card size="sm">
+			<CardHeader>
+				<div className="flex flex-wrap items-center justify-between gap-control">
+					<div className="grid min-w-0 gap-compact">
+						<CardTitle>{t(Messages.dashboard.accounts.title)}</CardTitle>
+						<CardDescription>
+							{t(Messages.dashboard.accounts.description)}
+						</CardDescription>
+					</div>
+					<ActionLink href="/dashboard/users" className="shrink-0 gap-compact">
+						{t(Messages.dashboard.manageUsers)}
+						<ArrowRightIcon aria-hidden="true" className="size-4" />
+					</ActionLink>
+				</div>
+			</CardHeader>
+			<CardContent>
+				{isLoading ? (
+					<p className="text-sm text-muted-foreground">
+						{t(Messages.dashboard.accounts.loading)}
+					</p>
+				) : isError ? (
+					<p role="alert" className="text-sm text-destructive">
+						{t(Messages.dashboard.accounts.loadFailed)}
+					</p>
+				) : (
+					<dl className={`grid grid-cols-2 gap-y-4 ${columns}`}>
+						{metrics.map(({ label, value }, index) => (
+							<div
+								key={label}
+								className={`grid content-center gap-compact border-border/70 ${
+									index % 2 === 1 ? "border-l px-control" : "border-l-0 px-0"
+								} ${
+									index === 0
+										? "@2xl/workspace:border-l-0 @2xl/workspace:px-0"
+										: "@2xl/workspace:border-l @2xl/workspace:px-control"
+								}`}
+							>
+								<dt className="text-meta text-muted-foreground">{t(label)}</dt>
+								<dd className="text-2xl font-semibold tabular-nums">{value}</dd>
+							</div>
+						))}
+					</dl>
+				)}
+			</CardContent>
+		</Card>
+	);
+}
+
 function getRecentOrderPeriod() {
 	const today = new Date();
 	const firstMonth = new Date(
@@ -334,19 +412,16 @@ function getRecentOrderMonths(
 	});
 }
 
-function OrderActivitySection() {
+function OrderActivitySection({
+	report,
+	from,
+}: {
+	report: UseQueryResult<OrderReport, Error>;
+	from: string;
+}) {
 	const t = useTranslate();
 	const locale = useLocale();
-	const [period] = useState(getRecentOrderPeriod);
-	const report = useQuery({
-		queryKey: ["dashboard-order-activity", period],
-		queryFn: () => getOrderReport(period),
-	});
-	const months = getRecentOrderMonths(
-		period.from,
-		report.data?.byMonth ?? [],
-		locale,
-	);
+	const months = getRecentOrderMonths(from, report.data?.byMonth ?? [], locale);
 	const maxCount = Math.max(1, ...months.map(({ count }) => count));
 
 	return (
@@ -450,6 +525,87 @@ function OrderActivitySection() {
 	);
 }
 
+function OrderStatusSection({
+	report,
+}: {
+	report: UseQueryResult<OrderReport, Error>;
+}) {
+	const t = useTranslate();
+	const locale = useLocale();
+	const statuses = report.data?.byStatus ?? [];
+	const total = statuses.reduce((sum, status) => sum + status.count, 0);
+	const maxCount = Math.max(1, ...statuses.map(({ count }) => count));
+	const chartLabel = statuses
+		.map(({ name, count }) =>
+			t(Messages.dashboard.activity.statusCount, {
+				status: getOrderStatusLabel(name, locale),
+				count,
+			}),
+		)
+		.join(", ");
+
+	if (report.isError) return null;
+
+	return (
+		<Card size="sm">
+			<CardHeader>
+				<div className="grid min-w-0 gap-compact">
+					<CardTitle>{t(Messages.dashboard.activity.statusTitle)}</CardTitle>
+					<CardDescription>
+						{t(Messages.dashboard.activity.statusDescription)}
+					</CardDescription>
+				</div>
+			</CardHeader>
+			<CardContent>
+				{report.isPending ? (
+					<div
+						role="status"
+						className="flex h-32 items-center justify-center gap-control text-sm text-muted-foreground"
+					>
+						<LoaderCircleIcon
+							aria-hidden="true"
+							className="size-4 animate-spin motion-reduce:animate-none"
+						/>
+						{t(Messages.dashboard.activity.loading)}
+					</div>
+				) : total === 0 ? (
+					<div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
+						{t(Messages.dashboard.activity.statusEmpty)}
+					</div>
+				) : (
+					<div
+						role="img"
+						aria-label={t(Messages.dashboard.activity.statusChartLabel, {
+							statuses: chartLabel,
+						})}
+						className="grid gap-control"
+					>
+						{statuses.map(({ id, name, count }) => (
+							<div key={id} className="grid gap-compact">
+								<div className="flex items-center justify-between gap-control text-sm">
+									<span className="truncate">
+										{getOrderStatusLabel(name, locale)}
+									</span>
+									<span className="shrink-0 tabular-nums text-muted-foreground">
+										{count}
+									</span>
+								</div>
+								<div className="h-2 overflow-hidden rounded-full bg-muted">
+									<div
+										aria-hidden="true"
+										className="h-full rounded-full bg-primary transition-[width] duration-300 motion-reduce:transition-none"
+										style={{ width: `${(count / maxCount) * 100}%` }}
+									/>
+								</div>
+							</div>
+						))}
+					</div>
+				)}
+			</CardContent>
+		</Card>
+	);
+}
+
 export function DashboardOverview() {
 	const t = useTranslate();
 	const locale = useLocale();
@@ -464,6 +620,8 @@ export function DashboardOverview() {
 	const canReadReports = hasPermission(Permission.REPORTS_READ);
 	const canReadUsers = hasPermission(Permission.USERS_READ);
 	const canReviewUsers = canReadUsers && hasPermission(Permission.USERS_UPDATE);
+	const canManageReferenceData = hasPermission(Permission.CATALOG_MANAGE);
+	const canManageAccessProfiles = hasPermission(Permission.ROLES_MANAGE);
 	const showReadyOrders = canReadOrders && canCreatePrograms;
 	const recentSectionCount =
 		Number(canReadOrders) + Number(canReadPrograms) + Number(canReadClaims);
@@ -501,8 +659,14 @@ export function DashboardOverview() {
 		{ sortBy: "createdAt", sortOrder: "desc" },
 		{ query: { enabled: canReadClaims } },
 	);
+	const [activityPeriod] = useState(getRecentOrderPeriod);
+	const orderReport = useQuery<OrderReport>({
+		queryKey: ["dashboard-order-activity", activityPeriod],
+		queryFn: () => getOrderReport(activityPeriod),
+		enabled: canReadReports,
+	});
 	const usersQuery = useUsersControllerFindAll({
-		query: { enabled: canReviewUsers },
+		query: { enabled: canReadUsers },
 	});
 	const pendingRegistrations = getPendingClientRegistrations(
 		usersQuery.data ?? [],
@@ -623,6 +787,14 @@ export function DashboardOverview() {
 			</PageHeader>
 
 			<PendingRegistrationsSection users={pendingRegistrations} />
+			{canReadUsers && (
+				<UserAccountsSection
+					users={usersQuery.data ?? []}
+					canReviewUsers={canReviewUsers}
+					isLoading={usersQuery.isLoading}
+					isError={usersQuery.isError}
+				/>
+			)}
 
 			{(showReadyOrdersCard || canReadReports) && (
 				<section
@@ -637,7 +809,15 @@ export function DashboardOverview() {
 							onRetry={() => void readyOrdersQuery.refetch()}
 						/>
 					)}
-					{canReadReports && <OrderActivitySection />}
+					{canReadReports && (
+						<>
+							<OrderActivitySection
+								report={orderReport}
+								from={activityPeriod.from}
+							/>
+							<OrderStatusSection report={orderReport} />
+						</>
+					)}
 				</section>
 			)}
 
@@ -666,10 +846,18 @@ export function DashboardOverview() {
 							/>
 							<div className="grid min-w-0 gap-compact">
 								<p className="font-medium">
-									{t(Messages.dashboard.noListsTitle)}
+									{t(
+										canManageReferenceData || canManageAccessProfiles
+											? Messages.dashboard.workspaceTitle
+											: Messages.dashboard.noListsTitle,
+									)}
 								</p>
 								<p className="text-sm text-muted-foreground">
-									{t(Messages.dashboard.noListsDescription)}
+									{t(
+										canManageReferenceData || canManageAccessProfiles
+											? Messages.dashboard.workspaceDescription
+											: Messages.dashboard.noListsDescription,
+									)}
 								</p>
 							</div>
 						</div>
@@ -690,6 +878,22 @@ export function DashboardOverview() {
 									})}
 								>
 									{t(Messages.dashboard.manageUsers)}
+								</Link>
+							)}
+							{canManageAccessProfiles && (
+								<Link
+									className={buttonVariants({ variant: "outline" })}
+									href="/dashboard/roles"
+								>
+									{t(Messages.dashboard.manageAccessProfiles)}
+								</Link>
+							)}
+							{canManageReferenceData && (
+								<Link
+									className={buttonVariants({ variant: "outline" })}
+									href="/dashboard/catalog"
+								>
+									{t(Messages.dashboard.manageReferenceData)}
 								</Link>
 							)}
 						</div>

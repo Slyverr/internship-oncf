@@ -50,6 +50,23 @@ export function getPendingClientRegistrations(
 		);
 }
 
+export function getUserAccountOverview(users: UserListDto[]) {
+	const pendingUsers = users.filter(
+		(user) => user.registrationStatus === RegistrationStatus.PENDING,
+	);
+	const activeUsers = users.filter(
+		(user) =>
+			user.isActive && user.registrationStatus !== RegistrationStatus.PENDING,
+	);
+
+	return {
+		total: users.length,
+		active: activeUsers.length,
+		pending: pendingUsers.length,
+		inactive: users.length - activeUsers.length - pendingUsers.length,
+	};
+}
+
 export function hasAvailableActions(...actions: boolean[]): boolean {
 	return actions.some(Boolean);
 }

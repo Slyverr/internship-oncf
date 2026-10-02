@@ -279,6 +279,16 @@ export const en = {
 			viewAll: "View all",
 			review: "Review registration for {name}",
 		},
+		accounts: {
+			title: "User accounts",
+			description: "A live overview of account access and registration state.",
+			total: "Total accounts",
+			active: "Active",
+			pending: "Awaiting review",
+			inactive: "Inactive",
+			loading: "Loading account overview…",
+			loadFailed: "Could not load account totals.",
+		},
 		activity: {
 			title: "Order activity",
 			description: "Orders from the past six months.",
@@ -290,6 +300,12 @@ export const en = {
 			empty: "No orders in this period.",
 			chartLabel: "Monthly order counts for the past six months: {months}",
 			monthCount: "{month} {count}",
+			statusTitle: "Orders by status",
+			statusDescription:
+				"Order counts from the past six months, grouped by status.",
+			statusEmpty: "No order status data for this period.",
+			statusChartLabel: "Order counts by status: {statuses}",
+			statusCount: "{status}: {count} orders",
 		},
 		insightsLabel: "Dashboard insights",
 		recentActivityLabel: "Recent activity",
@@ -298,6 +314,11 @@ export const en = {
 		noListsDescription: "Choose an available section to continue.",
 		viewReports: "View reports",
 		manageUsers: "Manage users",
+		manageReferenceData: "Reference data",
+		manageAccessProfiles: "Access profiles",
+		workspaceTitle: "Workspace management",
+		workspaceDescription:
+			"Review accounts and maintain the access rules and reference values used across ECommand.",
 	},
 	orders: {
 		pageTitle: "Orders",
