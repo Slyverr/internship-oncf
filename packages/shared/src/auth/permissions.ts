@@ -94,6 +94,9 @@ export const PERMISSION_DEFINITIONS: Record<Permission, PermissionDefinition> =
 		[Permission.CUSTOMERS_MANAGE_OTHER]: {
 			description: "Manage customers belonging to other users",
 		},
+		[Permission.CUSTOMERS_ACTION_ASSIGN_PORTFOLIO]: {
+			description: "View customer records to assign user portfolios",
+		},
 
 		[Permission.PROGRAMS_CREATE]: {
 			description: "Create new programs",
@@ -246,6 +249,9 @@ export const PERMISSION_DEFINITIONS: Record<Permission, PermissionDefinition> =
 
 		[Permission.REPORTS_READ]: {
 			description: "View reports and analytics data",
+		},
+		[Permission.REPORTS_MANAGE_OTHER]: {
+			description: "View reports across other users' customer portfolios",
 		},
 		[Permission.REPORTS_ACTION]: {
 			description: "Perform report actions",

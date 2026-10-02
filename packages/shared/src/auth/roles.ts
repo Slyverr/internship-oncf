@@ -10,7 +10,13 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, Permission[]> = {
 		Permission.USERS_MANAGE_OTHER,
 		Permission.ROLES_MANAGE,
 		Permission.PERMISSIONS_MANAGE,
+		Permission.CUSTOMERS_READ,
+		Permission.CUSTOMERS_ACTION_ASSIGN_PORTFOLIO,
 		Permission.REPORTS_READ,
+		Permission.REPORTS_MANAGE_OTHER,
+		Permission.REPORTS_ACTION_EXPORT,
+		Permission.CATALOG_READ,
+		Permission.CATALOG_MANAGE,
 		Permission.PROFILE_UPDATE,
 	],
 
@@ -29,6 +35,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, Permission[]> = {
 		Permission.CLAIMS_ACTION_CLOSE,
 
 		Permission.REPORTS_READ,
+		Permission.REPORTS_ACTION_EXPORT,
 		Permission.PROFILE_UPDATE,
 
 		Permission.PROGRAMS_READ,
@@ -59,6 +66,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, Permission[]> = {
 		Permission.TRACKING_READ,
 
 		Permission.REPORTS_READ,
+		Permission.REPORTS_ACTION_EXPORT,
 		Permission.PROFILE_UPDATE,
 
 		Permission.PROGRAMS_CREATE,

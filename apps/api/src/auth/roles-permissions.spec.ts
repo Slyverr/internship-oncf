@@ -11,7 +11,7 @@ describe("default role permission matrix", () => {
 		return hasOnePermission(new Set(assigned), permission);
 	}
 
-	it("limits administrators to account, access, reporting, and profile work", () => {
+	it("grants administrators the customer reads needed for user portfolio assignment", () => {
 		expect(new Set(DEFAULT_ROLE_PERMISSIONS[Role.ADMIN])).toEqual(
 			new Set([
 				Permission.USERS_CREATE,
@@ -22,7 +22,13 @@ describe("default role permission matrix", () => {
 				Permission.USERS_MANAGE_OTHER,
 				Permission.ROLES_MANAGE,
 				Permission.PERMISSIONS_MANAGE,
+				Permission.CUSTOMERS_READ,
+				Permission.CUSTOMERS_ACTION_ASSIGN_PORTFOLIO,
 				Permission.REPORTS_READ,
+				Permission.REPORTS_MANAGE_OTHER,
+				Permission.REPORTS_ACTION_EXPORT,
+				Permission.CATALOG_READ,
+				Permission.CATALOG_MANAGE,
 				Permission.PROFILE_UPDATE,
 			]),
 		);
@@ -31,13 +37,14 @@ describe("default role permission matrix", () => {
 			Permission.ORDERS_READ,
 			Permission.PROGRAMS_READ,
 			Permission.CLAIMS_READ,
-			Permission.CUSTOMERS_READ,
-			Permission.CATALOG_READ,
 			Permission.TRACKING_READ,
 		];
 		for (const permission of operationalPermissions) {
 			expect(grants(Role.ADMIN, permission)).toBe(false);
 		}
+		expect(grants(Role.ADMIN, Permission.CATALOG_MANAGE_UNITS)).toBe(true);
+		expect(grants(Role.ADMIN, Permission.CATALOG_MANAGE_GOODS)).toBe(true);
+		expect(grants(Role.ADMIN, Permission.CATALOG_READ)).toBe(true);
 	});
 
 	it("limits client representatives to order submission and client-facing work", () => {
@@ -84,6 +91,14 @@ describe("default role permission matrix", () => {
 			for (const permission of managementPermissions) {
 				expect(grants(role, permission)).toBe(false);
 			}
+		},
+	);
+
+	it.each([Role.CLIENT_REPRESENTATIVE, Role.AGENT_COMMERCIAL])(
+		"grants %s export access when it can read reports",
+		(role) => {
+			expect(grants(role, Permission.REPORTS_READ)).toBe(true);
+			expect(grants(role, Permission.REPORTS_ACTION_EXPORT)).toBe(true);
 		},
 	);
 

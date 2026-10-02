@@ -1,9 +1,11 @@
+import { API_ERROR_CODES, Permission } from "@ecommand/shared";
 import {
 	ForbiddenException,
 	Injectable,
 	NotFoundException,
 } from "@nestjs/common";
 import type { AuthUser } from "@/auth/auth.types";
+import { hasOnePermission } from "@/auth/auth.utils";
 import { canAccessCustomer, getCustomerScope } from "@/auth/customer-scope";
 import { CustomersMapper } from "./customers.mapper";
 import { CustomersQuery } from "./customers.query";
@@ -23,18 +25,21 @@ export class CustomersService {
 		const scope = getCustomerScope(user);
 		return this.customersQuery.findCustomers(
 			query,
-			scope === null ? undefined : scope,
+			scope === null ||
+				hasOnePermission(user, Permission.CUSTOMERS_ACTION_ASSIGN_PORTFOLIO)
+				? undefined
+				: scope,
 		);
 	}
 
 	async findOne(id: CustomerId, user?: AuthUser) {
 		if (user && !canAccessCustomer(user, id)) {
-			throw new ForbiddenException(
-				"Customer is outside your assigned portfolio",
-			);
+			throw new ForbiddenException({
+				code: API_ERROR_CODES.CUSTOMER_OUTSIDE_PORTFOLIO,
+			});
 		}
 		const customer = await this.customersQuery.findCustomer(id);
-		return this.ensure(customer, id);
+		return this.ensure(customer);
 	}
 
 	async findActiveCustomerForRegistration(customerCode: string, ice: string) {
@@ -61,12 +66,12 @@ export class CustomersService {
 		const customer = await this.customersQuery.updateCustomer(id, {
 			isActive: false,
 		});
-		return this.ensure(customer, id);
+		return this.ensure(customer);
 	}
 
-	private ensure<T>(customer: T | undefined, id: CustomerId): T {
+	private ensure<T>(customer: T | undefined): T {
 		if (!customer) {
-			throw new NotFoundException(`Customer ${id} not found`);
+			throw new NotFoundException({ code: API_ERROR_CODES.CUSTOMER_NOT_FOUND });
 		}
 		return customer;
 	}

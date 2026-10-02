@@ -1,9 +1,14 @@
+import { randomUUID } from "node:crypto";
 import {
+	API_ERROR_CODES,
 	ClaimStatus,
 	ClaimType,
+	NotificationMessageCode,
 	OrderStatus,
+	Permission,
 	ProgramStatus,
 	Role,
+	RolePersona,
 } from "@ecommand/shared";
 import type { INestApplication } from "@nestjs/common";
 import request from "supertest";
@@ -257,7 +262,7 @@ describe("customer portfolio authorization (e2e)", () => {
 			.expect(403);
 	});
 
-	it("limits administrators to account administration and reports", async () => {
+	it("limits administrators to user administration and grants customer reads for portfolio assignment", async () => {
 		const adminToken = await login(app, E2E_USERS.admin.email);
 		await request(app.getHttpServer())
 			.get("/users")
@@ -267,8 +272,22 @@ describe("customer portfolio authorization (e2e)", () => {
 			.get("/reports/orders")
 			.set("Authorization", `Bearer ${adminToken}`)
 			.expect(200);
+		const adminCustomers = await request(app.getHttpServer())
+			.get("/customers")
+			.set("Authorization", `Bearer ${adminToken}`)
+			.expect(200);
+		expect(
+			adminCustomers.body.map(
+				(customer: { customerCode: string }) => customer.customerCode,
+			),
+		).toEqual(expect.arrayContaining(Object.values(E2E_CUSTOMERS)));
+		await request(app.getHttpServer())
+			.put(`/customers/${customerIds[E2E_CUSTOMERS.assignedA]}`)
+			.set("Authorization", `Bearer ${adminToken}`)
+			.send({})
+			.expect(403);
 
-		for (const path of ["/customers", "/orders", "/programs", "/claims"]) {
+		for (const path of ["/orders", "/programs", "/claims"]) {
 			await request(app.getHttpServer())
 				.get(path)
 				.set("Authorization", `Bearer ${adminToken}`)
@@ -286,6 +305,129 @@ describe("customer portfolio authorization (e2e)", () => {
 			.get("/customers")
 			.set("Authorization", `Bearer ${clientToken}`)
 			.expect(403);
+	});
+
+	it("lets admins manage custom permission profiles without exposing access grants", async () => {
+		const adminToken = await login(app, E2E_USERS.admin.email);
+		const agentToken = await login(app, E2E_USERS.agentAssigned.employeeCode);
+		const profileName = `Order reader ${randomUUID()}`;
+
+		await request(app.getHttpServer())
+			.get("/roles")
+			.set("Authorization", `Bearer ${agentToken}`)
+			.expect(403);
+
+		const current = await request(app.getHttpServer())
+			.get("/roles")
+			.set("Authorization", `Bearer ${adminToken}`)
+			.expect(200);
+		const systemAdmin = current.body.find(
+			(role: { persona: RolePersona }) => role.persona === RolePersona.ADMIN,
+		);
+		expect(systemAdmin).toMatchObject({ isSystem: true, isActive: true });
+
+		const permissionDefinitions = await request(app.getHttpServer())
+			.get("/roles/permissions")
+			.set("Authorization", `Bearer ${adminToken}`)
+			.expect(200);
+		const reservedUserPermission = permissionDefinitions.body.find(
+			(permission: { name: string }) =>
+				permission.name === Permission.USERS_READ,
+		);
+		expect(reservedUserPermission.assignable).toBe(false);
+
+		await request(app.getHttpServer())
+			.post("/roles")
+			.set("Authorization", `Bearer ${adminToken}`)
+			.send({
+				name: "Forbidden access profile",
+				persona: RolePersona.AGENT_COMMERCIAL,
+				permissionNames: [Permission.ROLES_MANAGE],
+			})
+			.expect(403);
+
+		await request(app.getHttpServer())
+			.post("/roles")
+			.set("Authorization", `Bearer ${adminToken}`)
+			.send({
+				name: `Administrator persona ${randomUUID()}`,
+				persona: RolePersona.ADMIN,
+				permissionNames: [Permission.ORDERS_READ],
+			})
+			.expect(400);
+
+		const created = await request(app.getHttpServer())
+			.post("/roles")
+			.set("Authorization", `Bearer ${adminToken}`)
+			.send({
+				name: profileName,
+				description: "Read assigned orders",
+				persona: RolePersona.AGENT_COMMERCIAL,
+				permissionNames: [Permission.ORDERS_READ],
+			})
+			.expect(201);
+		expect(created.body).toMatchObject({
+			name: profileName,
+			isSystem: false,
+			persona: RolePersona.AGENT_COMMERCIAL,
+			permissionNames: [Permission.ORDERS_READ],
+		});
+		const customUserEmail = `custom-${randomUUID()}@example.test`;
+		const customUser = await request(app.getHttpServer())
+			.post("/users")
+			.set("Authorization", `Bearer ${adminToken}`)
+			.send({
+				email: customUserEmail,
+				password: "StrongPass1!",
+				firstName: "Custom",
+				lastName: "Operator",
+				roleId: created.body.id,
+			})
+			.expect(201);
+		expect(customUser.body.roleId).toBe(created.body.id);
+
+		const customUserToken = await login(app, customUserEmail, "StrongPass1!");
+		await request(app.getHttpServer())
+			.get("/orders")
+			.set("Authorization", `Bearer ${customUserToken}`)
+			.expect(200);
+		await request(app.getHttpServer())
+			.get("/programs")
+			.set("Authorization", `Bearer ${customUserToken}`)
+			.expect(403);
+
+		await request(app.getHttpServer())
+			.patch(`/roles/${created.body.id}`)
+			.set("Authorization", `Bearer ${adminToken}`)
+			.send({ permissionNames: [Permission.USERS_READ] })
+			.expect(403);
+
+		await request(app.getHttpServer())
+			.patch(`/roles/${systemAdmin.id}`)
+			.set("Authorization", `Bearer ${adminToken}`)
+			.send({ name: "Modified administrator" })
+			.expect(403);
+
+		await request(app.getHttpServer())
+			.patch(`/roles/${created.body.id}`)
+			.set("Authorization", `Bearer ${adminToken}`)
+			.send({ isActive: false })
+			.expect(409);
+		await request(app.getHttpServer())
+			.put(`/users/${customUser.body.id}`)
+			.set("Authorization", `Bearer ${adminToken}`)
+			.send({ role: Role.AGENT_COMMERCIAL })
+			.expect(200);
+		await request(app.getHttpServer())
+			.delete(`/users/${customUser.body.id}`)
+			.set("Authorization", `Bearer ${adminToken}`)
+			.expect(200);
+		const archived = await request(app.getHttpServer())
+			.patch(`/roles/${created.body.id}`)
+			.set("Authorization", `Bearer ${adminToken}`)
+			.send({ isActive: false })
+			.expect(200);
+		expect(archived.body.isActive).toBe(false);
 	});
 
 	it("lets administrators assign and remove agent customer portfolios", async () => {
@@ -414,11 +556,7 @@ describe("customer portfolio authorization (e2e)", () => {
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200);
 
-		expect(
-			filteredResponse.body.map(
-				(claim: { description: string }) => claim.description,
-			),
-		).toEqual([E2E_CLAIMS.assignedA]);
+		expect(filteredResponse.body).toEqual([]);
 
 		await request(app.getHttpServer())
 			.get(`/claims/${claimNumbers[E2E_CLAIMS.assignedASecondClient]}`)
@@ -459,6 +597,52 @@ describe("customer portfolio authorization (e2e)", () => {
 			.get(`/claims/${claimNumbers[E2E_CLAIMS.outside]}`)
 			.set("Authorization", `Bearer ${token}`)
 			.expect(403);
+	});
+
+	it("notifies claim readers assigned to the customer's portfolio", async () => {
+		const clientToken = await login(app, E2E_USERS.clientA.email);
+		const created = await request(app.getHttpServer())
+			.post("/claims")
+			.set("Authorization", `Bearer ${clientToken}`)
+			.send({
+				customerId: customerIds[E2E_CUSTOMERS.assignedA],
+				orderId: orderIds[E2E_ORDERS.assignedA],
+				type: ClaimType.OTHER,
+				description: "E2E claim recipient permission check",
+			})
+			.expect(201);
+
+		await request(app.getHttpServer())
+			.post(`/claims/${created.body.claimNumber}/comments`)
+			.set("Authorization", `Bearer ${clientToken}`)
+			.send({ content: "Please review this claim." })
+			.expect(201);
+
+		const recipientTokens = [
+			[E2E_USERS.agentAssigned.employeeCode, true],
+			[E2E_USERS.agentOutside.employeeCode, false],
+			[E2E_USERS.clientASecond.email, false],
+		] as const;
+
+		for (const [username, shouldReceive] of recipientTokens) {
+			const token = await login(app, username);
+			const response = await request(app.getHttpServer())
+				.get("/notifications")
+				.set("Authorization", `Bearer ${token}`)
+				.expect(200);
+			const matching = response.body.filter(
+				(notification: {
+					messageCode: NotificationMessageCode;
+					messageParameters: Record<string, string>;
+				}) =>
+					notification.messageCode ===
+						NotificationMessageCode.CLAIM_COMMENT_ADDED &&
+					notification.messageParameters.recordCode ===
+						created.body.claimNumber,
+			);
+
+			expect(matching.length > 0).toBe(shouldReceive);
+		}
 	});
 
 	it("scopes forecast programs to their linked order customer", async () => {
@@ -835,8 +1019,8 @@ describe("customer portfolio authorization (e2e)", () => {
 				orderId: ineligibleOrder.body.id,
 			})
 			.expect(409);
-		expect(draftOrderResponse.body.message).toBe(
-			"Order is not eligible for program creation",
+		expect(draftOrderResponse.body.code).toBe(
+			API_ERROR_CODES.ORDER_NOT_ELIGIBLE_FOR_PROGRAM,
 		);
 
 		const createdProgram = await request(app.getHttpServer())
@@ -901,6 +1085,86 @@ describe("customer portfolio authorization (e2e)", () => {
 			),
 		).toBe(true);
 	});
+
+	it("serializes concurrent administrator deactivation and preserves one active account", async () => {
+		const adminToken = await login(app, E2E_USERS.admin.email);
+		const userList = await request(app.getHttpServer())
+			.get("/users")
+			.set("Authorization", `Bearer ${adminToken}`)
+			.expect(200);
+		const seededAdmin = userList.body.find(
+			(user: { email: string }) => user.email === E2E_USERS.admin.email,
+		);
+		const roleList = await request(app.getHttpServer())
+			.get("/roles")
+			.set("Authorization", `Bearer ${adminToken}`)
+			.expect(200);
+		const adminRole = roleList.body.find(
+			(role: { persona: RolePersona }) => role.persona === RolePersona.ADMIN,
+		);
+		const secondaryEmail = `lockout-${randomUUID()}@example.test`;
+		const secondaryAdmin = await request(app.getHttpServer())
+			.post("/users")
+			.set("Authorization", `Bearer ${adminToken}`)
+			.send({
+				email: secondaryEmail,
+				password: "StrongPass1!",
+				firstName: "Secondary",
+				lastName: "Administrator",
+				roleId: adminRole.id,
+			})
+			.expect(201);
+
+		expect(seededAdmin).toBeDefined();
+		expect(adminRole).toBeDefined();
+
+		const [seededAdminDeactivation, secondaryAdminDeactivation] =
+			await Promise.all([
+				request(app.getHttpServer())
+					.delete(`/users/${seededAdmin.id}`)
+					.set("Authorization", `Bearer ${adminToken}`),
+				request(app.getHttpServer())
+					.delete(`/users/${secondaryAdmin.body.id}`)
+					.set("Authorization", `Bearer ${adminToken}`),
+			]);
+
+		const deactivations = [seededAdminDeactivation, secondaryAdminDeactivation];
+		expect(
+			deactivations.filter((response) => response.status === 200),
+		).toHaveLength(1);
+		const blockedDeactivation = deactivations.find(
+			(response) => response.status !== 200,
+		);
+		expect([401, 409]).toContain(blockedDeactivation?.status);
+		if (blockedDeactivation?.status === 409) {
+			expect(blockedDeactivation.body.code).toBe(
+				API_ERROR_CODES.LAST_ACTIVE_ADMIN,
+			);
+		}
+
+		if (seededAdminDeactivation.status === 200) {
+			const secondaryAdminToken = await login(
+				app,
+				secondaryEmail,
+				"StrongPass1!",
+			);
+			await request(app.getHttpServer())
+				.put(`/users/${seededAdmin.id}`)
+				.set("Authorization", `Bearer ${secondaryAdminToken}`)
+				.send({ isActive: true })
+				.expect(200);
+			await request(app.getHttpServer())
+				.delete(`/users/${secondaryAdmin.body.id}`)
+				.set("Authorization", `Bearer ${secondaryAdminToken}`)
+				.expect(200);
+		}
+
+		const restoredAdminToken = await login(app, E2E_USERS.admin.email);
+		await request(app.getHttpServer())
+			.get("/roles")
+			.set("Authorization", `Bearer ${restoredAdminToken}`)
+			.expect(200);
+	}, 15_000);
 
 	afterAll(async () => {
 		await app?.close();

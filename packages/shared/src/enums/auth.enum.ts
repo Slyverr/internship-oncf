@@ -4,6 +4,12 @@ export enum Role {
 	CLIENT_REPRESENTATIVE = "CLIENT_REPRESENTATIVE",
 }
 
+export enum RolePersona {
+	ADMIN = "ADMIN",
+	AGENT_COMMERCIAL = "AGENT_COMMERCIAL",
+	CLIENT_REPRESENTATIVE = "CLIENT_REPRESENTATIVE",
+}
+
 export enum RegistrationStatus {
 	PENDING = "PENDING",
 	APPROVED = "APPROVED",
@@ -39,6 +45,7 @@ export enum Permission {
 	CUSTOMERS_DELETE = "customers:delete",
 	CUSTOMERS_MANAGE = "customers:manage",
 	CUSTOMERS_MANAGE_OTHER = "customers:manage:other",
+	CUSTOMERS_ACTION_ASSIGN_PORTFOLIO = "customers:action:assign-portfolio",
 
 	PROGRAMS_CREATE = "programs:create",
 	PROGRAMS_READ = "programs:read",
@@ -86,6 +93,7 @@ export enum Permission {
 	TRACKING_MANAGE = "tracking:manage",
 
 	REPORTS_READ = "reports:read",
+	REPORTS_MANAGE_OTHER = "reports:manage:other",
 	REPORTS_ACTION = "reports:action",
 	REPORTS_ACTION_EXPORT = "reports:action:export",
 
