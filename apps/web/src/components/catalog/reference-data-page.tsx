@@ -372,7 +372,7 @@ function CatalogTable({
 	}
 	return (
 		<div className="overflow-hidden rounded-lg border">
-			<Table>
+			<Table className="min-w-[34rem]">
 				<TableHeader>
 					<TableRow>
 						<TableHead>{t(Messages.referenceData.name)}</TableHead>
