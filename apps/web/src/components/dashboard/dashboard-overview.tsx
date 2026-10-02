@@ -44,7 +44,7 @@ import {
 import { useProgramsControllerFindAll } from "@/lib/api/programs";
 import { useUsersControllerFindAll } from "@/lib/api/users";
 import { formatMediumDate, formatMonthLabel } from "@/lib/date-utils";
-import type { OrderReport } from "@/lib/reports";
+import type { OrderReport, ReportCount } from "@/lib/reports";
 import { getOrderReport } from "@/lib/reports";
 import { useAuth } from "@/providers/auth-provider";
 
@@ -606,6 +606,53 @@ function OrderStatusSection({
 	);
 }
 
+function OrderBreakdownSection({
+	title,
+	items,
+}: {
+	title: string;
+	items: ReportCount[];
+}) {
+	const t = useTranslate();
+	const locale = useLocale();
+	const topItems = items.slice(0, 5);
+	const maxCount = Math.max(1, ...items.map(({ count }) => count));
+	const chartLabel = topItems
+		.map(({ name, count }) =>
+			t(Messages.dashboard.activity.breakdownCount, { name, count }),
+		)
+		.join(", ");
+
+	return (
+		<Card size="sm">
+			<CardHeader>
+				<CardTitle>{title}</CardTitle>
+			</CardHeader>
+			<CardContent>
+				<div role="img" aria-label={chartLabel} className="grid gap-control">
+					{topItems.map(({ id, name, count }) => (
+						<div key={id} className="grid gap-compact">
+							<div className="flex min-w-0 items-center justify-between gap-control text-sm">
+								<span className="truncate">{name}</span>
+								<span className="shrink-0 tabular-nums text-muted-foreground">
+									{new Intl.NumberFormat(locale).format(count)}
+								</span>
+							</div>
+							<div className="h-2 overflow-hidden rounded-full bg-muted">
+								<div
+									aria-hidden="true"
+									className="h-full rounded-full bg-primary/75"
+									style={{ width: `${(count / maxCount) * 100}%` }}
+								/>
+							</div>
+						</div>
+					))}
+				</div>
+			</CardContent>
+		</Card>
+	);
+}
+
 export function DashboardOverview() {
 	const t = useTranslate();
 	const locale = useLocale();
@@ -816,6 +863,18 @@ export function DashboardOverview() {
 								from={activityPeriod.from}
 							/>
 							<OrderStatusSection report={orderReport} />
+							{(orderReport.data?.byCustomer.length ?? 0) > 0 && (
+								<OrderBreakdownSection
+									title={t(Messages.reports.byCustomer)}
+									items={orderReport.data?.byCustomer ?? []}
+								/>
+							)}
+							{(orderReport.data?.byProduct.length ?? 0) > 0 && (
+								<OrderBreakdownSection
+									title={t(Messages.reports.byProduct)}
+									items={orderReport.data?.byProduct ?? []}
+								/>
+							)}
 						</>
 					)}
 				</section>

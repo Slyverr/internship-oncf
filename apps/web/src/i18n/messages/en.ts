@@ -306,6 +306,7 @@ export const en = {
 			statusEmpty: "No order status data for this period.",
 			statusChartLabel: "Order counts by status: {statuses}",
 			statusCount: "{status}: {count} orders",
+			breakdownCount: "{name}: {count} orders",
 		},
 		insightsLabel: "Dashboard insights",
 		recentActivityLabel: "Recent activity",

@@ -316,6 +316,7 @@ export const frDraft = {
 			statusEmpty: "Aucune donnée de statut sur cette période.",
 			statusChartLabel: "Nombre de demandes par statut : {statuses}",
 			statusCount: "{status} : {count} demandes",
+			breakdownCount: "{name} : {count} commandes",
 		},
 		insightsLabel: "Indicateurs du tableau de bord",
 		recentActivityLabel: "Activité récente",

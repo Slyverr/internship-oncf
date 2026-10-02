@@ -297,6 +297,7 @@ export const Messages = {
 			statusEmpty: "dashboard.activity.statusEmpty",
 			statusChartLabel: "dashboard.activity.statusChartLabel",
 			statusCount: "dashboard.activity.statusCount",
+			breakdownCount: "dashboard.activity.breakdownCount",
 		},
 		insightsLabel: "dashboard.insightsLabel",
 		recentActivityLabel: "dashboard.recentActivityLabel",
