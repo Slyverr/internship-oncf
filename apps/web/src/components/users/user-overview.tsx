@@ -51,12 +51,14 @@ export function UserOverview({ user }: { user: UserDetailDto }) {
 					<RecordDetail
 						label={t(Messages.users.form.fields.role)}
 						value={
-							<Badge
-								variant="outline"
-								className="max-w-full text-right text-xs"
-							>
-								{formatUserRole(user.role.name, locale)}
-							</Badge>
+							<span className="flex justify-end">
+								<Badge
+									variant="outline"
+									className="max-w-full text-right text-xs"
+								>
+									{formatUserRole(user.role.name, locale)}
+								</Badge>
+							</span>
 						}
 					/>
 					<RecordDetail
