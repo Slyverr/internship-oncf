@@ -311,39 +311,68 @@ export async function verifyAgentOperationalCreation(page: Page) {
 	await expect(page).toHaveURL(/\/dashboard\/claims\/CLM-[A-Z0-9]+$/);
 	await expect(page.getByRole("heading")).toContainText(/CLM-/);
 
-	const eligibleOrdersResponse = page.waitForResponse((response) =>
-		response.url().includes("/orders/eligible-for-programs"),
-	);
-	await page.goto("/dashboard/programs/new");
-	const eligibleOrders = (await (
-		await eligibleOrdersResponse
-	).json()) as Array<{
-		orderNumber: string;
-	}>;
-	expect(eligibleOrders.map((order) => order.orderNumber)).toContain(
-		E2E_ORDERS.assignedB,
-	);
-	await expect(page.locator("#orderId")).toBeEnabled();
-	await page
-		.locator('[data-slot="input-group"]')
-		.filter({ has: page.locator("#orderId") })
-		.getByRole("button")
-		.click();
-	const eligibleOrder = page.getByRole("option", {
-		name: E2E_ORDERS.assignedB,
-		exact: true,
+	const programCreateRequests: string[] = [];
+	page.on("request", (request) => {
+		if (
+			request.method() === "POST" &&
+			/\/programs(?:\?|$)/.test(request.url())
+		) {
+			programCreateRequests.push(request.url());
+		}
 	});
-	await expect(eligibleOrder).toBeVisible();
-	await eligibleOrder.click();
-	await page.locator("#plannedDate").fill("2026-10-10");
-	await page.locator("#quantityPlanned").fill("20");
+
+	const openProgramForm = async (verifyEligibility: boolean) => {
+		const eligibleOrdersResponse = verifyEligibility
+			? page.waitForResponse((response) =>
+					response.url().includes("/orders/eligible-for-programs"),
+				)
+			: undefined;
+		await page.goto(`/dashboard/orders/${E2E_ORDERS.assignedB}`);
+		await page
+			.getByRole("link", {
+				name: translate(Messages.orders.detail.createProgram),
+				exact: true,
+			})
+			.click();
+		if (eligibleOrdersResponse) {
+			const response = await eligibleOrdersResponse;
+			const eligibleOrders = (await response.json()) as Array<{
+				orderNumber: string;
+			}>;
+			expect(eligibleOrders.map((order) => order.orderNumber)).toContain(
+				E2E_ORDERS.assignedB,
+			);
+		}
+		await expect(page.locator("#orderId")).toHaveValue(E2E_ORDERS.assignedB);
+	};
+
+	const planAndContinue = async () => {
+		await page.locator("#plannedDate").fill("2026-10-10");
+		await page.locator("#quantityPlanned").fill("20");
+		await page
+			.getByRole("button", {
+				name: translate(Messages.common.actions.continue),
+				exact: true,
+			})
+			.click();
+		await expect(page.locator("#quantityRealized")).toBeVisible();
+		expect(programCreateRequests).toHaveLength(0);
+	};
+
+	await openProgramForm(true);
+	await planAndContinue();
 	await page
 		.getByRole("button", {
-			name: translate(Messages.common.actions.continue),
+			name: translate(Messages.common.actions.cancel),
 			exact: true,
 		})
 		.click();
-	await expect(page.locator("#quantityRealized")).toBeVisible();
+	await expect(page).toHaveURL(
+		new RegExp(`/dashboard/orders/${E2E_ORDERS.assignedB}$`),
+	);
+
+	await openProgramForm(false);
+	await planAndContinue();
 	await page
 		.getByRole("button", {
 			name: translate(Messages.programs.createForm.create),
@@ -352,6 +381,7 @@ export async function verifyAgentOperationalCreation(page: Page) {
 		.click();
 	await expect(page).toHaveURL(/\/dashboard\/programs\/PRG-[A-Z0-9]+$/);
 	await expect(page.getByRole("heading")).toContainText(/PRG-/);
+	expect(programCreateRequests).toHaveLength(1);
 }
 export async function verifyClientOrderSubmission(page: Page) {
 	await signIn(page, E2E_USERS.clientA.email);
