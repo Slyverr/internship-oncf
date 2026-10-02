@@ -5,6 +5,8 @@ import { DEFAULT_LOCALE } from "@ecommand/shared";
 import { ConfigService } from "@nestjs/config";
 import nodemailer from "nodemailer";
 import { EmailService } from "./email.service";
+import { enEmailMessages } from "./messages/en";
+import { frEmailMessagesDraft } from "./messages/fr-draft";
 
 jest.mock("nodemailer", () => ({
 	__esModule: true,
@@ -12,6 +14,42 @@ jest.mock("nodemailer", () => ({
 }));
 
 const createTransport = nodemailer.createTransport as jest.Mock;
+
+function messagePaths(value: unknown, prefix = ""): string[] {
+	if (value === null || typeof value !== "object") return [prefix];
+	return Object.entries(value).flatMap(([key, child]) =>
+		messagePaths(child, prefix ? `${prefix}.${key}` : key),
+	);
+}
+
+function readMessagePath(source: unknown, path: string): unknown {
+	return path.split(".").reduce<unknown>((value, key) => {
+		if (value === null || typeof value !== "object") return undefined;
+		return (value as Record<string, unknown>)[key];
+	}, source);
+}
+
+describe("reset email message draft parity", () => {
+	it("keeps draft keys and reset-link interpolation aligned with English", () => {
+		const englishPaths = messagePaths(enEmailMessages).sort();
+		const frenchPaths = messagePaths(frEmailMessagesDraft).sort();
+		expect(frenchPaths).toEqual(englishPaths);
+
+		for (const path of englishPaths) {
+			const englishValue = readMessagePath(enEmailMessages, path);
+			const frenchValue = readMessagePath(frEmailMessagesDraft, path);
+			expect(typeof frenchValue).toBe(typeof englishValue);
+			if (typeof englishValue !== "function") continue;
+
+			const marker = "RESET_LINK_PARITY_MARKER";
+			const englishText = englishValue(marker) as string;
+			const frenchText = (frenchValue as (value: string) => string)(marker);
+			const occurrences = (text: string) => text.split(marker).length - 1;
+			expect(occurrences(frenchText)).toBe(occurrences(englishText));
+			expect(occurrences(frenchText)).toBeGreaterThan(0);
+		}
+	});
+});
 
 describe("EmailService password reset delivery", () => {
 	let mailboxPath: string;
