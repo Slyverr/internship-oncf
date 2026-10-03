@@ -1,6 +1,8 @@
 "use client";
 
 import {
+	CLAIM_REJECTION_REASON_MAX_LENGTH,
+	CLAIM_RESOLUTION_MAX_LENGTH,
 	CLAIM_TRANSITIONS,
 	ClaimStatus,
 	isWorkflowTransitionAllowed,
@@ -31,6 +33,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useUpdateDetailCache } from "@/hooks/use-update-detail-cache";
 import { Messages } from "@/i18n";
 import { useTranslate } from "@/i18n/locale-provider";
+import { canSubmitRequiredText } from "@/lib/action-visibility";
 import {
 	getClaimsControllerFindOneQueryKey,
 	useClaimsControllerAwaitInfo,
@@ -323,6 +326,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 							value={resolutionText}
 							onChange={(event) => setResolutionText(event.target.value)}
 							placeholder={t(Messages.claims.actions.resolutionPlaceholder)}
+							maxLength={CLAIM_RESOLUTION_MAX_LENGTH}
 						/>
 					</AlertDialogBody>
 
@@ -331,7 +335,10 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 							{t(Messages.claims.edit.cancel)}
 						</AlertDialogCancel>
 
-						<AlertDialogAction disabled={isPending} onClick={handleResolve}>
+						<AlertDialogAction
+							disabled={!canSubmitRequiredText(resolutionText, isPending)}
+							onClick={handleResolve}
+						>
 							{t(Messages.claims.actions.confirmResolution)}
 						</AlertDialogAction>
 					</AlertDialogFooter>
@@ -355,6 +362,7 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 							value={rejectionReason}
 							onChange={(event) => setRejectionReason(event.target.value)}
 							placeholder={t(Messages.claims.actions.rejectionPlaceholder)}
+							maxLength={CLAIM_REJECTION_REASON_MAX_LENGTH}
 						/>
 					</AlertDialogBody>
 
@@ -363,7 +371,10 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 							{t(Messages.claims.edit.cancel)}
 						</AlertDialogCancel>
 
-						<AlertDialogAction disabled={isPending} onClick={handleReject}>
+						<AlertDialogAction
+							disabled={!canSubmitRequiredText(rejectionReason, isPending)}
+							onClick={handleReject}
+						>
 							{t(Messages.claims.actions.confirmReject)}
 						</AlertDialogAction>
 					</AlertDialogFooter>

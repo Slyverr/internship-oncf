@@ -17,6 +17,7 @@ import {
 import {
 	canDeleteProgram,
 	canReviewRegistration,
+	canSubmitRequiredText,
 	getDashboardQuickActions,
 	getPendingClientRegistrations,
 	getUserAccountOverview,
@@ -280,6 +281,9 @@ assert.equal(
 	false,
 	"commercial agents do not get an empty customer actions menu",
 );
+assert.equal(canSubmitRequiredText("   ", false), false);
+assert.equal(canSubmitRequiredText("This explains the decision.", false), true);
+assert.equal(canSubmitRequiredText("This explains the decision.", true), false);
 assert.equal(
 	hasAvailableActions(
 		roleHasPermission(Role.ADMIN, Permission.CUSTOMERS_DELETE),

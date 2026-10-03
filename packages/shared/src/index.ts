@@ -2,6 +2,7 @@ export * from "./api-errors";
 export * from "./appearance";
 export * from "./auth";
 export * from "./catalog";
+export * from "./claims/validation";
 export * from "./customer-identity";
 export * from "./enums";
 export * from "./i18n/locales";

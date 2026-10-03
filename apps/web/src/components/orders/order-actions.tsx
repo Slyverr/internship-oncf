@@ -31,6 +31,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useUpdateDetailCache } from "@/hooks/use-update-detail-cache";
 import { Messages } from "@/i18n";
 import { useTranslate } from "@/i18n/locale-provider";
+import { canSubmitRequiredText } from "@/lib/action-visibility";
 import type { OrderDetailDto } from "@/lib/api/generated.schemas";
 import {
 	getOrdersControllerFindOneQueryKey,
@@ -295,7 +296,7 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 						</AlertDialogCancel>
 
 						<AlertDialogAction
-							disabled={isPending || !rejectionReason.trim()}
+							disabled={!canSubmitRequiredText(rejectionReason, isPending)}
 							onClick={handleReject}
 						>
 							{t(

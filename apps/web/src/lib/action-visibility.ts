@@ -71,6 +71,13 @@ export function hasAvailableActions(...actions: boolean[]): boolean {
 	return actions.some(Boolean);
 }
 
+export function canSubmitRequiredText(
+	value: string,
+	isPending: boolean,
+): boolean {
+	return !isPending && value.trim().length > 0;
+}
+
 export function canDeleteProgram(
 	status: string,
 	hasDeletePermission: boolean,

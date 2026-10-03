@@ -1,4 +1,9 @@
-import { ClaimPriority, ClaimStatus, ClaimType } from "@ecommand/shared";
+import {
+	CLAIM_RESOLUTION_MAX_LENGTH,
+	ClaimPriority,
+	ClaimStatus,
+	ClaimType,
+} from "@ecommand/shared";
 import { Transform, Type } from "class-transformer";
 import {
 	IsEnum,
@@ -50,6 +55,6 @@ export class CreateClaimDto {
 
 	@IsOptional()
 	@IsString()
-	@MaxLength(1000)
+	@MaxLength(CLAIM_RESOLUTION_MAX_LENGTH)
 	resolution?: string;
 }
