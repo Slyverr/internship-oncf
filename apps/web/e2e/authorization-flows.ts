@@ -1,4 +1,5 @@
-import { readFile } from "node:fs/promises";
+import { mkdir, readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { API_ERROR_CODES, API_TRANSPORT_ERROR_CODES } from "@ecommand/shared";
 import { expect, type Page } from "@playwright/test";
 import {
@@ -468,6 +469,56 @@ export async function verifyAgentOperationalCreation(page: Page) {
 	await page
 		.locator("#description")
 		.fill("E2E agent claim creation workflow check.");
+	let failClaimCreate = true;
+	await page.route("**/api/proxy/claims", async (route) => {
+		if (
+			failClaimCreate &&
+			route.request().method() === "POST" &&
+			new URL(route.request().url()).pathname === "/api/proxy/claims"
+		) {
+			failClaimCreate = false;
+			await route.fulfill({
+				status: 500,
+				contentType: "application/json",
+				body: JSON.stringify({
+					code: API_ERROR_CODES.INTERNAL_ERROR,
+					statusCode: 500,
+				}),
+			});
+			return;
+		}
+		await route.continue();
+	});
+	const failedCreateResponse = page.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			new URL(response.url()).pathname === "/api/proxy/claims",
+	);
+	await page
+		.getByRole("button", {
+			name: translate(Messages.claims.create),
+			exact: true,
+		})
+		.click();
+	expect((await failedCreateResponse).status()).toBe(500);
+	const failureAlert = page.locator('[role="alert"].text-destructive');
+	await expect(failureAlert).toContainText(
+		translate(Messages.apiError.internal),
+	);
+	await expect(page).toHaveURL(/\/dashboard\/claims\/new$/);
+	if (process.env.E2E_CAPTURE_DIR) {
+		await mkdir(process.env.E2E_CAPTURE_DIR, { recursive: true });
+		await page.setViewportSize({ width: 390, height: 844 });
+		await page.screenshot({
+			path: join(process.env.E2E_CAPTURE_DIR, "claim-submit-error-phone.png"),
+			fullPage: true,
+		});
+		await page.setViewportSize({ width: 1440, height: 900 });
+		await page.screenshot({
+			path: join(process.env.E2E_CAPTURE_DIR, "claim-submit-error-desktop.png"),
+			fullPage: true,
+		});
+	}
 	const claimCreateResponse = page.waitForResponse(
 		(response) =>
 			response.request().method() === "POST" &&
