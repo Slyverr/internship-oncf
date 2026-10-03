@@ -242,7 +242,7 @@ export function AppearanceProvider({
 export function writeAppearancePreferenceCookie(
 	preferences: AppearancePreferences,
 	userId: number,
-	updatedAt?: string,
+	updatedAt?: string | null,
 ) {
 	try {
 		const secure = window.location.protocol === "https:" ? "; Secure" : "";

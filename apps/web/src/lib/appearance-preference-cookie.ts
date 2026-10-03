@@ -22,7 +22,7 @@ export type CachedAppearancePreferenceSnapshot = {
 export function serializeAppearancePreferenceCookie(
 	preferences: AppearancePreferences,
 	userId: number,
-	updatedAt = new Date().toISOString(),
+	updatedAt: string | null = new Date().toISOString(),
 ) {
 	return encodeURIComponent(JSON.stringify({ userId, preferences, updatedAt }));
 }

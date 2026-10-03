@@ -36,5 +36,17 @@ assert.ok(
 	initializationEffect < storedPreferenceRead,
 	"Read the local appearance fallback in the pre-paint initialization effect.",
 );
+assert.ok(
+	source.includes(
+		"if (!serverPreferencesAvailable) {\n\t\t\t\t// When SSR could not reach the preference API",
+	),
+	"Cache the local preference for server rendering when no server snapshot exists.",
+);
+assert.ok(
+	source.includes(
+		"writeAppearancePreferenceCookie(preferences, profile.id, null);",
+	),
+	"Mark an offline render cache as unversioned so a database value remains authoritative.",
+);
 
 console.log("Appearance preference revalidation checks passed.");

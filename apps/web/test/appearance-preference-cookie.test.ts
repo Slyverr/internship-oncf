@@ -5,6 +5,7 @@ import {
 } from "@ecommand/shared";
 import {
 	parseAppearancePreferenceCookie,
+	parseAppearancePreferenceSnapshot,
 	serializeAppearancePreferenceCookie,
 } from "../src/lib/appearance-preference-cookie";
 
@@ -19,6 +20,16 @@ assert.deepEqual(parseAppearancePreferenceCookie(encoded, 42), preferences);
 assert.equal(parseAppearancePreferenceCookie(encoded, 43), null);
 assert.equal(parseAppearancePreferenceCookie("not-json", 42), null);
 assert.equal(parseAppearancePreferenceCookie(undefined, 42), null);
+const offlineSnapshot = serializeAppearancePreferenceCookie(
+	preferences,
+	42,
+	null,
+);
+assert.deepEqual(
+	parseAppearancePreferenceSnapshot(offlineSnapshot, 42),
+	{ preferences, updatedAt: null },
+	"an offline fallback must not claim to be newer than the database",
+);
 
 const invalidValues = encodeURIComponent(
 	JSON.stringify({

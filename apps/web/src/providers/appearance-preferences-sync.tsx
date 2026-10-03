@@ -95,6 +95,11 @@ export function AppearancePreferencesSync({
 		if (!initializedCookieSnapshot.current) {
 			initializedCookieSnapshot.current = true;
 			lastCookiePreferences.current = serialized;
+			if (!serverPreferencesAvailable) {
+				// When SSR could not reach the preference API, cache the local choice
+				// for the next request without claiming it is newer than the database.
+				writeAppearancePreferenceCookie(preferences, profile.id, null);
+			}
 			return;
 		}
 		if (serialized === lastCookiePreferences.current) return;
@@ -180,6 +185,11 @@ export function AppearancePreferencesSync({
 
 			lastSent.current = JSON.stringify(serverPreferences);
 			lastCookiePreferences.current = JSON.stringify(serverPreferences);
+			writeAppearancePreferenceCookie(
+				serverPreferences,
+				profile.id,
+				preferencesQuery.data.updatedAt,
+			);
 			setPreferences(serverPreferences);
 			setStatus("saved");
 			return;
