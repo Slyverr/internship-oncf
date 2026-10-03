@@ -4,8 +4,8 @@ This is the milestone journal for finishing the ECommand MVP. Read it with [work
 
 ## Current position
 
-- **Completed chapters:** 1–23 — API/browser workflows, permission/ownership enforcement, Admin reference data and custom profiles, English i18n/API message contracts, UX/print work, notification transactions, and transactional user assignments.
-- **Active chapter:** 24 — finish role-aware product review and the highest-impact workflow/UI gaps. French rollout remains deferred. See [MVP readiness](project/readiness.md) for the ranked continuation plan.
+- **Completed chapters:** 1–28 — API/browser workflows, permission/ownership enforcement, Admin reference data and custom profiles, English i18n/API message contracts, UX/print work, notification transactions, transactional user assignments, and guided-form recovery.
+- **Active chapter:** 29 — continue the route/state/role product review and close the highest-impact workflow and UI gaps. French rollout remains deferred. See [MVP readiness](project/readiness.md) for the ranked continuation plan.
 - **Current checkout:** `develop`; product changes are committed locally and have not been pushed. Do not rewrite published commits.
 - **Local app:** `bun run dev` is running at `http://localhost:3000`; web `/login` and API `http://localhost:8000/health` return HTTP 200. The ignored API `.env` points to the isolated `ecommand_preview` database. The pre-existing `ecommand` database was left untouched.
 
@@ -320,6 +320,8 @@ The security follow-up for preventing administrator lockout is completed in Chap
 
 - Auditing claim create/edit workflows exposed that failed API submissions in all shared guided create/edit forms had no visible failure feedback. Added one error region to `GuidedFormActions` and connected localized mutation errors from Claims, Customers, Orders, Programs, and Users; Order edit's existing localized failure now uses the same surface.
 - Added a focused regression check requiring all eight guided create/edit forms to supply their save error and the shared action component to announce it with the semantic destructive treatment.
-- Verification: web checks, web TypeScript compilation, Biome on changed source/test files, and `git diff --check` passed. Fresh user-profile-step captures at 390×844 and 1440×900 retained the action layout and showed no horizontal overflow. The forced API-failure visual state was not separately captured.
+- Fresh browser verification forced a coded 500 on claim submission. The localized error appeared, the form values remained, a second submit reached the success handler, and no record was written during the visual check because both responses were mocked. Captures: `/tmp/ecommand-guided-form-failure/claim-submit-error-desktop.png` and `claim-submit-error-phone.png`.
+- The failure capture exposed intrinsic textarea sizing and stacked field wrappers shrinking to their contents. The shared field utility now fills its parent; standard textareas use fixed sizing while the chat composer keeps content sizing. Browser measurements show matching textarea widths at desktop (1232px) and phone (311px); after scrolling, the phone create action clears the fixed navigation by 31px. The browser workflow now asserts these widths and action clearance and injects one failure before retrying against the API.
+- Verification: web checks, web TypeScript compilation, Biome on changed source/test files, and `git diff --check` passed. The isolated API/browser E2E runner was not run in this turn.
 
-**Next:** continue the route/state/role review, including a browser-captured save failure state and other role-specific empty/error paths. Keep external DTM and SMTP contracts, ICE data ownership, and French runtime support tracked separately.
+**Next:** continue the route/state/role review across remaining empty/error states and routes. Keep external DTM and SMTP contracts, ICE data ownership, and French runtime support tracked separately.
