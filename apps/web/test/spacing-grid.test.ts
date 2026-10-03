@@ -58,6 +58,12 @@ function collectSpacingUtilities(directory: string) {
 }
 
 collectSpacingUtilities(sourceRoot);
+const globalStyles = readFileSync(join(sourceRoot, "app/globals.css"), "utf8");
+assert.match(
+	globalStyles,
+	/@utility oncf-field\s*\{[^}]*align-content:\s*start;/s,
+	"Shared form fields must keep their contents top-aligned inside taller grid rows.",
+);
 assert.deepEqual(
 	offGrid,
 	[],
