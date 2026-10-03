@@ -23,6 +23,7 @@ import {
 	useMemo,
 	useState,
 } from "react";
+import { serializeAppearancePreferenceCookie } from "@/lib/appearance-preference-cookie";
 
 export type ThemeMode = AppearanceTheme;
 export type FontFamily = AppearanceFontFamily;
@@ -241,7 +242,7 @@ export function writeAppearancePreferenceCookie(
 ) {
 	try {
 		const secure = window.location.protocol === "https:" ? "; Secure" : "";
-		const value = encodeURIComponent(JSON.stringify({ userId, preferences }));
+		const value = serializeAppearancePreferenceCookie(preferences, userId);
 		// The cookie is a non-sensitive, user-scoped render cache read by Next.js.
 		// biome-ignore lint/suspicious/noDocumentCookie: server rendering needs this preference snapshot in a request cookie.
 		document.cookie = `ecommand-appearance=${value}; Path=/; Max-Age=31536000; SameSite=Lax${secure}`;
