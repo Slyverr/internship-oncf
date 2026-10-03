@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { NotificationMessageCode } from "@ecommand/shared";
 import type { NotificationListDto } from "../src/lib/api/generated.schemas";
-import { isUnreadClaimCommentNotification } from "../src/lib/claim-conversation-utils";
+import {
+	getConversationScrollAction,
+	isUnreadClaimCommentNotification,
+} from "../src/lib/claim-conversation-utils";
 
 const notification: NotificationListDto = {
 	id: 1,
@@ -51,4 +54,49 @@ assert.equal(
 	"claim lifecycle notifications are not mistaken for conversation messages",
 );
 
-console.log("Claim conversation unread indicator checks passed.");
+assert.equal(
+	getConversationScrollAction({
+		positionedAtLatest: false,
+		scrollAfterReply: false,
+		nearLatest: false,
+		previousMessageCount: 0,
+		nextMessageCount: 4,
+	}),
+	"follow-latest",
+	"initial conversation load opens at the newest message",
+);
+assert.equal(
+	getConversationScrollAction({
+		positionedAtLatest: true,
+		scrollAfterReply: false,
+		nearLatest: true,
+		previousMessageCount: 4,
+		nextMessageCount: 5,
+	}),
+	"follow-latest",
+	"incoming messages keep the reader at the newest message when already near it",
+);
+assert.equal(
+	getConversationScrollAction({
+		positionedAtLatest: true,
+		scrollAfterReply: false,
+		nearLatest: false,
+		previousMessageCount: 4,
+		nextMessageCount: 5,
+	}),
+	"show-new",
+	"incoming messages notify the reader without moving them away from older messages",
+);
+assert.equal(
+	getConversationScrollAction({
+		positionedAtLatest: true,
+		scrollAfterReply: false,
+		nearLatest: false,
+		previousMessageCount: 4,
+		nextMessageCount: 4,
+	}),
+	"none",
+	"background refreshes do not scroll or show a new-message action without new messages",
+);
+
+console.log("Claim conversation update behavior checks passed.");

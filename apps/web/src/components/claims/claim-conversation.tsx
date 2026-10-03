@@ -40,7 +40,10 @@ import {
 	useNotificationsControllerFindAll,
 	useNotificationsControllerMarkAsRead,
 } from "@/lib/api/notifications";
-import { isUnreadClaimCommentNotification } from "@/lib/claim-conversation-utils";
+import {
+	getConversationScrollAction,
+	isUnreadClaimCommentNotification,
+} from "@/lib/claim-conversation-utils";
 import {
 	formatFullMessageTime,
 	formatMessageTime,
@@ -290,15 +293,15 @@ export function ClaimConversation({
 		}
 		if (commentsQuery.isLoading || commentsQuery.isError || !commentsUpdatedAt)
 			return;
-		const receivedNewMessage =
-			positionedAtLatest.current &&
-			chronological.length > previousCommentCount.current;
-		const shouldFollowLatest =
-			!positionedAtLatest.current ||
-			scrollAfterReply.current ||
-			nearLatest.current;
-		if (receivedNewMessage && !shouldFollowLatest) setHasNewMessages(true);
-		if (shouldFollowLatest) {
+		const scrollAction = getConversationScrollAction({
+			positionedAtLatest: positionedAtLatest.current,
+			scrollAfterReply: scrollAfterReply.current,
+			nearLatest: nearLatest.current,
+			previousMessageCount: previousCommentCount.current,
+			nextMessageCount: chronological.length,
+		});
+		if (scrollAction === "show-new") setHasNewMessages(true);
+		if (scrollAction === "follow-latest") {
 			messagesEndRef.current?.scrollIntoView({ block: "end" });
 			nearLatest.current = true;
 			setHasNewMessages(false);
