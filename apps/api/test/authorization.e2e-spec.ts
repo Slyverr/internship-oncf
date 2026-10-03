@@ -1,6 +1,8 @@
 import { randomUUID } from "node:crypto";
 import {
 	API_ERROR_CODES,
+	CLAIM_REJECTION_REASON_MAX_LENGTH,
+	CLAIM_RESOLUTION_MAX_LENGTH,
 	ClaimStatus,
 	ClaimType,
 	NotificationMessageCode,
@@ -933,6 +935,30 @@ describe("customer portfolio authorization (e2e)", () => {
 			.expect(403);
 
 		const agentToken = await login(app, E2E_USERS.agentAssigned.employeeCode);
+		const requiredClaimActionText = [
+			{
+				path: `/claims/${claimNumber}/reject`,
+				field: "rejectionReason",
+				maxLength: CLAIM_REJECTION_REASON_MAX_LENGTH,
+			},
+			{
+				path: `/claims/${claimNumber}/resolve`,
+				field: "resolution",
+				maxLength: CLAIM_RESOLUTION_MAX_LENGTH,
+			},
+		];
+		for (const { path, field, maxLength } of requiredClaimActionText) {
+			for (const value of ["", " \t ", "x".repeat(maxLength + 1)]) {
+				const invalidAction = await request(app.getHttpServer())
+					.post(path)
+					.set("Authorization", `Bearer ${agentToken}`)
+					.send({ [field]: value })
+					.expect(400);
+				expect(invalidAction.body.code).toBe(API_ERROR_CODES.VALIDATION_FAILED);
+				expect(invalidAction.body.details.fields[field]).toBeDefined();
+			}
+		}
+
 		const createdByAgent = await request(app.getHttpServer())
 			.post("/claims")
 			.set("Authorization", `Bearer ${agentToken}`)
