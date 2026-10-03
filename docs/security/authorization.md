@@ -43,7 +43,7 @@ References: [OWASP Authorization Cheat Sheet](https://cheatsheetseries.owasp.org
 | Capability | Admin | Commercial agent | Client representative |
 | --- | :---: | :---: | :---: |
 | User administration and registration review | Create/read/update/deactivate accounts | — | — |
-| Roles and permissions | Manage role/access definitions | — | — |
+| Access profiles | Manage custom role profiles and their permission bundles | — | — |
 | Reference data | Read, add, rename, archive, and restore catalog values | Read | Read |
 | Orders | — | Operational actions for assigned-customer records | Create/read/update/delete drafts and submit; reads use the assigned customer when present, otherwise own-created records |
 | Programs | — | Create/read/update; status, ownership, and lifecycle actions | Read programs linked to orders for the assigned customer; no create/update/delete/workflow actions |
@@ -54,7 +54,7 @@ References: [OWASP Authorization Cheat Sheet](https://cheatsheetseries.owasp.org
 | Reports | Read and export across all portfolios (`reports:manage:other`) | Read and export across the assigned-customer portfolio | Read and export orders for the assigned customer when present, otherwise own-created orders |
 | Profile | Update | Update | Update |
 
-The administrator grant follows the SDF role boundary: manage accounts and access rights, consult reports, and manage reference data. Admin has no `customers:read` grant. The user-management form gets a minimal list of active customer IDs, names, and codes from `GET /customers/portfolio-options`, guarded by `users:create` or `users:update`; this does not expose customer records or expand order, program, claim, or report scope. Admin has no customer update permission. Full report scope is controlled by `reports:manage:other`, never by the role name. The `roles:manage` permission gates profile administration; permission definitions remain read-only and reserved grants cannot be assigned to custom profiles. Parent permissions imply descendants (for example, claims:action grants each claim lifecycle action). A dash means the default role has no grant. Custom database grants may change runtime access, so use effective permissions when checking actual access. Reference seeding removes stale extra grants from the default administrator role.
+The administrator grant follows the SDF role boundary: manage accounts and access rights, consult reports, and manage reference data. Admin has no `customers:read` grant. The user-management form gets a minimal list of active customer IDs, names, and codes from `GET /customers/portfolio-options`, guarded by `users:create` or `users:update`; this does not expose customer records or expand order, program, claim, or report scope. Admin has no customer update permission. Full report scope is controlled by `reports:manage:other`, never by the role name. The `roles:manage` permission gates profile administration; permission definitions remain code-owned and read-only. The unused `permissions:manage` grant is not assigned to the administrator. Reserved user and access-management grants cannot be assigned to custom profiles. Parent permissions imply descendants (for example, claims:action grants each claim lifecycle action). A dash means the default role has no grant. Custom database grants may change runtime access, so use effective permissions when checking actual access. Reference seeding removes stale extra grants from the default administrator role.
 
 ## API and web mapping
 

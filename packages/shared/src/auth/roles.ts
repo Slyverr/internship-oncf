@@ -9,7 +9,6 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, Permission[]> = {
 		Permission.USERS_MANAGE,
 		Permission.USERS_MANAGE_OTHER,
 		Permission.ROLES_MANAGE,
-		Permission.PERMISSIONS_MANAGE,
 		Permission.REPORTS_READ,
 		Permission.REPORTS_MANAGE_OTHER,
 		Permission.REPORTS_ACTION_EXPORT,
