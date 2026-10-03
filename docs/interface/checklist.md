@@ -2,6 +2,14 @@
 
 This is the running review list for the application-wide usability and visual overhaul. Check an item only after reviewing its current implementation at relevant screen sizes, making the change, and verifying the rendered result. Keep changes focused and preserve the existing ECommand stack and business rules.
 
+## Responsive dashboard and centered-header review — 2026-10-03
+
+- Fresh Admin, Commercial Agent, and Client Representative dashboard captures at 390, 1440, and 3840px were inspected, along with phone bottom-of-page views for Agent and Client. Each role showed its permission-appropriate actions and data; all captures matched `/dashboard` and reported no horizontal overflow. The phone views keep the fixed navigation clear of the last content row.
+- The Admin centered-header layout was inspected at 390, 768, 1024, 1440, 1920, and 3840px. Navigation stays on one centered row where it fits, phone navigation stays in the bottom bar, the 1536px workspace cap holds at ultrawide widths, and no capture overflowed horizontally. No header change was warranted.
+- Appearance settings were rechecked at 390 and 1440px. The theme/layout/font/text/motion previews remain visible in their controls; desktop uses the two-column grouping while phone content scrolls inside the dialog. The broader route/state/theme/role matrix remains open.
+- The screenshot helper now preserves an opened state while reusing one browser page across viewports and reports the actual scroll coordinates. Its isolated Admin, Agent, and Client captures were exercised through login and route navigation without changing the existing browser tab or creating records.
+- Captures: `/tmp/ecommand-dashboard-counts`, `/tmp/ecommand-centered-header-review`, and `/tmp/ecommand-settings-current`.
+
 ## User detail row alignment recheck — 2026-10-03
 
 - Reopened the live pending registration account at `/dashboard/users/6` as Admin and captured the actual rendered detail page at 320, 375, 390, 640, 768, 1024, 1440, 1920, 2560, and 3840px. Inspected all ten images. The role badge sits on the value side with the other right-aligned values at every width, and the ultrawide workspace remains capped and centered. The 320px top viewport naturally scrolls through the detail cards above bottom navigation; it does not show page-level horizontal overflow. No code change was needed. Captures: `/tmp/ecommand-user-detail-recheck`.
