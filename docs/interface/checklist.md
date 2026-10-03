@@ -9,6 +9,7 @@ This is the running review list for the application-wide usability and visual ov
 - Fresh `/login` captures at 390, 1440, 1920, and 3840px showed a consistent layout. The required email/employee-code and password labels lacked markers, so they now use the same required-field convention as signup. Empty submission at 390px and 1440px invokes native required-field validation, keeps the layout within the viewport, and does not submit credentials.
 - Fresh `/forgot-password` and `/reset-password` captures at 390, 1440, 1920, and 3840px showed the recovery forms remain within the viewport. Missing-token reset is disabled; submitting a fake token shows the localized invalid-link response at 390px and 1440px without changing an account password.
 - Browser navigation verified `/login` → `/forgot-password`, and each recovery form's “Back to sign in” link → `/login` in a fresh context. No recovery email was requested and no account credentials were changed.
+- The shared auth content transition was verified on `/login`: it uses the 180ms `page-enter` animation with normal motion, and the computed animation is disabled when reduced motion is emulated. Returned the browser to the dashboard afterward.
 - Captures: `/tmp/ecommand-auth-final-review`.
 - This review covers layout and navigation states. It does not establish successful provider email delivery or a valid-token password reset, which require a configured mail provider and a disposable account/token.
 
@@ -48,7 +49,7 @@ This is the running review list for the application-wide usability and visual ov
 
 | # | Area | Required review and acceptance evidence | Status |
 | --- | --- | --- | --- |
-| 1 | Login and registration | Remove redundant nested surfaces and unnecessary explanation; fix the registration form's field layout and logo fit. Show concise API-backed password validation, keep the desktop auth shell the same size for both routes, add a public theme selector and a soft route transition, then review phone, laptop, 2K, and 4K captures. | In progress |
+| 1 | Login and registration | Remove redundant nested surfaces and unnecessary explanation; fix the registration form's field layout and logo fit. Show concise API-backed password validation, keep the desktop auth shell the same size for both routes, add a public theme selector and a soft route transition, then review phone, laptop, 2K, and 4K captures. | Complete — transition and reduced-motion behavior verified 2026-10-03 |
 | 2 | Order creation | Check the form's usable width, grouping, step navigation, validation, and action placement at phone, tablet, laptop, and wide widths. | Complete |
 | 3 | Menus | Review account and other dropdown hover/focus shapes, item insets, active state, keyboard use, and touch behavior. | In progress |
 | 4 | Button surfaces | Find light-theme buttons that look like unbounded white text; set a consistent semantic surface, border, or restrained elevation. Check every button variant in both themes. | In progress |
