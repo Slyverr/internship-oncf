@@ -6,6 +6,11 @@ import { parseAppearancePreferenceCookie } from "@/lib/appearance-preference-coo
 const SERVER_PREFERENCE_TIMEOUT_MS = 3_000;
 const PREFERENCE_COOKIE = "ecommand-appearance";
 
+type ServerAppearancePreferenceDependencies = {
+	getCookies?: typeof cookies;
+	getPreferences?: typeof profileControllerGetPreferences;
+};
+
 function getTokenUserId(token?: string): number | null {
 	const payload = token?.split(".")[1];
 	if (!payload) return null;
@@ -22,8 +27,11 @@ function getTokenUserId(token?: string): number | null {
 	}
 }
 
-export async function getServerAppearancePreferences(): Promise<AppearancePreferences | null> {
-	const requestCookies = await cookies();
+export async function getServerAppearancePreferences({
+	getCookies = cookies,
+	getPreferences = profileControllerGetPreferences,
+}: ServerAppearancePreferenceDependencies = {}): Promise<AppearancePreferences | null> {
+	const requestCookies = await getCookies();
 	const token = requestCookies.get("access_token")?.value;
 	if (!token) return null;
 
@@ -34,13 +42,11 @@ export async function getServerAppearancePreferences(): Promise<AppearancePrefer
 				userId,
 			)
 		: null;
-	if (cachedPreferences) return cachedPreferences;
-
 	try {
-		const preferences = await profileControllerGetPreferences({
+		const preferences = await getPreferences({
 			timeout: SERVER_PREFERENCE_TIMEOUT_MS,
 		});
-		if (!preferences) return null;
+		if (!preferences) return cachedPreferences;
 
 		return {
 			theme: preferences.theme,
@@ -50,8 +56,8 @@ export async function getServerAppearancePreferences(): Promise<AppearancePrefer
 			workspaceLayout: preferences.workspaceLayout,
 		};
 	} catch {
-		// Rendering must keep working when the API is unavailable; the browser
-		// appearance provider falls back to the locally cached preference.
-		return null;
+		// Prefer the database when it is reachable, while retaining the last local
+		// appearance if the API is unavailable during a page request.
+		return cachedPreferences;
 	}
 }

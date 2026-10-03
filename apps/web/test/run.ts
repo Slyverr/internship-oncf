@@ -3,6 +3,7 @@ import "./api-availability.test";
 import "./appearance-preference-cookie.test";
 import "./appearance-theme-styles.test";
 import "./appearance-preferences-sync.test";
+import "./server-appearance-preferences.test";
 import "./spacing-grid.test";
 import "./table-frame.test";
 import "./catalog-coverage.test";
