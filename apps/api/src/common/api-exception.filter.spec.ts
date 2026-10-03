@@ -1,4 +1,6 @@
-import { API_ERROR_CODES } from "@ecommand/shared";
+import { readdir, readFile } from "node:fs/promises";
+import { join } from "node:path";
+import { API_ERROR_CODES, API_VALIDATION_RULE_CODES } from "@ecommand/shared";
 import { HttpStatus } from "@nestjs/common";
 import type { ValidationError } from "class-validator";
 import {
@@ -6,6 +8,21 @@ import {
 	toErrorResponse,
 	toValidationDetails,
 } from "./api-exception.filter";
+
+async function getSourceFiles(directory: string): Promise<string[]> {
+	const entries = await readdir(directory, { withFileTypes: true });
+	const nested = await Promise.all(
+		entries.map((entry) => {
+			const path = join(directory, entry.name);
+			return entry.isDirectory()
+				? getSourceFiles(path)
+				: entry.isFile() && entry.name.endsWith(".ts")
+					? Promise.resolve([path])
+					: Promise.resolve([]);
+		}),
+	);
+	return nested.flat();
+}
 
 describe("API error response contract", () => {
 	it("returns stable codes for standard HTTP failures", () => {
@@ -117,6 +134,37 @@ describe("API error response contract", () => {
 				recordId: ["IS_UUID"],
 			},
 		});
+	});
+
+	it("maps every API class-validator decorator to a shared stable rule code", async () => {
+		const sourceFiles = await getSourceFiles(join(__dirname, ".."));
+		const sources = await Promise.all(
+			sourceFiles.map((file) => readFile(file, "utf8")),
+		);
+		const decorators = new Set(
+			sources.flatMap((source) =>
+				Array.from(
+					source.matchAll(
+						/@(Array[A-Z][A-Za-z0-9]*|Is[A-Z][A-Za-z0-9]*|Matches|Max(?:Length)?|Min(?:Length)?)\s*\(/g,
+					),
+					([, match]) => match,
+				),
+			),
+		);
+		decorators.delete("IsOptional");
+		const knownCodes = new Set(Object.values(API_VALIDATION_RULE_CODES));
+		const unmapped = [...decorators].filter((decorator) => {
+			const code = decorator
+				.replace(/UUID/g, "Uuid")
+				.replace(/[A-Z]/g, (letter) => `_${letter}`)
+				.replace(/^_/, "")
+				.toUpperCase();
+			return !knownCodes.has(
+				code as (typeof API_VALIDATION_RULE_CODES)[keyof typeof API_VALIDATION_RULE_CODES],
+			);
+		});
+
+		expect(unmapped).toEqual([]);
 	});
 
 	it("converts array size validation to a stable rule code", () => {
