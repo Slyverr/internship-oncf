@@ -75,6 +75,14 @@ The earlier live workflow check recorded these QA records:
 
 The order/program/claim are preserved so their resulting workflow state can be inspected. The test user should be deactivated or removed before reusing this preview database for a clean demonstration.
 
+### Client registration review — 2026-10-03
+
+- Exercised `/signup` in the running browser with the documented synthetic `LOCAL-REG-TEST` customer. A valid registration returned `201 REGISTRATION_SUBMITTED_FOR_REVIEW` and created an inactive `PENDING` Client Representative; sign-in returned `401` before review.
+- Admin approved one request through the user detail screen. The API returned `200 APPROVED`, set the account active, and sign-in then returned `201` with a session token. Admin rejected a second request through the same screen; it remained inactive with `REJECTED` status and sign-in returned `401`.
+- Invalid ICE and unknown customer-code submissions each returned `400 CUSTOMER_IDENTITY_INVALID`. The valid flow uses local preview data only; it does not verify identity against an external ONCF registry or send email.
+- Both disposable QA accounts were deactivated through the Admin API after verification. They remain as inactive audit rows in the preview database. The browser was restored to the Admin dashboard.
+- Captures: `/tmp/ecommand-registration-review/registration-result-390x844.png`, `admin-approved-1440x900.png`, and `admin-rejected-1440x900.png`.
+
 ## Prioritized continuation
 
 ### P0 — Enforce operational access scope
