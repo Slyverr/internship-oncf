@@ -4,10 +4,10 @@ This is the milestone journal for finishing the ECommand MVP. Read it with [work
 
 ## Current position
 
-- **Completed chapters:** 1–28 — API/browser workflows, permission/ownership enforcement, Admin reference data and custom profiles, English i18n/API message contracts, UX/print work, notification transactions, transactional user assignments, and guided-form recovery.
-- **Active chapter:** 29 — continue the route/state/role product review and close the highest-impact workflow and UI gaps. French rollout remains deferred. See [MVP readiness](project/readiness.md) for the ranked continuation plan.
-- **Current checkout:** `develop`; product changes are committed locally and have not been pushed. Do not rewrite published commits.
-- **Local app:** `bun run dev` is running at `http://localhost:3000`; web `/login` and API `http://localhost:8000/health` return HTTP 200. The ignored API `.env` points to the isolated `ecommand_preview` database. The pre-existing `ecommand` database was left untouched.
+- **Completed chapters:** 1–29 — API/browser workflows, permission/ownership enforcement, Admin reference data and custom profiles, English i18n/API message contracts, UX/print work, notification transactions, transactional user assignments, guided-form recovery, and the report-backed functional gaps below.
+- **Current checkpoint:** the report-backed workflow closeout is implemented. French rollout remains deferred. Remaining work is limited to verification/runtime constraints and external or production integrations listed in [MVP readiness](project/readiness.md).
+- **Current checkout:** `develop`; chapter 29 code is committed locally as `e43965b` and not pushed. Do not rewrite published commits.
+- **Local app:** the existing web server at `http://localhost:3000` and API at `http://localhost:8000/health` return HTTP 200. The API uses the approved local preview database; the pre-existing `ecommand` database was not used.
 
 ## Completed chapter 1 — API E2E and core workflows
 
@@ -108,6 +108,16 @@ Coverage includes:
 - Claim detail, edit, comment, and workflow API routes now accept the public code. The ownership guard validates the code and still applies customer/creator ownership checks. Dashboard and table links use the code; numeric claim route segments return 400.
 - A live check against the isolated preview app authenticated as the test client, fetched its claim list, opened a claim by `CLM-` code (200), and verified a numeric claim route is rejected (400).
 - `bun run verify:commit` passed: Biome, all workspace typechecks, web checks, 58 API suites / 442 tests, and production builds. Local isolated API E2E could not run in this environment because only Bun's Node shim is available; CI uses Node 24 and should be checked on its first hosted run.
+
+## Completed chapter 29 — report-backed workflow closeout — 2026-10-04
+
+- Safa’s internship report is the current requirements baseline; the older SFD is used only where the report does not supersede it. The existing Bun/NestJS/Next.js stack remains authoritative over the report’s older technical architecture.
+- Added configurable login lockout after repeated failed passwords, with counters reset after successful login or password reset and generic errors for unknown, pending, and inactive accounts.
+- Added order duplication as a new draft, a print-ready order PDF view, and an all-pages filtered CSV export that opens in Excel.
+- Expanded guarded Admin reference-data management to stations, agencies, ports, berths, sidings, vessels, and shipping companies; the existing unit/goods/accessory-operation screens cover the other report categories.
+- Aligned claim closure with the newer report: agents can close resolved claims; clients can follow them but cannot close them. Reference seeding removes stale system-role grants.
+- Verification on this checkout: API unit tests passed (77 suites / 675 tests); web checks, workspace typechecks, Biome, and `git diff --check` passed. The isolated API/browser E2E runner could not run because this environment has no real Node.js binary. `bun run generate:api` reached its documented schema preflight but Bun’s API schema omitted DTO properties, so generated files were left untouched; new reference-data requests temporarily use typed `customFetch`. Root `bun run test` also encounters an esbuild `EPERM` while Turbo rebuilds the shared package on this mounted filesystem; direct API and web test commands passed after restoring ignored shared build outputs with Bun.
+- The current preview returns HTTP 200 from `/login` and `/health`. No database schema push or production integration was attempted.
 - Order/program route conversion was the next item after this chapter and is now completed in [Chapter 9](#chapter-9--order-and-program-public-routes--2026-09-30). Existing IDs remain internal for relations and notification metadata.
 
 ## Chapter 9 — order and program public routes — 2026-09-30
