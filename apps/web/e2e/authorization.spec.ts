@@ -3,6 +3,7 @@ import {
 	verifyAdminCatalogLifecycle,
 	verifyAdminCustomRoleAssignment,
 	verifyAdminDashboard,
+	verifyAdminDashboardApiRecovery,
 	verifyAdminNavigation,
 	verifyAdminRegistrationReview,
 	verifyAdminReportCsvExport,
@@ -29,6 +30,12 @@ test("admin sees account/access/report navigation, not operational records", asy
 
 test("admin dashboard requests only report and user data", async ({ page }) => {
 	await verifyAdminDashboard(page);
+});
+
+test("admin dashboard recovers when the API becomes available", async ({
+	page,
+}) => {
+	await verifyAdminDashboardApiRecovery(page);
 });
 
 test("admin can assign a custom permission profile and it controls access", async ({

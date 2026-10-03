@@ -4,6 +4,7 @@ import {
 	verifyAdminCatalogLifecycle,
 	verifyAdminCustomRoleAssignment,
 	verifyAdminDashboard,
+	verifyAdminDashboardApiRecovery,
 	verifyAdminNavigation,
 	verifyAdminRegistrationReview,
 	verifyAdminReportCsvExport,
@@ -16,10 +17,15 @@ import {
 } from "./authorization-flows";
 
 const endpoint = process.env.PLAYWRIGHT_CDP_ENDPOINT;
+const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3100";
 
 const workflows: [string, (page: Page) => Promise<void>][] = [
 	["admin navigation and access", verifyAdminNavigation],
 	["admin dashboard visibility follows permissions", verifyAdminDashboard],
+	[
+		"admin dashboard recovers when the API becomes available",
+		verifyAdminDashboardApiRecovery,
+	],
 	["admin report CSV download", verifyAdminReportCsvExport],
 	["admin registration review", verifyAdminRegistrationReview],
 	[
@@ -65,7 +71,7 @@ async function main() {
 			let context: BrowserContext | undefined;
 			try {
 				context = await browser.newContext({
-					baseURL: "http://localhost:3100",
+					baseURL,
 					viewport: { width: 1440, height: 900 },
 				});
 				const page = await context.newPage();

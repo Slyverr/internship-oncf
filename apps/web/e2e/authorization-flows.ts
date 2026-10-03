@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { API_ERROR_CODES } from "@ecommand/shared";
+import { API_ERROR_CODES, API_TRANSPORT_ERROR_CODES } from "@ecommand/shared";
 import { expect, type Page } from "@playwright/test";
 import {
 	E2E_CUSTOMER_ICE,
@@ -23,7 +23,7 @@ const navigation = {
 };
 
 async function signIn(page: Page, username: string) {
-	await page.goto("/login");
+	await page.goto("/login", { waitUntil: "domcontentloaded" });
 	await page.getByLabel(translate(Messages.auth.login.username)).fill(username);
 	await page.locator("#password").fill(E2E_PASSWORD);
 	await page
@@ -129,6 +129,54 @@ async function verifyDashboardPersona(
 
 export async function verifyAdminDashboard(page: Page) {
 	await verifyDashboardPersona(page, E2E_USERS.admin.email, false, true, false);
+}
+
+export async function verifyAdminDashboardApiRecovery(page: Page) {
+	let apiHealthy = false;
+	let reportUnavailable = true;
+	await page.route("**/api/proxy/reports/orders*", async (route) => {
+		if (reportUnavailable) {
+			await route.fulfill({
+				status: 503,
+				contentType: "application/json",
+				body: JSON.stringify({
+					code: API_TRANSPORT_ERROR_CODES.API_UNAVAILABLE,
+					statusCode: 503,
+				}),
+			});
+			return;
+		}
+		await route.continue();
+	});
+	await page.route("**/api/proxy/health", async (route) => {
+		await route.fulfill({
+			status: apiHealthy ? 200 : 503,
+			contentType: "application/json",
+			body: JSON.stringify(apiHealthy ? { status: "ok" } : {}),
+		});
+	});
+
+	await signIn(page, E2E_USERS.admin.email);
+	const failureMessage = page.getByText(
+		translate(Messages.dashboard.activity.loadFailed),
+		{ exact: true },
+	);
+	await expect(failureMessage).toBeVisible();
+	await expect(
+		page.getByRole("button", {
+			name: translate(Messages.dashboard.activity.retry),
+		}),
+	).toBeEnabled();
+
+	reportUnavailable = false;
+	apiHealthy = true;
+	await page.evaluate(() => window.dispatchEvent(new Event("online")));
+	await expect(failureMessage).toBeHidden({ timeout: 10_000 });
+	await expect(
+		page.getByText(translate(Messages.dashboard.activity.statusTitle), {
+			exact: true,
+		}),
+	).toBeVisible();
 }
 
 export async function verifyAgentDashboard(page: Page) {

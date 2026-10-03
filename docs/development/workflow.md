@@ -37,7 +37,7 @@ Run the isolated API and browser journey suites from the repository root with:
 - bun scripts/run-api-e2e.ts
 - bun scripts/run-api-e2e.ts --browser
 
-The browser option runs the API suite first, resets and reseeds the disposable ecommand_e2e database, then runs browser workflows through the Chrome CDP endpoint configured by PLAYWRIGHT_CDP_ENDPOINT. The reset helper checks the exact database name and refuses to reset another database. These flows cover role grants, reference-data lifecycle, order submission, claim/program creation, and registration review. The runner tears down its Compose services when complete.
+The browser option runs the API suite first, resets and reseeds the disposable ecommand_e2e database, then runs browser workflows through the Chrome CDP endpoint configured by PLAYWRIGHT_CDP_ENDPOINT. The reset helper checks the exact database name and refuses to reset another database. These flows cover role grants, reference-data lifecycle, order submission, claim/program creation, and registration review. The runner tears down its Compose services when complete. The standalone browser workflow runner defaults to `http://localhost:3100`; set `PLAYWRIGHT_BASE_URL` to review another running web app without changing the test flows.
 
 API database commands run from `apps/api`:
 
