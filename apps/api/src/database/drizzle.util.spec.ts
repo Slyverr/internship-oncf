@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus } from "@nestjs/common";
-import { ConstraintCode } from "./constraints";
+import { ConstraintCode, constraintHandlers } from "./constraints";
 import { withDbErrorHandling } from "./drizzle.util";
 
 describe("withDbErrorHandling", () => {
@@ -21,5 +21,41 @@ describe("withDbErrorHandling", () => {
 				code: ConstraintCode.DUPLICATE_USER_EMAIL,
 			});
 		}
+	});
+
+	it("maps every registered constraint to a stable code and status", async () => {
+		for (const [constraint, handler] of Object.entries(constraintHandlers)) {
+			const expected = handler({});
+			const error = await withDbErrorHandling(
+				() => Promise.reject({ cause: { constraint } }),
+				{},
+			).catch((caught: unknown) => caught);
+
+			expect(error).toBeInstanceOf(HttpException);
+			if (!(error instanceof HttpException)) continue;
+
+			expect(error.getStatus()).toBe(expected.statusCode);
+			expect(error.getResponse()).toEqual({ code: expected.code });
+			expect(Object.values(ConstraintCode)).toContain(expected.code);
+			expect(expected.statusCode).toBe(
+				constraint.endsWith("_fkey")
+					? HttpStatus.UNPROCESSABLE_ENTITY
+					: HttpStatus.CONFLICT,
+			);
+		}
+	});
+
+	it("rethrows unregistered database errors unchanged", async () => {
+		const error = new Error("database details must remain internal");
+		await expect(
+			withDbErrorHandling(() => Promise.reject(error), {}),
+		).rejects.toBe(error);
+	});
+
+	it("returns successful database results unchanged", async () => {
+		const result = { id: 1 };
+		await expect(
+			withDbErrorHandling(() => Promise.resolve(result), {}),
+		).resolves.toBe(result);
 	});
 });
