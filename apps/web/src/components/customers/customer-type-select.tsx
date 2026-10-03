@@ -63,6 +63,7 @@ export function CustomerTypeSelect({
 			>
 				<ComboboxInput
 					id={id}
+					className="w-full"
 					placeholder={
 						isLoading
 							? t(Messages.customers.form.typeSelect.loading)

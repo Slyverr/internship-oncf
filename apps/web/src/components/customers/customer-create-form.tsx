@@ -123,7 +123,7 @@ export function CustomerCreateForm(): JSX.Element {
 						{t(Messages.customers.form.companyDescription)}
 					</CardDescription>
 				</CardHeader>
-				<CardContent className="grid gap-4 @3xl/workspace:grid-cols-2">
+				<CardContent className="grid items-start gap-4 @3xl/workspace:grid-cols-2">
 					<form.Field name="companyName">
 						{(field) => {
 							const errorMsg =
@@ -176,7 +176,7 @@ export function CustomerCreateForm(): JSX.Element {
 						)}
 					</form.Field>
 
-					<div className="grid gap-4 @3xl/workspace:col-span-2 @3xl/workspace:grid-cols-2">
+					<div className="grid items-start gap-4 @3xl/workspace:col-span-2 @3xl/workspace:grid-cols-2">
 						<form.Field name="ice">
 							{(field) => (
 								<div className="oncf-field">

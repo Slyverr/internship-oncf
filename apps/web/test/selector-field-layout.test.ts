@@ -22,4 +22,24 @@ for (const file of selectorFiles) {
 	);
 }
 
+const customerTypeSelector = readFileSync(
+	resolve(sourceRoot, "components/customers/customer-type-select.tsx"),
+	"utf8",
+);
+assert.match(
+	customerTypeSelector,
+	/<ComboboxInput\s+id=\{id\}\s+className="w-full"/,
+	"Customer type control should fill its grid column like sibling inputs",
+);
+
+const customerCreateForm = readFileSync(
+	resolve(sourceRoot, "components/customers/customer-create-form.tsx"),
+	"utf8",
+);
+assert.match(
+	customerCreateForm,
+	/<div className="grid items-start gap-4 @3xl\/workspace:col-span-2 @3xl\/workspace:grid-cols-2">/,
+	"Customer identity fields should align to the top within their responsive grid row",
+);
+
 console.log("Shared selector field-layout checks passed.");
