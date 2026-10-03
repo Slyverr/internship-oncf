@@ -1,6 +1,7 @@
 import {
 	API_ERROR_CODES,
 	API_RESPONSE_CODES,
+	type AppearancePreferences,
 	RegistrationStatus,
 	Role,
 } from "@ecommand/shared";
@@ -62,6 +63,86 @@ describe("API bootstrap and authentication (e2e)", () => {
 
 		expect(response.body.email).toBe(E2E_USERS.agentAssigned.email);
 		expect(response.body.role).toBe(Role.AGENT_COMMERCIAL);
+	});
+
+	it("persists appearance preferences per user and updates existing choices", async () => {
+		const adminToken = await login(app, E2E_USERS.admin.email);
+		const agentToken = await login(app, E2E_USERS.agentUnassigned.employeeCode);
+		const adminPreferences = {
+			theme: "mono-dark",
+			fontFamily: "geist",
+			textSize: "large",
+			motion: "reduced",
+			workspaceLayout: "centered-header",
+		} satisfies AppearancePreferences;
+		const updatedAdminPreferences = {
+			theme: "dark",
+			fontFamily: "system",
+			textSize: "default",
+			motion: "system",
+			workspaceLayout: "sidebar",
+		} satisfies AppearancePreferences;
+		const agentPreferences = {
+			theme: "mono-light",
+			fontFamily: "geist",
+			textSize: "small",
+			motion: "reduced",
+			workspaceLayout: "sidebar",
+		} satisfies AppearancePreferences;
+		const expectNoSavedPreferences = async (token: string) => {
+			const response = await request(app.getHttpServer())
+				.get("/profile/preferences")
+				.set("Authorization", `Bearer ${token}`)
+				.expect(200);
+			expect(
+				response.body == null ||
+					(typeof response.body === "object" &&
+						Object.keys(response.body).length === 0),
+			).toBe(true);
+		};
+
+		await expectNoSavedPreferences(adminToken);
+
+		await request(app.getHttpServer())
+			.put("/profile/preferences")
+			.set("Authorization", `Bearer ${adminToken}`)
+			.send(adminPreferences)
+			.expect(200)
+			.expect(({ body }) => {
+				expect(body).toMatchObject(adminPreferences);
+				expect(body.updatedAt).toEqual(expect.any(String));
+			});
+
+		await expectNoSavedPreferences(agentToken);
+
+		await request(app.getHttpServer())
+			.put("/profile/preferences")
+			.set("Authorization", `Bearer ${adminToken}`)
+			.send(updatedAdminPreferences)
+			.expect(200)
+			.expect(({ body }) =>
+				expect(body).toMatchObject(updatedAdminPreferences),
+			);
+
+		await request(app.getHttpServer())
+			.put("/profile/preferences")
+			.set("Authorization", `Bearer ${agentToken}`)
+			.send(agentPreferences)
+			.expect(200)
+			.expect(({ body }) => expect(body).toMatchObject(agentPreferences));
+
+		const [adminRead, agentRead] = await Promise.all([
+			request(app.getHttpServer())
+				.get("/profile/preferences")
+				.set("Authorization", `Bearer ${adminToken}`)
+				.expect(200),
+			request(app.getHttpServer())
+				.get("/profile/preferences")
+				.set("Authorization", `Bearer ${agentToken}`)
+				.expect(200),
+		]);
+		expect(adminRead.body).toMatchObject(updatedAdminPreferences);
+		expect(agentRead.body).toMatchObject(agentPreferences);
 	});
 
 	it("requires verified customer identity and admin review before client sign-in", async () => {
