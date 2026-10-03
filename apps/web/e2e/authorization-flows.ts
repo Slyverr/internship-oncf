@@ -387,6 +387,23 @@ export async function verifyAgentNavigation(page: Page) {
 			exact: true,
 		}),
 	).toBeVisible();
+	const createdAtHeader = page
+		.getByRole("columnheader")
+		.filter({ hasText: translate(Messages.claims.list.createdAt) });
+	await expect(createdAtHeader).toHaveAttribute("aria-sort", "descending");
+	await createdAtHeader.getByRole("button").click();
+	await expect(page).toHaveURL(/sortBy=createdAt&sortOrder=asc/);
+	await expect(createdAtHeader).toHaveAttribute("aria-sort", "ascending");
+
+	const claimCodeHeader = page
+		.getByRole("columnheader")
+		.filter({ hasText: translate(Messages.claims.list.claimCode) });
+	await claimCodeHeader.getByRole("button").click();
+	await expect(page).toHaveURL(/sortBy=claimNumber&sortOrder=asc/);
+	await expect(claimCodeHeader).toHaveAttribute("aria-sort", "ascending");
+	await claimCodeHeader.getByRole("button").click();
+	await expect(page).toHaveURL(/sortBy=claimNumber&sortOrder=desc/);
+	await expect(claimCodeHeader).toHaveAttribute("aria-sort", "descending");
 }
 
 export async function verifyAdminCustomRoleAssignment(page: Page) {
