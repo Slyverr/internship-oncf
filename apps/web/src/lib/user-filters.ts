@@ -8,6 +8,13 @@ export interface UserFilters {
 	search?: string;
 }
 
+export function parseUserRoleFilter(
+	queryValue: string | string[] | undefined,
+): string | undefined {
+	if (typeof queryValue !== "string") return undefined;
+	return queryValue.trim() || undefined;
+}
+
 export function filterUsers(users: UserListDto[], filters: UserFilters) {
 	const normalizedSearch = filters.search?.trim().toLowerCase() ?? "";
 

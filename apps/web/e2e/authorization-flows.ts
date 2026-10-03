@@ -369,6 +369,18 @@ export async function verifyAdminCustomRoleAssignment(page: Page) {
 		.click();
 	await expect(page).toHaveURL(/\/dashboard\/users\/[0-9a-f-]+$/i);
 
+	await page.goto(
+		`/dashboard/users?${new URLSearchParams({ role: roleName })}`,
+	);
+	await expect(
+		page.getByRole("combobox", {
+			name: translate(Messages.users.list.filterByRole),
+		}),
+	).toContainText(roleName);
+	await expect(
+		page.getByRole("link", { name: email, exact: true }),
+	).toBeVisible();
+
 	await page.context().clearCookies();
 	await signIn(page, email);
 	await expectRouteVisible(page, navigation.orders, true);

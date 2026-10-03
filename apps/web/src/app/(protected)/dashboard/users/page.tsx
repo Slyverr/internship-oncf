@@ -1,4 +1,4 @@
-import { RegistrationStatus, Role } from "@ecommand/shared";
+import { RegistrationStatus } from "@ecommand/shared";
 import { PlusIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -9,6 +9,7 @@ import { UsersTable } from "@/components/users/users-table";
 import { Messages } from "@/i18n";
 import { getRequestTranslator } from "@/i18n/server";
 import { usersControllerFindAll } from "@/lib/api/users";
+import { parseUserRoleFilter } from "@/lib/user-filters";
 import { usersBreadcrumbs } from "./breadcrumbs";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -28,7 +29,7 @@ export default async function Page({ searchParams }: PageProps) {
 	const registrationStatus = Object.values(RegistrationStatus).find(
 		(value) => value === query.registrationStatus,
 	);
-	const role = Object.values(Role).find((value) => value === query.role);
+	const role = parseUserRoleFilter(query.role);
 	const activeStatus =
 		query.activeStatus === "ACTIVE" || query.activeStatus === "INACTIVE"
 			? query.activeStatus

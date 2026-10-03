@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { RegistrationStatus, Role } from "@ecommand/shared";
 import type { UserListDto } from "../src/lib/api/generated.schemas";
-import { filterUsers } from "../src/lib/user-filters";
+import { filterUsers, parseUserRoleFilter } from "../src/lib/user-filters";
 
 function createUser(
 	id: number,
@@ -72,6 +72,16 @@ assert.deepEqual(
 	).map((user) => user.id),
 	[4],
 	"custom access profiles can be selected in the role filter",
+);
+assert.equal(
+	parseUserRoleFilter("Regional Operations"),
+	"Regional Operations",
+	"custom access profile filters survive query parsing",
+);
+assert.equal(
+	parseUserRoleFilter(["CLIENT_REPRESENTATIVE", "AGENT_COMMERCIAL"]),
+	undefined,
+	"ambiguous repeated role filters are ignored",
 );
 assert.deepEqual(
 	filterUsers(users, { activeStatus: "ACTIVE" }).map((user) => user.id),
