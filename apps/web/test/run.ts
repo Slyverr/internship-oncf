@@ -1,6 +1,8 @@
 import "./form-utils.test";
 import "./api-availability.test";
 import "./appearance-preference-cookie.test";
+import "./appearance-theme-styles.test";
+import "./appearance-preferences-sync.test";
 import "./spacing-grid.test";
 import "./catalog-coverage.test";
 import "./i18n.test";

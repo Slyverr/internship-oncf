@@ -117,6 +117,10 @@ export function AppearancePreferencesSync({
 
 	useEffect(() => {
 		if (!initialized || hydrated.current) return;
+		// initialData paints the server snapshot immediately; wait for its first
+		// network read before treating that snapshot as canonical. Another device
+		// may have changed the account preference since this browser cached it.
+		if (!preferencesQuery.isFetched) return;
 		if (preferencesQuery.isError) {
 			hydrated.current = true;
 			lastSent.current = JSON.stringify(preferences);
@@ -141,6 +145,7 @@ export function AppearancePreferencesSync({
 		preferences,
 		preferencesQuery.data,
 		preferencesQuery.isError,
+		preferencesQuery.isFetched,
 		preferencesQuery.isSuccess,
 		enqueueLatestSave,
 		setPreferences,
