@@ -91,7 +91,7 @@ export function CenteredAppHeader() {
 					: "translate-y-0"
 			}`}
 		>
-			<div className="relative mx-auto w-full max-w-screen-2xl md:rounded-b-2xl md:border md:border-border md:bg-card md:shadow-sm">
+			<div className="relative mx-auto w-full max-w-screen-2xl md:rounded-b-2xl md:border-x md:border-b md:border-border md:bg-card md:shadow-sm">
 				<div className="relative z-10 grid min-h-12 w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-y-0 pl-control pr-0 md:h-16 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:px-4">
 					<div className="hidden min-w-0 items-center justify-start md:col-start-1 md:row-start-1 md:flex">
 						<Link
