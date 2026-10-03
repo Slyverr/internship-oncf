@@ -2,13 +2,15 @@
 
 This is the running review list for the application-wide usability and visual overhaul. Check an item only after reviewing its current implementation at relevant screen sizes, making the change, and verifying the rendered result. Keep changes focused and preserve the existing ECommand stack and business rules.
 
-## Signup required-field review — 2026-10-03
+## Authentication form review — 2026-10-03
 
 - Fresh `/signup` captures at 390, 1440, 1920, and 3840px showed the two-step form stayed within its responsive content width. Blank-Continue validation at 390px and 1440px remained aligned and had no horizontal overflow.
 - The screenshot review showed that all seven mandatory identity and credential fields lacked the required marker used elsewhere in forms. Added the marker to both signup steps. Recaptured validation at 390px and 1440px and the sign-in-details step at both widths; labels, controls, helper text, and actions remain aligned. No registration was submitted.
 - Fresh `/login` captures at 390, 1440, 1920, and 3840px showed a consistent layout. The required email/employee-code and password labels lacked markers, so they now use the same required-field convention as signup. Empty submission at 390px and 1440px invokes native required-field validation, keeps the layout within the viewport, and does not submit credentials.
+- Fresh `/forgot-password` and `/reset-password` captures at 390, 1440, 1920, and 3840px showed the recovery forms remain within the viewport. Missing-token reset is disabled; submitting a fake token shows the localized invalid-link response at 390px and 1440px without changing an account password.
+- Browser navigation verified `/login` → `/forgot-password`, and each recovery form's “Back to sign in” link → `/login` in a fresh context. No recovery email was requested and no account credentials were changed.
 - Captures: `/tmp/ecommand-auth-final-review`.
-- Login and registration remain in progress until the forgot-password/reset routes and auth route transitions are reviewed.
+- This review covers layout and navigation states. It does not establish successful provider email delivery or a valid-token password reset, which require a configured mail provider and a disposable account/token.
 
 ## Reference-data page review — 2026-10-01
 
