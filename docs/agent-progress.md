@@ -315,3 +315,11 @@ The security follow-up for preventing administrator lockout is completed in Chap
 - Web catalog and API-code checks passed, including the no-inline-copy scan; direct TypeScript compilation passed. The standard package typecheck command could not resolve `tsc` in the shell PATH, so the compiler was invoked directly.
 
 **Next:** close the remaining route/state/theme/role visual matrix and verify the current permission/user/schema workflows. External DTM handoff and production mail delivery still need endpoint/provider contracts; customer ICE data still needs a named owner and update process. Keep French deferred until the product closeout is complete.
+
+## Chapter 28 — guided form submission recovery — 2026-10-03
+
+- Auditing claim create/edit workflows exposed that failed API submissions in all shared guided create/edit forms had no visible failure feedback. Added one error region to `GuidedFormActions` and connected localized mutation errors from Claims, Customers, Orders, Programs, and Users; Order edit's existing localized failure now uses the same surface.
+- Added a focused regression check requiring all eight guided create/edit forms to supply their save error and the shared action component to announce it with the semantic destructive treatment.
+- Verification: web checks, web TypeScript compilation, Biome on changed source/test files, and `git diff --check` passed. Fresh user-profile-step captures at 390×844 and 1440×900 retained the action layout and showed no horizontal overflow. The forced API-failure visual state was not separately captured.
+
+**Next:** continue the route/state/role review, including a browser-captured save failure state and other role-specific empty/error paths. Keep external DTM and SMTP contracts, ICE data ownership, and French runtime support tracked separately.
