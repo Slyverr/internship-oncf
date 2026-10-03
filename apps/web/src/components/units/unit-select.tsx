@@ -53,7 +53,7 @@ export function UnitSelect({
 	const selected = units.find((unit) => unit.id === value);
 
 	return (
-		<div className="oncf-field">
+		<>
 			<Combobox
 				items={units}
 				disabled={
@@ -100,6 +100,6 @@ export function UnitSelect({
 					{t(Messages.units.select.noneAvailable)}
 				</p>
 			)}
-		</div>
+		</>
 	);
 }

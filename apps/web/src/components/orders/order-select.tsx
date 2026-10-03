@@ -44,7 +44,7 @@ export function OrderSelect({
 	const selected = orders.find((order) => order.id === value);
 
 	return (
-		<div className="oncf-field">
+		<>
 			<Combobox
 				items={orders}
 				disabled={isLoading || (isError && orders.length === 0)}
@@ -78,6 +78,6 @@ export function OrderSelect({
 					onRetry={onRetry}
 				/>
 			)}
-		</div>
+		</>
 	);
 }

@@ -8,6 +8,8 @@ const selectorFiles = [
 	"components/customers/customer-select.tsx",
 	"components/customers/customer-type-select.tsx",
 	"components/goods/good-select.tsx",
+	"components/orders/order-select.tsx",
+	"components/units/unit-select.tsx",
 	"components/users/user-select.tsx",
 ];
 
