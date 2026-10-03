@@ -18,6 +18,7 @@ import { PageHeader } from "@/components/common/page-header";
 import { TableActionButton } from "@/components/common/table-action-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
 	Dialog,
@@ -624,12 +625,12 @@ export function RoleProfilesPage() {
 					})}
 				</p>
 			) : profiles.length === 0 ? (
-				<div className="oncf-card grid justify-items-center gap-4 p-8 text-center">
+				<Card className="min-h-40 items-center justify-center gap-4 px-8 py-8 text-center">
 					<ShieldCheckIcon className="size-8 text-muted-foreground" />
 					<p className="text-sm text-muted-foreground">
 						{t(Messages.roleProfiles.noProfiles)}
 					</p>
-				</div>
+				</Card>
 			) : (
 				<>
 					<div className="grid divide-y border-y @5xl/workspace:hidden">
