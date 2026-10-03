@@ -304,6 +304,44 @@ async function evaluate<T>(expression: string): Promise<T> {
 	return result.value as T;
 }
 
+async function dispatchPointerClick(point: { x: number; y: number }) {
+	await call("Input.dispatchMouseEvent", {
+		type: "mouseMoved",
+		x: point.x,
+		y: point.y,
+	});
+	await call("Input.dispatchMouseEvent", {
+		type: "mousePressed",
+		x: point.x,
+		y: point.y,
+		button: "left",
+		clickCount: 1,
+	});
+	await call("Input.dispatchMouseEvent", {
+		type: "mouseReleased",
+		x: point.x,
+		y: point.y,
+		button: "left",
+		clickCount: 1,
+	});
+}
+
+async function clickSelector(selector: string) {
+	const point = await evaluate<{ x: number; y: number } | null>(`(() => {
+		const target = document.querySelector(${JSON.stringify(selector)});
+		if (!(target instanceof HTMLElement) || target.getClientRects().length === 0) return null;
+		target.scrollIntoView({ block: "center", inline: "center" });
+		const style = getComputedStyle(target);
+		if (style.visibility === "hidden" || style.pointerEvents === "none") return null;
+		const rect = target.getBoundingClientRect();
+		if (rect.width === 0 || rect.height === 0) return null;
+		return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+	})()`);
+	if (!point) return false;
+	await dispatchPointerClick(point);
+	return true;
+}
+
 async function waitForPaint() {
 	await evaluate<boolean>(`(() => {
 		for (const element of document.querySelectorAll("ol[aria-label='Form steps'] *")) {
@@ -384,12 +422,7 @@ try {
 		const missingClickTargets: string[] = [];
 		const missingFillTargets: string[] = [];
 		for (const selector of runActions ? clickBeforeFillSelectors : []) {
-			const clicked = await evaluate<boolean>(`(() => {
-				const target = document.querySelector(${JSON.stringify(selector)});
-				if (!target) return false;
-				target.click();
-				return true;
-			})()`);
+			const clicked = await clickSelector(selector);
 			if (!clicked) missingClickTargets.push(selector);
 			if (settleMs > 0) await Bun.sleep(settleMs);
 		}
@@ -419,12 +452,7 @@ try {
 			if (!filled) missingFillTargets.push(selector);
 		}
 		for (const selector of runActions ? clickSelectors : []) {
-			const clicked = await evaluate<boolean>(`(() => {
-				const target = document.querySelector(${JSON.stringify(selector)});
-				if (!target) return false;
-				target.click();
-				return true;
-			})()`);
+			const clicked = await clickSelector(selector);
 			if (!clicked) missingClickTargets.push(selector);
 			if (settleMs > 0) await Bun.sleep(settleMs);
 		}
@@ -455,12 +483,7 @@ try {
 			if (!filled) missingFillTargets.push(`after-url:${selector}`);
 		}
 		for (const selector of runActions ? clickAfterUrlSelectors : []) {
-			const clicked = await evaluate<boolean>(`(() => {
-				const target = document.querySelector(${JSON.stringify(selector)});
-				if (!target) return false;
-				target.click();
-				return true;
-			})()`);
+			const clicked = await clickSelector(selector);
 			if (!clicked) missingClickTargets.push(`after-url:${selector}`);
 			if (settleMs > 0) await Bun.sleep(settleMs);
 		}
@@ -585,7 +608,7 @@ function readAssignments(name: string) {
 }
 
 async function clickVisibleControlByText(text: string) {
-	return evaluate<boolean>(`(() => {
+	const point = await evaluate<{ x: number; y: number } | null>(`(() => {
 		const normalize = (value) => value.replace(/\\s+/g, " ").trim();
 		const target = Array.from(
 			document.querySelectorAll(
@@ -593,8 +616,13 @@ async function clickVisibleControlByText(text: string) {
 			),
 		)
 			.find((element) => element.getClientRects().length > 0 && normalize(element.textContent ?? "") === ${JSON.stringify(text)});
-		if (!target) return false;
-		target.click();
-		return true;
+		if (!(target instanceof HTMLElement)) return null;
+		target.scrollIntoView({ block: "center", inline: "center" });
+		const rect = target.getBoundingClientRect();
+		if (rect.width === 0 || rect.height === 0) return null;
+		return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
 	})()`);
+	if (!point) return false;
+	await dispatchPointerClick(point);
+	return true;
 }
