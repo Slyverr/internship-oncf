@@ -225,7 +225,7 @@ export function OrderReportView() {
 				)}
 			</PageHeader>
 			<form
-				className="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_max-content] items-end gap-3 print:hidden @md/workspace:w-fit @md/workspace:grid-cols-[minmax(0,12rem)_minmax(0,12rem)_max-content]"
+				className="grid w-full min-w-0 grid-cols-1 items-end gap-3 print:hidden @md/workspace:w-fit @md/workspace:grid-cols-[minmax(0,12rem)_minmax(0,12rem)_max-content]"
 				onSubmit={(event) => {
 					event.preventDefault();
 					const invalid = hasInvalidOrderReportDateRange(from, to);
@@ -233,10 +233,7 @@ export function OrderReportView() {
 					if (!invalid) setPeriod({ from, to });
 				}}
 			>
-				<label
-					htmlFor="report-from"
-					className="oncf-field col-span-2 min-w-0 text-sm @md/workspace:col-span-1"
-				>
+				<label htmlFor="report-from" className="oncf-field min-w-0 text-sm">
 					<span className="font-medium">{t(Messages.reports.from)}</span>
 					<Input
 						id="report-from"
