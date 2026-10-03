@@ -40,5 +40,6 @@ import "./user-labels.test";
 import "./user-filters.test";
 import "./user-customer-select.test";
 import "./role-profile-select.test";
+import "./role-authorization-boundary.test";
 import "./user-credentials-schema.test";
 import "./wait-for-api.test";
