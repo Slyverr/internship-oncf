@@ -1,6 +1,6 @@
 "use client";
 
-import { Permission } from "@ecommand/shared";
+import { CATALOG_MANAGEMENT_REQUIREMENTS, Permission } from "@ecommand/shared";
 import { type UseQueryResult, useQuery } from "@tanstack/react-query";
 import {
 	ArrowRightIcon,
@@ -732,7 +732,9 @@ export function DashboardOverview() {
 	const canReadReports = hasPermission(Permission.REPORTS_READ);
 	const canReadUsers = hasPermission(Permission.USERS_READ);
 	const canReviewUsers = canReadUsers && hasPermission(Permission.USERS_UPDATE);
-	const canManageReferenceData = hasPermission(Permission.CATALOG_MANAGE);
+	const canManageReferenceData = Object.values(
+		CATALOG_MANAGEMENT_REQUIREMENTS,
+	).some((group) => group.every(hasPermission));
 	const canManageAccessProfiles = hasPermission(Permission.ROLES_MANAGE);
 	const showReadyOrders = canReadOrders && canCreatePrograms;
 	const recentSectionCount =

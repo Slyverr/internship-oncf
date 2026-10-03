@@ -6,6 +6,14 @@ export type PermissionDefinition = {
 	assignable?: boolean;
 };
 
+export const CATALOG_MANAGEMENT_REQUIREMENTS = {
+	units: [Permission.CATALOG_MANAGE_UNITS],
+	goodsTypes: [Permission.CATALOG_MANAGE_GOODS_TYPES],
+	goods: [Permission.CATALOG_MANAGE_GOODS, Permission.CATALOG_READ],
+	accessoryOperations: [Permission.CATALOG_MANAGE_ACCESSORY_OPERATIONS],
+	rejectionReasons: [Permission.CATALOG_MANAGE_REJECTION_REASONS],
+} as const;
+
 export const PERMISSION_DEFINITIONS: Record<Permission, PermissionDefinition> =
 	{
 		[Permission.USERS_CREATE]: {

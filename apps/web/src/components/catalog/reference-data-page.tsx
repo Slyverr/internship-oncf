@@ -1,6 +1,6 @@
 "use client";
 
-import { Permission } from "@ecommand/shared";
+import { CATALOG_MANAGEMENT_REQUIREMENTS, Permission } from "@ecommand/shared";
 import { useQueryClient } from "@tanstack/react-query";
 import {
 	CircleHelpIcon,
@@ -61,6 +61,7 @@ import {
 	useCatalogControllerCreateGoodsType,
 	useCatalogControllerCreateRejectionReason,
 	useCatalogControllerCreateUnit,
+	useCatalogControllerFindGoodsTypes,
 	useCatalogControllerFindManageAccessoryOperations,
 	useCatalogControllerFindManageGoods,
 	useCatalogControllerFindManageGoodsTypes,
@@ -101,26 +102,31 @@ const emptyDraft: CatalogDraft = {
 const categoryOptions = [
 	{
 		value: "units",
+		permissions: CATALOG_MANAGEMENT_REQUIREMENTS.units,
 		message: Messages.referenceData.sections.units,
 		icon: RulerIcon,
 	},
 	{
 		value: "goodsTypes",
+		permissions: CATALOG_MANAGEMENT_REQUIREMENTS.goodsTypes,
 		message: Messages.referenceData.sections.goodsTypes,
 		icon: TagIcon,
 	},
 	{
 		value: "goods",
+		permissions: CATALOG_MANAGEMENT_REQUIREMENTS.goods,
 		message: Messages.referenceData.sections.goods,
 		icon: PackageIcon,
 	},
 	{
 		value: "accessoryOperations",
+		permissions: CATALOG_MANAGEMENT_REQUIREMENTS.accessoryOperations,
 		message: Messages.referenceData.sections.accessoryOperations,
 		icon: WrenchIcon,
 	},
 	{
 		value: "rejectionReasons",
+		permissions: CATALOG_MANAGEMENT_REQUIREMENTS.rejectionReasons,
 		message: Messages.referenceData.sections.rejectionReasons,
 		icon: CircleHelpIcon,
 	},
@@ -532,22 +538,38 @@ export function ReferenceDataPage() {
 	const t = useTranslate();
 	const locale = useLocale();
 	const { hasPermission } = useAuth();
-	const canManage = hasPermission(Permission.CATALOG_MANAGE);
+	const accessibleCategories = categoryOptions.filter(({ permissions }) =>
+		permissions.every(hasPermission),
+	);
+	const canManageUnits = hasPermission(Permission.CATALOG_MANAGE_UNITS);
+	const canManageGoodsTypes = hasPermission(
+		Permission.CATALOG_MANAGE_GOODS_TYPES,
+	);
+	const canManageGoods = hasPermission(Permission.CATALOG_MANAGE_GOODS);
+	const canManageAccessoryOperations = hasPermission(
+		Permission.CATALOG_MANAGE_ACCESSORY_OPERATIONS,
+	);
+	const canManageRejectionReasons = hasPermission(
+		Permission.CATALOG_MANAGE_REJECTION_REASONS,
+	);
 	const queryClient = useQueryClient();
 	const units = useCatalogControllerFindManageUnits({
-		query: { enabled: canManage },
+		query: { enabled: canManageUnits },
 	});
 	const goodsTypes = useCatalogControllerFindManageGoodsTypes({
-		query: { enabled: canManage },
+		query: { enabled: canManageGoodsTypes },
 	});
 	const goods = useCatalogControllerFindManageGoods({
-		query: { enabled: canManage },
+		query: { enabled: canManageGoods },
 	});
 	const accessoryOperations = useCatalogControllerFindManageAccessoryOperations(
-		{ query: { enabled: canManage } },
+		{ query: { enabled: canManageAccessoryOperations } },
 	);
 	const rejectionReasons = useCatalogControllerFindManageRejectionReasons({
-		query: { enabled: canManage },
+		query: { enabled: canManageRejectionReasons },
+	});
+	const readableGoodsTypes = useCatalogControllerFindGoodsTypes({
+		query: { enabled: canManageGoods && !canManageGoodsTypes },
 	});
 	const createUnit = useCatalogControllerCreateUnit();
 	const createGoodsType = useCatalogControllerCreateGoodsType();
@@ -561,13 +583,15 @@ export function ReferenceDataPage() {
 	const updateAccessoryOperation =
 		useCatalogControllerUpdateAccessoryOperation();
 	const updateRejectionReason = useCatalogControllerUpdateRejectionReason();
-	const [category, setCategory] = useState("units");
+	const [category, setCategory] = useState(
+		() => accessibleCategories[0]?.value ?? "units",
+	);
 	const [goodsDialogOpen, setGoodsDialogOpen] = useState(false);
 	const [editingGood, setEditingGood] = useState<GoodItem | null>(null);
 	const [goodsError, setGoodsError] = useState("");
 	const [goodsSaving, setGoodsSaving] = useState(false);
 
-	if (!canManage) {
+	if (accessibleCategories.length === 0) {
 		return (
 			<p className="text-sm text-muted-foreground">
 				{t(Messages.referenceData.noAccess)}
@@ -627,9 +651,11 @@ export function ReferenceDataPage() {
 		}
 	}
 
-	const goodsTypeOptions = (goodsTypes.data ?? []).map(
-		({ id, name, isActive }) => ({ id, name, isActive }),
-	);
+	const goodsTypeOptions = (
+		goodsTypes.data ??
+		readableGoodsTypes.data ??
+		[]
+	).map(({ id, name, isActive }) => ({ id, name, isActive }));
 
 	return (
 		<div className="space-y-6">
@@ -641,7 +667,7 @@ export function ReferenceDataPage() {
 				aria-label={t(Messages.referenceData.chooseCategory)}
 				className="flex min-w-0 flex-wrap gap-2 border-b pb-2"
 			>
-				{categoryOptions.map(({ value, message, icon: Icon }) => (
+				{accessibleCategories.map(({ value, message, icon: Icon }) => (
 					<Button
 						key={value}
 						type="button"

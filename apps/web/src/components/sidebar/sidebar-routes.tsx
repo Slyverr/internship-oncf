@@ -1,4 +1,4 @@
-import { Permission } from "@ecommand/shared";
+import { CATALOG_MANAGEMENT_REQUIREMENTS, Permission } from "@ecommand/shared";
 import type { LucideIcon } from "lucide-react";
 import {
 	BadgeAlertIcon,
@@ -19,6 +19,7 @@ type SidebarRoute = {
 	icon: LucideIcon;
 	exact: boolean;
 	permission?: Permission;
+	anyPermissionGroups?: readonly (readonly Permission[])[];
 };
 
 export const sidebarRoutes: SidebarRoute[] = [
@@ -82,7 +83,7 @@ export const sidebarRoutes: SidebarRoute[] = [
 		url: "/dashboard/catalog",
 		icon: DatabaseIcon,
 		exact: false,
-		permission: Permission.CATALOG_MANAGE,
+		anyPermissionGroups: Object.values(CATALOG_MANAGEMENT_REQUIREMENTS),
 	},
 ];
 
@@ -90,6 +91,10 @@ export function getVisibleSidebarRoutes(
 	hasPermission: (permission: Permission) => boolean,
 ) {
 	return sidebarRoutes.filter(
-		(route) => !route.permission || hasPermission(route.permission),
+		(route) =>
+			(!route.permission && !route.anyPermissionGroups) ||
+			(route.permission ? hasPermission(route.permission) : false) ||
+			(route.anyPermissionGroups?.some((group) => group.every(hasPermission)) ??
+				false),
 	);
 }

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+	CATALOG_MANAGEMENT_REQUIREMENTS,
 	DEFAULT_ROLE_PERMISSIONS,
 	hasOnePermission,
 	isWorkflowTransitionAllowed,
@@ -29,10 +30,10 @@ import { canCreateProgramForOrder } from "../src/lib/program-creation-eligibilit
 const referenceDataRoute = sidebarRoutes.find(
 	(route) => route.url === "/dashboard/catalog",
 );
-assert.equal(
-	referenceDataRoute?.permission,
-	Permission.CATALOG_MANAGE,
-	"reference-data navigation requires its management permission",
+assert.deepEqual(
+	referenceDataRoute?.anyPermissionGroups,
+	Object.values(CATALOG_MANAGEMENT_REQUIREMENTS),
+	"reference-data navigation uses category-specific access requirements",
 );
 assert.equal(
 	roleHasPermission(Role.ADMIN, Permission.CATALOG_MANAGE),
@@ -203,9 +204,9 @@ const expectedSidebarRoutes: Record<Role, string[]> = {
 for (const role of Object.values(Role)) {
 	const permissions = new Set(DEFAULT_ROLE_PERMISSIONS[role]);
 	assert.deepEqual(
-		getVisibleSidebarRoutes((permission) => permissions.has(permission)).map(
-			(route) => route.url,
-		),
+		getVisibleSidebarRoutes((permission) =>
+			hasOnePermission(permissions, permission),
+		).map((route) => route.url),
 		expectedSidebarRoutes[role],
 		`${role} sees only its default permission-backed navigation routes`,
 	);
@@ -217,6 +218,15 @@ assert.deepEqual(
 	).map((route) => route.url),
 	["/dashboard", "/dashboard/claims"],
 	"custom permission sets do not gain catalog management from catalog read access",
+);
+assert.deepEqual(
+	getVisibleSidebarRoutes((permission) =>
+		[Permission.CATALOG_MANAGE_GOODS, Permission.CATALOG_READ].includes(
+			permission,
+		),
+	).map((route) => route.url),
+	["/dashboard", "/dashboard/catalog"],
+	"a user with goods management and catalog read can open reference data",
 );
 assert.equal(
 	isWorkflowTransitionAllowed(
