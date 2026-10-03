@@ -11,6 +11,19 @@ function setup() {
 }
 
 describe("CustomersQuery", () => {
+	it("falls back to the default sort for unsupported relation columns", async () => {
+		const { query, findMany } = setup();
+
+		await query.findCustomers({
+			page: 1,
+			limit: 20,
+			sortBy: "customerType",
+			sortOrder: "asc",
+		});
+
+		expect(findMany.mock.calls[0][0].orderBy).toEqual({ createdAt: "asc" });
+	});
+
 	it("combines portfolio scope, filters, sorting, and pagination", async () => {
 		const { query, findMany } = setup();
 

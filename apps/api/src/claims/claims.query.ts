@@ -22,6 +22,13 @@ import { ListClaimQueryDto } from "./requests/list-claim.dto";
 type ClaimsColumns = QueryColumns<"claims">;
 type ClaimsRelations = QueryRelations<"claims">;
 
+const claimSortColumns = [
+	"claimNumber",
+	"priority",
+	"createdAt",
+	"updatedAt",
+] as const;
+
 const claimListColumns = {
 	id: true,
 	claimNumber: true,
@@ -182,7 +189,9 @@ export class ClaimsQuery {
 			with: claimListRelations,
 
 			orderBy: {
-				[sortBy]: sortOrder,
+				[claimSortColumns.includes(sortBy as (typeof claimSortColumns)[number])
+					? sortBy
+					: "createdAt"]: sortOrder,
 			},
 
 			limit,

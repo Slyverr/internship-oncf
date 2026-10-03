@@ -21,6 +21,13 @@ import { OrderListQueryDto } from "./requests/order-list-query.dto";
 type OrdersColumns = QueryColumns<"orders">;
 type OrdersRelations = QueryRelations<"orders">;
 
+const orderSortColumns = [
+	"orderNumber",
+	"quantityDemanded",
+	"orderDate",
+	"createdAt",
+] as const;
+
 const orderListColumns = {
 	id: true,
 	orderNumber: true,
@@ -118,6 +125,8 @@ export class OrdersQuery {
 			endDate,
 			page,
 			limit,
+			sortBy = "createdAt",
+			sortOrder = "desc",
 		} = query;
 		const customerScope = getCustomerScope(user);
 		const managesOther = hasOnePermission(user, Permission.ORDERS_MANAGE_OTHER);
@@ -205,7 +214,9 @@ export class OrdersQuery {
 			columns: orderListColumns,
 			with: orderBaseRelations,
 			orderBy: {
-				createdAt: "desc",
+				[orderSortColumns.includes(sortBy as (typeof orderSortColumns)[number])
+					? sortBy
+					: "createdAt"]: sortOrder,
 				id: "desc",
 			},
 			limit,

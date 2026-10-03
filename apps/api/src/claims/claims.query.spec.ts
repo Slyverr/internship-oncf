@@ -133,6 +133,12 @@ describe("ClaimsQuery customer portfolio filters", () => {
 		});
 	});
 
+	it("falls back to the default sort for unsupported relation columns", async () => {
+		await query.findClaims({ sortBy: "customer", sortOrder: "asc" } as never);
+
+		expect(findMany.mock.calls[0][0].orderBy).toEqual({ createdAt: "asc" });
+	});
+
 	it("allows broad lists when no customer portfolio is supplied", async () => {
 		await query.findClaims({} as never);
 

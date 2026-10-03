@@ -13,6 +13,14 @@ import { ListCustomerQueryDto } from "./requests/list-customer.dto";
 
 type CustomersColumns = QueryColumns<"customers">;
 
+const customerSortColumns = [
+	"customerCode",
+	"companyName",
+	"email",
+	"phone",
+	"city",
+] as const;
+
 const customerListColumns = {
 	id: true,
 	companyName: true,
@@ -86,7 +94,11 @@ export class CustomersQuery {
 				customerType: { columns: { name: true } },
 			},
 			orderBy: {
-				[sortBy]: sortOrder,
+				[customerSortColumns.includes(
+					sortBy as (typeof customerSortColumns)[number],
+				)
+					? sortBy
+					: "createdAt"]: sortOrder,
 			},
 			limit,
 			offset: (page - 1) * limit,

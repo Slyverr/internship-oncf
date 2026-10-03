@@ -19,6 +19,8 @@ import { ListProgramQueryDto } from "./requests/list-program.dto";
 type ProgramsColumns = QueryColumns<"forecastPrograms">;
 type ProgramsRelations = QueryRelations<"forecastPrograms">;
 
+const programSortColumns = ["programNumber", "plannedDate"] as const;
+
 const programListColumns = {
 	id: true,
 	programNumber: true,
@@ -147,7 +149,11 @@ export class ProgramsQuery {
 			columns: programListColumns,
 			with: programListRelations,
 			orderBy: {
-				[sortBy]: sortOrder,
+				[programSortColumns.includes(
+					sortBy as (typeof programSortColumns)[number],
+				)
+					? sortBy
+					: "createdAt"]: sortOrder,
 			},
 			limit,
 			offset: (page - 1) * limit,

@@ -18,6 +18,32 @@ describe("OrdersQuery authorization scope", () => {
 		findMany.mockReset().mockResolvedValue([]);
 	});
 
+	it("applies supported list sorting and safely rejects arbitrary sort fields", async () => {
+		const user = createUser(17, [Permission.ORDERS_MANAGE_OTHER]);
+
+		await query.findOrders(user, {
+			page: 1,
+			limit: 20,
+			sortBy: "orderDate",
+			sortOrder: "asc",
+		} as never);
+		expect(findMany.mock.calls[0][0].orderBy).toEqual({
+			orderDate: "asc",
+			id: "desc",
+		});
+
+		await query.findOrders(user, {
+			page: 1,
+			limit: 20,
+			sortBy: "customer",
+			sortOrder: "asc",
+		} as never);
+		expect(findMany.mock.calls[1][0].orderBy).toEqual({
+			createdAt: "asc",
+			id: "desc",
+		});
+	});
+
 	it("restricts ordinary order lists to the authenticated creator", async () => {
 		const user = createUser(17);
 		await query.findOrders(user, {
