@@ -153,13 +153,22 @@ async function runBrowserWorkflows() {
 	try {
 		await rm(resolve(webDir, buildDir), { recursive: true, force: true });
 		await waitForServer("http://localhost:8100/health", "E2E API", api);
-		web = Bun.spawn(["bun", "run", "next", "dev", "--port", "3100"], {
-			cwd: webDir,
-			env: browserEnv,
-			stdin: "ignore",
-			stdout: "ignore",
-			stderr: "inherit",
-		});
+		web = Bun.spawn(
+			[
+				nodeExecutable,
+				resolve(rootDir, "node_modules/next/dist/bin/next"),
+				"dev",
+				"--port",
+				"3100",
+			],
+			{
+				cwd: webDir,
+				env: browserEnv,
+				stdin: "ignore",
+				stdout: "ignore",
+				stderr: "inherit",
+			},
+		);
 		await waitForServer("http://localhost:3100/login", "E2E web app", web);
 		if (browserEnv.PLAYWRIGHT_CDP_ENDPOINT) {
 			await run(

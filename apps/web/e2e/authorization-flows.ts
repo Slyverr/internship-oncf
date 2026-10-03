@@ -414,7 +414,19 @@ export async function verifyAdminRegistrationReview(page: Page) {
 	).toBeVisible();
 
 	await signIn(page, E2E_USERS.admin.email);
-	await page.goto("/dashboard/users?registrationStatus=PENDING");
+	await page
+		.locator(
+			'a[href="/dashboard/users?registrationStatus=PENDING&role=CLIENT_REPRESENTATIVE"]',
+		)
+		.click();
+	await expect(page).toHaveURL(
+		/dashboard\/users\?registrationStatus=PENDING&role=CLIENT_REPRESENTATIVE$/,
+	);
+	await expect(
+		page.getByRole("combobox", {
+			name: translate(Messages.users.list.filterByRegistration),
+		}),
+	).toContainText(translate(Messages.users.list.awaitingReview));
 	const applicantLink = page.getByRole("link", { name: email, exact: true });
 	await expect(applicantLink).toBeVisible();
 	await applicantLink.click();
