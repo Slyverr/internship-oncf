@@ -6,6 +6,7 @@ import "./appearance-theme-styles.test";
 import "./appearance-preferences-sync.test";
 import "./server-appearance-preferences.test";
 import "./shared-style-utilities.test";
+import "./select-popup-layout.test";
 import "./spacing-grid.test";
 import "./table-frame.test";
 import "./catalog-coverage.test";
