@@ -53,7 +53,11 @@ export default async function Page({ searchParams }: PageProps) {
 				</Link>
 			</PageHeader>
 
-			<CustomersTable data={customers} />
+			<CustomersTable
+				data={customers}
+				sortBy={typeof query.sortBy === "string" ? query.sortBy : undefined}
+				sortOrder={query.sortOrder}
+			/>
 		</>
 	);
 }

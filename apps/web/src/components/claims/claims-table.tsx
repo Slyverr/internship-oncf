@@ -2,19 +2,21 @@
 
 import { ClaimPriority, ClaimStatus, ClaimType } from "@ecommand/shared";
 import type { ColumnDef } from "@tanstack/react-table";
-import { FlexRender, tableFeatures, useTable } from "@tanstack/react-table";
 import {
-	ChevronDownIcon,
-	ChevronsUpDownIcon,
-	ChevronUpIcon,
-	PlusIcon,
-} from "lucide-react";
+	createSortedRowModel,
+	FlexRender,
+	rowSortingFeature,
+	tableFeatures,
+	useTable,
+} from "@tanstack/react-table";
+import { PlusIcon } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import { ActionLink } from "@/components/common/action-link";
 import { TableEmptyStateRow } from "@/components/common/table-empty-state-row";
 import { TableLoadingState } from "@/components/common/table-loading-state";
 import { TableRowLink } from "@/components/common/table-row-link";
+import { TableSortButton } from "@/components/common/table-sort-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -55,7 +57,10 @@ interface ClaimsTableProps {
 	isLoading?: boolean;
 }
 
-const features = tableFeatures({});
+const features = tableFeatures({
+	rowSortingFeature,
+	sortedRowModel: createSortedRowModel(),
+});
 
 function buildClaimsColumns(
 	locale: AppLocale,
@@ -72,24 +77,28 @@ function buildClaimsColumns(
 					{info.getValue<string>()}
 				</TableRowLink>
 			),
+			enableSorting: true,
 		},
 		{
 			accessorFn: (row) => row.customer.companyName,
 			id: "customer",
 			header: () => t(Messages.claims.list.customer),
 			cell: (info) => info.getValue<string>(),
+			enableSorting: true,
 		},
 		{
 			accessorFn: (row) => row.claimType.name,
 			id: "type",
 			header: () => t(Messages.claims.list.type),
 			cell: (info) => getClaimTypeLabel(info.getValue<string>(), locale),
+			enableSorting: true,
 		},
 		{
 			accessorFn: (row) => row.order?.orderNumber ?? "—",
 			id: "orderNumber",
 			header: () => t(Messages.claims.list.orderCode),
 			cell: (info) => info.getValue<string>(),
+			enableSorting: true,
 		},
 		{
 			accessorKey: "priority",
@@ -102,12 +111,14 @@ function buildClaimsColumns(
 					"—"
 				);
 			},
+			enableSorting: true,
 		},
 		{
 			accessorFn: (row) => row.claimStatus.name,
 			id: "status",
 			header: () => t(Messages.claims.list.status),
 			cell: (info) => getClaimStatusLabel(String(info.getValue()), locale),
+			enableSorting: true,
 		},
 		{
 			accessorKey: "createdAt",
@@ -116,6 +127,7 @@ function buildClaimsColumns(
 				const value = info.getValue<string>();
 				return formatDisplayDate(value, locale);
 			},
+			enableSorting: true,
 		},
 	];
 }
@@ -141,8 +153,14 @@ export function ClaimsTable({
 	const currentType = searchParams.get("type") ?? type ?? "ALL";
 	const currentPriority = searchParams.get("priority") ?? priority ?? "ALL";
 
-	const { searchValue, setSearchValue, updateQuery, updateSort } =
-		useTableQueryState({ search, sortBy, sortOrder });
+	const {
+		searchValue,
+		setSearchValue,
+		updateQuery,
+		updateSort,
+		sortBy: activeSortBy,
+		sortOrder: activeSortOrder,
+	} = useTableQueryState({ search, sortBy, sortOrder });
 
 	const hasActiveFilters =
 		searchValue.trim().length > 0 ||
@@ -167,6 +185,11 @@ export function ClaimsTable({
 		features,
 		columns,
 		data,
+		initialState: {
+			sorting: activeSortBy
+				? [{ id: activeSortBy, desc: activeSortOrder === "desc" }]
+				: [{ id: "createdAt", desc: true }],
+		},
 	});
 
 	if (isLoading) {
@@ -262,31 +285,30 @@ export function ClaimsTable({
 						{table.getHeaderGroups().map((headerGroup) => (
 							<TableRow key={headerGroup.id}>
 								{headerGroup.headers.map((header) => {
-									const sorted =
-										sortBy === header.column.id ? sortOrder : undefined;
+									const sorted = header.column.getIsSorted();
 
 									return (
-										<TableHead key={header.id}>
+										<TableHead
+											key={header.id}
+											aria-sort={
+												sorted === "asc"
+													? "ascending"
+													: sorted === "desc"
+														? "descending"
+														: "none"
+											}
+										>
 											{header.isPlaceholder ? null : (
-												<button
-													type="button"
-													onClick={() => updateSort(header.column.id)}
-													className="flex w-full items-center gap-2 text-left"
+												<TableSortButton
+													sorted={sorted}
+													canSort={header.column.getCanSort()}
+													onClick={(event) => {
+														header.column.getToggleSortingHandler()?.(event);
+														updateSort(header.column.id);
+													}}
 												>
 													<FlexRender header={header} />
-
-													{sorted === "asc" && (
-														<ChevronUpIcon className="size-4" />
-													)}
-
-													{sorted === "desc" && (
-														<ChevronDownIcon className="size-4" />
-													)}
-
-													{!sorted && (
-														<ChevronsUpDownIcon className="size-4 text-muted-foreground/50" />
-													)}
-												</button>
+												</TableSortButton>
 											)}
 										</TableHead>
 									);

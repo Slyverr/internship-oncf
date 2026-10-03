@@ -2,17 +2,19 @@
 
 import { OrderStatus } from "@ecommand/shared";
 import type { ColumnDef } from "@tanstack/react-table";
-import { FlexRender, tableFeatures, useTable } from "@tanstack/react-table";
 import {
-	ChevronDownIcon,
-	ChevronsUpDownIcon,
-	ChevronUpIcon,
-} from "lucide-react";
+	createSortedRowModel,
+	FlexRender,
+	rowSortingFeature,
+	tableFeatures,
+	useTable,
+} from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { TableEmptyStateRow } from "@/components/common/table-empty-state-row";
 import { TableLoadingState } from "@/components/common/table-loading-state";
 import { TableRowLink } from "@/components/common/table-row-link";
+import { TableSortButton } from "@/components/common/table-sort-button";
 import { Input } from "@/components/ui/input";
 import {
 	Select,
@@ -46,7 +48,10 @@ interface OrdersTableProps {
 	isLoading?: boolean;
 }
 
-const features = tableFeatures({});
+const features = tableFeatures({
+	rowSortingFeature,
+	sortedRowModel: createSortedRowModel(),
+});
 
 function createColumns(
 	t: ReturnType<typeof useTranslate>,
@@ -63,29 +68,34 @@ function createColumns(
 					{info.getValue<string>()}
 				</TableRowLink>
 			),
+			enableSorting: true,
 		},
 		{
 			accessorFn: (row) => row.customer.companyName,
 			id: "customer",
 			header: t(Messages.orders.list.customer),
 			cell: (info) => info.getValue<string>(),
+			enableSorting: true,
 		},
 		{
 			accessorFn: (row) => row.good.name,
 			id: "good",
 			header: t(Messages.orders.list.good),
 			cell: (info) => info.getValue<string>(),
+			enableSorting: true,
 		},
 		{
 			accessorKey: "quantityDemanded",
 			header: t(Messages.orders.list.quantity),
 			cell: (info) => info.getValue<string>(),
+			enableSorting: true,
 		},
 		{
 			accessorFn: (row) => row.orderStatus.name,
 			id: "status",
 			header: t(Messages.orders.list.status),
 			cell: (info) => getOrderStatusLabel(String(info.getValue()), locale),
+			enableSorting: true,
 		},
 		{
 			accessorKey: "orderDate",
@@ -95,6 +105,7 @@ function createColumns(
 
 				return formatDisplayDate(value, locale);
 			},
+			enableSorting: true,
 		},
 	];
 }
@@ -111,14 +122,29 @@ export function OrdersTable({
 	const locale = useLocale();
 	const columns = useMemo(() => createColumns(t, locale), [locale, t]);
 	const router = useRouter();
-	const { searchValue, setSearchValue, updateQuery, updateSort } =
-		useTableQueryState({ search, sortBy, sortOrder });
+	const {
+		searchValue,
+		setSearchValue,
+		updateQuery,
+		updateSort,
+		sortBy: activeSortBy,
+		sortOrder: activeSortOrder,
+	} = useTableQueryState({
+		search,
+		sortBy,
+		sortOrder,
+	});
 
 	const table = useTable({
 		key: "orders-table",
 		features,
 		columns,
 		data,
+		initialState: {
+			sorting: activeSortBy
+				? [{ id: activeSortBy, desc: activeSortOrder === "desc" }]
+				: [{ id: "orderDate", desc: true }],
+		},
 	});
 
 	if (isLoading) {
@@ -167,31 +193,30 @@ export function OrdersTable({
 						{table.getHeaderGroups().map((headerGroup) => (
 							<TableRow key={headerGroup.id}>
 								{headerGroup.headers.map((header) => {
-									const sorted =
-										sortBy === header.column.id ? sortOrder : undefined;
+									const sorted = header.column.getIsSorted();
 
 									return (
-										<TableHead key={header.id}>
+										<TableHead
+											key={header.id}
+											aria-sort={
+												sorted === "asc"
+													? "ascending"
+													: sorted === "desc"
+														? "descending"
+														: "none"
+											}
+										>
 											{header.isPlaceholder ? null : (
-												<button
-													type="button"
-													onClick={() => updateSort(header.column.id)}
-													className="flex w-full items-center gap-2 text-left"
+												<TableSortButton
+													sorted={sorted}
+													canSort={header.column.getCanSort()}
+													onClick={(event) => {
+														header.column.getToggleSortingHandler()?.(event);
+														updateSort(header.column.id);
+													}}
 												>
 													<FlexRender header={header} />
-
-													{sorted === "asc" && (
-														<ChevronUpIcon className="size-4" />
-													)}
-
-													{sorted === "desc" && (
-														<ChevronDownIcon className="size-4" />
-													)}
-
-													{!sorted && (
-														<ChevronsUpDownIcon className="size-4 text-muted-foreground/50" />
-													)}
-												</button>
+												</TableSortButton>
 											)}
 										</TableHead>
 									);

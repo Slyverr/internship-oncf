@@ -12,6 +12,13 @@ const tableFiles = [
 	"components/programs/programs-table.tsx",
 	"components/users/users-table.tsx",
 ];
+const sortableTableFiles = [
+	"components/claims/claims-table.tsx",
+	"components/customers/customers-table.tsx",
+	"components/orders/orders-table.tsx",
+	"components/programs/programs-table.tsx",
+	"components/users/users-table.tsx",
+];
 
 const tablePrimitive = readFileSync(
 	resolve(sourceRoot, "components/ui/table.tsx"),
@@ -33,4 +40,58 @@ for (const file of tableFiles) {
 	);
 }
 
-console.log("Shared table-frame styling checks passed.");
+const sortButton = readFileSync(
+	resolve(sourceRoot, "components/common/table-sort-button.tsx"),
+	"utf8",
+);
+assert.match(
+	sortButton,
+	/className=\{`flex w-full items-center gap-2 text-left/,
+	"The shared sort control must own the sortable heading layout.",
+);
+assert.match(
+	sortButton,
+	/disabled=\{!canSort\}[\s\S]*?onClick=\{onClick\}/,
+	"The shared sort control must preserve disabled and click behavior.",
+);
+assert.match(
+	sortButton,
+	/Messages\.common\.accessibility\.sortedAscending[\s\S]*Messages\.common\.accessibility\.sortedDescending/,
+	"The active sort direction must be announced by the shared control.",
+);
+assert.match(
+	sortButton,
+	/<ChevronUpIcon[\s\S]*?<ChevronDownIcon/,
+	"The sort indicator must keep both chevrons visible and light the active direction.",
+);
+
+for (const file of sortableTableFiles) {
+	const source = readFileSync(resolve(sourceRoot, file), "utf8");
+	assert.match(source, /<TableSortButton/, `${file} must use TableSortButton`);
+	assert.doesNotMatch(
+		source,
+		/Chevron(?:Down|Up)Icon|ChevronsUpDownIcon|flex w-full items-center gap-2 text-left/,
+		`${file} must not duplicate sortable heading icons or layout`,
+	);
+}
+
+for (const file of [
+	"components/claims/claims-table.tsx",
+	"components/customers/customers-table.tsx",
+	"components/orders/orders-table.tsx",
+	"components/users/users-table.tsx",
+]) {
+	const source = readFileSync(resolve(sourceRoot, file), "utf8");
+	assert.match(
+		source,
+		/canSort=/,
+		`${file} must explicitly declare which columns can be sorted`,
+	);
+	assert.match(
+		source,
+		/aria-sort=/,
+		`${file} must expose the active direction on its table header`,
+	);
+}
+
+console.log("Shared table-frame and sortable-header checks passed.");

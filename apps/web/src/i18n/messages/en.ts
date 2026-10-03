@@ -123,6 +123,8 @@ export const en = {
 			breadcrumb: "Breadcrumb",
 			scrollableTable: "Scrollable table content",
 			tableScrollHint: "Scroll to see the remaining columns",
+			sortedAscending: "Sorted ascending",
+			sortedDescending: "Sorted descending",
 		},
 		underConstruction: {
 			title: "Under Construction",

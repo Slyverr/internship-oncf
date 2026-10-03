@@ -10,18 +10,14 @@ import {
 	tableFeatures,
 	useTable,
 } from "@tanstack/react-table";
-import {
-	ChevronDownIcon,
-	ChevronsUpDownIcon,
-	ChevronUpIcon,
-	PlusIcon,
-} from "lucide-react";
+import { PlusIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ActionLink } from "@/components/common/action-link";
 import { TableEmptyStateRow } from "@/components/common/table-empty-state-row";
 import { TableLoadingState } from "@/components/common/table-loading-state";
 import { TableRowLink } from "@/components/common/table-row-link";
+import { TableSortButton } from "@/components/common/table-sort-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -40,6 +36,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { useTableQueryState } from "@/hooks/use-table-query-state";
 import { type AppLocale, Messages, type TypedMessageTranslator } from "@/i18n";
 import { useLocale, useTranslate } from "@/i18n/locale-provider";
 import { getProgramStatusLabel } from "@/i18n/status-labels";
@@ -85,17 +82,20 @@ function getProgramColumns(
 			accessorKey: "quantityPlanned",
 			header: t(Messages.programs.list.quantityPlanned),
 			cell: (info) => info.getValue<string>(),
+			enableSorting: true,
 		},
 		{
 			accessorKey: "quantityRealized",
 			header: t(Messages.programs.list.quantityRealized),
 			cell: (info) => info.getValue<string | null>() ?? "—",
+			enableSorting: true,
 		},
 		{
 			accessorFn: (row) => row.programStatus.name,
 			id: "status",
 			header: t(Messages.programs.list.status),
 			cell: (info) => getProgramStatusLabel(String(info.getValue()), locale),
+			enableSorting: true,
 		},
 		{
 			accessorKey: "plannedDate",
@@ -113,6 +113,7 @@ function getProgramColumns(
 			id: "createdByUser",
 			header: t(Messages.programs.list.createdBy),
 			cell: (info) => info.getValue<string>(),
+			enableSorting: true,
 		},
 	];
 }
@@ -121,6 +122,7 @@ export function ProgramsTable({ data, isLoading }: ProgramsTableProps) {
 	const t = useTranslate();
 	const locale = useLocale();
 	const router = useRouter();
+	const { updateSort, sortBy, sortOrder } = useTableQueryState({ search: "" });
 	const [globalFilter, setGlobalFilter] = useState("");
 	const [statusFilter, setStatusFilter] = useState("ALL");
 	const columns = getProgramColumns(t, locale);
@@ -147,7 +149,12 @@ export function ProgramsTable({ data, isLoading }: ProgramsTableProps) {
 		columns,
 		data: filteredData,
 		initialState: {
-			sorting: [{ id: "plannedDate", desc: true }],
+			sorting: [
+				{
+					id: sortBy ?? "plannedDate",
+					desc: (sortOrder ?? "desc") === "desc",
+				},
+			],
 		},
 	});
 
@@ -203,26 +210,16 @@ export function ProgramsTable({ data, isLoading }: ProgramsTableProps) {
 									return (
 										<TableHead key={header.id}>
 											{header.isPlaceholder ? null : (
-												<button
-													type="button"
-													disabled={!canSort}
-													onClick={header.column.getToggleSortingHandler()}
-													className="flex w-full items-center gap-2 text-left"
+												<TableSortButton
+													sorted={sortState}
+													canSort={canSort}
+													onClick={(event) => {
+														header.column.getToggleSortingHandler()?.(event);
+														updateSort(header.column.id);
+													}}
 												>
 													<FlexRender header={header} />
-
-													{sortState === "asc" && (
-														<ChevronUpIcon className="size-4 text-foreground/70" />
-													)}
-
-													{sortState === "desc" && (
-														<ChevronDownIcon className="size-4 text-foreground/70" />
-													)}
-
-													{!sortState && canSort && (
-														<ChevronsUpDownIcon className="size-4 text-muted-foreground/50" />
-													)}
-												</button>
+												</TableSortButton>
 											)}
 										</TableHead>
 									);

@@ -35,6 +35,11 @@ export default async function Page({ searchParams }: PageProps) {
 			? query.activeStatus
 			: undefined;
 	const search = typeof query.search === "string" ? query.search : undefined;
+	const sortBy = typeof query.sortBy === "string" ? query.sortBy : undefined;
+	const sortOrder =
+		query.sortOrder === "asc" || query.sortOrder === "desc"
+			? query.sortOrder
+			: undefined;
 	const users = await usersControllerFindAll();
 	const pendingRegistrations = users.filter(
 		(user) => user.registrationStatus === RegistrationStatus.PENDING,
@@ -66,6 +71,8 @@ export default async function Page({ searchParams }: PageProps) {
 				role={role}
 				activeStatus={activeStatus}
 				search={search}
+				sortBy={sortBy}
+				sortOrder={sortOrder}
 			/>
 		</>
 	);

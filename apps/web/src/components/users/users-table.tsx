@@ -2,18 +2,20 @@
 
 import { RegistrationStatus } from "@ecommand/shared";
 import type { ColumnDef } from "@tanstack/react-table";
-import { FlexRender, tableFeatures, useTable } from "@tanstack/react-table";
 import {
-	ChevronDownIcon,
-	ChevronsUpDownIcon,
-	ChevronUpIcon,
-} from "lucide-react";
+	createSortedRowModel,
+	FlexRender,
+	rowSortingFeature,
+	tableFeatures,
+	useTable,
+} from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { ActionLink } from "@/components/common/action-link";
 import { TableEmptyStateRow } from "@/components/common/table-empty-state-row";
 import { TableLoadingState } from "@/components/common/table-loading-state";
 import { TableRowLink } from "@/components/common/table-row-link";
+import { TableSortButton } from "@/components/common/table-sort-button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
@@ -50,7 +52,10 @@ interface UsersTableProps {
 	isLoading?: boolean;
 }
 
-const features = tableFeatures({});
+const features = tableFeatures({
+	rowSortingFeature,
+	sortedRowModel: createSortedRowModel(),
+});
 
 function createColumns(
 	t: ReturnType<typeof useTranslate>,
@@ -60,6 +65,7 @@ function createColumns(
 		{
 			accessorKey: "email",
 			header: t(Messages.users.list.email),
+			enableSorting: true,
 			cell: (info) => (
 				<TableRowLink href={`/dashboard/users/${info.row.original.id}`}>
 					{info.getValue<string>()}
@@ -69,16 +75,19 @@ function createColumns(
 		{
 			accessorKey: "firstName",
 			header: t(Messages.users.list.firstName),
+			enableSorting: true,
 			cell: (info) => info.getValue<string>(),
 		},
 		{
 			accessorKey: "lastName",
 			header: t(Messages.users.list.lastName),
+			enableSorting: true,
 			cell: (info) => info.getValue<string>(),
 		},
 		{
 			accessorKey: "role.name",
 			header: t(Messages.users.list.role),
+			enableSorting: true,
 			cell: (info) => (
 				<Badge variant="outline" className="text-xs">
 					{formatUserRole(info.getValue<string>(), locale)}
@@ -88,11 +97,13 @@ function createColumns(
 		{
 			accessorKey: "employeeCode",
 			header: t(Messages.users.list.employeeCode),
+			enableSorting: true,
 			cell: (info) => info.getValue<string | null>() ?? "—",
 		},
 		{
 			accessorKey: "isActive",
 			header: t(Messages.users.list.status),
+			enableSorting: true,
 			cell: (info) => {
 				const user = info.row.original;
 				if (user.registrationStatus === RegistrationStatus.PENDING) {
@@ -140,12 +151,18 @@ export function UsersTable({
 	const locale = useLocale();
 	const columns = useMemo(() => createColumns(t, locale), [locale, t]);
 	const router = useRouter();
-	const { searchValue, setSearchValue, updateQuery, updateSort } =
-		useTableQueryState({
-			search,
-			sortBy,
-			sortOrder,
-		});
+	const {
+		searchValue,
+		setSearchValue,
+		updateQuery,
+		updateSort,
+		sortBy: activeSortBy,
+		sortOrder: activeSortOrder,
+	} = useTableQueryState({
+		search,
+		sortBy,
+		sortOrder,
+	});
 	const filteredUsers = filterUsers(data, {
 		registrationStatus,
 		role,
@@ -166,6 +183,11 @@ export function UsersTable({
 		features,
 		columns,
 		data: filteredUsers,
+		initialState: {
+			sorting: activeSortBy
+				? [{ id: activeSortBy, desc: activeSortOrder === "desc" }]
+				: [{ id: "email", desc: false }],
+		},
 	});
 
 	if (isLoading) {
@@ -274,27 +296,29 @@ export function UsersTable({
 						{table.getHeaderGroups().map((headerGroup) => (
 							<TableRow key={headerGroup.id}>
 								{headerGroup.headers.map((header) => {
-									const sorted =
-										sortBy === header.column.id ? sortOrder : undefined;
+									const sorted = header.column.getIsSorted();
 									return (
-										<TableHead key={header.id}>
+										<TableHead
+											key={header.id}
+											aria-sort={
+												sorted === "asc"
+													? "ascending"
+													: sorted === "desc"
+														? "descending"
+														: "none"
+											}
+										>
 											{header.isPlaceholder ? null : (
-												<button
-													type="button"
-													onClick={() => updateSort(header.column.id)}
-													className="flex w-full items-center gap-2 text-left"
+												<TableSortButton
+													sorted={sorted}
+													canSort={header.column.getCanSort()}
+													onClick={(event) => {
+														header.column.getToggleSortingHandler()?.(event);
+														updateSort(header.column.id);
+													}}
 												>
 													<FlexRender header={header} />
-													{sorted === "asc" && (
-														<ChevronUpIcon className="size-4" />
-													)}
-													{sorted === "desc" && (
-														<ChevronDownIcon className="size-4" />
-													)}
-													{!sorted && (
-														<ChevronsUpDownIcon className="size-4 text-muted-foreground/50" />
-													)}
-												</button>
+												</TableSortButton>
 											)}
 										</TableHead>
 									);

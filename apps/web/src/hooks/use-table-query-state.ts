@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 
@@ -17,6 +17,13 @@ export function useTableQueryState({
 }: UseTableQueryStateOptions) {
 	const pathname = usePathname();
 	const router = useRouter();
+	const searchParams = useSearchParams();
+	const activeSortBy = searchParams.get("sortBy") ?? sortBy;
+	const querySortOrder = searchParams.get("sortOrder");
+	const activeSortOrder =
+		querySortOrder === "asc" || querySortOrder === "desc"
+			? querySortOrder
+			: sortOrder;
 	const [searchValue, setSearchValue] = useState(search);
 	const debouncedSearch = useDebounce(searchValue);
 
@@ -52,7 +59,7 @@ export function useTableQueryState({
 	const updateSort = useCallback(
 		(column: string) => {
 			const nextOrder =
-				sortBy === column && sortOrder === "asc" ? "desc" : "asc";
+				activeSortBy === column && activeSortOrder === "asc" ? "desc" : "asc";
 			const params = new URLSearchParams(window.location.search);
 			params.set("sortBy", column);
 			params.set("sortOrder", nextOrder);
@@ -60,8 +67,15 @@ export function useTableQueryState({
 
 			router.replace(`${pathname}?${query}`, { scroll: false });
 		},
-		[pathname, router, sortBy, sortOrder],
+		[pathname, router, activeSortBy, activeSortOrder],
 	);
 
-	return { searchValue, setSearchValue, updateQuery, updateSort };
+	return {
+		searchValue,
+		setSearchValue,
+		updateQuery,
+		updateSort,
+		sortBy: activeSortBy,
+		sortOrder: activeSortOrder,
+	};
 }

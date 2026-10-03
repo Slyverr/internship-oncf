@@ -127,6 +127,8 @@ export const Messages = {
 			breadcrumb: "common.accessibility.breadcrumb",
 			scrollableTable: "common.accessibility.scrollableTable",
 			tableScrollHint: "common.accessibility.tableScrollHint",
+			sortedAscending: "common.accessibility.sortedAscending",
+			sortedDescending: "common.accessibility.sortedDescending",
 		},
 		underConstruction: {
 			title: "common.underConstruction.title",

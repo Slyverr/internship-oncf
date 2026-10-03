@@ -39,7 +39,11 @@ export default async function Page({ searchParams }: PageProps) {
 
 			<ClaimsPageHeader />
 
-			<ClaimsTable data={claims} />
+			<ClaimsTable
+				data={claims}
+				sortBy={typeof query.sortBy === "string" ? query.sortBy : undefined}
+				sortOrder={query.sortOrder}
+			/>
 		</>
 	);
 }

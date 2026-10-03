@@ -114,7 +114,12 @@ export default async function Page({ searchParams }: PageProps) {
 				</Link>
 			</PageHeader>
 
-			<OrdersTable data={orders} />
+			<OrdersTable
+				data={orders}
+				search={typeof query.search === "string" ? query.search : ""}
+				sortBy={typeof query.sortBy === "string" ? query.sortBy : undefined}
+				sortOrder={query.sortOrder}
+			/>
 		</>
 	);
 }

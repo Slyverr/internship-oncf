@@ -124,6 +124,8 @@ export const frDraft = {
 			breadcrumb: "Fil d’Ariane",
 			scrollableTable: "Contenu du tableau défilant",
 			tableScrollHint: "Faites défiler pour voir les autres colonnes",
+			sortedAscending: "Trié par ordre croissant",
+			sortedDescending: "Trié par ordre décroissant",
 		},
 		underConstruction: {
 			title: "En construction",
