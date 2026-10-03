@@ -586,6 +586,11 @@ export function ReferenceDataPage() {
 	const [category, setCategory] = useState(
 		() => accessibleCategories[0]?.value ?? "units",
 	);
+	const activeCategory = accessibleCategories.some(
+		({ value }) => value === category,
+	)
+		? category
+		: (accessibleCategories[0]?.value ?? "units");
 	const [goodsDialogOpen, setGoodsDialogOpen] = useState(false);
 	const [editingGood, setEditingGood] = useState<GoodItem | null>(null);
 	const [goodsError, setGoodsError] = useState("");
@@ -671,9 +676,9 @@ export function ReferenceDataPage() {
 					<Button
 						key={value}
 						type="button"
-						variant={category === value ? "secondary" : "ghost"}
+						variant={activeCategory === value ? "secondary" : "ghost"}
 						aria-label={t(message)}
-						aria-pressed={category === value}
+						aria-pressed={activeCategory === value}
 						className="h-11 justify-start gap-2 whitespace-normal px-3 sm:justify-center"
 						onClick={() => setCategory(value)}
 					>
@@ -683,7 +688,7 @@ export function ReferenceDataPage() {
 				))}
 			</nav>
 			<div className="min-w-0 w-full">
-				{category === "units" && (
+				{activeCategory === "units" && (
 					<SimpleCatalogSection
 						title={t(Messages.referenceData.sections.units)}
 						items={(units.data ?? []).map(({ id, name, isActive }) => ({
@@ -721,7 +726,7 @@ export function ReferenceDataPage() {
 						}}
 					/>
 				)}
-				{category === "goodsTypes" && (
+				{activeCategory === "goodsTypes" && (
 					<SimpleCatalogSection
 						title={t(Messages.referenceData.sections.goodsTypes)}
 						items={(goodsTypes.data ?? []).map(({ id, name, isActive }) => ({
@@ -759,7 +764,7 @@ export function ReferenceDataPage() {
 						}}
 					/>
 				)}
-				{category === "goods" && (
+				{activeCategory === "goods" && (
 					<section className="min-w-0">
 						<div className="mb-4 flex flex-wrap items-center justify-between gap-4">
 							<h2 className="text-base font-semibold">
@@ -914,7 +919,7 @@ export function ReferenceDataPage() {
 						/>
 					</section>
 				)}
-				{category === "accessoryOperations" && (
+				{activeCategory === "accessoryOperations" && (
 					<SimpleCatalogSection
 						title={t(Messages.referenceData.sections.accessoryOperations)}
 						items={(accessoryOperations.data ?? []).map(
@@ -954,7 +959,7 @@ export function ReferenceDataPage() {
 						}}
 					/>
 				)}
-				{category === "rejectionReasons" && (
+				{activeCategory === "rejectionReasons" && (
 					<SimpleCatalogSection
 						title={t(Messages.referenceData.sections.rejectionReasons)}
 						items={(rejectionReasons.data ?? []).map(
