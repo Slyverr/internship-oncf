@@ -481,7 +481,7 @@ export function ClaimConversation({
 							>
 								<AvatarGroup
 									aria-hidden="true"
-									className="-space-x-2 *:data-[slot=avatar]:ring-0"
+									className="-space-x-2.5 *:data-[slot=avatar]:ring-0"
 								>
 									{participants.slice(0, 3).map(({ id, name }) => (
 										<Avatar key={id} className="size-7 after:hidden">
