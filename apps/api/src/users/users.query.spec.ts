@@ -1,6 +1,34 @@
 import type { DrizzleService } from "@/database/drizzle.service";
 import { UsersQuery } from "./users.query";
 
+function setupAssignmentUpdate(updatedUsers: { id: number }[]) {
+	const returning = jest.fn().mockResolvedValue(updatedUsers);
+	const updateWhere = jest.fn().mockReturnValue({ returning });
+	const set = jest.fn().mockReturnValue({ where: updateWhere });
+	const update = jest.fn().mockReturnValue({ set });
+	const deleteWhere = jest.fn().mockResolvedValue(undefined);
+	const removeAssignments = jest.fn().mockReturnValue({ where: deleteWhere });
+	const insertValues = jest.fn().mockResolvedValue(undefined);
+	const insert = jest.fn().mockReturnValue({ values: insertValues });
+	const tx = { update, delete: removeAssignments, insert };
+	const transaction = jest.fn(async (callback: (tx: never) => unknown) =>
+		callback(tx as never),
+	);
+	const query = new UsersQuery({ db: { transaction } } as never);
+
+	return {
+		query,
+		transaction,
+		set,
+		updateWhere,
+		returning,
+		removeAssignments,
+		deleteWhere,
+		insert,
+		insertValues,
+	};
+}
+
 describe("UsersQuery login identifier lookup", () => {
 	it.each([
 		["person@example.test", { email: { ilike: "person@example.test" } }],
@@ -73,5 +101,57 @@ describe("UsersQuery account lookups", () => {
 			where: { id: 9 },
 			columns: { id: true },
 		});
+	});
+});
+
+describe("UsersQuery customer-assignment updates", () => {
+	it("preserves existing assignments when the update omits a new portfolio", async () => {
+		const { query, transaction, removeAssignments, insert } =
+			setupAssignmentUpdate([{ id: 12 }]);
+
+		await expect(
+			query.updateUserAndAssignments(12 as never, { firstName: "Updated" }),
+		).resolves.toEqual({ id: 12 });
+
+		expect(transaction).toHaveBeenCalledTimes(1);
+		expect(removeAssignments).not.toHaveBeenCalled();
+		expect(insert).not.toHaveBeenCalled();
+	});
+
+	it("does not alter assignments when the target user no longer exists", async () => {
+		const { query, removeAssignments, insert } = setupAssignmentUpdate([]);
+
+		await expect(
+			query.updateUserAndAssignments(12 as never, {}, [4]),
+		).resolves.toBeUndefined();
+
+		expect(removeAssignments).not.toHaveBeenCalled();
+		expect(insert).not.toHaveBeenCalled();
+	});
+
+	it("clears the portfolio when given an explicit empty assignment list", async () => {
+		const { query, removeAssignments, deleteWhere, insert } =
+			setupAssignmentUpdate([{ id: 12 }]);
+
+		await query.updateUserAndAssignments(12 as never, {}, []);
+
+		expect(removeAssignments).toHaveBeenCalledTimes(1);
+		expect(deleteWhere).toHaveBeenCalledTimes(1);
+		expect(insert).not.toHaveBeenCalled();
+	});
+
+	it("replaces the portfolio with the supplied customer assignments", async () => {
+		const { query, removeAssignments, deleteWhere, insert, insertValues } =
+			setupAssignmentUpdate([{ id: 12 }]);
+
+		await query.updateUserAndAssignments(12 as never, {}, [4, 8]);
+
+		expect(removeAssignments).toHaveBeenCalledTimes(1);
+		expect(deleteWhere).toHaveBeenCalledTimes(1);
+		expect(insert).toHaveBeenCalledTimes(1);
+		expect(insertValues).toHaveBeenCalledWith([
+			{ userId: 12, customerId: 4 },
+			{ userId: 12, customerId: 8 },
+		]);
 	});
 });
