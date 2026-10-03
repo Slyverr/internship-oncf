@@ -374,6 +374,8 @@ type CaptureResult = {
 	file: string;
 	pageWidth: number;
 	pageHeight: number;
+	scrollX: number;
+	scrollY: number;
 	horizontalOverflow: boolean;
 	missingClickTargets: string[];
 	missingFillTargets: string[];
@@ -528,6 +530,9 @@ try {
 		await evaluate<boolean>(`window.scrollTo(0, ${scrollY}); true`);
 		if (settleMs > 0) await Bun.sleep(settleMs);
 		await waitForPaint();
+		const scrollPosition = await evaluate<{ scrollX: number; scrollY: number }>(
+			"({ scrollX: window.scrollX, scrollY: window.scrollY })",
+		);
 		const screenshot = await call("Page.captureScreenshot", {
 			format: "png",
 			captureBeyondViewport: false,
@@ -540,6 +545,7 @@ try {
 			...viewport,
 			file,
 			...dimensions,
+			...scrollPosition,
 			horizontalOverflow: dimensions.pageWidth > viewport.width,
 			missingClickTargets,
 			missingFillTargets,
