@@ -46,7 +46,10 @@ export default function Page() {
 						</div>
 					)}
 					<div className="oncf-field">
-						<Label htmlFor="username">{t(Messages.auth.login.username)}</Label>
+						<Label htmlFor="username">
+							{t(Messages.auth.login.username)}{" "}
+							<span aria-hidden="true">*</span>
+						</Label>
 						<Input
 							id="username"
 							name="username"
@@ -76,7 +79,8 @@ export default function Page() {
 					<div className="oncf-field">
 						<div className="flex items-center justify-between">
 							<Label htmlFor="password">
-								{t(Messages.auth.login.password)}
+								{t(Messages.auth.login.password)}{" "}
+								<span aria-hidden="true">*</span>
 							</Label>
 							<Link
 								href="/forgot-password"

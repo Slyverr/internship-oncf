@@ -6,8 +6,9 @@ This is the running review list for the application-wide usability and visual ov
 
 - Fresh `/signup` captures at 390, 1440, 1920, and 3840px showed the two-step form stayed within its responsive content width. Blank-Continue validation at 390px and 1440px remained aligned and had no horizontal overflow.
 - The screenshot review showed that all seven mandatory identity and credential fields lacked the required marker used elsewhere in forms. Added the marker to both signup steps. Recaptured validation at 390px and 1440px and the sign-in-details step at both widths; labels, controls, helper text, and actions remain aligned. No registration was submitted.
+- Fresh `/login` captures at 390, 1440, 1920, and 3840px showed a consistent layout. The required email/employee-code and password labels lacked markers, so they now use the same required-field convention as signup. Empty submission at 390px and 1440px invokes native required-field validation, keeps the layout within the viewport, and does not submit credentials.
 - Captures: `/tmp/ecommand-auth-final-review`.
-- Login and registration remain in progress until login and the route transition are reviewed alongside signup at all required states.
+- Login and registration remain in progress until the forgot-password/reset routes and auth route transitions are reviewed.
 
 ## Reference-data page review — 2026-10-01
 
