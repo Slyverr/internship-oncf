@@ -122,29 +122,21 @@ export function OrdersTable({
 	const locale = useLocale();
 	const columns = useMemo(() => createColumns(t, locale), [locale, t]);
 	const router = useRouter();
-	const {
-		searchValue,
-		setSearchValue,
-		updateQuery,
-		updateSort,
-		sortBy: activeSortBy,
-		sortOrder: activeSortOrder,
-	} = useTableQueryState({
-		search,
-		sortBy,
-		sortOrder,
-	});
+	const { searchValue, setSearchValue, updateQuery, updateSort, sorting } =
+		useTableQueryState({
+			search,
+			sortBy,
+			sortOrder,
+			defaultSortBy: "orderDate",
+			defaultSortOrder: "desc",
+		});
 
 	const table = useTable({
 		key: "orders-table",
 		features,
 		columns,
 		data,
-		initialState: {
-			sorting: activeSortBy
-				? [{ id: activeSortBy, desc: activeSortOrder === "desc" }]
-				: [{ id: "orderDate", desc: true }],
-		},
+		state: { sorting },
 	});
 
 	if (isLoading) {
@@ -210,8 +202,7 @@ export function OrdersTable({
 												<TableSortButton
 													sorted={sorted}
 													canSort={header.column.getCanSort()}
-													onClick={(event) => {
-														header.column.getToggleSortingHandler()?.(event);
+													onClick={() => {
 														updateSort(header.column.id);
 													}}
 												>

@@ -122,7 +122,11 @@ export function ProgramsTable({ data, isLoading }: ProgramsTableProps) {
 	const t = useTranslate();
 	const locale = useLocale();
 	const router = useRouter();
-	const { updateSort, sortBy, sortOrder } = useTableQueryState({ search: "" });
+	const { updateSort, sorting } = useTableQueryState({
+		search: "",
+		defaultSortBy: "plannedDate",
+		defaultSortOrder: "desc",
+	});
 	const [globalFilter, setGlobalFilter] = useState("");
 	const [statusFilter, setStatusFilter] = useState("ALL");
 	const columns = getProgramColumns(t, locale);
@@ -148,14 +152,7 @@ export function ProgramsTable({ data, isLoading }: ProgramsTableProps) {
 		features,
 		columns,
 		data: filteredData,
-		initialState: {
-			sorting: [
-				{
-					id: sortBy ?? "plannedDate",
-					desc: (sortOrder ?? "desc") === "desc",
-				},
-			],
-		},
+		state: { sorting },
 	});
 
 	if (isLoading) {
@@ -208,13 +205,21 @@ export function ProgramsTable({ data, isLoading }: ProgramsTableProps) {
 									const sortState = header.column.getIsSorted();
 
 									return (
-										<TableHead key={header.id}>
+										<TableHead
+											key={header.id}
+											aria-sort={
+												sortState === "asc"
+													? "ascending"
+													: sortState === "desc"
+														? "descending"
+														: "none"
+											}
+										>
 											{header.isPlaceholder ? null : (
 												<TableSortButton
 													sorted={sortState}
 													canSort={canSort}
-													onClick={(event) => {
-														header.column.getToggleSortingHandler()?.(event);
+													onClick={() => {
 														updateSort(header.column.id);
 													}}
 												>

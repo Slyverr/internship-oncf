@@ -68,6 +68,21 @@ assert.match(
 for (const file of sortableTableFiles) {
 	const source = readFileSync(resolve(sourceRoot, file), "utf8");
 	assert.match(source, /<TableSortButton/, `${file} must use TableSortButton`);
+	assert.match(
+		source,
+		/state: \{ sorting \}/,
+		`${file} must derive displayed sorting from the URL state`,
+	);
+	assert.match(
+		source,
+		/defaultSortBy:/,
+		`${file} must expose its default sorted column on first render`,
+	);
+	assert.doesNotMatch(
+		source,
+		/getToggleSortingHandler/,
+		`${file} must not maintain a second local sort state`,
+	);
 	assert.doesNotMatch(
 		source,
 		/Chevron(?:Down|Up)Icon|ChevronsUpDownIcon|flex w-full items-center gap-2 text-left/,
@@ -93,5 +108,20 @@ for (const file of [
 		`${file} must expose the active direction on its table header`,
 	);
 }
+
+const tableSortState = readFileSync(
+	resolve(sourceRoot, "hooks/use-table-query-state.ts"),
+	"utf8",
+);
+assert.match(
+	tableSortState,
+	/searchParams\.get\("sortBy"\) \?\? sortBy \?\? defaultSortBy/,
+	"Table sorting must prefer the URL, then server sort, then a page default.",
+);
+assert.match(
+	tableSortState,
+	/const sorting: SortingState = activeSortBy[\s\S]*?id: activeSortBy, desc: activeSortOrder === "desc"/,
+	"The displayed sort column and direction must be derived from the active query state.",
+);
 
 console.log("Shared table-frame and sortable-header checks passed.");

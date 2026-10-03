@@ -106,31 +106,21 @@ export function CustomersTable({
 	const t = useTranslate();
 	const columns = useMemo(() => createColumns(t), [t]);
 	const router = useRouter();
-	const {
-		searchValue,
-		setSearchValue,
-		updateSort,
-		sortBy: activeSortBy,
-		sortOrder: activeSortOrder,
-	} = useTableQueryState({
-		search,
-		sortBy,
-		sortOrder,
-	});
+	const { searchValue, setSearchValue, updateSort, sorting } =
+		useTableQueryState({
+			search,
+			sortBy,
+			sortOrder,
+			defaultSortBy: "customerCode",
+			defaultSortOrder: "asc",
+		});
 
 	const table = useTable({
 		key: "customers-table",
 		features,
 		columns,
 		data,
-		initialState: {
-			sorting: [
-				{
-					id: activeSortBy ?? "customerCode",
-					desc: (activeSortOrder ?? "asc") === "desc",
-				},
-			],
-		},
+		state: { sorting },
 	});
 
 	if (isLoading) {
@@ -170,8 +160,7 @@ export function CustomersTable({
 												<TableSortButton
 													sorted={sorted}
 													canSort={header.column.getCanSort()}
-													onClick={(event) => {
-														header.column.getToggleSortingHandler()?.(event);
+													onClick={() => {
 														updateSort(header.column.id);
 													}}
 												>

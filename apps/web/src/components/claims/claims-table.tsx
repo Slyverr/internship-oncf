@@ -153,14 +153,14 @@ export function ClaimsTable({
 	const currentType = searchParams.get("type") ?? type ?? "ALL";
 	const currentPriority = searchParams.get("priority") ?? priority ?? "ALL";
 
-	const {
-		searchValue,
-		setSearchValue,
-		updateQuery,
-		updateSort,
-		sortBy: activeSortBy,
-		sortOrder: activeSortOrder,
-	} = useTableQueryState({ search, sortBy, sortOrder });
+	const { searchValue, setSearchValue, updateQuery, updateSort, sorting } =
+		useTableQueryState({
+			search,
+			sortBy,
+			sortOrder,
+			defaultSortBy: "createdAt",
+			defaultSortOrder: "desc",
+		});
 
 	const hasActiveFilters =
 		searchValue.trim().length > 0 ||
@@ -185,11 +185,7 @@ export function ClaimsTable({
 		features,
 		columns,
 		data,
-		initialState: {
-			sorting: activeSortBy
-				? [{ id: activeSortBy, desc: activeSortOrder === "desc" }]
-				: [{ id: "createdAt", desc: true }],
-		},
+		state: { sorting },
 	});
 
 	if (isLoading) {
@@ -302,8 +298,7 @@ export function ClaimsTable({
 												<TableSortButton
 													sorted={sorted}
 													canSort={header.column.getCanSort()}
-													onClick={(event) => {
-														header.column.getToggleSortingHandler()?.(event);
+													onClick={() => {
 														updateSort(header.column.id);
 													}}
 												>

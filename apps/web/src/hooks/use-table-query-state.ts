@@ -1,5 +1,6 @@
 "use client";
 
+import type { SortingState } from "@tanstack/react-table";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -8,22 +9,29 @@ interface UseTableQueryStateOptions {
 	search: string;
 	sortBy?: string;
 	sortOrder?: "asc" | "desc";
+	defaultSortBy?: string;
+	defaultSortOrder?: "asc" | "desc";
 }
 
 export function useTableQueryState({
 	search,
 	sortBy,
 	sortOrder,
+	defaultSortBy,
+	defaultSortOrder,
 }: UseTableQueryStateOptions) {
 	const pathname = usePathname();
 	const router = useRouter();
 	const searchParams = useSearchParams();
-	const activeSortBy = searchParams.get("sortBy") ?? sortBy;
+	const activeSortBy = searchParams.get("sortBy") ?? sortBy ?? defaultSortBy;
 	const querySortOrder = searchParams.get("sortOrder");
 	const activeSortOrder =
 		querySortOrder === "asc" || querySortOrder === "desc"
 			? querySortOrder
-			: sortOrder;
+			: (sortOrder ?? defaultSortOrder);
+	const sorting: SortingState = activeSortBy
+		? [{ id: activeSortBy, desc: activeSortOrder === "desc" }]
+		: [];
 	const [searchValue, setSearchValue] = useState(search);
 	const debouncedSearch = useDebounce(searchValue);
 
@@ -77,5 +85,6 @@ export function useTableQueryState({
 		updateSort,
 		sortBy: activeSortBy,
 		sortOrder: activeSortOrder,
+		sorting,
 	};
 }
