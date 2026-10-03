@@ -543,6 +543,15 @@ export async function verifyAgentOperationalCreation(page: Page) {
 }
 export async function verifyClientOrderSubmission(page: Page) {
 	await signIn(page, E2E_USERS.clientA.email);
+	const orderCreateRequests: string[] = [];
+	page.on("request", (request) => {
+		if (
+			request.method() === "POST" &&
+			new URL(request.url()).pathname.endsWith("/orders")
+		) {
+			orderCreateRequests.push(request.url());
+		}
+	});
 	await page.goto("/dashboard/orders/new");
 	await page.locator("#goodsId").click();
 	await page
@@ -564,12 +573,22 @@ export async function verifyClientOrderSubmission(page: Page) {
 			name: translate(Messages.orders.createForm.scheduleTitle),
 		}),
 	).toBeVisible();
+	await expect(page).toHaveURL(/\/dashboard\/orders\/new$/);
+	expect(orderCreateRequests).toHaveLength(0);
+
+	const createResponse = page.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			new URL(response.url()).pathname.endsWith("/orders"),
+	);
 	await page
 		.getByRole("button", {
 			name: translate(Messages.orders.createForm.create),
 			exact: true,
 		})
 		.click();
+	expect((await createResponse).status()).toBe(201);
+	expect(orderCreateRequests).toHaveLength(1);
 	await expect(page).toHaveURL(/\/dashboard\/orders\/ORD-[A-Z0-9]+$/);
 	await expect(page.getByRole("heading")).toContainText(/ORD-/);
 }
