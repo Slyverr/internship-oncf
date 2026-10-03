@@ -876,7 +876,7 @@ export function DashboardOverview() {
 	].filter(Boolean);
 
 	return (
-		<section className="mx-auto grid w-full max-w-screen-2xl min-w-0 gap-6">
+		<section className="grid w-full min-w-0 gap-6">
 			<PageHeader
 				title={t(Messages.dashboard.welcome, {
 					name: `${profile.firstName} ${profile.lastName}`,
