@@ -4,6 +4,15 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const sourceRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../src");
+const dashboardShell = readFileSync(
+	resolve(sourceRoot, "components/common/dashboard-shell.tsx"),
+	"utf8",
+);
+assert.match(
+	dashboardShell,
+	/workspaceContentClassName[\s\S]*?overflow-x-clip[\s\S]*?\[&>\*\]:min-w-0/,
+	"The workspace must contain wide table scrollers without widening the page.",
+);
 const tableFiles = [
 	"components/claims/claims-table.tsx",
 	"components/customers/customers-table.tsx",

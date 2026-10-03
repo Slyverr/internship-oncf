@@ -16,7 +16,7 @@ type DashboardWorkspaceProps = {
 };
 
 const workspaceContentClassName =
-	"page-enter mx-auto grid w-full min-w-0 max-w-screen-2xl grid-cols-1 content-start gap-6 p-4 sm:p-6 print:p-0";
+	"page-enter mx-auto grid w-full min-w-0 max-w-screen-2xl grid-cols-1 content-start gap-6 overflow-x-clip p-4 sm:p-6 [&>*]:min-w-0 print:p-0";
 
 function SidebarWorkspace({ children, modal }: DashboardWorkspaceProps) {
 	return (
