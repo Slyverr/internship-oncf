@@ -1,6 +1,11 @@
 import { mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { API_ERROR_CODES, API_TRANSPORT_ERROR_CODES } from "@ecommand/shared";
+import {
+	API_ERROR_CODES,
+	API_TRANSPORT_ERROR_CODES,
+	CLAIM_REJECTION_REASON_MAX_LENGTH,
+	CLAIM_RESOLUTION_MAX_LENGTH,
+} from "@ecommand/shared";
 import { expect, type Page } from "@playwright/test";
 import {
 	E2E_CUSTOMER_ICE,
@@ -595,6 +600,74 @@ export async function verifyAgentOperationalCreation(page: Page) {
 	expect((await claimCreateResponse).status()).toBe(201);
 	await expect(page).toHaveURL(/\/dashboard\/claims\/CLM-[A-Z0-9]+$/);
 	await expect(page.getByRole("heading")).toContainText(/CLM-/);
+
+	await page
+		.getByRole("button", {
+			name: translate(Messages.claims.actions.rejectButton),
+			exact: true,
+		})
+		.click();
+	const rejectDialog = page.getByRole("alertdialog");
+	const rejectionInput = rejectDialog.locator("textarea");
+	await expect(rejectionInput).toHaveAttribute(
+		"maxlength",
+		String(CLAIM_REJECTION_REASON_MAX_LENGTH),
+	);
+	const confirmRejectButton = rejectDialog.getByRole("button", {
+		name: translate(Messages.claims.actions.confirmReject),
+		exact: true,
+	});
+	await expect(confirmRejectButton).toBeDisabled();
+	await rejectionInput.fill(" \t ");
+	await expect(confirmRejectButton).toBeDisabled();
+	await rejectionInput.fill("E2E validation check");
+	await expect(confirmRejectButton).toBeEnabled();
+	await rejectDialog
+		.getByRole("button", {
+			name: translate(Messages.claims.edit.cancel),
+			exact: true,
+		})
+		.click();
+
+	await page
+		.getByRole("button", {
+			name: translate(Messages.claims.actions.startInvestigation),
+			exact: true,
+		})
+		.click();
+	await page
+		.getByRole("button", {
+			name: translate(Messages.claims.actions.startTreatment),
+			exact: true,
+		})
+		.click();
+	await page
+		.getByRole("button", {
+			name: translate(Messages.claims.actions.resolve),
+			exact: true,
+		})
+		.click();
+	const resolveDialog = page.getByRole("alertdialog");
+	const resolutionInput = resolveDialog.locator("textarea");
+	await expect(resolutionInput).toHaveAttribute(
+		"maxlength",
+		String(CLAIM_RESOLUTION_MAX_LENGTH),
+	);
+	const confirmResolutionButton = resolveDialog.getByRole("button", {
+		name: translate(Messages.claims.actions.confirmResolution),
+		exact: true,
+	});
+	await expect(confirmResolutionButton).toBeDisabled();
+	await resolutionInput.fill(" \t ");
+	await expect(confirmResolutionButton).toBeDisabled();
+	await resolutionInput.fill("E2E validation check");
+	await expect(confirmResolutionButton).toBeEnabled();
+	await resolveDialog
+		.getByRole("button", {
+			name: translate(Messages.claims.edit.cancel),
+			exact: true,
+		})
+		.click();
 
 	const programCreateRequests: string[] = [];
 	page.on("request", (request) => {
