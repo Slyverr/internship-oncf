@@ -1,5 +1,7 @@
 # Workflow verification
 
+> **Historical record:** the 2026-09-28 checks below were interpreted against the SFD then in use. Safa’s internship report is now the current requirements baseline. Current policy allows agents to close resolved claims; clients can read and comment on their own claims but cannot close them. See the current [authorization matrix](../security/authorization.md) and [MVP readiness](readiness.md).
+
 ## Live check — 2026-09-28
 
 Checked the running local web/API stack against the project SDF using the seeded admin, client representative, and commercial-agent accounts. API workflows were exercised directly; browser screenshots were used to check the dashboard at representative phone and desktop sizes.

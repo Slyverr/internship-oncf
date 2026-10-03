@@ -1,6 +1,6 @@
 # MVP readiness
 
-This status describes the current repository against the project SDF and report. It distinguishes implemented local behavior from placeholders and external integrations that still need confirmation.
+This status uses Safa’s internship report as the current requirements baseline. The older SFD is secondary where the report supersedes it. It distinguishes implemented local behavior from placeholders and external integrations that still need confirmation.
 
 ## Implemented
 
@@ -59,16 +59,16 @@ This status describes the current repository against the project SDF and report.
 ## Current verification — 2026-10-04
 
 - Safa’s internship report is the current requirements baseline; the older SFD is secondary where the report supersedes it. The current Bun/NestJS/Next.js implementation stack remains authoritative.
-- API unit tests pass: 77 suites / 675 tests. Web checks, workspace typechecks, Biome, and `git diff --check` pass.
-- The report-backed order duplication, PDF/CSV export, login-lockout, claim-closure, and reference-data API/browser E2E paths were added but not executed in this checkout: the isolated runner requires real Node.js, which is unavailable here. Root `bun run test` also hits an esbuild `EPERM` during Turbo’s shared-package rebuild on this mounted filesystem; direct API and web test commands pass after restoring ignored shared outputs with Bun.
-- `bun run generate:api` reaches its schema preflight but Bun’s API server emits empty DTO property schemas. The new reference-data requests use typed `customFetch` until the client can be generated with the documented real Node runtime.
-- The web preview at `http://localhost:3000` and API `/health` both return HTTP 200. No schema push, deployment, or external integration was performed.
+- Isolated API E2E passes 2 suites / 30 tests against its disposable PostgreSQL database. This run found and fixed a lockout SQL type mismatch that returned HTTP 500 for wrong passwords; lockout and workflow cases now pass.
+- The OpenAPI client was regenerated from the live NestJS contract using Node 24 in a temporary container. Managed-reference-data CRUD, active reference lookups, and order duplication now use generated operations and schemas.
+- Web checks, web typecheck, API typecheck, focused API tests (2 suites / 39 tests), Biome, and `git diff --check` pass. The full root `bun run verify` was not rerun in this checkpoint.
+- Browser E2E and the full route/state/role/theme screenshot matrix remain open. No database push was made to preview or production; the E2E runner created and removed only its disposable database.
 
 ## Incomplete for a usable MVP
 
 - **ICE data ownership:** signup compares the submitted customer code and ICE with the locally maintained customer record; it does not query an external ONCF registry. Confirm who maintains customer ICE values and how they are kept current before production use.
 - **Report PDF quality:** browser print hides app navigation and breadcrumbs and applies a light, A4 print theme with consistent margins. A browser regression test uses 36 customer rows, 36 product rows, and 12 months, checks long-label wrapping and hidden controls, and verifies the generated A4 PDF has multiple pages. Fresh report captures at 320, 375, 390, 640, 768, 1024, 1440, 1920, 2560, and 3840px show no horizontal overflow. Captures: `/tmp/ecommand-report-layout-final`. A backend-generated PDF is only warranted if exact cross-browser output or archived documents become a requirement.
-- **OpenAPI generation runtime:** the Bun development API can return incomplete DTO schemas. The web generation command now preflights representative schemas and leaves generated files unchanged on failure. The new managed-reference-data calls temporarily use the typed `customFetch` pattern because generation was rejected by preflight. Use the real Node runtime documented in the [development workflow](../development/workflow.md#local-setup), regenerate the client, and replace those calls with generated operations.
+- **OpenAPI generation runtime:** generation succeeds with a real Node runtime. This workstation has no host Node binary; the latest client was generated with Node 24 in a temporary Podman container. The generated-client flow is verified. `scripts/node-in-container.sh` provides the same Node 24 container runtime for repeatable API E2E runs on Podman hosts.
 
 ## External and production requirements
 

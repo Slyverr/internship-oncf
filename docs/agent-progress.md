@@ -1,13 +1,13 @@
 # Agent progress
 
-This is the milestone journal for finishing the ECommand MVP. Read it with [workflow verification](project/workflows.md), [MVP readiness](project/readiness.md), and [authorization](security/authorization.md) before continuing. Update this journal after a major chapter, not after every task; use commit history and test output for task-level detail.
+This is the milestone journal for finishing the ECommand MVP. Safa’s internship report is the current requirements baseline; older SFD interpretations are historical where they conflict. For current policy, prefer [MVP readiness](project/readiness.md) and [authorization](security/authorization.md) over earlier journal entries. Update this journal after a major chapter, not after every task; use commit history and test output for task-level detail.
 
 ## Current position
 
 - **Completed chapters:** 1–29 — API/browser workflows, permission/ownership enforcement, Admin reference data and custom profiles, English i18n/API message contracts, UX/print work, notification transactions, transactional user assignments, guided-form recovery, and the report-backed functional gaps below.
-- **Current checkpoint:** the report-backed workflow closeout is implemented. French rollout remains deferred. Remaining work is limited to verification/runtime constraints and external or production integrations listed in [MVP readiness](project/readiness.md).
+- **Current checkpoint:** the report-backed workflow closeout has been reverified. Isolated API E2E passed 2 suites / 30 tests; the OpenAPI client was regenerated with Node 24 in a temporary container; web checks, API/web typechecks, focused API tests, and Biome passed. Remaining work includes browser E2E/current screenshot review and items listed in [MVP readiness](project/readiness.md). French rollout and production/deployment work remain deferred.
 - **Current checkout:** `develop`; chapter 29 code is committed locally as `e43965b` and not pushed. Do not rewrite published commits.
-- **Local app:** the existing web server at `http://localhost:3000` and API at `http://localhost:8000/health` return HTTP 200. The API uses the approved local preview database; the pre-existing `ecommand` database was not used.
+- **Database/runtime safety:** the isolated E2E runner removed its disposable database. The temporary Node 24 API server used for OpenAPI generation was stopped. The preview database and pre-existing `ecommand` database were not modified during this checkpoint.
 
 ## Completed chapter 1 — API E2E and core workflows
 
@@ -116,7 +116,7 @@ Coverage includes:
 - Added order duplication as a new draft, a print-ready order PDF view, and an all-pages filtered CSV export that opens in Excel.
 - Expanded guarded Admin reference-data management to stations, agencies, ports, berths, sidings, vessels, and shipping companies; the existing unit/goods/accessory-operation screens cover the other report categories.
 - Aligned claim closure with the newer report: agents can close resolved claims; clients can follow them but cannot close them. Reference seeding removes stale system-role grants.
-- Verification on this checkout: API unit tests passed (77 suites / 675 tests); web checks, workspace typechecks, Biome, and `git diff --check` passed. The isolated API/browser E2E runner could not run because this environment has no real Node.js binary. `bun run generate:api` reached its documented schema preflight but Bun’s API schema omitted DTO properties, so generated files were left untouched; new reference-data requests temporarily use typed `customFetch`. Root `bun run test` also encounters an esbuild `EPERM` while Turbo rebuilds the shared package on this mounted filesystem; direct API and web test commands passed after restoring ignored shared build outputs with Bun.
+- Verification follow-up: isolated API E2E passed 2 suites / 30 tests using Node 24 from a temporary container. It exposed a timestamp/text type mismatch in failed-login lockout SQL; lockout values are now explicitly cast and wrong-password cases return the expected 401. Two stale E2E assertions were corrected for the database’s zero achieved-quantity default and client claim-close denial. Focused API tests passed (2 suites / 39 tests), web checks and API/web typechecks passed, and the OpenAPI client was regenerated from the live Node-backed API contract. Managed-reference data and order duplication now use generated operations.
 - The current preview returns HTTP 200 from `/login` and `/health`. No database schema push or production integration was attempted.
 - Order/program route conversion was the next item after this chapter and is now completed in [Chapter 9](#chapter-9--order-and-program-public-routes--2026-09-30). Existing IDs remain internal for relations and notification metadata.
 
