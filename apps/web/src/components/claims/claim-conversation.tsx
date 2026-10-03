@@ -506,7 +506,7 @@ export function ClaimConversation({
 									rows={1}
 									maxLength={2000}
 									disabled={addComment.isPending}
-									className="max-h-32 min-h-11 min-w-0 flex-1 resize-none rounded-lg border-0 bg-transparent px-3 py-3 text-sm shadow-none focus-visible:border-transparent focus-visible:ring-0 dark:bg-transparent"
+									className="field-sizing-content max-h-32 min-h-11 min-w-0 flex-1 resize-none rounded-lg border-0 bg-transparent px-3 py-3 text-sm shadow-none focus-visible:border-transparent focus-visible:ring-0 dark:bg-transparent"
 								/>
 								<Button
 									type="submit"

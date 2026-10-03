@@ -469,6 +469,16 @@ export async function verifyAgentOperationalCreation(page: Page) {
 	await page
 		.locator("#description")
 		.fill("E2E agent claim creation workflow check.");
+	const expectClaimTextareasAligned = async () => {
+		const widths = await page
+			.locator("#description, #resolution")
+			.evaluateAll((fields) =>
+				fields.map((field) => field.getBoundingClientRect().width),
+			);
+		expect(widths).toHaveLength(2);
+		expect(Math.abs(widths[0] - widths[1])).toBeLessThanOrEqual(1);
+	};
+	await expectClaimTextareasAligned();
 	let failClaimCreate = true;
 	await page.route("**/api/proxy/claims", async (route) => {
 		if (
@@ -509,9 +519,37 @@ export async function verifyAgentOperationalCreation(page: Page) {
 	if (process.env.E2E_CAPTURE_DIR) {
 		await mkdir(process.env.E2E_CAPTURE_DIR, { recursive: true });
 		await page.setViewportSize({ width: 390, height: 844 });
+		await expectClaimTextareasAligned();
 		await page.screenshot({
 			path: join(process.env.E2E_CAPTURE_DIR, "claim-submit-error-phone.png"),
 			fullPage: true,
+		});
+		await page.evaluate(() =>
+			window.scrollTo(0, document.documentElement.scrollHeight),
+		);
+		const createButton = page.getByRole("button", {
+			name: translate(Messages.claims.create),
+			exact: true,
+		});
+		const mobileNavigation = page
+			.locator('[class~="fixed"][class~="bottom-0"]')
+			.last();
+		const createButtonBounds = await createButton.boundingBox();
+		const mobileNavigationBounds = await mobileNavigation.boundingBox();
+		if (!createButtonBounds || !mobileNavigationBounds) {
+			throw new Error(
+				"Expected mobile create actions and navigation to render",
+			);
+		}
+		expect(
+			createButtonBounds.y + createButtonBounds.height,
+		).toBeLessThanOrEqual(mobileNavigationBounds.y);
+		await page.screenshot({
+			path: join(
+				process.env.E2E_CAPTURE_DIR,
+				"claim-submit-error-phone-actions.png",
+			),
+			fullPage: false,
 		});
 		await page.setViewportSize({ width: 1440, height: 900 });
 		await page.screenshot({

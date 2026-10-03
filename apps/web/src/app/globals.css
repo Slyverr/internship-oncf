@@ -88,6 +88,8 @@ html[data-theme="mono-dark"] {
 
 @utility oncf-field {
 	display: grid;
+	width: 100%;
+	min-width: 0;
 	align-self: start;
 	align-content: start;
 	gap: var(--spacing-control);
