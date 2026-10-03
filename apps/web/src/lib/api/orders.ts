@@ -205,7 +205,63 @@ export function useOrdersControllerFindAll<TData = Awaited<ReturnType<typeof ord
 
 
 
-export const ordersControllerFindEligibleForPrograms = (
+export const ordersControllerDuplicate = (
+    id: string,
+ options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
+) => {
+
+
+      return customFetch<OrderDetailDto>(
+      {url: `/orders/${id}/duplicate`, method: 'POST', signal
+    },
+      options);
+    }
+
+
+
+
+export const getOrdersControllerDuplicateMutationOptions = <TError = ApiErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersControllerDuplicate>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof ordersControllerDuplicate>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['ordersControllerDuplicate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof ordersControllerDuplicate>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  ordersControllerDuplicate(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type OrdersControllerDuplicateMutationResult = NonNullable<Awaited<ReturnType<typeof ordersControllerDuplicate>>>
+
+    export type OrdersControllerDuplicateMutationError = ApiErrorResponseDto
+
+    export const useOrdersControllerDuplicate = <TError = ApiErrorResponseDto,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ordersControllerDuplicate>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof ordersControllerDuplicate>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getOrdersControllerDuplicateMutationOptions(options), queryClient);
+    }
+    export const ordersControllerFindEligibleForPrograms = (
     params?: OrdersControllerFindEligibleForProgramsParams,
  options?: SecondParameter<typeof customFetch>,signal?: AbortSignal
 ) => {

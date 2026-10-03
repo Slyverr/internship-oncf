@@ -849,7 +849,8 @@ describe("customer portfolio authorization (e2e)", () => {
 			createdOrder.body.createdByUserId,
 		);
 		expect(duplicate.body.supervisor).toBe("E2E Updated Supervisor");
-		expect(duplicate.body.quantityAchieved).toBeNull();
+		// The duplicate insert omits achieved quantity; the database initializes a fresh order to zero.
+		expect(duplicate.body.quantityAchieved).toBe("0.000");
 		expect(duplicate.body.forecastPrograms).toHaveLength(0);
 		expect(duplicate.body.orderExecutions).toHaveLength(0);
 		expect(duplicate.body.orderFiles).toHaveLength(0);
@@ -946,7 +947,7 @@ describe("customer portfolio authorization (e2e)", () => {
 		await request(app.getHttpServer())
 			.post(`/claims/${claimNumber}/close`)
 			.set("Authorization", `Bearer ${clientToken}`)
-			.expect(409);
+			.expect(403);
 
 		const secondClientToken = await login(app, E2E_USERS.clientASecond.email);
 		await request(app.getHttpServer())

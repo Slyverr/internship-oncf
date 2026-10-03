@@ -36,6 +36,7 @@ const {
 	list: OrderListResponse,
 	detail: OrderDetailResponse,
 	create: OrderCreateResponse,
+	duplicate: OrderDuplicateResponse,
 	remove: OrderDeleteResponse,
 	eligibleForPrograms: EligibleOrderForProgramsResponse,
 } = createCrudResponses({
@@ -44,6 +45,16 @@ const {
 	remove: OrderDeleteDto,
 
 	custom: {
+		duplicate: {
+			type: OrderDetailDto,
+			status: HttpStatus.CREATED,
+			errors: [
+				HttpStatus.UNAUTHORIZED,
+				HttpStatus.BAD_REQUEST,
+				HttpStatus.FORBIDDEN,
+				HttpStatus.NOT_FOUND,
+			],
+		},
 		eligibleForPrograms: {
 			type: [EligibleOrderForProgramDto],
 			status: HttpStatus.OK,
@@ -69,7 +80,7 @@ export class OrdersController {
 
 	@Post(":id/duplicate")
 	@RequireAny(Permission.ORDERS_CREATE)
-	@OrderDetailResponse()
+	@OrderDuplicateResponse()
 	async duplicate(
 		@OrderNumberParam() number: OrderNumber,
 		@Request() req: AuthRequest,

@@ -149,6 +149,7 @@ export const ApiErrorCode = {
   CURRENT_PASSWORD_INVALID: 'CURRENT_PASSWORD_INVALID',
   CUSTOMER_IDENTITY_INVALID: 'CUSTOMER_IDENTITY_INVALID',
   AUTHENTICATION_REQUIRED: 'AUTHENTICATION_REQUIRED',
+  AUTH_ACCOUNT_LOCKED: 'AUTH_ACCOUNT_LOCKED',
   CONFLICT: 'CONFLICT',
   INTERNAL_ERROR: 'INTERNAL_ERROR',
   INVALID_IDENTIFIER: 'INVALID_IDENTIFIER',
@@ -1724,6 +1725,130 @@ export interface UpdateRejectionReasonDto {
   isActive: boolean;
 }
 
+export type ManagedReferenceDataDtoType = typeof ManagedReferenceDataDtoType[keyof typeof ManagedReferenceDataDtoType];
+
+
+export const ManagedReferenceDataDtoType = {
+  normal: 'normal',
+  dry: 'dry',
+} as const;
+
+export interface ManagedReferenceDataDto {
+  id: number;
+  name: string;
+  isActive: boolean;
+  stationCode?: string;
+  /** @nullable */
+  address?: string | null;
+  /** @nullable */
+  city?: string | null;
+  /** @nullable */
+  phone?: string | null;
+  /** @nullable */
+  email?: string | null;
+  type?: ManagedReferenceDataDtoType;
+  /** @nullable */
+  stationId?: number | null;
+  portId?: number;
+  /** @nullable */
+  stationName?: string | null;
+  /** @nullable */
+  portName?: string | null;
+}
+
+export type CreateManagedReferenceDataDtoType = typeof CreateManagedReferenceDataDtoType[keyof typeof CreateManagedReferenceDataDtoType];
+
+
+export const CreateManagedReferenceDataDtoType = {
+  normal: 'normal',
+  dry: 'dry',
+} as const;
+
+export interface CreateManagedReferenceDataDto {
+  /** @maxLength 200 */
+  name: string;
+  /**
+     * @maxLength 50
+     * @nullable
+     */
+  stationCode?: string | null;
+  /**
+     * @maxLength 500
+     * @nullable
+     */
+  address?: string | null;
+  /**
+     * @maxLength 100
+     * @nullable
+     */
+  city?: string | null;
+  /**
+     * @maxLength 20
+     * @nullable
+     */
+  phone?: string | null;
+  /**
+     * @maxLength 100
+     * @nullable
+     */
+  email?: string | null;
+  type?: CreateManagedReferenceDataDtoType;
+  /**
+     * @minimum 1
+     * @nullable
+     */
+  stationId?: number | null;
+  /** @minimum 1 */
+  portId?: number;
+}
+
+export type UpdateManagedReferenceDataDtoType = typeof UpdateManagedReferenceDataDtoType[keyof typeof UpdateManagedReferenceDataDtoType];
+
+
+export const UpdateManagedReferenceDataDtoType = {
+  normal: 'normal',
+  dry: 'dry',
+} as const;
+
+export interface UpdateManagedReferenceDataDto {
+  /** @maxLength 200 */
+  name: string;
+  /**
+     * @maxLength 50
+     * @nullable
+     */
+  stationCode?: string | null;
+  /**
+     * @maxLength 500
+     * @nullable
+     */
+  address?: string | null;
+  /**
+     * @maxLength 100
+     * @nullable
+     */
+  city?: string | null;
+  /**
+     * @maxLength 20
+     * @nullable
+     */
+  phone?: string | null;
+  /**
+     * @maxLength 100
+     * @nullable
+     */
+  email?: string | null;
+  type?: UpdateManagedReferenceDataDtoType;
+  /**
+     * @minimum 1
+     * @nullable
+     */
+  stationId?: number | null;
+  /** @minimum 1 */
+  portId?: number;
+  isActive: boolean;
+}
+
 export interface RoleProfileDto {
   persona: RolePersona | null;
   id: string;
@@ -1819,6 +1944,13 @@ export const CreateRoleProfileDtoPermissionNamesItem = {
   'catalog:manage:goods-types': 'catalog:manage:goods-types',
   'catalog:manage:accessory-operations': 'catalog:manage:accessory-operations',
   'catalog:manage:rejection-reasons': 'catalog:manage:rejection-reasons',
+  'catalog:manage:stations': 'catalog:manage:stations',
+  'catalog:manage:agencies': 'catalog:manage:agencies',
+  'catalog:manage:ports': 'catalog:manage:ports',
+  'catalog:manage:berths': 'catalog:manage:berths',
+  'catalog:manage:sidings': 'catalog:manage:sidings',
+  'catalog:manage:vessels': 'catalog:manage:vessels',
+  'catalog:manage:shipping-companies': 'catalog:manage:shipping-companies',
   'tracking:read': 'tracking:read',
   'tracking:update': 'tracking:update',
   'tracking:manage': 'tracking:manage',
@@ -1922,6 +2054,13 @@ export const UpdateRoleProfileDtoPermissionNamesItem = {
   'catalog:manage:goods-types': 'catalog:manage:goods-types',
   'catalog:manage:accessory-operations': 'catalog:manage:accessory-operations',
   'catalog:manage:rejection-reasons': 'catalog:manage:rejection-reasons',
+  'catalog:manage:stations': 'catalog:manage:stations',
+  'catalog:manage:agencies': 'catalog:manage:agencies',
+  'catalog:manage:ports': 'catalog:manage:ports',
+  'catalog:manage:berths': 'catalog:manage:berths',
+  'catalog:manage:sidings': 'catalog:manage:sidings',
+  'catalog:manage:vessels': 'catalog:manage:vessels',
+  'catalog:manage:shipping-companies': 'catalog:manage:shipping-companies',
   'tracking:read': 'tracking:read',
   'tracking:update': 'tracking:update',
   'tracking:manage': 'tracking:manage',

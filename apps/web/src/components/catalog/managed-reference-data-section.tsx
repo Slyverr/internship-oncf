@@ -37,25 +37,21 @@ import {
 import type { MessageKey } from "@/i18n";
 import { Messages } from "@/i18n";
 import { useLocale, useTranslate } from "@/i18n/locale-provider";
-import { customFetch } from "@/lib/axios";
+import { activeReferenceDataControllerFindAll } from "@/lib/api/active-reference-data";
+import type {
+	CreateManagedReferenceDataDto,
+	ManagedReferenceDataDto,
+	UpdateManagedReferenceDataDto,
+} from "@/lib/api/generated.schemas";
+import {
+	managedReferenceDataControllerCreate,
+	managedReferenceDataControllerFindAll,
+	managedReferenceDataControllerUpdate,
+} from "@/lib/api/managed-reference-data";
 import { getFormErrorMessage } from "@/lib/form-utils";
 
 type Resource = ManagedReferenceResource;
-type ManagedReferenceRow = {
-	id: number;
-	name: string;
-	isActive: boolean;
-	stationCode?: string;
-	address?: string | null;
-	city?: string | null;
-	phone?: string | null;
-	email?: string | null;
-	type?: "normal" | "dry";
-	stationId?: number | null;
-	portId?: number;
-	stationName?: string | null;
-	portName?: string | null;
-};
+type ManagedReferenceRow = ManagedReferenceDataDto;
 type Draft = Omit<ManagedReferenceRow, "id" | "stationName" | "portName">;
 type FieldKey =
 	| "stationCode"
@@ -121,10 +117,6 @@ const fieldsByResource: Partial<Record<Resource, FieldSpec[]>> = {
 
 const emptyDraft: Draft = { name: "", isActive: true };
 
-function endpoint(resource: Resource) {
-	return `/catalog/managed-reference-data/${resource}`;
-}
-
 function ActiveOptions({
 	kind,
 	value,
@@ -144,11 +136,10 @@ function ActiveOptions({
 	const options = useQuery({
 		queryKey: ["active-reference-data", kind],
 		enabled: kind !== "port-type",
-		queryFn: () =>
-			customFetch<ManagedReferenceRow[]>({
-				url: `/catalog/active-reference-data/${kind}`,
-				method: "GET",
-			}),
+		queryFn: () => {
+			if (kind === "port-type") return Promise.resolve([]);
+			return activeReferenceDataControllerFindAll(kind);
+		},
 	});
 	const values =
 		kind === "port-type"
@@ -408,11 +399,7 @@ export function ManagedReferenceDataSection({
 	const queryKey = ["managed-reference-data", resource];
 	const rows = useQuery({
 		queryKey,
-		queryFn: () =>
-			customFetch<ManagedReferenceRow[]>({
-				url: endpoint(resource),
-				method: "GET",
-			}),
+		queryFn: () => managedReferenceDataControllerFindAll(resource),
 	});
 
 	function openCreate() {
@@ -425,27 +412,32 @@ export function ManagedReferenceDataSection({
 	}
 
 	async function save(draft: Draft) {
-		const data = { ...draft } as Record<string, unknown>;
-		data.name = (data.name as string).trim();
-		for (const [key, value] of Object.entries(data)) {
-			if (key !== "name" && typeof value === "string") {
-				data[key] = value.trim() || null;
-			}
-		}
-		delete data.id;
-		delete data.createdAt;
-		delete data.updatedAt;
-		delete data.stationName;
-		delete data.portName;
+		const createData: CreateManagedReferenceDataDto = {
+			name: draft.name.trim(),
+			stationCode: draft.stationCode?.trim() || null,
+			address: draft.address?.trim() || null,
+			city: draft.city?.trim() || null,
+			phone: draft.phone?.trim() || null,
+			email: draft.email?.trim() || null,
+			type: draft.type,
+			stationId: draft.stationId,
+			portId: draft.portId,
+		};
 		if (editing) {
-			await customFetch({
-				url: `${endpoint(resource)}/${editing.id}`,
-				method: "PATCH",
-				data,
-			});
+			const updateData: UpdateManagedReferenceDataDto = {
+				...createData,
+				isActive: draft.isActive,
+			};
+			await managedReferenceDataControllerUpdate(
+				resource,
+				editing.id,
+				updateData,
+			);
 		} else {
-			delete data.isActive;
-			await customFetch({ url: endpoint(resource), method: "POST", data });
+			await managedReferenceDataControllerCreate(
+				resource,
+				createData satisfies CreateManagedReferenceDataDto,
+			);
 		}
 		await queryClient.invalidateQueries({ queryKey });
 		await queryClient.invalidateQueries({

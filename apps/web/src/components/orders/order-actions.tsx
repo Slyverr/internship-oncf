@@ -6,7 +6,6 @@ import {
 	OrderStatus,
 	Permission,
 } from "@ecommand/shared";
-import { useMutation } from "@tanstack/react-query";
 import { CopyIcon, EllipsisVerticalIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -38,12 +37,12 @@ import {
 	getOrdersControllerFindOneQueryKey,
 	useOrdersControllerApprove,
 	useOrdersControllerCancel,
+	useOrdersControllerDuplicate,
 	useOrdersControllerReject,
 	useOrdersControllerRemove,
 	useOrdersControllerSendToDtm,
 	useOrdersControllerSubmit,
 } from "@/lib/api/orders";
-import { customFetch } from "@/lib/axios";
 import { useAuth } from "@/providers/auth-provider";
 import { ConfirmDialog } from "../common/confirm-dialog";
 
@@ -66,14 +65,11 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 	const cancelMutation = useOrdersControllerCancel();
 	const sendToDtmMutation = useOrdersControllerSendToDtm();
 	const removeMutation = useOrdersControllerRemove();
-	const duplicateMutation = useMutation({
-		mutationFn: () =>
-			customFetch<OrderDetailDto>({
-				url: `/orders/${order.orderNumber}/duplicate`,
-				method: "POST",
-			}),
-		onSuccess: (duplicatedOrder) =>
-			router.push(`/dashboard/orders/${duplicatedOrder.orderNumber}`),
+	const duplicateMutation = useOrdersControllerDuplicate({
+		mutation: {
+			onSuccess: (duplicatedOrder) =>
+				router.push(`/dashboard/orders/${duplicatedOrder.orderNumber}`),
+		},
 	});
 
 	const status = order.orderStatus.name;
@@ -129,7 +125,7 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 					<Button
 						variant="outline"
 						disabled={duplicateMutation.isPending}
-						onClick={() => duplicateMutation.mutate()}
+						onClick={() => duplicateMutation.mutate({ id: order.orderNumber })}
 					>
 						<CopyIcon aria-hidden="true" />
 						{t(Messages.orders.detail.duplicate)}
