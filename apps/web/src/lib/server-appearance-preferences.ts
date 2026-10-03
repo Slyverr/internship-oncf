@@ -2,11 +2,15 @@ import type { AppearancePreferences } from "@ecommand/shared";
 import { cookies } from "next/headers";
 import { profileControllerGetPreferences } from "@/lib/api/profile";
 
+const SERVER_PREFERENCE_TIMEOUT_MS = 3_000;
+
 export async function getServerAppearancePreferences(): Promise<AppearancePreferences | null> {
 	if (!(await cookies()).has("access_token")) return null;
 
 	try {
-		const preferences = await profileControllerGetPreferences();
+		const preferences = await profileControllerGetPreferences({
+			timeout: SERVER_PREFERENCE_TIMEOUT_MS,
+		});
 		if (!preferences) return null;
 
 		return {
