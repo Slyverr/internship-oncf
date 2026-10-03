@@ -52,7 +52,7 @@ export function CustomerTypeSelect({
 		: null;
 
 	return (
-		<div className="oncf-field">
+		<>
 			<Combobox
 				items={options}
 				disabled={disabled || isLoading || isError}
@@ -98,6 +98,6 @@ export function CustomerTypeSelect({
 					{t(Messages.customers.form.typeSelect.noneAvailable)}
 				</p>
 			)}
-		</div>
+		</>
 	);
 }
