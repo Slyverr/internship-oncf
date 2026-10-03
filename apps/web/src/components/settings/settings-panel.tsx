@@ -1,7 +1,6 @@
 "use client";
 
 import { isStrongPassword } from "@ecommand/shared";
-import { PanelLeftIcon, PanelTopIcon } from "lucide-react";
 import {
 	type FormEvent,
 	type ReactNode,
@@ -218,9 +217,14 @@ function SidebarLayoutPreview() {
 	return (
 		<span
 			aria-hidden="true"
-			className="grid size-8 shrink-0 place-items-center rounded-md border border-border bg-muted text-primary"
+			data-layout-preview="sidebar"
+			className="grid h-8 w-12 shrink-0 grid-cols-[8px_minmax(0,1fr)] gap-compact overflow-hidden rounded-md border border-border bg-background p-compact"
 		>
-			<PanelLeftIcon className="size-4" />
+			<span className="rounded-sm bg-sidebar ring-1 ring-border" />
+			<span className="grid content-start gap-compact pt-compact">
+				<span className="h-1 rounded-full bg-primary" />
+				<span className="h-2 rounded-sm bg-card ring-1 ring-border" />
+			</span>
 		</span>
 	);
 }
@@ -229,9 +233,18 @@ function CenteredLayoutPreview() {
 	return (
 		<span
 			aria-hidden="true"
-			className="grid size-8 shrink-0 place-items-center rounded-md border border-border bg-muted text-primary"
+			data-layout-preview="centered-header"
+			className="grid h-8 w-12 shrink-0 grid-rows-[8px_minmax(0,1fr)] gap-compact overflow-hidden rounded-md border border-border bg-background p-compact"
 		>
-			<PanelTopIcon className="size-4" />
+			<span className="grid grid-cols-[1fr_2fr_1fr] items-center gap-compact rounded-sm bg-sidebar px-compact">
+				<span className="h-1 w-1 rounded-full bg-primary" />
+				<span className="h-1 rounded-full bg-muted-foreground" />
+				<span className="h-1 w-1 justify-self-end rounded-full bg-primary" />
+			</span>
+			<span className="mx-auto grid w-4/5 content-start gap-compact pt-compact">
+				<span className="h-1 rounded-full bg-primary" />
+				<span className="h-2 rounded-sm bg-card ring-1 ring-border" />
+			</span>
 		</span>
 	);
 }
