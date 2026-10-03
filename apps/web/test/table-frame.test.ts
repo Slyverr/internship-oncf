@@ -28,6 +28,15 @@ const sortableTableFiles = [
 	"components/programs/programs-table.tsx",
 	"components/users/users-table.tsx",
 ];
+const sortableTableFeatures = readFileSync(
+	resolve(sourceRoot, "components/common/sortable-table-features.ts"),
+	"utf8",
+);
+assert.match(
+	sortableTableFeatures,
+	/sortFns:\s*\{[\s\S]*alphanumeric:\s*sortFn_alphanumeric[\s\S]*datetime:\s*sortFn_datetime/,
+	"Shared sortable table features must register the built-in comparators used by columns.",
+);
 
 const tablePrimitive = readFileSync(
 	resolve(sourceRoot, "components/ui/table.tsx"),
@@ -76,6 +85,11 @@ assert.match(
 
 for (const file of sortableTableFiles) {
 	const source = readFileSync(resolve(sourceRoot, file), "utf8");
+	assert.match(
+		source,
+		/sortableTableFeatures as features/,
+		`${file} must use the shared comparator registry`,
+	);
 	assert.match(source, /<TableSortButton/, `${file} must use TableSortButton`);
 	assert.match(
 		source,

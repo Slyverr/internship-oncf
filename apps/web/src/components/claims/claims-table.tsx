@@ -2,21 +2,17 @@
 
 import { ClaimPriority, ClaimStatus, ClaimType } from "@ecommand/shared";
 import type { ColumnDef } from "@tanstack/react-table";
-import {
-	createSortedRowModel,
-	FlexRender,
-	rowSortingFeature,
-	tableFeatures,
-	useTable,
-} from "@tanstack/react-table";
+import { FlexRender, useTable } from "@tanstack/react-table";
 import { PlusIcon } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import { ActionLink } from "@/components/common/action-link";
+import { sortableTableFeatures as features } from "@/components/common/sortable-table-features";
 import { TableEmptyStateRow } from "@/components/common/table-empty-state-row";
 import { TableLoadingState } from "@/components/common/table-loading-state";
 import { TableRowLink } from "@/components/common/table-row-link";
 import { TableSortButton } from "@/components/common/table-sort-button";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -57,11 +53,6 @@ interface ClaimsTableProps {
 	isLoading?: boolean;
 }
 
-const features = tableFeatures({
-	rowSortingFeature,
-	sortedRowModel: createSortedRowModel(),
-});
-
 function buildClaimsColumns(
 	locale: AppLocale,
 	t: ReturnType<typeof useTranslate>,
@@ -90,7 +81,11 @@ function buildClaimsColumns(
 			accessorFn: (row) => row.claimType.name,
 			id: "type",
 			header: () => t(Messages.claims.list.type),
-			cell: (info) => getClaimTypeLabel(info.getValue<string>(), locale),
+			cell: (info) => (
+				<Badge variant="outline">
+					{getClaimTypeLabel(info.getValue<string>(), locale)}
+				</Badge>
+			),
 			enableSorting: true,
 		},
 		{
@@ -105,10 +100,19 @@ function buildClaimsColumns(
 			header: () => t(Messages.claims.list.priority),
 			cell: (info) => {
 				const value = info.getValue<string | null>();
-				return value ? (
-					<span>{getClaimPriorityLabel(value, locale)}</span>
-				) : (
-					"—"
+				if (!value) return "—";
+				const variant =
+					value === ClaimPriority.URGENT
+						? "destructive"
+						: value === ClaimPriority.HIGH
+							? "default"
+							: value === ClaimPriority.MEDIUM
+								? "secondary"
+								: "outline";
+				return (
+					<Badge variant={variant}>
+						{getClaimPriorityLabel(value, locale)}
+					</Badge>
 				);
 			},
 			enableSorting: true,
@@ -117,7 +121,11 @@ function buildClaimsColumns(
 			accessorFn: (row) => row.claimStatus.name,
 			id: "status",
 			header: () => t(Messages.claims.list.status),
-			cell: (info) => getClaimStatusLabel(String(info.getValue()), locale),
+			cell: (info) => (
+				<Badge variant="outline">
+					{getClaimStatusLabel(String(info.getValue()), locale)}
+				</Badge>
+			),
 			enableSorting: true,
 		},
 		{
@@ -127,6 +135,7 @@ function buildClaimsColumns(
 				const value = info.getValue<string>();
 				return formatDisplayDate(value, locale);
 			},
+			sortFn: "datetime",
 			enableSorting: true,
 		},
 	];

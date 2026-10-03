@@ -2,16 +2,11 @@
 
 import { RegistrationStatus } from "@ecommand/shared";
 import type { ColumnDef } from "@tanstack/react-table";
-import {
-	createSortedRowModel,
-	FlexRender,
-	rowSortingFeature,
-	tableFeatures,
-	useTable,
-} from "@tanstack/react-table";
+import { FlexRender, useTable } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { ActionLink } from "@/components/common/action-link";
+import { sortableTableFeatures as features } from "@/components/common/sortable-table-features";
 import { TableEmptyStateRow } from "@/components/common/table-empty-state-row";
 import { TableLoadingState } from "@/components/common/table-loading-state";
 import { TableRowLink } from "@/components/common/table-row-link";
@@ -51,11 +46,6 @@ interface UsersTableProps {
 	sortOrder?: "asc" | "desc";
 	isLoading?: boolean;
 }
-
-const features = tableFeatures({
-	rowSortingFeature,
-	sortedRowModel: createSortedRowModel(),
-});
 
 function createColumns(
 	t: ReturnType<typeof useTranslate>,

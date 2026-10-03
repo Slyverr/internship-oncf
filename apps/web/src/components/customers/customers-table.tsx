@@ -1,19 +1,15 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import {
-	createSortedRowModel,
-	FlexRender,
-	rowSortingFeature,
-	tableFeatures,
-	useTable,
-} from "@tanstack/react-table";
+import { FlexRender, useTable } from "@tanstack/react-table";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
+import { sortableTableFeatures as features } from "@/components/common/sortable-table-features";
 import { TableEmptyStateRow } from "@/components/common/table-empty-state-row";
 import { TableLoadingState } from "@/components/common/table-loading-state";
 import { TableRowLink } from "@/components/common/table-row-link";
 import { TableSortButton } from "@/components/common/table-sort-button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
 	Table,
@@ -37,11 +33,6 @@ interface CustomersTableProps {
 	sortOrder?: "asc" | "desc";
 	isLoading?: boolean;
 }
-
-const features = tableFeatures({
-	rowSortingFeature,
-	sortedRowModel: createSortedRowModel(),
-});
 
 function createColumns(
 	t: ReturnType<typeof useTranslate>,
@@ -72,7 +63,10 @@ function createColumns(
 			accessorFn: (customer) =>
 				getCustomerTypeLabel(customer.customerType?.name, t) ?? null,
 			header: t(Messages.customers.list.type),
-			cell: (info) => info.getValue<string | null>() ?? "—",
+			cell: (info) => {
+				const value = info.getValue<string | null>();
+				return value ? <Badge variant="outline">{value}</Badge> : "—";
+			},
 			enableSorting: true,
 		},
 		{

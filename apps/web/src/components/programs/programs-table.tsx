@@ -2,22 +2,17 @@
 
 import { ProgramStatus } from "@ecommand/shared";
 import type { ColumnDef } from "@tanstack/react-table";
-import {
-	createSortedRowModel,
-	FlexRender,
-	rowSortingFeature,
-	sortFn_datetime,
-	tableFeatures,
-	useTable,
-} from "@tanstack/react-table";
+import { FlexRender, useTable } from "@tanstack/react-table";
 import { PlusIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ActionLink } from "@/components/common/action-link";
+import { sortableTableFeatures as features } from "@/components/common/sortable-table-features";
 import { TableEmptyStateRow } from "@/components/common/table-empty-state-row";
 import { TableLoadingState } from "@/components/common/table-loading-state";
 import { TableRowLink } from "@/components/common/table-row-link";
 import { TableSortButton } from "@/components/common/table-sort-button";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -47,12 +42,6 @@ interface ProgramsTableProps {
 	data: ProgramListDto[];
 	isLoading?: boolean;
 }
-
-const features = tableFeatures({
-	rowSortingFeature,
-	sortedRowModel: createSortedRowModel(),
-	sortFns: { datetime: sortFn_datetime },
-});
 
 function getProgramColumns(
 	t: TypedMessageTranslator,
@@ -94,7 +83,11 @@ function getProgramColumns(
 			accessorFn: (row) => row.programStatus.name,
 			id: "status",
 			header: t(Messages.programs.list.status),
-			cell: (info) => getProgramStatusLabel(String(info.getValue()), locale),
+			cell: (info) => (
+				<Badge variant="outline">
+					{getProgramStatusLabel(String(info.getValue()), locale)}
+				</Badge>
+			),
 			enableSorting: true,
 		},
 		{
