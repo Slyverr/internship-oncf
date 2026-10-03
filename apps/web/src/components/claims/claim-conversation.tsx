@@ -450,8 +450,8 @@ export function ClaimConversation({
 			</Button>
 			<DialogContent size="conversation" className="gap-0 overflow-hidden p-0">
 				<DialogHeader className="items-center gap-0 px-4 py-2 pb-2 sm:px-6">
-					<div className="flex min-w-0 items-center justify-between gap-3">
-						<div className="flex min-w-0 items-baseline gap-3">
+					<div className="flex min-w-0 items-center justify-between gap-2">
+						<div className="flex min-w-0 items-baseline gap-2">
 							<DialogTitle className="shrink-0 text-base">
 								{t(Messages.claims.conversation.dialogTitle)}
 							</DialogTitle>
@@ -475,16 +475,16 @@ export function ClaimConversation({
 											},
 										)}
 										title={participants.map(({ name }) => name).join(", ")}
-										className="h-9 shrink-0 gap-2 px-2"
+										className="h-9 shrink-0 gap-1 px-0"
 									/>
 								}
 							>
-								<AvatarGroup aria-hidden="true">
+								<AvatarGroup
+									aria-hidden="true"
+									className="-space-x-1 *:data-[slot=avatar]:ring-0"
+								>
 									{participants.slice(0, 3).map(({ id, name }) => (
-										<Avatar
-											key={id}
-											className="size-7 border border-background"
-										>
+										<Avatar key={id} className="size-7 after:hidden">
 											<AvatarFallback className="text-micro">
 												{getInitials(name)}
 											</AvatarFallback>

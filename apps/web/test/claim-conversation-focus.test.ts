@@ -48,7 +48,7 @@ assert.match(
 );
 assert.match(
 	source,
-	/<AvatarGroup aria-hidden="true">[\s\S]*?<PopoverContent[\s\S]*?participants\.map\(\(\{ id, name \}\)/,
+	/<AvatarGroup[\s\S]*?<PopoverContent[\s\S]*?participants\.map\(\(\{ id, name \}\)/,
 	"The participant avatar group must open a list limited to the conversation members.",
 );
 assert.match(
