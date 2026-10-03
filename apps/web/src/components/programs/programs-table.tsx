@@ -35,6 +35,7 @@ import {
 	Table,
 	TableBody,
 	TableCell,
+	TableFrame,
 	TableHead,
 	TableHeader,
 	TableRow,
@@ -190,7 +191,7 @@ export function ProgramsTable({ data, isLoading }: ProgramsTableProps) {
 				</Select>
 			</div>
 
-			<div className="rounded-md border">
+			<TableFrame>
 				<Table>
 					<TableHeader>
 						{table.getHeaderGroups().map((headerGroup) => (
@@ -288,7 +289,7 @@ export function ProgramsTable({ data, isLoading }: ProgramsTableProps) {
 						)}
 					</TableBody>
 				</Table>
-			</div>
+			</TableFrame>
 		</div>
 	);
 }

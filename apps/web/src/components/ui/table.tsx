@@ -5,6 +5,16 @@ import { Messages } from "@/i18n";
 import { useTranslate } from "@/i18n/locale-provider";
 import { cn } from "@/lib/utils";
 
+function TableFrame({ className, ...props }: React.ComponentProps<"div">) {
+	return (
+		<div
+			data-slot="table-frame"
+			className={cn("rounded-md border", className)}
+			{...props}
+		/>
+	);
+}
+
 function Table({ className, ...props }: React.ComponentProps<"table">) {
 	const t = useTranslate();
 	const scrollAreaRef = React.useRef<HTMLDivElement>(null);
@@ -173,6 +183,7 @@ export {
 	TableCaption,
 	TableCell,
 	TableFooter,
+	TableFrame,
 	TableHead,
 	TableHeader,
 	TableRow,

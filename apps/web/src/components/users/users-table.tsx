@@ -27,6 +27,7 @@ import {
 	Table,
 	TableBody,
 	TableCell,
+	TableFrame,
 	TableHead,
 	TableHeader,
 	TableRow,
@@ -267,7 +268,7 @@ export function UsersTable({
 				)}
 			</div>
 
-			<div className="rounded-md border">
+			<TableFrame>
 				<Table>
 					<TableHeader>
 						{table.getHeaderGroups().map((headerGroup) => (
@@ -327,7 +328,7 @@ export function UsersTable({
 						)}
 					</TableBody>
 				</Table>
-			</div>
+			</TableFrame>
 		</div>
 	);
 }

@@ -8,6 +8,7 @@ import {
 	Table,
 	TableBody,
 	TableCell,
+	TableFrame,
 	TableHead,
 	TableHeader,
 	TableRow,
@@ -63,7 +64,7 @@ export function EligibleOrdersTable({
 				</p>
 			</div>
 
-			<div className="min-w-0 rounded-md border">
+			<TableFrame className="min-w-0">
 				<Table>
 					<TableHeader>
 						<TableRow>
@@ -111,7 +112,7 @@ export function EligibleOrdersTable({
 						)}
 					</TableBody>
 				</Table>
-			</div>
+			</TableFrame>
 
 			{(page > 1 || hasNextPage) && (
 				<nav
