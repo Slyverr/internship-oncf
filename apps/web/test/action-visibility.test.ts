@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import {
 	DEFAULT_ROLE_PERMISSIONS,
 	hasOnePermission,
+	isWorkflowTransitionAllowed,
+	ORDER_TRANSITIONS,
 	OrderStatus,
 	Permission,
 	ProgramStatus,
@@ -214,6 +216,33 @@ assert.deepEqual(
 	).map((route) => route.url),
 	["/dashboard", "/dashboard/claims"],
 	"custom permission sets do not gain catalog management from catalog read access",
+);
+assert.equal(
+	isWorkflowTransitionAllowed(
+		ORDER_TRANSITIONS,
+		OrderStatus.SUBMITTED,
+		OrderStatus.CANCELLED,
+	),
+	true,
+	"the order UI can show cancellation when the shared workflow permits it",
+);
+assert.equal(
+	isWorkflowTransitionAllowed(
+		ORDER_TRANSITIONS,
+		OrderStatus.IN_PROGRESS,
+		OrderStatus.CANCELLED,
+	),
+	true,
+	"an in-progress order can be cancelled because the API permits it",
+);
+assert.equal(
+	isWorkflowTransitionAllowed(
+		ORDER_TRANSITIONS,
+		OrderStatus.APPROVED,
+		OrderStatus.CANCELLED,
+	),
+	false,
+	"the order UI hides cancellation when the shared workflow disallows it",
 );
 assert.deepEqual(
 	getDashboardQuickActions(

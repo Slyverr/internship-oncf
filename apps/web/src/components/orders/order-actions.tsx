@@ -1,6 +1,11 @@
 "use client";
 
-import { OrderStatus, Permission } from "@ecommand/shared";
+import {
+	isWorkflowTransitionAllowed,
+	ORDER_TRANSITIONS,
+	OrderStatus,
+	Permission,
+} from "@ecommand/shared";
 import { EllipsisVerticalIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -110,7 +115,11 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 			<div className="flex flex-wrap items-center gap-4">
 				{/* Submit: DRAFT → SUBMITTED */}
 				{hasPermission(Permission.ORDERS_ACTION_SUBMIT) &&
-					status === OrderStatus.DRAFT && (
+					isWorkflowTransitionAllowed(
+						ORDER_TRANSITIONS,
+						status,
+						OrderStatus.SUBMITTED,
+					) && (
 						<Button
 							disabled={isPending}
 							onClick={() =>
@@ -130,7 +139,11 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 
 				{/* Approve: SUBMITTED → APPROVED */}
 				{hasPermission(Permission.ORDERS_ACTION_APPROVE) &&
-					status === OrderStatus.SUBMITTED && (
+					isWorkflowTransitionAllowed(
+						ORDER_TRANSITIONS,
+						status,
+						OrderStatus.APPROVED,
+					) && (
 						<Button
 							variant="secondary"
 							disabled={isPending}
@@ -151,7 +164,11 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 
 				{/* Reject: SUBMITTED → REJECTED */}
 				{hasPermission(Permission.ORDERS_ACTION_REJECT) &&
-					status === OrderStatus.SUBMITTED && (
+					isWorkflowTransitionAllowed(
+						ORDER_TRANSITIONS,
+						status,
+						OrderStatus.REJECTED,
+					) && (
 						<Button
 							variant="destructive"
 							disabled={isPending}
@@ -161,10 +178,13 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 						</Button>
 					)}
 
-				{/* Cancel: DRAFT or SUBMITTED → CANCELLED */}
+				{/* Cancel: follow every transition accepted by the API. */}
 				{hasPermission(Permission.ORDERS_ACTION_CANCEL) &&
-					(status === OrderStatus.DRAFT ||
-						status === OrderStatus.SUBMITTED) && (
+					isWorkflowTransitionAllowed(
+						ORDER_TRANSITIONS,
+						status,
+						OrderStatus.CANCELLED,
+					) && (
 						<Button
 							variant="outline"
 							disabled={isPending}
@@ -185,7 +205,11 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 
 				{/* Send to DTM: APPROVED → SENT_TO_DTM */}
 				{hasPermission(Permission.ORDERS_ACTION_SEND_TO_DTM) &&
-					status === OrderStatus.APPROVED && (
+					isWorkflowTransitionAllowed(
+						ORDER_TRANSITIONS,
+						status,
+						OrderStatus.SENT_TO_DTM,
+					) && (
 						<Button
 							variant="outline"
 							disabled={isPending}

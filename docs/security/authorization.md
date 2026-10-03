@@ -62,7 +62,7 @@ The administrator grant follows the SDF role boundary: manage accounts and acces
 | --- | --- | --- | --- |
 | Orders list/detail/files | orders:read | Sidebar Orders; order list/detail and attachments | Commercial agents are limited to their `user_customers` portfolio even with manage-other. Client representatives use their linked customer; unscoped users fall back to creator-only unless their effective permissions explicitly allow broader access. |
 | Orders create/edit/delete | orders:create/update/delete | Dashboard quick action; create form; order action menu | The dashboard action is permission-filtered; the API and web both restrict deletion to draft orders. |
-| Order lifecycle | orders:action:* | OrderActions | API state transitions are authoritative. |
+| Order lifecycle | orders:action:* | OrderActions | UI and API share the same transition graph. Cancellation is available from draft, submitted, and in-progress orders; approval, rejection, and dispatch remain state-gated. |
 | Programs list/detail | programs:read | Sidebar Programs; list/detail | Commercial agents follow their `user_customers` portfolio through the linked order. Client representatives follow their assigned customer; unscoped users fall back to creator scope unless their effective permissions allow broader access. |
 | Programs create/edit/delete | programs:create/update/delete | Create form; program action menu | The API and web both restrict deletion to draft programs. |
 | Program lifecycle | programs:action:* | ProgramActions | Valid path: draft → pending approval → approved → confirmed → sent to DTM → in progress. Cancellation is allowed before dispatch. |

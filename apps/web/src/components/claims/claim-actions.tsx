@@ -1,6 +1,11 @@
 "use client";
 
-import { ClaimStatus, Permission } from "@ecommand/shared";
+import {
+	CLAIM_TRANSITIONS,
+	ClaimStatus,
+	isWorkflowTransitionAllowed,
+	Permission,
+} from "@ecommand/shared";
 import { EllipsisVerticalIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -127,7 +132,11 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 			<div className="flex flex-wrap items-center gap-4">
 				{/* Start Progress: NEW -> IN_PROGRESS */}
 				{hasPermission(Permission.CLAIMS_ACTION_START_PROGRESS) &&
-					status === ClaimStatus.NEW && (
+					isWorkflowTransitionAllowed(
+						CLAIM_TRANSITIONS,
+						status,
+						ClaimStatus.IN_PROGRESS,
+					) && (
 						<Button
 							disabled={isPending}
 							onClick={() =>
@@ -143,7 +152,11 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 
 				{/* Await information: IN_PROGRESS -> AWAITING_INFO */}
 				{hasPermission(Permission.CLAIMS_ACTION_AWAIT_INFO) &&
-					status === ClaimStatus.IN_PROGRESS && (
+					isWorkflowTransitionAllowed(
+						CLAIM_TRANSITIONS,
+						status,
+						ClaimStatus.AWAITING_INFO,
+					) && (
 						<Button
 							disabled={isPending}
 							variant="outline"
@@ -160,8 +173,11 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 
 				{/* Start treatment: IN_PROGRESS / AWAITING_INFO -> IN_TREATMENT */}
 				{hasPermission(Permission.CLAIMS_ACTION_START_TREATMENT) &&
-					(status === ClaimStatus.IN_PROGRESS ||
-						status === ClaimStatus.AWAITING_INFO) && (
+					isWorkflowTransitionAllowed(
+						CLAIM_TRANSITIONS,
+						status,
+						ClaimStatus.IN_TREATMENT,
+					) && (
 						<Button
 							disabled={isPending}
 							variant="secondary"
@@ -178,7 +194,11 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 
 				{/* Resolve: IN_TREATMENT -> RESOLVED */}
 				{hasPermission(Permission.CLAIMS_ACTION_RESOLVE) &&
-					status === ClaimStatus.IN_TREATMENT && (
+					isWorkflowTransitionAllowed(
+						CLAIM_TRANSITIONS,
+						status,
+						ClaimStatus.RESOLVED,
+					) && (
 						<Button
 							variant="secondary"
 							disabled={isPending}
@@ -190,7 +210,11 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 
 				{/* Close: RESOLVED -> CLOSED */}
 				{hasPermission(Permission.CLAIMS_ACTION_CLOSE) &&
-					status === ClaimStatus.RESOLVED && (
+					isWorkflowTransitionAllowed(
+						CLAIM_TRANSITIONS,
+						status,
+						ClaimStatus.CLOSED,
+					) && (
 						<Button
 							variant="outline"
 							disabled={isPending}
@@ -207,9 +231,11 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 
 				{/* Reject: allowed by the backend transition rules */}
 				{hasPermission(Permission.CLAIMS_ACTION_REJECT) &&
-					(status === ClaimStatus.NEW ||
-						status === ClaimStatus.IN_PROGRESS ||
-						status === ClaimStatus.IN_TREATMENT) && (
+					isWorkflowTransitionAllowed(
+						CLAIM_TRANSITIONS,
+						status,
+						ClaimStatus.REJECTED,
+					) && (
 						<Button
 							variant="destructive"
 							disabled={isPending}
@@ -220,9 +246,11 @@ export function ClaimActions({ claim }: { claim: ClaimDetailDto }) {
 					)}
 
 				{hasPermission(Permission.CLAIMS_ACTION_SEND_TO_DTM) &&
-					(status === ClaimStatus.IN_PROGRESS ||
-						status === ClaimStatus.IN_TREATMENT ||
-						status === ClaimStatus.RESOLVED) && (
+					isWorkflowTransitionAllowed(
+						CLAIM_TRANSITIONS,
+						status,
+						ClaimStatus.SENT_TO_DTM,
+					) && (
 						<Button
 							disabled={isPending}
 							variant="outline"

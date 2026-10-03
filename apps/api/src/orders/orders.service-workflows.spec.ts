@@ -194,6 +194,27 @@ describe("OrdersService workflows", () => {
 		expect(query.updateOrder).not.toHaveBeenCalled();
 	});
 
+	it.each([OrderStatus.SUBMITTED, OrderStatus.IN_PROGRESS])(
+		"cancels an order from %s and records the transition",
+		async (status) => {
+			query.findOrderStatus.mockResolvedValue({
+				statusId: ORDER_STATUSES[status].id,
+				orderNumber: draftOrder.orderNumber,
+				createdByUserId: user.id,
+			} as never);
+
+			await service.cancel(id, user);
+
+			expect(query.updateOrder).toHaveBeenCalledWith(
+				id,
+				{ statusId: ORDER_STATUSES[OrderStatus.CANCELLED].id },
+				expect.objectContaining({
+					history: { userId: user.id, comment: undefined },
+				}),
+			);
+		},
+	);
+
 	it("rejects transitions that are not allowed from the current status", async () => {
 		query.findOrderStatus.mockResolvedValue({
 			statusId: ORDER_STATUSES[OrderStatus.DRAFT].id,

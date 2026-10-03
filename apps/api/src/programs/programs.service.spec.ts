@@ -228,6 +228,16 @@ describe("ProgramsService lifecycle", () => {
 		expect(notifyChange).not.toHaveBeenCalled();
 	});
 
+	it("does not allow program cancellation after dispatch", async () => {
+		query.findProgramStatus.mockResolvedValue({
+			statusId: PROGRAM_STATUSES[ProgramStatus.IN_PROGRESS].id,
+		});
+		await expect(service.cancel(id, user)).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.PROGRAM_TRANSITION_INVALID },
+		});
+		expect(query.updateProgram).not.toHaveBeenCalled();
+	});
+
 	it("rejects an unknown status reference", async () => {
 		query.findProgramStatus.mockResolvedValue({ statusId: "missing-status" });
 		await expect(service.submit(id, user)).rejects.toMatchObject({

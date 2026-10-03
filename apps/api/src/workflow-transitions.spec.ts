@@ -7,7 +7,11 @@ describe("workflow transition matrix", () => {
 	it("defines only valid order lifecycle transitions", () => {
 		expect(ORDER_TRANSITION).toEqual({
 			[OrderStatus.DRAFT]: [OrderStatus.SUBMITTED, OrderStatus.CANCELLED],
-			[OrderStatus.SUBMITTED]: [OrderStatus.APPROVED, OrderStatus.REJECTED],
+			[OrderStatus.SUBMITTED]: [
+				OrderStatus.APPROVED,
+				OrderStatus.REJECTED,
+				OrderStatus.CANCELLED,
+			],
 			[OrderStatus.APPROVED]: [OrderStatus.SENT_TO_DTM],
 			[OrderStatus.SENT_TO_DTM]: [OrderStatus.IN_PROGRESS],
 			[OrderStatus.IN_PROGRESS]: [OrderStatus.COMPLETED, OrderStatus.CANCELLED],
@@ -36,6 +40,9 @@ describe("workflow transition matrix", () => {
 		]);
 		expect(PROGRAM_TRANSITION[ProgramStatus.SENT_TO_DTM]).toEqual([
 			ProgramStatus.IN_PROGRESS,
+		]);
+		expect(PROGRAM_TRANSITION[ProgramStatus.IN_PROGRESS]).toEqual([
+			ProgramStatus.COMPLETED,
 		]);
 	});
 

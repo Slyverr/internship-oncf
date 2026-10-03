@@ -6,3 +6,4 @@ export * from "./customer-identity";
 export * from "./enums";
 export * from "./i18n/locales";
 export * from "./notifications/notification-message";
+export * from "./workflows";

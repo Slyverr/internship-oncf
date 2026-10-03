@@ -1,6 +1,11 @@
 "use client";
 
-import { Permission, ProgramStatus } from "@ecommand/shared";
+import {
+	isWorkflowTransitionAllowed,
+	Permission,
+	PROGRAM_TRANSITIONS,
+	ProgramStatus,
+} from "@ecommand/shared";
 import { EllipsisVerticalIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -102,7 +107,11 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 			<div className="flex flex-wrap items-center gap-4">
 				{/* Submit: DRAFT → PENDING_APPROVAL */}
 				{hasPermission(Permission.PROGRAMS_ACTION_SUBMIT) &&
-					status === ProgramStatus.DRAFT && (
+					isWorkflowTransitionAllowed(
+						PROGRAM_TRANSITIONS,
+						status,
+						ProgramStatus.PENDING_APPROVAL,
+					) && (
 						<Button
 							disabled={isPending}
 							onClick={() =>
@@ -122,7 +131,11 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 
 				{/* Approve: PENDING_APPROVAL → APPROVED */}
 				{hasPermission(Permission.PROGRAMS_ACTION_APPROVE) &&
-					status === ProgramStatus.PENDING_APPROVAL && (
+					isWorkflowTransitionAllowed(
+						PROGRAM_TRANSITIONS,
+						status,
+						ProgramStatus.APPROVED,
+					) && (
 						<Button
 							variant="secondary"
 							disabled={isPending}
@@ -143,7 +156,11 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 
 				{/* Confirm: APPROVED → CONFIRMED */}
 				{hasPermission(Permission.PROGRAMS_ACTION_CONFIRM) &&
-					status === ProgramStatus.APPROVED && (
+					isWorkflowTransitionAllowed(
+						PROGRAM_TRANSITIONS,
+						status,
+						ProgramStatus.CONFIRMED,
+					) && (
 						<Button
 							variant="outline"
 							disabled={isPending}
@@ -164,7 +181,11 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 
 				{/* Send to DTM: CONFIRMED → SENT_TO_DTM */}
 				{hasPermission(Permission.PROGRAMS_ACTION_SEND) &&
-					status === ProgramStatus.CONFIRMED && (
+					isWorkflowTransitionAllowed(
+						PROGRAM_TRANSITIONS,
+						status,
+						ProgramStatus.SENT_TO_DTM,
+					) && (
 						<Button
 							variant="outline"
 							disabled={isPending}
@@ -183,11 +204,13 @@ export function ProgramActions({ program }: { program: ProgramDetailDto }) {
 						</Button>
 					)}
 
-				{/* Cancel: DRAFT, PENDING_APPROVAL, or APPROVED → CANCELLED */}
+				{/* Cancel: follow every transition accepted by the API. */}
 				{hasPermission(Permission.PROGRAMS_ACTION_CANCEL) &&
-					(status === ProgramStatus.DRAFT ||
-						status === ProgramStatus.PENDING_APPROVAL ||
-						status === ProgramStatus.APPROVED) && (
+					isWorkflowTransitionAllowed(
+						PROGRAM_TRANSITIONS,
+						status,
+						ProgramStatus.CANCELLED,
+					) && (
 						<Button
 							variant="destructive"
 							disabled={isPending}
