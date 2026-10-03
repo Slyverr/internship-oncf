@@ -72,8 +72,8 @@ const workspaceLayouts: Record<
 };
 
 export function DashboardShell(props: DashboardWorkspaceProps) {
-	const { initialized, preferences } = useAppearance();
-	const selectedLayout = initialized ? preferences.workspaceLayout : "sidebar";
+	const { preferences } = useAppearance();
+	const selectedLayout = preferences.workspaceLayout;
 	const Workspace = workspaceLayouts[selectedLayout];
 
 	return <Workspace {...props} />;
