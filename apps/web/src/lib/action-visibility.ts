@@ -2,7 +2,7 @@ import {
 	Permission,
 	ProgramStatus,
 	RegistrationStatus,
-	Role,
+	RolePersona,
 } from "@ecommand/shared";
 import type { UserListDto } from "@/lib/api/generated.schemas";
 
@@ -42,7 +42,7 @@ export function getPendingClientRegistrations(
 		.filter(
 			(user) =>
 				user.registrationStatus === RegistrationStatus.PENDING &&
-				user.role?.name === Role.CLIENT_REPRESENTATIVE,
+				user.role?.persona === RolePersona.CLIENT_REPRESENTATIVE,
 		)
 		.sort(
 			(first, second) =>

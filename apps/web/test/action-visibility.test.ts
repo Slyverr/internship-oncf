@@ -10,6 +10,7 @@ import {
 	ProgramStatus,
 	RegistrationStatus,
 	Role,
+	RolePersona,
 } from "@ecommand/shared";
 import {
 	getVisibleSidebarRoutes,
@@ -80,7 +81,8 @@ assert.equal(
 function registrationUser(
 	id: number,
 	registrationStatus: RegistrationStatus,
-	role: Role,
+	roleName: string,
+	persona: RolePersona | null,
 	createdAt: string,
 ): UserListDto {
 	return {
@@ -90,8 +92,8 @@ function registrationUser(
 		email: `client${id}@example.test`,
 		employeeCode: null,
 		type: "external",
-		roleId: role,
-		role: { id: role, name: role },
+		roleId: roleName,
+		role: { id: roleName, name: roleName, persona },
 		registrationStatus,
 		customerId: null,
 		userCustomers: [],
@@ -108,31 +110,42 @@ const registrationUsers = [
 		8,
 		RegistrationStatus.PENDING,
 		Role.CLIENT_REPRESENTATIVE,
+		RolePersona.CLIENT_REPRESENTATIVE,
 		"2026-09-28T10:00:00.000Z",
 	),
 	registrationUser(
 		4,
 		RegistrationStatus.PENDING,
 		Role.CLIENT_REPRESENTATIVE,
+		RolePersona.CLIENT_REPRESENTATIVE,
 		"2026-09-27T10:00:00.000Z",
 	),
 	registrationUser(
 		12,
 		RegistrationStatus.PENDING,
 		Role.AGENT_COMMERCIAL,
+		RolePersona.AGENT_COMMERCIAL,
 		"2026-09-26T10:00:00.000Z",
 	),
 	registrationUser(
 		2,
 		RegistrationStatus.APPROVED,
 		Role.CLIENT_REPRESENTATIVE,
+		RolePersona.CLIENT_REPRESENTATIVE,
 		"2026-09-25T10:00:00.000Z",
+	),
+	registrationUser(
+		16,
+		RegistrationStatus.PENDING,
+		"Client Review Team",
+		RolePersona.CLIENT_REPRESENTATIVE,
+		"2026-09-29T10:00:00.000Z",
 	),
 ];
 assert.deepEqual(
 	getPendingClientRegistrations(registrationUsers, true).map((user) => user.id),
-	[4, 8],
-	"the review queue includes pending client accounts oldest first",
+	[4, 8, 16],
+	"the review queue includes pending client-persona accounts oldest first, including custom profile names",
 );
 assert.deepEqual(
 	getPendingClientRegistrations(registrationUsers, false),
@@ -141,7 +154,7 @@ assert.deepEqual(
 );
 assert.deepEqual(
 	getUserAccountOverview(registrationUsers),
-	{ total: 4, active: 1, pending: 3, inactive: 0 },
+	{ total: 5, active: 1, pending: 4, inactive: 0 },
 	"account overview counts disjoint active, pending, and inactive account states",
 );
 

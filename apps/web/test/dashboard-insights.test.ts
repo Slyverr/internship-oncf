@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { RolePersona } from "@ecommand/shared";
 import {
 	getDashboardRegistrationCounts,
 	getDashboardRoleCounts,
@@ -6,10 +7,28 @@ import {
 
 assert.deepEqual(
 	getDashboardRoleCounts([
-		{ role: { id: "1", name: "Commercial agent" } },
-		{ role: { id: "2", name: "Administrator" } },
-		{ role: { id: "3", name: "Commercial agent" } },
-		{ role: { id: "4", name: "Client representative" } },
+		{
+			role: {
+				id: "1",
+				name: "Commercial agent",
+				persona: RolePersona.AGENT_COMMERCIAL,
+			},
+		},
+		{ role: { id: "2", name: "Administrator", persona: RolePersona.ADMIN } },
+		{
+			role: {
+				id: "3",
+				name: "Commercial agent",
+				persona: RolePersona.AGENT_COMMERCIAL,
+			},
+		},
+		{
+			role: {
+				id: "4",
+				name: "Client representative",
+				persona: RolePersona.CLIENT_REPRESENTATIVE,
+			},
+		},
 	]),
 	[
 		{ name: "Commercial agent", count: 2 },

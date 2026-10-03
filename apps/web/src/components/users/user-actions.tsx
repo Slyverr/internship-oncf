@@ -1,6 +1,6 @@
 "use client";
 
-import { Permission, Role } from "@ecommand/shared";
+import { Permission, RolePersona } from "@ecommand/shared";
 import { useQueryClient } from "@tanstack/react-query";
 import { EllipsisVerticalIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -63,7 +63,7 @@ export function UserActions({ user }: { user: UserDetailDto }) {
 	const canReview = canReviewRegistration(
 		user.registrationStatus,
 		canUpdate,
-		user.role.name === Role.CLIENT_REPRESENTATIVE,
+		user.role?.persona === RolePersona.CLIENT_REPRESENTATIVE,
 	);
 
 	const reviewRegistration = (

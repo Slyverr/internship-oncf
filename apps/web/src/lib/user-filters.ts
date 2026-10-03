@@ -24,7 +24,7 @@ export function filterUsers(users: UserListDto[], filters: UserFilters) {
 			user.firstName,
 			user.lastName,
 			user.employeeCode ?? "",
-			user.role.name,
+			user.role?.name ?? "",
 		];
 
 		return (
@@ -34,7 +34,7 @@ export function filterUsers(users: UserListDto[], filters: UserFilters) {
 				)) &&
 			(!filters.registrationStatus ||
 				user.registrationStatus === filters.registrationStatus) &&
-			(!filters.role || user.role.name === filters.role) &&
+			(!filters.role || user.role?.name === filters.role) &&
 			(!filters.activeStatus ||
 				(filters.activeStatus === "ACTIVE" ? user.isActive : !user.isActive))
 		);

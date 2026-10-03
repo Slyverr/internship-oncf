@@ -4,6 +4,7 @@ export function getDashboardRoleCounts(users: Pick<UserListDto, "role">[]) {
 	const counts = new Map<string, number>();
 
 	for (const user of users) {
+		if (!user.role) continue;
 		counts.set(user.role.name, (counts.get(user.role.name) ?? 0) + 1);
 	}
 

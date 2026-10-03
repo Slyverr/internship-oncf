@@ -2,6 +2,7 @@ import { RegistrationStatus } from "@ecommand/shared";
 import { ApiProperty } from "@nestjs/swagger";
 import { Assert, Equals } from "@/common/utils/type-assertions";
 import { UserDetail } from "../users.types";
+import { UserRoleDto } from "./user-role.dto";
 
 type _Assertion = Assert<Equals<UserDetailDto, UserDetail>>;
 
@@ -15,7 +16,8 @@ export class UserDetailDto implements UserDetail {
 	roleId: string;
 	@ApiProperty({ enum: RegistrationStatus, enumName: "RegistrationStatus" })
 	registrationStatus: RegistrationStatus;
-	role: { id: string; name: string } | null;
+	@ApiProperty({ type: () => UserRoleDto, nullable: true })
+	role: UserRoleDto | null;
 	customerId: number | null;
 	userCustomers: { customerId: number }[];
 	agencyId: number | null;

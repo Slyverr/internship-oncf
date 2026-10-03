@@ -68,7 +68,7 @@ export function UserOverview({ user }: { user: UserDetailDto }) {
 									variant="outline"
 									className="max-w-full text-right text-xs"
 								>
-									{formatUserRole(user.role.name, locale)}
+									{user.role ? formatUserRole(user.role.name, locale) : "—"}
 								</Badge>
 							</span>
 						}

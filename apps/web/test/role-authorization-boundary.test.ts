@@ -41,8 +41,6 @@ assert.deepEqual(
 		"apps/api/src/database/reference-data/constants/auth.const.ts",
 		"apps/api/src/database/reference-data/reference-data.seeder.ts",
 		"apps/api/src/users/users.mapper.ts",
-		"apps/web/src/components/users/user-actions.tsx",
-		"apps/web/src/lib/action-visibility.ts",
 		"apps/web/src/lib/user-labels.ts",
 	].sort(),
 	"role constants may only provision or describe personas; authorization must check permissions",

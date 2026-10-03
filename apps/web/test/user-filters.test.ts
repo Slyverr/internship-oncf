@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { RegistrationStatus, Role } from "@ecommand/shared";
+import { RegistrationStatus, Role, RolePersona } from "@ecommand/shared";
 import type { UserListDto } from "../src/lib/api/generated.schemas";
 import { filterUsers, parseUserRoleFilter } from "../src/lib/user-filters";
 
@@ -15,7 +15,11 @@ function createUser(
 		employeeCode: id === 3 ? "EMP-003" : null,
 		type: "external",
 		roleId: Role.CLIENT_REPRESENTATIVE,
-		role: { id: Role.CLIENT_REPRESENTATIVE, name: Role.CLIENT_REPRESENTATIVE },
+		role: {
+			id: Role.CLIENT_REPRESENTATIVE,
+			name: Role.CLIENT_REPRESENTATIVE,
+			persona: RolePersona.CLIENT_REPRESENTATIVE,
+		},
 		registrationStatus:
 			id === 1 ? RegistrationStatus.PENDING : RegistrationStatus.APPROVED,
 		customerId: 1,
@@ -34,7 +38,11 @@ const users = [
 	createUser(2),
 	createUser(3, {
 		roleId: Role.AGENT_COMMERCIAL,
-		role: { id: Role.AGENT_COMMERCIAL, name: Role.AGENT_COMMERCIAL },
+		role: {
+			id: Role.AGENT_COMMERCIAL,
+			name: Role.AGENT_COMMERCIAL,
+			persona: RolePersona.AGENT_COMMERCIAL,
+		},
 	}),
 ];
 
@@ -65,7 +73,11 @@ assert.deepEqual(
 			...users,
 			createUser(4, {
 				roleId: "role-regional-operations",
-				role: { id: "role-regional-operations", name: "Regional Operations" },
+				role: {
+					id: "role-regional-operations",
+					name: "Regional Operations",
+					persona: null,
+				},
 			}),
 		],
 		{ role: "Regional Operations" },

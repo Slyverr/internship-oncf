@@ -35,6 +35,7 @@ const userListRelations = {
 		columns: {
 			id: true,
 			name: true,
+			persona: true,
 		},
 	},
 } satisfies UsersRelations;

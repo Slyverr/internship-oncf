@@ -14,10 +14,20 @@ export const RegistrationStatus = {
   REJECTED: 'REJECTED',
 } as const;
 
-export type UserListDtoRole = {
+export type RolePersona = typeof RolePersona[keyof typeof RolePersona];
+
+
+export const RolePersona = {
+  ADMIN: 'ADMIN',
+  AGENT_COMMERCIAL: 'AGENT_COMMERCIAL',
+  CLIENT_REPRESENTATIVE: 'CLIENT_REPRESENTATIVE',
+} as const;
+
+export interface UserRoleDto {
+  persona: RolePersona | null;
   id: string;
   name: string;
-};
+}
 
 export type UserListDtoUserCustomersItem = {
   customerId: number;
@@ -25,6 +35,8 @@ export type UserListDtoUserCustomersItem = {
 
 export interface UserListDto {
   registrationStatus: RegistrationStatus;
+  /** @nullable */
+  role: UserRoleDto | null;
   id: number;
   email: string;
   lastName: string;
@@ -34,7 +46,6 @@ export interface UserListDto {
   /** @nullable */
   type: string | null;
   roleId: string;
-  role: UserListDtoRole;
   /** @nullable */
   customerId: number | null;
   userCustomers: UserListDtoUserCustomersItem[];
@@ -224,17 +235,14 @@ export interface ApiErrorResponseDto {
   details?: ApiErrorDetailsDto;
 }
 
-export type UserDetailDtoRole = {
-  id: string;
-  name: string;
-};
-
 export type UserDetailDtoUserCustomersItem = {
   customerId: number;
 };
 
 export interface UserDetailDto {
   registrationStatus: RegistrationStatus;
+  /** @nullable */
+  role: UserRoleDto | null;
   id: number;
   email: string;
   lastName: string;
@@ -244,7 +252,6 @@ export interface UserDetailDto {
   /** @nullable */
   type: string | null;
   roleId: string;
-  role: UserDetailDtoRole;
   /** @nullable */
   customerId: number | null;
   userCustomers: UserDetailDtoUserCustomersItem[];
@@ -1716,15 +1723,6 @@ export interface UpdateRejectionReasonDto {
   name: string;
   isActive: boolean;
 }
-
-export type RolePersona = typeof RolePersona[keyof typeof RolePersona];
-
-
-export const RolePersona = {
-  ADMIN: 'ADMIN',
-  AGENT_COMMERCIAL: 'AGENT_COMMERCIAL',
-  CLIENT_REPRESENTATIVE: 'CLIENT_REPRESENTATIVE',
-} as const;
 
 export interface RoleProfileDto {
   persona: RolePersona | null;
