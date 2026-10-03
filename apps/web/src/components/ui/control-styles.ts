@@ -1,2 +1,7 @@
-export const controlSurfaceClasses =
-	"rounded-md border border-input bg-background shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40";
+export const disabledBehaviorClasses =
+	"disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-100";
+
+export const disabledSurfaceClasses =
+	"disabled:opacity-100 disabled:border-border disabled:bg-muted disabled:text-muted-foreground dark:disabled:bg-muted dark:disabled:text-muted-foreground";
+
+export const controlSurfaceClasses = `rounded-md border border-input bg-background shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 ${disabledBehaviorClasses} ${disabledSurfaceClasses} aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40`;

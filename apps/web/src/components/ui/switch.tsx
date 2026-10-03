@@ -23,7 +23,7 @@ export function Switch({
 			aria-label={ariaLabel}
 			disabled={disabled}
 			onClick={() => onCheckedChange(!checked)}
-			className={`inline-flex h-11 shrink-0 items-center justify-center rounded-md outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 ${label ? "px-1 hover:bg-transparent" : "size-11 hover:bg-muted/40"}`}
+			className={`inline-flex h-11 shrink-0 items-center justify-center rounded-md outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-100 ${label ? "px-1 hover:bg-transparent" : "size-11 hover:bg-muted/40"}`}
 		>
 			{label ? (
 				<span
