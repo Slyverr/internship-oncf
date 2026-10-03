@@ -1,4 +1,6 @@
+import { API_TRANSPORT_ERROR_CODES } from "@ecommand/shared";
 import axios, { AxiosRequestConfig } from "axios";
+import { isApiUnavailableError } from "./api-availability";
 import { sanitizeApiError } from "./safe-api-error";
 
 export async function customFetch<T>(
@@ -28,7 +30,17 @@ export async function customFetch<T>(
 
 		return data;
 	} catch (error) {
-		throw sanitizeApiError(error);
+		const safeError = sanitizeApiError(error);
+		if (
+			isServer &&
+			safeError instanceof Error &&
+			isApiUnavailableError(safeError)
+		) {
+			// Next.js serializes the error message across the server boundary. Keep
+			// this marker machine-readable; ErrorPage resolves it through the catalog.
+			safeError.message = API_TRANSPORT_ERROR_CODES.API_UNAVAILABLE;
+		}
+		throw safeError;
 	}
 }
 

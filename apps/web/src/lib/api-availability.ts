@@ -18,6 +18,13 @@ export function isApiUnavailableError(error: unknown): boolean {
 	);
 }
 
+export function isSerializedApiUnavailableError(error: unknown): boolean {
+	return (
+		error instanceof Error &&
+		error.message === API_TRANSPORT_ERROR_CODES.API_UNAVAILABLE
+	);
+}
+
 export function shouldRetryApiRequest(
 	failureCount: number,
 	error: unknown,

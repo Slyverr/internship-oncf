@@ -14,6 +14,10 @@ import {
 } from "@/components/ui/card";
 import { Messages } from "@/i18n";
 import { useTranslate } from "@/i18n/locale-provider";
+import {
+	isApiUnavailableError,
+	isSerializedApiUnavailableError,
+} from "@/lib/api-availability";
 
 export default function ErrorPage({
 	error,
@@ -23,7 +27,8 @@ export default function ErrorPage({
 	reset: () => void;
 }) {
 	const t = useTranslate();
-	const apiUnavailable = error.message === t(Messages.transport.apiUnavailable);
+	const apiUnavailable =
+		isSerializedApiUnavailableError(error) || isApiUnavailableError(error);
 	useEffect(() => {
 		console.error(error);
 	}, [error]);

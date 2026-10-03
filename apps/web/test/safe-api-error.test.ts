@@ -19,6 +19,7 @@ const safeTransportError = sanitizeApiError(transportError) as Error & {
 	code?: string;
 	request?: unknown;
 	config?: unknown;
+	response?: { status?: number; data?: { code?: string; statusCode?: number } };
 };
 
 assert.equal(
@@ -27,6 +28,12 @@ assert.equal(
 	"transport errors use a credential-free message",
 );
 assert.equal(safeTransportError.code, "ECONNREFUSED");
+assert.equal(
+	safeTransportError.response?.data?.code,
+	API_TRANSPORT_ERROR_CODES.API_UNAVAILABLE,
+	"direct server transport failures receive the same stable outage code as proxy failures",
+);
+assert.equal(safeTransportError.response?.status, 503);
 assert.equal(safeTransportError.config, undefined);
 assert.equal(safeTransportError.request, undefined);
 assert.equal(safeTransportError.stack?.includes(accessToken), false);

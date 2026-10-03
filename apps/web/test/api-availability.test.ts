@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { API_TRANSPORT_ERROR_CODES } from "@ecommand/shared";
 import {
 	isApiUnavailableError,
+	isSerializedApiUnavailableError,
 	shouldRetryApiRequest,
 } from "../src/lib/api-availability";
 
@@ -21,6 +22,18 @@ assert.equal(
 	}),
 	false,
 	"ordinary server errors do not trigger API recovery polling",
+);
+assert.equal(
+	isSerializedApiUnavailableError(
+		new Error(API_TRANSPORT_ERROR_CODES.API_UNAVAILABLE),
+	),
+	true,
+	"server-rendered outages keep a stable code across the Next.js boundary",
+);
+assert.equal(
+	isSerializedApiUnavailableError(new Error("The API is unavailable.")),
+	false,
+	"server outage detection does not depend on localized display copy",
 );
 
 assert.equal(shouldRetryApiRequest(0, new Error("network")), true);
