@@ -2,6 +2,13 @@
 
 This is the running review list for the application-wide usability and visual overhaul. Check an item only after reviewing its current implementation at relevant screen sizes, making the change, and verifying the rendered result. Keep changes focused and preserve the existing ECommand stack and business rules.
 
+## Signup required-field review — 2026-10-03
+
+- Fresh `/signup` captures at 390, 1440, 1920, and 3840px showed the two-step form stayed within its responsive content width. Blank-Continue validation at 390px and 1440px remained aligned and had no horizontal overflow.
+- The screenshot review showed that all seven mandatory identity and credential fields lacked the required marker used elsewhere in forms. Added the marker to both signup steps. Recaptured validation at 390px and 1440px and the sign-in-details step at both widths; labels, controls, helper text, and actions remain aligned. No registration was submitted.
+- Captures: `/tmp/ecommand-auth-final-review`.
+- Login and registration remain in progress until login and the route transition are reviewed alongside signup at all required states.
+
 ## Reference-data page review — 2026-10-01
 
 - Captured the complete Reference data page and all five category states before and after the redesign at 320, 390, 768, 1024, 1440, 1920, 2560, and 3840px. Before/after PNGs are in `/tmp/ecommand-reference-audit`.

@@ -218,7 +218,7 @@ export function ClientRegistrationForm() {
 								<div className="grid items-start gap-4 sm:grid-cols-2">
 									<div className="oncf-field">
 										<Label htmlFor="registration-first-name">
-											{t(Messages.auth.signup.firstName)}
+											{t(Messages.auth.signup.firstName)} *
 										</Label>
 										<Input
 											id="registration-first-name"
@@ -253,7 +253,7 @@ export function ClientRegistrationForm() {
 									</div>
 									<div className="oncf-field">
 										<Label htmlFor="registration-last-name">
-											{t(Messages.auth.signup.lastName)}
+											{t(Messages.auth.signup.lastName)} *
 										</Label>
 										<Input
 											id="registration-last-name"
@@ -288,7 +288,7 @@ export function ClientRegistrationForm() {
 									</div>
 									<div className="oncf-field">
 										<Label htmlFor="registration-customer-code">
-											{t(Messages.auth.signup.customerCode)}
+											{t(Messages.auth.signup.customerCode)} *
 										</Label>
 										<Input
 											id="registration-customer-code"
@@ -325,7 +325,7 @@ export function ClientRegistrationForm() {
 									</div>
 									<div className="oncf-field">
 										<Label htmlFor="registration-ice">
-											{t(Messages.auth.signup.ice)}
+											{t(Messages.auth.signup.ice)} *
 										</Label>
 										<Input
 											id="registration-ice"
@@ -376,7 +376,7 @@ export function ClientRegistrationForm() {
 								<div className="grid items-start gap-4">
 									<div className="oncf-field">
 										<Label htmlFor="registration-email">
-											{t(Messages.auth.signup.email)}
+											{t(Messages.auth.signup.email)} *
 										</Label>
 										<Input
 											id="registration-email"
@@ -412,7 +412,7 @@ export function ClientRegistrationForm() {
 									<div className="grid items-start gap-4 sm:grid-cols-2">
 										<div className="oncf-field">
 											<Label htmlFor="registration-password">
-												{t(Messages.auth.signup.password)}
+												{t(Messages.auth.signup.password)} *
 											</Label>
 											<Input
 												id="registration-password"
@@ -434,7 +434,7 @@ export function ClientRegistrationForm() {
 										</div>
 										<div className="oncf-field">
 											<Label htmlFor="registration-password-confirmation">
-												{t(Messages.auth.signup.confirmPassword)}
+												{t(Messages.auth.signup.confirmPassword)} *
 											</Label>
 											<Input
 												id="registration-password-confirmation"
