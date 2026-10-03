@@ -335,12 +335,6 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 				</CardContent>
 			</Card>
 
-			{error && (
-				<p role="alert" className="text-destructive">
-					{error}
-				</p>
-			)}
-
 			<GuidedFormActions
 				currentStep={step}
 				stepCount={orderEditSteps.length}
@@ -352,6 +346,7 @@ export function OrderEditForm({ order }: { order: OrderDetailDto }) {
 				isSubmitting={false}
 				isPending={mutation.isPending}
 				isSubmitDisabled={!hasChanges}
+				errorMessage={error}
 			/>
 		</form>
 	);

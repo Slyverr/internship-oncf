@@ -1,4 +1,5 @@
 import "./form-utils.test";
+import "./guided-form-feedback.test";
 import "./api-availability.test";
 import "./appearance-preference-cookie.test";
 import "./appearance-theme-styles.test";

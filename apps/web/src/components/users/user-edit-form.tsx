@@ -462,6 +462,9 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 						isSubmitting={state.isSubmitting}
 						isPending={mutation.isPending}
 						isSubmitDisabled={!state.canSubmit}
+						errorMessage={
+							mutation.isError ? getErrorMessage(mutation.error) : undefined
+						}
 					/>
 				)}
 			</form.Subscribe>

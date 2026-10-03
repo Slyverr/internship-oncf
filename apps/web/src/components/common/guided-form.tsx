@@ -99,6 +99,7 @@ export function GuidedFormActions({
 	isSubmitting,
 	isPending,
 	isSubmitDisabled = false,
+	errorMessage,
 }: {
 	currentStep: number;
 	stepCount: number;
@@ -110,66 +111,74 @@ export function GuidedFormActions({
 	isSubmitting: boolean;
 	isPending: boolean;
 	isSubmitDisabled?: boolean;
+	errorMessage?: string;
 }) {
 	const t = useTranslate();
 	const isLastStep = currentStep === stepCount - 1;
 	const isBusy = isPending || isSubmitting;
 
 	return (
-		<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-			<Button
-				type="button"
-				variant="outline"
-				className="w-full sm:w-auto"
-				disabled={isBusy}
-				onClick={onCancel}
-			>
-				{t(Messages.common.actions.cancel)}
-			</Button>
-			<div className="grid w-full grid-cols-[auto_1fr] gap-4 sm:ml-auto sm:flex sm:w-auto sm:justify-end">
-				{currentStep > 0 ? (
-					<Button
-						type="button"
-						variant="outline"
-						className="w-full sm:w-auto"
-						disabled={isBusy}
-						onClick={onPrevious}
-					>
-						<ArrowLeft />
-						{t(Messages.common.actions.back)}
-					</Button>
-				) : null}
-				{isLastStep ? (
-					<Button
-						type="submit"
-						className={
-							currentStep === 0
-								? "col-span-2 w-full sm:col-span-1 sm:w-auto"
-								: "w-full sm:w-auto"
-						}
-						disabled={isBusy || isSubmitDisabled}
-					>
-						{isPending || isSubmitting ? pendingLabel : submitLabel}
-					</Button>
-				) : (
-					<Button
-						type="button"
-						className={
-							currentStep === 0
-								? "col-span-2 w-full sm:col-span-1 sm:w-auto"
-								: "w-full sm:w-auto"
-						}
-						disabled={isBusy}
-						onClick={(event) => {
-							event.preventDefault();
-							event.stopPropagation();
-							onContinue();
-						}}
-					>
-						{t(Messages.common.actions.continue)}
-						<ArrowRight />
-					</Button>
-				)}
+		<div className="grid gap-4">
+			{errorMessage && (
+				<p role="alert" className="text-sm text-destructive">
+					{errorMessage}
+				</p>
+			)}
+			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+				<Button
+					type="button"
+					variant="outline"
+					className="w-full sm:w-auto"
+					disabled={isBusy}
+					onClick={onCancel}
+				>
+					{t(Messages.common.actions.cancel)}
+				</Button>
+				<div className="grid w-full grid-cols-[auto_1fr] gap-4 sm:ml-auto sm:flex sm:w-auto sm:justify-end">
+					{currentStep > 0 ? (
+						<Button
+							type="button"
+							variant="outline"
+							className="w-full sm:w-auto"
+							disabled={isBusy}
+							onClick={onPrevious}
+						>
+							<ArrowLeft />
+							{t(Messages.common.actions.back)}
+						</Button>
+					) : null}
+					{isLastStep ? (
+						<Button
+							type="submit"
+							className={
+								currentStep === 0
+									? "col-span-2 w-full sm:col-span-1 sm:w-auto"
+									: "w-full sm:w-auto"
+							}
+							disabled={isBusy || isSubmitDisabled}
+						>
+							{isPending || isSubmitting ? pendingLabel : submitLabel}
+						</Button>
+					) : (
+						<Button
+							type="button"
+							className={
+								currentStep === 0
+									? "col-span-2 w-full sm:col-span-1 sm:w-auto"
+									: "w-full sm:w-auto"
+							}
+							disabled={isBusy}
+							onClick={(event) => {
+								event.preventDefault();
+								event.stopPropagation();
+								onContinue();
+							}}
+						>
+							{t(Messages.common.actions.continue)}
+							<ArrowRight />
+						</Button>
+					)}
+				</div>
 			</div>
 		</div>
 	);
