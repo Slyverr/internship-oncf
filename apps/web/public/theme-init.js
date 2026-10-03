@@ -1,10 +1,18 @@
 try {
-	const stored = JSON.parse(
-		localStorage.getItem("ecommand-appearance") || "null",
-	);
+	const root = document.documentElement;
+	const hasServerAppearance = root.dataset.serverAppearance === "true";
+	const stored = hasServerAppearance
+		? {
+				theme: root.dataset.theme,
+				fontFamily: root.dataset.fontFamily,
+				textSize: root.dataset.textSize,
+				motion: root.dataset.motion,
+				workspaceLayout: root.dataset.workspaceLayout,
+			}
+		: JSON.parse(localStorage.getItem("ecommand-appearance") || "null");
 	const legacyTheme = localStorage.getItem("ecommand-theme");
 	const themes = ["light", "dark", "mono-light", "mono-dark", "system"];
-	const fonts = ["inter", "geist", "system"];
+	const fonts = ["inter", "geist", "system", "arial", "serif", "monospace"];
 	const sizes = ["small", "default", "large"];
 	const motions = ["system", "reduced"];
 	const workspaceLayouts = ["sidebar", "centered-header"];
@@ -29,10 +37,10 @@ try {
 		theme === "mono-dark" ||
 		(theme === "system" && prefersDark);
 
-	document.documentElement.classList.toggle("dark", dark);
-	document.documentElement.dataset.theme = theme;
-	document.documentElement.dataset.fontFamily = fontFamily;
-	document.documentElement.dataset.textSize = textSize;
-	document.documentElement.dataset.motion = motion;
-	document.documentElement.dataset.workspaceLayout = workspaceLayout;
+	root.classList.toggle("dark", dark);
+	root.dataset.theme = theme;
+	root.dataset.fontFamily = fontFamily;
+	root.dataset.textSize = textSize;
+	root.dataset.motion = motion;
+	root.dataset.workspaceLayout = workspaceLayout;
 } catch {}

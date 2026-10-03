@@ -51,10 +51,24 @@ export function AppearancePreferencesSync({
 }: {
 	children: ReactNode;
 }) {
-	const { initialized, preferences, setPreferences } = useAppearance();
+	const {
+		initialized,
+		preferences,
+		serverPreferencesAvailable,
+		setPreferences,
+	} = useAppearance();
 	const queryClient = useQueryClient();
 	const preferencesQuery = useProfileControllerGetPreferences({
-		query: { retry: false, refetchOnWindowFocus: false },
+		query: {
+			retry: false,
+			refetchOnWindowFocus: false,
+			...(serverPreferencesAvailable && {
+				initialData: {
+					...preferences,
+					updatedAt: "",
+				} as AppearancePreferencesDto,
+			}),
+		},
 	});
 	const savePreferences = useProfileControllerUpdatePreferences();
 	const [status, setStatus] = useState<AppearanceSyncStatus>("loading");

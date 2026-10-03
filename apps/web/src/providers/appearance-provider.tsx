@@ -34,6 +34,7 @@ export type AppearancePreferences = SharedAppearancePreferences;
 interface AppearanceContextValue {
 	preferences: AppearancePreferences;
 	initialized: boolean;
+	serverPreferencesAvailable: boolean;
 	setPreferences: (preferences: AppearancePreferences) => void;
 	setTheme: (theme: ThemeMode) => void;
 	setFontFamily: (fontFamily: FontFamily) => void;
@@ -129,17 +130,34 @@ function isWorkspaceLayout(value: unknown): value is WorkspaceLayout {
 	);
 }
 
-export function AppearanceProvider({ children }: { children: ReactNode }) {
-	const [preferences, setPreferencesState] =
-		useState<AppearancePreferences>(DEFAULT_PREFERENCES);
-	const [initialized, setInitialized] = useState(false);
+export function AppearanceProvider({
+	children,
+	initialPreferences,
+}: {
+	children: ReactNode;
+	initialPreferences?: AppearancePreferences | null;
+}) {
+	const [preferences, setPreferencesState] = useState<AppearancePreferences>(
+		initialPreferences ?? DEFAULT_PREFERENCES,
+	);
+	const [initialized, setInitialized] = useState(Boolean(initialPreferences));
 
 	useEffect(() => {
-		const storedPreferences = readPreferences();
+		const storedPreferences = initialPreferences ?? readPreferences();
 		setPreferencesState(storedPreferences);
 		applyAppearance(storedPreferences);
+		if (initialPreferences) {
+			try {
+				window.localStorage.setItem(
+					STORAGE_KEY,
+					JSON.stringify(initialPreferences),
+				);
+			} catch {
+				// The server preference remains active for the current page.
+			}
+		}
 		setInitialized(true);
-	}, []);
+	}, [initialPreferences]);
 
 	useEffect(() => {
 		if (!initialized) return;
@@ -196,6 +214,7 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
 		() => ({
 			preferences,
 			initialized,
+			serverPreferencesAvailable: Boolean(initialPreferences),
 			setPreferences,
 			theme: preferences.theme,
 			setTheme,
@@ -207,6 +226,7 @@ export function AppearanceProvider({ children }: { children: ReactNode }) {
 		[
 			preferences,
 			initialized,
+			initialPreferences,
 			setPreferences,
 			setTheme,
 			setFontFamily,

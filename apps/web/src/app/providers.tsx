@@ -1,5 +1,6 @@
 "use client";
 
+import type { AppearancePreferences } from "@ecommand/shared";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useState } from "react";
@@ -15,9 +16,11 @@ const enableQueryDevtools =
 export function Providers({
 	children,
 	locale,
+	initialAppearancePreferences,
 }: {
 	children: React.ReactNode;
 	locale: AppLocale;
+	initialAppearancePreferences: AppearancePreferences | null;
 }) {
 	const [queryClient] = useState(
 		() =>
@@ -34,7 +37,7 @@ export function Providers({
 
 	return (
 		<LocaleProvider locale={locale}>
-			<AppearanceProvider>
+			<AppearanceProvider initialPreferences={initialAppearancePreferences}>
 				<QueryClientProvider client={queryClient}>
 					<ApiRecoveryMonitor />
 					{children}

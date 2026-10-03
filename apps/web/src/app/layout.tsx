@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Inter } from "next/font/google";
 import Script from "next/script";
 import { Messages, translate } from "@/i18n";
 import { getRequestLocale } from "@/i18n/server";
+import { getServerAppearancePreferences } from "@/lib/server-appearance-preferences";
 import { cn } from "@/lib/utils";
 import "./globals.css";
 import { Providers } from "./providers";
@@ -39,10 +40,17 @@ export default async function Layout({
 	children: React.ReactNode;
 }>) {
 	const locale = await getRequestLocale();
+	const initialAppearancePreferences = await getServerAppearancePreferences();
 	return (
 		<html
 			lang={locale}
 			suppressHydrationWarning
+			data-server-appearance={initialAppearancePreferences ? "true" : undefined}
+			data-theme={initialAppearancePreferences?.theme}
+			data-font-family={initialAppearancePreferences?.fontFamily}
+			data-text-size={initialAppearancePreferences?.textSize}
+			data-motion={initialAppearancePreferences?.motion}
+			data-workspace-layout={initialAppearancePreferences?.workspaceLayout}
 			className={cn(
 				"h-full",
 				"antialiased",
@@ -54,7 +62,12 @@ export default async function Layout({
 		>
 			<body className="min-h-full flex flex-col">
 				<Script src="/theme-init.js" strategy="beforeInteractive" />
-				<Providers locale={locale}>{children}</Providers>
+				<Providers
+					locale={locale}
+					initialAppearancePreferences={initialAppearancePreferences}
+				>
+					{children}
+				</Providers>
 			</body>
 		</html>
 	);
