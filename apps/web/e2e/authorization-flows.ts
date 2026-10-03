@@ -63,6 +63,68 @@ export async function verifyAdminNavigation(page: Page) {
 	await expectRouteVisible(page, navigation.customers, false);
 }
 
+export async function verifyAdminAppearanceSettings(page: Page) {
+	await signIn(page, E2E_USERS.admin.email);
+	await page.goto("/dashboard/settings?section=appearance");
+
+	const dialog = page.getByRole("dialog");
+	await expect(dialog).toBeVisible();
+	const themeControl = dialog.getByRole("combobox", {
+		name: translate(Messages.settings.appearance.theme),
+	});
+	await themeControl.click();
+
+	const darkThemeOption = page.getByRole("option", {
+		name: translate(Messages.settings.appearance.options.theme.dark.label),
+	});
+	await expect(darkThemeOption).toBeVisible();
+	await expect(darkThemeOption.locator('[data-theme="dark"]')).toBeVisible();
+	await darkThemeOption.click();
+	await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+
+	const layoutControl = dialog.getByRole("combobox", {
+		name: translate(Messages.settings.appearance.layout),
+	});
+	await layoutControl.click();
+	const sidebarOption = page.getByRole("option", {
+		name: translate(Messages.settings.appearance.options.layout.sidebar.label),
+	});
+	await expect(sidebarOption).toBeVisible();
+	await expect(
+		sidebarOption.locator('[data-layout-preview="sidebar"]'),
+	).toHaveCSS("width", "48px");
+	await sidebarOption.click();
+	await expect(
+		dialog.getByText(
+			translate(
+				Messages.settings.appearance.options.layout.sidebar.description,
+			),
+			{ exact: true },
+		),
+	).toBeVisible();
+	await expect(dialog.getByRole("status")).toHaveText(
+		translate(Messages.settings.sync.saved),
+	);
+
+	await layoutControl.click();
+	await page
+		.getByRole("option", {
+			name: translate(
+				Messages.settings.appearance.options.layout.centeredHeader.label,
+			),
+		})
+		.click();
+	await themeControl.click();
+	await page
+		.getByRole("option", {
+			name: translate(Messages.settings.appearance.options.theme.system.label),
+		})
+		.click();
+	await expect(dialog.getByRole("status")).toHaveText(
+		translate(Messages.settings.sync.saved),
+	);
+}
+
 async function verifyDashboardPersona(
 	page: Page,
 	username: string,

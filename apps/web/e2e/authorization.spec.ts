@@ -1,5 +1,6 @@
 import { test } from "@playwright/test";
 import {
+	verifyAdminAppearanceSettings,
 	verifyAdminCatalogLifecycle,
 	verifyAdminCustomRoleAssignment,
 	verifyAdminDashboard,
@@ -26,6 +27,12 @@ test("admin sees account/access/report navigation, not operational records", asy
 	page,
 }) => {
 	await verifyAdminNavigation(page);
+});
+
+test("admin appearance controls preview and sync visual preferences", async ({
+	page,
+}) => {
+	await verifyAdminAppearanceSettings(page);
 });
 
 test("admin dashboard requests only report and user data", async ({ page }) => {

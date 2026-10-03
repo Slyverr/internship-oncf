@@ -1,6 +1,7 @@
 import type { BrowserContext, Page } from "@playwright/test";
 import { chromium } from "@playwright/test";
 import {
+	verifyAdminAppearanceSettings,
 	verifyAdminCatalogLifecycle,
 	verifyAdminCustomRoleAssignment,
 	verifyAdminDashboard,
@@ -20,6 +21,7 @@ const endpoint = process.env.PLAYWRIGHT_CDP_ENDPOINT;
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3100";
 
 const workflows: [string, (page: Page) => Promise<void>][] = [
+	["admin appearance preview and preferences", verifyAdminAppearanceSettings],
 	["admin navigation and access", verifyAdminNavigation],
 	["admin dashboard visibility follows permissions", verifyAdminDashboard],
 	[
