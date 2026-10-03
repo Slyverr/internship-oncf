@@ -30,11 +30,13 @@
 		},
 		"dev": {
 			"cache": false,
-			"persistent": true
+			"persistent": true,
+			"passThroughEnv": ["BACKEND_API_URL"]
 		},
 		"dev:light": {
 			"cache": false,
-			"persistent": true
+			"persistent": true,
+			"passThroughEnv": ["BACKEND_API_URL"]
 		},
 		"//#format-and-lint": {},
 		"//#format-and-lint:fix": {

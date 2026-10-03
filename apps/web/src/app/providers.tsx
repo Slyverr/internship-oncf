@@ -17,7 +17,18 @@ export function Providers({
 	children: React.ReactNode;
 	locale: AppLocale;
 }) {
-	const [queryClient] = useState(() => new QueryClient());
+	const [queryClient] = useState(
+		() =>
+			new QueryClient({
+				defaultOptions: {
+					queries: {
+						retry: 2,
+						retryDelay: (attempt) => Math.min(1_000 * 2 ** attempt, 5_000),
+						refetchOnWindowFocus: true,
+					},
+				},
+			}),
+	);
 
 	return (
 		<LocaleProvider locale={locale}>

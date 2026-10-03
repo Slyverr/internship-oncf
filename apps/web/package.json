@@ -3,8 +3,8 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"dev": "concurrently --kill-others --names next,typecheck \"next dev\" \"tsc --noEmit --watch --preserveWatchOutput\"",
-		"dev:light": "next dev",
+		"dev": "bun ../../scripts/wait-for-api.ts && concurrently --kill-others --names next,typecheck \"next dev\" \"tsc --noEmit --watch --preserveWatchOutput\"",
+		"dev:light": "bun ../../scripts/wait-for-api.ts && next dev",
 		"typecheck": "tsc --noEmit",
 		"typecheck:watch": "tsc --noEmit --watch --preserveWatchOutput",
 		"build": "next build",

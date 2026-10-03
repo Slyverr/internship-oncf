@@ -175,11 +175,13 @@ function ReadyOrdersSection({
 	orders,
 	isLoading,
 	isError,
+	isFetching,
 	onRetry,
 }: {
 	orders: { id: number; orderNumber: string }[];
 	isLoading: boolean;
 	isError: boolean;
+	isFetching: boolean;
 	onRetry: () => void;
 }) {
 	const t = useTranslate();
@@ -210,14 +212,12 @@ function ReadyOrdersSection({
 						{t(Messages.dashboard.readyOrders.checking)}
 					</p>
 				) : isError ? (
-					<div className="flex flex-wrap items-center justify-between gap-control">
-						<p className="text-sm text-destructive">
-							{t(Messages.dashboard.readyOrders.checkFailed)}
-						</p>
-						<Button type="button" variant="outline" onClick={onRetry}>
-							{t(Messages.dashboard.readyOrders.tryAgain)}
-						</Button>
-					</div>
+					<InlineQueryRetry
+						message={t(Messages.dashboard.readyOrders.checkFailed)}
+						retryLabel={t(Messages.dashboard.readyOrders.tryAgain)}
+						isFetching={isFetching}
+						onRetry={onRetry}
+					/>
 				) : (
 					<div
 						className={`grid gap-control ${orders.length > 1 ? "@2xl/workspace:grid-cols-2" : "grid-cols-1"}`}
@@ -940,6 +940,7 @@ export function DashboardOverview() {
 							orders={readyOrdersQuery.data ?? []}
 							isLoading={readyOrdersQuery.isLoading}
 							isError={readyOrdersQuery.isError}
+							isFetching={readyOrdersQuery.isFetching}
 							onRetry={() => void readyOrdersQuery.refetch()}
 						/>
 					)}
