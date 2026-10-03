@@ -1,7 +1,7 @@
 import type { AppearancePreferences } from "@ecommand/shared";
 import { cookies } from "next/headers";
 import { profileControllerGetPreferences } from "@/lib/api/profile";
-import { parseAppearancePreferenceCookie } from "@/lib/appearance-preference-cookie";
+import { parseAppearancePreferenceSnapshot } from "@/lib/appearance-preference-cookie";
 
 const SERVER_PREFERENCE_TIMEOUT_MS = 3_000;
 const PREFERENCE_COOKIE = "ecommand-appearance";
@@ -36,17 +36,30 @@ export async function getServerAppearancePreferences({
 	if (!token) return null;
 
 	const userId = getTokenUserId(token);
-	const cachedPreferences = userId
-		? parseAppearancePreferenceCookie(
+	const cachedSnapshot = userId
+		? parseAppearancePreferenceSnapshot(
 				requestCookies.get(PREFERENCE_COOKIE)?.value,
 				userId,
 			)
 		: null;
+	const cachedPreferences = cachedSnapshot?.preferences ?? null;
 	try {
 		const preferences = await getPreferences({
 			timeout: SERVER_PREFERENCE_TIMEOUT_MS,
 		});
 		if (!preferences) return cachedPreferences;
+		const cachedUpdatedAt = cachedSnapshot?.updatedAt
+			? Date.parse(cachedSnapshot.updatedAt)
+			: Number.NaN;
+		const databaseUpdatedAt = Date.parse(preferences.updatedAt);
+		if (
+			cachedPreferences &&
+			Number.isFinite(cachedUpdatedAt) &&
+			Number.isFinite(databaseUpdatedAt) &&
+			cachedUpdatedAt > databaseUpdatedAt
+		) {
+			return cachedPreferences;
+		}
 
 		return {
 			theme: preferences.theme,

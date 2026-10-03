@@ -11,6 +11,7 @@ import {
 	useCallback,
 	useContext,
 	useEffect,
+	useLayoutEffect,
 	useRef,
 	useState,
 } from "react";
@@ -23,6 +24,7 @@ import {
 	useProfileControllerGetPreferences,
 	useProfileControllerUpdatePreferences,
 } from "@/lib/api/profile";
+import { parseAppearancePreferenceSnapshot } from "@/lib/appearance-preference-cookie";
 import {
 	useAppearance,
 	writeAppearancePreferenceCookie,
@@ -30,6 +32,9 @@ import {
 import { useAuth } from "@/providers/auth-provider";
 
 export type AppearanceSyncStatus = "loading" | "saving" | "saved" | "local";
+
+const useClientLayoutEffect =
+	typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 const AppearanceSyncContext = createContext<AppearanceSyncStatus>("loading");
 
@@ -78,12 +83,23 @@ export function AppearancePreferencesSync({
 	const savePreferences = useProfileControllerUpdatePreferences();
 	const [status, setStatus] = useState<AppearanceSyncStatus>("loading");
 	const hydrated = useRef(false);
+	const initializedCookieSnapshot = useRef(false);
+	const lastCookiePreferences = useRef(JSON.stringify(preferences));
 	const lastSent = useRef<string | null>(null);
 	const saveQueue = useRef<Promise<void>>(Promise.resolve());
 	const currentPreferences = useRef(preferences);
 	currentPreferences.current = preferences;
-	useEffect(() => {
+	useClientLayoutEffect(() => {
 		if (!initialized) return;
+		const serialized = JSON.stringify(preferences);
+		if (!initializedCookieSnapshot.current) {
+			initializedCookieSnapshot.current = true;
+			lastCookiePreferences.current = serialized;
+			return;
+		}
+		if (serialized === lastCookiePreferences.current) return;
+
+		lastCookiePreferences.current = serialized;
 		writeAppearancePreferenceCookie(preferences, profile.id);
 	}, [initialized, preferences, profile.id]);
 
@@ -100,6 +116,11 @@ export function AppearancePreferencesSync({
 					// the checked-in generated write DTO still has the older font enum.
 					data: latestPreferences as unknown as UpdateAppearancePreferencesDto,
 				});
+				writeAppearancePreferenceCookie(
+					latestPreferences,
+					profile.id,
+					saved.updatedAt,
+				);
 				queryClient.setQueryData(
 					getProfileControllerGetPreferencesQueryKey(),
 					saved,
@@ -113,7 +134,7 @@ export function AppearancePreferencesSync({
 				}
 			}
 		});
-	}, [queryClient, savePreferences.mutateAsync]);
+	}, [profile.id, queryClient, savePreferences.mutateAsync]);
 
 	useEffect(() => {
 		if (!initialized || hydrated.current) return;
@@ -132,7 +153,33 @@ export function AppearancePreferencesSync({
 		hydrated.current = true;
 		if (preferencesQuery.data) {
 			const serverPreferences = toPreferences(preferencesQuery.data);
+			const appearanceCookie = document.cookie
+				.split(";")
+				.map((cookie) => cookie.trim())
+				.find((cookie) => cookie.startsWith("ecommand-appearance="))
+				?.slice("ecommand-appearance=".length);
+			const cachedSnapshot = parseAppearancePreferenceSnapshot(
+				appearanceCookie,
+				profile.id,
+			);
+			const cachedUpdatedAt = cachedSnapshot?.updatedAt
+				? Date.parse(cachedSnapshot.updatedAt)
+				: Number.NaN;
+			const serverUpdatedAt = Date.parse(preferencesQuery.data.updatedAt);
+			if (
+				cachedSnapshot &&
+				Number.isFinite(cachedUpdatedAt) &&
+				Number.isFinite(serverUpdatedAt) &&
+				cachedUpdatedAt > serverUpdatedAt
+			) {
+				lastSent.current = JSON.stringify(serverPreferences);
+				setStatus("saving");
+				enqueueLatestSave();
+				return;
+			}
+
 			lastSent.current = JSON.stringify(serverPreferences);
+			lastCookiePreferences.current = JSON.stringify(serverPreferences);
 			setPreferences(serverPreferences);
 			setStatus("saved");
 			return;
@@ -148,6 +195,7 @@ export function AppearancePreferencesSync({
 		preferencesQuery.isFetched,
 		preferencesQuery.isSuccess,
 		enqueueLatestSave,
+		profile.id,
 		setPreferences,
 	]);
 

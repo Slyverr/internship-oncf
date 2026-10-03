@@ -10,20 +10,27 @@ import {
 
 type CachedAppearancePreferences = {
 	userId?: unknown;
+	updatedAt?: unknown;
 	preferences?: Partial<AppearancePreferences>;
+};
+
+export type CachedAppearancePreferenceSnapshot = {
+	preferences: AppearancePreferences;
+	updatedAt: string | null;
 };
 
 export function serializeAppearancePreferenceCookie(
 	preferences: AppearancePreferences,
 	userId: number,
+	updatedAt = new Date().toISOString(),
 ) {
-	return encodeURIComponent(JSON.stringify({ userId, preferences }));
+	return encodeURIComponent(JSON.stringify({ userId, preferences, updatedAt }));
 }
 
-export function parseAppearancePreferenceCookie(
+export function parseAppearancePreferenceSnapshot(
 	value: string | undefined,
 	userId: number,
-): AppearancePreferences | null {
+): CachedAppearancePreferenceSnapshot | null {
 	if (!value) return null;
 
 	try {
@@ -33,7 +40,7 @@ export function parseAppearancePreferenceCookie(
 		if (cached.userId !== userId || !cached.preferences) return null;
 		const stored = cached.preferences;
 
-		return {
+		const preferences: AppearancePreferences = {
 			theme: APPEARANCE_THEMES.includes(
 				stored.theme as AppearancePreferences["theme"],
 			)
@@ -60,7 +67,21 @@ export function parseAppearancePreferenceCookie(
 				? (stored.workspaceLayout as AppearancePreferences["workspaceLayout"])
 				: DEFAULT_APPEARANCE_PREFERENCES.workspaceLayout,
 		};
+		const updatedAt =
+			typeof cached.updatedAt === "string" &&
+			Number.isFinite(Date.parse(cached.updatedAt))
+				? cached.updatedAt
+				: null;
+
+		return { preferences, updatedAt };
 	} catch {
 		return null;
 	}
+}
+
+export function parseAppearancePreferenceCookie(
+	value: string | undefined,
+	userId: number,
+): AppearancePreferences | null {
+	return parseAppearancePreferenceSnapshot(value, userId)?.preferences ?? null;
 }

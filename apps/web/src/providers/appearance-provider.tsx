@@ -242,10 +242,15 @@ export function AppearanceProvider({
 export function writeAppearancePreferenceCookie(
 	preferences: AppearancePreferences,
 	userId: number,
+	updatedAt?: string,
 ) {
 	try {
 		const secure = window.location.protocol === "https:" ? "; Secure" : "";
-		const value = serializeAppearancePreferenceCookie(preferences, userId);
+		const value = serializeAppearancePreferenceCookie(
+			preferences,
+			userId,
+			updatedAt,
+		);
 		// The cookie is a non-sensitive, user-scoped render cache read by Next.js.
 		// biome-ignore lint/suspicious/noDocumentCookie: server rendering needs this preference snapshot in a request cookie.
 		document.cookie = `ecommand-appearance=${value}; Path=/; Max-Age=31536000; SameSite=Lax${secure}`;
