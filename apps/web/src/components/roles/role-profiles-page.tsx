@@ -698,7 +698,7 @@ export function RoleProfilesPage() {
 													</span>
 												</div>
 												{!profile.isSystem && profile.description && (
-													<span className="text-xs font-normal text-muted-foreground">
+													<span className="text-sm font-normal text-muted-foreground">
 														{profile.description}
 													</span>
 												)}
