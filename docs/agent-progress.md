@@ -301,3 +301,13 @@ The security follow-up for preventing administrator lockout is completed in Chap
 - Updated the readiness report and marked the program-selection/cancel checklist item complete based on the current browser workflow evidence.
 
 **Next:** continue the route-by-route UI audit with remaining create/edit steps, settings/dialog sections, and role-specific empty/error states. Reconcile remaining checklist items against current evidence; keep French deferred until these higher-priority reviews are complete. Customer ICE ownership and external DTM/SMTP contracts remain open decisions.
+
+## Chapter 27 — settings, field alignment, and shell hydration — 2026-10-03
+
+- Disabled password change until the current password is present, the new password passes the shared strength rule, and confirmation matches. Password mismatch feedback now updates while editing. Replaced the two Appearance shell miniatures with clear sidebar/header icons.
+- Fixed the shared `oncf-field` grid utility so helper text in one field cannot vertically distribute its label and input or offset its sibling. Inspected fresh customer-create captures at 390px and 1920px; fields align on desktop and stack on phone.
+- Authenticated root renders now load the saved appearance preference through the existing session cookie before the dashboard shell renders. The server fetch times out after three seconds and falls back to browser storage on API failure. A signed-in dashboard reload rendered the saved centered-header layout without first showing the sidebar.
+- Verification: web typecheck, web checks, Biome, and `git diff --check` passed. Preview web and API health endpoints both returned 200. Temporary capture Chromium was stopped; the preview servers remain running.
+- Commits: `6548265 fix(web/settings): validate password changes before submit`, `cf30ba0 fix(web/forms): top-align fields inside grid rows`, `9a6256d fix(web/layout): render saved shell preference on server`, `bfcbe79 fix(web/layout): bound server preference lookup`.
+
+**Next:** close the remaining route/state/theme/role visual matrix and verify the current permission/user/schema workflows. External DTM handoff and production mail delivery still need endpoint/provider contracts; customer ICE data still needs a named owner and update process. Keep French deferred until the product closeout is complete.

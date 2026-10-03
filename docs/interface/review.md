@@ -242,6 +242,13 @@ The checked-in capture utility makes responsive screenshots repeatable, but it d
 - The access-profile bars used a 75% opacity primary color while the dashboard activity bars use the full primary token. Matched the bars to the shared primary token.
 - Re-inspected all four updated captures; metrics now align at the section start, bars match the dashboard primary color, and the viewport has no horizontal overflow. Images are in `/tmp/ecommand-admin-dashboard-review/` as `admin-dashboard-account-alignment-fixed-*`.
 
+## Form alignment and appearance initialization — 2026-10-03
+
+- Customer creation screenshots at 390×844 and 1920×1080 exposed a grid field with helper text vertically spreading its label and control, leaving the sibling Customer type field lower. The shared `oncf-field` utility now top-aligns its contents. Both updated screenshots were inspected; the controls share a desktop baseline and the phone form stacks without horizontal overflow. Images are in `/tmp/ecommand-final-ui-review/`.
+- Appearance previews use explicit sidebar and header icons. The Security action stays disabled until the current password is entered, the new password meets the shared strength rule, and both new-password values match; mismatch feedback updates as the user types.
+- Authenticated server renders load the saved appearance preference before rendering the workspace shell. A dashboard reload showed the saved centered-header layout immediately. When the API is unavailable, the server lookup is bounded to three seconds and the browser preference remains the fallback.
+- Focused web typecheck, web tests, and Biome passed. The review server returned healthy responses; its temporary screenshot browser was stopped afterward.
+
 ## Admin user creation review — 2026-10-02
 
 - Captured the Credentials step at 320×568, 390×844, 768×1024, 1024×768, 1440×900, 1920×1080, 2560×1440, and 3840×2160; every capture matched `/dashboard/users/new` and reported no horizontal overflow. The centered page cap and two-column desktop fields remain consistent with the shared workspace form.
