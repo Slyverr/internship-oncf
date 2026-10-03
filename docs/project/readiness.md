@@ -42,6 +42,13 @@ This status describes the current repository against the project SDF and report.
 - The host's Playwright-managed Chromium could not start because `libnspr4.so` is missing. The browser workflows passed through the documented `PLAYWRIGHT_CDP_ENDPOINT` path using the available system Chromium; no system packages were installed.
 - The access-profile screen was captured and inspected at all ten documented widths from 320px to 3840px. It had no horizontal overflow; desktop uses the shared table component and smaller containers use the responsive card list. No change was warranted by this pass. The full route/state/theme/role visual matrix remains incomplete.
 
+## Current verification — 2026-10-03
+
+- The API unit suite passes 73 suites / 611 tests. Coverage is 76.47% statements, 73.89% branches, 58.83% functions, and 76.61% lines. Focused coverage now includes customer query scoping and transactional user portfolio updates: omitted assignments preserve the portfolio, an empty list clears it, and a missing user cannot trigger assignment deletion.
+- Web unit checks, centralized-copy and API-code scans, and web typecheck pass. The English-only locale contract and route metadata checks remain green.
+- A live API smoke check passed for the seeded Admin, Commercial Agent, and Client Representative accounts. Admin can read users and reports but receives 403 for operational lists. Agent and client requests to orders, claims, programs, and reports returned 200, while user-list requests returned 403. Each program row returned in those agent/client sessions linked to an order also present in that user's order response. The temporary login sessions were revoked after the check.
+- The local API and web preview both returned successful health/page responses. Screenshot capture could not be repeated because the cached Chromium binary lacks system libraries including `libnspr4` and `libnss3`; the full route/state/theme/role visual matrix remains unverified.
+
 ## Incomplete for a usable MVP
 
 - **ICE data ownership:** signup compares the submitted customer code and ICE with the locally maintained customer record; it does not query an external ONCF registry. Confirm who maintains customer ICE values and how they are kept current before production use.
