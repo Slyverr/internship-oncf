@@ -20,6 +20,7 @@ import {
 	useCallback,
 	useContext,
 	useEffect,
+	useLayoutEffect,
 	useMemo,
 	useState,
 } from "react";
@@ -48,6 +49,8 @@ interface AppearanceContextValue {
 const STORAGE_KEY = "ecommand-appearance";
 const LEGACY_STORAGE_KEY = "ecommand-theme";
 const DEFAULT_PREFERENCES = DEFAULT_APPEARANCE_PREFERENCES;
+const useAppearanceInitializationEffect =
+	typeof window === "undefined" ? useEffect : useLayoutEffect;
 const AppearanceContext = createContext<AppearanceContextValue | null>(null);
 
 function applyAppearance(preferences: AppearancePreferences) {
@@ -151,7 +154,7 @@ export function AppearanceProvider({
 	);
 	const [initialized, setInitialized] = useState(Boolean(initialPreferences));
 
-	useEffect(() => {
+	useAppearanceInitializationEffect(() => {
 		const storedPreferences = initialPreferences ?? readPreferences();
 		setPreferencesState(storedPreferences);
 		applyAppearance(storedPreferences);
