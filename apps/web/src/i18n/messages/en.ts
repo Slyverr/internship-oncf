@@ -1457,7 +1457,23 @@ export const en = {
 		},
 		conversation: {
 			button: "Conversation",
-			dialogTitle: "Claim {recordCode}",
+			dialogTitle: "Conversation",
+			messagesCount: {
+				plural: {
+					zero: "No messages",
+					one: "{count} message",
+					other: "{count} messages",
+				},
+			},
+			participantsCount: {
+				plural: {
+					zero: "No participants",
+					one: "{count} participant",
+					other: "{count} participants",
+				},
+			},
+			participantsAccessibleLabel: "Participants: {names}",
+			showNewMessages: "New messages",
 			openCount: {
 				plural: {
 					zero: "Open conversation, {count} messages{unreadSuffix}",

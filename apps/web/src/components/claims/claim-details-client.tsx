@@ -32,6 +32,10 @@ export function ClaimDetailsClient({ claim }: ClaimDetailsClientProps) {
 					claimId={currentClaim.id}
 					claimNumber={currentClaim.claimNumber}
 					commentCount={currentClaim.claimComments?.length ?? 0}
+					claimCreator={{
+						id: currentClaim.createdByUserId,
+						name: `${currentClaim.createdByUser.firstName} ${currentClaim.createdByUser.lastName}`,
+					}}
 				/>
 				<ClaimActions claim={currentClaim} />
 			</PageHeader>

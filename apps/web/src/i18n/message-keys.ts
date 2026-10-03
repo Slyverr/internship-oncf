@@ -1434,6 +1434,11 @@ export const Messages = {
 			messageAccessibleLabel: "claims.conversation.messageAccessibleLabel",
 			today: "claims.conversation.today",
 			yesterday: "claims.conversation.yesterday",
+			messagesCount: "claims.conversation.messagesCount",
+			participantsCount: "claims.conversation.participantsCount",
+			participantsAccessibleLabel:
+				"claims.conversation.participantsAccessibleLabel",
+			showNewMessages: "claims.conversation.showNewMessages",
 		},
 		actions: {
 			more: "claims.actions.more",

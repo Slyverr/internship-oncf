@@ -1599,7 +1599,23 @@ export const frDraft = {
 		},
 		conversation: {
 			button: "Conversation",
-			dialogTitle: "Réclamation {recordCode}",
+			dialogTitle: "Conversation",
+			messagesCount: {
+				plural: {
+					zero: "Aucun message",
+					one: "{count} message",
+					other: "{count} messages",
+				},
+			},
+			participantsCount: {
+				plural: {
+					zero: "Aucun participant",
+					one: "{count} participant",
+					other: "{count} participants",
+				},
+			},
+			participantsAccessibleLabel: "Participants : {names}",
+			showNewMessages: "Nouveaux messages",
 			openCount: {
 				plural: {
 					zero: "Ouvrir la conversation, aucun message{unreadSuffix}",

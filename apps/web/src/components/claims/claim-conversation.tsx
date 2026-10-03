@@ -18,6 +18,7 @@ import {
 	Dialog,
 	DialogBody,
 	DialogContent,
+	DialogDescription,
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
@@ -52,6 +53,7 @@ interface ClaimConversationProps {
 	claimId: number;
 	claimNumber: string;
 	commentCount: number;
+	claimCreator: { id: number; name: string };
 }
 
 function CommentMessage({
@@ -196,6 +198,7 @@ export function ClaimConversation({
 	claimId,
 	claimNumber,
 	commentCount,
+	claimCreator,
 }: ClaimConversationProps) {
 	const t = useTranslate();
 	const getErrorMessage = useFormErrorMessage();
@@ -212,14 +215,31 @@ export function ClaimConversation({
 	const messagesEndRef = useRef<HTMLLIElement>(null);
 	const positionedAtLatest = useRef(false);
 	const scrollAfterReply = useRef(false);
+	const composerRef = useRef<HTMLTextAreaElement>(null);
+	const restoreComposerFocus = useRef(false);
+	const nearLatest = useRef(true);
+	const previousCommentCount = useRef(0);
+	const [hasNewMessages, setHasNewMessages] = useState(false);
 	const commentsQuery = useClaimsControllerGetComments(claimNumber, {
-		query: { enabled: open },
+		query: { enabled: open, refetchInterval: open ? 5000 : false },
 	});
 	const notificationsQuery = useNotificationsControllerFindAll({
 		query: { refetchInterval: 30000 },
 	});
 	const addComment = useClaimsControllerAddComment();
 	const markRead = useNotificationsControllerMarkAsRead();
+	useEffect(() => {
+		if (!open || !canComment) return;
+		const frame = window.requestAnimationFrame(() => {
+			composerRef.current?.focus({ preventScroll: true });
+		});
+		return () => window.cancelAnimationFrame(frame);
+	}, [canComment, open]);
+	useEffect(() => {
+		if (addComment.isPending || !restoreComposerFocus.current) return;
+		restoreComposerFocus.current = false;
+		if (open) composerRef.current?.focus();
+	}, [addComment.isPending, open]);
 	const unreadComments = useMemo(
 		() =>
 			(notificationsQuery.data ?? []).filter((notification) =>
@@ -236,6 +256,20 @@ export function ClaimConversation({
 			),
 		[commentsQuery.data],
 	);
+	const participants = useMemo(() => {
+		const byUserId = new Map<number, string>([
+			[claimCreator.id, claimCreator.name],
+		]);
+		for (const comment of chronological) {
+			if (!byUserId.has(comment.authorUserId)) {
+				byUserId.set(
+					comment.authorUserId,
+					comment.authorName ?? t(Messages.claims.conversation.formerUser),
+				);
+			}
+		}
+		return [...byUserId.values()];
+	}, [claimCreator.id, claimCreator.name, chronological, t]);
 	const conversationDayKeys = new Set(
 		chronological.map((comment) => getMessageDayKey(comment.createdAt)),
 	);
@@ -249,16 +283,36 @@ export function ClaimConversation({
 	useEffect(() => {
 		if (!open) {
 			positionedAtLatest.current = false;
+			nearLatest.current = true;
+			previousCommentCount.current = 0;
+			setHasNewMessages(false);
 			return;
 		}
 		if (commentsQuery.isLoading || commentsQuery.isError || !commentsUpdatedAt)
 			return;
-		if (positionedAtLatest.current && !scrollAfterReply.current) return;
-
-		messagesEndRef.current?.scrollIntoView({ block: "end" });
+		const receivedNewMessage =
+			positionedAtLatest.current &&
+			chronological.length > previousCommentCount.current;
+		const shouldFollowLatest =
+			!positionedAtLatest.current ||
+			scrollAfterReply.current ||
+			nearLatest.current;
+		if (receivedNewMessage && !shouldFollowLatest) setHasNewMessages(true);
+		if (shouldFollowLatest) {
+			messagesEndRef.current?.scrollIntoView({ block: "end" });
+			nearLatest.current = true;
+			setHasNewMessages(false);
+		}
+		previousCommentCount.current = chronological.length;
 		positionedAtLatest.current = true;
 		scrollAfterReply.current = false;
-	}, [commentsUpdatedAt, commentsQuery.isError, commentsQuery.isLoading, open]);
+	}, [
+		commentsUpdatedAt,
+		commentsQuery.isError,
+		commentsQuery.isLoading,
+		chronological.length,
+		open,
+	]);
 
 	useEffect(() => {
 		if (!open) {
@@ -319,6 +373,7 @@ export function ClaimConversation({
 		const trimmedContent = content.trim();
 		if (!trimmedContent || addComment.isPending) return;
 
+		restoreComposerFocus.current = true;
 		try {
 			await addComment.mutateAsync({
 				id: claimNumber,
@@ -377,17 +432,51 @@ export function ClaimConversation({
 				)}
 			</Button>
 			<DialogContent size="conversation" className="gap-0 overflow-hidden p-0">
-				<DialogHeader className="px-4 py-3 sm:px-6">
-					<DialogTitle className="truncate text-base sm:text-lg">
-						{t(Messages.claims.conversation.dialogTitle, {
-							recordCode: claimNumber,
-						})}
-					</DialogTitle>
+				<DialogHeader className="items-center px-4 py-3 sm:px-6">
+					<div className="grid min-w-0 gap-1">
+						<DialogTitle className="truncate text-base sm:text-lg">
+							{t(Messages.claims.conversation.dialogTitle)}
+						</DialogTitle>
+						<DialogDescription className="grid min-w-0 gap-1 text-caption">
+							<span className="truncate">{claimNumber}</span>
+							<span className="flex min-w-0 items-center gap-x-compact whitespace-nowrap">
+								<span>
+									{t(Messages.claims.conversation.messagesCount, {
+										count: chronological.length || commentCount,
+									})}
+								</span>
+								<span aria-hidden="true" className="px-1">
+									·
+								</span>
+								<span
+									role="img"
+									title={participants.join(", ")}
+									aria-label={t(
+										Messages.claims.conversation.participantsAccessibleLabel,
+										{ names: participants.join(", ") },
+									)}
+								>
+									{t(Messages.claims.conversation.participantsCount, {
+										count: participants.length,
+									})}
+								</span>
+							</span>
+						</DialogDescription>
+					</div>
 				</DialogHeader>
 				<DialogBody className="grid min-h-0 grid-rows-[minmax(0,1fr)_auto] overflow-hidden">
 					<section
 						aria-label={t(Messages.claims.conversation.messagesLabel)}
 						className="min-h-0 overflow-y-auto p-4 sm:p-6"
+						onScroll={(event) => {
+							const element = event.currentTarget;
+							nearLatest.current =
+								element.scrollHeight -
+									element.scrollTop -
+									element.clientHeight <=
+								48;
+							if (nearLatest.current) setHasNewMessages(false);
+						}}
 					>
 						{commentsQuery.isLoading ? (
 							<div className="grid gap-4">
@@ -434,15 +523,13 @@ export function ClaimConversation({
 									return (
 										<Fragment key={comment.id}>
 											{startsNewDay && showDateSeparators && (
-												<li className="flex items-center gap-3 py-3">
-													<span className="h-px flex-1 bg-border" />
+												<li className="flex justify-center py-3">
 													<time
 														dateTime={getMessageDayKey(comment.createdAt)}
-														className="text-caption font-medium text-muted-foreground"
+														className="text-caption text-muted-foreground"
 													>
 														{getMessageDayLabel(comment.createdAt, locale, t)}
 													</time>
-													<span className="h-px flex-1 bg-border" />
 												</li>
 											)}
 											<CommentMessage
@@ -484,11 +571,31 @@ export function ClaimConversation({
 								</p>
 							</div>
 						)}
+						{hasNewMessages && (
+							<div className="sticky bottom-2 z-10 mx-auto w-fit">
+								<Button
+									type="button"
+									size="sm"
+									variant="secondary"
+									onClick={() => {
+										messagesEndRef.current?.scrollIntoView({
+											behavior: "smooth",
+											block: "end",
+										});
+										nearLatest.current = true;
+										setHasNewMessages(false);
+									}}
+								>
+									{t(Messages.claims.conversation.showNewMessages)}
+								</Button>
+							</div>
+						)}
 					</section>
 					{canComment && (
 						<form className="border-t p-4 sm:p-6" onSubmit={submitComment}>
 							<div className="flex items-end gap-2 rounded-xl border bg-background p-1 transition-colors focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/30">
 								<Textarea
+									ref={composerRef}
 									aria-label={t(Messages.claims.conversation.writeReply)}
 									placeholder={t(Messages.claims.conversation.replyPlaceholder)}
 									value={content}
@@ -505,7 +612,7 @@ export function ClaimConversation({
 									}}
 									rows={1}
 									maxLength={2000}
-									disabled={addComment.isPending}
+									readOnly={addComment.isPending}
 									className="field-sizing-content max-h-32 min-h-11 min-w-0 flex-1 resize-none rounded-lg border-0 bg-transparent px-3 py-3 text-sm shadow-none focus-visible:border-transparent focus-visible:ring-0 dark:bg-transparent"
 								/>
 								<Button
