@@ -222,7 +222,7 @@ function ReadyOrdersSection({
 					<div
 						className={`grid gap-control ${orders.length > 1 ? "@2xl/workspace:grid-cols-2" : "grid-cols-1"}`}
 					>
-						{orders.slice(0, 4).map((order) => (
+						{orders.map((order) => (
 							<Link
 								key={order.id}
 								href={`/dashboard/programs/new?orderNumber=${order.orderNumber}&search=${encodeURIComponent(order.orderNumber)}`}
@@ -744,11 +744,11 @@ export function DashboardOverview() {
 		recentSectionCount > 1 ? "workspace-recent-rail" : "grid gap-4";
 
 	const ordersQuery = useOrdersControllerFindAll(
-		{ sortBy: "createdAt", sortOrder: "desc" },
+		{ page: 1, limit: 2, sortBy: "createdAt", sortOrder: "desc" },
 		{ query: { enabled: canReadOrders } },
 	);
 	const readyOrdersQuery = useOrdersControllerFindEligibleForPrograms(
-		{ limit: 20 },
+		{ page: 1, limit: 4 },
 		{
 			query: {
 				enabled: canReadOrders && canCreatePrograms,
@@ -761,11 +761,11 @@ export function DashboardOverview() {
 			readyOrdersQuery.isError ||
 			(readyOrdersQuery.data?.length ?? 0) > 0);
 	const programsQuery = useProgramsControllerFindAll(
-		{ sortBy: "createdAt", sortOrder: "desc" },
+		{ page: 1, limit: 2, sortBy: "createdAt", sortOrder: "desc" },
 		{ query: { enabled: canReadPrograms } },
 	);
 	const claimsQuery = useClaimsControllerFindAll(
-		{ sortBy: "createdAt", sortOrder: "desc" },
+		{ page: 1, limit: 2, sortBy: "createdAt", sortOrder: "desc" },
 		{ query: { enabled: canReadClaims } },
 	);
 	const [activityPeriod] = useState(getRecentOrderPeriod);
@@ -800,7 +800,7 @@ export function DashboardOverview() {
 				isError={ordersQuery.isError}
 				isFetching={ordersQuery.isFetching}
 				onRetry={() => void ordersQuery.refetch()}
-				items={(ordersQuery.data ?? []).slice(0, 2).map((order) => ({
+				items={(ordersQuery.data ?? []).map((order) => ({
 					id: order.id,
 					title: order.orderNumber,
 					description: t(Messages.dashboard.orders.itemDescription, {
@@ -830,7 +830,7 @@ export function DashboardOverview() {
 				isError={programsQuery.isError}
 				isFetching={programsQuery.isFetching}
 				onRetry={() => void programsQuery.refetch()}
-				items={(programsQuery.data ?? []).slice(0, 2).map((program) => ({
+				items={(programsQuery.data ?? []).map((program) => ({
 					id: program.id,
 					title: program.programNumber,
 					description: t(Messages.dashboard.programs.itemDescription, {
@@ -860,7 +860,7 @@ export function DashboardOverview() {
 				isError={claimsQuery.isError}
 				isFetching={claimsQuery.isFetching}
 				onRetry={() => void claimsQuery.refetch()}
-				items={(claimsQuery.data ?? []).slice(0, 2).map((claim) => ({
+				items={(claimsQuery.data ?? []).map((claim) => ({
 					id: claim.id,
 					title: claim.claimNumber,
 					description: t(Messages.dashboard.claims.itemDescription, {
