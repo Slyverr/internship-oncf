@@ -102,6 +102,10 @@ html[data-theme="mono-dark"] {
 	}
 }
 
+@utility oncf-popover-surface {
+	@apply bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10;
+}
+
 @utility menu-separator-spacing {
 	margin-block: var(--spacing);
 	margin-inline: calc(var(--spacing) * -1);

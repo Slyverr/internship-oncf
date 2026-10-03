@@ -45,3 +45,24 @@ assert.deepEqual(
 );
 
 console.log("Shared component style utility checks passed.");
+
+const popoverSurfaceComponents = [
+	"components/ui/combobox.tsx",
+	"components/ui/dropdown-menu.tsx",
+	"components/ui/popover.tsx",
+	"components/ui/select.tsx",
+];
+assert.match(
+	globalStyles,
+	/@utility oncf-popover-surface\s*\{\s*@apply bg-popover text-popover-foreground shadow-md ring-1 ring-foreground\/10;/,
+	"Floating menus must use the shared semantic surface and shadow treatment.",
+);
+for (const componentPath of popoverSurfaceComponents) {
+	assert.match(
+		readFileSync(join(sourceRoot, componentPath), "utf8"),
+		/\boncf-popover-surface\b/,
+		`${componentPath} must use the shared popover surface utility.`,
+	);
+}
+
+console.log("Shared floating surface checks passed.");
