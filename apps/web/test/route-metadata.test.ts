@@ -142,4 +142,17 @@ assert.deepEqual(
 	`Pass the request translator to entity breadcrumbs:\n${unscopedBreadcrumbs.join("\n")}`,
 );
 
+const reportsPage = await readFile(
+	resolve(appRoot, "(protected)/dashboard/reports/page.tsx"),
+	"utf8",
+);
+const reportsMetadata = reportsPage.match(
+	/export\s+async\s+function\s+generateMetadata[\s\S]*?^\s*}\s*$/m,
+)?.[0];
+assert.match(
+	reportsMetadata ?? "",
+	/title:\s*t\(Messages\.reports\.title\)/,
+	"The Reports document title should match its visible Order reports heading.",
+);
+
 console.log("Localized route metadata checks passed.");

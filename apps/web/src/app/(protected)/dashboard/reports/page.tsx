@@ -7,7 +7,7 @@ import { getRequestTranslator } from "@/i18n/server";
 export async function generateMetadata(): Promise<Metadata> {
 	const t = await getRequestTranslator();
 	return {
-		title: t(Messages.reports.pageTitle),
+		title: t(Messages.reports.title),
 	};
 }
 
