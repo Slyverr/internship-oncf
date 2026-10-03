@@ -12,6 +12,7 @@ import {
 import Link from "next/link";
 import { useState } from "react";
 import { ActionLink } from "@/components/common/action-link";
+import { InlineQueryRetry } from "@/components/common/inline-query-retry";
 import { PageHeader } from "@/components/common/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -71,6 +72,8 @@ interface RecentSectionProps {
 	items: DashboardItem[];
 	isLoading: boolean;
 	isError: boolean;
+	isFetching: boolean;
+	onRetry: () => void;
 }
 
 function RecentSection({
@@ -82,6 +85,8 @@ function RecentSection({
 	items,
 	isLoading,
 	isError,
+	isFetching,
+	onRetry,
 }: RecentSectionProps) {
 	const t = useTranslate();
 	const locale = useLocale();
@@ -111,9 +116,12 @@ function RecentSection({
 						{t(Messages.dashboard.recent.loading)}
 					</p>
 				) : isError ? (
-					<p className="text-sm text-destructive">
-						{t(Messages.dashboard.recent.loadFailed)}
-					</p>
+					<InlineQueryRetry
+						message={t(Messages.dashboard.recent.loadFailed)}
+						retryLabel={t(Messages.common.actions.retry)}
+						isFetching={isFetching}
+						onRetry={onRetry}
+					/>
 				) : items.length === 0 ? (
 					<div className="grid gap-control">
 						<p className="text-sm text-muted-foreground">{emptyMessage}</p>
@@ -245,12 +253,16 @@ function UserAccountsSection({
 	canReviewUsers,
 	isLoading,
 	isError,
+	isFetching,
+	onRetry,
 }: {
 	users: UserListDto[];
 	pendingUsers: ReturnType<typeof getPendingClientRegistrations>;
 	canReviewUsers: boolean;
 	isLoading: boolean;
 	isError: boolean;
+	isFetching: boolean;
+	onRetry: () => void;
 }) {
 	const t = useTranslate();
 	const locale = useLocale();
@@ -292,9 +304,12 @@ function UserAccountsSection({
 						{t(Messages.dashboard.accounts.loading)}
 					</p>
 				) : isError ? (
-					<p role="alert" className="text-sm text-destructive">
-						{t(Messages.dashboard.accounts.loadFailed)}
-					</p>
+					<InlineQueryRetry
+						message={t(Messages.dashboard.accounts.loadFailed)}
+						retryLabel={t(Messages.common.actions.retry)}
+						isFetching={isFetching}
+						onRetry={onRetry}
+					/>
 				) : (
 					<div className="grid min-w-0 gap-6 @3xl/workspace:grid-cols-2 @6xl/workspace:grid-cols-3">
 						<dl className="grid grid-cols-3 gap-control">
@@ -783,6 +798,8 @@ export function DashboardOverview() {
 				})}
 				isLoading={ordersQuery.isLoading}
 				isError={ordersQuery.isError}
+				isFetching={ordersQuery.isFetching}
+				onRetry={() => void ordersQuery.refetch()}
 				items={(ordersQuery.data ?? []).slice(0, 2).map((order) => ({
 					id: order.id,
 					title: order.orderNumber,
@@ -811,6 +828,8 @@ export function DashboardOverview() {
 				}
 				isLoading={programsQuery.isLoading}
 				isError={programsQuery.isError}
+				isFetching={programsQuery.isFetching}
+				onRetry={() => void programsQuery.refetch()}
 				items={(programsQuery.data ?? []).slice(0, 2).map((program) => ({
 					id: program.id,
 					title: program.programNumber,
@@ -839,6 +858,8 @@ export function DashboardOverview() {
 				})}
 				isLoading={claimsQuery.isLoading}
 				isError={claimsQuery.isError}
+				isFetching={claimsQuery.isFetching}
+				onRetry={() => void claimsQuery.refetch()}
 				items={(claimsQuery.data ?? []).slice(0, 2).map((claim) => ({
 					id: claim.id,
 					title: claim.claimNumber,
@@ -887,6 +908,8 @@ export function DashboardOverview() {
 					canReviewUsers={canReviewUsers}
 					isLoading={usersQuery.isLoading}
 					isError={usersQuery.isError}
+					isFetching={usersQuery.isFetching}
+					onRetry={() => void usersQuery.refetch()}
 				/>
 			)}
 
