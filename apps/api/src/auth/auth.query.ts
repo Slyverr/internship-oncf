@@ -56,7 +56,7 @@ export class AuthQuery {
 				failedLoginAttempts: sql<number>`CASE WHEN ${expiredLock} THEN 1 ELSE COALESCE(${users.failedLoginAttempts}, 0) + 1 END`,
 				accountLockedUntil: sql<
 					string | null
-				>`CASE WHEN ${expiredLock} THEN CASE WHEN ${maxAttempts} <= 1 THEN ${lockUntil} ELSE NULL END WHEN COALESCE(${users.failedLoginAttempts}, 0) + 1 >= ${maxAttempts} THEN ${lockUntil} ELSE ${users.accountLockedUntil} END`,
+				>`CASE WHEN ${expiredLock} THEN CASE WHEN ${maxAttempts} <= 1 THEN ${lockUntil}::timestamp ELSE NULL END WHEN COALESCE(${users.failedLoginAttempts}, 0) + 1 >= ${maxAttempts} THEN ${lockUntil}::timestamp ELSE ${users.accountLockedUntil} END`,
 			})
 			.where(
 				and(
