@@ -193,6 +193,12 @@ export function CustomerCreateForm(): JSX.Element {
 										aria-describedby="customer-ice-hint"
 										onChange={(event) => field.handleChange(event.target.value)}
 									/>
+									<p
+										id="customer-ice-hint"
+										className="text-meta text-muted-foreground"
+									>
+										{t(Messages.customers.form.iceHint)}
+									</p>
 								</div>
 							)}
 						</form.Field>
@@ -212,12 +218,6 @@ export function CustomerCreateForm(): JSX.Element {
 							)}
 						</form.Field>
 					</div>
-					<p
-						id="customer-ice-hint"
-						className="text-meta text-muted-foreground @3xl/workspace:col-span-2"
-					>
-						{t(Messages.customers.form.iceHint)}
-					</p>
 				</CardContent>
 			</Card>
 
