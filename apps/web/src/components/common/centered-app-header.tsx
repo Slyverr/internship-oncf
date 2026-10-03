@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { OncfMark } from "@/components/common/brand-mark";
 import { CenteredNavigation } from "@/components/common/centered-navigation";
 import { WorkspaceLayoutSwitch } from "@/components/common/workspace-layout-switch";
 import { NotificationLink } from "@/components/notifications/notification-link";
@@ -100,14 +100,7 @@ export function CenteredAppHeader() {
 							className="inline-flex min-h-16 items-center gap-control rounded-md text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 						>
 							<span className="flex size-8 shrink-0 items-center justify-center rounded-sm oncf-brand-surface p-control">
-								<Image
-									src="/oncf.png"
-									alt=""
-									width={24}
-									height={12}
-									className="h-3 w-6 object-cover object-[center_40%] oncf-brand-mark"
-									priority
-								/>
+								<OncfMark />
 							</span>
 							{customerName && (
 								<span className="max-w-48 truncate text-sm font-medium text-muted-foreground xl:max-w-64">
