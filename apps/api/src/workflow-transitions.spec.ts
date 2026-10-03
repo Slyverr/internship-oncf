@@ -47,6 +47,7 @@ describe("workflow transition matrix", () => {
 		expect(CLAIM_TRANSITION[ClaimStatus.IN_PROGRESS]).toEqual([
 			ClaimStatus.AWAITING_INFO,
 			ClaimStatus.IN_TREATMENT,
+			ClaimStatus.REJECTED,
 			ClaimStatus.SENT_TO_DTM,
 		]);
 		expect(CLAIM_TRANSITION[ClaimStatus.AWAITING_INFO]).toEqual([

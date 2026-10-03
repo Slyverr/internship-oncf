@@ -281,6 +281,27 @@ describe("ClaimsService workflows", () => {
 		expect(query.updateClaim).not.toHaveBeenCalled();
 	});
 
+	it("allows an in-progress claim to be rejected with its reason", async () => {
+		query.findClaimStatus.mockResolvedValue({
+			statusId: CLAIM_STATUSES[ClaimStatus.IN_PROGRESS].id,
+			claimNumber: claim.claimNumber,
+			createdByUserId: claim.createdByUserId,
+		} as never);
+
+		await service.reject(id, agent, "The reported damage was not confirmed");
+
+		expect(query.updateClaim).toHaveBeenCalledWith(
+			id,
+			{ statusId: CLAIM_STATUSES[ClaimStatus.REJECTED].id },
+			expect.objectContaining({
+				history: {
+					userId: agent.id,
+					comment: "The reported damage was not confirmed",
+				},
+			}),
+		);
+	});
+
 	it("requires a resolution before resolving an unresolved claim", async () => {
 		query.findClaim.mockResolvedValue({ ...claim, resolution: null } as never);
 		await expect(service.resolve(id, agent)).rejects.toMatchObject({
