@@ -2,7 +2,6 @@
 
 import {
 	CUSTOMER_ICE_LENGTH,
-	CUSTOMER_ICE_PATTERN,
 	isStrongPassword,
 	STRONG_PASSWORD_MAX_LENGTH,
 	STRONG_PASSWORD_REQUIREMENTS,
@@ -20,6 +19,10 @@ import { useFormErrorMessage } from "@/hooks/use-form-error-message";
 import { type MessageKey, Messages, translateApiResponse } from "@/i18n";
 import { useLocale, useTranslate } from "@/i18n/locale-provider";
 import { useAuthControllerRegister } from "@/lib/api/auth";
+import {
+	type RegistrationIdentityField,
+	validateRegistrationIdentity,
+} from "@/lib/client-registration-validation";
 import { AuthPageLayout } from "./auth-page-layout";
 
 const requirementLabels: Record<
@@ -50,8 +53,27 @@ export function ClientRegistrationForm() {
 	const [password, setPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
 	const [formError, setFormError] = useState("");
+	const [identityErrors, setIdentityErrors] = useState<
+		Partial<Record<RegistrationIdentityField, "required" | "format">>
+	>({});
+	const [emailError, setEmailError] = useState<"required" | "format">();
+	const firstNameRef = useRef<HTMLInputElement>(null);
+	const lastNameRef = useRef<HTMLInputElement>(null);
+	const customerCodeRef = useRef<HTMLInputElement>(null);
+	const iceRef = useRef<HTMLInputElement>(null);
+	const emailRef = useRef<HTMLInputElement>(null);
 	const passwordRef = useRef<HTMLInputElement>(null);
 	const confirmationRef = useRef<HTMLInputElement>(null);
+	function scrollToStepStart() {
+		window.requestAnimationFrame(() => {
+			window.scrollTo({
+				top: 0,
+				behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+					? "auto"
+					: "smooth",
+			});
+		});
+	}
 	const missingPasswordRequirements = STRONG_PASSWORD_REQUIREMENTS.filter(
 		(requirement) => !requirement.isMet(password),
 	).map((requirement) => t(requirementLabels[requirement.id]));
@@ -78,9 +100,38 @@ export function ClientRegistrationForm() {
 		event.preventDefault();
 		setFormError("");
 		if (step === 0) {
+			const errors = validateRegistrationIdentity({
+				firstName,
+				lastName,
+				customerCode,
+				ice,
+			});
+			setIdentityErrors(errors);
+			const firstInvalidField = (
+				[
+					["firstName", firstNameRef],
+					["lastName", lastNameRef],
+					["customerCode", customerCodeRef],
+					["ice", iceRef],
+				] as const
+			).find(([field]) => errors[field]);
+			if (firstInvalidField) {
+				window.requestAnimationFrame(() =>
+					firstInvalidField[1].current?.focus(),
+				);
+				return;
+			}
 			setStep(1);
+			scrollToStepStart();
 			return;
 		}
+		const emailValidity = emailRef.current?.validity;
+		if (!email.trim() || !emailValidity?.valid) {
+			setEmailError(email.trim() ? "format" : "required");
+			window.requestAnimationFrame(() => emailRef.current?.focus());
+			return;
+		}
+		setEmailError(undefined);
 		if (!isStrongPassword(password)) {
 			setFormError(t(Messages.auth.passwordHint));
 			window.requestAnimationFrame(() => passwordRef.current?.focus());
@@ -118,7 +169,11 @@ export function ClientRegistrationForm() {
 
 	return (
 		<AuthPageLayout>
-			<form onSubmit={submit} className="mx-auto grid w-full max-w-md gap-4">
+			<form
+				onSubmit={submit}
+				noValidate
+				className="mx-auto grid w-full max-w-md gap-4"
+			>
 				<header className="grid gap-control px-4">
 					<h1 className="text-2xl font-bold tracking-tight">
 						{t(Messages.auth.signup.title)}
@@ -167,13 +222,34 @@ export function ClientRegistrationForm() {
 										</Label>
 										<Input
 											id="registration-first-name"
+											ref={firstNameRef}
 											value={firstName}
 											placeholder={t(Messages.auth.signup.firstNamePlaceholder)}
 											autoComplete="given-name"
 											required
+											aria-invalid={Boolean(identityErrors.firstName)}
+											aria-describedby={
+												identityErrors.firstName
+													? "registration-first-name-error"
+													: undefined
+											}
 											maxLength={100}
-											onChange={(event) => setFirstName(event.target.value)}
+											onChange={(event) => {
+												setFirstName(event.target.value);
+												setIdentityErrors((current) => ({
+													...current,
+													firstName: undefined,
+												}));
+											}}
 										/>
+										{identityErrors.firstName && (
+											<p
+												id="registration-first-name-error"
+												className="text-meta text-destructive"
+											>
+												{t(Messages.apiError.validationRules.isNotEmpty)}
+											</p>
+										)}
 									</div>
 									<div className="oncf-field">
 										<Label htmlFor="registration-last-name">
@@ -181,13 +257,34 @@ export function ClientRegistrationForm() {
 										</Label>
 										<Input
 											id="registration-last-name"
+											ref={lastNameRef}
 											value={lastName}
 											placeholder={t(Messages.auth.signup.lastNamePlaceholder)}
 											autoComplete="family-name"
 											required
+											aria-invalid={Boolean(identityErrors.lastName)}
+											aria-describedby={
+												identityErrors.lastName
+													? "registration-last-name-error"
+													: undefined
+											}
 											maxLength={100}
-											onChange={(event) => setLastName(event.target.value)}
+											onChange={(event) => {
+												setLastName(event.target.value);
+												setIdentityErrors((current) => ({
+													...current,
+													lastName: undefined,
+												}));
+											}}
 										/>
+										{identityErrors.lastName && (
+											<p
+												id="registration-last-name-error"
+												className="text-meta text-destructive"
+											>
+												{t(Messages.apiError.validationRules.isNotEmpty)}
+											</p>
+										)}
 									</div>
 									<div className="oncf-field">
 										<Label htmlFor="registration-customer-code">
@@ -195,15 +292,36 @@ export function ClientRegistrationForm() {
 										</Label>
 										<Input
 											id="registration-customer-code"
+											ref={customerCodeRef}
 											value={customerCode}
 											autoComplete="off"
 											required
+											aria-invalid={Boolean(identityErrors.customerCode)}
+											aria-describedby={
+												identityErrors.customerCode
+													? "registration-customer-code-error"
+													: undefined
+											}
 											maxLength={50}
 											placeholder={t(
 												Messages.auth.signup.customerCodePlaceholder,
 											)}
-											onChange={(event) => setCustomerCode(event.target.value)}
+											onChange={(event) => {
+												setCustomerCode(event.target.value);
+												setIdentityErrors((current) => ({
+													...current,
+													customerCode: undefined,
+												}));
+											}}
 										/>
+										{identityErrors.customerCode && (
+											<p
+												id="registration-customer-code-error"
+												className="text-meta text-destructive"
+											>
+												{t(Messages.apiError.validationRules.isNotEmpty)}
+											</p>
+										)}
 									</div>
 									<div className="oncf-field">
 										<Label htmlFor="registration-ice">
@@ -211,22 +329,47 @@ export function ClientRegistrationForm() {
 										</Label>
 										<Input
 											id="registration-ice"
+											ref={iceRef}
 											value={ice}
 											autoComplete="off"
 											inputMode="numeric"
 											required
+											aria-invalid={Boolean(identityErrors.ice)}
 											maxLength={CUSTOMER_ICE_LENGTH}
-											pattern={CUSTOMER_ICE_PATTERN.source}
-											aria-describedby="registration-ice-help"
+											pattern={`[0-9]{${CUSTOMER_ICE_LENGTH}}`}
+											aria-describedby={
+												identityErrors.ice
+													? "registration-ice-error"
+													: "registration-ice-help"
+											}
 											placeholder={t(Messages.auth.signup.icePlaceholder)}
-											onChange={(event) => setIce(event.target.value)}
+											onChange={(event) => {
+												setIce(event.target.value);
+												setIdentityErrors((current) => ({
+													...current,
+													ice: undefined,
+												}));
+											}}
 										/>
-										<p
-											id="registration-ice-help"
-											className="text-meta text-muted-foreground"
-										>
-											{t(Messages.auth.signup.iceHelp)}
-										</p>
+										{identityErrors.ice ? (
+											<p
+												id="registration-ice-error"
+												className="text-meta text-destructive"
+											>
+												{t(
+													identityErrors.ice === "required"
+														? Messages.apiError.validationRules.isNotEmpty
+														: Messages.apiError.validationRules.matches,
+												)}
+											</p>
+										) : (
+											<p
+												id="registration-ice-help"
+												className="text-meta text-muted-foreground"
+											>
+												{t(Messages.auth.signup.iceHelp)}
+											</p>
+										)}
 									</div>
 								</div>
 							) : (
@@ -237,14 +380,34 @@ export function ClientRegistrationForm() {
 										</Label>
 										<Input
 											id="registration-email"
+											ref={emailRef}
 											value={email}
 											type="email"
 											placeholder={t(Messages.auth.signup.emailPlaceholder)}
 											autoComplete="email"
 											required
+											aria-invalid={Boolean(emailError)}
+											aria-describedby={
+												emailError ? "registration-email-error" : undefined
+											}
 											maxLength={100}
-											onChange={(event) => setEmail(event.target.value)}
+											onChange={(event) => {
+												setEmail(event.target.value);
+												setEmailError(undefined);
+											}}
 										/>
+										{emailError && (
+											<p
+												id="registration-email-error"
+												className="text-meta text-destructive"
+											>
+												{t(
+													emailError === "required"
+														? Messages.apiError.validationRules.isNotEmpty
+														: Messages.apiError.validationRules.isEmail,
+												)}
+											</p>
+										)}
 									</div>
 									<div className="grid items-start gap-4 sm:grid-cols-2">
 										<div className="oncf-field">
@@ -331,6 +494,7 @@ export function ClientRegistrationForm() {
 										onClick={() => {
 											setFormError("");
 											setStep(0);
+											scrollToStepStart();
 										}}
 									>
 										{t(Messages.auth.signup.back)}

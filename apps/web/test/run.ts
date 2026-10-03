@@ -21,6 +21,7 @@ import "./claim-conversation-utils.test";
 import "./claim-labels.test";
 import "./customer-form-schema.test";
 import "./customer-identity.test";
+import "./client-registration-validation.test";
 import "./customer-type-label.test";
 import "./selector-field-layout.test";
 import "./date-utils.test";
