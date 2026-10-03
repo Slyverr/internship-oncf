@@ -96,6 +96,14 @@ function readPreferences(): AppearancePreferences {
 	}
 }
 
+function persistPreferencesLocally(preferences: AppearancePreferences) {
+	try {
+		window.localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences));
+	} catch {
+		// Appearance remains available for the current page when storage is blocked.
+	}
+}
+
 function isThemeMode(value: unknown): value is ThemeMode {
 	return (
 		typeof value === "string" && APPEARANCE_THEMES.includes(value as ThemeMode)
@@ -146,16 +154,7 @@ export function AppearanceProvider({
 		const storedPreferences = initialPreferences ?? readPreferences();
 		setPreferencesState(storedPreferences);
 		applyAppearance(storedPreferences);
-		if (initialPreferences) {
-			try {
-				window.localStorage.setItem(
-					STORAGE_KEY,
-					JSON.stringify(initialPreferences),
-				);
-			} catch {
-				// The server preference remains active for the current page.
-			}
-		}
+		persistPreferencesLocally(storedPreferences);
 		setInitialized(true);
 	}, [initialPreferences]);
 
@@ -174,14 +173,7 @@ export function AppearanceProvider({
 
 	const setPreferences = useCallback(
 		(nextPreferences: AppearancePreferences) => {
-			try {
-				window.localStorage.setItem(
-					STORAGE_KEY,
-					JSON.stringify(nextPreferences),
-				);
-			} catch {
-				// Appearance remains available for the current page when storage is blocked.
-			}
+			persistPreferencesLocally(nextPreferences);
 			applyAppearance(nextPreferences);
 			setPreferencesState(nextPreferences);
 		},
@@ -241,6 +233,21 @@ export function AppearanceProvider({
 			{children}
 		</AppearanceContext.Provider>
 	);
+}
+
+export function writeAppearancePreferenceCookie(
+	preferences: AppearancePreferences,
+	userId: number,
+) {
+	try {
+		const secure = window.location.protocol === "https:" ? "; Secure" : "";
+		const value = encodeURIComponent(JSON.stringify({ userId, preferences }));
+		// The cookie is a non-sensitive, user-scoped render cache read by Next.js.
+		// biome-ignore lint/suspicious/noDocumentCookie: server rendering needs this preference snapshot in a request cookie.
+		document.cookie = `ecommand-appearance=${value}; Path=/; Max-Age=31536000; SameSite=Lax${secure}`;
+	} catch {
+		// Server preferences remain available even when the cache cookie is blocked.
+	}
 }
 
 export function useAppearance() {

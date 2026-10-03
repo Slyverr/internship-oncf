@@ -23,7 +23,11 @@ import {
 	useProfileControllerGetPreferences,
 	useProfileControllerUpdatePreferences,
 } from "@/lib/api/profile";
-import { useAppearance } from "@/providers/appearance-provider";
+import {
+	useAppearance,
+	writeAppearancePreferenceCookie,
+} from "@/providers/appearance-provider";
+import { useAuth } from "@/providers/auth-provider";
 
 export type AppearanceSyncStatus = "loading" | "saving" | "saved" | "local";
 
@@ -51,6 +55,7 @@ export function AppearancePreferencesSync({
 }: {
 	children: ReactNode;
 }) {
+	const { profile } = useAuth();
 	const {
 		initialized,
 		preferences,
@@ -77,6 +82,11 @@ export function AppearancePreferencesSync({
 	const saveQueue = useRef<Promise<void>>(Promise.resolve());
 	const currentPreferences = useRef(preferences);
 	currentPreferences.current = preferences;
+	useEffect(() => {
+		if (!initialized) return;
+		writeAppearancePreferenceCookie(preferences, profile.id);
+	}, [initialized, preferences, profile.id]);
+
 	const enqueueLatestSave = useCallback(() => {
 		saveQueue.current = saveQueue.current.then(async () => {
 			const latestPreferences = currentPreferences.current;
