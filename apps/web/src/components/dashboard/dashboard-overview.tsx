@@ -280,6 +280,7 @@ function UserAccountsSection({
 	const metrics = [
 		{ label: Messages.dashboard.accounts.total, value: summary.total },
 		{ label: Messages.dashboard.accounts.active, value: summary.active },
+		{ label: Messages.dashboard.accounts.pending, value: summary.pending },
 		{ label: Messages.dashboard.accounts.inactive, value: summary.inactive },
 	];
 	return (
@@ -312,21 +313,23 @@ function UserAccountsSection({
 					/>
 				) : (
 					<div className="grid min-w-0 gap-6 @3xl/workspace:grid-cols-2 @6xl/workspace:grid-cols-3">
-						<dl className="grid grid-cols-3 gap-control">
-							{metrics.map(({ label, value }, index) => (
-								<div
-									key={label}
-									className={`grid content-start gap-compact border-border/70 ${index > 0 ? "border-l px-control" : "border-l-0 px-0"}`}
-								>
-									<dt className="text-meta text-muted-foreground">
-										{t(label)}
-									</dt>
-									<dd className="text-2xl font-semibold tabular-nums">
-										{value}
-									</dd>
-								</div>
-							))}
-						</dl>
+						<div className="@container/account-metrics min-w-0">
+							<dl className="grid grid-cols-2 gap-x-4 gap-y-6 @2xl/account-metrics:grid-cols-4">
+								{metrics.map(({ label, value }) => (
+									<div
+										key={label}
+										className="grid min-w-0 content-start gap-compact"
+									>
+										<dt className="text-meta text-muted-foreground">
+											{t(label)}
+										</dt>
+										<dd className="text-2xl font-semibold tabular-nums">
+											{value}
+										</dd>
+									</div>
+								))}
+							</dl>
+						</div>
 						{roleCounts.length > 0 && (
 							<section className="grid min-w-0 content-start gap-control border-t border-border/70 pt-4 @3xl/workspace:border-l @3xl/workspace:border-t-0 @3xl/workspace:pl-6 @3xl/workspace:pt-0">
 								<h3 className="text-sm font-medium">

@@ -284,6 +284,7 @@ export const en = {
 			description: "A live overview of account access and registration state.",
 			total: "Total accounts",
 			active: "Active",
+			pending: "Pending",
 			inactive: "Inactive",
 			byAccessProfile: "Accounts by access profile",
 			roleChartLabel: "Accounts by access profile: {roles}",

@@ -276,6 +276,7 @@ export const Messages = {
 			description: "dashboard.accounts.description",
 			total: "dashboard.accounts.total",
 			active: "dashboard.accounts.active",
+			pending: "dashboard.accounts.pending",
 			inactive: "dashboard.accounts.inactive",
 			byAccessProfile: "dashboard.accounts.byAccessProfile",
 			roleChartLabel: "dashboard.accounts.roleChartLabel",
