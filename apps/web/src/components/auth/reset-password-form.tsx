@@ -33,7 +33,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
 	return (
 		<AuthPageLayout>
 			<Card className="w-full max-w-sm">
-				<form action={action}>
+				<form action={action} className="grid gap-4">
 					<CardHeader className="space-y-2 text-center">
 						<CardTitle className="text-2xl font-bold">
 							{t(Messages.auth.recovery.resetTitle)}
