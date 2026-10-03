@@ -1473,6 +1473,7 @@ export const en = {
 				},
 			},
 			participantsAccessibleLabel: "Participants: {names}",
+			participantsTitle: "In this conversation",
 			showNewMessages: "New messages",
 			openCount: {
 				plural: {

@@ -1615,6 +1615,7 @@ export const frDraft = {
 				},
 			},
 			participantsAccessibleLabel: "Participants : {names}",
+			participantsTitle: "Dans cette conversation",
 			showNewMessages: "Nouveaux messages",
 			openCount: {
 				plural: {

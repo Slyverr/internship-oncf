@@ -12,7 +12,12 @@ import {
 	useRef,
 	useState,
 } from "react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+	Avatar,
+	AvatarFallback,
+	AvatarGroup,
+	AvatarGroupCount,
+} from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -22,6 +27,11 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/toast";
@@ -59,6 +69,14 @@ interface ClaimConversationProps {
 	claimCreator: { id: number; name: string };
 }
 
+function getInitials(name: string) {
+	return name
+		.split(" ")
+		.map((part) => part[0])
+		.join("")
+		.toUpperCase();
+}
+
 function CommentMessage({
 	comment,
 	currentUserId,
@@ -87,11 +105,7 @@ function CommentMessage({
 	const fullMessageTime = formatFullMessageTime(comment.createdAt, locale);
 	const authorName =
 		comment.authorName ?? t(Messages.claims.conversation.formerUser);
-	const initials = authorName
-		.split(" ")
-		.map((part) => part[0])
-		.join("")
-		.toUpperCase();
+	const initials = getInitials(authorName);
 	const showIncomingAvatar =
 		!isOwnMessage && (groupPosition === "single" || groupPosition === "last");
 	const groupedCornerRadius = isOwnMessage
@@ -271,7 +285,7 @@ export function ClaimConversation({
 				);
 			}
 		}
-		return [...byUserId.values()];
+		return [...byUserId].map(([id, name]) => ({ id, name }));
 	}, [claimCreator.id, claimCreator.name, chronological, t]);
 	const conversationDayKeys = new Set(
 		chronological.map((comment) => getMessageDayKey(comment.createdAt)),
@@ -435,36 +449,84 @@ export function ClaimConversation({
 				)}
 			</Button>
 			<DialogContent size="conversation" className="gap-0 overflow-hidden p-0">
-				<DialogHeader className="items-center px-4 py-3 sm:px-6">
-					<div className="grid min-w-0 gap-1">
-						<DialogTitle className="truncate text-base sm:text-lg">
-							{t(Messages.claims.conversation.dialogTitle)}
-						</DialogTitle>
-						<DialogDescription className="grid min-w-0 gap-1 text-caption">
-							<span className="truncate">{claimNumber}</span>
-							<span className="flex min-w-0 items-center gap-x-compact whitespace-nowrap">
-								<span>
-									{t(Messages.claims.conversation.messagesCount, {
-										count: chronological.length || commentCount,
-									})}
-								</span>
-								<span aria-hidden="true" className="px-1">
-									·
-								</span>
-								<span
-									role="img"
-									title={participants.join(", ")}
-									aria-label={t(
-										Messages.claims.conversation.participantsAccessibleLabel,
-										{ names: participants.join(", ") },
+				<DialogHeader className="items-center gap-0 px-4 py-2 pb-2 sm:px-6">
+					<div className="flex min-w-0 items-center justify-between gap-3">
+						<div className="flex min-w-0 items-baseline gap-3">
+							<DialogTitle className="shrink-0 text-base">
+								{t(Messages.claims.conversation.dialogTitle)}
+							</DialogTitle>
+							<DialogDescription className="min-w-0 truncate text-caption">
+								<span className="sr-only">{claimNumber} · </span>
+								{t(Messages.claims.conversation.messagesCount, {
+									count: chronological.length || commentCount,
+								})}
+							</DialogDescription>
+						</div>
+						<Popover>
+							<PopoverTrigger
+								render={
+									<Button
+										variant="ghost"
+										size="sm"
+										aria-label={t(
+											Messages.claims.conversation.participantsAccessibleLabel,
+											{
+												names: participants.map(({ name }) => name).join(", "),
+											},
+										)}
+										title={participants.map(({ name }) => name).join(", ")}
+										className="h-9 shrink-0 gap-2 px-2"
+									/>
+								}
+							>
+								<AvatarGroup aria-hidden="true">
+									{participants.slice(0, 3).map(({ id, name }) => (
+										<Avatar
+											key={id}
+											className="size-7 border border-background"
+										>
+											<AvatarFallback className="text-micro">
+												{getInitials(name)}
+											</AvatarFallback>
+										</Avatar>
+									))}
+									{participants.length > 3 && (
+										<AvatarGroupCount className="size-7 text-micro">
+											+{participants.length - 3}
+										</AvatarGroupCount>
 									)}
-								>
-									{t(Messages.claims.conversation.participantsCount, {
-										count: participants.length,
-									})}
+								</AvatarGroup>
+								<span className="text-caption tabular-nums text-muted-foreground">
+									{participants.length}
 								</span>
-							</span>
-						</DialogDescription>
+							</PopoverTrigger>
+							<PopoverContent
+								aria-label={t(Messages.claims.conversation.participantsTitle)}
+							>
+								<div className="mb-3 flex items-baseline justify-between gap-4">
+									<p className="text-sm font-semibold">
+										{t(Messages.claims.conversation.participantsTitle)}
+									</p>
+									<span className="text-caption text-muted-foreground">
+										{t(Messages.claims.conversation.participantsCount, {
+											count: participants.length,
+										})}
+									</span>
+								</div>
+								<ul className="grid gap-compact">
+									{participants.map(({ id, name }) => (
+										<li key={id} className="flex min-w-0 items-center gap-3">
+											<Avatar className="size-8">
+												<AvatarFallback className="text-caption">
+													{getInitials(name)}
+												</AvatarFallback>
+											</Avatar>
+											<span className="truncate text-sm">{name}</span>
+										</li>
+									))}
+								</ul>
+							</PopoverContent>
+						</Popover>
 					</div>
 				</DialogHeader>
 				<DialogBody className="grid min-h-0 grid-rows-[minmax(0,1fr)_auto] overflow-hidden">

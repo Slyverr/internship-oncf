@@ -1436,6 +1436,7 @@ export const Messages = {
 			yesterday: "claims.conversation.yesterday",
 			messagesCount: "claims.conversation.messagesCount",
 			participantsCount: "claims.conversation.participantsCount",
+			participantsTitle: "claims.conversation.participantsTitle",
 			participantsAccessibleLabel:
 				"claims.conversation.participantsAccessibleLabel",
 			showNewMessages: "claims.conversation.showNewMessages",

@@ -43,8 +43,13 @@ assert.match(
 );
 assert.match(
 	source,
-	/Messages\.claims\.conversation\.messagesCount[\s\S]*?Messages\.claims\.conversation\.participantsCount/,
-	"The conversation header must summarize the message and participant counts.",
+	/<DialogHeader className="items-center gap-0 px-4 py-2 pb-2 sm:px-6">[\s\S]*?Messages\.claims\.conversation\.messagesCount/,
+	"The conversation header must keep its summary in a compact horizontal row.",
+);
+assert.match(
+	source,
+	/<AvatarGroup aria-hidden="true">[\s\S]*?<PopoverContent[\s\S]*?participants\.map\(\(\{ id, name \}\)/,
+	"The participant avatar group must open a list limited to the conversation members.",
 );
 assert.match(
 	source,
