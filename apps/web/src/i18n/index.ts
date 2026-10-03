@@ -246,6 +246,7 @@ export const apiErrorMessages: Record<ApiErrorCode, MessageKey> = {
 		Messages.apiError.customerIdentityInvalid,
 	[API_ERROR_CODES.AUTHENTICATION_REQUIRED]:
 		Messages.apiError.authenticationRequired,
+	[API_ERROR_CODES.AUTH_ACCOUNT_LOCKED]: Messages.apiError.accountLocked,
 	[API_ERROR_CODES.CONFLICT]: Messages.apiError.conflict,
 	[API_ERROR_CODES.INTERNAL_ERROR]: Messages.apiError.internal,
 	[API_ERROR_CODES.INVALID_IDENTIFIER]: Messages.apiError.invalidIdentifier,

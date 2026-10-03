@@ -67,6 +67,19 @@ export class OrdersController {
 		return this.ordersService.create(createOrderDto, req.user);
 	}
 
+	@Post(":id/duplicate")
+	@RequireAny(Permission.ORDERS_CREATE)
+	@OrderDetailResponse()
+	async duplicate(
+		@OrderNumberParam() number: OrderNumber,
+		@Request() req: AuthRequest,
+	) {
+		return this.ordersService.duplicate(
+			await this.ordersService.resolveOrderId(number),
+			req.user,
+		);
+	}
+
 	@Get()
 	@RequireAny(Permission.ORDERS_READ)
 	@OrderListResponse()

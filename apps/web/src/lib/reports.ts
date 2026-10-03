@@ -1,4 +1,5 @@
 import { customFetch } from "@/lib/axios";
+import { csvRowsToText } from "@/lib/csv";
 
 export interface ReportCount {
 	id: number | string;
@@ -26,12 +27,6 @@ export interface OrderReportCsvLabels {
 	byMonth: string;
 }
 
-function escapeCsvCell(value: string | number): string {
-	const text = String(value);
-	const safeText = /^[=+@\-\t\r]/.test(text) ? `'${text}` : text;
-	return `"${safeText.replaceAll('"', '""')}"`;
-}
-
 export function orderReportToCsv(
 	report: OrderReport,
 	labels: OrderReportCsvLabels,
@@ -53,9 +48,7 @@ export function orderReportToCsv(
 		),
 	];
 
-	return [[labels.section, labels.name, labels.orders], ...rows]
-		.map((row) => row.map(escapeCsvCell).join(","))
-		.join("\r\n");
+	return csvRowsToText([[labels.section, labels.name, labels.orders], ...rows]);
 }
 
 export function hasInvalidOrderReportDateRange(from: string, to: string) {

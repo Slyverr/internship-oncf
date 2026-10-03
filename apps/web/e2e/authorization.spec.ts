@@ -75,7 +75,9 @@ test("agent can create a scoped claim and an eligible-order program", async ({
 	await verifyAgentOperationalCreation(page);
 });
 
-test("client can submit an order through the guided form", async ({ page }) => {
+test("client can submit an order and print its details to PDF", async ({
+	page,
+}) => {
 	await verifyClientOrderSubmission(page);
 });
 

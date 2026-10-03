@@ -1,3 +1,4 @@
+import { OrderStatus } from "@ecommand/shared";
 import { PlusIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -117,6 +118,7 @@ export default async function Page({ searchParams }: PageProps) {
 			<OrdersTable
 				data={orders}
 				search={typeof query.search === "string" ? query.search : ""}
+				status={query.status as OrderStatus | undefined}
 				sortBy={typeof query.sortBy === "string" ? query.sortBy : undefined}
 				sortOrder={query.sortOrder}
 			/>

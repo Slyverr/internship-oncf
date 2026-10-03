@@ -1,12 +1,20 @@
+import type { ManagedReferenceResource } from "@ecommand/shared";
 import { Injectable } from "@nestjs/common";
 import {
 	accessoryOperations,
+	agencies,
+	berths,
 	goods,
 	goodsTypes,
+	ports,
 	rejectionReasons,
+	shippingCompanies,
+	sidings,
+	stations,
 	units,
+	vessels,
 } from "drizzle/schema";
-import { eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { DrizzleService } from "@/database/drizzle.service";
 import { withDbErrorHandling } from "@/database/drizzle.util";
 import {
@@ -21,10 +29,306 @@ import {
 	UnitInsert,
 	UnitUpdate,
 } from "./catalog.types";
+import type {
+	CreateManagedReferenceDataDto,
+	UpdateManagedReferenceDataDto,
+} from "./requests/managed-reference-data.dto";
 
 @Injectable()
 export class CatalogQuery {
 	constructor(private readonly drizzle: DrizzleService) {}
+
+	async findManagedReferenceData(resource: ManagedReferenceResource) {
+		switch (resource) {
+			case "stations":
+				return this.drizzle.db.query.stations.findMany({
+					orderBy: { name: "asc" },
+				});
+			case "agencies":
+				return this.drizzle.db.query.agencies.findMany({
+					orderBy: { name: "asc" },
+				});
+			case "ports": {
+				const rows = await this.drizzle.db.query.ports.findMany({
+					with: { station: { columns: { id: true, name: true } } },
+					orderBy: { name: "asc" },
+				});
+				return rows.map(({ station, ...port }) => ({
+					...port,
+					stationName: station?.name ?? null,
+				}));
+			}
+			case "berths": {
+				const rows = await this.drizzle.db.query.berths.findMany({
+					with: { port: { columns: { id: true, name: true } } },
+					orderBy: { name: "asc" },
+				});
+				return rows.map(({ port, ...berth }) => ({
+					...berth,
+					portName: port?.name ?? null,
+				}));
+			}
+			case "sidings":
+				return this.drizzle.db.query.sidings.findMany({
+					orderBy: { name: "asc" },
+				});
+			case "vessels":
+				return this.drizzle.db
+					.select()
+					.from(vessels)
+					.orderBy(asc(vessels.name));
+			case "shippingCompanies":
+				return this.drizzle.db
+					.select()
+					.from(shippingCompanies)
+					.orderBy(asc(shippingCompanies.name));
+		}
+	}
+
+	async createManagedReferenceData(
+		resource: ManagedReferenceResource,
+		values: CreateManagedReferenceDataDto,
+	) {
+		const input = { ...values, createdAt: undefined };
+		switch (resource) {
+			case "stations":
+				return withDbErrorHandling(
+					() =>
+						this.drizzle.db
+							.insert(stations)
+							.values({
+								name: input.name,
+								stationCode: input.stationCode as string,
+								address: input.address ?? null,
+								city: input.city ?? null,
+							})
+							.returning(),
+					{},
+				);
+			case "agencies":
+				return withDbErrorHandling(
+					() =>
+						this.drizzle.db
+							.insert(agencies)
+							.values({
+								name: input.name,
+								city: input.city ?? null,
+								address: input.address ?? null,
+								phone: input.phone ?? null,
+								email: input.email ?? null,
+							})
+							.returning(),
+					{},
+				);
+			case "ports":
+				return withDbErrorHandling(
+					() =>
+						this.drizzle.db
+							.insert(ports)
+							.values({
+								name: input.name,
+								type: input.type as "normal" | "dry",
+								city: input.city ?? null,
+								stationId: input.stationId ?? null,
+							})
+							.returning(),
+					{},
+				);
+			case "berths":
+				return withDbErrorHandling(
+					() =>
+						this.drizzle.db
+							.insert(berths)
+							.values({ name: input.name, portId: input.portId as number })
+							.returning(),
+					{},
+				);
+			case "sidings":
+				return withDbErrorHandling(
+					() =>
+						this.drizzle.db
+							.insert(sidings)
+							.values({ name: input.name, city: input.city ?? null })
+							.returning(),
+					{},
+				);
+			case "vessels":
+				return withDbErrorHandling(
+					() =>
+						this.drizzle.db
+							.insert(vessels)
+							.values({ name: input.name })
+							.returning(),
+					{},
+				);
+			case "shippingCompanies":
+				return withDbErrorHandling(
+					() =>
+						this.drizzle.db
+							.insert(shippingCompanies)
+							.values({ name: input.name })
+							.returning(),
+					{},
+				);
+		}
+	}
+
+	async updateManagedReferenceData(
+		resource: ManagedReferenceResource,
+		id: number,
+		values: UpdateManagedReferenceDataDto,
+	) {
+		const updatedAt = new Date().toISOString();
+		switch (resource) {
+			case "stations":
+				return withDbErrorHandling(
+					() =>
+						this.drizzle.db
+							.update(stations)
+							.set({
+								name: values.name,
+								stationCode: values.stationCode as string,
+								address: values.address ?? null,
+								city: values.city ?? null,
+								isActive: values.isActive,
+								updatedAt,
+							})
+							.where(eq(stations.id, id))
+							.returning(),
+					{},
+				);
+			case "agencies":
+				return withDbErrorHandling(
+					() =>
+						this.drizzle.db
+							.update(agencies)
+							.set({
+								name: values.name,
+								city: values.city ?? null,
+								address: values.address ?? null,
+								phone: values.phone ?? null,
+								email: values.email ?? null,
+								isActive: values.isActive,
+								updatedAt,
+							})
+							.where(eq(agencies.id, id))
+							.returning(),
+					{},
+				);
+			case "ports":
+				return withDbErrorHandling(
+					() =>
+						this.drizzle.db
+							.update(ports)
+							.set({
+								name: values.name,
+								type: values.type as "normal" | "dry",
+								city: values.city ?? null,
+								stationId: values.stationId ?? null,
+								isActive: values.isActive,
+								updatedAt,
+							})
+							.where(eq(ports.id, id))
+							.returning(),
+					{},
+				);
+			case "berths":
+				return withDbErrorHandling(
+					() =>
+						this.drizzle.db
+							.update(berths)
+							.set({
+								name: values.name,
+								portId: values.portId as number,
+								isActive: values.isActive,
+								updatedAt,
+							})
+							.where(eq(berths.id, id))
+							.returning(),
+					{},
+				);
+			case "sidings":
+				return withDbErrorHandling(
+					() =>
+						this.drizzle.db
+							.update(sidings)
+							.set({
+								name: values.name,
+								city: values.city ?? null,
+								isActive: values.isActive,
+								updatedAt,
+							})
+							.where(eq(sidings.id, id))
+							.returning(),
+					{},
+				);
+			case "vessels":
+				return withDbErrorHandling(
+					() =>
+						this.drizzle.db
+							.update(vessels)
+							.set({ name: values.name, isActive: values.isActive, updatedAt })
+							.where(eq(vessels.id, id))
+							.returning(),
+					{},
+				);
+			case "shippingCompanies":
+				return withDbErrorHandling(
+					() =>
+						this.drizzle.db
+							.update(shippingCompanies)
+							.set({ name: values.name, isActive: values.isActive, updatedAt })
+							.where(eq(shippingCompanies.id, id))
+							.returning(),
+					{},
+				);
+		}
+	}
+
+	async hasActiveStation(id: number) {
+		return Boolean(
+			await this.drizzle.db.query.stations.findFirst({
+				where: { id, isActive: true },
+				columns: { id: true },
+			}),
+		);
+	}
+
+	async hasActivePortsForStation(id: number) {
+		return Boolean(
+			await this.drizzle.db.query.ports.findFirst({
+				where: { stationId: id, isActive: true },
+				columns: { id: true },
+			}),
+		);
+	}
+
+	async hasActivePort(id: number) {
+		return Boolean(
+			await this.drizzle.db.query.ports.findFirst({
+				where: { id, isActive: true },
+				columns: { id: true },
+			}),
+		);
+	}
+
+	async hasActiveBerthsForPort(id: number) {
+		return Boolean(
+			await this.drizzle.db.query.berths.findFirst({
+				where: { portId: id, isActive: true },
+				columns: { id: true },
+			}),
+		);
+	}
+
+	async hasActiveLoadingLocationsForPort(id: number) {
+		return Boolean(
+			await this.drizzle.db.query.loadingLocations.findFirst({
+				where: { portId: id, isActive: true },
+				columns: { id: true },
+			}),
+		);
+	}
 
 	async findUnits() {
 		return this.drizzle.db.query.units.findMany({

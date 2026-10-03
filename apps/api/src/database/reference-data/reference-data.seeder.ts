@@ -144,17 +144,23 @@ async function deactivateLegacyUnits(tx: DatabaseClient) {
 async function seedRolePermissions(tx: DatabaseClient) {
 	if (!ROLE_PERMISSIONS.length) return;
 
-	const adminPermissionIds = ROLE_PERMISSIONS_MAP[Role.ADMIN].map(
-		({ permissionId }) => permissionId,
-	);
-	await tx
-		.delete(rolePermissions)
-		.where(
-			and(
-				eq(rolePermissions.roleId, ROLES[Role.ADMIN].id),
-				notInArray(rolePermissions.permissionId, adminPermissionIds),
-			),
+	for (const role of [
+		Role.ADMIN,
+		Role.AGENT_COMMERCIAL,
+		Role.CLIENT_REPRESENTATIVE,
+	]) {
+		const permissionIds = ROLE_PERMISSIONS_MAP[role].map(
+			({ permissionId }) => permissionId,
 		);
+		await tx
+			.delete(rolePermissions)
+			.where(
+				and(
+					eq(rolePermissions.roleId, ROLES[role].id),
+					notInArray(rolePermissions.permissionId, permissionIds),
+				),
+			);
+	}
 
 	await tx
 		.insert(rolePermissions)

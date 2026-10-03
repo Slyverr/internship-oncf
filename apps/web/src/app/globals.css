@@ -621,4 +621,96 @@ html[data-motion="reduced"] *::after {
 		-webkit-print-color-adjust: exact;
 		print-color-adjust: exact;
 	}
+
+	html:has([data-order-print-root]) {
+		color-scheme: light;
+	}
+	body:has([data-order-print-root]) {
+		position: relative;
+		margin: 0;
+		background: white;
+		color: oklch(0.27 0.018 55);
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
+	}
+	body:has([data-order-print-root]) main:has([data-order-print-root]) {
+		display: block;
+		width: 100%;
+		max-width: none;
+		margin: 0;
+		padding: 0;
+		overflow: visible;
+	}
+	[data-order-print-root] {
+		position: absolute;
+		inset-block-start: 0;
+		inset-inline-start: 0;
+		z-index: 9999;
+		box-sizing: border-box;
+		width: 100%;
+		padding: 0;
+		background: white;
+		color: oklch(0.27 0.018 55);
+		font-size: 10pt;
+		line-height: 1.45;
+	}
+	body:has([data-order-print-root]) * {
+		visibility: hidden;
+	}
+	body:has([data-order-print-root]) [data-order-print-root],
+	body:has([data-order-print-root]) [data-order-print-root] * {
+		visibility: visible;
+	}
+	.order-print-header {
+		margin-block-end: 8mm;
+		padding-block-end: 6mm;
+		border-block-end: 2px solid oklch(0.48 0.13 38);
+	}
+	.order-print-header h1 {
+		margin-block: 2mm;
+		font-size: 22pt;
+		font-weight: 700;
+	}
+	.order-print-header p {
+		margin: 0;
+		color: oklch(0.49 0.018 55);
+	}
+	.order-print-header .order-print-brand {
+		color: oklch(0.48 0.13 38);
+		font-size: 9pt;
+		font-weight: 700;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+	}
+	.order-print-section {
+		margin-block: 0 6mm;
+		break-inside: avoid;
+	}
+	.order-print-section h2 {
+		margin-block: 0 3mm;
+		padding-block-end: 2mm;
+		border-block-end: 1px solid oklch(0.87 0.012 70);
+		font-size: 12pt;
+		font-weight: 700;
+	}
+	.order-print-section dl {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		column-gap: 8mm;
+		row-gap: 3mm;
+		margin: 0;
+	}
+	.order-print-field {
+		min-width: 0;
+		break-inside: avoid;
+	}
+	.order-print-field dt {
+		color: oklch(0.49 0.018 55);
+		font-size: 8.5pt;
+	}
+	.order-print-field dd {
+		margin: 1mm 0 0;
+		overflow-wrap: anywhere;
+		font-weight: 600;
+	}
 }

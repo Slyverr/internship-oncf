@@ -20,6 +20,8 @@ const e2eEnv = {
 	DATABASE_URL: `postgresql://postgres:postgres@127.0.0.1:${postgresPort}/ecommand_e2e`,
 	JWT_SECRET: "ecommand-e2e-test-secret-not-for-production",
 	JWT_EXPIRES_IN: "30m",
+	AUTH_LOGIN_MAX_ATTEMPTS: "3",
+	AUTH_LOGIN_LOCK_DURATION_SECONDS: "1",
 	WEB_APP_URL: "http://localhost:3000",
 };
 

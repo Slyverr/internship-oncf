@@ -1,6 +1,7 @@
+import { RegistrationStatus } from "@ecommand/shared";
 import { Injectable } from "@nestjs/common";
 import { passwordResetTokens, userSessions, users } from "drizzle/schema";
-import { and, eq, gte } from "drizzle-orm";
+import { and, eq, gte, lte, sql } from "drizzle-orm";
 import { DrizzleService } from "@/database/drizzle.service";
 import type { UserId } from "@/users/users.types";
 
@@ -34,10 +35,61 @@ export class AuthQuery {
 			.where(eq(userSessions.sessionToken, sessionToken));
 	}
 
+	async recordFailedLoginAttempt(
+		userId: UserId,
+		maxAttempts: number,
+		lockDurationSeconds: number,
+		now = new Date(),
+	) {
+		const nowIso = now.toISOString();
+		const lockUntil = new Date(
+			now.getTime() + lockDurationSeconds * 1000,
+		).toISOString();
+		const expiredLock = and(
+			sql`${users.accountLockedUntil} IS NOT NULL`,
+			lte(users.accountLockedUntil, nowIso),
+		);
+
+		const [updated] = await this.drizzle.db
+			.update(users)
+			.set({
+				failedLoginAttempts: sql<number>`CASE WHEN ${expiredLock} THEN 1 ELSE COALESCE(${users.failedLoginAttempts}, 0) + 1 END`,
+				accountLockedUntil: sql<
+					string | null
+				>`CASE WHEN ${expiredLock} THEN CASE WHEN ${maxAttempts} <= 1 THEN ${lockUntil} ELSE NULL END WHEN COALESCE(${users.failedLoginAttempts}, 0) + 1 >= ${maxAttempts} THEN ${lockUntil} ELSE ${users.accountLockedUntil} END`,
+			})
+			.where(
+				and(
+					eq(users.id, userId),
+					eq(users.isActive, true),
+					eq(users.registrationStatus, RegistrationStatus.APPROVED),
+				),
+			)
+			.returning({
+				failedLoginAttempts: users.failedLoginAttempts,
+				accountLockedUntil: users.accountLockedUntil,
+			});
+		return updated;
+	}
+
+	async resetFailedLoginAttempts(userId: UserId) {
+		await this.drizzle.db
+			.update(users)
+			.set({ failedLoginAttempts: 0, accountLockedUntil: null })
+			.where(eq(users.id, userId));
+	}
+
 	async updatePasswordAndRevokeSessions(userId: UserId, password: string) {
 		await this.drizzle.db.transaction(async (tx) => {
 			const now = new Date().toISOString();
-			await tx.update(users).set({ password }).where(eq(users.id, userId));
+			await tx
+				.update(users)
+				.set({
+					password,
+					failedLoginAttempts: 0,
+					accountLockedUntil: null,
+				})
+				.where(eq(users.id, userId));
 			await tx
 				.update(userSessions)
 				.set({ logoutAt: now })
@@ -110,7 +162,11 @@ export class AuthQuery {
 
 			await tx
 				.update(users)
-				.set({ password })
+				.set({
+					password,
+					failedLoginAttempts: 0,
+					accountLockedUntil: null,
+				})
 				.where(eq(users.id, consumedToken.userId));
 			await tx
 				.update(userSessions)

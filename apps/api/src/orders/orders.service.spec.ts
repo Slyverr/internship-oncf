@@ -1,5 +1,6 @@
 import { API_ERROR_CODES, OrderStatus } from "@ecommand/shared";
 import { ConflictException } from "@nestjs/common";
+import type { AuthUser } from "@/auth/auth.types";
 import { OrdersQuery } from "./orders.query";
 import { OrdersService } from "./orders.service";
 import type { OrderId } from "./orders.types";
@@ -61,5 +62,79 @@ describe("OrdersService public code resolution", () => {
 		).rejects.toMatchObject({
 			response: { code: API_ERROR_CODES.ORDER_NOT_FOUND },
 		});
+	});
+});
+
+describe("OrdersService duplication", () => {
+	it("creates a new draft from business fields only", async () => {
+		const sourceId = 5 as OrderId;
+		const actor: AuthUser = {
+			id: 9,
+			email: "client@example.test",
+			role: "CLIENT_REPRESENTATIVE" as never,
+			permissions: new Set(),
+			sessionId: "session",
+			customerId: 42,
+			agencyId: null,
+			assignedCustomerIds: [],
+		};
+		const source = {
+			id: 5,
+			goodsId: 4,
+			customerId: 42,
+			supervisor: "A supervisor",
+			movementTypeId: "movement",
+			quantityDemanded: "25",
+			quantityAchieved: "10",
+			unitId: "unit",
+			departureStationId: 1,
+			debtorCustomerId: 2,
+			pickupLocationTypeId: "pickup",
+			dispatchTypeId: "dispatch",
+			destinationCustomerId: 3,
+			arrivalStationId: 4,
+			deliveryLocationTypeId: "delivery",
+			pickupPortId: 5,
+			pickupBerthId: 6,
+			pickupSidingId: 7,
+			deliveryPortId: 8,
+			deliveryBerthId: 9,
+			deliverySidingId: 10,
+			remarks: "business context",
+			orderDate: "2026-10-01T00:00:00.000Z",
+			startDate: null,
+			endDate: "2026-10-31T00:00:00.000Z",
+			orderStatus: { name: OrderStatus.COMPLETED },
+			forecastPrograms: [{ id: 19 }],
+			orderExecutions: [{ id: 20 }],
+			orderFiles: [{ id: 21 }],
+			parentOrderId: 2,
+		};
+		const findOrder = jest.fn().mockResolvedValue(source);
+		const createOrder = jest.fn().mockResolvedValue({ id: 6 });
+		const mapper = { toCreate: jest.fn().mockReturnValue({}) };
+		const service = new OrdersService(
+			{} as never,
+			{ findOrder, createOrder } as unknown as OrdersQuery,
+			mapper as never,
+		);
+
+		await service.duplicate(sourceId, actor);
+
+		expect(mapper.toCreate).toHaveBeenCalledWith(
+			expect.objectContaining({
+				goodsId: 4,
+				customerId: 42,
+				quantityDemanded: "25",
+				unitId: "unit",
+				remarks: "business context",
+			}),
+			actor,
+		);
+		const duplicateDto = mapper.toCreate.mock.calls[0][0];
+		expect(duplicateDto).not.toHaveProperty("status");
+		expect(duplicateDto).not.toHaveProperty("quantityAchieved");
+		expect(duplicateDto).not.toHaveProperty("parentOrderId");
+		expect(createOrder).toHaveBeenCalledWith({});
 	});
 });

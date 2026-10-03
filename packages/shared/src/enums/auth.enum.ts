@@ -86,6 +86,13 @@ export enum Permission {
 	CATALOG_MANAGE_GOODS_TYPES = "catalog:manage:goods-types",
 	CATALOG_MANAGE_ACCESSORY_OPERATIONS = "catalog:manage:accessory-operations",
 	CATALOG_MANAGE_REJECTION_REASONS = "catalog:manage:rejection-reasons",
+	CATALOG_MANAGE_STATIONS = "catalog:manage:stations",
+	CATALOG_MANAGE_AGENCIES = "catalog:manage:agencies",
+	CATALOG_MANAGE_PORTS = "catalog:manage:ports",
+	CATALOG_MANAGE_BERTHS = "catalog:manage:berths",
+	CATALOG_MANAGE_SIDINGS = "catalog:manage:sidings",
+	CATALOG_MANAGE_VESSELS = "catalog:manage:vessels",
+	CATALOG_MANAGE_SHIPPING_COMPANIES = "catalog:manage:shipping-companies",
 
 	TRACKING_READ = "tracking:read",
 	TRACKING_UPDATE = "tracking:update",

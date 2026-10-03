@@ -1,14 +1,23 @@
 "use client";
 
-import { CATALOG_MANAGEMENT_REQUIREMENTS, Permission } from "@ecommand/shared";
+import {
+	CATALOG_MANAGEMENT_REQUIREMENTS,
+	ManagedReferenceResource,
+	Permission,
+} from "@ecommand/shared";
 import { useQueryClient } from "@tanstack/react-query";
 import {
+	AnchorIcon,
+	Building2Icon,
 	CircleHelpIcon,
+	MapPinIcon,
 	PackageIcon,
 	PencilIcon,
 	PlusIcon,
 	RulerIcon,
+	ShipIcon,
 	TagIcon,
+	TrainTrackIcon,
 	WrenchIcon,
 } from "lucide-react";
 import { type FormEvent, useEffect, useState } from "react";
@@ -75,6 +84,7 @@ import {
 } from "@/lib/api/catalog";
 import { getFormErrorMessage } from "@/lib/form-utils";
 import { useAuth } from "@/providers/auth-provider";
+import { ManagedReferenceDataSection } from "./managed-reference-data-section";
 
 type CatalogItem = { id: string; name: string; isActive: boolean };
 type GoodsTypeOption = CatalogItem;
@@ -129,6 +139,48 @@ const categoryOptions = [
 		permissions: CATALOG_MANAGEMENT_REQUIREMENTS.rejectionReasons,
 		message: Messages.referenceData.sections.rejectionReasons,
 		icon: CircleHelpIcon,
+	},
+	{
+		value: ManagedReferenceResource.STATIONS,
+		permissions: CATALOG_MANAGEMENT_REQUIREMENTS.stations,
+		message: Messages.referenceData.sections.stations,
+		icon: MapPinIcon,
+	},
+	{
+		value: ManagedReferenceResource.AGENCIES,
+		permissions: CATALOG_MANAGEMENT_REQUIREMENTS.agencies,
+		message: Messages.referenceData.sections.agencies,
+		icon: Building2Icon,
+	},
+	{
+		value: ManagedReferenceResource.PORTS,
+		permissions: CATALOG_MANAGEMENT_REQUIREMENTS.ports,
+		message: Messages.referenceData.sections.ports,
+		icon: AnchorIcon,
+	},
+	{
+		value: ManagedReferenceResource.BERTHS,
+		permissions: CATALOG_MANAGEMENT_REQUIREMENTS.berths,
+		message: Messages.referenceData.sections.berths,
+		icon: AnchorIcon,
+	},
+	{
+		value: ManagedReferenceResource.SIDINGS,
+		permissions: CATALOG_MANAGEMENT_REQUIREMENTS.sidings,
+		message: Messages.referenceData.sections.sidings,
+		icon: TrainTrackIcon,
+	},
+	{
+		value: ManagedReferenceResource.VESSELS,
+		permissions: CATALOG_MANAGEMENT_REQUIREMENTS.vessels,
+		message: Messages.referenceData.sections.vessels,
+		icon: ShipIcon,
+	},
+	{
+		value: ManagedReferenceResource.SHIPPING_COMPANIES,
+		permissions: CATALOG_MANAGEMENT_REQUIREMENTS.shippingCompanies,
+		message: Messages.referenceData.sections.shippingCompanies,
+		icon: Building2Icon,
 	},
 ] as const;
 
@@ -995,6 +1047,24 @@ export function ReferenceDataPage() {
 								}),
 							]);
 						}}
+					/>
+				)}
+				{[
+					ManagedReferenceResource.STATIONS,
+					ManagedReferenceResource.AGENCIES,
+					ManagedReferenceResource.PORTS,
+					ManagedReferenceResource.BERTHS,
+					ManagedReferenceResource.SIDINGS,
+					ManagedReferenceResource.VESSELS,
+					ManagedReferenceResource.SHIPPING_COMPANIES,
+				].includes(activeCategory as ManagedReferenceResource) && (
+					<ManagedReferenceDataSection
+						resource={activeCategory as ManagedReferenceResource}
+						title={t(
+							Messages.referenceData.sections[
+								activeCategory as keyof typeof Messages.referenceData.sections
+							],
+						)}
 					/>
 				)}
 			</div>

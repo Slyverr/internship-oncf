@@ -47,6 +47,59 @@ describe("AuthQuery", () => {
 		expect(where).toHaveBeenCalledWith(expect.anything());
 	});
 
+	it("atomically increments failed attempts and computes an account lock expiry", async () => {
+		const lockedUntil = "2030-01-01T00:15:00.000Z";
+		const returning = jest
+			.fn()
+			.mockResolvedValue([
+				{ failedLoginAttempts: 5, accountLockedUntil: lockedUntil },
+			]);
+		const where = jest.fn().mockReturnValue({ returning });
+		const set = jest.fn().mockReturnValue({ where });
+		const update = jest.fn().mockReturnValue({ set });
+		const query = new AuthQuery({ db: { update } } as never);
+
+		await expect(
+			query.recordFailedLoginAttempt(
+				userId,
+				5,
+				900,
+				new Date("2030-01-01T00:00:00.000Z"),
+			),
+		).resolves.toEqual({
+			failedLoginAttempts: 5,
+			accountLockedUntil: lockedUntil,
+		});
+		expect(update).toHaveBeenCalledWith(users);
+		expect(set).toHaveBeenCalledWith(
+			expect.objectContaining({
+				failedLoginAttempts: expect.any(Object),
+				accountLockedUntil: expect.any(Object),
+			}),
+		);
+		expect(where).toHaveBeenCalledWith(expect.anything());
+		expect(returning).toHaveBeenCalledWith({
+			failedLoginAttempts: users.failedLoginAttempts,
+			accountLockedUntil: users.accountLockedUntil,
+		});
+	});
+
+	it("clears failed attempts and an expired lock when sign-in succeeds", async () => {
+		const where = jest.fn().mockResolvedValue(undefined);
+		const set = jest.fn().mockReturnValue({ where });
+		const update = jest.fn().mockReturnValue({ set });
+		const query = new AuthQuery({ db: { update } } as never);
+
+		await query.resetFailedLoginAttempts(userId);
+
+		expect(update).toHaveBeenCalledWith(users);
+		expect(set).toHaveBeenCalledWith({
+			failedLoginAttempts: 0,
+			accountLockedUntil: null,
+		});
+		expect(where).toHaveBeenCalledWith(expect.anything());
+	});
+
 	it("updates a password and revokes all sessions atomically", async () => {
 		const set = jest.fn().mockReturnValue({
 			where: jest.fn().mockResolvedValue(undefined),
@@ -60,7 +113,11 @@ describe("AuthQuery", () => {
 
 		expect(transaction).toHaveBeenCalledTimes(1);
 		expect(update).toHaveBeenNthCalledWith(1, users);
-		expect(set).toHaveBeenNthCalledWith(1, { password: "hashed-password" });
+		expect(set).toHaveBeenNthCalledWith(1, {
+			password: "hashed-password",
+			failedLoginAttempts: 0,
+			accountLockedUntil: null,
+		});
 		expect(update).toHaveBeenNthCalledWith(2, userSessions);
 		expect(set).toHaveBeenNthCalledWith(2, { logoutAt: expect.any(String) });
 	});
@@ -249,7 +306,11 @@ describe("AuthQuery", () => {
 		expect(update).toHaveBeenNthCalledWith(1, passwordResetTokens);
 		expect(resetSet).toHaveBeenCalledWith({ used: true });
 		expect(update).toHaveBeenNthCalledWith(2, users);
-		expect(userSet).toHaveBeenCalledWith({ password: "hashed-password" });
+		expect(userSet).toHaveBeenCalledWith({
+			password: "hashed-password",
+			failedLoginAttempts: 0,
+			accountLockedUntil: null,
+		});
 		expect(update).toHaveBeenNthCalledWith(3, userSessions);
 		expect(sessionsSet).toHaveBeenCalledWith({ logoutAt: expect.any(String) });
 	});

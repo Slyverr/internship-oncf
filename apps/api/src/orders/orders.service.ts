@@ -44,6 +44,38 @@ export class OrdersService {
 		return this.findOne(created.id);
 	}
 
+	async duplicate(id: OrderId, user: AuthUser) {
+		const source = await this.findOne(id);
+		return this.create(
+			{
+				goodsId: source.goodsId,
+				customerId: source.customerId,
+				supervisor: source.supervisor ?? undefined,
+				movementTypeId: source.movementTypeId ?? undefined,
+				quantityDemanded: source.quantityDemanded,
+				unitId: source.unitId,
+				departureStationId: source.departureStationId ?? undefined,
+				debtorCustomerId: source.debtorCustomerId ?? undefined,
+				pickupLocationTypeId: source.pickupLocationTypeId ?? undefined,
+				dispatchTypeId: source.dispatchTypeId ?? undefined,
+				destinationCustomerId: source.destinationCustomerId ?? undefined,
+				arrivalStationId: source.arrivalStationId ?? undefined,
+				deliveryLocationTypeId: source.deliveryLocationTypeId ?? undefined,
+				pickupPortId: source.pickupPortId ?? undefined,
+				pickupBerthId: source.pickupBerthId ?? undefined,
+				pickupSidingId: source.pickupSidingId ?? undefined,
+				deliveryPortId: source.deliveryPortId ?? undefined,
+				deliveryBerthId: source.deliveryBerthId ?? undefined,
+				deliverySidingId: source.deliverySidingId ?? undefined,
+				remarks: source.remarks ?? undefined,
+				orderDate: source.orderDate,
+				startDate: source.startDate ?? undefined,
+				endDate: source.endDate ?? undefined,
+			},
+			user,
+		);
+	}
+
 	async findAll(user: AuthUser, query: OrderListQueryDto) {
 		return this.ordersQuery.findOrders(user, query);
 	}

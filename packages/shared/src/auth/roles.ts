@@ -29,7 +29,6 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<Role, Permission[]> = {
 		Permission.CLAIMS_CREATE,
 		Permission.CLAIMS_READ,
 		Permission.CLAIMS_ACTION_COMMENT,
-		Permission.CLAIMS_ACTION_CLOSE,
 
 		Permission.REPORTS_READ,
 		Permission.REPORTS_ACTION_EXPORT,

@@ -856,6 +856,68 @@ export async function verifyClientOrderSubmission(page: Page) {
 	expect(orderCreateRequests).toHaveLength(1);
 	await expect(page).toHaveURL(/\/dashboard\/orders\/ORD-[A-Z0-9]+$/);
 	await expect(page.getByRole("heading")).toContainText(/ORD-/);
+
+	const printButton = page.getByRole("button", {
+		name: translate(Messages.orders.detail.printPdf),
+		exact: true,
+	});
+	await expect(printButton).toBeVisible();
+	await page.evaluate(() => {
+		window.print = () =>
+			document.documentElement.setAttribute("data-print-requested", "true");
+	});
+	await printButton.click();
+	await expect(page.locator("html")).toHaveAttribute(
+		"data-print-requested",
+		"true",
+	);
+	await page.emulateMedia({ media: "print" });
+	const printDocument = page.locator("#order-print-document");
+	await expect(printDocument).toBeVisible();
+	await expect(printDocument).toContainText(/ORD-[A-Z0-9]+/);
+	await expect(printDocument).toContainText("E2E Test Cereals");
+	await expect(printDocument).toContainText("7 Tonnes");
+	await expect(
+		page.getByRole("button", {
+			name: translate(Messages.orders.detail.printPdf),
+		}),
+	).toBeHidden();
+	const pdf = await page.pdf({
+		format: "A4",
+		printBackground: true,
+		displayHeaderFooter: false,
+	});
+	expect(pdf.subarray(0, 4).toString()).toBe("%PDF");
+	expect(
+		Number(
+			pdf
+				.toString("latin1")
+				.match(/\/Type \/Pages\b[\s\S]*?\/Count (\d+)/)?.[1] ?? "0",
+		),
+	).toBeGreaterThan(0);
+
+	const originalOrderNumber = new URL(page.url()).pathname.split("/").at(-1);
+	await page.emulateMedia({ media: "screen" });
+	const duplicateResponse = page.waitForResponse(
+		(response) =>
+			response.request().method() === "POST" &&
+			new URL(response.url()).pathname.endsWith(
+				`/orders/${originalOrderNumber}/duplicate`,
+			),
+	);
+	await page
+		.getByRole("button", {
+			name: translate(Messages.orders.detail.duplicate),
+			exact: true,
+		})
+		.click();
+	const duplicatedResponse = await duplicateResponse;
+	expect(duplicatedResponse.status()).toBe(201);
+	await expect(page).toHaveURL(/\/dashboard\/orders\/ORD-[A-Z0-9]+$/);
+	expect(new URL(page.url()).pathname.split("/").at(-1)).not.toBe(
+		originalOrderNumber,
+	);
+	await expect(page.getByText("7 Tonnes", { exact: true })).toBeVisible();
 }
 export async function verifyClientAuthorization(page: Page) {
 	await signIn(page, E2E_USERS.clientA.email);

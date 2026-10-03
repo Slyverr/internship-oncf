@@ -18,6 +18,13 @@ const endpoints = [
 		serviceArgs: [order, user],
 	},
 	{
+		action: "duplicate",
+		permission: Permission.ORDERS_CREATE,
+		serviceMethod: "duplicate",
+		args: [orderNumber, { user }],
+		serviceArgs: [42, user],
+	},
+	{
 		action: "findAll",
 		permission: Permission.ORDERS_READ,
 		serviceMethod: "findAll",

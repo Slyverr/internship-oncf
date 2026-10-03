@@ -22,6 +22,23 @@ export interface JwtPayload {
 	sid: string;
 }
 
+const DUMMY_PASSWORD_HASH =
+	"$2b$10$sZOhHN3cM.EAyYArL1vqRO7PNE2k9S5ff9VYMijvkDYIlGTa6WweW";
+const DEFAULT_LOGIN_MAX_ATTEMPTS = 5;
+const DEFAULT_LOGIN_LOCK_DURATION_SECONDS = 15 * 60;
+
+function positiveConfigInteger(
+	config: ConfigService,
+	key: string,
+	fallback: number,
+	maximum: number,
+) {
+	const value = Number(config.get<string | number>(key));
+	return Number.isSafeInteger(value) && value >= 1 && value <= maximum
+		? value
+		: fallback;
+}
+
 @Injectable()
 export class AuthService {
 	constructor(
@@ -37,7 +54,15 @@ export class AuthService {
 		const user = await this.usersService.findOneByLoginIdentifier(
 			identifier.trim(),
 		);
-		if (!user) return null;
+		if (!user) {
+			await bcrypt.compare(password, DUMMY_PASSWORD_HASH);
+			return null;
+		}
+
+		const passwordMatches = await bcrypt.compare(
+			password,
+			user.password ?? DUMMY_PASSWORD_HASH,
+		);
 
 		if (
 			!user.isActive ||
@@ -49,11 +74,35 @@ export class AuthService {
 			user.accountLockedUntil &&
 			new Date(user.accountLockedUntil) > new Date()
 		) {
-			return null;
+			throw new UnauthorizedException({
+				code: API_ERROR_CODES.AUTH_ACCOUNT_LOCKED,
+			});
 		}
 
-		const passwordMatches = await bcrypt.compare(password, user.password);
 		if (!passwordMatches) {
+			const failedAttempt = await this.authQuery.recordFailedLoginAttempt(
+				user.id,
+				positiveConfigInteger(
+					this.config,
+					"AUTH_LOGIN_MAX_ATTEMPTS",
+					DEFAULT_LOGIN_MAX_ATTEMPTS,
+					100,
+				),
+				positiveConfigInteger(
+					this.config,
+					"AUTH_LOGIN_LOCK_DURATION_SECONDS",
+					DEFAULT_LOGIN_LOCK_DURATION_SECONDS,
+					7 * 24 * 60 * 60,
+				),
+			);
+			if (
+				failedAttempt?.accountLockedUntil &&
+				new Date(failedAttempt.accountLockedUntil) > new Date()
+			) {
+				throw new UnauthorizedException({
+					code: API_ERROR_CODES.AUTH_ACCOUNT_LOCKED,
+				});
+			}
 			return null;
 		}
 
@@ -83,6 +132,7 @@ export class AuthService {
 	}
 
 	async login(user: Omit<User, "password">) {
+		await this.authQuery.resetFailedLoginAttempts(user.id);
 		const sessionId = crypto.randomUUID();
 
 		const accessToken = await this.jwtService.signAsync({

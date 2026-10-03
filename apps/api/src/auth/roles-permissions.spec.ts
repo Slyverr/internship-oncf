@@ -24,7 +24,6 @@ describe("default role permission matrix", () => {
 				Permission.CLAIMS_CREATE,
 				Permission.CLAIMS_READ,
 				Permission.CLAIMS_ACTION_COMMENT,
-				Permission.CLAIMS_ACTION_CLOSE,
 				Permission.REPORTS_READ,
 				Permission.REPORTS_ACTION_EXPORT,
 				Permission.PROFILE_UPDATE,
@@ -100,6 +99,17 @@ describe("default role permission matrix", () => {
 		}
 		expect(grants(Role.ADMIN, Permission.CATALOG_MANAGE_UNITS)).toBe(true);
 		expect(grants(Role.ADMIN, Permission.CATALOG_MANAGE_GOODS)).toBe(true);
+		for (const permission of [
+			Permission.CATALOG_MANAGE_STATIONS,
+			Permission.CATALOG_MANAGE_AGENCIES,
+			Permission.CATALOG_MANAGE_PORTS,
+			Permission.CATALOG_MANAGE_BERTHS,
+			Permission.CATALOG_MANAGE_SIDINGS,
+			Permission.CATALOG_MANAGE_VESSELS,
+			Permission.CATALOG_MANAGE_SHIPPING_COMPANIES,
+		]) {
+			expect(grants(Role.ADMIN, permission)).toBe(true);
+		}
 		expect(grants(Role.ADMIN, Permission.CATALOG_READ)).toBe(true);
 		expect(grants(Role.ADMIN, Permission.ROLES_MANAGE)).toBe(true);
 		expect(grants(Role.ADMIN, Permission.PERMISSIONS_MANAGE)).toBe(false);
@@ -123,7 +133,7 @@ describe("default role permission matrix", () => {
 		).toBe(true);
 		expect(
 			grants(Role.CLIENT_REPRESENTATIVE, Permission.CLAIMS_ACTION_CLOSE),
-		).toBe(true);
+		).toBe(false);
 		expect(
 			grants(
 				Role.CLIENT_REPRESENTATIVE,
@@ -144,6 +154,13 @@ describe("default role permission matrix", () => {
 				Permission.CATALOG_MANAGE_GOODS,
 				Permission.CATALOG_MANAGE_ACCESSORY_OPERATIONS,
 				Permission.CATALOG_MANAGE_REJECTION_REASONS,
+				Permission.CATALOG_MANAGE_STATIONS,
+				Permission.CATALOG_MANAGE_AGENCIES,
+				Permission.CATALOG_MANAGE_PORTS,
+				Permission.CATALOG_MANAGE_BERTHS,
+				Permission.CATALOG_MANAGE_SIDINGS,
+				Permission.CATALOG_MANAGE_VESSELS,
+				Permission.CATALOG_MANAGE_SHIPPING_COMPANIES,
 			];
 			expect(grants(role, Permission.CATALOG_READ)).toBe(true);
 			for (const permission of managementPermissions) {

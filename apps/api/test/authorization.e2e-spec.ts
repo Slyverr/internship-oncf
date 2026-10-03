@@ -839,6 +839,27 @@ describe("customer portfolio authorization (e2e)", () => {
 			.expect(200);
 		expect(updatedOrder.body.supervisor).toBe("E2E Updated Supervisor");
 
+		const duplicate = await request(app.getHttpServer())
+			.post(`/orders/${createdOrder.body.orderNumber}/duplicate`)
+			.set("Authorization", `Bearer ${token}`)
+			.expect(201);
+		expect(duplicate.body.orderNumber).not.toBe(createdOrder.body.orderNumber);
+		expect(duplicate.body.orderStatus.name).toBe(OrderStatus.DRAFT);
+		expect(duplicate.body.createdByUserId).toBe(
+			createdOrder.body.createdByUserId,
+		);
+		expect(duplicate.body.supervisor).toBe("E2E Updated Supervisor");
+		expect(duplicate.body.quantityAchieved).toBeNull();
+		expect(duplicate.body.forecastPrograms).toHaveLength(0);
+		expect(duplicate.body.orderExecutions).toHaveLength(0);
+		expect(duplicate.body.orderFiles).toHaveLength(0);
+
+		const outsideDuplicate = await request(app.getHttpServer())
+			.post(`/orders/${E2E_ORDERS.outside}/duplicate`)
+			.set("Authorization", `Bearer ${token}`)
+			.expect(403);
+		expect(outsideDuplicate.body).toBeDefined();
+
 		await request(app.getHttpServer())
 			.post("/orders")
 			.set("Authorization", `Bearer ${token}`)
@@ -893,7 +914,7 @@ describe("customer portfolio authorization (e2e)", () => {
 			.expect(403);
 	});
 
-	it("runs a client claim through agent treatment, resolution, and client close", async () => {
+	it("runs a client claim through agent treatment and resolution, with agent-only closure", async () => {
 		const clientToken = await login(app, E2E_USERS.clientA.email);
 		const createdClaim = await request(app.getHttpServer())
 			.post("/claims")
@@ -1013,17 +1034,25 @@ describe("customer portfolio authorization (e2e)", () => {
 			.send({ resolution: "E2E resolution" })
 			.expect(200);
 		expect(resolved.body.claimStatus.name).toBe(ClaimStatus.RESOLVED);
-
-		const closed = await request(app.getHttpServer())
-			.post(`/claims/${claimNumber}/close`)
-			.set("Authorization", `Bearer ${clientToken}`)
-			.expect(200);
-		expect(closed.body.claimStatus.name).toBe(ClaimStatus.CLOSED);
-		expect(closed.body.resolution).toBe("E2E resolution");
-
 		await request(app.getHttpServer())
 			.post(`/claims/${claimNumber}/close`)
 			.set("Authorization", `Bearer ${clientToken}`)
+			.expect(403);
+
+		const closed = await request(app.getHttpServer())
+			.post(`/claims/${claimNumber}/close`)
+			.set("Authorization", `Bearer ${agentToken}`)
+			.expect(200);
+		expect(closed.body.claimStatus.name).toBe(ClaimStatus.CLOSED);
+		expect(closed.body.resolution).toBe("E2E resolution");
+		await request(app.getHttpServer())
+			.get(`/claims/${claimNumber}`)
+			.set("Authorization", `Bearer ${clientToken}`)
+			.expect(200);
+
+		await request(app.getHttpServer())
+			.post(`/claims/${claimNumber}/close`)
+			.set("Authorization", `Bearer ${agentToken}`)
 			.expect(409);
 	});
 

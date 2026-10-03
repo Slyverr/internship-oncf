@@ -65,6 +65,66 @@ describe("API bootstrap and authentication (e2e)", () => {
 		expect(response.body.role).toBe(Role.AGENT_COMMERCIAL);
 	});
 
+	it("locks after the configured failed attempts, expires, and resets on success", async () => {
+		const username = E2E_USERS.passwordReset.email;
+		const loginRequest = (password: string) =>
+			request(app.getHttpServer())
+				.post("/auth/login")
+				.send({ username, password });
+
+		for (let attempt = 0; attempt < 2; attempt++) {
+			const response = await loginRequest("wrong-password").expect(401);
+			expect(response.body.code).toBe(API_ERROR_CODES.AUTHENTICATION_REQUIRED);
+		}
+
+		await loginRequest(E2E_PASSWORD).expect(201);
+
+		for (let attempt = 0; attempt < 2; attempt++) {
+			const response = await loginRequest("wrong-password").expect(401);
+			expect(response.body.code).toBe(API_ERROR_CODES.AUTHENTICATION_REQUIRED);
+		}
+
+		const threshold = await loginRequest("wrong-password").expect(401);
+		expect(threshold.body.code).toBe(API_ERROR_CODES.AUTH_ACCOUNT_LOCKED);
+		const stillLocked = await loginRequest(E2E_PASSWORD).expect(401);
+		expect(stillLocked.body.code).toBe(API_ERROR_CODES.AUTH_ACCOUNT_LOCKED);
+
+		await new Promise((resolve) => setTimeout(resolve, 1_100));
+		const expired = await loginRequest("wrong-password").expect(401);
+		expect(expired.body.code).toBe(API_ERROR_CODES.AUTHENTICATION_REQUIRED);
+		await loginRequest(E2E_PASSWORD).expect(201);
+	});
+
+	it("keeps unknown and inactive account failures generic without locking them", async () => {
+		const adminToken = await login(app, E2E_USERS.admin.email);
+		const disabledEmail = "e2e.login.disabled@example.test";
+		await request(app.getHttpServer())
+			.post("/users")
+			.set("Authorization", `Bearer ${adminToken}`)
+			.send({
+				email: disabledEmail,
+				password: E2E_PASSWORD,
+				firstName: "Disabled",
+				lastName: "Account",
+				role: Role.AGENT_COMMERCIAL,
+				type: "internal",
+				isActive: false,
+			})
+			.expect(201);
+
+		for (const username of ["missing-login@example.test", disabledEmail]) {
+			for (let attempt = 0; attempt < 3; attempt++) {
+				const response = await request(app.getHttpServer())
+					.post("/auth/login")
+					.send({ username, password: "wrong-password" })
+					.expect(401);
+				expect(response.body.code).toBe(
+					API_ERROR_CODES.AUTHENTICATION_REQUIRED,
+				);
+			}
+		}
+	});
+
 	it("persists appearance preferences per user and updates existing choices", async () => {
 		const adminToken = await login(app, E2E_USERS.admin.email);
 		const agentToken = await login(app, E2E_USERS.agentUnassigned.employeeCode);

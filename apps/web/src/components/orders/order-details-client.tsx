@@ -1,18 +1,19 @@
 "use client";
 
 import { Permission } from "@ecommand/shared";
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, PrinterIcon } from "lucide-react";
 import Link from "next/link";
 import { PageHeader } from "@/components/common/page-header";
 import { OrderActions } from "@/components/orders/order-actions";
 import { OrderOverview } from "@/components/orders/order-overview";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Messages } from "@/i18n";
 import { useTranslate } from "@/i18n/locale-provider";
 import type { OrderDetailDto } from "@/lib/api/generated.schemas";
 import { useOrdersControllerFindOne } from "@/lib/api/orders";
 import { canCreateProgramForOrder } from "@/lib/program-creation-eligibility";
 import { useAuth } from "@/providers/auth-provider";
+import { OrderPrintDocument } from "./order-print-document";
 
 interface OrderDetailsClientProps {
 	order: OrderDetailDto;
@@ -37,6 +38,16 @@ export function OrderDetailsClient({ order }: OrderDetailsClientProps) {
 				title={currentOrder.orderNumber}
 				description={currentOrder.customer.companyName}
 			>
+				{hasPermission(Permission.ORDERS_READ) && (
+					<Button
+						className="print:hidden"
+						variant="outline"
+						onClick={() => window.print()}
+					>
+						<PrinterIcon aria-hidden="true" />
+						{t(Messages.orders.detail.printPdf)}
+					</Button>
+				)}
 				<OrderActions order={currentOrder} />
 				{canCreateProgramForOrder({
 					canCreate: hasPermission(Permission.PROGRAMS_CREATE),
@@ -61,7 +72,10 @@ export function OrderDetailsClient({ order }: OrderDetailsClientProps) {
 				)}
 			</PageHeader>
 
-			<OrderOverview order={currentOrder} />
+			<div className="print:hidden">
+				<OrderOverview order={currentOrder} />
+			</div>
+			<OrderPrintDocument order={currentOrder} />
 		</>
 	);
 }

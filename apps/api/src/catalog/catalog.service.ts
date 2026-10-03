@@ -1,5 +1,10 @@
-import { API_ERROR_CODES } from "@ecommand/shared";
 import {
+	API_ERROR_CODES,
+	ManagedReferenceResource,
+	type ManagedReferenceResource as ManagedReferenceResourceType,
+} from "@ecommand/shared";
+import {
+	BadRequestException,
 	ConflictException,
 	Injectable,
 	NotFoundException,
@@ -14,6 +19,10 @@ import {
 	CreateUnitDto,
 } from "./requests/create-catalog.dto";
 import {
+	CreateManagedReferenceDataDto,
+	UpdateManagedReferenceDataDto,
+} from "./requests/managed-reference-data.dto";
+import {
 	UpdateAccessoryOperationDto,
 	UpdateGoodDto,
 	UpdateGoodsTypeDto,
@@ -27,6 +36,94 @@ export class CatalogService {
 		private readonly catalogQuery: CatalogQuery,
 		private readonly catalogMapper: CatalogMapper,
 	) {}
+
+	async findManagedReferenceData(resource: ManagedReferenceResourceType) {
+		return this.catalogQuery.findManagedReferenceData(resource);
+	}
+
+	async findActiveReferenceData(resource: ManagedReferenceResourceType) {
+		const rows = await this.catalogQuery.findManagedReferenceData(resource);
+		return (rows ?? []).filter((row) => row.isActive);
+	}
+
+	async createManagedReferenceData(
+		resource: ManagedReferenceResourceType,
+		dto: CreateManagedReferenceDataDto,
+	) {
+		this.validateRequiredFields(resource, dto);
+		await this.validateActiveParent(resource, dto);
+		const created = await this.catalogQuery.createManagedReferenceData(
+			resource,
+			dto,
+		);
+		return this.ensure(created?.[0]);
+	}
+
+	async updateManagedReferenceData(
+		resource: ManagedReferenceResourceType,
+		id: number,
+		dto: UpdateManagedReferenceDataDto,
+	) {
+		this.validateRequiredFields(resource, dto);
+		await this.validateActiveParent(resource, dto);
+		if (
+			resource === ManagedReferenceResource.STATIONS &&
+			!dto.isActive &&
+			(await this.catalogQuery.hasActivePortsForStation(id))
+		) {
+			throw new ConflictException({ code: API_ERROR_CODES.CONFLICT });
+		}
+		if (
+			resource === ManagedReferenceResource.PORTS &&
+			!dto.isActive &&
+			((await this.catalogQuery.hasActiveBerthsForPort(id)) ||
+				(await this.catalogQuery.hasActiveLoadingLocationsForPort(id)))
+		) {
+			throw new ConflictException({ code: API_ERROR_CODES.CONFLICT });
+		}
+		const updated = await this.catalogQuery.updateManagedReferenceData(
+			resource,
+			id,
+			dto,
+		);
+		return this.ensure(updated?.[0]);
+	}
+
+	private validateRequiredFields(
+		resource: ManagedReferenceResourceType,
+		dto: CreateManagedReferenceDataDto,
+	) {
+		const missingField =
+			(resource === ManagedReferenceResource.STATIONS &&
+				!dto.stationCode &&
+				"stationCode") ||
+			(resource === ManagedReferenceResource.PORTS && !dto.type && "type") ||
+			(resource === ManagedReferenceResource.BERTHS && !dto.portId && "portId");
+		if (!missingField) return;
+		throw new BadRequestException({
+			code: API_ERROR_CODES.VALIDATION_FAILED,
+			details: { fields: { [missingField]: ["IS_NOT_EMPTY"] } },
+		});
+	}
+
+	private async validateActiveParent(
+		resource: ManagedReferenceResourceType,
+		dto: CreateManagedReferenceDataDto,
+	) {
+		const parentIsActive =
+			(resource === ManagedReferenceResource.PORTS &&
+				dto.stationId != null &&
+				(await this.catalogQuery.hasActiveStation(dto.stationId))) ||
+			(resource === ManagedReferenceResource.BERTHS &&
+				dto.portId != null &&
+				(await this.catalogQuery.hasActivePort(dto.portId)));
+		const requiresParent =
+			(resource === ManagedReferenceResource.PORTS && dto.stationId != null) ||
+			(resource === ManagedReferenceResource.BERTHS && dto.portId != null);
+		if (requiresParent && !parentIsActive) {
+			throw new ConflictException({ code: API_ERROR_CODES.CONFLICT });
+		}
+	}
 
 	async findAllUnits() {
 		return this.catalogQuery.findUnits();

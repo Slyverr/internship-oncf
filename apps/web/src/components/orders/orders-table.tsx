@@ -3,14 +3,16 @@
 import { OrderStatus } from "@ecommand/shared";
 import type { ColumnDef } from "@tanstack/react-table";
 import { FlexRender, useTable } from "@tanstack/react-table";
+import { DownloadIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { sortableTableFeatures as features } from "@/components/common/sortable-table-features";
 import { TableEmptyStateRow } from "@/components/common/table-empty-state-row";
 import { TableLoadingState } from "@/components/common/table-loading-state";
 import { TableRowLink } from "@/components/common/table-row-link";
 import { TableSortButton } from "@/components/common/table-sort-button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
 	Select,
@@ -34,6 +36,11 @@ import { useLocale, useTranslate } from "@/i18n/locale-provider";
 import { getOrderStatusLabel } from "@/i18n/status-labels";
 import { OrderListDto } from "@/lib/api/generated.schemas";
 import { formatDisplayDate } from "@/lib/date-utils";
+import {
+	fetchAllOrdersForExport,
+	getOrderExportFilters,
+	ordersToCsv,
+} from "@/lib/orders-export";
 
 interface OrdersTableProps {
 	data: OrderListDto[];
@@ -118,6 +125,8 @@ export function OrdersTable({
 	const locale = useLocale();
 	const columns = useMemo(() => createColumns(t, locale), [locale, t]);
 	const router = useRouter();
+	const [isExporting, setIsExporting] = useState(false);
+	const [exportError, setExportError] = useState("");
 	const { searchValue, setSearchValue, updateQuery, updateSort, sorting } =
 		useTableQueryState({
 			search,
@@ -134,6 +143,49 @@ export function OrdersTable({
 		data,
 		state: { sorting },
 	});
+
+	const exportOrders = async () => {
+		setIsExporting(true);
+		setExportError("");
+		try {
+			const filters = getOrderExportFilters(
+				searchValue,
+				window.location.search,
+			);
+			const orders = await fetchAllOrdersForExport(filters);
+			const csv = ordersToCsv(
+				orders,
+				{
+					orderNumber: t(Messages.orders.list.orderNumber),
+					customer: t(Messages.orders.list.customer),
+					good: t(Messages.orders.list.good),
+					quantityDemanded: t(Messages.orders.createForm.quantity),
+					quantityAchieved: t(Messages.common.fields.quantityAchieved),
+					unit: t(Messages.common.fields.unitId),
+					status: t(Messages.orders.list.status),
+					orderDate: t(Messages.orders.list.date),
+					startDate: t(Messages.common.fields.startDate),
+					endDate: t(Messages.common.fields.endDate),
+					createdBy: t(Messages.orders.list.createdBy),
+				},
+				(statusValue) => getOrderStatusLabel(statusValue, locale),
+				(dateValue) => formatDisplayDate(dateValue, locale),
+			);
+			const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+			const url = URL.createObjectURL(blob);
+			const link = document.createElement("a");
+			link.href = url;
+			link.download = `orders-${new Date().toISOString().slice(0, 10)}.csv`;
+			document.body.append(link);
+			link.click();
+			link.remove();
+			URL.revokeObjectURL(url);
+		} catch {
+			setExportError(t(Messages.orders.list.exportFailed));
+		} finally {
+			setIsExporting(false);
+		}
+	};
 
 	if (isLoading) {
 		return <TableLoadingState resource="orders" />;
@@ -173,7 +225,26 @@ export function OrdersTable({
 						))}
 					</SelectContent>
 				</Select>
+
+				<Button
+					className="ml-auto"
+					variant="outline"
+					disabled={isExporting}
+					onClick={exportOrders}
+				>
+					<DownloadIcon aria-hidden="true" />
+					{t(
+						isExporting
+							? Messages.orders.list.exporting
+							: Messages.orders.list.exportExcel,
+					)}
+				</Button>
 			</div>
+			{exportError && (
+				<p role="alert" className="text-sm text-destructive">
+					{exportError}
+				</p>
+			)}
 
 			<TableFrame>
 				<Table>

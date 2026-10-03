@@ -12,6 +12,13 @@ export const CATALOG_MANAGEMENT_REQUIREMENTS = {
 	goods: [Permission.CATALOG_MANAGE_GOODS, Permission.CATALOG_READ],
 	accessoryOperations: [Permission.CATALOG_MANAGE_ACCESSORY_OPERATIONS],
 	rejectionReasons: [Permission.CATALOG_MANAGE_REJECTION_REASONS],
+	stations: [Permission.CATALOG_MANAGE_STATIONS],
+	agencies: [Permission.CATALOG_MANAGE_AGENCIES],
+	ports: [Permission.CATALOG_MANAGE_PORTS],
+	berths: [Permission.CATALOG_MANAGE_BERTHS],
+	sidings: [Permission.CATALOG_MANAGE_SIDINGS],
+	vessels: [Permission.CATALOG_MANAGE_VESSELS],
+	shippingCompanies: [Permission.CATALOG_MANAGE_SHIPPING_COMPANIES],
 } as const;
 
 export const PERMISSION_DEFINITIONS: Record<Permission, PermissionDefinition> =
@@ -241,6 +248,34 @@ export const PERMISSION_DEFINITIONS: Record<Permission, PermissionDefinition> =
 		},
 		[Permission.CATALOG_MANAGE_REJECTION_REASONS]: {
 			description: "Manage rejection reasons",
+			parent: Permission.CATALOG_MANAGE,
+		},
+		[Permission.CATALOG_MANAGE_STATIONS]: {
+			description: "Manage freight stations",
+			parent: Permission.CATALOG_MANAGE,
+		},
+		[Permission.CATALOG_MANAGE_AGENCIES]: {
+			description: "Manage agencies",
+			parent: Permission.CATALOG_MANAGE,
+		},
+		[Permission.CATALOG_MANAGE_PORTS]: {
+			description: "Manage ports",
+			parent: Permission.CATALOG_MANAGE,
+		},
+		[Permission.CATALOG_MANAGE_BERTHS]: {
+			description: "Manage port berths and quays",
+			parent: Permission.CATALOG_MANAGE,
+		},
+		[Permission.CATALOG_MANAGE_SIDINGS]: {
+			description: "Manage railway sidings and connections",
+			parent: Permission.CATALOG_MANAGE,
+		},
+		[Permission.CATALOG_MANAGE_VESSELS]: {
+			description: "Manage vessels",
+			parent: Permission.CATALOG_MANAGE,
+		},
+		[Permission.CATALOG_MANAGE_SHIPPING_COMPANIES]: {
+			description: "Manage shipping companies",
 			parent: Permission.CATALOG_MANAGE,
 		},
 

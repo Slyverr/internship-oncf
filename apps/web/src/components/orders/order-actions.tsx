@@ -6,7 +6,8 @@ import {
 	OrderStatus,
 	Permission,
 } from "@ecommand/shared";
-import { EllipsisVerticalIcon } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { CopyIcon, EllipsisVerticalIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
@@ -42,6 +43,7 @@ import {
 	useOrdersControllerSendToDtm,
 	useOrdersControllerSubmit,
 } from "@/lib/api/orders";
+import { customFetch } from "@/lib/axios";
 import { useAuth } from "@/providers/auth-provider";
 import { ConfirmDialog } from "../common/confirm-dialog";
 
@@ -64,6 +66,15 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 	const cancelMutation = useOrdersControllerCancel();
 	const sendToDtmMutation = useOrdersControllerSendToDtm();
 	const removeMutation = useOrdersControllerRemove();
+	const duplicateMutation = useMutation({
+		mutationFn: () =>
+			customFetch<OrderDetailDto>({
+				url: `/orders/${order.orderNumber}/duplicate`,
+				method: "POST",
+			}),
+		onSuccess: (duplicatedOrder) =>
+			router.push(`/dashboard/orders/${duplicatedOrder.orderNumber}`),
+	});
 
 	const status = order.orderStatus.name;
 
@@ -114,6 +125,21 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 	return (
 		<>
 			<div className="flex flex-wrap items-center gap-4">
+				{hasPermission(Permission.ORDERS_CREATE) && (
+					<Button
+						variant="outline"
+						disabled={duplicateMutation.isPending}
+						onClick={() => duplicateMutation.mutate()}
+					>
+						<CopyIcon aria-hidden="true" />
+						{t(Messages.orders.detail.duplicate)}
+					</Button>
+				)}
+				{duplicateMutation.isError && (
+					<p className="basis-full text-sm text-destructive" role="alert">
+						{t(Messages.orders.detail.duplicateFailed)}
+					</p>
+				)}
 				{/* Submit: DRAFT → SUBMITTED */}
 				{hasPermission(Permission.ORDERS_ACTION_SUBMIT) &&
 					isWorkflowTransitionAllowed(

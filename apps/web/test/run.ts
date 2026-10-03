@@ -38,6 +38,7 @@ import "./safe-api-error.test";
 import "./status-labels.test";
 import "./report-date-range.test";
 import "./report-export.test";
+import "./orders-export.test";
 import "./route-metadata.test";
 import "./user-labels.test";
 import "./user-filters.test";

@@ -39,6 +39,8 @@ describe("AuthService", () => {
 			createSession: jest.fn(),
 			findSession: jest.fn(),
 			logoutSession: jest.fn(),
+			recordFailedLoginAttempt: jest.fn(),
+			resetFailedLoginAttempts: jest.fn(),
 			updatePasswordAndRevokeSessions: jest.fn(),
 			findUserByEmail: jest.fn(),
 			createPasswordResetToken: jest.fn(),
@@ -61,19 +63,29 @@ describe("AuthService", () => {
 		);
 	});
 
-	it("rejects inactive and currently locked accounts before checking passwords", async () => {
+	it("keeps inactive and pending account errors generic, and identifies active lockouts", async () => {
 		users.findOneByLoginIdentifier.mockResolvedValue({ isActive: false });
 		expect(
 			await service.validateUser("agent@example.test", "secret"),
 		).toBeNull();
 		users.findOneByLoginIdentifier.mockResolvedValue({
 			isActive: true,
+			registrationStatus: RegistrationStatus.PENDING,
+		});
+		expect(
+			await service.validateUser("pending@example.test", "secret"),
+		).toBeNull();
+		users.findOneByLoginIdentifier.mockResolvedValue({
+			isActive: true,
 			registrationStatus: RegistrationStatus.APPROVED,
 			accountLockedUntil: new Date(Date.now() + 60_000).toISOString(),
 		});
-		expect(
-			await service.validateUser("agent@example.test", "secret"),
-		).toBeNull();
+		await expect(
+			service.validateUser("agent@example.test", "secret"),
+		).rejects.toMatchObject({
+			response: { code: API_ERROR_CODES.AUTH_ACCOUNT_LOCKED },
+		});
+		expect(query.recordFailedLoginAttempt).not.toHaveBeenCalled();
 	});
 
 	it("returns null for a wrong password and omits the stored hash on success", async () => {
@@ -94,6 +106,43 @@ describe("AuthService", () => {
 		);
 		expect(result).toMatchObject({ id: 7, email: "agent@example.test" });
 		expect(result).not.toHaveProperty("password");
+		expect(query.recordFailedLoginAttempt).toHaveBeenCalledWith(7, 5, 900);
+	});
+
+	it("uses configured positive lockout limits and resets the counter after a valid login", async () => {
+		config.get.mockImplementation((key: string) =>
+			key === "AUTH_LOGIN_MAX_ATTEMPTS" ? "4" : "120",
+		);
+		const password = await bcrypt.hash("correct horse battery staple", 4);
+		users.findOneByLoginIdentifier.mockResolvedValue({
+			id: 17,
+			email: "agent@example.test",
+			password,
+			isActive: true,
+			registrationStatus: RegistrationStatus.APPROVED,
+		});
+		query.recordFailedLoginAttempt.mockResolvedValue({
+			failedLoginAttempts: 1,
+			accountLockedUntil: null,
+		});
+
+		await service.validateUser("agent@example.test", "wrong password");
+		expect(query.recordFailedLoginAttempt).toHaveBeenCalledWith(17, 4, 120);
+
+		await service.login({ id: 17 } as never);
+		expect(query.resetFailedLoginAttempts).toHaveBeenCalledWith(17);
+	});
+
+	it("does not track failed attempts for unknown or inactive users", async () => {
+		users.findOneByLoginIdentifier.mockResolvedValue(undefined);
+		await expect(
+			service.validateUser("missing@example.test", "incorrect"),
+		).resolves.toBeNull();
+		users.findOneByLoginIdentifier.mockResolvedValue({ isActive: false });
+		await expect(
+			service.validateUser("disabled@example.test", "incorrect"),
+		).resolves.toBeNull();
+		expect(query.recordFailedLoginAttempt).not.toHaveBeenCalled();
 	});
 
 	it("uses a trimmed email or employee identifier for account lookup", async () => {
@@ -171,6 +220,7 @@ describe("AuthService", () => {
 			expect.any(String),
 			new Date(2_000_000_000_000).toISOString(),
 		);
+		expect(query.resetFailedLoginAttempts).toHaveBeenCalledWith(7);
 	});
 
 	it.each([
