@@ -2,6 +2,10 @@
 
 This is the running review list for the application-wide usability and visual overhaul. Check an item only after reviewing its current implementation at relevant screen sizes, making the change, and verifying the rendered result. Keep changes focused and preserve the existing ECommand stack and business rules.
 
+## User detail row alignment recheck — 2026-10-03
+
+- Reopened the live pending registration account at `/dashboard/users/6` as Admin and captured the actual rendered detail page at 320, 375, 390, 640, 768, 1024, 1440, 1920, 2560, and 3840px. Inspected all ten images. The role badge sits on the value side with the other right-aligned values at every width, and the ultrawide workspace remains capped and centered. The 320px top viewport naturally scrolls through the detail cards above bottom navigation; it does not show page-level horizontal overflow. No code change was needed. Captures: `/tmp/ecommand-user-detail-recheck`.
+
 ## Authentication form review — 2026-10-03
 
 - Fresh `/signup` captures at 390, 1440, 1920, and 3840px showed the two-step form stayed within its responsive content width. Blank-Continue validation at 390px and 1440px remained aligned and had no horizontal overflow.
