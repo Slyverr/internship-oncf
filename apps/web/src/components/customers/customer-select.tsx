@@ -19,17 +19,15 @@ export function CustomerSelect({ id, value, onChange }: CustomerSelectProps) {
 	} = useCustomersControllerFindAll({});
 
 	return (
-		<div className="oncf-field">
-			<CustomerOptionsSelect
-				id={id}
-				value={value}
-				customers={customers}
-				isLoading={isLoading}
-				isError={isError}
-				isFetching={isFetching}
-				onChange={onChange}
-				onRetry={() => void refetch()}
-			/>
-		</div>
+		<CustomerOptionsSelect
+			id={id}
+			value={value}
+			customers={customers}
+			isLoading={isLoading}
+			isError={isError}
+			isFetching={isFetching}
+			onChange={onChange}
+			onRetry={() => void refetch()}
+		/>
 	);
 }

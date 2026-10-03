@@ -44,7 +44,7 @@ export function UserSelect({
 	const selectedUser = users.find((user) => user.id === value);
 
 	return (
-		<div className="oncf-field">
+		<>
 			<Combobox
 				items={users}
 				disabled={isLoading || (isError && users.length === 0)}
@@ -75,6 +75,6 @@ export function UserSelect({
 					onRetry={onRetry}
 				/>
 			)}
-		</div>
+		</>
 	);
 }

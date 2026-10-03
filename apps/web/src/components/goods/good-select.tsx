@@ -34,7 +34,7 @@ export function GoodSelect({ id, value, onChange }: GoodSelectProps) {
 	const selectedGood = goods.find((good) => good.id === value);
 
 	return (
-		<div className="oncf-field">
+		<>
 			<Select
 				value={selectedGood?.id.toString() ?? null}
 				onValueChange={(selectedId) => onChange(Number(selectedId))}
@@ -71,6 +71,6 @@ export function GoodSelect({ id, value, onChange }: GoodSelectProps) {
 					{t(Messages.goods.select.noneAvailable)}
 				</p>
 			)}
-		</div>
+		</>
 	);
 }

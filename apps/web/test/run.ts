@@ -22,6 +22,7 @@ import "./claim-labels.test";
 import "./customer-form-schema.test";
 import "./customer-identity.test";
 import "./customer-type-label.test";
+import "./selector-field-layout.test";
 import "./date-utils.test";
 import "./dashboard-insights.test";
 import "./program-creation-selection.test";
