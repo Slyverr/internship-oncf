@@ -1022,6 +1022,7 @@ export const en = {
 		validationFailed: "Please check the entered values and try again.",
 		validationFields: "Review these fields: {fields}",
 		validationRules: {
+			arrayMaxSize: "Reduce the number of selected items",
 			arrayUnique: "Remove duplicate values",
 			isArray: "Enter a list of values",
 			isBoolean: "Choose yes or no",

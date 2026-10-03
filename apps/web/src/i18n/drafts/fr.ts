@@ -888,6 +888,7 @@ export const frDraft = {
 		validationFailed: "Vérifiez les valeurs saisies puis réessayez.",
 		validationFields: "Vérifiez les champs suivants : {fields}",
 		validationRules: {
+			arrayMaxSize: "Réduisez le nombre d’éléments sélectionnés",
 			arrayUnique: "Supprimez les valeurs en double",
 			isArray: "Saisissez une liste de valeurs",
 			isBoolean: "Choisissez oui ou non",

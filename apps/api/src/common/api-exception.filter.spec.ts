@@ -119,6 +119,17 @@ describe("API error response contract", () => {
 		});
 	});
 
+	it("converts array size validation to a stable rule code", () => {
+		expect(
+			toValidationDetails([
+				{
+					property: "permissionNames",
+					constraints: { arrayMaxSize: "too many permissions" },
+				},
+			]),
+		).toEqual({ fields: { permissionNames: ["ARRAY_MAX_SIZE"] } });
+	});
+
 	it("converts unsupported validator names to a stable fallback code", () => {
 		expect(
 			toValidationDetails([

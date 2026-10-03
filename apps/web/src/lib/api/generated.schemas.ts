@@ -184,6 +184,7 @@ export type ApiErrorDetailsDtoFieldsItem = typeof ApiErrorDetailsDtoFieldsItem[k
 
 
 export const ApiErrorDetailsDtoFieldsItem = {
+  ARRAY_MAX_SIZE: 'ARRAY_MAX_SIZE',
   ARRAY_UNIQUE: 'ARRAY_UNIQUE',
   IS_ARRAY: 'IS_ARRAY',
   IS_BOOLEAN: 'IS_BOOLEAN',

@@ -965,6 +965,7 @@ export const Messages = {
 		validationFailed: "apiError.validationFailed",
 		validationFields: "apiError.validationFields",
 		validationRules: {
+			arrayMaxSize: "apiError.validationRules.arrayMaxSize",
 			arrayUnique: "apiError.validationRules.arrayUnique",
 			isArray: "apiError.validationRules.isArray",
 			isBoolean: "apiError.validationRules.isBoolean",
