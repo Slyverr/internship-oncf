@@ -176,42 +176,48 @@ export function CustomerCreateForm(): JSX.Element {
 						)}
 					</form.Field>
 
-					<form.Field name="ice">
-						{(field) => (
-							<div className="oncf-field">
-								<Label htmlFor="customer-ice">
-									{t(Messages.customers.form.ice)}
-								</Label>
-								<Input
-									id="customer-ice"
-									inputMode="numeric"
-									maxLength={CUSTOMER_ICE_LENGTH}
-									pattern={CUSTOMER_ICE_PATTERN.source}
-									placeholder={t(Messages.customers.form.icePlaceholder)}
-									value={field.state.value ?? ""}
-									onChange={(event) => field.handleChange(event.target.value)}
-								/>
-								<p className="text-meta text-muted-foreground">
-									{t(Messages.customers.form.iceHint)}
-								</p>
-							</div>
-						)}
-					</form.Field>
+					<div className="grid gap-4 @3xl/workspace:col-span-2 @3xl/workspace:grid-cols-2">
+						<form.Field name="ice">
+							{(field) => (
+								<div className="oncf-field">
+									<Label htmlFor="customer-ice">
+										{t(Messages.customers.form.ice)}
+									</Label>
+									<Input
+										id="customer-ice"
+										inputMode="numeric"
+										maxLength={CUSTOMER_ICE_LENGTH}
+										pattern={CUSTOMER_ICE_PATTERN.source}
+										placeholder={t(Messages.customers.form.icePlaceholder)}
+										value={field.state.value ?? ""}
+										aria-describedby="customer-ice-hint"
+										onChange={(event) => field.handleChange(event.target.value)}
+									/>
+								</div>
+							)}
+						</form.Field>
 
-					<form.Field name="typeId">
-						{(field) => (
-							<div className="oncf-field">
-								<Label htmlFor="typeId">
-									{t(Messages.customers.form.type)}
-								</Label>
-								<CustomerTypeSelect
-									id="typeId"
-									value={field.state.value ?? ""}
-									onChange={field.handleChange}
-								/>
-							</div>
-						)}
-					</form.Field>
+						<form.Field name="typeId">
+							{(field) => (
+								<div className="oncf-field">
+									<Label htmlFor="typeId">
+										{t(Messages.customers.form.type)}
+									</Label>
+									<CustomerTypeSelect
+										id="typeId"
+										value={field.state.value ?? ""}
+										onChange={field.handleChange}
+									/>
+								</div>
+							)}
+						</form.Field>
+					</div>
+					<p
+						id="customer-ice-hint"
+						className="text-meta text-muted-foreground @3xl/workspace:col-span-2"
+					>
+						{t(Messages.customers.form.iceHint)}
+					</p>
 				</CardContent>
 			</Card>
 
