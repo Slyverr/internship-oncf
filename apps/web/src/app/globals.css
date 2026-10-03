@@ -4,6 +4,16 @@
 
 @custom-variant dark (&:is(.dark *));
 
+html {
+	color-scheme: light;
+}
+
+html.dark,
+html[data-theme="dark"],
+html[data-theme="mono-dark"] {
+	color-scheme: dark;
+}
+
 @theme inline {
 	--breakpoint-xs: 24rem;
 	--breakpoint-3xl: 150rem;
