@@ -1,6 +1,7 @@
 "use client";
 
 import { isStrongPassword } from "@ecommand/shared";
+import { PanelLeftIcon, PanelTopIcon } from "lucide-react";
 import {
 	type FormEvent,
 	type ReactNode,
@@ -217,10 +218,9 @@ function SidebarLayoutPreview() {
 	return (
 		<span
 			aria-hidden="true"
-			className="grid size-8 shrink-0 grid-cols-[8px_1fr] gap-compact rounded-md border border-border bg-background p-compact"
+			className="grid size-8 shrink-0 place-items-center rounded-md border border-border bg-muted text-primary"
 		>
-			<span className="rounded-sm bg-sidebar" />
-			<span className="rounded-sm bg-muted" />
+			<PanelLeftIcon className="size-4" />
 		</span>
 	);
 }
@@ -229,10 +229,9 @@ function CenteredLayoutPreview() {
 	return (
 		<span
 			aria-hidden="true"
-			className="grid size-8 shrink-0 content-start gap-compact rounded-md border border-border bg-background p-compact"
+			className="grid size-8 shrink-0 place-items-center rounded-md border border-border bg-muted text-primary"
 		>
-			<span className="h-2 rounded-full bg-sidebar" />
-			<span className="mx-auto mt-compact h-3 w-5 rounded-sm bg-muted" />
+			<PanelTopIcon className="size-4" />
 		</span>
 	);
 }
@@ -386,6 +385,10 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 		firstName.trim() !== profile.firstName ||
 		lastName.trim() !== profile.lastName ||
 		email.trim() !== profile.email;
+	const passwordFormIsValid =
+		currentPassword.length > 0 &&
+		isStrongPassword(newPassword) &&
+		newPassword === confirmNewPassword;
 
 	useEffect(() => {
 		setFirstName(profile.firstName);
@@ -714,7 +717,10 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 									required
 									onChange={(event) => {
 										setNewPassword(event.target.value);
-										setPasswordMismatch(false);
+										setPasswordMismatch(
+											confirmNewPassword.length > 0 &&
+												confirmNewPassword !== event.target.value,
+										);
 									}}
 								/>
 								<p
@@ -741,7 +747,10 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 									required
 									onChange={(event) => {
 										setConfirmNewPassword(event.target.value);
-										setPasswordMismatch(false);
+										setPasswordMismatch(
+											newPassword.length > 0 &&
+												newPassword !== event.target.value,
+										);
 									}}
 								/>
 								{passwordMismatch && (
@@ -755,7 +764,10 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 								)}
 							</div>
 							<div className="flex flex-wrap items-center gap-4">
-								<Button type="submit" disabled={passwordMutation.isPending}>
+								<Button
+									type="submit"
+									disabled={passwordMutation.isPending || !passwordFormIsValid}
+								>
 									{passwordMutation.isPending
 										? t(Messages.settings.security.updating)
 										: t(Messages.settings.security.changePassword)}
