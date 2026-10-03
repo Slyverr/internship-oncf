@@ -1058,6 +1058,8 @@ export const en = {
 		title: "This page ran into a problem",
 		description:
 			"Try loading it again. If the problem continues, sign in again or come back in a moment.",
+		apiUnavailableDetails:
+			"The ECommand API is temporarily unavailable. Your session is safe; retry in a moment.",
 		formSubmitted:
 			"If you were submitting a form, check whether it completed before trying again.",
 		signIn: "Go to sign in",

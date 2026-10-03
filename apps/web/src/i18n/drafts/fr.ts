@@ -926,6 +926,8 @@ export const frDraft = {
 		title: "Cette page a rencontré un problème",
 		description:
 			"Essayez de la recharger. Si le problème persiste, reconnectez-vous ou réessayez plus tard.",
+		apiUnavailableDetails:
+			"L’API ECommand est temporairement indisponible. Votre session est conservée ; réessayez dans un instant.",
 		formSubmitted:
 			"Si vous avez soumis un formulaire, vérifiez qu’il a bien été traité avant de réessayer.",
 		signIn: "Aller à la connexion",

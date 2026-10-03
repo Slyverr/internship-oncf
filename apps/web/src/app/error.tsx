@@ -23,6 +23,7 @@ export default function ErrorPage({
 	reset: () => void;
 }) {
 	const t = useTranslate();
+	const apiUnavailable = error.message === t(Messages.transport.apiUnavailable);
 	useEffect(() => {
 		console.error(error);
 	}, [error]);
@@ -38,24 +39,30 @@ export default function ErrorPage({
 						{t(Messages.errorPage.title)}
 					</CardTitle>
 					<CardDescription role="alert">
-						{t(Messages.errorPage.description)}
+						{apiUnavailable
+							? t(Messages.errorPage.apiUnavailableDetails)
+							: t(Messages.errorPage.description)}
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="items-center">
 					<p className="text-center text-sm text-muted-foreground">
-						{t(Messages.errorPage.formSubmitted)}
+						{apiUnavailable
+							? t(Messages.transport.apiUnavailable)
+							: t(Messages.errorPage.formSubmitted)}
 					</p>
 				</CardContent>
 				<CardFooter className="flex-col-reverse gap-3 sm:flex-row sm:justify-center">
-					<Button
-						nativeButton={false}
-						type="button"
-						variant="outline"
-						render={<Link href="/login" />}
-						className="w-full sm:w-auto"
-					>
-						{t(Messages.errorPage.signIn)}
-					</Button>
+					{!apiUnavailable && (
+						<Button
+							nativeButton={false}
+							type="button"
+							variant="outline"
+							render={<Link href="/login" />}
+							className="w-full sm:w-auto"
+						>
+							{t(Messages.errorPage.signIn)}
+						</Button>
+					)}
 					<Button type="button" onClick={reset} className="w-full sm:w-auto">
 						<RefreshCwIcon aria-hidden="true" />
 						{t(Messages.errorPage.retry)}

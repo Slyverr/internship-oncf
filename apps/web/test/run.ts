@@ -1,4 +1,5 @@
 import "./form-utils.test";
+import "./api-availability.test";
 import "./spacing-grid.test";
 import "./catalog-coverage.test";
 import "./i18n.test";

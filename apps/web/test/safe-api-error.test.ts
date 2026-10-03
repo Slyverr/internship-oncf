@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { API_TRANSPORT_ERROR_CODES } from "@ecommand/shared";
 import axios from "axios";
 import { getFormErrorMessage } from "../src/lib/form-utils";
 import { loadPageData } from "../src/lib/load-page-data";
@@ -57,6 +58,32 @@ assert.equal(
 	getFormErrorMessage(safeResponseError),
 	"This action conflicts with the current record state.",
 	"API errors are mapped from stable codes instead of server messages",
+);
+
+const apiUnavailableError = Object.assign(new Error("upstream unavailable"), {
+	isAxiosError: true,
+	response: {
+		status: 503,
+		data: {
+			code: API_TRANSPORT_ERROR_CODES.API_UNAVAILABLE,
+			statusCode: 503,
+		},
+	},
+});
+const safeApiUnavailableError = sanitizeApiError(
+	apiUnavailableError,
+) as Error & {
+	response?: { status: number; data?: { code?: string } };
+};
+assert.equal(
+	safeApiUnavailableError.message,
+	"The ECommand API could not be reached.",
+	"proxy outages use the shared API error code and localized transport message",
+);
+assert.equal(
+	safeApiUnavailableError.response?.data?.code,
+	API_TRANSPORT_ERROR_CODES.API_UNAVAILABLE,
+	"the unavailable code survives sanitization so the app can recover the query",
 );
 assert.equal(
 	(safeResponseError as Error).message,

@@ -998,6 +998,7 @@ export const Messages = {
 	errorPage: {
 		title: "errorPage.title",
 		description: "errorPage.description",
+		apiUnavailableDetails: "errorPage.apiUnavailableDetails",
 		formSubmitted: "errorPage.formSubmitted",
 		signIn: "errorPage.signIn",
 		retry: "errorPage.retry",

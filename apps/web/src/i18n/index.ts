@@ -2,6 +2,7 @@ import {
 	API_CONSTRAINT_ERROR_CODES,
 	API_ERROR_CODES,
 	API_RESPONSE_CODES,
+	API_TRANSPORT_ERROR_CODES,
 	API_VALIDATION_RULE_CODES,
 	type ApiConstraintErrorCode,
 	type ApiErrorCode,
@@ -315,6 +316,9 @@ export function translateApiError(
 	status?: number,
 	locale: AppLocale = DEFAULT_LOCALE,
 ): string {
+	if (code === API_TRANSPORT_ERROR_CODES.API_UNAVAILABLE) {
+		return translate(Messages.transport.apiUnavailable, {}, locale);
+	}
 	if (code && Object.hasOwn(apiErrorMessages, code)) {
 		return translate(apiErrorMessages[code as ApiErrorCode], {}, locale);
 	}

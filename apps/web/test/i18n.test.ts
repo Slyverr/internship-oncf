@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import {
 	API_ERROR_CODES,
 	API_RESPONSE_CODES,
+	API_TRANSPORT_ERROR_CODES,
 	API_VALIDATION_RULE_CODES,
 	DEFAULT_LOCALE,
 } from "@ecommand/shared";
@@ -237,6 +238,10 @@ assert.equal(
 	"If you were submitting a form, check whether it completed before trying again.",
 );
 assert.equal(
+	translate("errorPage.apiUnavailableDetails"),
+	"The ECommand API is temporarily unavailable. Your session is safe; retry in a moment.",
+);
+assert.equal(
 	translate("common.underConstruction.description"),
 	"This page is being built. Check back soon.",
 );
@@ -359,6 +364,10 @@ assert.equal(
 assert.equal(
 	translateApiError(API_ERROR_CODES.ACCESS_DENIED),
 	"You do not have permission to perform this action.",
+);
+assert.equal(
+	translateApiError(API_TRANSPORT_ERROR_CODES.API_UNAVAILABLE),
+	"The ECommand API could not be reached.",
 );
 for (const code of [
 	API_ERROR_CODES.DUPLICATE_ORDER_ATTRIBUTE,

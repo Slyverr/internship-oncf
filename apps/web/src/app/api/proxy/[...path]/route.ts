@@ -1,3 +1,4 @@
+import { API_TRANSPORT_ERROR_CODES } from "@ecommand/shared";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -14,9 +15,9 @@ async function handler(
 	const contentType = req.headers.get("content-type");
 	const backendUrl = process.env.BACKEND_API_URL ?? "http://localhost:8000";
 
-	const res = await fetch(
-		`${backendUrl}/${path.join("/")}${req.nextUrl.search}`,
-		{
+	let res: Response;
+	try {
+		res = await fetch(`${backendUrl}/${path.join("/")}${req.nextUrl.search}`, {
 			method: req.method,
 			headers: {
 				...(contentType && { "content-type": contentType }),
@@ -25,8 +26,16 @@ async function handler(
 			body:
 				req.method === "GET" || req.method === "HEAD" ? undefined : req.body,
 			duplex: "half",
-		} as NodeRequestInit,
-	);
+		} as NodeRequestInit);
+	} catch {
+		return NextResponse.json(
+			{
+				code: API_TRANSPORT_ERROR_CODES.API_UNAVAILABLE,
+				statusCode: 503,
+			},
+			{ status: 503 },
+		);
+	}
 
 	const responseContentType = res.headers.get("content-type");
 	const contentDisposition = res.headers.get("content-disposition");

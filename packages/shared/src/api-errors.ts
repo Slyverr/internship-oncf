@@ -142,6 +142,10 @@ export const API_ERROR_CODES = {
 export type ApiErrorCode =
 	(typeof API_ERROR_CODES)[keyof typeof API_ERROR_CODES];
 
+export const API_TRANSPORT_ERROR_CODES = {
+	API_UNAVAILABLE: "API_UNAVAILABLE",
+} as const;
+
 export const API_VALIDATION_RULE_CODES = {
 	ARRAY_UNIQUE: "ARRAY_UNIQUE",
 	IS_ARRAY: "IS_ARRAY",

@@ -5,6 +5,8 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useState } from "react";
 import type { AppLocale } from "@/i18n";
 import { LocaleProvider } from "@/i18n/locale-provider";
+import { shouldRetryApiRequest } from "@/lib/api-availability";
+import { ApiRecoveryMonitor } from "@/providers/api-recovery-monitor";
 import { AppearanceProvider } from "@/providers/appearance-provider";
 
 const enableQueryDevtools =
@@ -22,7 +24,7 @@ export function Providers({
 			new QueryClient({
 				defaultOptions: {
 					queries: {
-						retry: 2,
+						retry: shouldRetryApiRequest,
 						retryDelay: (attempt) => Math.min(1_000 * 2 ** attempt, 5_000),
 						refetchOnWindowFocus: true,
 					},
@@ -34,6 +36,7 @@ export function Providers({
 		<LocaleProvider locale={locale}>
 			<AppearanceProvider>
 				<QueryClientProvider client={queryClient}>
+					<ApiRecoveryMonitor />
 					{children}
 					{enableQueryDevtools && (
 						<ReactQueryDevtools buttonPosition="bottom-right" />
