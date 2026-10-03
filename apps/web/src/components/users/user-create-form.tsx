@@ -373,13 +373,13 @@ export function UserCreateForm(): JSX.Element {
 									profiles={roleProfiles}
 									value={field.state.value}
 									onValueChange={field.handleChange}
-									disabled={roleProfilesQuery.isLoading}
+									disabled={
+										roleProfilesQuery.isLoading && roleProfiles.length === 0
+									}
+									isError={roleProfilesQuery.isError}
+									isFetching={roleProfilesQuery.isFetching}
+									onRetry={() => void roleProfilesQuery.refetch()}
 								/>
-								{roleProfilesQuery.isError && (
-									<p className="text-sm text-destructive">
-										{t(Messages.users.form.rolesLoadFailed)}
-									</p>
-								)}
 							</div>
 						)}
 					</form.Field>

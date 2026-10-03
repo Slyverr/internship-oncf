@@ -37,5 +37,6 @@ import "./route-metadata.test";
 import "./user-labels.test";
 import "./user-filters.test";
 import "./user-customer-select.test";
+import "./role-profile-select.test";
 import "./user-credentials-schema.test";
 import "./wait-for-api.test";
