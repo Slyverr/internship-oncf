@@ -1319,7 +1319,9 @@ export const Messages = {
 	},
 	claims: {
 		title: "claims.title",
-		pageDescription: "claims.pageDescription",
+		managedDescription: "claims.managedDescription",
+		conversationDescription: "claims.conversationDescription",
+		readOnlyDescription: "claims.readOnlyDescription",
 		create: "claims.create",
 		newTitle: "claims.newTitle",
 		newDescription: "claims.newDescription",

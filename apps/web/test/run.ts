@@ -24,6 +24,7 @@ import "./entity-breadcrumbs.test";
 import "./action-visibility.test";
 import "./claim-conversation-utils.test";
 import "./claim-conversation-focus.test";
+import "./claims-page-copy.test";
 import "./claim-labels.test";
 import "./customer-form-schema.test";
 import "./customer-identity.test";

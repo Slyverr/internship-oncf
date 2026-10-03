@@ -1495,7 +1495,12 @@ export const frDraft = {
 	},
 	claims: {
 		title: "Réclamations",
-		pageDescription: "Consultez et gérez les réclamations des clients.",
+		managedDescription:
+			"Consultez et gérez les réclamations des clients de votre portefeuille.",
+		conversationDescription:
+			"Suivez vos réclamations et ajoutez des commentaires à la conversation.",
+		readOnlyDescription:
+			"Consultez les réclamations accessibles à votre compte.",
 		create: "Créer une réclamation",
 		newTitle: "Nouvelle réclamation",
 		newDescription:

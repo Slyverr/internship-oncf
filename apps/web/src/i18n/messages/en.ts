@@ -1356,7 +1356,10 @@ export const en = {
 	},
 	claims: {
 		title: "Claims",
-		pageDescription: "Review and manage customer claims.",
+		managedDescription: "Review and manage claims for assigned customers.",
+		conversationDescription:
+			"Track your claims and add comments to the conversation.",
+		readOnlyDescription: "View the claims available to your account.",
 		create: "Create claim",
 		newTitle: "New claim",
 		newDescription:
