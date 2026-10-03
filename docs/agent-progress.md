@@ -291,3 +291,13 @@ The security follow-up for preventing administrator lockout is completed in Chap
 - Commits: `7283595 feat(web/dashboard): add customer and product insights`, `eeca067 refactor(web/navigation): centralize route permissions`.
 
 **Next:** continue the product closeout, not test-only work: review create/edit forms, settings/dialog states, role-specific empty/error states, and the permission matrix at route level. Record a defect only from inspected screenshots or a reproduced workflow, then fix and retake the affected evidence. Customer ICE ownership remains unresolved; French and production deployment remain deferred.
+
+## Chapter 26 — responsive order creation and workflow verification — 2026-10-03
+
+- Captured and inspected the Agent order-create first step at 390, 768, 1440, 1920, 2560, and 3840px. The title follows the shared workspace width, the form is constrained consistently on large screens, phone controls stack cleanly, and the footer actions remain reachable above the fixed navigation. No UI change was warranted; screenshots are in `/tmp/ecommand-order-create-current`.
+- Ran `bun run verify` successfully against the current checkout: formatting/linting, workspace typechecks, unit suites, and production builds all passed.
+- Ran the isolated browser E2E suite using temporary real Node and Chromium runtimes. Both API suites / 27 tests passed, as did all 12 browser workflows, including Admin management, Agent and Client workflows, CSV export, and the preselected order → cancel → create program path. The test runner removed its disposable database and services.
+- Rechecked the live preview after the verification run: API health and web login returned 200, and temporary capture Chromium was stopped to release memory.
+- Updated the readiness report and marked the program-selection/cancel checklist item complete based on the current browser workflow evidence.
+
+**Next:** continue the route-by-route UI audit with remaining create/edit steps, settings/dialog sections, and role-specific empty/error states. Reconcile remaining checklist items against current evidence; keep French deferred until these higher-priority reviews are complete. Customer ICE ownership and external DTM/SMTP contracts remain open decisions.
