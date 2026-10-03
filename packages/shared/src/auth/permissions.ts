@@ -3,6 +3,7 @@ import { Permission } from "../enums/auth.enum";
 export type PermissionDefinition = {
 	description: string;
 	parent?: Permission;
+	assignable?: boolean;
 };
 
 export const PERMISSION_DEFINITIONS: Record<Permission, PermissionDefinition> =
@@ -146,6 +147,7 @@ export const PERMISSION_DEFINITIONS: Record<Permission, PermissionDefinition> =
 		},
 		[Permission.PROGRAMS_ACTION_EXECUTE]: {
 			description: "Record program execution",
+			assignable: false,
 			parent: Permission.PROGRAMS_ACTION,
 		},
 
@@ -242,6 +244,7 @@ export const PERMISSION_DEFINITIONS: Record<Permission, PermissionDefinition> =
 		},
 		[Permission.TRACKING_MANAGE]: {
 			description: "Manage tracking properties and settings",
+			assignable: false,
 		},
 
 		[Permission.REPORTS_READ]: {
@@ -267,6 +270,7 @@ export const PERMISSION_DEFINITIONS: Record<Permission, PermissionDefinition> =
 
 		[Permission.LOGS_READ]: {
 			description: "View system audit logs and activity history",
+			assignable: false,
 		},
 
 		[Permission.PROFILE_UPDATE]: {
@@ -275,8 +279,10 @@ export const PERMISSION_DEFINITIONS: Record<Permission, PermissionDefinition> =
 
 		[Permission.ARCHIVAL_READ]: {
 			description: "View archived data and historical records",
+			assignable: false,
 		},
 		[Permission.ARCHIVAL_MANAGE]: {
 			description: "Manage data archival, retention, and purging policies",
+			assignable: false,
 		},
 	};

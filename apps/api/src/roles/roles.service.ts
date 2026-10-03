@@ -15,8 +15,8 @@ import { CreateRoleProfileDto } from "./requests/create-role-profile.dto";
 import { UpdateRoleProfileDto } from "./requests/update-role-profile.dto";
 import {
 	assertCustomRolePermissions,
+	isCustomRolePermissionAssignable,
 	isCustomRolePersona,
-	isReservedCustomRolePermission,
 } from "./role-profile-policy";
 import { RolesQuery } from "./roles.query";
 
@@ -41,7 +41,7 @@ export class RolesService {
 			parent:
 				PERMISSION_DEFINITIONS[permission.name as Permission]?.parent ??
 				undefined,
-			assignable: !isReservedCustomRolePermission(
+			assignable: isCustomRolePermissionAssignable(
 				permission.name as Permission,
 			),
 		}));

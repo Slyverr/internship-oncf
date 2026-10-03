@@ -92,6 +92,8 @@ describe("RolesService", () => {
 				name: Permission.ORDERS_ACTION_SUBMIT,
 				description: "Submit orders for processing",
 			},
+			{ name: Permission.LOGS_READ, description: "View system audit logs" },
+			{ name: "obsolete:permission" as Permission, description: "Old grant" },
 		] as Awaited<ReturnType<RolesQuery["findPermissions"]>>);
 
 		await expect(service.findPermissionDefinitions()).resolves.toEqual([
@@ -99,6 +101,16 @@ describe("RolesService", () => {
 				name: Permission.ORDERS_ACTION_SUBMIT,
 				parent: Permission.ORDERS_ACTION,
 				assignable: true,
+			},
+			{
+				name: Permission.LOGS_READ,
+				parent: undefined,
+				assignable: false,
+			},
+			{
+				name: "obsolete:permission",
+				parent: undefined,
+				assignable: false,
 			},
 		]);
 	});
