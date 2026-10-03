@@ -394,18 +394,25 @@ try {
 		if (results.length === 0 || !reusePage) {
 			if (
 				freshContext &&
+				results.length === 0 &&
 				new URL(captureTarget.url).pathname === new URL(baseUrl).pathname
 			) {
 				let routeLoaded = false;
-				for (let attempt = 0; attempt < 40; attempt++) {
+				for (let attempt = 0; attempt < 150; attempt++) {
 					routeLoaded = await evaluate<boolean>(
 						`document.readyState === "complete" && location.pathname === ${JSON.stringify(new URL(baseUrl).pathname)}`,
 					);
 					if (routeLoaded) break;
 					await Bun.sleep(100);
 				}
-				if (!routeLoaded)
-					throw new Error(`The isolated browser tab did not load ${baseUrl}.`);
+				if (!routeLoaded) {
+					const pageState = await evaluate<string>(
+						`JSON.stringify({ url: location.href, readyState: document.readyState, title: document.title })`,
+					);
+					throw new Error(
+						`The isolated browser tab did not load ${baseUrl}. Current page: ${pageState}`,
+					);
+				}
 				await evaluate<boolean>(
 					"document.fonts?.ready.then(() => true) ?? true",
 				);
@@ -461,7 +468,7 @@ try {
 			if (!clicked) missingClickTargets.push(`text:${text}`);
 			if (settleMs > 0) await Bun.sleep(settleMs);
 		}
-		if (thenUrl) await navigate(new URL(thenUrl, baseUrl).href);
+		if (thenUrl && runActions) await navigate(new URL(thenUrl, baseUrl).href);
 		for (const { selector, value } of runActions ? fillAfterUrlFields : []) {
 			const filled = await evaluate<boolean>(`(() => {
 				const target = document.querySelector(${JSON.stringify(selector)});
