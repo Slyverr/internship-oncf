@@ -7,6 +7,7 @@ import {
 } from "@ecommand/shared";
 import type { AuthUser } from "@/auth/auth.types";
 import { ORDER_STATUSES } from "@/database/reference-data";
+import type { DtmGateway } from "@/dtm/dtm.gateway";
 import type { OrdersMapper } from "./orders.mapper";
 import type { OrdersQuery } from "./orders.query";
 import { OrdersService } from "./orders.service";
@@ -41,6 +42,7 @@ describe("OrdersService workflows", () => {
 		notifyChange: jest.Mock;
 		createChangeRecord: jest.Mock;
 	};
+	let dtm: jest.Mocked<DtmGateway>;
 
 	beforeEach(() => {
 		query = {
@@ -53,7 +55,8 @@ describe("OrdersService workflows", () => {
 			notifyChange: jest.fn().mockResolvedValue(undefined),
 			createChangeRecord: jest.fn().mockReturnValue({ id: "notification" }),
 		};
-		service = new OrdersService(notifications as never, query, mapper);
+		dtm = { submitOrder: jest.fn(), submitProgram: jest.fn() };
+		service = new OrdersService(notifications as never, query, mapper, dtm);
 		query.findOrder.mockResolvedValue(draftOrder as never);
 		query.updateOrder.mockResolvedValue(undefined as never);
 	});
@@ -181,6 +184,28 @@ describe("OrdersService workflows", () => {
 					status: OrderStatus.SUBMITTED,
 				},
 			},
+		);
+	});
+
+	it("submits an order to the configured DTM gateway after transitioning it", async () => {
+		query.findOrderStatus.mockResolvedValue({
+			statusId: ORDER_STATUSES[OrderStatus.APPROVED].id,
+			orderNumber: draftOrder.orderNumber,
+			createdByUserId: user.id,
+		} as never);
+		const sentOrder = {
+			...draftOrder,
+			orderStatus: { name: OrderStatus.SENT_TO_DTM },
+		};
+		query.findOrder.mockResolvedValue(sentOrder as never);
+
+		await expect(service.sendToDtm(id, user)).resolves.toEqual(sentOrder);
+
+		expect(dtm.submitOrder).toHaveBeenCalledWith(sentOrder, user);
+		expect(query.updateOrder).toHaveBeenCalledWith(
+			id,
+			{ statusId: ORDER_STATUSES[OrderStatus.SENT_TO_DTM].id },
+			expect.any(Object),
 		);
 	});
 

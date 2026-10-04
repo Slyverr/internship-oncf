@@ -736,6 +736,12 @@ export interface OrderDetailDto {
   endDate: string | null;
   createdAt: string;
   updatedAt: string;
+  /** @nullable */
+  dtmRequestStatus: string | null;
+  /** @nullable */
+  dtmResponseStatus: string | null;
+  /** @nullable */
+  dtmSubmittedAt: string | null;
   orderStatus: OrderDetailDtoOrderStatus;
   forecastPrograms: OrderDetailDtoForecastProgramsItem[];
   orderExecutions: OrderDetailDtoOrderExecutionsItem[];

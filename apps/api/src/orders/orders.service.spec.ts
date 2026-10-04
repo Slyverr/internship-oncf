@@ -12,6 +12,7 @@ describe("OrdersService deletion", () => {
 		{} as never,
 		{ findOrder, deleteOrder } as unknown as OrdersQuery,
 		{} as never,
+		{} as never,
 	);
 	const id = 5 as OrderId;
 
@@ -44,6 +45,7 @@ describe("OrdersService public code resolution", () => {
 	const service = new OrdersService(
 		{} as never,
 		{ findOrderIdByNumber } as unknown as OrdersQuery,
+		{} as never,
 		{} as never,
 	);
 
@@ -117,6 +119,7 @@ describe("OrdersService duplication", () => {
 			{} as never,
 			{ findOrder, createOrder } as unknown as OrdersQuery,
 			mapper as never,
+			{} as never,
 		);
 
 		await service.duplicate(sourceId, actor);

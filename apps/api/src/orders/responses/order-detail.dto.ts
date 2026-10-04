@@ -35,6 +35,9 @@ export class OrderDetailDto implements OrderDetail {
 	endDate: string | null;
 	createdAt: string;
 	updatedAt: string;
+	dtmRequestStatus: string | null;
+	dtmResponseStatus: string | null;
+	dtmSubmittedAt: string | null;
 	orderStatus: { id: string; name: string } | null;
 	forecastPrograms: {
 		id: number;

@@ -25,6 +25,8 @@ export function OrderDetailsClient({ order }: OrderDetailsClientProps) {
 	const { data: currentOrder } = useOrdersControllerFindOne(order.orderNumber, {
 		query: {
 			initialData: order,
+			refetchInterval: (query) =>
+				query.state.data?.dtmRequestStatus === "PENDING" ? 1_000 : false,
 		},
 	});
 

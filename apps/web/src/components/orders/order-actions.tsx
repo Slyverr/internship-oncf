@@ -28,6 +28,7 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Textarea } from "@/components/ui/textarea";
+import { useFormErrorMessage } from "@/hooks/use-form-error-message";
 import { useUpdateDetailCache } from "@/hooks/use-update-detail-cache";
 import { Messages } from "@/i18n";
 import { useTranslate } from "@/i18n/locale-provider";
@@ -48,6 +49,7 @@ import { ConfirmDialog } from "../common/confirm-dialog";
 
 export function OrderActions({ order }: { order: OrderDetailDto }) {
 	const t = useTranslate();
+	const getErrorMessage = useFormErrorMessage();
 	const { hasPermission } = useAuth();
 	const updateOrderCache = useUpdateDetailCache<OrderDetailDto, string>(
 		getOrdersControllerFindOneQueryKey,
@@ -134,6 +136,12 @@ export function OrderActions({ order }: { order: OrderDetailDto }) {
 				{duplicateMutation.isError && (
 					<p className="basis-full text-sm text-destructive" role="alert">
 						{t(Messages.orders.detail.duplicateFailed)}
+					</p>
+				)}
+				{sendToDtmMutation.isError && (
+					<p className="basis-full text-sm text-destructive" role="alert">
+						{getErrorMessage(sendToDtmMutation.error) ??
+							t(Messages.orders.actions.sendToDtmFailed)}
 					</p>
 				)}
 				{/* Submit: DRAFT → SUBMITTED */}

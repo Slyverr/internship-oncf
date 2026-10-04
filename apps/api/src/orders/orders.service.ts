@@ -8,6 +8,7 @@ import {
 	BadRequestException,
 	ConflictException,
 	ForbiddenException,
+	Inject,
 	Injectable,
 	NotFoundException,
 } from "@nestjs/common";
@@ -17,6 +18,7 @@ import { AuthUser } from "@/auth/auth.types";
 import { hasOnePermission } from "@/auth/auth.utils";
 import { ListQueryDto } from "@/common/requests/list-query.dto";
 import { ORDER_STATUSES } from "@/database/reference-data";
+import { DTM_GATEWAY, type DtmGateway } from "@/dtm/dtm.gateway";
 import { NotificationsService } from "@/notifications/notifications.service";
 import {
 	ORDER_QUANTITY_PATTERN,
@@ -36,6 +38,7 @@ export class OrdersService {
 		private readonly notifications: NotificationsService,
 		private readonly ordersQuery: OrdersQuery,
 		private readonly ordersMapper: OrdersMapper,
+		@Inject(DTM_GATEWAY) private readonly dtm: DtmGateway,
 	) {}
 
 	async create(dto: CreateOrderDto, user: AuthUser) {
@@ -182,7 +185,9 @@ export class OrdersService {
 	}
 
 	async sendToDtm(id: OrderId, user: AuthUser) {
-		return this.transition(id, user, OrderStatus.SENT_TO_DTM);
+		const order = await this.transition(id, user, OrderStatus.SENT_TO_DTM);
+		await this.dtm.submitOrder(order, user);
+		return this.findOne(id);
 	}
 
 	async remove(id: OrderId) {

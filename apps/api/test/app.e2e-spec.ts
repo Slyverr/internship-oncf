@@ -2,6 +2,7 @@ import {
 	API_ERROR_CODES,
 	API_RESPONSE_CODES,
 	type AppearancePreferences,
+	OrderStatus,
 	ProgramStatus,
 	RegistrationStatus,
 	Role,
@@ -13,10 +14,11 @@ import { eq } from "drizzle-orm";
 import request from "supertest";
 import type { App } from "supertest/types";
 import { DrizzleService } from "@/database/drizzle.service";
-import { PROGRAM_STATUSES } from "@/database/reference-data";
+import { DTM_REQUEST_TYPES, PROGRAM_STATUSES } from "@/database/reference-data";
 import {
 	E2E_CUSTOMER_ICE,
 	E2E_CUSTOMERS,
+	E2E_ORDERS,
 	E2E_PASSWORD,
 	E2E_PASSWORD_RESET,
 	E2E_PROGRAMS,
@@ -120,6 +122,65 @@ describe("API bootstrap and authentication (e2e)", () => {
 			httpStatusCode: 200,
 		});
 		expect(completedProgram?.dtmStatus).toBe("ACCEPTED");
+	});
+
+	it("records an order send and applies a simulated DTM acknowledgement", async () => {
+		const drizzle = app.get(DrizzleService);
+		const token = await login(app, E2E_USERS.agentAssigned.employeeCode);
+		const response = await request(app.getHttpServer())
+			.post(`/orders/${E2E_ORDERS.assignedB}/send-to-dtm`)
+			.set("Authorization", `Bearer ${token}`)
+			.expect(200);
+
+		expect(response.body.orderStatus.name).toBe(OrderStatus.SENT_TO_DTM);
+		expect(["PENDING", "SUCCESS"]).toContain(response.body.dtmRequestStatus);
+
+		const sentOrder = await drizzle.db.query.orders.findFirst({
+			where: { orderNumber: E2E_ORDERS.assignedB },
+			columns: { id: true },
+		});
+		expect(sentOrder).toBeDefined();
+
+		const requestLog = await drizzle.db.query.dtmIntegrationLog.findFirst({
+			where: {
+				relatedEntityId: sentOrder?.id,
+				relatedEntityType: "orders",
+			},
+		});
+		expect(requestLog).toMatchObject({
+			requestTypeId: DTM_REQUEST_TYPES.SEND_ORDER.id,
+			relatedEntityType: "orders",
+		});
+		expect(["PENDING", "SUCCESS"]).toContain(requestLog?.status);
+		expect([202, 200]).toContain(requestLog?.httpStatusCode);
+		expect(JSON.parse(requestLog?.requestPayload ?? "{}")).toMatchObject({
+			contract: "ecommand-dtm-simulator-v1",
+			order: { orderNumber: E2E_ORDERS.assignedB },
+		});
+
+		let completedLog = requestLog;
+		for (let attempt = 0; attempt < 20; attempt++) {
+			await new Promise((resolve) => setTimeout(resolve, 10));
+			completedLog = await drizzle.db.query.dtmIntegrationLog.findFirst({
+				where: { id: requestLog?.id ?? -1 },
+			});
+			if (completedLog?.status !== "PENDING") break;
+		}
+		expect(completedLog).toMatchObject({
+			status: "SUCCESS",
+			httpStatusCode: 200,
+		});
+		expect(JSON.parse(completedLog?.responsePayload ?? "{}")).toMatchObject({
+			status: "ACCEPTED",
+		});
+		const refreshedOrder = await request(app.getHttpServer())
+			.get(`/orders/${E2E_ORDERS.assignedB}`)
+			.set("Authorization", `Bearer ${token}`)
+			.expect(200);
+		expect(refreshedOrder.body).toMatchObject({
+			dtmRequestStatus: "SUCCESS",
+			dtmResponseStatus: "ACCEPTED",
+		});
 	});
 
 	it("locks after the configured failed attempts, expires, and resets on success", async () => {

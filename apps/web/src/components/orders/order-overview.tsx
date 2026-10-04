@@ -1,4 +1,5 @@
 import { RecordDetail, RecordMetric } from "@/components/common/record-summary";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Messages } from "@/i18n";
 import { useLocale, useTranslate } from "@/i18n/locale-provider";
@@ -10,6 +11,28 @@ import { OrderAttachments } from "./order-attachments";
 export function OrderOverview({ order }: { order: OrderDetailDto }) {
 	const locale = useLocale();
 	const t = useTranslate();
+	const dtmStatusMessage =
+		order.dtmRequestStatus === "PENDING"
+			? Messages.orders.detail.dtm.pending
+			: order.dtmResponseStatus === "ACCEPTED"
+				? Messages.orders.detail.dtm.accepted
+				: order.dtmResponseStatus === "REJECTED"
+					? Messages.orders.detail.dtm.rejected
+					: order.dtmRequestStatus === "TIMEOUT"
+						? Messages.orders.detail.dtm.timedOut
+						: order.dtmRequestStatus === "FAILED"
+							? Messages.orders.detail.dtm.failed
+							: order.dtmRequestStatus === "SUCCESS"
+								? Messages.orders.detail.dtm.responseReceived
+								: null;
+	const dtmStatusVariant =
+		order.dtmResponseStatus === "ACCEPTED"
+			? "secondary"
+			: order.dtmResponseStatus === "REJECTED" ||
+					order.dtmRequestStatus === "FAILED" ||
+					order.dtmRequestStatus === "TIMEOUT"
+				? "destructive"
+				: "outline";
 	return (
 		<div className="flex flex-col gap-8">
 			<div className="grid gap-4 @3xl/workspace:grid-cols-2">
@@ -33,6 +56,24 @@ export function OrderOverview({ order }: { order: OrderDetailDto }) {
 							label={t(Messages.orders.detail.status)}
 							value={getOrderStatusLabel(order.orderStatus.name, locale)}
 						/>
+
+						{dtmStatusMessage && (
+							<RecordDetail
+								label={t(Messages.orders.detail.dtm.status)}
+								value={
+									<Badge variant={dtmStatusVariant}>
+										{t(dtmStatusMessage)}
+									</Badge>
+								}
+							/>
+						)}
+
+						{order.dtmSubmittedAt && (
+							<RecordDetail
+								label={t(Messages.orders.detail.dtm.lastSubmitted)}
+								value={formatDisplayDate(order.dtmSubmittedAt, locale)}
+							/>
+						)}
 
 						<RecordDetail
 							label={t(Messages.orders.detail.supervisor)}
