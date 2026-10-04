@@ -3,7 +3,7 @@ import { ApiProperty } from "@nestjs/swagger";
 
 export class NotificationsMarkedReadDto {
 	@ApiProperty({ enum: [API_RESPONSE_CODES.NOTIFICATIONS_MARKED_READ] })
-	code: string;
+	code: typeof API_RESPONSE_CODES.NOTIFICATIONS_MARKED_READ;
 
 	@ApiProperty()
 	count: number;
