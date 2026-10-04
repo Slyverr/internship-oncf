@@ -3,7 +3,7 @@
 import { ManagedReferenceResource } from "@ecommand/shared";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { PencilIcon } from "lucide-react";
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, type ReactNode, useEffect, useState } from "react";
 import { TableActionButton } from "@/components/common/table-action-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -117,6 +117,112 @@ const fieldsByResource: Partial<Record<Resource, FieldSpec[]>> = {
 
 const emptyDraft: Draft = { name: "", isActive: true };
 
+type ReferenceColumn = {
+	key: string;
+	label: MessageKey;
+	value: (
+		row: ManagedReferenceRow,
+		t: ReturnType<typeof useTranslate>,
+	) => ReactNode;
+};
+
+const columnsByResource: Record<Resource, ReferenceColumn[]> = {
+	stations: [
+		{
+			key: "name",
+			label: Messages.referenceData.name,
+			value: (row) => row.name,
+		},
+		{
+			key: "stationCode",
+			label: Messages.common.fields.stationCode,
+			value: (row) => row.stationCode ?? "—",
+		},
+		{
+			key: "city",
+			label: Messages.referenceData.city,
+			value: (row) => row.city ?? "—",
+		},
+	],
+	agencies: [
+		{
+			key: "name",
+			label: Messages.referenceData.name,
+			value: (row) => row.name,
+		},
+		{
+			key: "city",
+			label: Messages.referenceData.city,
+			value: (row) => row.city ?? "—",
+		},
+	],
+	ports: [
+		{
+			key: "name",
+			label: Messages.referenceData.name,
+			value: (row) => row.name,
+		},
+		{
+			key: "type",
+			label: Messages.referenceData.portType,
+			value: (row, t) =>
+				row.type === "normal"
+					? t(Messages.referenceData.normalPort)
+					: row.type === "dry"
+						? t(Messages.referenceData.dryPort)
+						: "—",
+		},
+		{
+			key: "city",
+			label: Messages.referenceData.city,
+			value: (row) => row.city ?? "—",
+		},
+		{
+			key: "stationName",
+			label: Messages.common.fields.stationId,
+			value: (row) => row.stationName ?? "—",
+		},
+	],
+	berths: [
+		{
+			key: "name",
+			label: Messages.referenceData.name,
+			value: (row) => row.name,
+		},
+		{
+			key: "portName",
+			label: Messages.common.fields.portId,
+			value: (row) => row.portName ?? "—",
+		},
+	],
+	sidings: [
+		{
+			key: "name",
+			label: Messages.referenceData.name,
+			value: (row) => row.name,
+		},
+		{
+			key: "city",
+			label: Messages.referenceData.city,
+			value: (row) => row.city ?? "—",
+		},
+	],
+	vessels: [
+		{
+			key: "name",
+			label: Messages.referenceData.name,
+			value: (row) => row.name,
+		},
+	],
+	shippingCompanies: [
+		{
+			key: "name",
+			label: Messages.referenceData.name,
+			value: (row) => row.name,
+		},
+	],
+};
+
 function ActiveOptions({
 	kind,
 	value,
@@ -153,10 +259,7 @@ function ActiveOptions({
 				}));
 	return (
 		<div className="oncf-field">
-			<Label>
-				{label}
-				{required ? " *" : ""}
-			</Label>
+			<Label required={required}>{label}</Label>
 			<Select value={value} onValueChange={(next) => next && onChange(next)}>
 				<SelectTrigger className="w-full" aria-label={label}>
 					<SelectValue placeholder={label} />
@@ -233,7 +336,7 @@ function ManagedReferenceDialog({
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent size="form" className="gap-0 overflow-hidden p-0">
+			<DialogContent size="content" className="gap-0 overflow-hidden p-0">
 				<DialogHeader className="mx-6 mt-6 pb-4">
 					<DialogTitle className="text-base">
 						{t(
@@ -256,8 +359,8 @@ function ManagedReferenceDialog({
 						onSubmit={submit}
 					>
 						<div className="oncf-field sm:col-span-2">
-							<Label htmlFor="managed-reference-name">
-								{t(Messages.referenceData.name)} *
+							<Label htmlFor="managed-reference-name" required>
+								{t(Messages.referenceData.name)}
 							</Label>
 							<Input
 								id="managed-reference-name"
@@ -298,9 +401,11 @@ function ManagedReferenceDialog({
 							}
 							return (
 								<div key={field.key} className="oncf-field">
-									<Label htmlFor={`managed-reference-${field.key}`}>
+									<Label
+										htmlFor={`managed-reference-${field.key}`}
+										required={Boolean(field.required)}
+									>
 										{label}
-										{field.required ? " *" : ""}
 									</Label>
 									<Input
 										id={`managed-reference-${field.key}`}
@@ -471,13 +576,17 @@ export function ManagedReferenceDataSection({
 					</Button>
 				</div>
 			) : (
-				<div className="overflow-hidden rounded-lg border">
-					<Table>
+				<div className="overflow-x-auto rounded-lg border">
+					<Table className="min-w-[40rem]">
 						<TableHeader>
 							<TableRow>
-								<TableHead>{t(Messages.referenceData.name)}</TableHead>
-								<TableHead>{t(Messages.common.fields.status)}</TableHead>
-								<TableHead className="text-right">
+								{columnsByResource[resource].map((column) => (
+									<TableHead key={column.key}>{t(column.label)}</TableHead>
+								))}
+								<TableHead className="w-36 text-right">
+									{t(Messages.common.fields.status)}
+								</TableHead>
+								<TableHead className="w-20 text-right">
 									{t(Messages.referenceData.actions)}
 								</TableHead>
 							</TableRow>
@@ -485,31 +594,25 @@ export function ManagedReferenceDataSection({
 						<TableBody>
 							{rows.data?.length ? (
 								rows.data.map((row) => (
-									<TableRow key={row.id}>
-										<TableCell className="max-w-0">
-											<button
-												type="button"
-												className="block min-h-11 w-full truncate text-left font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-												onClick={() => openEdit(row)}
+									<TableRow key={row.id} onClick={() => openEdit(row)}>
+										{columnsByResource[resource].map((column, index) => (
+											<TableCell
+												key={column.key}
+												className={index === 0 ? "font-medium" : ""}
 											>
-												{row.name}
-											</button>
-											<p className="truncate text-xs text-muted-foreground">
-												{row.stationCode ??
-													row.city ??
-													row.portName ??
-													row.stationName ??
-													""}
-											</p>
-										</TableCell>
-										<TableCell>
-											<Badge variant="outline">
-												{t(
-													row.isActive
-														? Messages.referenceData.active
-														: Messages.referenceData.archived,
-												)}
-											</Badge>
+												{column.value(row, t)}
+											</TableCell>
+										))}
+										<TableCell className="text-right">
+											<div className="flex justify-end">
+												<Badge variant="outline">
+													{t(
+														row.isActive
+															? Messages.referenceData.active
+															: Messages.referenceData.archived,
+													)}
+												</Badge>
+											</div>
 										</TableCell>
 										<TableCell className="text-right">
 											<TableActionButton
@@ -523,7 +626,7 @@ export function ManagedReferenceDataSection({
 							) : (
 								<TableRow>
 									<TableCell
-										colSpan={3}
+										colSpan={columnsByResource[resource].length + 2}
 										className="h-24 whitespace-normal text-left text-muted-foreground md:text-center"
 									>
 										{t(Messages.referenceData.empty)}

@@ -93,6 +93,7 @@ export const berths = pgTable(
 			foreignColumns: [ports.id],
 			name: "berths_port_id_fkey",
 		}).onDelete("cascade"),
+		unique("berths_port_id_name_key").on(table.portId, table.name),
 		index("idx_berths_name").on(table.name),
 		index("idx_berths_port").on(table.portId),
 		index("idx_berths_active").on(table.isActive),

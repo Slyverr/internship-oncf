@@ -2,6 +2,7 @@
 
 import {
 	CATALOG_MANAGEMENT_REQUIREMENTS,
+	GoodsType,
 	ManagedReferenceResource,
 	Permission,
 } from "@ecommand/shared";
@@ -101,6 +102,10 @@ type CatalogDraft = {
 	goodsCode: string;
 	goodsTypeId: string;
 };
+
+function getGoodsTypeLabel(name: string) {
+	return name in GoodsType ? GoodsType[name as keyof typeof GoodsType] : name;
+}
 
 const emptyDraft: CatalogDraft = {
 	name: "",
@@ -258,10 +263,13 @@ function CatalogEntryDialog({
 			type.isActive ||
 			(allowInactiveGoodsType && type.id === initialValue.goodsTypeId),
 	);
+	const selectedGoodsType = availableGoodsTypes.find(
+		(type) => type.id === draft.goodsTypeId,
+	);
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent size="form" className="gap-0 overflow-hidden p-0">
+			<DialogContent size="content" className="gap-0 overflow-hidden p-0">
 				<DialogHeader className="mx-6 mt-6 pb-4">
 					<DialogTitle className="text-base">{title}</DialogTitle>
 					<DialogDescription>{description}</DialogDescription>
@@ -324,12 +332,18 @@ function CatalogEntryDialog({
 										<SelectTrigger id="reference-entry-type" className="w-full">
 											<SelectValue
 												placeholder={t(Messages.referenceData.goodsType)}
-											/>
+											>
+												{draft.goodsTypeId
+													? selectedGoodsType
+														? getGoodsTypeLabel(selectedGoodsType.name)
+														: "—"
+													: undefined}
+											</SelectValue>
 										</SelectTrigger>
-										<SelectContent>
+										<SelectContent className="max-h-40">
 											{availableGoodsTypes.map((type) => (
 												<SelectItem key={type.id} value={type.id}>
-													{type.name}
+													{getGoodsTypeLabel(type.name)}
 												</SelectItem>
 											))}
 										</SelectContent>
@@ -399,12 +413,14 @@ function CatalogTable({
 	isError,
 	refetch,
 	onEdit,
+	formatName,
 }: {
 	items: CatalogItem[];
 	isLoading: boolean;
 	isError: boolean;
 	refetch: () => void;
 	onEdit: (item: CatalogItem) => void;
+	formatName?: (name: string) => string;
 }) {
 	const t = useTranslate();
 	if (isLoading) {
@@ -434,10 +450,10 @@ function CatalogTable({
 				<TableHeader>
 					<TableRow>
 						<TableHead>{t(Messages.referenceData.name)}</TableHead>
-						<TableHead className="w-36">
+						<TableHead className="w-36 text-right">
 							{t(Messages.common.fields.status)}
 						</TableHead>
-						<TableHead className="w-32 text-right">
+						<TableHead className="w-20 text-right">
 							{t(Messages.referenceData.actions)}
 						</TableHead>
 					</TableRow>
@@ -445,24 +461,20 @@ function CatalogTable({
 				<TableBody>
 					{items.length ? (
 						items.map((item) => (
-							<TableRow key={item.id}>
-								<TableCell className="max-w-0">
-									<button
-										type="button"
-										className="block min-h-11 w-full truncate text-left font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-										onClick={() => onEdit(item)}
-									>
-										{item.name}
-									</button>
+							<TableRow key={item.id} onClick={() => onEdit(item)}>
+								<TableCell className="font-medium">
+									{formatName?.(item.name) ?? item.name}
 								</TableCell>
-								<TableCell>
-									<Badge variant="outline">
-										{t(
-											item.isActive
-												? Messages.referenceData.active
-												: Messages.referenceData.archived,
-										)}
-									</Badge>
+								<TableCell className="text-right">
+									<div className="flex justify-end">
+										<Badge variant="outline">
+											{t(
+												item.isActive
+													? Messages.referenceData.active
+													: Messages.referenceData.archived,
+											)}
+										</Badge>
+									</div>
 								</TableCell>
 								<TableCell className="text-right">
 									<TableActionButton
@@ -497,6 +509,7 @@ function SimpleCatalogSection({
 	refetch,
 	create,
 	update,
+	formatName,
 }: {
 	title: string;
 	items: CatalogItem[];
@@ -509,6 +522,7 @@ function SimpleCatalogSection({
 		name: string,
 		isActive: boolean,
 	) => Promise<unknown>;
+	formatName?: (name: string) => string;
 }) {
 	const t = useTranslate();
 	const locale = useLocale();
@@ -559,6 +573,7 @@ function SimpleCatalogSection({
 				isError={isError}
 				refetch={refetch}
 				onEdit={startEdit}
+				formatName={formatName}
 			/>
 			<CatalogEntryDialog
 				open={open}
@@ -722,7 +737,7 @@ export function ReferenceDataPage() {
 			/>
 			<nav
 				aria-label={t(Messages.referenceData.chooseCategory)}
-				className="flex min-w-0 flex-wrap gap-2 border-b pb-2"
+				className="flex min-w-0 flex-nowrap gap-2 overflow-x-auto border-b pb-2 md:flex-wrap md:overflow-visible"
 			>
 				{accessibleCategories.map(({ value, message, icon: Icon }) => (
 					<Button
@@ -731,7 +746,7 @@ export function ReferenceDataPage() {
 						variant={activeCategory === value ? "secondary" : "ghost"}
 						aria-label={t(message)}
 						aria-pressed={activeCategory === value}
-						className="h-11 justify-start gap-2 whitespace-normal px-3 sm:justify-center"
+						className="h-11 shrink-0 justify-center gap-2 whitespace-nowrap px-3"
 						onClick={() => setCategory(value)}
 					>
 						<Icon aria-hidden="true" className="size-4 shrink-0" />
@@ -781,6 +796,7 @@ export function ReferenceDataPage() {
 				{activeCategory === "goodsTypes" && (
 					<SimpleCatalogSection
 						title={t(Messages.referenceData.sections.goodsTypes)}
+						formatName={getGoodsTypeLabel}
 						items={(goodsTypes.data ?? []).map(({ id, name, isActive }) => ({
 							id,
 							name,
@@ -869,10 +885,10 @@ export function ReferenceDataPage() {
 											<TableHead>
 												{t(Messages.referenceData.goodsType)}
 											</TableHead>
-											<TableHead className="w-36">
+											<TableHead className="w-36 text-right">
 												{t(Messages.common.fields.status)}
 											</TableHead>
-											<TableHead className="w-32 text-right">
+											<TableHead className="w-20 text-right">
 												{t(Messages.referenceData.actions)}
 											</TableHead>
 										</TableRow>
@@ -884,38 +900,36 @@ export function ReferenceDataPage() {
 													(entry) => entry.id === item.goodsTypeId,
 												);
 												return (
-													<TableRow key={item.id}>
-														<TableCell className="w-1/4 whitespace-normal">
-															<button
-																type="button"
-																className="block min-h-11 w-full whitespace-normal break-words text-left font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-																onClick={() => startGoodEdit(item)}
-															>
-																{item.name}
-															</button>
+													<TableRow
+														key={item.id}
+														onClick={() => startGoodEdit(item)}
+													>
+														<TableCell className="w-1/4 whitespace-normal font-medium">
+															{item.name}
 														</TableCell>
 														<TableCell className="font-mono">
 															{item.goodsCode}
 														</TableCell>
-														<TableCell>{type?.name ?? "—"}</TableCell>
 														<TableCell>
-															<Badge variant="outline">
-																{t(
-																	item.isActive
-																		? Messages.referenceData.active
-																		: Messages.referenceData.archived,
-																)}
-															</Badge>
+															{type ? getGoodsTypeLabel(type.name) : "—"}
 														</TableCell>
 														<TableCell className="text-right">
-															<Button
-																type="button"
-																variant="ghost"
+															<div className="flex justify-end">
+																<Badge variant="outline">
+																	{t(
+																		item.isActive
+																			? Messages.referenceData.active
+																			: Messages.referenceData.archived,
+																	)}
+																</Badge>
+															</div>
+														</TableCell>
+														<TableCell className="text-right">
+															<TableActionButton
+																icon={PencilIcon}
+																label={t(Messages.referenceData.edit)}
 																onClick={() => startGoodEdit(item)}
-															>
-																<PencilIcon aria-hidden="true" />
-																{t(Messages.referenceData.edit)}
-															</Button>
+															/>
 														</TableCell>
 													</TableRow>
 												);

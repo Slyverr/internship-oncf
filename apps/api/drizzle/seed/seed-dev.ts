@@ -1,3 +1,4 @@
+import { GoodsType } from "@ecommand/shared";
 import bcrypt from "bcryptjs";
 import * as dotenv from "dotenv";
 import { relations } from "drizzle/relations";
@@ -16,7 +17,7 @@ import {
 	users,
 	vessels,
 } from "drizzle/schema";
-import { and, eq } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { generateDocumentNumber } from "../../src/common/utils/document-number";
@@ -140,6 +141,27 @@ async function seed() {
 			{ portName: "Safi", names: ["Sossipo"] },
 			{ portName: "Nador", names: ["Sossipo"] },
 		];
+		const seededBerthKeys = new Set(
+			berthConfigs.flatMap(({ portName, names }) => {
+				const port = portMap.find((entry) => entry.name === portName);
+				return port ? names.map((name) => `${port.id}:${name}`) : [];
+			}),
+		);
+		const existingBerths = await db
+			.select({ id: berths.id, portId: berths.portId, name: berths.name })
+			.from(berths)
+			.orderBy(berths.id);
+		const seenBerths = new Set<string>();
+		const duplicateBerthIds: number[] = [];
+		for (const berth of existingBerths) {
+			const key = `${berth.portId}:${berth.name}`;
+			if (!seededBerthKeys.has(key)) continue;
+			if (seenBerths.has(key)) duplicateBerthIds.push(berth.id);
+			else seenBerths.add(key);
+		}
+		if (duplicateBerthIds.length) {
+			await db.delete(berths).where(inArray(berths.id, duplicateBerthIds));
+		}
 
 		for (const { portName, names } of berthConfigs) {
 			const port = portMap.find((p) => p.name === portName);
@@ -148,7 +170,7 @@ async function seed() {
 				await db
 					.insert(berths)
 					.values({ portId: port.id, name, isActive: true })
-					.onConflictDoNothing();
+					.onConflictDoNothing({ target: [berths.portId, berths.name] });
 			}
 		}
 
@@ -242,6 +264,10 @@ async function seed() {
 		// Default goods per type
 		const goodsTypeList = await db.query.goodsTypes.findMany();
 		for (const gt of goodsTypeList) {
+			const defaultName =
+				GoodsType[gt.name as keyof typeof GoodsType] ??
+				gt.name.replaceAll("_", " ");
+			const legacyDefaultName = `${gt.name} (default)`;
 			const legacyCode = `MRC-${gt.id}`;
 			const [legacyDefaultGood] = await db
 				.select({ id: goods.id })
@@ -256,10 +282,8 @@ async function seed() {
 					.update(goods)
 					.set({ goodsCode: generateDocumentNumber("MRC") })
 					.where(eq(goods.id, legacyDefaultGood.id));
-				continue;
 			}
 
-			const defaultName = `${gt.name} (default)`;
 			const [existingDefaultGood] = await db
 				.select({ id: goods.id })
 				.from(goods)
@@ -267,6 +291,27 @@ async function seed() {
 				.limit(1);
 
 			if (existingDefaultGood) continue;
+
+			const [legacyNamedDefaultGood] = await db
+				.select({ id: goods.id })
+				.from(goods)
+				.where(
+					and(eq(goods.goodsTypeId, gt.id), eq(goods.name, legacyDefaultName)),
+				)
+				.limit(1);
+
+			if (legacyNamedDefaultGood) {
+				await db
+					.update(goods)
+					.set({ name: defaultName })
+					.where(
+						and(
+							eq(goods.id, legacyNamedDefaultGood.id),
+							eq(goods.name, legacyDefaultName),
+						),
+					);
+				continue;
+			}
 
 			await db
 				.insert(goods)
