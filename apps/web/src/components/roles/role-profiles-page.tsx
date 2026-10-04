@@ -827,7 +827,10 @@ export function RoleProfilesPage({
 										</h2>
 									</div>
 									{!profile.isSystem && profile.description && (
-										<p className="text-sm text-muted-foreground">
+										<p
+											className="line-clamp-2 min-w-0 text-sm text-muted-foreground [overflow-wrap:anywhere]"
+											title={profile.description}
+										>
 											{profile.description}
 										</p>
 									)}
@@ -857,16 +860,22 @@ export function RoleProfilesPage({
 						))}
 					</div>
 					<div className="hidden rounded-md border @5xl/workspace:block">
-						<Table>
+						<Table className="table-fixed min-w-[60rem]">
 							<TableHeader>
 								<TableRow>
-									<TableHead>{t(Messages.roleProfiles.name)}</TableHead>
-									<TableHead>{t(Messages.roleProfiles.persona)}</TableHead>
-									<TableHead>{t(Messages.roleProfiles.permissions)}</TableHead>
-									<TableHead className="w-24 text-center">
+									<TableHead className="w-[26rem]">
+										{t(Messages.roleProfiles.name)}
+									</TableHead>
+									<TableHead className="w-48">
+										{t(Messages.roleProfiles.persona)}
+									</TableHead>
+									<TableHead className="w-40">
+										{t(Messages.roleProfiles.permissions)}
+									</TableHead>
+									<TableHead className="w-28 text-center">
 										{t(Messages.roleProfiles.status)}
 									</TableHead>
-									<TableHead className="text-right">
+									<TableHead className="w-32 text-right">
 										{t(Messages.referenceData.actions)}
 									</TableHead>
 								</TableRow>
@@ -874,15 +883,18 @@ export function RoleProfilesPage({
 							<TableBody>
 								{profiles.map((profile) => (
 									<TableRow key={profile.id}>
-										<TableCell className="font-medium">
+										<TableCell className="max-w-[26rem] font-medium whitespace-normal">
 											<div className="grid min-w-0 gap-1">
 												<div className="flex min-w-0 flex-wrap items-center gap-2">
-													<span className="min-w-0 break-words">
+													<span className="min-w-0 [overflow-wrap:anywhere]">
 														{getProfileDisplayName(profile, t)}
 													</span>
 												</div>
 												{!profile.isSystem && profile.description && (
-													<span className="text-sm font-normal text-muted-foreground">
+													<span
+														className="truncate text-sm font-normal text-muted-foreground"
+														title={profile.description}
+													>
 														{profile.description}
 													</span>
 												)}

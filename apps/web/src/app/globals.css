@@ -246,6 +246,13 @@ html[data-theme="mono-dark"] {
 	}
 }
 
+@utility workspace-page {
+	display: grid;
+	width: 100%;
+	min-width: 0;
+	gap: calc(var(--spacing) * 6);
+}
+
 @utility workspace-form-body {
 	width: 100%;
 	min-width: 0;

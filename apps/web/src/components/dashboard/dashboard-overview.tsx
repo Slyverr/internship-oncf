@@ -881,7 +881,7 @@ export function DashboardOverview() {
 	].filter(Boolean);
 
 	return (
-		<section className="grid w-full min-w-0 gap-6">
+		<section className="workspace-page">
 			<PageHeader
 				title={t(Messages.dashboard.welcome, {
 					name: `${profile.firstName} ${profile.lastName}`,
