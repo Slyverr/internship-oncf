@@ -94,8 +94,9 @@ export function NotificationLink() {
 								</p>
 							</div>
 							<Button
-								variant="outline"
+								variant="ghost"
 								size="sm"
+								className="shrink-0 px-2"
 								disabled={pending || count === 0}
 								onClick={() => void markNotificationRead()}
 							>
