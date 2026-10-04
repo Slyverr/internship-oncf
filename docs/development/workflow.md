@@ -34,10 +34,11 @@ For faster responsive sweeps, add `--reuse-page`. It loads the route once, resiz
 ## Isolated E2E workflows
 
 Run the isolated API and browser journey suites from the repository root with:
-- bun scripts/run-api-e2e.ts
-- bun scripts/run-api-e2e.ts --browser
+- `bun scripts/run-api-e2e.ts` for the API E2E suite.
+- `bun run test:e2e:browser` for browser workflows only.
+- `bun scripts/run-api-e2e.ts --browser` to run the API suite followed by browser workflows.
 
-The browser option runs the API suite first, resets and reseeds the disposable `ecommand_e2e` database, then runs browser workflows through the Chrome CDP endpoint configured by `PLAYWRIGHT_CDP_ENDPOINT`. The reset helper checks the exact database name and refuses to reset another database. The runner starts both the API and Next.js browser-test server with the configured real Node.js runtime; this avoids the Next development Server Action mismatch observed when the isolated web server was launched through Bun. These flows cover role grants, reference-data lifecycle, order submission, claim/program creation, report export, and registration review through the Dashboard pending-registration link. The runner tears down its Compose services when complete. The standalone browser workflow runner defaults to `http://localhost:3100`; set `PLAYWRIGHT_BASE_URL` to review another running web app without changing the test flows.
+The browser option resets and reseeds the disposable `ecommand_e2e` database, then runs browser workflows through the Chrome CDP endpoint configured by `PLAYWRIGHT_CDP_ENDPOINT`. `bun run test:e2e:browser` runs only the browser workflows; invoke `bun scripts/run-api-e2e.ts --browser` to run API E2E tests first as well. The reset helper checks the exact database name and refuses to reset another database. The runner starts both the API and Next.js browser-test server with the configured real Node.js runtime; this avoids the Next development Server Action mismatch observed when the isolated web server was launched through Bun. These flows cover role grants, reference-data lifecycle, order submission, claim/program creation, report export, and registration review through the Dashboard pending-registration link. The runner tears down its Compose services when complete. The standalone browser workflow runner defaults to `http://localhost:3100`; set `PLAYWRIGHT_BASE_URL` to review another running web app without changing the test flows.
 
 Set `E2E_BROWSER_WORKFLOWS` to a comma-separated list of workflow names from `apps/web/e2e/run-cdp.ts` to run a focused subset. The browser report-export journey verifies that the CSV download starts with the expected filename; CSV content and spreadsheet-safety rules are covered by `apps/web/test/report-export.test.ts` because a remote Chromium download's temporary path may not be available to the Node container.
 
@@ -78,7 +79,7 @@ The web app currently ships English only. Keep every human-facing string in `app
 
 API responses carry stable codes, not user-facing prose. Add domain error and response codes to `packages/shared/src/api-errors.ts`, return those codes from NestJS, and map each code to a `Messages.apiError…` or `Messages.apiResponse…` key in `apps/web/src/i18n/index.ts`. Validation details carry field paths and validator rule codes; keep the UI wording in the message catalog. Never display a server-supplied message directly.
 
-When adding French, add a structurally complete catalog beside `en.ts`, add its locale to `SUPPORTED_LOCALES` and the locale catalog map, and provide any locale-specific date-fns locale in `date-utils.ts`. Keep the message-key tree derived from the canonical English catalog so keys remain stable, and run `bun run test` and `bun run typecheck` in `apps/web`. Add the language selection and persistence as a separate user-facing feature when a second complete catalog is ready; do not expose an incomplete locale.
+When adding French, add a reviewed, structurally complete catalog beside `en.ts`, add its locale to `SUPPORTED_LOCALES` and the locale catalog map, and provide any locale-specific date-fns locale in `date-utils.ts`. Keep the message-key tree derived from the canonical English catalog so keys remain stable, and run `bun run test` and `bun run typecheck` in `apps/web`. Appearance settings already contain the language selector and cookie persistence; enable French there only when its complete catalog is reviewed. Do not expose an incomplete locale as selectable.
 
 ## Code conventions
 

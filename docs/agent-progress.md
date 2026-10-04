@@ -4,10 +4,20 @@ This is the milestone journal for finishing the ECommand MVP. Safa’s internshi
 
 ## Current position
 
-- **Completed chapters:** 1–29 — API/browser workflows, permission/ownership enforcement, Admin reference data and custom profiles, English i18n/API message contracts, UX/print work, notification transactions, transactional user assignments, guided-form recovery, and the report-backed functional gaps below.
-- **Current checkpoint:** the report-backed workflow closeout has been reverified. Isolated API E2E passed 2 suites / 30 tests; the OpenAPI client was regenerated with Node 24 in a temporary container; web checks, API/web typechecks, focused API tests, and Biome passed. Remaining work includes browser E2E/current screenshot review and items listed in [MVP readiness](project/readiness.md). French rollout and production/deployment work remain deferred.
+- **Completed chapters:** 1–31 — API/browser workflows, permission/ownership enforcement, Admin reference data and custom profiles, English i18n/API message contracts, UX/print work, notification transactions, transactional user assignments, guided-form recovery, and the report-backed functional gaps below.
+- **Current checkpoint:** access-profile setup now uses a route-based two-step wizard with a permission-code guide; its focused browser workflow passed. Isolated API E2E passed 2 suites / 30 tests after fixing timezone handling for login lockouts and restoring a shared user fixture after password-change coverage. API typecheck, focused auth tests (2 suites / 39 tests), web checks/typecheck, Biome, and `git diff --check` passed. Remaining work includes the full route/state/role/theme screenshot review and items listed in [MVP readiness](project/readiness.md). French rollout and production/deployment work remain deferred.
 - **Current checkout:** `develop`; chapter 29 code is committed locally as `e43965b` and not pushed. Do not rewrite published commits.
 - **Database/runtime safety:** the isolated E2E runner removed its disposable database. The temporary Node 24 API server used for OpenAPI generation was stopped. The preview database and pre-existing `ecommand` database were not modified during this checkpoint.
+
+## Chapter 31 — access-profile guidance and auth E2E reliability — 2026-10-04
+
+- Replaced the access-profile modal with dedicated create/edit routes and a two-step profile-details/permissions wizard. Renamed “Workflow type” to “Assignable account group” and explained how agent portfolios and client representatives relate to assignment scope; actual authorization still comes from the selected permissions.
+- Added an expandable permission guide for record operations, other-record scope, targeted management, and named workflow actions. Kept the searchable grouped permission selector instead of introducing a node graph that could imply dependencies the permission model does not guarantee.
+- Updated the Admin browser journey to create, edit, and assign a custom profile, then verify its effective API access. The focused isolated browser workflow passed; inspected nine phone/desktop screenshots covering create/edit steps, permission guide, and search.
+- Reproducing the isolated API suite exposed a real account-lock bug: `account_locked_until` was timezone-less, so Node parsed the DB string in the workstation’s Africa/Casablanca timezone and treated a future lock as expired. Changed the evolving Drizzle column and SQL casts to timezone-aware timestamps. Also made the E2E lockout test follow the configured attempt count, use a valid shared test password, and deterministically expire the lock; the password-change test restores its shared agent fixture after assertions.
+- Verification: isolated API E2E passed 2 suites / 30 tests; focused auth unit tests passed 2 suites / 39 tests; API typecheck passed; focused browser journey passed; web checks and typecheck passed; Biome and `git diff --check` passed. No development or preview database was modified; the disposable E2E Compose services were removed.
+
+**Next:** continue the full route/state/theme/role screenshot review and close concrete workflow gaps listed in [MVP readiness](project/readiness.md). The full workspace verification has not been rerun in this checkpoint.
 
 ## Completed chapter 1 — API E2E and core workflows
 
@@ -119,6 +129,16 @@ Coverage includes:
 - Verification follow-up: isolated API E2E passed 2 suites / 30 tests using Node 24 from a temporary container. It exposed a timestamp/text type mismatch in failed-login lockout SQL; lockout values are now explicitly cast and wrong-password cases return the expected 401. Two stale E2E assertions were corrected for the database’s zero achieved-quantity default and client claim-close denial. Focused API tests passed (2 suites / 39 tests), web checks and API/web typechecks passed, and the OpenAPI client was regenerated from the live Node-backed API contract. Managed-reference data and order duplication now use generated operations.
 - The current preview returns HTTP 200 from `/login` and `/health`. No database schema push or production integration was attempted.
 - Order/program route conversion was the next item after this chapter and is now completed in [Chapter 9](#chapter-9--order-and-program-public-routes--2026-09-30). Existing IDs remain internal for relations and notification metadata.
+
+## Completed chapter 30 — auth and confirmation UI closeout — 2026-10-04
+
+- The phone login card no longer reserves a desktop-sized form height or vertically centers a short form. It now follows its content on phone/tablet widths; the 576px centered form rhythm remains at desktop widths.
+- Compact confirmations now use a 448px maximum width, content-based height, distinct header/body/action dividers, and natural wrapping. This applies to shared confirmation prompts; regular dialogs and large alert forms keep their existing layout.
+- Access-profile status uses the standard switch. Activation and deactivation both apply immediately with pending/error feedback. System profiles remain noninteractive.
+- Fresh logged-out login and signup screenshots were inspected at 390×844 and 1920×1080; login was also inspected at 320×568 and 768×1024. Signup’s second step was inspected at phone and desktop sizes with unsaved validation data. The access-profile archive prompt and status page were inspected at phone and desktop sizes. All captures matched their routes and reported no horizontal overflow. Report-sized auth images are under `/tmp/ecommand-report-final-2026-10-04`.
+- Web typecheck, web checks, Biome, and `git diff --check` passed. Browser interaction opened the archive prompt without submitting the action; no profile was archived.
+
+**Next:** continue the current route/state/role visual and workflow audit. French runtime support and production deployment remain deferred.
 
 ## Chapter 9 — order and program public routes — 2026-09-30
 
