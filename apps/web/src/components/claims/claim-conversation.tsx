@@ -141,12 +141,7 @@ function CommentMessage({
 				<div className="flex max-w-full items-end gap-2">
 					{!isOwnMessage &&
 						(showIncomingAvatar ? (
-							<Avatar
-								className={cn(
-									"size-8 shrink-0 border border-border/70",
-									groupPosition !== "single" && "rounded-bl-sm",
-								)}
-							>
+							<Avatar className="size-8 shrink-0 after:hidden">
 								<AvatarFallback className="text-caption font-medium">
 									{initials}
 								</AvatarFallback>
