@@ -99,7 +99,10 @@ export function GuidedFormActions({
 	isSubmitting,
 	isPending,
 	isSubmitDisabled = false,
+	isContinueDisabled = false,
 	errorMessage,
+	formId,
+	mobileInline = false,
 }: {
 	currentStep: number;
 	stepCount: number;
@@ -111,7 +114,10 @@ export function GuidedFormActions({
 	isSubmitting: boolean;
 	isPending: boolean;
 	isSubmitDisabled?: boolean;
+	isContinueDisabled?: boolean;
 	errorMessage?: string;
+	formId?: string;
+	mobileInline?: boolean;
 }) {
 	const t = useTranslate();
 	const isLastStep = currentStep === stepCount - 1;
@@ -124,22 +130,34 @@ export function GuidedFormActions({
 					{errorMessage}
 				</p>
 			)}
-			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+			<div
+				className={
+					mobileInline
+						? "flex flex-row items-center justify-between gap-2 sm:flex-row sm:gap-4"
+						: "flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+				}
+			>
 				<Button
 					type="button"
 					variant="outline"
-					className="w-full sm:w-auto"
+					className={mobileInline ? "w-auto" : "w-full sm:w-auto"}
 					disabled={isBusy}
 					onClick={onCancel}
 				>
 					{t(Messages.common.actions.cancel)}
 				</Button>
-				<div className="grid w-full grid-cols-[auto_1fr] gap-4 sm:ml-auto sm:flex sm:w-auto sm:justify-end">
+				<div
+					className={
+						mobileInline
+							? "flex min-w-0 gap-2 sm:ml-auto sm:w-auto sm:justify-end"
+							: "grid w-full grid-cols-[auto_1fr] gap-4 sm:ml-auto sm:flex sm:w-auto sm:justify-end"
+					}
+				>
 					{currentStep > 0 ? (
 						<Button
 							type="button"
 							variant="outline"
-							className="w-full sm:w-auto"
+							className={mobileInline ? "w-auto" : "w-full sm:w-auto"}
 							disabled={isBusy}
 							onClick={onPrevious}
 						>
@@ -150,10 +168,13 @@ export function GuidedFormActions({
 					{isLastStep ? (
 						<Button
 							type="submit"
+							form={formId}
 							className={
-								currentStep === 0
-									? "col-span-2 w-full sm:col-span-1 sm:w-auto"
-									: "w-full sm:w-auto"
+								mobileInline
+									? "w-auto"
+									: currentStep === 0
+										? "col-span-2 w-full sm:col-span-1 sm:w-auto"
+										: "w-full sm:w-auto"
 							}
 							disabled={isBusy || isSubmitDisabled}
 						>
@@ -163,11 +184,13 @@ export function GuidedFormActions({
 						<Button
 							type="button"
 							className={
-								currentStep === 0
-									? "col-span-2 w-full sm:col-span-1 sm:w-auto"
-									: "w-full sm:w-auto"
+								mobileInline
+									? "w-auto"
+									: currentStep === 0
+										? "col-span-2 w-full sm:col-span-1 sm:w-auto"
+										: "w-full sm:w-auto"
 							}
-							disabled={isBusy}
+							disabled={isBusy || isContinueDisabled}
 							onClick={(event) => {
 								event.preventDefault();
 								event.stopPropagation();

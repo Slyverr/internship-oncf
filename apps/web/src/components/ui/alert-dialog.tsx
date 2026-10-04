@@ -42,7 +42,7 @@ function AlertDialogContent({
 	size = "default",
 	...props
 }: AlertDialogPrimitive.Popup.Props & {
-	size?: "default" | "form";
+	size?: "default" | "form" | "compact";
 }) {
 	return (
 		<AlertDialogPortal>
@@ -51,7 +51,7 @@ function AlertDialogContent({
 				data-slot="alert-dialog-content"
 				data-size={size}
 				className={cn(
-					"group/alert-dialog-content oncf-dialog-surface grid min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] max-h-[calc(100svh-2rem)] w-[calc(100%-2rem)] overscroll-contain duration-100 outline-none data-[size=default]:h-[min(20rem,calc(100svh-2rem))] data-[size=default]:max-w-md sm:data-[size=default]:h-[min(17rem,calc(100svh-2rem))] data-[size=form]:h-[min(25rem,calc(100svh-2rem))] data-[size=form]:max-w-lg data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+					"group/alert-dialog-content oncf-dialog-surface grid min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] max-h-[calc(100svh-2rem)] w-[calc(100%-2rem)] overscroll-contain duration-100 outline-none data-[size=default]:h-[min(20rem,calc(100svh-2rem))] data-[size=default]:max-w-md sm:data-[size=default]:h-[min(17rem,calc(100svh-2rem))] data-[size=form]:h-[min(25rem,calc(100svh-2rem))] data-[size=form]:max-w-lg data-[size=compact]:h-auto data-[size=compact]:max-w-md data-[size=compact]:grid-rows-[auto_auto_auto] data-[size=compact]:gap-0 data-[size=compact]:p-5 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
 					className,
 				)}
 				{...props}
@@ -97,7 +97,7 @@ function AlertDialogBody({ className, ...props }: React.ComponentProps<"div">) {
 		<div
 			data-slot="alert-dialog-body"
 			className={cn(
-				"row-start-2 min-h-0 min-w-0 overflow-y-auto overscroll-contain",
+				"row-start-2 min-h-0 min-w-0 overflow-y-auto overscroll-contain group-data-[size=compact]/alert-dialog-content:py-4",
 				className,
 			)}
 			{...props}
@@ -145,7 +145,7 @@ function AlertDialogDescription({
 		<AlertDialogPrimitive.Description
 			data-slot="alert-dialog-description"
 			className={cn(
-				"text-sm text-balance text-muted-foreground md:text-pretty *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground",
+				"min-w-0 break-words text-sm text-pretty text-muted-foreground *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-foreground",
 				className,
 			)}
 			{...props}

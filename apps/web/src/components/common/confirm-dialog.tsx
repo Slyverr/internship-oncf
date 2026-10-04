@@ -43,15 +43,17 @@ export function ConfirmDialog({
 	const resolvedCancelLabel = cancelLabel ?? t(Messages.common.actions.cancel);
 	return (
 		<AlertDialog open={open} onOpenChange={onOpenChange}>
-			<AlertDialogContent>
+			<AlertDialogContent size="compact">
 				<AlertDialogHeader>
 					<AlertDialogTitle>{title}</AlertDialogTitle>
 				</AlertDialogHeader>
-				<AlertDialogBody className="flex items-center">
-					<AlertDialogDescription>{description}</AlertDialogDescription>
+				<AlertDialogBody className="flex w-full min-w-0 items-center">
+					<AlertDialogDescription className="min-w-0 flex-1">
+						{description}
+					</AlertDialogDescription>
 				</AlertDialogBody>
 
-				<AlertDialogFooter>
+				<AlertDialogFooter className="flex-row justify-end gap-control">
 					<AlertDialogCancel disabled={disabled}>
 						{resolvedCancelLabel}
 					</AlertDialogCancel>
