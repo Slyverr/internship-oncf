@@ -1,6 +1,7 @@
 "use client";
 
 import { isStrongPassword } from "@ecommand/shared";
+import { useRouter } from "next/navigation";
 import {
 	type FormEvent,
 	type ReactNode,
@@ -8,7 +9,7 @@ import {
 	useMemo,
 	useState,
 } from "react";
-import { ThemePreview } from "@/components/common/theme-preview";
+import { getThemeOptions } from "@/components/common/theme-options";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -27,11 +28,17 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import {
+	type AppLocale,
 	Messages,
+	SUPPORTED_LOCALES,
 	type TypedMessageTranslator,
 	translateApiResponse,
 } from "@/i18n";
-import { useLocale, useTranslate } from "@/i18n/locale-provider";
+import {
+	setLocalePreference,
+	useLocale,
+	useTranslate,
+} from "@/i18n/locale-provider";
 import { useAuthControllerChangePassword } from "@/lib/api/auth";
 import { useProfileControllerUpdate } from "@/lib/api/profile";
 import { getFormErrorMessage } from "@/lib/form-utils";
@@ -41,51 +48,6 @@ import {
 	useAppearance,
 } from "@/providers/appearance-provider";
 import { useAuth } from "@/providers/auth-provider";
-
-function getThemeOptions(t: TypedMessageTranslator) {
-	return [
-		{
-			value: "system" as const,
-			label: t(Messages.settings.appearance.options.theme.system.label),
-			description: t(
-				Messages.settings.appearance.options.theme.system.description,
-			),
-			preview: <ThemePreview theme="system" size="compact" />,
-		},
-		{
-			value: "light" as const,
-			label: t(Messages.settings.appearance.options.theme.light.label),
-			description: t(
-				Messages.settings.appearance.options.theme.light.description,
-			),
-			preview: <ThemePreview theme="light" size="compact" />,
-		},
-		{
-			value: "dark" as const,
-			label: t(Messages.settings.appearance.options.theme.dark.label),
-			description: t(
-				Messages.settings.appearance.options.theme.dark.description,
-			),
-			preview: <ThemePreview theme="dark" size="compact" />,
-		},
-		{
-			value: "mono-light" as const,
-			label: t(Messages.settings.appearance.options.theme.monoLight.label),
-			description: t(
-				Messages.settings.appearance.options.theme.monoLight.description,
-			),
-			preview: <ThemePreview theme="mono-light" size="compact" />,
-		},
-		{
-			value: "mono-dark" as const,
-			label: t(Messages.settings.appearance.options.theme.monoDark.label),
-			description: t(
-				Messages.settings.appearance.options.theme.monoDark.description,
-			),
-			preview: <ThemePreview theme="mono-dark" size="compact" />,
-		},
-	];
-}
 
 function getFontOptions(t: TypedMessageTranslator) {
 	return [
@@ -317,6 +279,7 @@ function PreferenceSelect<Value extends string>({
 		label: string;
 		description: string;
 		preview?: ReactNode;
+		disabled?: boolean;
 	}[];
 	onChange: (value: Value) => void;
 }) {
@@ -344,7 +307,11 @@ function PreferenceSelect<Value extends string>({
 					className="max-w-[calc(100vw-2rem)]"
 				>
 					{options.map((option) => (
-						<SelectItem key={option.value} value={option.value}>
+						<SelectItem
+							key={option.value}
+							value={option.value}
+							disabled={option.disabled}
+						>
 							{option.preview}
 							{option.label}
 						</SelectItem>
@@ -363,6 +330,7 @@ export type SettingsSection = "appearance" | "profile" | "security";
 export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 	const t = useTranslate();
 	const locale = useLocale();
+	const router = useRouter();
 	const { profile, setProfile } = useAuth();
 	const {
 		preferences,
@@ -374,7 +342,15 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 	} = useAppearance();
 	const profileMutation = useProfileControllerUpdate();
 	const passwordMutation = useAuthControllerChangePassword();
-	const themeOptions = useMemo(() => getThemeOptions(t), [t]);
+	const themeOptions = useMemo(
+		() =>
+			getThemeOptions().map((option) => ({
+				...option,
+				label: t(option.label),
+				description: t(option.description),
+			})),
+		[t],
+	);
 	const fontOptions = useMemo(() => getFontOptions(t), [t]);
 	const textSizeOptions = useMemo(() => getTextSizeOptions(t), [t]);
 	const motionOptions = useMemo(() => getMotionOptions(t), [t]);
@@ -382,6 +358,35 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 		() => getWorkspaceLayoutOptions(t),
 		[t],
 	);
+	const languageOptions = useMemo(() => {
+		const names = new Intl.DisplayNames([locale], { type: "language" });
+		const available = SUPPORTED_LOCALES.map((value) => {
+			const language = names.of(value) ?? value;
+			return {
+				value,
+				label: language,
+				description: t(
+					Messages.settings.appearance.options.language.description,
+					{ language },
+				),
+			};
+		});
+		const unavailable = SUPPORTED_LOCALES.includes("fr" as AppLocale)
+			? []
+			: [
+					{
+						value: "fr",
+						label: t(
+							Messages.settings.appearance.options.language.frenchUnavailable,
+						),
+						description: t(
+							Messages.settings.appearance.options.language.frenchDescription,
+						),
+						disabled: true,
+					},
+				];
+		return [...available, ...unavailable];
+	}, [locale, t]);
 	const [firstName, setFirstName] = useState(profile.firstName);
 	const [lastName, setLastName] = useState(profile.lastName);
 	const [email, setEmail] = useState(profile.email);
@@ -412,6 +417,16 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 	function clearProfileFeedback() {
 		setProfileMessage("");
 		setProfileError("");
+	}
+
+	function changeLanguage(nextLocale: string) {
+		if (
+			!SUPPORTED_LOCALES.includes(nextLocale as AppLocale) ||
+			nextLocale === locale
+		)
+			return;
+		setLocalePreference(nextLocale as AppLocale);
+		router.refresh();
 	}
 
 	function saveProfile(event: FormEvent<HTMLFormElement>) {
@@ -530,6 +545,13 @@ export function SettingsPanel({ section }: { section?: SettingsSection } = {}) {
 									value={preferences.workspaceLayout}
 									options={workspaceLayoutOptions}
 									onChange={setWorkspaceLayout}
+								/>
+								<PreferenceSelect
+									id="appearance-language"
+									label={t(Messages.settings.appearance.language)}
+									value={locale}
+									options={languageOptions}
+									onChange={changeLanguage}
 								/>
 							</div>
 							<div className="grid content-start gap-4">

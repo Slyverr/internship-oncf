@@ -8,6 +8,12 @@ import {
 	SUPPORTED_LOCALES,
 } from ".";
 
+export function setLocalePreference(locale: AppLocale) {
+	const secure = window.location.protocol === "https:" ? "; Secure" : "";
+	// biome-ignore lint/suspicious/noDocumentCookie: Set the preference before refreshing the server-rendered locale.
+	document.cookie = `ecommand-locale=${locale}; Path=/; Max-Age=31536000; SameSite=Lax${secure}`;
+}
+
 const LocaleContext = createContext<AppLocale>(DEFAULT_LOCALE);
 
 export function LocaleProvider({
