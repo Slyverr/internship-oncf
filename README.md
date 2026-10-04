@@ -1,15 +1,38 @@
 # ECommand
 
-ECommand is an ONCF freight-order portal. This repository uses a Bun/Turborepo monorepo with a Next.js web app, a NestJS API, PostgreSQL/Drizzle, and MinIO for attachments.
+ECommand is ONCF's freight operations workspace. Customers submit transport orders; commercial agents manage orders, forecast programs, and claims; administrators manage users, access profiles, reference data, and reports.
+
+## What the project includes
+
+- Permission-based access and customer ownership scopes, with administrator-managed custom access profiles.
+- Client registration with administrator review, user and customer management, and reference-data management.
+- Order, forecast-program, and claim workflows, including history, comments, attachments, and in-app notifications.
+- Operational dashboards, filtered reports, and printable report exports.
+- English interface strings centralized for translation; French is not enabled as a runtime locale yet.
+
+**Integration boundary:** the current “Send to DTM” actions update ECommand's local workflow state. They do not send a request to an ONCF DTM service. A real handoff needs the ONCF endpoint, authentication, payload, acknowledgement, and retry contract. Password recovery uses SMTP only when configured; otherwise development messages are written to a local mailbox.
+
+## Stack
+
+- Bun workspaces and Turborepo
+- Next.js 16 and React 19 (`apps/web`)
+- NestJS 11 (`apps/api`)
+- PostgreSQL and Drizzle ORM
+- MinIO-compatible object storage for attachments
+- Shared permissions, enums, and domain values (`packages/shared`)
+
+The repository implementation is authoritative. The internship reference report describes an older Java/Spring design; this project uses the TypeScript stack above.
 
 ## Requirements
 
-- Bun 1.4.x
+- Bun 1.4.2
 - Podman with Compose support or Docker Compose
+- Node.js 24 for the isolated browser workflow runner and reliable OpenAPI generation
+- Chromium for browser workflow tests
 
 ## Local setup
 
-1. Install packages from the repository root:
+1. Install workspace dependencies from the repository root:
 
    ```sh
    bun install
@@ -21,18 +44,18 @@ ECommand is an ONCF freight-order portal. This repository uses a Bun/Turborepo m
    podman compose up -d postgres minio
    ```
 
-   Use `docker compose` in place of `podman compose` if Docker Compose is installed.
+   Use `docker compose` if Docker Compose is installed instead.
 
-3. Copy the app environment templates:
+3. Create local environment files:
 
    ```sh
    cp apps/api/.env.example apps/api/.env
    cp apps/web/.env.example apps/web/.env
    ```
 
-   Keep these files local. Replace `JWT_SECRET` with a randomly generated value before running the API. The checked-in Compose credentials are for local development only.
+   Keep `.env` files local. Replace `JWT_SECRET` with a randomly generated value. The checked-in Compose credentials are for local development only.
 
-4. Synchronize the current Drizzle schema to the local database and seed reference/demo data:
+4. Apply the current development schema and seed reference/demo data:
 
    ```sh
    cd apps/api
@@ -41,39 +64,46 @@ ECommand is an ONCF freight-order portal. This repository uses a Bun/Turborepo m
    cd ../..
    ```
 
-   The schema in `apps/api/drizzle` is the source of truth. Migrations are intentionally deferred while the data model is being refined. `db:push` is for the local development database; review Drizzle's proposed changes before accepting them, especially if the database contains data you need.
+   Review Drizzle's proposed schema changes before accepting them. Migrations are intentionally deferred while the domain model is still being refined; use `db:push` only with a disposable local database.
 
-5. Start both apps from the repository root:
+5. Start the API and web app from the root:
 
    ```sh
    bun run dev
    ```
 
-    The default command watches API and web source files and also runs the web TypeScript watcher because Next.js does not typecheck during development. To save memory, use `bun run dev:light`: Next.js still hot-reloads, while the API starts from the current source once and must be restarted manually after API changes. This avoids NestJS's memory-heavy TypeScript watch compiler. Run `bun run typecheck` for a one-time check.
+   Open the web app at <http://localhost:3000>, the API at <http://localhost:8000>, and Swagger at <http://localhost:8000/api-docs>.
 
-   Web: <http://localhost:3000>
-   API: <http://localhost:8000>
-   Swagger: <http://localhost:8000/api-docs>
+The default development command watches API and web sources and runs the web TypeScript watcher. For lower memory use, run `bun run dev:light`; the API starts once and must be restarted manually after API changes. Both commands wait for API health before starting Next.js.
 
-Password recovery can use any SMTP provider by setting `SMTP_HOST` and `SMTP_FROM` in `apps/api/.env`; add `SMTP_USER` and `SMTP_PASSWORD` together when authentication is required. Without complete SMTP settings, `.eml` files are written to `apps/api/.local-mailbox`. Open the newest message in a mail client or text editor and use its reset link. The directory is ignored by Git because those files contain reset tokens.
+## Verification and development commands
 
-## Useful commands
-
-Run from the repository root:
+Run these from the repository root:
 
 ```sh
-bun run build
-bun run typecheck
 bun run format-and-lint
+bun run typecheck
+bun run test
+bun run build
+bun run verify
 ```
 
-The API also provides `bun run seed:ref`, `bun run seed:dev`, `bun run db:push`, and `bun run db:studio` from `apps/api`.
+`bun run verify` runs formatting/linting, workspace typechecks, tests, and production builds, stopping at the first failure. The web verification build uses a separate `.next-verify` output directory.
 
-## Repository layout
+For isolated API and browser workflows, install Chromium first and run:
 
-- `apps/web` — Next.js App Router UI and generated API client.
-- `apps/api` — NestJS feature modules and Drizzle schema/queries.
-- `packages/shared` — shared roles, permissions, enums, and catalog definitions.
-- `docs` — maintained architecture, development conventions, and MVP status.
+```sh
+bun run --filter ecommand-web playwright install --with-deps chromium
+bun run test:e2e:browser
+```
 
-The API is a modular service. Domain code is organized by feature (`orders`, `programs`, `claims`, and others); controllers handle HTTP, services enforce workflows, and query classes access PostgreSQL through Drizzle. See the [documentation index](docs/README.md) for the architecture and development conventions.
+The runner uses a disposable `ecommand_e2e` database and tears down its Compose services after the run. See [development workflow](docs/development/workflow.md) for focused tests, screenshot review, generated API client updates, and runtime details.
+
+## Repository map
+
+- `apps/web` — user interface, route layouts, and generated API client.
+- `apps/api` — feature modules, OpenAPI contract, database schema, and seed scripts.
+- `packages/shared` — permissions, enums, and shared domain definitions.
+- `docs` — architecture, workflows, security, interface rules, and current readiness.
+
+Start with the [documentation index](docs/README.md) for architecture, setup, authorization, product readiness, and interface guidance.
