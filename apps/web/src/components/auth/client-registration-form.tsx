@@ -172,9 +172,9 @@ export function ClientRegistrationForm() {
 			<form
 				onSubmit={submit}
 				noValidate
-				className="mx-auto grid w-full max-w-md gap-4"
+				className="mx-auto grid w-full max-w-none gap-4"
 			>
-				<header className="grid gap-control px-4">
+				<header className="grid gap-control">
 					<h1 className="text-2xl font-bold tracking-tight">
 						{t(Messages.auth.signup.title)}
 					</h1>
@@ -183,10 +183,7 @@ export function ClientRegistrationForm() {
 					</p>
 				</header>
 				{submitted ? (
-					<div
-						role="status"
-						className="grid min-h-96 content-center gap-2 px-4"
-					>
+					<div role="status" className="grid min-h-64 content-center gap-2">
 						<p className="font-medium">
 							{submittedCode
 								? (translateApiResponse(submittedCode, locale) ??
@@ -199,13 +196,13 @@ export function ClientRegistrationForm() {
 					</div>
 				) : (
 					<>
-						<div className="px-4">
+						<div>
 							<GuidedFormProgress
 								steps={registrationSteps}
 								currentStep={step}
 							/>
 						</div>
-						<div className="min-h-88 px-4 sm:min-h-60">
+						<div>
 							{formError && (
 								<p
 									role="alert"
@@ -217,8 +214,8 @@ export function ClientRegistrationForm() {
 							{step === 0 ? (
 								<div className="grid items-start gap-4 sm:grid-cols-2">
 									<div className="oncf-field">
-										<Label htmlFor="registration-first-name">
-											{t(Messages.auth.signup.firstName)} *
+										<Label htmlFor="registration-first-name" required>
+											{t(Messages.auth.signup.firstName)}
 										</Label>
 										<Input
 											id="registration-first-name"
@@ -252,8 +249,8 @@ export function ClientRegistrationForm() {
 										)}
 									</div>
 									<div className="oncf-field">
-										<Label htmlFor="registration-last-name">
-											{t(Messages.auth.signup.lastName)} *
+										<Label htmlFor="registration-last-name" required>
+											{t(Messages.auth.signup.lastName)}
 										</Label>
 										<Input
 											id="registration-last-name"
@@ -287,8 +284,8 @@ export function ClientRegistrationForm() {
 										)}
 									</div>
 									<div className="oncf-field">
-										<Label htmlFor="registration-customer-code">
-											{t(Messages.auth.signup.customerCode)} *
+										<Label htmlFor="registration-customer-code" required>
+											{t(Messages.auth.signup.customerCode)}
 										</Label>
 										<Input
 											id="registration-customer-code"
@@ -324,8 +321,8 @@ export function ClientRegistrationForm() {
 										)}
 									</div>
 									<div className="oncf-field">
-										<Label htmlFor="registration-ice">
-											{t(Messages.auth.signup.ice)} *
+										<Label htmlFor="registration-ice" required>
+											{t(Messages.auth.signup.ice)}
 										</Label>
 										<Input
 											id="registration-ice"
@@ -375,8 +372,8 @@ export function ClientRegistrationForm() {
 							) : (
 								<div className="grid items-start gap-4">
 									<div className="oncf-field">
-										<Label htmlFor="registration-email">
-											{t(Messages.auth.signup.email)} *
+										<Label htmlFor="registration-email" required>
+											{t(Messages.auth.signup.email)}
 										</Label>
 										<Input
 											id="registration-email"
@@ -411,8 +408,8 @@ export function ClientRegistrationForm() {
 									</div>
 									<div className="grid items-start gap-4 sm:grid-cols-2">
 										<div className="oncf-field">
-											<Label htmlFor="registration-password">
-												{t(Messages.auth.signup.password)} *
+											<Label htmlFor="registration-password" required>
+												{t(Messages.auth.signup.password)}
 											</Label>
 											<Input
 												id="registration-password"
@@ -433,8 +430,11 @@ export function ClientRegistrationForm() {
 											/>
 										</div>
 										<div className="oncf-field">
-											<Label htmlFor="registration-password-confirmation">
-												{t(Messages.auth.signup.confirmPassword)} *
+											<Label
+												htmlFor="registration-password-confirmation"
+												required
+											>
+												{t(Messages.auth.signup.confirmPassword)}
 											</Label>
 											<Input
 												id="registration-password-confirmation"
@@ -484,7 +484,7 @@ export function ClientRegistrationForm() {
 								</div>
 							)}
 						</div>
-						<footer className="grid gap-4 px-4">
+						<footer className="grid gap-4">
 							<div className="flex justify-end gap-control">
 								{step === 1 && (
 									<Button

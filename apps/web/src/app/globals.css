@@ -82,6 +82,109 @@ html[data-theme="mono-dark"] {
 	height: min(47rem, calc(100svh - 3rem));
 }
 
+@utility oncf-auth-page {
+	display: grid;
+	min-height: 100svh;
+	place-items: start center;
+	padding: 1rem;
+	background:
+		radial-gradient(
+			ellipse at 8% 0%,
+			color-mix(in srgb, var(--color-primary) 8%, transparent),
+			transparent 38rem
+		),
+		var(--color-background);
+
+	@media (min-width: 640px) {
+		place-items: center;
+		padding: 1.5rem;
+	}
+}
+
+@utility oncf-auth-shell {
+	display: grid;
+	width: 100%;
+	max-width: 76rem;
+	min-width: 0;
+	border: 1px solid var(--color-border);
+	border-radius: 1.5rem;
+	background: var(--color-card);
+	box-shadow: 0 1.5rem 4rem
+		color-mix(in srgb, var(--color-foreground) 10%, transparent);
+	overflow: hidden;
+
+	@media (min-width: 1280px) {
+		min-height: min(47rem, calc(100svh - 3rem));
+		grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+	}
+}
+
+@utility oncf-auth-brand {
+	display: none;
+	min-width: 0;
+	flex-direction: column;
+	justify-content: space-between;
+	background: var(--color-sidebar);
+	color: var(--color-sidebar-foreground);
+	padding: 3rem;
+
+	@media (min-width: 1280px) {
+		display: flex;
+	}
+}
+
+@utility oncf-auth-content {
+	position: relative;
+	display: flex;
+	min-width: 0;
+	flex-direction: column;
+	justify-content: center;
+	gap: 1.5rem;
+	padding: 1rem;
+
+	@media (min-width: 640px) {
+		padding: 2rem;
+	}
+
+	@media (min-width: 1280px) {
+		padding: 3rem;
+	}
+}
+
+@utility oncf-auth-toolbar {
+	display: flex;
+	width: 100%;
+	min-width: 0;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+
+	@media (min-width: 1280px) {
+		position: absolute;
+		top: 1.5rem;
+		right: 1.5rem;
+		width: auto;
+	}
+}
+
+@utility oncf-auth-form-region {
+	width: 100%;
+	min-width: 0;
+	max-width: 36rem;
+	margin-inline: auto;
+
+	> form {
+		width: 100%;
+		max-width: 36rem;
+		margin-inline: auto;
+
+		@media (min-width: 1280px) {
+			min-height: 36rem;
+			align-content: center;
+		}
+	}
+}
+
 @utility gap-control {
 	gap: var(--spacing-control);
 }

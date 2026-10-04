@@ -30,13 +30,13 @@ export default function Page() {
 
 	return (
 		<AuthPageLayout>
-			<form action={action} className="mx-auto grid w-full max-w-md">
-				<header className="grid gap-control px-4 pb-4">
+			<form action={action} className="mx-auto grid w-full max-w-md gap-4">
+				<header className="grid gap-control pb-4">
 					<h1 className="text-2xl font-bold tracking-tight">
 						{t(Messages.auth.login.title)}
 					</h1>
 				</header>
-				<div className="grid gap-5 px-4">
+				<div className="grid gap-4">
 					{state?.errors?.form && (
 						<div
 							role="alert"
@@ -46,9 +46,8 @@ export default function Page() {
 						</div>
 					)}
 					<div className="oncf-field">
-						<Label htmlFor="username">
-							{t(Messages.auth.login.username)}{" "}
-							<span aria-hidden="true">*</span>
+						<Label htmlFor="username" required>
+							{t(Messages.auth.login.username)}
 						</Label>
 						<Input
 							id="username"
@@ -78,9 +77,8 @@ export default function Page() {
 					</div>
 					<div className="oncf-field">
 						<div className="flex items-center justify-between">
-							<Label htmlFor="password">
-								{t(Messages.auth.login.password)}{" "}
-								<span aria-hidden="true">*</span>
+							<Label htmlFor="password" required>
+								{t(Messages.auth.login.password)}
 							</Label>
 							<Link
 								href="/forgot-password"
@@ -145,7 +143,7 @@ export default function Page() {
 						</Label>
 					</div>
 				</div>
-				<footer className="grid justify-items-center gap-4 px-4 pt-4">
+				<footer className="grid justify-items-center gap-4 pt-4">
 					<Button className="w-full" type="submit" disabled={pending}>
 						{pending ? (
 							<>
