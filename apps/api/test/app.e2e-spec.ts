@@ -2,21 +2,24 @@ import {
 	API_ERROR_CODES,
 	API_RESPONSE_CODES,
 	type AppearancePreferences,
+	ProgramStatus,
 	RegistrationStatus,
 	Role,
 } from "@ecommand/shared";
 import type { INestApplication } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { users } from "drizzle/schema";
+import { forecastPrograms, users } from "drizzle/schema";
 import { eq } from "drizzle-orm";
 import request from "supertest";
 import type { App } from "supertest/types";
 import { DrizzleService } from "@/database/drizzle.service";
+import { PROGRAM_STATUSES } from "@/database/reference-data";
 import {
 	E2E_CUSTOMER_ICE,
 	E2E_CUSTOMERS,
 	E2E_PASSWORD,
 	E2E_PASSWORD_RESET,
+	E2E_PROGRAMS,
 	E2E_USERS,
 } from "./fixtures/e2e-fixtures";
 import { createE2eApp, login } from "./helpers/e2e-app";
@@ -72,6 +75,51 @@ describe("API bootstrap and authentication (e2e)", () => {
 
 		expect(response.body.email).toBe(E2E_USERS.agentAssigned.email);
 		expect(response.body.role).toBe(Role.AGENT_COMMERCIAL);
+	});
+
+	it("records a program send and applies a delayed simulated DTM acknowledgement", async () => {
+		const drizzle = app.get(DrizzleService);
+		const [program] = await drizzle.db
+			.update(forecastPrograms)
+			.set({ statusId: PROGRAM_STATUSES[ProgramStatus.CONFIRMED].id })
+			.where(eq(forecastPrograms.programNumber, E2E_PROGRAMS.assignedA))
+			.returning({ id: forecastPrograms.id });
+		expect(program).toBeDefined();
+
+		const token = await login(app, E2E_USERS.agentAssigned.email);
+		const response = await request(app.getHttpServer())
+			.post(`/programs/${E2E_PROGRAMS.assignedA}/send`)
+			.set("Authorization", `Bearer ${token}`)
+			.expect(200);
+		expect(response.body).toMatchObject({
+			programStatus: { name: ProgramStatus.SENT_TO_DTM },
+			dtmStatus: "PENDING",
+		});
+
+		const pendingLog = await drizzle.db.query.dtmIntegrationLog.findFirst({
+			where: { relatedEntityId: program.id },
+		});
+		expect(pendingLog).toMatchObject({
+			status: "PENDING",
+			httpStatusCode: 202,
+			relatedEntityType: "forecast_programs",
+		});
+
+		await new Promise((resolve) => setTimeout(resolve, 100));
+		const [completedLog, completedProgram] = await Promise.all([
+			drizzle.db.query.dtmIntegrationLog.findFirst({
+				where: { id: pendingLog?.id ?? -1 },
+			}),
+			drizzle.db.query.forecastPrograms.findFirst({
+				where: { id: program.id },
+				columns: { dtmStatus: true },
+			}),
+		]);
+		expect(completedLog).toMatchObject({
+			status: "SUCCESS",
+			httpStatusCode: 200,
+		});
+		expect(completedProgram?.dtmStatus).toBe("ACCEPTED");
 	});
 
 	it("locks after the configured failed attempts, expires, and resets on success", async () => {

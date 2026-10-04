@@ -11,6 +11,7 @@ describe("ProgramsService deletion", () => {
 		{} as never,
 		{ findProgram, removeProgram } as unknown as ProgramsQuery,
 		{} as never,
+		{} as never,
 	);
 	const id = 5 as ProgramId;
 	const user = {

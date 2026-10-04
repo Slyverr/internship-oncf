@@ -7,6 +7,7 @@ import {
 import {
 	ConflictException,
 	ForbiddenException,
+	Inject,
 	Injectable,
 	NotFoundException,
 } from "@nestjs/common";
@@ -15,6 +16,7 @@ import { and, eq } from "drizzle-orm";
 import { AuthUser } from "@/auth/auth.types";
 import { canAccessCustomer } from "@/auth/customer-scope";
 import { PROGRAM_STATUSES } from "@/database/reference-data";
+import { DTM_GATEWAY, type DtmGateway } from "@/dtm/dtm.gateway";
 import { NotificationsService } from "@/notifications/notifications.service";
 import { PROGRAM_STATUS_BY_ID, PROGRAM_TRANSITION } from "./programs.constants";
 import { ProgramsMapper } from "./programs.mapper";
@@ -34,6 +36,7 @@ export class ProgramsService {
 		private readonly notifications: NotificationsService,
 		private readonly programsQuery: ProgramsQuery,
 		private readonly programsMapper: ProgramsMapper,
+		@Inject(DTM_GATEWAY) private readonly dtm: DtmGateway,
 	) {}
 
 	async create(dto: CreateProgramDto, user: AuthUser) {
@@ -128,7 +131,9 @@ export class ProgramsService {
 	}
 
 	async sendToDtm(id: ProgramId, user: AuthUser) {
-		return this.transition(id, user, ProgramStatus.SENT_TO_DTM);
+		const program = await this.transition(id, user, ProgramStatus.SENT_TO_DTM);
+		await this.dtm.submitProgram(program, user);
+		return this.findOne(id);
 	}
 
 	async remove(id: ProgramId, user: AuthUser) {

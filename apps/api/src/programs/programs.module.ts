@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { DtmModule } from "@/dtm/dtm.module";
 import { NotificationsModule } from "@/notifications/notifications.module";
 import { OrdersModule } from "@/orders/orders.module";
 import { ProgramsController } from "./programs.controller";
@@ -7,7 +8,7 @@ import { ProgramsQuery } from "./programs.query";
 import { ProgramsService } from "./programs.service";
 
 @Module({
-	imports: [NotificationsModule, OrdersModule],
+	imports: [DtmModule, NotificationsModule, OrdersModule],
 	controllers: [ProgramsController],
 	providers: [ProgramsService, ProgramsQuery, ProgramsMapper],
 	exports: [ProgramsService],

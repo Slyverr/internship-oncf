@@ -48,6 +48,6 @@ The web API client is generated from the NestJS OpenAPI JSON endpoint with Orval
 - API configuration is accessed through `@nestjs/config`; examples are in `apps/api/.env.example`.
 - Attachments use the storage service and configured object-storage backend.
 - Password reset uses SMTP when `SMTP_HOST` and `SMTP_FROM` are configured. Without complete provider settings, development messages are saved as `.eml` files in the local mailbox path.
-- DTM/status fields currently represent local workflow state. They do not prove that a remote ONCF system accepted a request.
+- Forecast-program workflows depend on the stable `DTM_GATEWAY` token exported by `DtmModule`. The module selects a local simulator when `DTM_MODE=simulator`; otherwise it selects a no-op adapter. The simulator records a mock request and applies a delayed acknowledgement to the local integration log and program. It never contacts ONCF. Replacing it with a real transport should only require a new adapter and provider selection in this module. Neither simulator nor no-op mode proves a remote ONCF system accepted a request.
 
 - In-app notifications are stored as delivered immediately. Workflow services prepare notification records and persist them in the same database transaction as the associated state, history, or comment change. A notification write failure rolls back that workflow action. The inbox and unread badge use the authenticated recipient; external delivery and retry queues are not implemented.

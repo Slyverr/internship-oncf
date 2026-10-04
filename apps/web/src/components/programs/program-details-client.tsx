@@ -16,6 +16,8 @@ export function ProgramDetailsClient({ program }: ProgramDetailsClientProps) {
 		{
 			query: {
 				initialData: program,
+				refetchInterval: (query) =>
+					query.state.data?.dtmStatus === "PENDING" ? 1_000 : false,
 			},
 		},
 	);

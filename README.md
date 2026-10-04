@@ -10,7 +10,9 @@ ECommand is ONCF's freight operations workspace. Customers submit transport orde
 - Operational dashboards, filtered reports, and printable report exports.
 - English interface strings centralized for translation; French is not enabled as a runtime locale yet.
 
-**Integration boundary:** the current “Send to DTM” actions update ECommand's local workflow state. They do not send a request to an ONCF DTM service. A real handoff needs the ONCF endpoint, authentication, payload, acknowledgement, and retry contract. Password recovery uses SMTP only when configured; otherwise development messages are written to a local mailbox.
+**Integration boundary:** forecast-program workflows call the stable DTM gateway exported by the API's DTM module. `DTM_MODE=simulator` selects a local adapter that records a clearly labeled mock request and applies a delayed acknowledgement; unset or other values select a no-op adapter. No adapter currently contacts ONCF. Replacing the simulator with a real DTM adapter should only require configuring the DTM module provider, while preserving the program workflow. The real adapter still needs the ONCF endpoint, authentication, payload, acknowledgement, and retry contract. Password recovery uses SMTP only when configured; otherwise development messages are written to a local mailbox.
+
+For local simulation, set `DTM_MODE=simulator`, `DTM_SIMULATOR_DELAY_MS` (default `2000`), and `DTM_SIMULATOR_RESULT` (`ACCEPTED` or `REJECTED`) in `apps/api/.env`. The delayed response is held in process memory, so restarting the API cancels outstanding simulator responses.
 
 ## Stack
 

@@ -15,6 +15,7 @@ describe("ProgramsService lifecycle", () => {
 	const notifyChange = jest.fn();
 	const createChangeRecord = jest.fn().mockReturnValue({ id: "notification" });
 	const toCreate = jest.fn();
+	const submitProgram = jest.fn();
 	const query = {
 		createProgram: jest.fn(),
 		findOrderCustomer: jest.fn(),
@@ -28,6 +29,7 @@ describe("ProgramsService lifecycle", () => {
 		{ notifyChange, createChangeRecord } as never,
 		query as unknown as ProgramsQuery,
 		{ toCreate } as never,
+		{ submitProgram } as never,
 	);
 	const id = 5 as ProgramId;
 	const user = {
@@ -53,6 +55,7 @@ describe("ProgramsService lifecycle", () => {
 		notifyChange.mockReset();
 		createChangeRecord.mockClear();
 		toCreate.mockReset();
+		submitProgram.mockReset();
 	});
 
 	it("resolves a public program number to its internal relation ID", async () => {
@@ -236,6 +239,33 @@ describe("ProgramsService lifecycle", () => {
 			response: { code: API_ERROR_CODES.PROGRAM_TRANSITION_INVALID },
 		});
 		expect(query.updateProgram).not.toHaveBeenCalled();
+	});
+
+	it("submits a program to the configured DTM adapter after the workflow transition", async () => {
+		const programNumber = "PRG-ABCDEFGHIJ";
+		const program = {
+			id,
+			programNumber,
+			order: { id: 8, orderNumber: "ORD-ABCDEFGHIJ" },
+		} as never;
+		query.findProgramStatus.mockResolvedValue({
+			statusId: PROGRAM_STATUSES[ProgramStatus.CONFIRMED].id,
+			programNumber,
+			createdByUserId: 20,
+		});
+		query.updateProgram.mockResolvedValue({ id });
+		query.findProgram.mockResolvedValue(program);
+
+		await expect(service.sendToDtm(id, user)).resolves.toBe(program);
+
+		expect(submitProgram).toHaveBeenCalledWith(program, user);
+		expect(query.updateProgram).toHaveBeenCalledWith(
+			id,
+			{ statusId: PROGRAM_STATUSES[ProgramStatus.SENT_TO_DTM].id },
+			expect.anything(),
+			expect.objectContaining({ userId: 7 }),
+			expect.anything(),
+		);
 	});
 
 	it("rejects an unknown status reference", async () => {
