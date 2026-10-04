@@ -1,6 +1,14 @@
+import { Permission } from "@ecommand/shared";
 import type { MessageKey } from "./index";
 
 type MessageAliasTree = { [key: string]: MessageKey | MessageAliasTree };
+
+const permissionDescriptionMessages = Object.fromEntries(
+	Object.values(Permission).map((permission) => [
+		permission,
+		`roleProfiles.permissionDescriptions.${permission}`,
+	]),
+) as Record<Permission, MessageKey>;
 
 /** Stable message references; update a value here when a catalog path changes. */
 export const Messages = {
@@ -163,13 +171,38 @@ export const Messages = {
 		create: "roleProfiles.create",
 		name: "roleProfiles.name",
 		persona: "roleProfiles.persona",
+		personaHint: "roleProfiles.personaHint",
 		permissions: "roleProfiles.permissions",
+		permissionDescriptions: permissionDescriptionMessages,
+		profileDetailsStep: "roleProfiles.profileDetailsStep",
+		permissionsStep: "roleProfiles.permissionsStep",
+		permissionGuideTitle: "roleProfiles.permissionGuideTitle",
+		permissionConventionHint: "roleProfiles.permissionConventionHint",
+		profileNotFound: "roleProfiles.profileNotFound",
+		systemProfileReadOnly: "roleProfiles.systemProfileReadOnly",
+		backToProfiles: "roleProfiles.backToProfiles",
+		permissionGuide: {
+			recordsLabel: "roleProfiles.permissionGuide.recordsLabel",
+			recordsCode: "roleProfiles.permissionGuide.recordsCode",
+			recordsDescription: "roleProfiles.permissionGuide.recordsDescription",
+			scopeLabel: "roleProfiles.permissionGuide.scopeLabel",
+			scopeCode: "roleProfiles.permissionGuide.scopeCode",
+			scopeDescription: "roleProfiles.permissionGuide.scopeDescription",
+			targetLabel: "roleProfiles.permissionGuide.targetLabel",
+			targetCode: "roleProfiles.permissionGuide.targetCode",
+			targetDescription: "roleProfiles.permissionGuide.targetDescription",
+			actionLabel: "roleProfiles.permissionGuide.actionLabel",
+			actionCode: "roleProfiles.permissionGuide.actionCode",
+			actionDescription: "roleProfiles.permissionGuide.actionDescription",
+		},
+		permissionInherited: "roleProfiles.permissionInherited",
 		permissionCount: "roleProfiles.permissionCount",
+		saving: "roleProfiles.saving",
 		status: "roleProfiles.status",
 		system: "roleProfiles.system",
 		edit: "roleProfiles.edit",
-		archive: "roleProfiles.archive",
-		restore: "roleProfiles.restore",
+		activate: "roleProfiles.activate",
+		deactivate: "roleProfiles.deactivate",
 		createTitle: "roleProfiles.createTitle",
 		editTitle: "roleProfiles.editTitle",
 		dialogDescription: "roleProfiles.dialogDescription",
@@ -189,11 +222,6 @@ export const Messages = {
 		permissionLoadFailed: "roleProfiles.permissionLoadFailed",
 		noAccess: "roleProfiles.noAccess",
 		save: "roleProfiles.save",
-		cancel: "roleProfiles.cancel",
-		archiveTitle: "roleProfiles.archiveTitle",
-		archiveDescription: "roleProfiles.archiveDescription",
-		restoreTitle: "roleProfiles.restoreTitle",
-		restoreDescription: "roleProfiles.restoreDescription",
 	},
 	referenceData: {
 		pageTitle: "referenceData.pageTitle",
@@ -832,7 +860,6 @@ export const Messages = {
 				firstName: "users.form.fields.firstName",
 				lastName: "users.form.fields.lastName",
 				role: "users.form.fields.role",
-				type: "users.form.fields.type",
 				customer: "users.form.fields.customer",
 				employeeCode: "users.form.fields.employeeCode",
 				emailPlaceholder: "users.form.fields.emailPlaceholder",
@@ -840,6 +867,7 @@ export const Messages = {
 				firstNamePlaceholder: "users.form.fields.firstNamePlaceholder",
 				lastNamePlaceholder: "users.form.fields.lastNamePlaceholder",
 				employeeCodePlaceholder: "users.form.fields.employeeCodePlaceholder",
+				employeeCodeHelp: "users.form.fields.employeeCodeHelp",
 			},
 			validation: {
 				emailRequired: "users.form.validation.emailRequired",
@@ -892,6 +920,7 @@ export const Messages = {
 			loadFailed: "users.portfolio.loadFailed",
 			retry: "users.portfolio.retry",
 			empty: "users.portfolio.empty",
+			removeCustomer: "users.portfolio.removeCustomer",
 			selectedCount: "users.portfolio.selectedCount",
 		},
 		actions: {
@@ -1059,10 +1088,11 @@ export const Messages = {
 			category: "auth.brand.category",
 			headline: "auth.brand.headline",
 			description: "auth.brand.description",
-			highlights: {
-				orders: "auth.brand.highlights.orders",
-				programs: "auth.brand.highlights.programs",
-				claims: "auth.brand.highlights.claims",
+			areas: {
+				orders: "auth.brand.areas.orders",
+				programs: "auth.brand.areas.programs",
+				claims: "auth.brand.areas.claims",
+				tracking: "auth.brand.areas.tracking",
 			},
 			footer: "auth.brand.footer",
 		},
@@ -1155,6 +1185,7 @@ export const Messages = {
 			passwordMismatch: "auth.recovery.passwordMismatch",
 			invalidLink: "auth.recovery.invalidLink",
 			invalidLinkHelp: "auth.recovery.invalidLinkHelp",
+			requestNewLink: "auth.recovery.requestNewLink",
 			passwordUpdated: "auth.recovery.passwordUpdated",
 			saving: "auth.recovery.saving",
 			setPassword: "auth.recovery.setPassword",
@@ -1179,11 +1210,19 @@ export const Messages = {
 			title: "settings.appearance.title",
 			description: "settings.appearance.description",
 			layout: "settings.appearance.layout",
+			language: "settings.appearance.language",
 			theme: "settings.appearance.theme",
 			font: "settings.appearance.font",
 			textSize: "settings.appearance.textSize",
 			motion: "settings.appearance.motion",
 			options: {
+				language: {
+					description: "settings.appearance.options.language.description",
+					frenchUnavailable:
+						"settings.appearance.options.language.frenchUnavailable",
+					frenchDescription:
+						"settings.appearance.options.language.frenchDescription",
+				},
 				theme: {
 					system: {
 						label: "settings.appearance.options.theme.system.label",

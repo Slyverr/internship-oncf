@@ -1,4 +1,5 @@
 // Draft only: register this catalog after every section is translated and reviewed.
+import { en } from "../messages/en";
 export const frDraft = {
 	common: {
 		brand: {
@@ -161,8 +162,36 @@ export const frDraft = {
 			"Choisissez les codes d’autorisation accessibles à chaque profil utilisateur.",
 		create: "Créer un profil",
 		name: "Nom du profil",
-		persona: "Type de processus",
+		persona: "Groupe de comptes autorisé",
+		personaHint:
+			"Ce choix définit la configuration du compte : un représentant client est lié à un client, tandis qu’un agent peut recevoir un portefeuille de clients. Il n’accorde aucun accès à lui seul ; ce sont les autorisations ci-dessous qui le font.",
 		permissions: "Autorisations",
+		profileDetailsStep: "Détails du profil",
+		permissionsStep: "Autorisations",
+		permissionGuideTitle: "Comprendre les codes d’autorisation",
+		permissionConventionHint: "module:capacité[:cible]",
+		profileNotFound: "Le profil d’accès est introuvable.",
+		systemProfileReadOnly: "Les profils système ne peuvent pas être modifiés.",
+		backToProfiles: "Retour aux profils d’accès",
+		permissionGuide: {
+			recordsLabel: "Accès aux enregistrements",
+			recordsCode: "module:create / read / update / delete",
+			recordsDescription:
+				"Créer, consulter, modifier ou supprimer des enregistrements. Les périmètres client et propriétaire restent applicables.",
+			scopeLabel: "Autres enregistrements",
+			scopeCode: "module:manage:other",
+			scopeDescription:
+				"Étend l’accès concerné aux enregistrements d’autres utilisateurs ; ne remplace pas une autorisation de lecture, de modification ou d’action.",
+			targetLabel: "Gestion ciblée",
+			targetCode: "module:manage:target",
+			targetDescription:
+				"Autorise la gestion d’un élément précis, comme le statut ou le propriétaire. Un parent sélectionné inclut ses cibles associées.",
+			actionLabel: "Actions du processus",
+			actionCode: "module:action:name",
+			actionDescription:
+				"Autorise une action précise, comme soumettre ou approuver. La sélection de module:action inclut les actions associées.",
+		},
+		permissionInherited: "Incluse par {permission}",
 		permissionCount: {
 			plural: {
 				zero: "Aucune autorisation",
@@ -173,19 +202,19 @@ export const frDraft = {
 		status: "Statut",
 		system: "Système",
 		edit: "Modifier",
-		archive: "Archiver",
-		restore: "Restaurer",
+		activate: "Activer {profile}",
+		deactivate: "Désactiver {profile}",
 		createTitle: "Créer un profil d’accès",
 		editTitle: "Modifier le profil d’accès",
 		dialogDescription:
-			"Définissez le nom du profil, le type de processus et les autorisations accordées.",
+			"Créez un profil en deux étapes : choisissez qui peut l’utiliser, puis définissez ses autorisations.",
 		namePlaceholder: "Par exemple, Validation des demandes de transport",
 		descriptionLabel: "Description",
 		descriptionPlaceholder: "Décrivez l’objectif de ce profil",
 		agentPersona: "Agent commercial",
 		clientPersona: "Représentant du client",
 		permissionHint:
-			"Sélectionnez uniquement les autorisations nécessaires à ce profil. Les codes protègent également les actions de l’API.",
+			"Sélectionnez uniquement les accès nécessaires à ce profil. Chaque autorisation comprend une explication claire; les autorisations imbriquées indiquent lorsqu’une autorisation parente les accorde déjà.",
 		permissionSearchLabel: "Rechercher des autorisations",
 		permissionSearchPlaceholder: "Rechercher par code d’autorisation ou action",
 		noPermissionMatches: "Aucune autorisation ne correspond à cette recherche.",
@@ -197,13 +226,8 @@ export const frDraft = {
 			"Impossible de charger les définitions des autorisations.",
 		noAccess: "Vous n’êtes pas autorisé à gérer les profils d’accès.",
 		save: "Enregistrer le profil",
-		cancel: "Annuler",
-		archiveTitle: "Archiver ce profil d’accès ?",
-		archiveDescription:
-			"Les profils archivés ne peuvent pas être attribués aux utilisateurs. Supprimez d’abord les attributions existantes avant l’archivage.",
-		restoreTitle: "Restaurer ce profil d’accès ?",
-		restoreDescription:
-			"Ce profil pourra de nouveau être attribué aux utilisateurs.",
+		saving: "Enregistrement du profil…",
+		permissionDescriptions: en.roleProfiles.permissionDescriptions,
 	},
 	referenceData: {
 		pageTitle: "Données de référence",
@@ -1101,11 +1125,18 @@ export const frDraft = {
 			description:
 				"Personnalisez les couleurs, le texte et les animations pour un espace de travail confortable.",
 			layout: "Disposition de l’espace de travail",
+			language: "Langue",
 			theme: "Thème de couleurs",
 			font: "Police",
 			textSize: "Taille du texte",
 			motion: "Animations",
 			options: {
+				language: {
+					description:
+						"Définir la langue de l’espace de travail sur {language}.",
+					frenchUnavailable: "Français (bientôt disponible)",
+					frenchDescription: "Les traductions françaises sont en préparation.",
+				},
 				theme: {
 					system: {
 						label: "Système",
@@ -1236,12 +1267,11 @@ export const frDraft = {
 			headline: "Faites avancer vos opérations de fret.",
 			description:
 				"Gérez les demandes de transport, les programmes, les réclamations et le suivi dans un espace de travail opérationnel clair.",
-			highlights: {
-				orders: "Regroupez les demandes des clients et leurs informations.",
-				programs:
-					"Associez directement les demandes admissibles aux programmes.",
-				claims:
-					"Suivez l’avancement du fret et gérez les réclamations au même endroit.",
+			areas: {
+				orders: "Demandes des clients et détails des commandes",
+				programs: "Planification et allocation prévisionnelles",
+				claims: "Commentaires, suivis et résolutions",
+				tracking: "État et position des expéditions",
 			},
 			footer:
 				"Un espace partagé pour les équipes qui assurent chaque expédition.",
@@ -1341,6 +1371,7 @@ export const frDraft = {
 			invalidLink: "Ce lien de réinitialisation est invalide ou a expiré.",
 			invalidLinkHelp:
 				"Ce lien de réinitialisation est invalide ou a expiré. Demandez-en un nouveau puis réessayez.",
+			requestNewLink: "Demander un nouveau lien",
 			passwordUpdated:
 				"Votre mot de passe a été modifié. Vous pouvez maintenant vous connecter.",
 			saving: "Enregistrement…",
@@ -1397,7 +1428,6 @@ export const frDraft = {
 				firstName: "Prénom",
 				lastName: "Nom",
 				role: "Rôle de l’utilisateur",
-				type: "Type d’utilisateur",
 				customer: "Entreprise cliente",
 				employeeCode: "Matricule",
 				emailPlaceholder: "utilisateur@oncf.ma",
@@ -1405,6 +1435,8 @@ export const frDraft = {
 				firstNamePlaceholder: "ex. : Samira",
 				lastNamePlaceholder: "ex. : El Amrani",
 				employeeCodePlaceholder: "EMP-1234",
+				employeeCodeHelp:
+					"Facultatif. Saisissez uniquement un matricule officiel de l’ONCF ; aucun code ne sera généré si ce champ reste vide.",
 			},
 			validation: {
 				emailRequired: "L’adresse e-mail est obligatoire.",
@@ -1456,12 +1488,13 @@ export const frDraft = {
 		portfolio: {
 			title: "Portefeuille de clients",
 			description:
-				"Choisissez les clients que cet agent peut gérer. Un portefeuille vide ne lui donne accès à aucun enregistrement lié à un client.",
+				"Sans sélection, l’agent n’a aucun enregistrement associé à un client.",
 			loading: "Chargement des clients…",
 			loadFailed:
 				"Impossible de charger les clients. Vérifiez votre connexion.",
 			retry: "Réessayer de charger les clients",
 			empty: "Aucun client disponible.",
+			removeCustomer: "Retirer {name}",
 			selectedCount: {
 				plural: {
 					zero: "Aucun client sélectionné",

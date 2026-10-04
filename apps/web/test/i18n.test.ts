@@ -8,6 +8,7 @@ import {
 	API_TRANSPORT_ERROR_CODES,
 	API_VALIDATION_RULE_CODES,
 	DEFAULT_LOCALE,
+	Permission,
 } from "@ecommand/shared";
 import ts from "typescript";
 import {
@@ -45,6 +46,16 @@ assert.equal(DEFAULT_LOCALE, "en");
 assert.ok(SUPPORTED_LOCALES.includes(DEFAULT_LOCALE));
 assert.equal(resolveAppLocale(undefined), DEFAULT_LOCALE);
 assert.equal(resolveAppLocale("fr"), DEFAULT_LOCALE);
+for (const permission of Object.values(Permission)) {
+	assert.ok(
+		en.roleProfiles.permissionDescriptions[permission].length > 0,
+		`Permission ${permission} must have a localized English description`,
+	);
+	assert.equal(
+		Messages.roleProfiles.permissionDescriptions[permission],
+		`roleProfiles.permissionDescriptions.${permission}`,
+	);
+}
 for (const locale of SUPPORTED_LOCALES) {
 	assert.equal(isAppLocale(locale), true);
 	assert.equal(resolveAppLocale(locale), locale);
