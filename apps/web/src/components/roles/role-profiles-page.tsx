@@ -1,34 +1,26 @@
 "use client";
 
-import {
-	PERMISSION_DEFINITIONS,
-	Permission,
-	RolePersona,
-} from "@ecommand/shared";
+import { Permission, RolePersona } from "@ecommand/shared";
 import { useQueryClient } from "@tanstack/react-query";
 import {
+	ChevronDownIcon,
 	PencilIcon,
 	PlusIcon,
 	SearchIcon,
 	ShieldCheckIcon,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
-import { ConfirmDialog } from "@/components/common/confirm-dialog";
+import {
+	GuidedFormActions,
+	GuidedFormProgress,
+} from "@/components/common/guided-form";
 import { PageHeader } from "@/components/common/page-header";
 import { TableActionButton } from "@/components/common/table-action-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-	Dialog,
-	DialogBody,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -145,9 +137,11 @@ function getSafeError(error: unknown, locale: ReturnType<typeof useLocale>) {
 function ProfileStatus({
 	profile,
 	onToggle,
+	disabled,
 }: {
 	profile: RoleProfileDto;
 	onToggle: () => void;
+	disabled: boolean;
 }) {
 	const t = useTranslate();
 	if (profile.isSystem) {
@@ -159,9 +153,11 @@ function ProfileStatus({
 			checked={profile.isActive}
 			aria-label={t(
 				profile.isActive
-					? Messages.roleProfiles.archive
-					: Messages.roleProfiles.restore,
+					? Messages.roleProfiles.deactivate
+					: Messages.roleProfiles.activate,
+				{ profile: getProfileDisplayName(profile, t) },
 			)}
+			disabled={disabled}
 			onCheckedChange={onToggle}
 		/>
 	);
@@ -187,36 +183,37 @@ function ProfileActions({
 	);
 }
 
-function RoleProfileDialog({
-	open,
-	onOpenChange,
+function RoleProfileWizard({
 	profile,
 	permissions,
 	isSaving,
 	error,
 	onSave,
+	onCancel,
 }: {
-	open: boolean;
-	onOpenChange: (open: boolean) => void;
 	profile: RoleProfileDto | null;
 	permissions: PermissionDefinitionDto[];
 	isSaving: boolean;
 	error: string;
 	onSave: (draft: Draft, profile: RoleProfileDto | null) => Promise<void>;
+	onCancel: () => void;
 }) {
 	const t = useTranslate();
 	const [draft, setDraft] = useState<Draft>(() =>
 		createInitialDraft(profile, permissions),
 	);
 	const [permissionSearch, setPermissionSearch] = useState("");
+	const [currentStep, setCurrentStep] = useState(0);
 
 	const selectablePermissions = permissions
 		.filter((permission) => permission.assignable)
 		.map((permission) => ({
 			...permission,
-			description:
-				PERMISSION_DEFINITIONS[permission.name as Permission]?.description ??
-				"",
+			description: t(
+				Messages.roleProfiles.permissionDescriptions[
+					permission.name as Permission
+				],
+			),
 		}));
 	const modules = Array.from(
 		new Set(
@@ -234,15 +231,55 @@ function RoleProfileDialog({
 		selectablePermissions,
 		permissionSearch,
 	);
+	const permissionByName = new Map(
+		selectablePermissions.map((permission) => [permission.name, permission]),
+	);
+	const visiblePermissionNames = new Set(
+		filteredPermissions.map((permission) => permission.name),
+	);
+	const addVisibleDescendants = (parentName: string) => {
+		for (const child of selectablePermissions.filter(
+			(candidate) => candidate.parent === parentName,
+		)) {
+			visiblePermissionNames.add(child.name);
+			addVisibleDescendants(child.name);
+		}
+	};
+	for (const permission of filteredPermissions) {
+		let parent = permission.parent;
+		while (parent) {
+			visiblePermissionNames.add(parent);
+			parent = permissionByName.get(parent)?.parent;
+		}
+		addVisibleDescendants(permission.name);
+	}
+	const visiblePermissions = selectablePermissions.filter((permission) =>
+		visiblePermissionNames.has(permission.name),
+	);
 	const filteredModules = modules.filter((module) =>
-		filteredPermissions.some((permission) =>
+		visiblePermissions.some((permission) =>
 			permission.name.startsWith(`${module}:`),
 		),
 	);
+	const steps = [
+		{
+			title: t(Messages.roleProfiles.profileDetailsStep),
+			description: t(Messages.roleProfiles.profileDetailsStep),
+		},
+		{
+			title: t(Messages.roleProfiles.permissionsStep),
+			description: t(Messages.roleProfiles.permissionsStep),
+		},
+	];
 
 	async function submit(event: FormEvent<HTMLFormElement>) {
 		event.preventDefault();
-		if (!draft.name.trim() || draft.permissionNames.length === 0) return;
+		if (!draft.name.trim()) return;
+		if (currentStep === 0) {
+			setCurrentStep(1);
+			return;
+		}
+		if (draft.permissionNames.length === 0) return;
 		await onSave(
 			{
 				...draft,
@@ -253,30 +290,93 @@ function RoleProfileDialog({
 		);
 	}
 
-	return (
-		<Dialog
-			open={open}
-			onOpenChange={(nextOpen) => {
-				if (!nextOpen) setPermissionSearch("");
-				onOpenChange(nextOpen);
-			}}
-		>
-			<DialogContent size="wide" className="gap-0 overflow-hidden p-0">
-				<DialogHeader className="mx-6 mt-6 pb-4">
-					<DialogTitle className="text-base">
-						{t(
-							profile
-								? Messages.roleProfiles.editTitle
-								: Messages.roleProfiles.createTitle,
+	function togglePermission(name: string, checked: boolean) {
+		setDraft((current) => ({
+			...current,
+			permissionNames: checked
+				? Array.from(new Set([...current.permissionNames, name]))
+				: current.permissionNames.filter((permission) => permission !== name),
+		}));
+	}
+
+	function renderPermissionNode(
+		permission: (typeof selectablePermissions)[number],
+		inheritedFrom?: string,
+	) {
+		const directlySelected = draft.permissionNames.includes(permission.name);
+		const selected = directlySelected || inheritedFrom !== undefined;
+		const children = visiblePermissions.filter(
+			(child) => child.parent === permission.name,
+		);
+		const id = `role-permission-${permission.name.replaceAll(":", "-")}`;
+		return (
+			<div key={permission.name} className="grid gap-control">
+				<label
+					htmlFor={id}
+					className={`flex min-w-0 cursor-pointer items-start gap-control rounded-md border px-3 py-compact transition-colors ${selected ? "border-primary/40 bg-primary/5" : "border-border bg-card hover:bg-muted/50"}`}
+				>
+					<Checkbox
+						id={id}
+						className="mt-1"
+						checked={selected}
+						disabled={isSaving || inheritedFrom !== undefined}
+						onCheckedChange={(checked) =>
+							togglePermission(permission.name, Boolean(checked))
+						}
+					/>
+					<span className="grid min-w-0 gap-1">
+						<span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+							<span className="text-sm font-medium">
+								{permission.description}
+							</span>
+							<code className="break-all text-xs text-muted-foreground">
+								{permission.name}
+							</code>
+						</span>
+						{inheritedFrom && (
+							<span className="text-xs text-muted-foreground">
+								{t(Messages.roleProfiles.permissionInherited, {
+									permission: inheritedFrom,
+								})}
+							</span>
 						)}
-					</DialogTitle>
-					<DialogDescription>
-						{t(Messages.roleProfiles.dialogDescription)}
-					</DialogDescription>
-				</DialogHeader>
-				<DialogBody className="p-6">
-					<form id="role-profile-form" className="grid gap-6" onSubmit={submit}>
-						<div className="grid gap-4 xl:grid-cols-2">
+					</span>
+				</label>
+				{children.length > 0 && (
+					<div className="ml-4 grid gap-control border-l pl-3">
+						{children.map((child) =>
+							renderPermissionNode(
+								child,
+								inheritedFrom ??
+									(directlySelected ? permission.name : undefined),
+							),
+						)}
+					</div>
+				)}
+			</div>
+		);
+	}
+
+	return (
+		<form id="role-profile-form" className="workspace-form" onSubmit={submit}>
+			<PageHeader
+				title={t(
+					profile
+						? Messages.roleProfiles.editTitle
+						: Messages.roleProfiles.createTitle,
+				)}
+				description={t(Messages.roleProfiles.dialogDescription)}
+			/>
+			<GuidedFormProgress steps={steps} currentStep={currentStep} />
+			<Card>
+				{currentStep === 0 && (
+					<CardHeader>
+						<CardTitle>{t(Messages.roleProfiles.profileDetailsStep)}</CardTitle>
+					</CardHeader>
+				)}
+				<CardContent className="grid min-w-0 gap-6">
+					{currentStep === 0 ? (
+						<div className="grid content-start gap-4 xl:grid-cols-2">
 							<div className="oncf-field">
 								<Label htmlFor="role-profile-name">
 									{t(Messages.roleProfiles.name)}
@@ -327,6 +427,9 @@ function RoleProfileDialog({
 										</SelectItem>
 									</SelectContent>
 								</Select>
+								<p className="text-sm text-muted-foreground">
+									{t(Messages.roleProfiles.personaHint)}
+								</p>
 							</div>
 							<div className="oncf-field xl:col-span-2">
 								<Label htmlFor="role-profile-description">
@@ -346,6 +449,7 @@ function RoleProfileDialog({
 								/>
 							</div>
 						</div>
+					) : (
 						<section
 							className="grid min-h-0 gap-4"
 							aria-labelledby="role-profile-permissions-heading"
@@ -368,6 +472,53 @@ function RoleProfileDialog({
 									})}
 								</Badge>
 							</div>
+							<details className="group rounded-lg border bg-muted/20 px-4 py-3">
+								<summary className="cursor-pointer list-none text-sm font-medium marker:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
+									<span className="flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+										<span className="flex min-w-0 items-center gap-2">
+											<span>
+												{t(Messages.roleProfiles.permissionGuideTitle)}
+											</span>
+											<ChevronDownIcon
+												className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
+												aria-hidden="true"
+											/>
+										</span>
+										<span className="text-xs font-normal text-muted-foreground">
+											{t(Messages.roleProfiles.permissionConventionHint)}
+										</span>
+									</span>
+								</summary>
+								<div className="mt-3 grid gap-3 border-t pt-3 sm:grid-cols-2">
+									{(["records", "scope", "target", "action"] as const).map(
+										(kind) => (
+											<div key={kind} className="grid content-start gap-1">
+												<p className="text-sm font-medium">
+													{t(
+														Messages.roleProfiles.permissionGuide[
+															`${kind}Label`
+														],
+													)}
+												</p>
+												<code className="break-words text-xs text-muted-foreground">
+													{t(
+														Messages.roleProfiles.permissionGuide[
+															`${kind}Code`
+														],
+													)}
+												</code>
+												<p className="text-sm leading-5 text-muted-foreground">
+													{t(
+														Messages.roleProfiles.permissionGuide[
+															`${kind}Description`
+														],
+													)}
+												</p>
+											</div>
+										),
+									)}
+								</div>
+							</details>
 							{selectablePermissions.length === 0 ? (
 								<p className="text-sm text-muted-foreground">
 									{t(Messages.roleProfiles.noPermissions)}
@@ -403,98 +554,77 @@ function RoleProfileDialog({
 										</p>
 									) : (
 										<div className="grid content-start gap-4 xl:grid-cols-2">
-											{filteredModules.map((module) => (
-												<fieldset
-													key={module}
-													className="min-w-0 rounded-lg border p-4"
-												>
-													<legend className="px-2 text-sm font-semibold capitalize">
-														{module}
-													</legend>
-													<div className="grid gap-control sm:grid-cols-2">
-														{filteredPermissions
-															.filter((permission) =>
-																permission.name.startsWith(`${module}:`),
-															)
-															.map((permission) => {
-																const checked = draft.permissionNames.includes(
-																	permission.name,
-																);
-																return (
-																	<label
-																		key={permission.name}
-																		htmlFor={`role-permission-${permission.name.replaceAll(":", "-")}`}
-																		className={`flex min-h-12 min-w-0 cursor-pointer items-center gap-control rounded-md border px-control py-compact transition-colors ${checked ? "border-primary/40 bg-primary/5" : "border-border bg-card hover:bg-muted/50"}`}
-																	>
-																		<Checkbox
-																			id={`role-permission-${permission.name.replaceAll(":", "-")}`}
-																			checked={checked}
-																			onCheckedChange={(next) =>
-																				setDraft((current) => ({
-																					...current,
-																					permissionNames: next
-																						? Array.from(
-																								new Set([
-																									...current.permissionNames,
-																									permission.name,
-																								]),
-																							)
-																						: current.permissionNames.filter(
-																								(name) =>
-																									name !== permission.name,
-																							),
-																				}))
-																			}
-																		/>
-																		<code className="min-w-0 break-words text-sm">
-																			{permission.name}
-																		</code>
-																	</label>
-																);
-															})}
-													</div>
-												</fieldset>
-											))}
+											{filteredModules.map((module) => {
+												const modulePermissions = visiblePermissions.filter(
+													(permission) =>
+														permission.name.startsWith(`${module}:`),
+												);
+												const moduleNames = new Set(
+													modulePermissions.map(
+														(permission) => permission.name,
+													),
+												);
+												const roots = modulePermissions.filter(
+													(permission) =>
+														!permission.parent ||
+														!moduleNames.has(permission.parent),
+												);
+												return (
+													<fieldset
+														key={module}
+														className="min-w-0 rounded-lg border p-4"
+													>
+														<legend className="px-2 text-sm font-semibold capitalize">
+															{module}
+														</legend>
+														<div className="grid gap-2">
+															{roots.map((permission) =>
+																renderPermissionNode(permission),
+															)}
+														</div>
+													</fieldset>
+												);
+											})}
 										</div>
 									)}
 								</div>
 							)}
 						</section>
-						{error && (
-							<p className="text-sm text-destructive" role="alert">
-								{error}
-							</p>
-						)}
-					</form>
-				</DialogBody>
-				<DialogFooter className="mx-6 mb-6">
-					<Button
-						variant="outline"
-						type="button"
-						onClick={() => onOpenChange(false)}
-					>
-						{t(Messages.roleProfiles.cancel)}
-					</Button>
-					<Button
-						type="submit"
-						form="role-profile-form"
-						disabled={
-							isSaving ||
-							draft.permissionNames.length === 0 ||
-							!draft.name.trim()
-						}
-					>
-						{t(Messages.roleProfiles.save)}
-					</Button>
-				</DialogFooter>
-			</DialogContent>
-		</Dialog>
+					)}
+				</CardContent>
+			</Card>
+			<GuidedFormActions
+				currentStep={currentStep}
+				stepCount={steps.length}
+				onCancel={onCancel}
+				onPrevious={() => setCurrentStep(0)}
+				onContinue={() => setCurrentStep(1)}
+				submitLabel={t(Messages.roleProfiles.save)}
+				pendingLabel={t(Messages.roleProfiles.saving)}
+				isSubmitting={false}
+				isPending={isSaving}
+				isSubmitDisabled={draft.permissionNames.length === 0}
+				isContinueDisabled={!draft.name.trim()}
+				errorMessage={error}
+				formId="role-profile-form"
+				mobileInline
+			/>
+		</form>
 	);
 }
 
-export function RoleProfilesPage() {
+type RoleProfilesPageProps = {
+	mode?: "list" | "create" | "edit";
+	profileId?: string;
+};
+
+export function RoleProfilesPage({
+	mode = "list",
+	profileId,
+}: RoleProfilesPageProps) {
 	const t = useTranslate();
 	const locale = useLocale();
+	const router = useRouter();
 	const { hasPermission } = useAuth();
 	const canManage = hasPermission(Permission.ROLES_MANAGE);
 	const queryClient = useQueryClient();
@@ -506,14 +636,8 @@ export function RoleProfilesPage() {
 	});
 	const createMutation = useRolesControllerCreateProfile();
 	const updateMutation = useRolesControllerUpdateProfile();
-	const [dialogOpen, setDialogOpen] = useState(false);
-	const [editingProfile, setEditingProfile] = useState<RoleProfileDto | null>(
-		null,
-	);
-	const [dialogError, setDialogError] = useState("");
+	const [editorError, setEditorError] = useState("");
 	const [pageError, setPageError] = useState("");
-	const [statusTarget, setStatusTarget] = useState<RoleProfileDto | null>(null);
-	const [statusSaving, setStatusSaving] = useState(false);
 
 	if (!canManage) {
 		return (
@@ -526,21 +650,13 @@ export function RoleProfilesPage() {
 	const profiles = profilesQuery.data ?? [];
 	const permissions = permissionsQuery.data ?? [];
 	const isSaving = createMutation.isPending || updateMutation.isPending;
-
-	function openCreate() {
-		setEditingProfile(null);
-		setDialogError("");
-		setDialogOpen(true);
-	}
-
-	function openEdit(profile: RoleProfileDto) {
-		setEditingProfile(profile);
-		setDialogError("");
-		setDialogOpen(true);
-	}
+	const editingProfile =
+		mode === "edit"
+			? profiles.find((profile) => profile.id === profileId)
+			: null;
 
 	async function saveProfile(draft: Draft, profile: RoleProfileDto | null) {
-		setDialogError("");
+		setEditorError("");
 		try {
 			if (profile) {
 				await updateMutation.mutateAsync({
@@ -567,30 +683,32 @@ export function RoleProfilesPage() {
 			await queryClient.invalidateQueries({
 				queryKey: getRolesControllerFindProfilesQueryKey(),
 			});
-			setDialogOpen(false);
+			router.push("/dashboard/roles");
 		} catch (error) {
-			setDialogError(getSafeError(error, locale));
+			setEditorError(getSafeError(error, locale));
 		}
 	}
 
-	async function changeProfileStatus() {
-		if (!statusTarget) return;
-		setStatusSaving(true);
+	async function updateProfileStatus(
+		profile: RoleProfileDto,
+		isActive: boolean,
+	) {
 		setPageError("");
 		try {
 			await updateMutation.mutateAsync({
-				id: statusTarget.id,
-				data: { isActive: !statusTarget.isActive },
+				id: profile.id,
+				data: { isActive },
 			});
 			await queryClient.invalidateQueries({
 				queryKey: getRolesControllerFindProfilesQueryKey(),
 			});
-			setStatusTarget(null);
 		} catch (error) {
 			setPageError(getSafeError(error, locale));
-		} finally {
-			setStatusSaving(false);
 		}
+	}
+
+	function handleProfileStatusToggle(profile: RoleProfileDto) {
+		void updateProfileStatus(profile, !profile.isActive);
 	}
 
 	const queryError = profilesQuery.isError
@@ -599,6 +717,69 @@ export function RoleProfilesPage() {
 			? t(Messages.roleProfiles.permissionLoadFailed)
 			: "";
 
+	if (mode !== "list") {
+		if (
+			permissionsQuery.isPending ||
+			(mode === "edit" && profilesQuery.isPending)
+		) {
+			return (
+				<p className="text-sm text-muted-foreground">
+					{t(Messages.common.loadingResource, {
+						resource: t(Messages.roleProfiles.pageTitle),
+					})}
+				</p>
+			);
+		}
+		if (
+			permissionsQuery.isError ||
+			(mode === "edit" && profilesQuery.isError)
+		) {
+			return (
+				<div className="grid gap-4">
+					<p role="alert" className="text-sm text-destructive">
+						{queryError}
+					</p>
+					<Button
+						variant="outline"
+						onClick={() => router.push("/dashboard/roles")}
+					>
+						{t(Messages.common.actions.cancel)}
+					</Button>
+				</div>
+			);
+		}
+		if (mode === "edit" && (!editingProfile || editingProfile.isSystem)) {
+			return (
+				<div className="grid gap-4">
+					<p role="alert" className="text-sm text-destructive">
+						{t(
+							editingProfile?.isSystem
+								? Messages.roleProfiles.systemProfileReadOnly
+								: Messages.roleProfiles.profileNotFound,
+						)}
+					</p>
+					<Button
+						variant="outline"
+						onClick={() => router.push("/dashboard/roles")}
+					>
+						{t(Messages.roleProfiles.backToProfiles)}
+					</Button>
+				</div>
+			);
+		}
+		return (
+			<RoleProfileWizard
+				key={editingProfile?.id ?? "new"}
+				profile={editingProfile ?? null}
+				permissions={permissions}
+				isSaving={isSaving}
+				error={editorError}
+				onSave={saveProfile}
+				onCancel={() => router.push("/dashboard/roles")}
+			/>
+		);
+	}
+
 	return (
 		<>
 			<PageHeader
@@ -606,7 +787,7 @@ export function RoleProfilesPage() {
 				description={t(Messages.roleProfiles.description)}
 			>
 				<Button
-					onClick={openCreate}
+					onClick={() => router.push("/dashboard/roles/new")}
 					disabled={permissionsQuery.isPending || permissionsQuery.isError}
 				>
 					<PlusIcon data-icon="inline-start" />
@@ -654,11 +835,14 @@ export function RoleProfilesPage() {
 								<div className="flex items-center justify-end gap-2">
 									<ProfileStatus
 										profile={profile}
-										onToggle={() => setStatusTarget(profile)}
+										disabled={updateMutation.isPending}
+										onToggle={() => handleProfileStatusToggle(profile)}
 									/>
 									<ProfileActions
 										profile={profile}
-										onEdit={() => openEdit(profile)}
+										onEdit={() =>
+											router.push(`/dashboard/roles/${profile.id}/edit`)
+										}
 									/>
 								</div>
 								<div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
@@ -713,14 +897,17 @@ export function RoleProfilesPage() {
 										<TableCell className="text-center">
 											<ProfileStatus
 												profile={profile}
-												onToggle={() => setStatusTarget(profile)}
+												disabled={updateMutation.isPending}
+												onToggle={() => handleProfileStatusToggle(profile)}
 											/>
 										</TableCell>
 										<TableCell>
 											<div className="flex justify-end">
 												<ProfileActions
 													profile={profile}
-													onEdit={() => openEdit(profile)}
+													onEdit={() =>
+														router.push(`/dashboard/roles/${profile.id}/edit`)
+													}
 												/>
 											</div>
 										</TableCell>
@@ -731,38 +918,6 @@ export function RoleProfilesPage() {
 					</div>
 				</>
 			)}
-			<RoleProfileDialog
-				key={`${editingProfile?.id ?? "new"}:${dialogOpen}`}
-				open={dialogOpen}
-				onOpenChange={setDialogOpen}
-				profile={editingProfile}
-				permissions={permissions}
-				isSaving={isSaving}
-				error={dialogError}
-				onSave={saveProfile}
-			/>
-			<ConfirmDialog
-				open={statusTarget !== null}
-				onOpenChange={(open) => !open && setStatusTarget(null)}
-				title={t(
-					statusTarget?.isActive
-						? Messages.roleProfiles.archiveTitle
-						: Messages.roleProfiles.restoreTitle,
-				)}
-				description={t(
-					statusTarget?.isActive
-						? Messages.roleProfiles.archiveDescription
-						: Messages.roleProfiles.restoreDescription,
-				)}
-				confirmLabel={t(
-					statusTarget?.isActive
-						? Messages.roleProfiles.archive
-						: Messages.roleProfiles.restore,
-				)}
-				variant={statusTarget?.isActive ? "destructive" : "default"}
-				disabled={statusSaving}
-				onConfirm={() => void changeProfileStatus()}
-			/>
 		</>
 	);
 }

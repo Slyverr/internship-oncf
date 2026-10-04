@@ -46,4 +46,16 @@ describe("system role reference data", () => {
 			PERMISSIONS[Permission.CLAIMS_ACTION].id,
 		);
 	});
+
+	it("seeds permission codes and hierarchy without backend-authored labels", () => {
+		expect(PERMISSIONS[Permission.ORDERS_READ]).toMatchObject({
+			name: Permission.ORDERS_READ,
+		});
+		expect(PERMISSIONS[Permission.ORDERS_READ]).not.toHaveProperty(
+			"description",
+		);
+		expect(PERMISSIONS[Permission.ORDERS_ACTION_SUBMIT].parentId).toBe(
+			PERMISSIONS[Permission.ORDERS_ACTION].id,
+		);
+	});
 });

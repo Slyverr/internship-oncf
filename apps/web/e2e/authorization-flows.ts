@@ -412,19 +412,53 @@ export async function verifyAdminCustomRoleAssignment(page: Page) {
 			exact: true,
 		})
 		.click();
-	const roleDialog = page.getByRole("dialog");
-	await roleDialog
+	await expect(page).toHaveURL(/\/dashboard\/roles\/new$/);
+	const roleForm = page.locator("#role-profile-form");
+	await roleForm
 		.getByLabel(translate(Messages.roleProfiles.name), { exact: true })
 		.fill(roleName);
-	await roleDialog.locator('label[for="role-permission-orders-read"]').click();
-	await roleDialog
+	await roleForm
+		.getByRole("button", {
+			name: translate(Messages.common.actions.continue),
+			exact: true,
+		})
+		.click();
+	await roleForm.locator('label[for="role-permission-orders-read"]').click();
+	await roleForm
 		.getByRole("button", {
 			name: translate(Messages.roleProfiles.save),
 			exact: true,
 		})
 		.click();
-	await expect(roleDialog).toBeHidden();
-	await expect(page.getByRole("cell", { name: roleName })).toBeVisible();
+	await expect(page).toHaveURL(/\/dashboard\/roles$/);
+	await expect(
+		page.getByRole("cell", { name: roleName, exact: true }),
+	).toBeVisible();
+	const roleRow = page.getByRole("row").filter({ hasText: roleName });
+	await roleRow
+		.getByRole("button", {
+			name: translate(Messages.roleProfiles.edit),
+			exact: true,
+		})
+		.click();
+	await expect(page).toHaveURL(/\/dashboard\/roles\/[0-9a-f-]+\/edit$/i);
+	await page
+		.locator("#role-profile-description")
+		.fill("Verified through the edit route");
+	await page
+		.getByRole("button", {
+			name: translate(Messages.common.actions.continue),
+			exact: true,
+		})
+		.click();
+	await expect(page.locator("#role-permission-orders-read")).toBeChecked();
+	await page
+		.getByRole("button", {
+			name: translate(Messages.roleProfiles.save),
+			exact: true,
+		})
+		.click();
+	await expect(page).toHaveURL(/\/dashboard\/roles$/);
 
 	const email = `e2e.order-reader.${Date.now()}@example.test`;
 	await page.goto("/dashboard/users/new");

@@ -4,6 +4,7 @@ type SwitchProps = {
 	checked: boolean;
 	"aria-label": string;
 	label?: string;
+	visual?: "default" | "badge";
 	disabled?: boolean;
 	onCheckedChange: (checked: boolean) => void;
 };
@@ -12,6 +13,7 @@ export function Switch({
 	checked,
 	"aria-label": ariaLabel,
 	label,
+	visual = "default",
 	disabled = false,
 	onCheckedChange,
 }: SwitchProps) {
@@ -38,6 +40,17 @@ export function Switch({
 					>
 						<span className="absolute top-1/2 left-0.5 size-3 -translate-y-1/2 rounded-full bg-background shadow-sm transition-transform data-[checked=true]:translate-x-3" />
 					</span>
+				</span>
+			) : visual === "badge" ? (
+				<span
+					aria-hidden="true"
+					data-checked={checked}
+					className="relative h-5 w-14 rounded-full border border-border bg-secondary transition-colors data-[checked=true]:border-primary data-[checked=true]:bg-primary"
+				>
+					<span
+						data-checked={checked}
+						className="absolute top-1/2 left-0.5 size-3 -translate-y-1/2 rounded-full bg-background shadow-sm transition-transform data-[checked=true]:translate-x-9"
+					/>
 				</span>
 			) : (
 				<span

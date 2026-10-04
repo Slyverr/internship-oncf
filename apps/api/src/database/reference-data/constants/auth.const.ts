@@ -34,10 +34,9 @@ export const ROLES = createReferenceMap(
 
 export const PERMISSIONS = createReferenceMap(
 	PERMISSION_DEFINITIONS,
-	(name, { description, parent }) => ({
+	(name, { parent }) => ({
 		id: createReferenceId(PERMISSIONS_SCOPE, name),
 		name,
-		description,
 		parentId: parent ? createReferenceId(PERMISSIONS_SCOPE, parent) : undefined,
 	}),
 );
