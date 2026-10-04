@@ -1,4 +1,4 @@
-export const E2E_PASSWORD = "e2e-password-123";
+export const E2E_PASSWORD = "E2e-password-123!";
 
 export const E2E_PASSWORD_RESET = {
 	valid: "e2e-password-reset-valid-token",

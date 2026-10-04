@@ -6,8 +6,12 @@ import {
 	Role,
 } from "@ecommand/shared";
 import type { INestApplication } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { users } from "drizzle/schema";
+import { eq } from "drizzle-orm";
 import request from "supertest";
 import type { App } from "supertest/types";
+import { DrizzleService } from "@/database/drizzle.service";
 import {
 	E2E_CUSTOMER_ICE,
 	E2E_CUSTOMERS,
@@ -32,13 +36,18 @@ describe("API bootstrap and authentication (e2e)", () => {
 	});
 
 	it("rejects invalid credentials", async () => {
-		await request(app.getHttpServer())
+		const response = await request(app.getHttpServer())
 			.post("/auth/login")
 			.send({
 				username: E2E_USERS.admin.email,
 				password: "wrong-password",
 			})
 			.expect(401);
+
+		expect(response.body).toEqual({
+			code: API_ERROR_CODES.AUTHENTICATION_REQUIRED,
+			statusCode: 401,
+		});
 	});
 
 	it("authenticates by email and authorizes the resulting bearer session", async () => {
@@ -71,15 +80,18 @@ describe("API bootstrap and authentication (e2e)", () => {
 			request(app.getHttpServer())
 				.post("/auth/login")
 				.send({ username, password });
+		const maxAttempts = Number(
+			app.get(ConfigService).get("AUTH_LOGIN_MAX_ATTEMPTS", 5),
+		);
 
-		for (let attempt = 0; attempt < 2; attempt++) {
+		for (let attempt = 0; attempt < maxAttempts - 1; attempt++) {
 			const response = await loginRequest("wrong-password").expect(401);
 			expect(response.body.code).toBe(API_ERROR_CODES.AUTHENTICATION_REQUIRED);
 		}
 
 		await loginRequest(E2E_PASSWORD).expect(201);
 
-		for (let attempt = 0; attempt < 2; attempt++) {
+		for (let attempt = 0; attempt < maxAttempts - 1; attempt++) {
 			const response = await loginRequest("wrong-password").expect(401);
 			expect(response.body.code).toBe(API_ERROR_CODES.AUTHENTICATION_REQUIRED);
 		}
@@ -89,7 +101,13 @@ describe("API bootstrap and authentication (e2e)", () => {
 		const stillLocked = await loginRequest(E2E_PASSWORD).expect(401);
 		expect(stillLocked.body.code).toBe(API_ERROR_CODES.AUTH_ACCOUNT_LOCKED);
 
-		await new Promise((resolve) => setTimeout(resolve, 1_100));
+		await app
+			.get(DrizzleService)
+			.db.update(users)
+			.set({
+				accountLockedUntil: new Date(Date.now() - 1_000).toISOString(),
+			})
+			.where(eq(users.email, username));
 		const expired = await loginRequest("wrong-password").expect(401);
 		expect(expired.body.code).toBe(API_ERROR_CODES.AUTHENTICATION_REQUIRED);
 		await loginRequest(E2E_PASSWORD).expect(201);
@@ -406,6 +424,14 @@ describe("API bootstrap and authentication (e2e)", () => {
 			.post("/auth/login")
 			.send({ username: email, password: newPassword })
 			.expect(201);
+
+		const restorationSession = await login(app, email, newPassword);
+		await request(app.getHttpServer())
+			.post("/auth/change-password")
+			.set("Authorization", `Bearer ${restorationSession}`)
+			.send({ currentPassword: newPassword, newPassword: E2E_PASSWORD })
+			.expect(201);
+		await login(app, email);
 	});
 
 	afterAll(async () => {

@@ -13,7 +13,7 @@
 		"verify:commit": "bun run verify",
 		"ui:review": "bun scripts/capture-ui-review.ts",
 		"test:e2e:api": "bun run --filter ecommand-api test:e2e",
-		"test:e2e:browser": "bun scripts/run-api-e2e.ts --browser"
+		"test:e2e:browser": "bun scripts/run-api-e2e.ts --browser --browser-only"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.5.5",

@@ -7,6 +7,7 @@ const webDir = resolve(rootDir, "apps/web");
 const jestExecutable = resolve(rootDir, "node_modules/jest/bin/jest.js");
 const composeFile = resolve(rootDir, "docker-compose.e2e.yml");
 const postgresPort = Number(process.env.ECOMMAND_E2E_POSTGRES_PORT ?? "55432");
+const browserOnly = process.argv.includes("--browser-only");
 
 const e2eEnv = {
 	...process.env,
@@ -21,7 +22,7 @@ const e2eEnv = {
 	JWT_SECRET: "ecommand-e2e-test-secret-not-for-production",
 	JWT_EXPIRES_IN: "30m",
 	AUTH_LOGIN_MAX_ATTEMPTS: "3",
-	AUTH_LOGIN_LOCK_DURATION_SECONDS: "1",
+	AUTH_LOGIN_LOCK_DURATION_SECONDS: "60",
 	WEB_APP_URL: "http://localhost:3000",
 };
 
@@ -215,16 +216,18 @@ try {
 	await run([nodeExecutable, tsxExecutable, "./test/fixtures/seed-e2e.ts"], {
 		cwd: apiDir,
 	});
-	await run(
-		[
-			nodeExecutable,
-			jestExecutable,
-			"--config",
-			"./test/jest-e2e.json",
-			"--runInBand",
-		],
-		{ cwd: apiDir },
-	);
+	if (!browserOnly) {
+		await run(
+			[
+				nodeExecutable,
+				jestExecutable,
+				"--config",
+				"./test/jest-e2e.json",
+				"--runInBand",
+			],
+			{ cwd: apiDir },
+		);
+	}
 	if (process.argv.includes("--browser")) {
 		await run(
 			[nodeExecutable, tsxExecutable, "./test/helpers/reset-e2e-database.ts"],
