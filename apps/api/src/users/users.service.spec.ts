@@ -167,8 +167,36 @@ describe("UsersService", () => {
 			authUser,
 			"role-id",
 		);
-		expect(query.createUser).toHaveBeenCalledWith(values, []);
+		expect(query.createUser).toHaveBeenCalledWith(
+			{ ...values, type: "internal" },
+			[],
+		);
 		expect(query.findUser).toHaveBeenCalledWith(12);
+	});
+
+	it("derives account type from the assigned persona", async () => {
+		query.findAssignableRole.mockResolvedValue({
+			id: "client-role-id",
+			persona: RolePersona.CLIENT_REPRESENTATIVE,
+		} as never);
+		mapper.toCreate.mockResolvedValue({ email: user.email } as never);
+		query.createUser.mockResolvedValue({ id: 12 } as never);
+		query.findUser.mockResolvedValue(user as never);
+
+		await service.create(
+			{
+				email: user.email,
+				roleId: "client-role-id",
+				customerId: 7,
+				type: "internal",
+			} as never,
+			authUser,
+		);
+
+		expect(query.createUser).toHaveBeenCalledWith(
+			expect.objectContaining({ type: "external" }),
+			undefined,
+		);
 	});
 
 	it("requires a customer when creating a client representative", async () => {
@@ -304,7 +332,7 @@ describe("UsersService", () => {
 	});
 
 	it("maps updates and returns the updated user", async () => {
-		const values = { firstName: "Updated" };
+		const values = { firstName: "Updated", type: "internal" };
 		mapper.toUpdate.mockResolvedValue(values as never);
 		query.updateUserAndAssignments.mockResolvedValue({ id: 12 } as never);
 		query.findUser.mockResolvedValue({
@@ -327,7 +355,7 @@ describe("UsersService", () => {
 		);
 		expect(query.updateUserAndAssignments).toHaveBeenCalledWith(
 			12,
-			values,
+			{ firstName: "Updated", type: "internal" },
 			undefined,
 		);
 	});

@@ -4,9 +4,12 @@
 
 import * as React from "react";
 
+import { RequiredMark } from "@/components/common/required-mark";
 import { cn } from "@/lib/utils";
 
-function Label({ className, ...props }: React.ComponentProps<"label">) {
+type LabelProps = React.ComponentProps<"label"> & { required?: boolean };
+
+function Label({ className, required, children, ...props }: LabelProps) {
 	return (
 		<label
 			data-slot="label"
@@ -15,7 +18,10 @@ function Label({ className, ...props }: React.ComponentProps<"label">) {
 				className,
 			)}
 			{...props}
-		/>
+		>
+			{children}
+			{required ? <RequiredMark /> : null}
+		</label>
 	);
 }
 

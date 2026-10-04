@@ -136,7 +136,10 @@ export const users = pgTable(
 		customerId: bigint("customer_id", { mode: "number" }),
 		agencyId: bigint("agency_id", { mode: "number" }),
 		failedLoginAttempts: integer("failed_login_attempts").default(0),
-		accountLockedUntil: timestamp("account_locked_until", { mode: "string" }),
+		accountLockedUntil: timestamp("account_locked_until", {
+			mode: "string",
+			withTimezone: true,
+		}),
 		createdBy: varchar("created_by", { length: 100 }),
 		updatedBy: varchar("updated_by", { length: 100 }),
 		createdAt: timestamp("created_at", { mode: "string" })

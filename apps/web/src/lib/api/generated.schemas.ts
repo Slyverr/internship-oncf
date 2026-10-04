@@ -274,17 +274,6 @@ export const CreateUserDtoRole = {
   CLIENT_REPRESENTATIVE: 'CLIENT_REPRESENTATIVE',
 } as const;
 
-/**
- * @maxLength 20
- */
-export type CreateUserDtoType = typeof CreateUserDtoType[keyof typeof CreateUserDtoType];
-
-
-export const CreateUserDtoType = {
-  internal: 'internal',
-  external: 'external',
-} as const;
-
 export interface CreateUserDto {
   /** @maxLength 100 */
   email: string;
@@ -301,8 +290,6 @@ export interface CreateUserDto {
   roleId?: string;
   /** @maxLength 50 */
   employeeCode?: string;
-  /** @maxLength 20 */
-  type?: CreateUserDtoType;
   /** @minimum 1 */
   customerId?: number;
   /** @items.minimum 1 */
@@ -320,17 +307,6 @@ export const UpdateUserDtoRole = {
   CLIENT_REPRESENTATIVE: 'CLIENT_REPRESENTATIVE',
 } as const;
 
-/**
- * @maxLength 20
- */
-export type UpdateUserDtoType = typeof UpdateUserDtoType[keyof typeof UpdateUserDtoType];
-
-
-export const UpdateUserDtoType = {
-  internal: 'internal',
-  external: 'external',
-} as const;
-
 export interface UpdateUserDto {
   /** @maxLength 100 */
   email?: string;
@@ -342,8 +318,6 @@ export interface UpdateUserDto {
   roleId?: string;
   /** @maxLength 50 */
   employeeCode?: string;
-  /** @maxLength 20 */
-  type?: UpdateUserDtoType;
   /** @minimum 1 */
   customerId?: number;
   /** @items.minimum 1 */

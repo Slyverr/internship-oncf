@@ -78,6 +78,7 @@ export class UsersService {
 		const role = await this.resolveRole(dto.roleId, dto.role);
 		this.ensureCustomerAssignment(role.persona, dto.customerId);
 		const values = await this.usersMapper.toCreate(dto, user, role.id);
+		values.type = this.userTypeForPersona(role.persona);
 		const created = await this.usersQuery.createUser(
 			values,
 			role.persona === RolePersona.AGENT_COMMERCIAL
@@ -141,6 +142,7 @@ export class UsersService {
 			dto.roleId !== undefined || dto.role !== undefined ? role.id : undefined;
 		const values = await this.usersMapper.toUpdate(dto, user, assignedRoleId);
 		const roleChanged = dto.role !== undefined || dto.roleId !== undefined;
+		values.type = this.userTypeForPersona(role.persona);
 		let customerIds: readonly number[] | undefined;
 		if (dto.customerIds !== undefined) {
 			customerIds =
@@ -183,6 +185,14 @@ export class UsersService {
 				code: API_ERROR_CODES.CUSTOMER_ASSIGNMENT_REQUIRED,
 			});
 		}
+	}
+
+	private userTypeForPersona(
+		persona: RolePersona | null,
+	): "internal" | "external" {
+		return persona === RolePersona.CLIENT_REPRESENTATIVE
+			? "external"
+			: "internal";
 	}
 
 	private async resolveRole(

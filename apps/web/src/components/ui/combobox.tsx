@@ -4,6 +4,7 @@ import { Combobox as ComboboxPrimitive } from "@base-ui/react";
 import { CheckIcon, ChevronDownIcon, XIcon } from "lucide-react";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
+import { controlSurfaceClasses } from "@/components/ui/control-styles";
 import {
 	InputGroup,
 	InputGroupAddon,
@@ -226,7 +227,8 @@ function ComboboxChips({
 		<ComboboxPrimitive.Chips
 			data-slot="combobox-chips"
 			className={cn(
-				"flex min-h-11 flex-wrap items-center gap-compact rounded-md border border-input bg-transparent bg-clip-padding px-control py-control text-sm shadow-xs transition-[color,box-shadow] focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 has-aria-invalid:border-destructive has-aria-invalid:ring-3 has-aria-invalid:ring-destructive/20 has-data-[slot=combobox-chip]:px-compact dark:bg-input/30 dark:has-aria-invalid:border-destructive/50 dark:has-aria-invalid:ring-destructive/40",
+				"flex min-h-11 flex-wrap items-center gap-compact bg-clip-padding px-control py-control text-sm focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 has-data-[slot=combobox-chip]:px-compact",
+				controlSurfaceClasses,
 				className,
 			)}
 			{...props}
@@ -238,9 +240,11 @@ function ComboboxChip({
 	className,
 	children,
 	showRemove = true,
+	removeLabel,
 	...props
 }: ComboboxPrimitive.Chip.Props & {
 	showRemove?: boolean;
+	removeLabel?: string;
 }) {
 	return (
 		<ComboboxPrimitive.Chip
@@ -255,6 +259,7 @@ function ComboboxChip({
 			{showRemove && (
 				<ComboboxPrimitive.ChipRemove
 					render={<Button variant="ghost" size="icon-sm" />}
+					aria-label={removeLabel}
 					className="-ml-1 opacity-50 hover:opacity-100"
 					data-slot="combobox-chip-remove"
 				>

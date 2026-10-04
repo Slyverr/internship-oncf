@@ -1,7 +1,18 @@
 "use client";
 
 import { InlineQueryRetry } from "@/components/common/inline-query-retry";
-import { Checkbox } from "@/components/ui/checkbox";
+import {
+	Combobox,
+	ComboboxChip,
+	ComboboxChips,
+	ComboboxChipsInput,
+	ComboboxContent,
+	ComboboxEmpty,
+	ComboboxItem,
+	ComboboxList,
+	ComboboxValue,
+	useComboboxAnchor,
+} from "@/components/ui/combobox";
 import { Messages } from "@/i18n";
 import { useTranslate } from "@/i18n/locale-provider";
 import { useCustomersControllerFindPortfolioOptions } from "@/lib/api/customers";
@@ -16,6 +27,7 @@ export function CustomerPortfolioField({
 	onChange,
 }: CustomerPortfolioFieldProps) {
 	const t = useTranslate();
+	const anchor = useComboboxAnchor();
 	const {
 		data: customers = [],
 		isLoading,
@@ -23,15 +35,15 @@ export function CustomerPortfolioField({
 		isFetching,
 		refetch,
 	} = useCustomersControllerFindPortfolioOptions();
+	const selectedCustomers = customers.filter((customer) =>
+		value.includes(customer.id),
+	);
 
 	return (
-		<fieldset className="oncf-field @3xl/workspace:col-span-2">
+		<fieldset className="oncf-field min-w-0">
 			<legend className="text-sm font-medium">
 				{t(Messages.users.portfolio.title)}
 			</legend>
-			<p className="text-meta text-muted-foreground">
-				{t(Messages.users.portfolio.description)}
-			</p>
 			{isLoading ? (
 				<p className="text-sm text-muted-foreground">
 					{t(Messages.users.portfolio.loading)}
@@ -48,40 +60,72 @@ export function CustomerPortfolioField({
 					{t(Messages.users.portfolio.empty)}
 				</p>
 			) : (
-				<div className="grid max-h-96 gap-2 overflow-y-auto rounded-lg border p-3 sm:max-h-64 sm:grid-cols-2">
-					{customers.map((customer) => {
-						const checked = value.includes(customer.id);
-						return (
-							<label
-								key={customer.id}
-								htmlFor={`customer-${customer.id}`}
-								className="flex min-h-11 cursor-pointer items-center gap-3 rounded-md border border-transparent px-3 transition-colors hover:bg-muted/60 has-aria-checked:border-border has-aria-checked:bg-muted/40"
-							>
-								<Checkbox
-									id={`customer-${customer.id}`}
-									checked={checked}
-									onCheckedChange={(nextChecked) => {
-										if (nextChecked === true) {
-											onChange([...value, customer.id]);
-										} else {
-											onChange(value.filter((id) => id !== customer.id));
+				<>
+					<Combobox
+						items={customers}
+						multiple
+						value={selectedCustomers}
+						onValueChange={(selection) =>
+							onChange(selection.map((customer) => customer.id))
+						}
+						itemToStringLabel={(customer) =>
+							`${customer.companyName} ${customer.customerCode}`
+						}
+						itemToStringValue={(customer) => String(customer.id)}
+					>
+						<ComboboxValue>
+							{(selected: typeof customers) => (
+								<ComboboxChips
+									ref={anchor}
+									aria-label={t(Messages.users.portfolio.title)}
+								>
+									{selected.map((customer) => (
+										<ComboboxChip
+											key={customer.id}
+											removeLabel={t(Messages.users.portfolio.removeCustomer, {
+												name: customer.companyName,
+											})}
+										>
+											<span className="max-w-40 truncate">
+												{customer.companyName}
+											</span>
+										</ComboboxChip>
+									))}
+									<ComboboxChipsInput
+										aria-label={t(Messages.customers.list.search)}
+										placeholder={
+											selected.length === 0
+												? t(Messages.customers.list.search)
+												: undefined
 										}
-									}}
-								/>
-								<span className="grid min-w-0 gap-compact">
-									<span className="truncate text-sm font-medium">
-										{customer.companyName}
-									</span>
-									<span className="truncate text-meta text-muted-foreground">
-										{customer.customerCode}
-									</span>
-								</span>
-							</label>
-						);
-					})}
-				</div>
+									/>
+								</ComboboxChips>
+							)}
+						</ComboboxValue>
+						<ComboboxContent anchor={anchor}>
+							<ComboboxEmpty>
+								{t(Messages.customers.list.noResults)}
+							</ComboboxEmpty>
+							<ComboboxList className="max-h-32">
+								{(customer) => (
+									<ComboboxItem key={customer.id} value={customer}>
+										<span className="min-w-0 flex-1 truncate">
+											{customer.companyName}
+										</span>
+										<span className="text-meta text-muted-foreground">
+											{customer.customerCode}
+										</span>
+									</ComboboxItem>
+								)}
+							</ComboboxList>
+						</ComboboxContent>
+					</Combobox>
+					<p className="text-meta text-muted-foreground">
+						{t(Messages.users.portfolio.description)}
+					</p>
+				</>
 			)}
-			<p className="text-meta text-muted-foreground" aria-live="polite">
+			<p className="sr-only" aria-live="polite">
 				{t(Messages.users.portfolio.selectedCount, {
 					count: value.length,
 				})}

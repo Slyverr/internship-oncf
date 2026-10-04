@@ -20,27 +20,16 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import { CustomerPortfolioField } from "@/components/users/customer-portfolio-field";
 import { RoleProfileSelect } from "@/components/users/role-profile-select";
 import { UserCustomerSelect } from "@/components/users/user-customer-select";
 import { useFormErrorMessage } from "@/hooks/use-form-error-message";
 import { useGuidedFormState } from "@/hooks/use-guided-form-state";
 import { Messages, type TypedMessageTranslator } from "@/i18n";
-import { useLocale, useTranslate } from "@/i18n/locale-provider";
-import {
-	UpdateUserDtoType,
-	type UserDetailDto,
-} from "@/lib/api/generated.schemas";
+import { useTranslate } from "@/i18n/locale-provider";
+import type { UserDetailDto } from "@/lib/api/generated.schemas";
 import { useRolesControllerFindProfiles } from "@/lib/api/roles";
 import { useUsersControllerUpdate } from "@/lib/api/users";
-import { formatUserType } from "@/lib/user-labels";
 
 function createUpdateUserSchemaBase(t: TypedMessageTranslator) {
 	return z.object({
@@ -63,7 +52,6 @@ function createUpdateUserSchemaBase(t: TypedMessageTranslator) {
 			.optional(),
 		roleId: z.string().uuid().optional(),
 		employeeCode: z.string().max(50).optional(),
-		type: z.nativeEnum(UpdateUserDtoType).optional(),
 		customerId: z.number().int().positive().optional(),
 		customerIds: z.array(z.number().int().positive()).optional(),
 	});
@@ -89,7 +77,6 @@ function getUserEditSteps(t: TypedMessageTranslator) {
 export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 	const router = useRouter();
 	const t = useTranslate();
-	const locale = useLocale();
 	const getErrorMessage = useFormErrorMessage();
 	const mutation = useUsersControllerUpdate();
 	const roleProfilesQuery = useRolesControllerFindProfiles();
@@ -100,7 +87,7 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 		const baseSchema = createUpdateUserSchemaBase(t);
 		return {
 			baseSchema,
-			accessSchema: baseSchema.pick({ email: true, roleId: true, type: true }),
+			accessSchema: baseSchema.pick({ email: true, roleId: true }),
 			steps: getUserEditSteps(t),
 		};
 	}, [t]);
@@ -137,7 +124,6 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 			lastName: user.lastName,
 			roleId: user.roleId,
 			employeeCode: user.employeeCode ?? "",
-			type: (user.type as UpdateUserDtoType) ?? UpdateUserDtoType.internal,
 			customerId: user.customerId ?? undefined,
 			customerIds: user.userCustomers.map(({ customerId }) => customerId),
 		} as UpdateUserFormValues,
@@ -163,7 +149,6 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 						...(value.employeeCode?.trim()
 							? { employeeCode: value.employeeCode.trim() }
 							: {}),
-						...(value.type ? { type: value.type } : {}),
 						...(value.customerId ? { customerId: value.customerId } : {}),
 						...(roleProfiles.find(({ id }) => id === value.roleId)?.persona ===
 						RolePersona.AGENT_COMMERCIAL
@@ -250,7 +235,7 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 					<form.Field name="roleId">
 						{(field) => (
 							<div className="oncf-field">
-								<Label htmlFor="roleId">
+								<Label htmlFor="roleId" required>
 									{t(Messages.users.form.fields.role)}
 								</Label>
 								<RoleProfileSelect
@@ -264,36 +249,6 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 									isFetching={roleProfilesQuery.isFetching}
 									onRetry={() => void roleProfilesQuery.refetch()}
 								/>
-							</div>
-						)}
-					</form.Field>
-
-					<form.Field name="type">
-						{(field) => (
-							<div className="oncf-field">
-								<Label htmlFor="type">
-									{t(Messages.users.form.fields.type)}
-								</Label>
-								<Select
-									value={field.state.value}
-									onValueChange={(val) =>
-										field.handleChange(val as UpdateUserDtoType)
-									}
-								>
-									<SelectTrigger id="type">
-										<SelectValue>
-											{formatUserType(field.state.value, locale)}
-										</SelectValue>
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value={UpdateUserDtoType.internal}>
-											{formatUserType(UpdateUserDtoType.internal, locale)}
-										</SelectItem>
-										<SelectItem value={UpdateUserDtoType.external}>
-											{formatUserType(UpdateUserDtoType.external, locale)}
-										</SelectItem>
-									</SelectContent>
-								</Select>
 							</div>
 						)}
 					</form.Field>
@@ -390,7 +345,7 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 											getErrorMessage(field.state.meta.errors[0]);
 
 										return (
-											<div className="oncf-field @3xl/workspace:col-span-2">
+											<div className="oncf-field">
 												<FormFieldHeader
 													htmlFor="customerId"
 													label={t(Messages.users.form.fields.customer)}
@@ -429,23 +384,33 @@ export function UserEditForm({ user }: { user: UserDetailDto }): JSX.Element {
 						}
 					</form.Subscribe>
 
-					<form.Field name="employeeCode">
-						{(field) => (
-							<div className="oncf-field">
-								<Label htmlFor="employeeCode">
-									{t(Messages.users.form.fields.employeeCode)}
-								</Label>
-								<Input
-									id="employeeCode"
-									placeholder={t(
-										Messages.users.form.fields.employeeCodePlaceholder,
+					<form.Subscribe selector={(state) => state.values.roleId}>
+						{(roleId) =>
+							roleProfiles.find(({ id }) => id === roleId)?.persona !==
+								RolePersona.CLIENT_REPRESENTATIVE && (
+								<form.Field name="employeeCode">
+									{(field) => (
+										<div className="oncf-field">
+											<Label htmlFor="employeeCode">
+												{t(Messages.users.form.fields.employeeCode)}
+											</Label>
+											<Input
+												id="employeeCode"
+												placeholder={t(
+													Messages.users.form.fields.employeeCodePlaceholder,
+												)}
+												value={field.state.value ?? ""}
+												onChange={(e) => field.handleChange(e.target.value)}
+											/>
+											<p className="text-meta text-muted-foreground">
+												{t(Messages.users.form.fields.employeeCodeHelp)}
+											</p>
+										</div>
 									)}
-									value={field.state.value ?? ""}
-									onChange={(e) => field.handleChange(e.target.value)}
-								/>
-							</div>
-						)}
-					</form.Field>
+								</form.Field>
+							)
+						}
+					</form.Subscribe>
 				</CardContent>
 			</Card>
 

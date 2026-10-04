@@ -17,8 +17,12 @@ export function FormFieldHeader({
 }: FormFieldHeaderProps) {
 	return (
 		<div className="grid justify-items-start gap-1">
-			<Label htmlFor={htmlFor} className={error ? "text-destructive" : ""}>
-				{label} {required ? "*" : ""}
+			<Label
+				htmlFor={htmlFor}
+				required={required}
+				className={error ? "text-destructive" : ""}
+			>
+				{label}
 			</Label>
 			{error ? (
 				<span

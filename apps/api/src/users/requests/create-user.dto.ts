@@ -46,11 +46,6 @@ export class CreateUserDto {
 	employeeCode?: string;
 
 	@IsOptional()
-	@IsString()
-	@MaxLength(20)
-	type?: "internal" | "external";
-
-	@IsOptional()
 	@IsInt()
 	@Min(1)
 	customerId?: number;
