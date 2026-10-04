@@ -1,4 +1,9 @@
-import { GoodsType } from "@ecommand/shared";
+import {
+	GoodsType,
+	OrderStatus,
+	RegistrationStatus,
+	Unit,
+} from "@ecommand/shared";
 import bcrypt from "bcryptjs";
 import * as dotenv from "dotenv";
 import { relations } from "drizzle/relations";
@@ -8,6 +13,8 @@ import {
 	customers,
 	goods,
 	importers,
+	orders,
+	orderWagons,
 	ports,
 	representatives,
 	shippingCompanies,
@@ -16,17 +23,43 @@ import {
 	userCustomers,
 	users,
 	vessels,
+	wagons,
+	wagonTracking,
 } from "drizzle/schema";
 import { and, eq, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { generateDocumentNumber } from "../../src/common/utils/document-number";
 
+type TrackingDemoWagon = {
+	number: string;
+	externalId: string;
+	status?: string;
+	latitude?: string;
+	longitude?: string;
+	reportedHoursAgo?: number;
+};
+
+type TrackingDemoScenario = {
+	remarks: string;
+	goodsId: number;
+	unitId: string;
+	statusId: string;
+	daysAgo: number;
+	wagons: TrackingDemoWagon[];
+};
+
 async function seed() {
 	dotenv.config();
+	const databaseUrl = process.env.DATABASE_URL;
+	if (!databaseUrl) {
+		console.error("DATABASE_URL is required to seed development fixtures");
+		process.exitCode = 1;
+		return;
+	}
 
 	const pool = new Pool({
-		connectionString: process.env.DATABASE_URL,
+		connectionString: databaseUrl,
 	});
 	const db = drizzle({ client: pool, relations: relations });
 
@@ -456,9 +489,16 @@ async function seed() {
 				.onConflictDoUpdate({
 					target: users.email,
 					set: {
+						password: userData.password,
+						lastName: userData.lastName,
+						firstName: userData.firstName,
 						employeeCode: userData.employeeCode,
 						type: userData.type,
 						roleId: role.id,
+						registrationStatus: RegistrationStatus.APPROVED,
+						isActive: true,
+						failedLoginAttempts: 0,
+						accountLockedUntil: null,
 						...(userData.roleName === "CLIENT_REPRESENTATIVE" && {
 							customerId: clientCustomer.id,
 						}),
@@ -483,10 +523,270 @@ async function seed() {
 			}
 		}
 
-		console.log("Dev fixtures and users seeded successfully");
+		const client = await db.query.users.findFirst({
+			where: { email: "client@oncf.ma" },
+			columns: { id: true },
+		});
+		const [demoGood, demoUnit, inProgressStatus] = await Promise.all([
+			db.query.goods.findFirst({ where: { name: GoodsType.CEREALS } }),
+			db.query.units.findFirst({
+				where: { name: { in: [Unit.TONNES, "TONNES"] } },
+			}),
+			db.query.orderStatus.findFirst({
+				where: { name: OrderStatus.IN_PROGRESS },
+			}),
+		]);
+		if (!client || !demoGood || !demoUnit || !inProgressStatus) {
+			throw new Error(
+				"Tracking demo requires the seeded client, cereals, tonnes, and IN_PROGRESS status",
+			);
+		}
+
+		const trackingDemoRemarks =
+			"LOCAL DEMO: synthetic wagon assignments and positions for tracking preview; not live GPS data.";
+		let demoOrder = await db.query.orders.findFirst({
+			where: { remarks: trackingDemoRemarks },
+			columns: { id: true },
+		});
+		if (!demoOrder) {
+			const [createdOrder] = await db
+				.insert(orders)
+				.values({
+					goodsId: demoGood.id,
+					customerId: clientCustomer.id,
+					createdByUserId: client.id,
+					statusId: inProgressStatus.id,
+					orderNumber: generateDocumentNumber("ORD"),
+					quantityDemanded: "20",
+					unitId: demoUnit.id,
+					orderDate: new Date().toISOString(),
+					remarks: trackingDemoRemarks,
+				})
+				.returning({ id: orders.id });
+			demoOrder = createdOrder;
+		}
+
+		const demoWagonRows = await db
+			.insert(wagons)
+			.values([
+				{
+					externalId: "LOCAL-DEMO-WAGON-001",
+					wagonNumber: "DEMO-WGN-001",
+					type: "Freight wagon",
+					capacity: "10.000",
+					isActive: true,
+				},
+				{
+					externalId: "LOCAL-DEMO-WAGON-002",
+					wagonNumber: "DEMO-WGN-002",
+					type: "Freight wagon",
+					capacity: "10.000",
+					isActive: true,
+				},
+			])
+			.onConflictDoUpdate({
+				target: wagons.wagonNumber,
+				set: { isActive: true },
+			})
+			.returning({ id: wagons.id, wagonNumber: wagons.wagonNumber });
+		const existingAssignments = await db.query.orderWagons.findMany({
+			where: { orderId: demoOrder.id },
+			columns: { wagonId: true },
+		});
+		for (const [index, wagon] of demoWagonRows.entries()) {
+			if (
+				!existingAssignments.some(
+					(assignment) => assignment.wagonId === wagon.id,
+				)
+			) {
+				await db.insert(orderWagons).values({
+					orderId: demoOrder.id,
+					wagonId: wagon.id,
+					quantityLoaded: "10",
+				});
+			}
+
+			const existingPosition = await db.query.wagonTracking.findFirst({
+				where: { wagonId: wagon.id },
+				columns: { id: true },
+			});
+			if (!existingPosition) {
+				await db.insert(wagonTracking).values({
+					wagonId: wagon.id,
+					latitude: index === 0 ? "34.2610" : "33.5731",
+					longitude: index === 0 ? "-6.5802" : "-7.5898",
+					status: index === 0 ? "In transit" : "At Casablanca freight yard",
+					recordedAt: new Date(
+						Date.now() - (1 - index) * 30 * 60_000,
+					).toISOString(),
+				});
+			}
+		}
+
+		const [containersGood, containerUnit, approvedStatus] = await Promise.all([
+			db.query.goods.findFirst({ where: { name: GoodsType.CONTAINERS_TC } }),
+			db.query.units.findFirst({ where: { name: Unit.TC20 } }),
+			db.query.orderStatus.findFirst({ where: { name: OrderStatus.APPROVED } }),
+		]);
+		if (!containersGood || !containerUnit || !approvedStatus) {
+			throw new Error(
+				"Tracking scenarios require Containers (TC), TC20, and APPROVED reference data",
+			);
+		}
+
+		const trackingScenarios: TrackingDemoScenario[] = [
+			{
+				remarks:
+					"LOCAL DEMO: containers moving from Tangier; synthetic position sample.",
+				goodsId: containersGood.id,
+				unitId: containerUnit.id,
+				statusId: approvedStatus.id,
+				daysAgo: 3,
+				wagons: [
+					{
+						number: "DEMO-WGN-101",
+						externalId: "LOCAL-DEMO-WAGON-101",
+						status: "At Tangier freight yard",
+						latitude: "35.7806",
+						longitude: "-5.8136",
+						reportedHoursAgo: 3,
+					},
+					{
+						number: "DEMO-WGN-102",
+						externalId: "LOCAL-DEMO-WAGON-102",
+						status: "In transit",
+						latitude: "34.2610",
+						longitude: "-6.5802",
+						reportedHoursAgo: 1,
+					},
+				],
+			},
+			{
+				remarks:
+					"LOCAL DEMO: long consist for tracking list scroll preview; synthetic positions.",
+				goodsId: demoGood.id,
+				unitId: demoUnit.id,
+				statusId: inProgressStatus.id,
+				daysAgo: 7,
+				wagons: Array.from({ length: 12 }, (_, index) => ({
+					number: `DEMO-WGN-${String(index + 201).padStart(3, "0")}`,
+					externalId: `LOCAL-DEMO-WAGON-${String(index + 201).padStart(3, "0")}`,
+					status:
+						index % 3 === 0
+							? "In transit"
+							: index % 3 === 1
+								? "At Kenitra freight yard"
+								: "Awaiting inspection",
+					latitude: index % 2 === 0 ? "34.2610" : "33.5731",
+					longitude: index % 2 === 0 ? "-6.5802" : "-7.5898",
+					reportedHoursAgo: index * 2 + 1,
+				})),
+			},
+			{
+				remarks:
+					"LOCAL DEMO: assigned wagon without a position report; tracking pending state.",
+				goodsId: demoGood.id,
+				unitId: demoUnit.id,
+				statusId: inProgressStatus.id,
+				daysAgo: 12,
+				wagons: [
+					{
+						number: "DEMO-WGN-301",
+						externalId: "LOCAL-DEMO-WAGON-301",
+					},
+				],
+			},
+		];
+
+		for (const scenario of trackingScenarios) {
+			let scenarioOrder = await db.query.orders.findFirst({
+				where: { remarks: scenario.remarks },
+				columns: { id: true },
+			});
+			if (!scenarioOrder) {
+				const [createdOrder] = await db
+					.insert(orders)
+					.values({
+						goodsId: scenario.goodsId,
+						customerId: clientCustomer.id,
+						createdByUserId: client.id,
+						statusId: scenario.statusId,
+						orderNumber: generateDocumentNumber("ORD"),
+						quantityDemanded: String(scenario.wagons.length * 10),
+						unitId: scenario.unitId,
+						orderDate: new Date(
+							Date.now() - scenario.daysAgo * 24 * 60 * 60_000,
+						).toISOString(),
+						remarks: scenario.remarks,
+					})
+					.returning({ id: orders.id });
+				scenarioOrder = createdOrder;
+			}
+
+			const scenarioWagons = await db
+				.insert(wagons)
+				.values(
+					scenario.wagons.map((wagon) => ({
+						externalId: wagon.externalId,
+						wagonNumber: wagon.number,
+						type: "Freight wagon",
+						capacity: "10.000",
+						isActive: true,
+					})),
+				)
+				.onConflictDoUpdate({
+					target: wagons.wagonNumber,
+					set: { isActive: true },
+				})
+				.returning({ id: wagons.id, wagonNumber: wagons.wagonNumber });
+			const scenarioAssignments = await db.query.orderWagons.findMany({
+				where: { orderId: scenarioOrder.id },
+				columns: { wagonId: true },
+			});
+
+			for (const [index, wagon] of scenarioWagons.entries()) {
+				if (
+					!scenarioAssignments.some(
+						(assignment) => assignment.wagonId === wagon.id,
+					)
+				) {
+					await db.insert(orderWagons).values({
+						orderId: scenarioOrder.id,
+						wagonId: wagon.id,
+						quantityLoaded: "10",
+					});
+				}
+
+				const wagonScenario = scenario.wagons.find(
+					(entry) => entry.number === wagon.wagonNumber,
+				);
+				if (!wagonScenario?.latitude || !wagonScenario.longitude) continue;
+
+				const existingPosition = await db.query.wagonTracking.findFirst({
+					where: { wagonId: wagon.id },
+					columns: { id: true },
+				});
+				if (!existingPosition) {
+					await db.insert(wagonTracking).values({
+						wagonId: wagon.id,
+						latitude: wagonScenario.latitude,
+						longitude: wagonScenario.longitude,
+						status: wagonScenario.status,
+						recordedAt: new Date(
+							Date.now() -
+								(wagonScenario.reportedHoursAgo ?? index) * 60 * 60_000,
+						).toISOString(),
+					});
+				}
+			}
+		}
+
+		console.log(
+			"Dev fixtures and users seeded successfully (tracking samples are synthetic, not live GPS data)",
+		);
 	} catch (error) {
 		console.error("Error seeding dev fixtures:", error);
-		process.exit(1);
+		process.exitCode = 1;
 	} finally {
 		await pool.end();
 	}

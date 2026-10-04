@@ -28,6 +28,7 @@ describe("default role permission matrix", () => {
 				Permission.REPORTS_ACTION_EXPORT,
 				Permission.PROFILE_UPDATE,
 				Permission.PROGRAMS_READ,
+				Permission.TRACKING_READ,
 			],
 		],
 		[
@@ -79,6 +80,7 @@ describe("default role permission matrix", () => {
 				Permission.USERS_MANAGE,
 				Permission.USERS_MANAGE_OTHER,
 				Permission.ROLES_MANAGE,
+				Permission.INTEGRATIONS_MANAGE,
 				Permission.REPORTS_READ,
 				Permission.REPORTS_MANAGE_OTHER,
 				Permission.REPORTS_ACTION_EXPORT,
@@ -116,6 +118,9 @@ describe("default role permission matrix", () => {
 	});
 
 	it("limits client representatives to order submission and client-facing work", () => {
+		expect(grants(Role.CLIENT_REPRESENTATIVE, Permission.TRACKING_READ)).toBe(
+			true,
+		);
 		expect(grants(Role.CLIENT_REPRESENTATIVE, Permission.ORDERS_CREATE)).toBe(
 			true,
 		);

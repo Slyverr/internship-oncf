@@ -14,9 +14,12 @@ import {
 	forecastPrograms,
 	goods,
 	orders,
+	orderWagons,
 	passwordResetTokens,
 	userCustomers,
 	users,
+	wagons,
+	wagonTracking,
 } from "drizzle/schema";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
@@ -263,6 +266,28 @@ async function seed() {
 		if (!id) throw new Error(`Missing E2E order ${orderNumber}`);
 		return id;
 	};
+
+	const [trackingWagon] = await db
+		.insert(wagons)
+		.values({
+			externalId: "E2E-TRACKING-WAGON",
+			wagonNumber: "E2E-WGN-001",
+			type: "Freight wagon",
+			capacity: "10.000",
+		})
+		.returning({ id: wagons.id });
+	await db.insert(orderWagons).values({
+		orderId: orderId(E2E_ORDERS.assignedB),
+		wagonId: trackingWagon.id,
+		quantityLoaded: "10",
+	});
+	await db.insert(wagonTracking).values({
+		wagonId: trackingWagon.id,
+		latitude: "34.2610",
+		longitude: "-6.5802",
+		status: "In transit",
+		recordedAt: "2026-10-04T10:00:00.000Z",
+	});
 
 	await db.insert(forecastPrograms).values([
 		{

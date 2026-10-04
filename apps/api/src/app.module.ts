@@ -5,6 +5,7 @@ import { CatalogModule } from "@/catalog/catalog.module";
 import { ClaimsModule } from "@/claims/claims.module";
 import { CustomersModule } from "@/customers/customers.module";
 import { DrizzleModule } from "@/database/drizzle.module";
+import { IntegrationCredentialsModule } from "@/integration-credentials/integration-credentials.module";
 import { NotificationsModule } from "@/notifications/notifications.module";
 import { OrdersModule } from "@/orders/orders.module";
 import { ProfileModule } from "@/profile/profile.module";
@@ -31,6 +32,7 @@ import { AppController } from "./app.controller";
 		CatalogModule,
 		RolesModule,
 		TrackingModule,
+		IntegrationCredentialsModule,
 	],
 	controllers: [AppController],
 })

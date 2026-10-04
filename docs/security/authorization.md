@@ -50,7 +50,7 @@ References: [OWASP Authorization Cheat Sheet](https://cheatsheetseries.owasp.org
 | Claims | — | Create/read/update assigned-customer claims; status and lifecycle actions, including closing resolved claims | Create/read/comment on own claims; cannot close or otherwise transition claims |
 | Customers | Select active portfolio choices in user forms | Read/update | — |
 | Catalog | Read | Read | Read |
-| Tracking | — | Read | — |
+| Tracking | — | Read | Read order tracking for assigned customer orders |
 | Reports | Read and export across all portfolios (`reports:manage:other`) | Read and export across the assigned-customer portfolio | Read and export orders for the assigned customer when present, otherwise own-created orders |
 | Profile | Update | Update | Update |
 
@@ -73,9 +73,10 @@ The administrator grant follows the current report-backed boundary: manage accou
 | Public client signup | Public `/auth/register` | `/signup` registration form | Submitted customer code and ICE must match an active local customer; new account is inactive and pending admin review. |
 | Users and registration review | users:read/create/update/delete | Sidebar Users; forms, request status, approve/reject actions | Admin-only by default. Only pending client-representative requests can be reviewed; pending and rejected accounts cannot sign in. Users can filter by any built-in or custom access profile, and the selected profile remains in query-string state. |
 | Catalog | catalog:read/manage:* | Admin: `/dashboard/catalog`; order and claim selectors; catalog API | Admin receives separate `catalog:read` and `catalog:manage` grants; manage inherits catalog-specific grants. The admin screen uses a responsive left-side category rail and supports add, rename, archive, and restore. Archiving a goods type is blocked while it has active goods; new or restored goods must reference an active type. Seeded catalog rows remain stable while admin-managed names and active states are preserved across reference seeding. Agents and clients receive catalog read only. |
-| Tracking | tracking:read/update | Tracking API surfaces | Commercial agents read; no default role has tracking permissions. |
+| Tracking | tracking:read/manage/update | Sidebar Tracking; order lookup and latest wagon reports | Agents are limited to their customer portfolio; clients are limited to their linked customer through the order tracking endpoint. Direct train/wagon lookup requires `tracking:manage`. |
 | Reports | reports:read; reports:manage:other; reports:action:export | Sidebar Reports and order report | `reports:manage:other` controls full data scope; export permission controls CSV export. Browser print/save PDF uses the data returned by the API. |
 | Profile and notifications | profile:update; authenticated ownership routes | Settings/profile and notifications | Notifications are scoped to the authenticated user. |
+| Integrations | `integrations:manage` | Admin Integrations page; manage integration credentials | Reserved to the seeded Admin persona. Issued credentials are currently limited to the tracking update endpoint; they are not human accounts and do not receive user/customer ownership scope. |
 
 ## Enforcement notes
 

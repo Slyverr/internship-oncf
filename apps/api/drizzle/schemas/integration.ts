@@ -7,6 +7,7 @@ import {
 	foreignKey,
 	index,
 	integer,
+	jsonb,
 	pgTable,
 	text,
 	timestamp,
@@ -16,6 +17,35 @@ import {
 } from "drizzle-orm/pg-core";
 import { users } from "./users";
 
+export const integrationCredentials = pgTable(
+	"integration_credentials",
+	{
+		id: bigserial("id", { mode: "number" }).primaryKey().notNull(),
+		name: varchar("name", { length: 100 }).notNull(),
+		keyId: varchar("key_id", { length: 24 }).notNull(),
+		secretHash: varchar("secret_hash", { length: 64 }).notNull(),
+		permissions: jsonb("permissions").$type<string[]>().default([]).notNull(),
+		createdByUserId: bigint("created_by_user_id", {
+			mode: "number",
+		}).references(() => users.id, { onDelete: "set null" }),
+		createdAt: timestamp("created_at", { mode: "string" })
+			.default(sql`CURRENT_TIMESTAMP`)
+			.notNull(),
+		lastUsedAt: timestamp("last_used_at", { mode: "string" }),
+		rotatedAt: timestamp("rotated_at", { mode: "string" }),
+		rotatedByUserId: bigint("rotated_by_user_id", {
+			mode: "number",
+		}).references(() => users.id, { onDelete: "set null" }),
+		revokedAt: timestamp("revoked_at", { mode: "string" }),
+		revokedByUserId: bigint("revoked_by_user_id", {
+			mode: "number",
+		}).references(() => users.id, { onDelete: "set null" }),
+	},
+	(table) => [
+		unique("integration_credentials_key_id_key").on(table.keyId),
+		index("idx_integration_credentials_active").on(table.revokedAt),
+	],
+);
 export const dtmRequestTypes = pgTable(
 	"dtm_request_types",
 	{

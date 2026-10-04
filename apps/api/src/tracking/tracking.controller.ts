@@ -57,14 +57,14 @@ export class TrackingController {
 	) {}
 
 	@Get("wagon/:wagonNumber")
-	@RequireAny(Permission.TRACKING_READ)
+	@RequireAny(Permission.TRACKING_MANAGE)
 	@TrackWagonResponse()
 	async trackWagon(@Param("wagonNumber") wagonNumber: string) {
 		return this.trackingService.trackWagon(wagonNumber);
 	}
 
 	@Get("train/:trainNumber")
-	@RequireAny(Permission.TRACKING_READ)
+	@RequireAny(Permission.TRACKING_MANAGE)
 	@TrackTrainResponse()
 	async trackTrain(@Param("trainNumber") trainNumber: string) {
 		return this.trackingService.trackTrain(trainNumber);

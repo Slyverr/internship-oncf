@@ -197,6 +197,7 @@ export type ApiErrorDetailsDtoFieldsItem = typeof ApiErrorDetailsDtoFieldsItem[k
 
 export const ApiErrorDetailsDtoFieldsItem = {
   ARRAY_MAX_SIZE: 'ARRAY_MAX_SIZE',
+  ARRAY_NOT_EMPTY: 'ARRAY_NOT_EMPTY',
   ARRAY_UNIQUE: 'ARRAY_UNIQUE',
   IS_ARRAY: 'IS_ARRAY',
   IS_BOOLEAN: 'IS_BOOLEAN',
@@ -2235,6 +2236,8 @@ endDate?: string;
 search?: string;
 sortBy?: string;
 sortOrder?: OrdersControllerFindAllSortOrder;
+/** Temporary until the generated client is refreshed from the updated API contract. */
+hasAssignedWagons?: boolean;
 };
 
 export type OrdersControllerFindAllStatus = typeof OrdersControllerFindAllStatus[keyof typeof OrdersControllerFindAllStatus];

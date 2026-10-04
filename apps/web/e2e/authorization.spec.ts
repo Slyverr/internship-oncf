@@ -12,6 +12,7 @@ import {
 	verifyAgentDashboard,
 	verifyAgentNavigation,
 	verifyAgentOperationalCreation,
+	verifyAgentTrackingWorkspace,
 	verifyClientAuthorization,
 	verifyClientDashboard,
 	verifyClientOrderSubmission,
@@ -79,6 +80,12 @@ test("client can submit an order and print its details to PDF", async ({
 	page,
 }) => {
 	await verifyClientOrderSubmission(page);
+});
+
+test("agent can search scoped orders and view their latest tracking report", async ({
+	page,
+}) => {
+	await verifyAgentTrackingWorkspace(page);
 });
 
 test("client sees own operational routes while user administration stays denied", async ({

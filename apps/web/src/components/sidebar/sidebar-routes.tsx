@@ -7,6 +7,8 @@ import {
 	ChartNoAxesCombinedIcon,
 	DatabaseIcon,
 	HomeIcon,
+	KeyRoundIcon,
+	MapPinIcon,
 	PackageIcon,
 	ShieldCheckIcon,
 	UsersIcon,
@@ -44,6 +46,13 @@ export const sidebarRoutes: SidebarRoute[] = [
 		permission: Permission.PROGRAMS_READ,
 	},
 	{
+		titleKey: Messages.navigation.tracking,
+		url: "/dashboard/tracking",
+		icon: MapPinIcon,
+		exact: false,
+		anyPermissionGroups: [[Permission.TRACKING_READ, Permission.ORDERS_READ]],
+	},
+	{
 		titleKey: Messages.navigation.reports,
 		url: "/dashboard/reports",
 		icon: ChartNoAxesCombinedIcon,
@@ -77,6 +86,13 @@ export const sidebarRoutes: SidebarRoute[] = [
 		icon: ShieldCheckIcon,
 		exact: false,
 		permission: Permission.ROLES_MANAGE,
+	},
+	{
+		titleKey: Messages.navigation.integrations,
+		url: "/dashboard/integrations",
+		icon: KeyRoundIcon,
+		exact: false,
+		permission: Permission.INTEGRATIONS_MANAGE,
 	},
 	{
 		titleKey: Messages.navigation.referenceData,

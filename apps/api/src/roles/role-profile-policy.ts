@@ -13,6 +13,7 @@ export const CUSTOM_ROLE_PERSONAS = [
 
 const RESERVED_CUSTOM_ROLE_PERMISSIONS = new Set<Permission>([
 	Permission.ROLES_MANAGE,
+	Permission.INTEGRATIONS_MANAGE,
 	Permission.PERMISSIONS_MANAGE,
 ]);
 

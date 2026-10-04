@@ -164,6 +164,8 @@ export function translateApiResponse(
 const apiValidationRuleMessages: Record<ApiValidationRuleCode, MessageKey> = {
 	[API_VALIDATION_RULE_CODES.ARRAY_MAX_SIZE]:
 		Messages.apiError.validationRules.arrayMaxSize,
+	[API_VALIDATION_RULE_CODES.ARRAY_NOT_EMPTY]:
+		Messages.apiError.validationRules.arrayNotEmpty,
 	[API_VALIDATION_RULE_CODES.ARRAY_UNIQUE]:
 		Messages.apiError.validationRules.arrayUnique,
 	[API_VALIDATION_RULE_CODES.IS_ARRAY]:

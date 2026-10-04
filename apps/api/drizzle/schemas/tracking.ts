@@ -13,6 +13,7 @@ import {
 	varchar,
 } from "drizzle-orm/pg-core";
 import { forecastPrograms } from "./forecast-programs";
+import { integrationCredentials } from "./integration";
 import { orders } from "./orders";
 import { stations } from "./reference-data";
 
@@ -145,6 +146,10 @@ export const wagonTracking = pgTable(
 		latitude: numeric("latitude", { precision: 10, scale: 8 }),
 		longitude: numeric("longitude", { precision: 11, scale: 8 }),
 		status: varchar("status", { length: 50 }),
+		source: varchar("source", { length: 30 }).default("MANUAL").notNull(),
+		integrationCredentialId: bigint("integration_credential_id", {
+			mode: "number",
+		}),
 		recordedAt: timestamp("recorded_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
 			.notNull(),
@@ -155,6 +160,11 @@ export const wagonTracking = pgTable(
 			foreignColumns: [wagons.id],
 			name: "wagon_tracking_wagon_id_fkey",
 		}),
+		foreignKey({
+			columns: [table.integrationCredentialId],
+			foreignColumns: [integrationCredentials.id],
+			name: "wagon_tracking_integration_credential_id_fkey",
+		}).onDelete("set null"),
 		index("idx_wagon_tracking_wagon").on(table.wagonId),
 		index("idx_wagon_tracking_recorded").on(table.recordedAt),
 		index("idx_wagon_tracking_status").on(table.status),

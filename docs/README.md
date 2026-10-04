@@ -10,6 +10,7 @@ Use these documents as the maintained guide to the repository:
 - [Workflow verification](project/workflows.md) — role-based live checks, SDF mismatches, QA data, and prioritized continuation plan.
 - [Agent progress](agent-progress.md) — milestone-level continuation journal and prioritized remaining work.
 - [Authorization matrix](security/authorization.md) — role grants, API permissions, ownership scope, and web visibility.
+- [Integration credentials](development/integration-credentials.md) — machine credentials, supported scope, and local setup.
 - [UI/UX review](interface/review.md) — current review findings and screenshot evidence.
 - [UI/UX checklist](interface/checklist.md) — route-level visual review scope, requested improvements, and remaining work.
 

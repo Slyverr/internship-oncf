@@ -12,6 +12,8 @@ ECommand is ONCF's freight operations workspace. Customers submit transport orde
 
 **Integration boundary:** forecast-program workflows call the stable DTM gateway exported by the API's DTM module. `DTM_MODE=simulator` selects a local adapter that records a clearly labeled mock request and applies a delayed acknowledgement; unset or other values select a no-op adapter. No adapter currently contacts ONCF. Replacing the simulator with a real DTM adapter should only require configuring the DTM module provider, while preserving the program workflow. The real adapter still needs the ONCF endpoint, authentication, payload, acknowledgement, and retry contract. Password recovery uses SMTP only when configured; otherwise development messages are written to a local mailbox.
 
+Admins can also create service credentials for a future tracking feed. These credentials are hashed at rest, shown only on creation or rotation, and limited to submitting wagon positions. This is an inbound integration scaffold, not a live ONCF connection; see [integration credential setup](docs/development/integration-credentials.md).
+
 For local simulation, set `DTM_MODE=simulator`, `DTM_SIMULATOR_DELAY_MS` (default `2000`), and `DTM_SIMULATOR_RESULT` (`ACCEPTED` or `REJECTED`) in `apps/api/.env`. The delayed response is held in process memory, so restarting the API cancels outstanding simulator responses.
 
 ## Stack
@@ -67,6 +69,8 @@ The repository implementation is authoritative. The internship reference report 
    ```
 
    Review Drizzle's proposed schema changes before accepting them. Migrations are intentionally deferred while the domain model is still being refined; use `db:push` only with a disposable local database.
+   The development seed adds clearly marked local tracking samples with varied goods, statuses, and dates. They include a multi-wagon order, a 12-wagon consist for scrollbar review, and an assigned wagon without a position report. All coordinates and reports are synthetic preview data, not live ONCF data.
+   The local seed accounts are `admin@oncf.ma`, `client@oncf.ma`, and `agent@oncf.ma`; all use `password123` in a development database only.
 
 5. Start the API and web app from the root:
 

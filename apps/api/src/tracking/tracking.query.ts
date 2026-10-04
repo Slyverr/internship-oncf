@@ -135,6 +135,13 @@ export class TrackingQuery {
 		});
 	}
 
+	async findWagonIdByNumber(wagonNumber: string) {
+		return this.drizzle.db.query.wagons.findFirst({
+			where: { wagonNumber },
+			columns: { id: true },
+		});
+	}
+
 	async createWagonTracking(values: WagonTrackingInsert) {
 		const [position] = await withDbErrorHandling(
 			() => this.drizzle.db.insert(wagonTracking).values(values).returning(),

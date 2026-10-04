@@ -12,6 +12,7 @@ import {
 	verifyAgentDashboard,
 	verifyAgentNavigation,
 	verifyAgentOperationalCreation,
+	verifyAgentTrackingWorkspace,
 	verifyClientAuthorization,
 	verifyClientDashboard,
 	verifyClientOrderSubmission,
@@ -39,6 +40,10 @@ const workflows: [string, (page: Page) => Promise<void>][] = [
 	["agent dashboard shows scoped operational insights", verifyAgentDashboard],
 	["agent scoped claim and program creation", verifyAgentOperationalCreation],
 	["client order submission", verifyClientOrderSubmission],
+	[
+		"agent order tracking search and latest position",
+		verifyAgentTrackingWorkspace,
+	],
 	[
 		"client dashboard hides management and program-creation actions",
 		verifyClientDashboard,

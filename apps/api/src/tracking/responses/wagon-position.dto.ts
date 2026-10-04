@@ -9,5 +9,7 @@ export class WagonPositionDto implements WagonPosition {
 	latitude: string | null;
 	longitude: string | null;
 	status: string | null;
+	source: string;
+	integrationCredentialId: number | null;
 	recordedAt: string;
 }

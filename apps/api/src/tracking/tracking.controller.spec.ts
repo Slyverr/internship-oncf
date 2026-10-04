@@ -10,13 +10,13 @@ const orderNumber = "ORD-ABCDEFGHIJ";
 const endpoints = [
 	{
 		action: "trackWagon",
-		permission: Permission.TRACKING_READ,
+		permission: Permission.TRACKING_MANAGE,
 		method: "trackWagon",
 		args: ["W-1"],
 	},
 	{
 		action: "trackTrain",
-		permission: Permission.TRACKING_READ,
+		permission: Permission.TRACKING_MANAGE,
 		method: "trackTrain",
 		args: ["T-1"],
 	},

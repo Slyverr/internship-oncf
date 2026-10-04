@@ -1,5 +1,10 @@
 import { Permission } from "../enums/auth.enum";
 
+/** Permissions currently supported by service credentials and integration routes. */
+export const INTEGRATION_CREDENTIAL_PERMISSIONS = [
+	Permission.TRACKING_UPDATE,
+] as const;
+
 export type PermissionDefinition = {
 	parent?: Permission;
 	assignable?: boolean;
@@ -186,6 +191,9 @@ export const PERMISSION_DEFINITIONS: Record<Permission, PermissionDefinition> =
 		},
 
 		[Permission.ROLES_MANAGE]: {},
+		[Permission.INTEGRATIONS_MANAGE]: {
+			assignable: false,
+		},
 		[Permission.PERMISSIONS_MANAGE]: {},
 
 		[Permission.LOGS_READ]: {

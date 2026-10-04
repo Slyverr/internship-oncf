@@ -46,6 +46,32 @@ export class TrackingService {
 			latitude: String(dto.latitude),
 			longitude: String(dto.longitude),
 			status: dto.status ?? "IN_TRANSIT",
+			...(dto.recordedAt && { recordedAt: dto.recordedAt }),
+		});
+	}
+
+	async updateWagonPositionByNumber(
+		wagonNumber: string,
+		dto: UpdateWagonPositionDto,
+		integrationCredentialId?: number,
+	) {
+		const wagon = await this.trackingQuery.findWagonIdByNumber(wagonNumber);
+		if (!wagon) {
+			throw new NotFoundException({
+				code: API_ERROR_CODES.TRACKED_WAGON_NOT_FOUND,
+			});
+		}
+		if (integrationCredentialId === undefined) {
+			return this.updateWagonPosition(wagon.id, dto);
+		}
+		return this.trackingQuery.createWagonTracking({
+			wagonId: wagon.id,
+			latitude: String(dto.latitude),
+			longitude: String(dto.longitude),
+			status: dto.status ?? "IN_TRANSIT",
+			source: "INTEGRATION",
+			integrationCredentialId,
+			...(dto.recordedAt && { recordedAt: dto.recordedAt }),
 		});
 	}
 

@@ -195,12 +195,14 @@ const expectedSidebarRoutes: Record<Role, string[]> = {
 		"/dashboard/reports",
 		"/dashboard/users",
 		"/dashboard/roles",
+		"/dashboard/integrations",
 		"/dashboard/catalog",
 	],
 	[Role.AGENT_COMMERCIAL]: [
 		"/dashboard",
 		"/dashboard/orders",
 		"/dashboard/programs",
+		"/dashboard/tracking",
 		"/dashboard/reports",
 		"/dashboard/claims",
 		"/dashboard/customers",
@@ -209,6 +211,7 @@ const expectedSidebarRoutes: Record<Role, string[]> = {
 		"/dashboard",
 		"/dashboard/orders",
 		"/dashboard/programs",
+		"/dashboard/tracking",
 		"/dashboard/reports",
 		"/dashboard/claims",
 	],
@@ -231,6 +234,20 @@ assert.deepEqual(
 	).map((route) => route.url),
 	["/dashboard", "/dashboard/claims"],
 	"custom permission sets do not gain catalog management from catalog read access",
+);
+assert.equal(
+	getVisibleSidebarRoutes(
+		(permission) => permission === Permission.TRACKING_READ,
+	).some((route) => route.url === "/dashboard/tracking"),
+	false,
+	"tracking navigation also requires order-read permission for its scoped order picker",
+);
+assert.equal(
+	getVisibleSidebarRoutes((permission) =>
+		[Permission.TRACKING_READ, Permission.ORDERS_READ].includes(permission),
+	).some((route) => route.url === "/dashboard/tracking"),
+	true,
+	"users with both tracking and order-read permissions can open tracking",
 );
 assert.deepEqual(
 	getVisibleSidebarRoutes((permission) =>

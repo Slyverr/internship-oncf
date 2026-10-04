@@ -13,12 +13,14 @@ type TableActionButtonProps = {
 	icon: LucideIcon;
 	label: string;
 	onClick: () => void;
+	disabled?: boolean;
 };
 
 export function TableActionButton({
 	icon: Icon,
 	label,
 	onClick,
+	disabled = false,
 }: TableActionButtonProps) {
 	return (
 		<TooltipProvider>
@@ -30,6 +32,7 @@ export function TableActionButton({
 							variant="ghost"
 							size="icon-sm"
 							aria-label={label}
+							disabled={disabled}
 							onClick={onClick}
 						>
 							<Icon aria-hidden="true" />

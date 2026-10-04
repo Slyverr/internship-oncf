@@ -104,6 +104,7 @@ export enum Permission {
 	REPORTS_ACTION_EXPORT = "reports:action:export",
 
 	ROLES_MANAGE = "roles:manage",
+	INTEGRATIONS_MANAGE = "integrations:manage",
 	PERMISSIONS_MANAGE = "permissions:manage",
 
 	LOGS_READ = "logs:read",

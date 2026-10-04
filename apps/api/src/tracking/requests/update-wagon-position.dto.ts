@@ -1,5 +1,6 @@
 import { Type } from "class-transformer";
 import {
+	IsDateString,
 	IsNotEmpty,
 	IsNumber,
 	IsOptional,
@@ -26,4 +27,8 @@ export class UpdateWagonPositionDto {
 	@IsOptional()
 	@IsString()
 	status?: string;
+
+	@IsOptional()
+	@IsDateString()
+	recordedAt?: string;
 }

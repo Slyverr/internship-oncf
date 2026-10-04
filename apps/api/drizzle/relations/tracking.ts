@@ -78,6 +78,10 @@ const wagonTrackingPart = defineRelationsPart(schema, (r) => ({
 			from: r.wagonTracking.wagonId,
 			to: r.wagons.id,
 		}),
+		integrationCredential: r.one.integrationCredentials({
+			from: r.wagonTracking.integrationCredentialId,
+			to: r.integrationCredentials.id,
+		}),
 	},
 }));
 

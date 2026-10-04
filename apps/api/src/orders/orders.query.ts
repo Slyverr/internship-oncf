@@ -13,6 +13,7 @@ import {
 	QueryRelations,
 } from "@/database/drizzle.types";
 import { withDbErrorHandling } from "@/database/drizzle.util";
+import { DTM_REQUEST_TYPES } from "@/database/reference-data";
 import type { NotificationInsert } from "@/notifications/notifications.types";
 import type { UserId } from "@/users/users.types";
 import type { OrderId, OrderInsert, OrderUpdate } from "./orders.types";
@@ -21,12 +22,56 @@ import { OrderListQueryDto } from "./requests/order-list-query.dto";
 type OrdersColumns = QueryColumns<"orders">;
 type OrdersRelations = QueryRelations<"orders">;
 
+function getDtmResponseStatus(payload: string | null | undefined) {
+	if (!payload) return null;
+	try {
+		const parsed: unknown = JSON.parse(payload);
+		if (
+			typeof parsed !== "object" ||
+			parsed === null ||
+			!("status" in parsed)
+		) {
+			return null;
+		}
+		const status = parsed.status;
+		return typeof status === "string" ? status : null;
+	} catch {
+		return null;
+	}
+}
+
 const orderSortColumns = [
 	"orderNumber",
 	"quantityDemanded",
 	"orderDate",
 	"createdAt",
 ] as const;
+
+function getSearchDateRange(search: string) {
+	const match = /^(\d{4})(?:-(\d{2})(?:-(\d{2}))?)?$/.exec(search.trim());
+	if (!match) return null;
+
+	const year = Number(match[1]);
+	const month = match[2] ? Number(match[2]) : 1;
+	const day = match[3] ? Number(match[3]) : 1;
+	if (year < 1000 || year > 9998 || month < 1 || month > 12) return null;
+
+	const start = new Date(Date.UTC(year, month - 1, day));
+	if (
+		start.getUTCFullYear() !== year ||
+		start.getUTCMonth() !== month - 1 ||
+		start.getUTCDate() !== day
+	) {
+		return null;
+	}
+
+	const end = match[3]
+		? new Date(Date.UTC(year, month - 1, day + 1))
+		: match[2]
+			? new Date(Date.UTC(year, month, 1))
+			: new Date(Date.UTC(year + 1, 0, 1));
+	return { start: start.toISOString(), end: end.toISOString() };
+}
 
 const orderListColumns = {
 	id: true,
@@ -123,11 +168,13 @@ export class OrdersQuery {
 			movementTypeId,
 			startDate,
 			endDate,
+			hasAssignedWagons,
 			page,
 			limit,
 			sortBy = "createdAt",
 			sortOrder = "desc",
 		} = query;
+		const searchDateRange = search ? getSearchDateRange(search) : null;
 		const customerScope = getCustomerScope(user);
 		const managesOther = hasOnePermission(user, Permission.ORDERS_MANAGE_OTHER);
 		const scopedCustomerIds =
@@ -180,6 +227,8 @@ export class OrdersQuery {
 						}
 					: {}),
 
+				...(hasAssignedWagons ? { orderWagons: true } : {}),
+
 				...(search
 					? {
 							OR: [
@@ -201,12 +250,54 @@ export class OrdersQuery {
 									},
 								},
 								{
+									customer: {
+										customerCode: {
+											ilike: `%${search}%`,
+										},
+									},
+								},
+								{
+									good: {
+										name: {
+											ilike: `%${search}%`,
+										},
+									},
+								},
+								{
 									orderStatus: {
 										name: {
 											ilike: `%${search}%`,
 										},
 									},
 								},
+								...(searchDateRange
+									? [
+											{
+												orderDate: {
+													gte: searchDateRange.start,
+													lt: searchDateRange.end,
+												},
+											},
+											{
+												startDate: {
+													gte: searchDateRange.start,
+													lt: searchDateRange.end,
+												},
+											},
+											{
+												endDate: {
+													gte: searchDateRange.start,
+													lt: searchDateRange.end,
+												},
+											},
+											{
+												createdAt: {
+													gte: searchDateRange.start,
+													lt: searchDateRange.end,
+												},
+											},
+										]
+									: []),
 							],
 						}
 					: {}),
@@ -225,10 +316,32 @@ export class OrdersQuery {
 	}
 
 	async findOrder(id: OrderId) {
-		return this.drizzle.db.query.orders.findFirst({
+		const order = await this.drizzle.db.query.orders.findFirst({
 			where: { id },
 			with: orderDetailRelations,
 		});
+		if (!order) return undefined;
+
+		const dtmRequest = await this.drizzle.db.query.dtmIntegrationLog.findFirst({
+			where: {
+				relatedEntityType: "orders",
+				relatedEntityId: id,
+				requestTypeId: DTM_REQUEST_TYPES.SEND_ORDER.id,
+			},
+			columns: {
+				status: true,
+				responsePayload: true,
+				createdAt: true,
+			},
+			orderBy: { createdAt: "desc", id: "desc" },
+		});
+
+		return {
+			...order,
+			dtmRequestStatus: dtmRequest?.status ?? null,
+			dtmResponseStatus: getDtmResponseStatus(dtmRequest?.responsePayload),
+			dtmSubmittedAt: dtmRequest?.createdAt ?? null,
+		};
 	}
 
 	async findOrderIdByNumber(orderNumber: string) {

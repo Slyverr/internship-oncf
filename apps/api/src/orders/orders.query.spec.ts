@@ -67,6 +67,63 @@ describe("OrdersQuery authorization scope", () => {
 		);
 	});
 
+	it("searches by customer code, goods, and ISO calendar date ranges", async () => {
+		const user = createUser(17);
+		await query.findOrders(user, {
+			page: 1,
+			limit: 20,
+			search: "2026-10-04",
+		} as never);
+
+		const searchTerms = findMany.mock.calls[0][0].where.OR;
+		expect(searchTerms).toEqual(
+			expect.arrayContaining([
+				{ customer: { customerCode: { ilike: "%2026-10-04%" } } },
+				{ good: { name: { ilike: "%2026-10-04%" } } },
+				{
+					orderDate: {
+						gte: "2026-10-04T00:00:00.000Z",
+						lt: "2026-10-05T00:00:00.000Z",
+					},
+				},
+				{
+					createdAt: {
+						gte: "2026-10-04T00:00:00.000Z",
+						lt: "2026-10-05T00:00:00.000Z",
+					},
+				},
+			]),
+		);
+	});
+
+	it("can limit order searches to orders with assigned wagons", async () => {
+		const user = createUser(17);
+		await query.findOrders(user, {
+			page: 1,
+			limit: 20,
+			hasAssignedWagons: true,
+		} as never);
+
+		expect(findMany.mock.calls[0][0].where).toMatchObject({
+			createdByUserId: user.id,
+			orderWagons: true,
+		});
+	});
+
+	it("does not treat an invalid ISO date as a date search", async () => {
+		const user = createUser(17);
+		await query.findOrders(user, {
+			page: 1,
+			limit: 20,
+			search: "2026-02-30",
+		} as never);
+
+		const searchTerms = findMany.mock.calls[0][0].where.OR;
+		expect(searchTerms).not.toContainEqual(
+			expect.objectContaining({ orderDate: expect.anything() }),
+		);
+	});
+
 	it("applies every explicit filter to a manage-other order list", async () => {
 		const user = createUser(17, [Permission.ORDERS_MANAGE_OTHER]);
 		await query.findOrders(user, {
@@ -237,11 +294,20 @@ describe("OrdersQuery authorization scope", () => {
 
 describe("OrdersQuery lookup methods", () => {
 	const findFirst = jest.fn();
+	const findLatestDtmRequest = jest.fn();
 	const query = new OrdersQuery({
-		db: { query: { orders: { findFirst } } },
+		db: {
+			query: {
+				orders: { findFirst },
+				dtmIntegrationLog: { findFirst: findLatestDtmRequest },
+			},
+		},
 	} as never);
 
-	beforeEach(() => findFirst.mockReset().mockResolvedValue({ id: 1 }));
+	beforeEach(() => {
+		findFirst.mockReset().mockResolvedValue({ id: 1 });
+		findLatestDtmRequest.mockReset().mockResolvedValue(undefined);
+	});
 
 	it("loads order details with related workflow and active attachment data", async () => {
 		await query.findOrder(12 as never);
@@ -260,6 +326,37 @@ describe("OrdersQuery lookup methods", () => {
 				}),
 			}),
 		);
+		expect(findLatestDtmRequest).toHaveBeenCalledWith(
+			expect.objectContaining({
+				where: expect.objectContaining({
+					relatedEntityType: "orders",
+					relatedEntityId: 12,
+				}),
+				orderBy: { createdAt: "desc", id: "desc" },
+			}),
+		);
+	});
+
+	it("returns the latest simulator response fields with order details", async () => {
+		findLatestDtmRequest.mockResolvedValue({
+			status: "SUCCESS",
+			responsePayload: JSON.stringify({ status: "ACCEPTED" }),
+			createdAt: "2026-10-04T12:00:00.000Z",
+		});
+
+		await expect(query.findOrder(12 as never)).resolves.toMatchObject({
+			dtmRequestStatus: "SUCCESS",
+			dtmResponseStatus: "ACCEPTED",
+			dtmSubmittedAt: "2026-10-04T12:00:00.000Z",
+		});
+	});
+
+	it("returns null DTM status when an order has not been submitted", async () => {
+		await expect(query.findOrder(12 as never)).resolves.toMatchObject({
+			dtmRequestStatus: null,
+			dtmResponseStatus: null,
+			dtmSubmittedAt: null,
+		});
 	});
 
 	it.each([

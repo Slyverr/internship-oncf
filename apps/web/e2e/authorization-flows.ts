@@ -22,6 +22,7 @@ const navigation = {
 	catalog: translate(Messages.navigation.referenceData),
 	customers: translate(Messages.navigation.customers),
 	orders: translate(Messages.navigation.orders),
+	tracking: translate(Messages.navigation.tracking),
 	programs: translate(Messages.navigation.programs),
 	reports: translate(Messages.navigation.reports),
 	roles: translate(Messages.navigation.roleProfiles),
@@ -366,6 +367,7 @@ export async function verifyAdminCatalogLifecycle(page: Page) {
 export async function verifyAgentNavigation(page: Page) {
 	await signIn(page, E2E_USERS.agentAssigned.employeeCode as string);
 	await expectRouteVisible(page, navigation.orders, true);
+	await expectRouteVisible(page, navigation.tracking, true);
 	await expectRouteVisible(page, navigation.programs, true);
 	await expectRouteVisible(page, navigation.claims, true);
 	await expectRouteVisible(page, navigation.customers, true);
@@ -951,6 +953,7 @@ export async function verifyClientOrderSubmission(page: Page) {
 export async function verifyClientAuthorization(page: Page) {
 	await signIn(page, E2E_USERS.clientA.email);
 	await expectRouteVisible(page, navigation.orders, true);
+	await expectRouteVisible(page, navigation.tracking, true);
 	await expectRouteVisible(page, navigation.programs, true);
 	await expectRouteVisible(page, navigation.claims, true);
 	await expectRouteVisible(page, navigation.customers, false);
@@ -965,6 +968,79 @@ export async function verifyClientAuthorization(page: Page) {
 	expect(await response.json()).toMatchObject({
 		code: API_ERROR_CODES.ACCESS_DENIED,
 	});
+}
+
+export async function verifyAgentTrackingWorkspace(page: Page) {
+	await signIn(page, E2E_USERS.agentAssigned.employeeCode as string);
+	await page.goto("/dashboard/tracking");
+	await expect(
+		page.getByRole("heading", {
+			name: translate(Messages.tracking.lookupTitle),
+		}),
+	).toBeVisible();
+
+	const orderPicker = page.getByRole("combobox", {
+		name: translate(Messages.tracking.orderNumber),
+	});
+	await orderPicker.click();
+	await orderPicker.fill(E2E_ORDERS.assignedA);
+	await expect(
+		page.getByText(translate(Messages.tracking.noMatchingOrders), {
+			exact: true,
+		}),
+	).toBeVisible();
+	await expect(
+		page.getByText(translate(Messages.tracking.recentOrders), { exact: true }),
+	).toHaveCount(0);
+	await orderPicker.fill("E");
+	await expect(
+		page.getByText(translate(Messages.tracking.matchingOrders), {
+			exact: true,
+		}),
+	).toBeVisible();
+	const orderOption = page.getByRole("option", {
+		name: new RegExp(E2E_ORDERS.assignedB),
+	});
+	await expect(orderOption).toBeVisible();
+	await orderPicker.fill(E2E_CUSTOMERS.assignedB);
+	await expect(orderOption).toBeVisible();
+	await orderOption.click();
+	await expect(page).toHaveURL(new RegExp(`order=${E2E_ORDERS.assignedB}`));
+	await orderPicker.click();
+	await expect(
+		page.getByText(translate(Messages.tracking.recentOrders), { exact: true }),
+	).toBeVisible();
+	const alternateOrderOption = page.getByRole("option", {
+		name: new RegExp(E2E_ORDERS.assignedA),
+	});
+	await orderPicker.fill(E2E_CUSTOMERS.assignedA);
+	await expect(
+		page.getByRole("heading", {
+			name: translate(Messages.tracking.latestPosition),
+		}),
+	).toBeVisible();
+	await expect(alternateOrderOption).toBeVisible();
+	await alternateOrderOption.click();
+	await expect(page).toHaveURL(new RegExp(`order=${E2E_ORDERS.assignedA}`));
+	await orderPicker.click();
+	await orderPicker.fill(E2E_CUSTOMERS.assignedB);
+	await expect(orderOption).toBeVisible();
+	await orderOption.click();
+	await expect(orderPicker).toHaveValue(E2E_ORDERS.assignedB);
+	await page.reload();
+	await expect(orderPicker).toHaveValue(E2E_ORDERS.assignedB);
+
+	await expect(
+		page.getByRole("heading", {
+			name: translate(Messages.tracking.latestPosition),
+		}),
+	).toBeVisible();
+	await expect(page.getByText("E2E-WGN-001").first()).toBeVisible();
+	await expect(page.getByText("In transit").first()).toBeVisible();
+	await expect(page.locator("iframe")).toHaveAttribute("src", /marker=/);
+	await expect(
+		page.getByText("34.2610, -6.5802", { exact: true }),
+	).toBeVisible();
 }
 
 export async function verifyAdminReportPrintLayout(page: Page) {

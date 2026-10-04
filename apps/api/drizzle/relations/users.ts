@@ -99,6 +99,10 @@ const usersPart = defineRelationsPart(schema, (r) => ({
 			from: r.users.id,
 			to: r.dtmIntegrationLog.createdByUserId,
 		}),
+		integrationCredentials: r.many.integrationCredentials({
+			from: r.users.id,
+			to: r.integrationCredentials.createdByUserId,
+		}),
 		archivalExecutionLogs: r.many.archivalExecutionLog({
 			from: r.users.id,
 			to: r.archivalExecutionLog.triggeredByUserId,
