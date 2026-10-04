@@ -10,6 +10,7 @@ interface TableSortButtonProps {
 	sorted: SortDirection;
 	onClick?: MouseEventHandler<HTMLButtonElement>;
 	canSort?: boolean;
+	align?: "start" | "end";
 }
 
 export function TableSortButton({
@@ -17,6 +18,7 @@ export function TableSortButton({
 	sorted,
 	onClick,
 	canSort = true,
+	align = "start",
 }: TableSortButtonProps) {
 	const t = useTranslate();
 	const isSorted = sorted === "asc" || sorted === "desc";
@@ -31,7 +33,7 @@ export function TableSortButton({
 			type="button"
 			disabled={!canSort}
 			onClick={onClick}
-			className={`flex w-full items-center gap-2 text-left ${isSorted ? "font-semibold text-primary" : ""} ${canSort ? "cursor-pointer" : "cursor-default"}`}
+			className={`flex w-full items-center gap-2 text-left ${align === "end" ? "justify-end" : "justify-start"} ${isSorted ? "font-semibold text-primary" : ""} ${canSort ? "cursor-pointer" : "cursor-default"}`}
 		>
 			{children}
 			{isSorted && (

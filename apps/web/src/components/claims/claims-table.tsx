@@ -118,6 +118,16 @@ function buildClaimsColumns(
 			enableSorting: true,
 		},
 		{
+			accessorKey: "createdAt",
+			header: () => t(Messages.claims.list.createdAt),
+			cell: (info) => {
+				const value = info.getValue<string>();
+				return formatDisplayDate(value, locale);
+			},
+			sortFn: "datetime",
+			enableSorting: true,
+		},
+		{
 			accessorFn: (row) => row.claimStatus.name,
 			id: "status",
 			header: () => t(Messages.claims.list.status),
@@ -126,16 +136,6 @@ function buildClaimsColumns(
 					{getClaimStatusLabel(String(info.getValue()), locale)}
 				</Badge>
 			),
-			enableSorting: true,
-		},
-		{
-			accessorKey: "createdAt",
-			header: () => t(Messages.claims.list.createdAt),
-			cell: (info) => {
-				const value = info.getValue<string>();
-				return formatDisplayDate(value, locale);
-			},
-			sortFn: "datetime",
 			enableSorting: true,
 		},
 	];
@@ -295,6 +295,9 @@ export function ClaimsTable({
 									return (
 										<TableHead
 											key={header.id}
+											className={
+												header.column.id === "status" ? "text-right" : ""
+											}
 											aria-sort={
 												sorted === "asc"
 													? "ascending"
@@ -307,6 +310,9 @@ export function ClaimsTable({
 												<TableSortButton
 													sorted={sorted}
 													canSort={header.column.getCanSort()}
+													align={
+														header.column.id === "status" ? "end" : "start"
+													}
 													onClick={() => {
 														updateSort(header.column.id);
 													}}
@@ -326,13 +332,17 @@ export function ClaimsTable({
 							table.getRowModel().rows.map((row) => (
 								<TableRow
 									key={row.id}
-									className="cursor-pointer"
 									onClick={() =>
 										router.push(`/dashboard/claims/${row.original.claimNumber}`)
 									}
 								>
 									{row.getAllCells().map((cell) => (
-										<TableCell key={cell.id}>
+										<TableCell
+											key={cell.id}
+											className={
+												cell.column.id === "status" ? "text-right" : ""
+											}
+										>
 											<FlexRender cell={cell} />
 										</TableCell>
 									))}

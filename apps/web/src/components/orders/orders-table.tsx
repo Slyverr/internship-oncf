@@ -89,17 +89,6 @@ function createColumns(
 			enableSorting: true,
 		},
 		{
-			accessorFn: (row) => row.orderStatus.name,
-			id: "status",
-			header: t(Messages.orders.list.status),
-			cell: (info) => (
-				<Badge variant="outline">
-					{getOrderStatusLabel(String(info.getValue()), locale)}
-				</Badge>
-			),
-			enableSorting: true,
-		},
-		{
 			accessorKey: "orderDate",
 			header: t(Messages.orders.list.date),
 			cell: (info) => {
@@ -108,6 +97,17 @@ function createColumns(
 				return formatDisplayDate(value, locale);
 			},
 			sortFn: "datetime",
+			enableSorting: true,
+		},
+		{
+			accessorFn: (row) => row.orderStatus.name,
+			id: "status",
+			header: t(Messages.orders.list.status),
+			cell: (info) => (
+				<Badge variant="outline">
+					{getOrderStatusLabel(String(info.getValue()), locale)}
+				</Badge>
+			),
 			enableSorting: true,
 		},
 	];
@@ -257,6 +257,9 @@ export function OrdersTable({
 									return (
 										<TableHead
 											key={header.id}
+											className={
+												header.column.id === "status" ? "text-right" : ""
+											}
 											aria-sort={
 												sorted === "asc"
 													? "ascending"
@@ -269,6 +272,9 @@ export function OrdersTable({
 												<TableSortButton
 													sorted={sorted}
 													canSort={header.column.getCanSort()}
+													align={
+														header.column.id === "status" ? "end" : "start"
+													}
 													onClick={() => {
 														updateSort(header.column.id);
 													}}
@@ -288,13 +294,17 @@ export function OrdersTable({
 							table.getRowModel().rows.map((row) => (
 								<TableRow
 									key={row.id}
-									className="cursor-pointer"
 									onClick={() =>
 										router.push(`/dashboard/orders/${row.original.orderNumber}`)
 									}
 								>
 									{row.getAllCells().map((cell) => (
-										<TableCell key={cell.id}>
+										<TableCell
+											key={cell.id}
+											className={
+												cell.column.id === "status" ? "text-right" : ""
+											}
+										>
 											<FlexRender cell={cell} />
 										</TableCell>
 									))}

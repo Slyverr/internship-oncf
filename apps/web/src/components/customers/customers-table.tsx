@@ -173,7 +173,6 @@ export function CustomersTable({
 							table.getRowModel().rows.map((row) => (
 								<TableRow
 									key={row.id}
-									className="cursor-pointer"
 									onClick={() =>
 										router.push(`/dashboard/customers/${row.original.id}`)
 									}

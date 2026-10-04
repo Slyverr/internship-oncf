@@ -2,6 +2,7 @@
 
 import { Permission } from "@ecommand/shared";
 import { ArrowRightIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { ActionLink } from "@/components/common/action-link";
 import { Input } from "@/components/ui/input";
 import {
@@ -39,6 +40,7 @@ export function EligibleOrdersTable({
 	page,
 	hasNextPage,
 }: EligibleOrdersTableProps) {
+	const router = useRouter();
 	const t = useTranslate();
 	const { hasPermission } = useAuth();
 	const canCreatePrograms = hasPermission(Permission.PROGRAMS_CREATE);
@@ -79,25 +81,38 @@ export function EligibleOrdersTable({
 					</TableHeader>
 					<TableBody>
 						{data.length ? (
-							data.map((order) => (
-								<TableRow key={order.id}>
-									<TableCell className="font-medium">
-										{order.orderNumber}
-									</TableCell>
-									<TableCell>{order.quantityDemanded}</TableCell>
-									{canCreatePrograms && (
-										<TableCell className="text-right">
-											<ActionLink
-												href={`/dashboard/programs/new?orderNumber=${order.orderNumber}&search=${encodeURIComponent(order.orderNumber ?? "")}`}
-												className="justify-end gap-compact"
-											>
-												{t(Messages.orders.eligible.createProgram)}
-												<ArrowRightIcon aria-hidden="true" className="size-4" />
-											</ActionLink>
+							data.map((order) => {
+								const createProgramHref = `/dashboard/programs/new?orderNumber=${order.orderNumber}&search=${encodeURIComponent(order.orderNumber ?? "")}`;
+								return (
+									<TableRow
+										key={order.id}
+										onClick={
+											canCreatePrograms
+												? () => router.push(createProgramHref)
+												: undefined
+										}
+									>
+										<TableCell className="font-medium">
+											{order.orderNumber}
 										</TableCell>
-									)}
-								</TableRow>
-							))
+										<TableCell>{order.quantityDemanded}</TableCell>
+										{canCreatePrograms && (
+											<TableCell className="text-right">
+												<ActionLink
+													href={createProgramHref}
+													className="justify-end gap-compact"
+												>
+													{t(Messages.orders.eligible.createProgram)}
+													<ArrowRightIcon
+														aria-hidden="true"
+														className="size-4"
+													/>
+												</ActionLink>
+											</TableCell>
+										)}
+									</TableRow>
+								);
+							})
 						) : (
 							<TableRow>
 								<TableCell

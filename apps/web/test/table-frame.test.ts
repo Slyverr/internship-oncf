@@ -47,6 +47,26 @@ assert.match(
 	/data-slot="table-frame"[\s\S]*?cn\("rounded-md border", className\)/,
 	"TableFrame must own the common bordered, rounded table surface.",
 );
+assert.match(
+	tablePrimitive,
+	/tabIndex=\{onClick \? \(tabIndex \?\? 0\) : tabIndex\}/,
+	"Clickable table rows must expose a keyboard focus target and shared pointer treatment.",
+);
+assert.match(
+	tablePrimitive,
+	/"cursor-pointer focus-visible:bg-muted\/50[^"]*"/,
+	"Clickable table rows must expose a shared pointer and focus treatment.",
+);
+assert.match(
+	tablePrimitive,
+	/event\.key !== "Enter" && event\.key !== " "/,
+	"Clickable table rows must activate from Enter and Space.",
+);
+assert.match(
+	tablePrimitive,
+	/event\.target\.closest\([\s\S]*?button[\s\S]*?\[role="checkbox"\]/,
+	"Nested links and controls must not trigger the parent row action.",
+);
 
 for (const file of tableFiles) {
 	const source = readFileSync(resolve(sourceRoot, file), "utf8");
@@ -110,6 +130,34 @@ for (const file of sortableTableFiles) {
 		source,
 		/Chevron(?:Down|Up)Icon|ChevronsUpDownIcon|flex w-full items-center gap-2 text-left/,
 		`${file} must not duplicate sortable heading icons or layout`,
+	);
+}
+
+for (const file of [
+	"components/claims/claims-table.tsx",
+	"components/orders/orders-table.tsx",
+	"components/programs/programs-table.tsx",
+]) {
+	const source = readFileSync(resolve(sourceRoot, file), "utf8");
+	assert.match(
+		source,
+		/className=\{\s*header\.column\.id === "status" \? "text-right" : ""\s*\}/,
+		`${file} must right-align the status heading`,
+	);
+	assert.match(
+		source,
+		/align=\{\s*header\.column\.id === "status" \? "end" : "start"\s*\}/,
+		`${file} must right-align the status sort control`,
+	);
+	assert.match(
+		source,
+		/className=\{\s*cell\.column\.id === "status" \? "text-right" : ""\s*\}/,
+		`${file} must right-align status values`,
+	);
+	assert.doesNotMatch(
+		source,
+		/className="cursor-pointer"/,
+		`${file} must use the shared clickable-row styling`,
 	);
 }
 

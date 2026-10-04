@@ -125,12 +125,45 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
 	);
 }
 
-function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
+function TableRow({
+	className,
+	onClick,
+	onKeyDown,
+	tabIndex,
+	...props
+}: React.ComponentProps<"tr">) {
+	function handleKeyDown(event: React.KeyboardEvent<HTMLTableRowElement>) {
+		onKeyDown?.(event);
+		if (
+			event.defaultPrevented ||
+			!onClick ||
+			event.target !== event.currentTarget ||
+			(event.key !== "Enter" && event.key !== " ")
+		)
+			return;
+		event.preventDefault();
+		event.currentTarget.click();
+	}
+
 	return (
 		<tr
 			data-slot="table-row"
+			onClick={(event) => {
+				if (
+					event.target instanceof Element &&
+					event.target.closest(
+						'a, button, input, select, textarea, [role="button"], [role="checkbox"]',
+					)
+				)
+					return;
+				onClick?.(event);
+			}}
+			onKeyDown={handleKeyDown}
+			tabIndex={onClick ? (tabIndex ?? 0) : tabIndex}
 			className={cn(
 				"border-b transition-colors hover:bg-muted/30 has-aria-expanded:bg-muted/30 data-[state=selected]:bg-muted",
+				onClick &&
+					"cursor-pointer focus-visible:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
 				className,
 			)}
 			{...props}

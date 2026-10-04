@@ -282,6 +282,9 @@ export function UsersTable({
 									return (
 										<TableHead
 											key={header.id}
+											className={
+												header.column.id === "isActive" ? "text-right" : ""
+											}
 											aria-sort={
 												sorted === "asc"
 													? "ascending"
@@ -294,6 +297,9 @@ export function UsersTable({
 												<TableSortButton
 													sorted={sorted}
 													canSort={header.column.getCanSort()}
+													align={
+														header.column.id === "isActive" ? "end" : "start"
+													}
 													onClick={() => {
 														updateSort(header.column.id);
 													}}
@@ -313,13 +319,17 @@ export function UsersTable({
 							table.getRowModel().rows.map((row) => (
 								<TableRow
 									key={row.id}
-									className="cursor-pointer"
 									onClick={() =>
 										router.push(`/dashboard/users/${row.original.id}`)
 									}
 								>
 									{row.getAllCells().map((cell) => (
-										<TableCell key={cell.id}>
+										<TableCell
+											key={cell.id}
+											className={
+												cell.column.id === "isActive" ? "text-right" : ""
+											}
+										>
 											<FlexRender cell={cell} />
 										</TableCell>
 									))}

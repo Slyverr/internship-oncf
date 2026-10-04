@@ -80,17 +80,6 @@ function getProgramColumns(
 			enableSorting: true,
 		},
 		{
-			accessorFn: (row) => row.programStatus.name,
-			id: "status",
-			header: t(Messages.programs.list.status),
-			cell: (info) => (
-				<Badge variant="outline">
-					{getProgramStatusLabel(String(info.getValue()), locale)}
-				</Badge>
-			),
-			enableSorting: true,
-		},
-		{
 			accessorKey: "plannedDate",
 			header: t(Messages.programs.list.plannedDate),
 			cell: (info) => {
@@ -106,6 +95,17 @@ function getProgramColumns(
 			id: "createdByUser",
 			header: t(Messages.programs.list.createdBy),
 			cell: (info) => info.getValue<string>(),
+			enableSorting: true,
+		},
+		{
+			accessorFn: (row) => row.programStatus.name,
+			id: "status",
+			header: t(Messages.programs.list.status),
+			cell: (info) => (
+				<Badge variant="outline">
+					{getProgramStatusLabel(String(info.getValue()), locale)}
+				</Badge>
+			),
 			enableSorting: true,
 		},
 	];
@@ -200,6 +200,9 @@ export function ProgramsTable({ data, isLoading }: ProgramsTableProps) {
 									return (
 										<TableHead
 											key={header.id}
+											className={
+												header.column.id === "status" ? "text-right" : ""
+											}
 											aria-sort={
 												sortState === "asc"
 													? "ascending"
@@ -212,6 +215,9 @@ export function ProgramsTable({ data, isLoading }: ProgramsTableProps) {
 												<TableSortButton
 													sorted={sortState}
 													canSort={canSort}
+													align={
+														header.column.id === "status" ? "end" : "start"
+													}
 													onClick={() => {
 														updateSort(header.column.id);
 													}}
@@ -231,7 +237,6 @@ export function ProgramsTable({ data, isLoading }: ProgramsTableProps) {
 							table.getRowModel().rows.map((row) => (
 								<TableRow
 									key={row.id}
-									className="cursor-pointer"
 									onClick={() =>
 										router.push(
 											`/dashboard/programs/${row.original.programNumber}`,
@@ -239,7 +244,12 @@ export function ProgramsTable({ data, isLoading }: ProgramsTableProps) {
 									}
 								>
 									{row.getAllCells().map((cell) => (
-										<TableCell key={cell.id}>
+										<TableCell
+											key={cell.id}
+											className={
+												cell.column.id === "status" ? "text-right" : ""
+											}
+										>
 											<FlexRender cell={cell} />
 										</TableCell>
 									))}
