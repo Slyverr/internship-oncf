@@ -112,7 +112,13 @@ export function AppearancePreferencesSync({
 		saveQueue.current = saveQueue.current.then(async () => {
 			const latestPreferences = currentPreferences.current;
 			const serialized = JSON.stringify(latestPreferences);
-			if (serialized === lastSent.current) return;
+			if (serialized === lastSent.current) {
+				// The queued snapshot is already persisted (or matches the canonical
+				// server snapshot). Resolve the indicator instead of leaving it in
+				// "saving" after a no-op enqueue.
+				setStatus("saved");
+				return;
+			}
 
 			lastSent.current = serialized;
 			try {
