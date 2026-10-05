@@ -212,6 +212,11 @@ async function runBrowserWorkflows() {
 let executionError: unknown;
 
 try {
+	await run(
+		[process.execPath, "run", "--filter", "@ecommand/shared", "build"],
+		{ env: process.env },
+	);
+
 	await run([...composeArgs, "down", "--volumes", "--remove-orphans"], {
 		env: process.env,
 		quiet: true,
