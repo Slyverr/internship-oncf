@@ -3,39 +3,76 @@ name: Verify
 on:
   push:
     branches:
-      - "**"
+      - develop
+      - master
+    paths-ignore:
+      - "**/*.md"
   pull_request:
+    branches:
+      - develop
+      - master
+    paths-ignore:
+      - "**/*.md"
+
+concurrency:
+  group: verify-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
   verify:
-    name: Workspace and API workflows
-    runs-on: ubuntu-latest
+    name: Workspace verification
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
-          cache: true
 
-      - name: Set up Node.js for Jest E2E
-        uses: actions/setup-node@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
         with:
           node-version: 24
+          package-manager-cache: false
 
       - name: Install workspace dependencies
         run: bun install --frozen-lockfile
 
-      - name: Run formatting, typechecks, tests, and production builds
+      - name: Verify workspace
         run: bun run verify
 
-      - name: Install Chromium for browser workflow tests
+  browser-e2e:
+    name: Browser E2E
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Install workspace dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Chromium
         run: node node_modules/playwright/cli.js install --with-deps chromium
 
-      - name: Run isolated API and browser workflow tests
+      - name: Run browser workflows
         run: bun run test:e2e:browser

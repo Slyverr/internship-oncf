@@ -4,19 +4,20 @@
 	"globalPassThroughEnv": [
 		"ECOMMAND_E2E_POSTGRES_PORT",
 		"ECOMMAND_E2E_OBJECT_STORAGE_PORT",
-		"ECOMMAND_E2E_NODE",
-		"NEXT_BUILD_DIST_DIR"
+		"ECOMMAND_E2E_NODE"
 	],
 	"tasks": {
 		"build": {
 			"dependsOn": ["^build"],
 			"inputs": ["$TURBO_DEFAULT$", ".env*"],
+			"env": ["NEXT_BUILD_DIST_DIR"],
 			"outputs": [
 				"dist/**",
 				".next/**",
 				".next-verify/**",
 				"!.next/cache/**",
-				"!.next/dev/**"
+				"!.next/dev/**",
+				"!.next-verify/cache/**"
 			]
 		},
 		"lint": {
