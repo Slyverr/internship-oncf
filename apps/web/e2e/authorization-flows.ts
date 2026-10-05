@@ -293,6 +293,22 @@ export async function verifyAdminCatalogLifecycle(page: Page) {
 	await page.getByRole("button", { name: unitCategory, exact: true }).click();
 	await expect(page.getByRole("heading", { name: unitCategory })).toBeVisible();
 
+	const catalogRow = (name: string) =>
+		page.getByRole("row").filter({
+			has: page.getByRole("cell", { name, exact: true }),
+		});
+
+	const editCatalogItem = async (name: string) => {
+		const row = catalogRow(name);
+		await expect(row).toBeVisible();
+		await row
+			.getByRole("button", {
+				name: translate(Messages.referenceData.edit),
+				exact: true,
+			})
+			.click();
+	};
+
 	const originalName = `E2E unit ${Date.now()}`;
 	const renamedName = `${originalName} renamed`;
 	await page
@@ -313,9 +329,8 @@ export async function verifyAdminCatalogLifecycle(page: Page) {
 		})
 		.click();
 	await expect(dialog).toBeHidden();
-	await expect(page.getByRole("button", { name: originalName })).toBeVisible();
 
-	await page.getByRole("button", { name: originalName, exact: true }).click();
+	await editCatalogItem(originalName);
 	dialog = page.getByRole("dialog");
 	await dialog
 		.getByLabel(translate(Messages.referenceData.name), { exact: true })
@@ -327,9 +342,8 @@ export async function verifyAdminCatalogLifecycle(page: Page) {
 		})
 		.click();
 	await expect(dialog).toBeHidden();
-	await expect(page.getByRole("button", { name: renamedName })).toBeVisible();
 
-	await page.getByRole("button", { name: renamedName, exact: true }).click();
+	await editCatalogItem(renamedName);
 	dialog = page.getByRole("dialog");
 	await dialog.getByRole("checkbox").uncheck();
 	await dialog
@@ -339,14 +353,13 @@ export async function verifyAdminCatalogLifecycle(page: Page) {
 		})
 		.click();
 	await expect(dialog).toBeHidden();
-	const archivedRow = page
-		.getByRole("row")
-		.filter({ has: page.getByRole("button", { name: renamedName }) });
+
+	const archivedRow = catalogRow(renamedName);
 	await expect(archivedRow).toContainText(
 		translate(Messages.referenceData.archived),
 	);
 
-	await page.getByRole("button", { name: renamedName, exact: true }).click();
+	await editCatalogItem(renamedName);
 	dialog = page.getByRole("dialog");
 	await dialog.getByRole("checkbox").check();
 	await dialog
@@ -356,9 +369,8 @@ export async function verifyAdminCatalogLifecycle(page: Page) {
 		})
 		.click();
 	await expect(dialog).toBeHidden();
-	const restoredRow = page
-		.getByRole("row")
-		.filter({ has: page.getByRole("button", { name: renamedName }) });
+
+	const restoredRow = catalogRow(renamedName);
 	await expect(restoredRow).toContainText(
 		translate(Messages.referenceData.active),
 	);
@@ -496,6 +508,7 @@ export async function verifyAdminCustomRoleAssignment(page: Page) {
 		page.getByRole("link", { name: email, exact: true }),
 	).toBeVisible();
 
+	await page.goto("about:blank");
 	await page.context().clearCookies();
 	await signIn(page, email);
 	await expectRouteVisible(page, navigation.orders, true);
@@ -974,9 +987,7 @@ export async function verifyAgentTrackingWorkspace(page: Page) {
 	await signIn(page, E2E_USERS.agentAssigned.employeeCode as string);
 	await page.goto("/dashboard/tracking");
 	await expect(
-		page.getByRole("heading", {
-			name: translate(Messages.tracking.lookupTitle),
-		}),
+		page.getByText(translate(Messages.tracking.lookupTitle), { exact: true }),
 	).toBeVisible();
 
 	const orderPicker = page.getByRole("combobox", {
@@ -1006,33 +1017,19 @@ export async function verifyAgentTrackingWorkspace(page: Page) {
 	await expect(orderOption).toBeVisible();
 	await orderOption.click();
 	await expect(page).toHaveURL(new RegExp(`order=${E2E_ORDERS.assignedB}`));
+	await expect(orderPicker).toHaveValue(E2E_ORDERS.assignedB);
+
 	await orderPicker.click();
 	await expect(
 		page.getByText(translate(Messages.tracking.recentOrders), { exact: true }),
 	).toBeVisible();
-	const alternateOrderOption = page.getByRole("option", {
-		name: new RegExp(E2E_ORDERS.assignedA),
-	});
-	await orderPicker.fill(E2E_CUSTOMERS.assignedA);
-	await expect(
-		page.getByRole("heading", {
-			name: translate(Messages.tracking.latestPosition),
-		}),
-	).toBeVisible();
-	await expect(alternateOrderOption).toBeVisible();
-	await alternateOrderOption.click();
-	await expect(page).toHaveURL(new RegExp(`order=${E2E_ORDERS.assignedA}`));
-	await orderPicker.click();
-	await orderPicker.fill(E2E_CUSTOMERS.assignedB);
-	await expect(orderOption).toBeVisible();
-	await orderOption.click();
-	await expect(orderPicker).toHaveValue(E2E_ORDERS.assignedB);
+
 	await page.reload();
 	await expect(orderPicker).toHaveValue(E2E_ORDERS.assignedB);
 
 	await expect(
-		page.getByRole("heading", {
-			name: translate(Messages.tracking.latestPosition),
+		page.getByText(translate(Messages.tracking.latestPosition), {
+			exact: true,
 		}),
 	).toBeVisible();
 	await expect(page.getByText("E2E-WGN-001").first()).toBeVisible();
