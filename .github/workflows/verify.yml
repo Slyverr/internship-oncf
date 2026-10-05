@@ -21,6 +21,7 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.2
+          cache: true
 
       - name: Set up Node.js for Jest E2E
         uses: actions/setup-node@v4
@@ -34,7 +35,7 @@ jobs:
         run: bun run verify
 
       - name: Install Chromium for browser workflow tests
-        run: bun run --filter ecommand-web playwright install --with-deps chromium
+        run: node node_modules/playwright/cli.js install --with-deps chromium
 
       - name: Run isolated API and browser workflow tests
         run: bun run test:e2e:browser

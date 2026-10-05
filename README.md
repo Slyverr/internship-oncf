@@ -99,7 +99,7 @@ bun run verify
 For isolated API and browser workflows, install Chromium first and run:
 
 ```sh
-bun run --filter ecommand-web playwright install --with-deps chromium
+node node_modules/playwright/cli.js install --with-deps chromium
 bun run test:e2e:browser
 ```
 

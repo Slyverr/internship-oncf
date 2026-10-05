@@ -205,20 +205,25 @@ try {
 		quiet: true,
 	});
 	await run([...composeArgs, "up", "-d", "postgres-e2e"]);
-	await run(
-		[nodeExecutable, tsxExecutable, "./test/helpers/wait-for-e2e-services.ts"],
-		{ cwd: apiDir },
-	);
-
-	await run([nodeExecutable, drizzleKitExecutable, "push", "--force"], {
-		cwd: apiDir,
-	});
-	await run([nodeExecutable, tsxExecutable, "./drizzle/seed/seed-ref.ts"], {
-		cwd: apiDir,
-	});
-	await run([nodeExecutable, tsxExecutable, "./test/fixtures/seed-e2e.ts"], {
-		cwd: apiDir,
-	});
+	if (!browserOnly) {
+		await run(
+			[
+				nodeExecutable,
+				tsxExecutable,
+				"./test/helpers/wait-for-e2e-services.ts",
+			],
+			{ cwd: apiDir },
+		);
+		await run([nodeExecutable, drizzleKitExecutable, "push", "--force"], {
+			cwd: apiDir,
+		});
+		await run([nodeExecutable, tsxExecutable, "./drizzle/seed/seed-ref.ts"], {
+			cwd: apiDir,
+		});
+		await run([nodeExecutable, tsxExecutable, "./test/fixtures/seed-e2e.ts"], {
+			cwd: apiDir,
+		});
+	}
 	if (!browserOnly) {
 		await run(
 			[
@@ -232,12 +237,24 @@ try {
 		);
 	}
 	if (process.argv.includes("--browser")) {
-		await run(
-			[nodeExecutable, tsxExecutable, "./test/helpers/reset-e2e-database.ts"],
-			{
-				cwd: apiDir,
-			},
-		);
+		if (!browserOnly) {
+			await run(
+				[nodeExecutable, tsxExecutable, "./test/helpers/reset-e2e-database.ts"],
+				{
+					cwd: apiDir,
+				},
+			);
+		}
+		if (browserOnly) {
+			await run(
+				[
+					nodeExecutable,
+					tsxExecutable,
+					"./test/helpers/wait-for-e2e-services.ts",
+				],
+				{ cwd: apiDir },
+			);
+		}
 		await run([nodeExecutable, drizzleKitExecutable, "push", "--force"], {
 			cwd: apiDir,
 		});
