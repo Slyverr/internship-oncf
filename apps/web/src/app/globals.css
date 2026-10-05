@@ -95,6 +95,10 @@ html[data-theme="mono-dark"] {
 		),
 		var(--color-background);
 
+	@media (min-height: 44rem) and (max-width: 639px) {
+		place-items: center;
+	}
+
 	@media (min-width: 640px) {
 		place-items: center;
 		padding: 1.5rem;
