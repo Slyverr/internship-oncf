@@ -4,8 +4,8 @@ This status uses Safa’s internship report as the current requirements baseline
 
 ## Implemented
 
-- Bun/Turborepo monorepo with a NestJS API, Next.js web app, shared TypeScript package, PostgreSQL/Drizzle, and MinIO-compatible file storage.
-- Local PostgreSQL/MinIO Compose setup, environment templates, API Swagger docs, Drizzle schema push/studio scripts, and reference/demo seed scripts.
+- Bun/Turborepo monorepo with a NestJS API, Next.js web app, shared TypeScript package, PostgreSQL/Drizzle, and SeaweedFS S3-compatible file storage.
+- Local PostgreSQL/SeaweedFS Compose setup, environment templates, API Swagger docs, Drizzle schema push/studio scripts, and reference/demo seed scripts.
 - Authentication, JWT-backed sessions, logout, password change, session revocation, configurable lockout after repeated failed logins, and permission/ownership enforcement.
 - User and customer CRUD APIs and screens. Customer records store the customer code and ICE used by client signup.
 - Public client signup checks the submitted customer code and ICE against an active local customer record, creates an inactive client-representative account in `PENDING` status, and blocks sign-in until an administrator approves it. Administrators can approve or reject pending requests from the user detail screen.

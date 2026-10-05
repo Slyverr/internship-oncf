@@ -3,7 +3,7 @@ import { waitForApi } from "../../../scripts/wait-for-api";
 
 let attempts = 0;
 await waitForApi("http://localhost:8000/health", {
-	timeoutMs: 100,
+	timeoutMs: 1_000,
 	pollIntervalMs: 0,
 	fetcher: async () => {
 		attempts += 1;

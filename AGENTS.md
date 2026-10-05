@@ -15,13 +15,13 @@ Use these instructions for changes in this repository. The product name in human
 - `apps/api/drizzle` — PostgreSQL schema, relations, reference data, and seed scripts. This is the current database source of truth.
 - `apps/web` — Next.js App Router application. Routes live in `src/app`, reusable UI in `src/components`, and API calls use the generated client in `src/lib/api`.
 - `packages/shared` — enums, permissions, catalog definitions, and types shared by the API and web app.
-- `docker-compose.yml` — local PostgreSQL and MinIO services.
+- `docker-compose.yml` — local PostgreSQL and SeaweedFS services.
 - `docs/project` — architecture and MVP readiness.
 - `docs/development` — setup, workflow, coding conventions, and verification.
 - `docs/security` — roles, permissions, ownership scope, and authorization mapping.
 - `docs/interface` — design system, screenshot review, and the ongoing UI/UX checklist.
 
-The current stack is Bun workspaces and Turborepo, NestJS 11, Next.js 16, React 19, PostgreSQL, Drizzle ORM, and MinIO-compatible object storage. Do not substitute the older Java/Spring stack described in project reference material for this existing implementation.
+The current stack is Bun workspaces and Turborepo, NestJS 11, Next.js 16, React 19, PostgreSQL, Drizzle ORM, and SeaweedFS S3-compatible object storage. Do not substitute the older Java/Spring stack described in project reference material for this existing implementation.
 
 ## Implementation standards
 

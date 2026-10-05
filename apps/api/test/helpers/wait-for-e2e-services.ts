@@ -22,21 +22,21 @@ async function waitForPostgres(databaseUrl: string): Promise<void> {
 	throw new Error("E2E PostgreSQL did not become ready within 30 seconds");
 }
 
-async function waitForMinio(endpoint: string, port: number): Promise<void> {
+async function waitForObjectStorage(endpoint: string): Promise<void> {
 	const deadline = Date.now() + timeoutMs;
-	const healthUrl = `http://${endpoint}:${port}/minio/health/live`;
+	const healthUrl = new URL("/", endpoint).toString();
 
 	while (Date.now() < deadline) {
 		try {
 			const response = await fetch(healthUrl);
-			if (response.ok) return;
+			if (response.status < 500) return;
 		} catch {
-			// MinIO may still be starting.
+			// Object storage may still be starting.
 		}
 		await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
 	}
 
-	throw new Error(`E2E MinIO did not become ready at ${healthUrl}`);
+	throw new Error(`E2E object storage did not become ready at ${healthUrl}`);
 }
 
 async function main() {
@@ -46,10 +46,9 @@ async function main() {
 	}
 
 	await waitForPostgres(databaseUrl);
-	const minioEndpoint = process.env.MINIO_ENDPOINT;
-	const minioPort = Number(process.env.MINIO_PORT);
-	if (minioEndpoint && Number.isInteger(minioPort) && minioPort > 0) {
-		await waitForMinio(minioEndpoint, minioPort);
+	const objectStorageEndpoint = process.env.OBJECT_STORAGE_ENDPOINT;
+	if (objectStorageEndpoint) {
+		await waitForObjectStorage(objectStorageEndpoint);
 	}
 }
 

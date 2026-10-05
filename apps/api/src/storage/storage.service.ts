@@ -1,5 +1,14 @@
 import { createHash } from "node:crypto";
 import type { Readable } from "node:stream";
+import {
+	CreateBucketCommand,
+	DeleteObjectCommand,
+	GetObjectCommand,
+	HeadBucketCommand,
+	PutObjectCommand,
+	S3Client,
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { API_ERROR_CODES } from "@ecommand/shared";
 import {
 	Injectable,
@@ -9,30 +18,33 @@ import {
 	OnModuleInit,
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { Client } from "minio";
 import type { StoredFile, UploadedFile } from "./storage.types";
 
 @Injectable()
 export class StorageService implements OnModuleInit {
 	private readonly logger = new Logger(StorageService.name);
-	private readonly client: Client;
+	private readonly client: S3Client;
 	private readonly bucket: string;
 
 	constructor(private readonly configService: ConfigService) {
-		this.bucket = this.configService.getOrThrow<string>("MINIO_BUCKET");
+		this.bucket = this.configService.getOrThrow<string>(
+			"OBJECT_STORAGE_BUCKET",
+		);
 
-		const port = Number(this.configService.getOrThrow("MINIO_PORT"));
-		const useSSL =
-			String(
-				this.configService.get("MINIO_USE_SSL") ?? "false",
-			).toLowerCase() === "true";
-
-		this.client = new Client({
-			endPoint: this.configService.getOrThrow<string>("MINIO_ENDPOINT"),
-			port,
-			accessKey: this.configService.getOrThrow<string>("MINIO_ACCESS_KEY"),
-			secretKey: this.configService.getOrThrow<string>("MINIO_SECRET_KEY"),
-			useSSL,
+		this.client = new S3Client({
+			endpoint: this.configService.getOrThrow<string>(
+				"OBJECT_STORAGE_ENDPOINT",
+			),
+			region: this.configService.getOrThrow<string>("OBJECT_STORAGE_REGION"),
+			forcePathStyle: true,
+			credentials: {
+				accessKeyId: this.configService.getOrThrow<string>(
+					"OBJECT_STORAGE_ACCESS_KEY",
+				),
+				secretAccessKey: this.configService.getOrThrow<string>(
+					"OBJECT_STORAGE_SECRET_KEY",
+				),
+			},
 		});
 	}
 
@@ -45,9 +57,15 @@ export class StorageService implements OnModuleInit {
 		const path = `attachments/${hash.slice(0, 2)}/${hash.slice(2, 4)}/${hash}`;
 
 		try {
-			await this.client.putObject(this.bucket, path, file.buffer, file.size, {
-				"Content-Type": file.mimetype,
-			});
+			await this.client.send(
+				new PutObjectCommand({
+					Bucket: this.bucket,
+					Key: path,
+					Body: file.buffer,
+					ContentLength: file.size,
+					ContentType: file.mimetype,
+				}),
+			);
 		} catch (error) {
 			this.logger.error(`Upload failed for ${file.originalName}`, error);
 			throw new InternalServerErrorException({
@@ -60,7 +78,13 @@ export class StorageService implements OnModuleInit {
 
 	async download(path: string): Promise<Buffer> {
 		try {
-			const stream = await this.client.getObject(this.bucket, path);
+			const response = await this.client.send(
+				new GetObjectCommand({ Bucket: this.bucket, Key: path }),
+			);
+			if (!response.Body) {
+				throw new Error("Object storage returned an empty response body");
+			}
+			const stream = response.Body as Readable;
 			return await this.streamToBuffer(stream);
 		} catch (error) {
 			if (this.isNotFound(error)) {
@@ -77,10 +101,10 @@ export class StorageService implements OnModuleInit {
 
 	async presign(path: string, expirySeconds = 3600): Promise<string> {
 		try {
-			return await this.client.presignedGetObject(
-				this.bucket,
-				path,
-				expirySeconds,
+			return await getSignedUrl(
+				this.client,
+				new GetObjectCommand({ Bucket: this.bucket, Key: path }),
+				{ expiresIn: expirySeconds },
 			);
 		} catch (error) {
 			if (this.isNotFound(error)) {
@@ -97,7 +121,9 @@ export class StorageService implements OnModuleInit {
 
 	async remove(path: string): Promise<void> {
 		try {
-			await this.client.removeObject(this.bucket, path);
+			await this.client.send(
+				new DeleteObjectCommand({ Bucket: this.bucket, Key: path }),
+			);
 		} catch (error) {
 			if (this.isNotFound(error)) return;
 			this.logger.error(`Delete failed for ${path}`, error);
@@ -109,9 +135,19 @@ export class StorageService implements OnModuleInit {
 
 	private async ensureBucket(): Promise<void> {
 		try {
-			const exists = await this.client.bucketExists(this.bucket);
-			if (exists) return;
-			await this.client.makeBucket(this.bucket);
+			await this.client.send(new HeadBucketCommand({ Bucket: this.bucket }));
+			return;
+		} catch (error) {
+			if (!this.isNotFound(error)) {
+				this.logger.error("Bucket initialization failed", error);
+				throw new InternalServerErrorException({
+					code: API_ERROR_CODES.INTERNAL_ERROR,
+				});
+			}
+		}
+
+		try {
+			await this.client.send(new CreateBucketCommand({ Bucket: this.bucket }));
 			this.logger.log(`Bucket "${this.bucket}" created`);
 		} catch (error) {
 			this.logger.error("Bucket initialization failed", error);
@@ -132,7 +168,19 @@ export class StorageService implements OnModuleInit {
 
 	private isNotFound(error: unknown): boolean {
 		if (typeof error !== "object" || error === null) return false;
-		const code = (error as { code?: unknown }).code;
-		return code === "NoSuchKey" || code === "NotFound";
+		const details = error as {
+			name?: unknown;
+			code?: unknown;
+			$metadata?: { httpStatusCode?: unknown };
+		};
+		return (
+			details.name === "NoSuchKey" ||
+			details.name === "NoSuchBucket" ||
+			details.name === "NotFound" ||
+			details.code === "NoSuchKey" ||
+			details.code === "NoSuchBucket" ||
+			details.code === "NotFound" ||
+			details.$metadata?.httpStatusCode === 404
+		);
 	}
 }

@@ -14,17 +14,18 @@ services:
       retries: 30
     restart: "no"
 
-  minio-e2e:
-    image: minio/minio:latest
+  seaweedfs-e2e:
+    image: docker.io/chrislusf/seaweedfs:4.48
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      AWS_ACCESS_KEY_ID: ecommandtest
+      AWS_SECRET_ACCESS_KEY: ecommand-test-secret
+      S3_BUCKET: ecommand-e2e
     ports:
-      - "${ECOMMAND_E2E_MINIO_PORT:-59000}:9000"
+      - "${ECOMMAND_E2E_OBJECT_STORAGE_PORT:-58333}:8333"
     volumes:
-      - minio_e2e_data:/data
-    command: server /data --console-address ":9001"
+      - seaweedfs_e2e_data:/data
+    command: ["mini", "-dir=/data"]
     restart: "no"
 
 volumes:
-  minio_e2e_data:
+  seaweedfs_e2e_data:

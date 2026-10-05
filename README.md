@@ -22,7 +22,7 @@ For local simulation, set `DTM_MODE=simulator`, `DTM_SIMULATOR_DELAY_MS` (defaul
 - Next.js 16 and React 19 (`apps/web`)
 - NestJS 11 (`apps/api`)
 - PostgreSQL and Drizzle ORM
-- MinIO-compatible object storage for attachments
+- SeaweedFS S3-compatible object storage for attachments
 - Shared permissions, enums, and domain values (`packages/shared`)
 
 The repository implementation is authoritative. The internship reference report describes an older Java/Spring design; this project uses the TypeScript stack above.
@@ -42,10 +42,10 @@ The repository implementation is authoritative. The internship reference report 
    bun install
    ```
 
-2. Start PostgreSQL and MinIO:
+2. Start PostgreSQL and SeaweedFS:
 
    ```sh
-   podman compose up -d postgres minio
+   podman compose up -d postgres seaweedfs
    ```
 
    Use `docker compose` if Docker Compose is installed instead.

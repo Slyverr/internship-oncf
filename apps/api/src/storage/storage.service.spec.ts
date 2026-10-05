@@ -1,40 +1,38 @@
 import { Readable } from "node:stream";
+import {
+	CreateBucketCommand,
+	DeleteObjectCommand,
+	GetObjectCommand,
+	HeadBucketCommand,
+	PutObjectCommand,
+	S3Client,
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { ConfigService } from "@nestjs/config";
 import { Test } from "@nestjs/testing";
 import { StorageService } from "./storage.service";
 
-const minioClientMock = {
-	bucketExists: jest.fn(),
-	makeBucket: jest.fn(),
-	putObject: jest.fn(),
-	getObject: jest.fn(),
-	presignedGetObject: jest.fn(),
-	removeObject: jest.fn(),
-};
-
-jest.mock("minio", () => ({
-	Client: jest.fn(() => minioClientMock),
+jest.mock("@aws-sdk/s3-request-presigner", () => ({
+	getSignedUrl: jest.fn(),
 }));
 
 describe("StorageService", () => {
 	let service: StorageService;
+	let sendMock: jest.SpyInstance;
 
 	const config: Record<string, unknown> = {
-		MINIO_BUCKET: "test-bucket",
-		MINIO_ENDPOINT: "localhost",
-		MINIO_PORT: 9000,
-		MINIO_ACCESS_KEY: "test-key",
-		MINIO_SECRET_KEY: "test-secret",
-		MINIO_USE_SSL: false,
+		OBJECT_STORAGE_BUCKET: "test-bucket",
+		OBJECT_STORAGE_ENDPOINT: "http://localhost:8333",
+		OBJECT_STORAGE_REGION: "us-east-1",
+		OBJECT_STORAGE_ACCESS_KEY: "test-key",
+		OBJECT_STORAGE_SECRET_KEY: "test-secret",
 	};
 
 	beforeEach(async () => {
 		jest.clearAllMocks();
-
-		minioClientMock.bucketExists.mockResolvedValue(true);
-		minioClientMock.makeBucket.mockResolvedValue(undefined);
-		minioClientMock.putObject.mockResolvedValue(undefined);
-		minioClientMock.removeObject.mockResolvedValue(undefined);
+		sendMock = jest
+			.spyOn(S3Client.prototype, "send")
+			.mockResolvedValue({} as never);
 
 		const module = await Test.createTestingModule({
 			providers: [
@@ -60,22 +58,32 @@ describe("StorageService", () => {
 		service = module.get(StorageService);
 	});
 
+	afterEach(() => {
+		jest.restoreAllMocks();
+	});
+
 	describe("onModuleInit", () => {
 		it("does not create the bucket when it already exists", async () => {
-			minioClientMock.bucketExists.mockResolvedValue(true);
-
 			await service.onModuleInit();
 
-			expect(minioClientMock.bucketExists).toHaveBeenCalledWith("test-bucket");
-			expect(minioClientMock.makeBucket).not.toHaveBeenCalled();
+			expect(sendMock).toHaveBeenCalledWith(expect.any(HeadBucketCommand));
+			expect(sendMock).not.toHaveBeenCalledWith(
+				expect.any(CreateBucketCommand),
+			);
 		});
 
 		it("creates the bucket when it does not exist", async () => {
-			minioClientMock.bucketExists.mockResolvedValue(false);
+			sendMock.mockRejectedValueOnce({
+				name: "NotFound",
+				$metadata: { httpStatusCode: 404 },
+			});
 
 			await service.onModuleInit();
 
-			expect(minioClientMock.makeBucket).toHaveBeenCalledWith("test-bucket");
+			expect(sendMock).toHaveBeenNthCalledWith(
+				2,
+				expect.any(CreateBucketCommand),
+			);
 		});
 	});
 
@@ -91,35 +99,31 @@ describe("StorageService", () => {
 			});
 
 			expect(result.hash).toHaveLength(64);
-
 			expect(result.path).toBe(
 				`attachments/${result.hash.slice(0, 2)}/${result.hash.slice(
 					2,
 					4,
 				)}/${result.hash}`,
 			);
-
-			expect(minioClientMock.putObject).toHaveBeenCalledWith(
-				"test-bucket",
-				result.path,
-				buffer,
-				buffer.length,
-				{
-					"Content-Type": "text/plain",
-				},
-			);
+			const command = sendMock.mock.calls[0][0] as PutObjectCommand;
+			expect(command).toBeInstanceOf(PutObjectCommand);
+			expect(command.input).toMatchObject({
+				Bucket: "test-bucket",
+				Key: result.path,
+				Body: buffer,
+				ContentLength: buffer.length,
+				ContentType: "text/plain",
+			});
 		});
 
 		it("produces the same path for identical content", async () => {
 			const buffer = Buffer.from("same-content");
-
 			const first = await service.upload({
 				originalName: "first.txt",
 				mimetype: "text/plain",
 				size: buffer.length,
 				buffer,
 			});
-
 			const second = await service.upload({
 				originalName: "completely-different-name.pdf",
 				mimetype: "application/pdf",
@@ -135,34 +139,33 @@ describe("StorageService", () => {
 	describe("download", () => {
 		it("returns the stored object as a Buffer", async () => {
 			const payload = Buffer.from("file-content");
-
-			minioClientMock.getObject.mockResolvedValue(Readable.from([payload]));
+			sendMock.mockResolvedValueOnce({
+				Body: Readable.from([payload]),
+			} as never);
 
 			const result = await service.download("attachments/aa/bb/example");
 
 			expect(result).toEqual(payload);
-
-			expect(minioClientMock.getObject).toHaveBeenCalledWith(
-				"test-bucket",
-				"attachments/aa/bb/example",
-			);
+			const command = sendMock.mock.calls[0][0] as GetObjectCommand;
+			expect(command).toBeInstanceOf(GetObjectCommand);
+			expect(command.input).toEqual({
+				Bucket: "test-bucket",
+				Key: "attachments/aa/bb/example",
+			});
 		});
 	});
 
 	describe("presign", () => {
 		it("returns a presigned download URL", async () => {
-			minioClientMock.presignedGetObject.mockResolvedValue(
-				"https://example.test/file",
-			);
+			jest.mocked(getSignedUrl).mockResolvedValue("https://example.test/file");
 
 			const result = await service.presign("attachments/aa/bb/example", 1800);
 
 			expect(result).toBe("https://example.test/file");
-
-			expect(minioClientMock.presignedGetObject).toHaveBeenCalledWith(
-				"test-bucket",
-				"attachments/aa/bb/example",
-				1800,
+			expect(getSignedUrl).toHaveBeenCalledWith(
+				expect.any(S3Client),
+				expect.any(GetObjectCommand),
+				{ expiresIn: 1800 },
 			);
 		});
 	});
@@ -171,15 +174,18 @@ describe("StorageService", () => {
 		it("removes an object from storage", async () => {
 			await service.remove("attachments/aa/bb/example");
 
-			expect(minioClientMock.removeObject).toHaveBeenCalledWith(
-				"test-bucket",
-				"attachments/aa/bb/example",
-			);
+			const command = sendMock.mock.calls[0][0] as DeleteObjectCommand;
+			expect(command).toBeInstanceOf(DeleteObjectCommand);
+			expect(command.input).toEqual({
+				Bucket: "test-bucket",
+				Key: "attachments/aa/bb/example",
+			});
 		});
 
 		it("does not fail when the object is already missing", async () => {
-			minioClientMock.removeObject.mockRejectedValue({
-				code: "NoSuchKey",
+			sendMock.mockRejectedValueOnce({
+				name: "NotFound",
+				$metadata: { httpStatusCode: 404 },
 			});
 
 			await expect(

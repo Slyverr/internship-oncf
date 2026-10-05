@@ -6,7 +6,7 @@
 - **Web:** Next.js 16 App Router and React 19 in `apps/web`.
 - **API:** NestJS 11 in `apps/api`.
 - **Database:** PostgreSQL accessed with Drizzle ORM.
-- **Files:** MinIO-compatible object storage, configured through API environment variables.
+- **Files:** SeaweedFS object storage through its S3-compatible API, configured through provider-neutral API environment variables.
 - **Shared domain code:** `packages/shared`.
 
 The repository is the implementation source of truth. Reference PDFs include an older Java/Spring design; do not treat those technologies or service boundaries as implemented here.

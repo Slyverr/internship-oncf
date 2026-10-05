@@ -96,7 +96,7 @@ Coverage includes:
 
 ## Continuation notes
 
-- Preserve the Bun/Turborepo, NestJS, Next.js, PostgreSQL, Drizzle, and MinIO stack; do not substitute the older Java stack from reference material.
+- Preserve the Bun/Turborepo, NestJS, Next.js, PostgreSQL, and Drizzle stack; use SeaweedFS through S3 for file storage. Do not substitute the older Java stack from reference material.
 - Agent resource scope must intersect assigned customer IDs; an empty portfolio returns no customer-scoped records. Client representatives remain within their linked customer and ownership rules.
 - Keep user-facing copy in English and use **ECommand** as the product name. Preserve technical identifiers such as `ecommand` package/database names.
 - Do not create migrations while the model is intentionally unstable. `db:push` is for disposable local or E2E databases only.

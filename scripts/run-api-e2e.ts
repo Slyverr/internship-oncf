@@ -7,7 +7,9 @@ const webDir = resolve(rootDir, "apps/web");
 const jestExecutable = resolve(rootDir, "node_modules/jest/bin/jest.js");
 const composeFile = resolve(rootDir, "docker-compose.e2e.yml");
 const postgresPort = Number(process.env.ECOMMAND_E2E_POSTGRES_PORT ?? "55432");
-const minioPort = Number(process.env.ECOMMAND_E2E_MINIO_PORT ?? "59000");
+const objectStoragePort = Number(
+	process.env.ECOMMAND_E2E_OBJECT_STORAGE_PORT ?? "58333",
+);
 const browserOnly = process.argv.includes("--browser-only");
 
 const e2eEnv = {
@@ -20,12 +22,11 @@ const e2eEnv = {
 		.filter(Boolean)
 		.join(delimiter),
 	DATABASE_URL: `postgresql://postgres:postgres@127.0.0.1:${postgresPort}/ecommand_e2e`,
-	MINIO_ENDPOINT: "127.0.0.1",
-	MINIO_PORT: String(minioPort),
-	MINIO_USE_SSL: "false",
-	MINIO_ACCESS_KEY: "minioadmin",
-	MINIO_SECRET_KEY: "minioadmin",
-	MINIO_BUCKET: "ecommand-e2e",
+	OBJECT_STORAGE_ENDPOINT: `http://127.0.0.1:${objectStoragePort}`,
+	OBJECT_STORAGE_REGION: "us-east-1",
+	OBJECT_STORAGE_ACCESS_KEY: "ecommandtest",
+	OBJECT_STORAGE_SECRET_KEY: "ecommand-test-secret",
+	OBJECT_STORAGE_BUCKET: "ecommand-e2e",
 	JWT_SECRET: "ecommand-e2e-test-secret-not-for-production",
 	JWT_EXPIRES_IN: "30m",
 	AUTH_LOGIN_MAX_ATTEMPTS: "3",
@@ -211,7 +212,7 @@ try {
 		env: process.env,
 		quiet: true,
 	});
-	await run([...composeArgs, "up", "-d", "postgres-e2e", "minio-e2e"]);
+	await run([...composeArgs, "up", "-d", "postgres-e2e", "seaweedfs-e2e"]);
 	if (!browserOnly) {
 		await run(
 			[

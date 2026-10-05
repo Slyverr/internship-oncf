@@ -1,10 +1,10 @@
 # ECommand API
 
-NestJS REST API for ECommand. It uses PostgreSQL through Drizzle ORM and MinIO for order attachments.
+NestJS REST API for ECommand. It uses PostgreSQL through Drizzle ORM and SeaweedFS through its S3 API for file attachments.
 
 ## Local development
 
-From the repository root, copy `apps/api/.env.example` to `apps/api/.env`, set a private `JWT_SECRET`, and start PostgreSQL and MinIO with `podman compose up -d postgres minio` (or `docker compose`). Then run:
+From the repository root, copy `apps/api/.env.example` to `apps/api/.env`, set a private `JWT_SECRET`, and start PostgreSQL and SeaweedFS with `podman compose up -d postgres seaweedfs` (or `docker compose`). Then run:
 
 ```sh
 cd apps/api
