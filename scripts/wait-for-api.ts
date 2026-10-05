@@ -6,6 +6,8 @@ const startupTimeoutMs = 60_000;
 const requestTimeoutMs = 1_000;
 const pollIntervalMs = 500;
 
+type Fetcher = (...args: Parameters<typeof fetch>) => ReturnType<typeof fetch>;
+
 export async function waitForApi(
 	url: string,
 	{
@@ -15,7 +17,7 @@ export async function waitForApi(
 	}: {
 		timeoutMs?: number;
 		pollIntervalMs?: number;
-		fetcher?: typeof fetch;
+		fetcher?: Fetcher;
 	} = {},
 ) {
 	const deadline = Date.now() + timeoutMs;

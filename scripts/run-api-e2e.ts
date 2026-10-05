@@ -12,7 +12,7 @@ const objectStoragePort = Number(
 );
 const browserOnly = process.argv.includes("--browser-only");
 
-const e2eEnv = {
+const e2eEnv: Record<string, string | undefined> = {
 	...process.env,
 	PATH: [
 		resolve(rootDir, "node_modules/.bin"),
@@ -85,18 +85,22 @@ async function findComposeCommand() {
 	);
 }
 
-const nodeExecutable = process.env.ECOMMAND_E2E_NODE ?? Bun.which("node");
+function resolveNodeExecutable(): string {
+	const executable = process.env.ECOMMAND_E2E_NODE ?? Bun.which("node");
+	if (!executable) {
+		throw new Error(
+			"Node.js is required to run Jest E2E tests. Put node on PATH or set ECOMMAND_E2E_NODE to its executable path.",
+		);
+	}
+	return executable;
+}
+
+const nodeExecutable = resolveNodeExecutable();
 const tsxExecutable = resolve(rootDir, "node_modules/tsx/dist/cli.mjs");
 const drizzleKitExecutable = resolve(
 	rootDir,
 	"node_modules/drizzle-kit/bin.cjs",
 );
-
-if (!nodeExecutable) {
-	throw new Error(
-		"Node.js is required to run Jest E2E tests. Put node on PATH or set ECOMMAND_E2E_NODE to its executable path.",
-	);
-}
 
 if (
 	await commandWorks([
@@ -145,7 +149,7 @@ async function stopServer(process: Bun.Subprocess) {
 
 async function runBrowserWorkflows() {
 	const buildDir = ".next-e2e";
-	const browserEnv = {
+	const browserEnv: Record<string, string | undefined> = {
 		...e2eEnv,
 		NESTJS_PORT: "8100",
 		WEB_APP_URL: "http://localhost:3100",
