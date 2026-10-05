@@ -25,6 +25,13 @@ const defaultViewports: Viewport[] = [
 
 const args = process.argv.slice(2);
 const route = readOption("--url");
+const loginUser = readOption("--login-user");
+const loginPassword =
+	// biome-ignore lint/suspicious/noUndeclaredEnvVars: This helper runs directly, outside Turbo tasks and their caches.
+	Bun.env.ECOMMAND_SCREENSHOT_PASSWORD ?? readOption("--login-password");
+const apiUrl = readOption("--api-url") ?? "http://localhost:8000";
+const requestedTheme = readOption("--theme");
+const requestedWorkspaceLayout = readOption("--workspace-layout");
 const thenUrl = readOption("--then-url");
 const expectedRoute = readOption("--expect-route");
 const requestedTargetId = readOption("--target-id");
@@ -39,6 +46,7 @@ const label = (
 ).replace(/[^a-zA-Z0-9_.-]/g, "-");
 const cdpUrl = readOption("--cdp") ?? "http://localhost:9235";
 const freshContext = args.includes("--fresh-context");
+const allowRedirect = args.includes("--allow-redirect");
 const reusePage = args.includes("--reuse-page");
 const scrollY = Number(readOption("--scroll-y") ?? "0");
 const actionsFirstViewportOnly = args.includes("--actions-first-viewport");
@@ -62,6 +70,41 @@ const viewports = requestedWidths
 		}))
 	: defaultViewports;
 
+const supportedThemes = ["system", "light", "dark", "mono-light", "mono-dark"];
+const supportedWorkspaceLayouts = ["sidebar", "centered-header"];
+if (requestedTheme && !supportedThemes.includes(requestedTheme)) {
+	throw new Error(`Unsupported theme: ${requestedTheme}`);
+}
+if (
+	requestedWorkspaceLayout &&
+	!supportedWorkspaceLayouts.includes(requestedWorkspaceLayout)
+) {
+	throw new Error(`Unsupported workspace layout: ${requestedWorkspaceLayout}`);
+}
+
+let accessToken: string | undefined;
+if (loginUser) {
+	if (!loginPassword) {
+		throw new Error(
+			"Set ECOMMAND_SCREENSHOT_PASSWORD or provide --login-password when using --login-user.",
+		);
+	}
+	const loginResponse = await fetch(new URL("/auth/login", apiUrl), {
+		method: "POST",
+		headers: { "content-type": "application/json" },
+		body: JSON.stringify({ username: loginUser, password: loginPassword }),
+	});
+	const loginData = (await loginResponse.json().catch(() => ({}))) as {
+		access_token?: string;
+	};
+	if (!loginResponse.ok || !loginData.access_token) {
+		throw new Error(
+			`Could not sign in ${loginUser} for screenshot capture (HTTP ${loginResponse.status}).`,
+		);
+	}
+	accessToken = loginData.access_token;
+}
+
 if (args.includes("--help")) {
 	console.log(`Capture the current ECommand browser page across responsive viewports.
 
@@ -69,6 +112,11 @@ Usage: bun run ui:review -- [options]
   --url <path-or-url>    Route to capture; defaults to the current browser URL
   --target-id <id>       Select a specific page from the Chrome DevTools target list
   --fresh-context        Use an isolated browser profile without saved app login
+  --allow-redirect       Capture the destination if the app redirects from --url
+  --login-user <email>   Sign in an isolated capture profile through the local API
+  --api-url <url>        API origin for --login-user (default: http://localhost:8000)
+  --theme <name>         Preview a theme without changing saved preferences
+  --workspace-layout <name> Preview a layout without changing saved preferences
   --fill <selector=value> Set a form field and dispatch input/change events (repeatable)
   --click-before-fill <selector> Click before filling fields (repeatable)
   --click-text-before-fill <text> Click a visible control by exact text before filling
@@ -126,14 +174,16 @@ const originalTarget =
 		: undefined) ??
 	pageTargets.find((target) => target.url.startsWith(appOrigin));
 if (!originalTarget) {
-	throw new Error(
-		requestedTargetId
-			? `No Chrome page target was found with id ${requestedTargetId}.`
-			: "No open web page was found in the Chrome session.",
-	);
+	if (!freshContext) {
+		throw new Error(
+			requestedTargetId
+				? `No Chrome page target was found with id ${requestedTargetId}.`
+				: "No open web page was found in the Chrome session.",
+		);
+	}
 }
 
-const initialUrl = originalTarget.url;
+const initialUrl = originalTarget?.url ?? appOrigin;
 const baseUrl = route ? new URL(route, initialUrl).href : initialUrl;
 let captureTarget = originalTarget;
 let isolatedContextId: string | undefined;
@@ -212,6 +262,10 @@ if (freshContext) {
 	}
 	if (captureTarget === originalTarget)
 		throw new Error("The isolated browser tab did not become available.");
+}
+
+if (!captureTarget) {
+	throw new Error("No browser page is available to capture.");
 }
 
 const socket = new WebSocket(captureTarget.webSocketDebuggerUrl);
@@ -366,6 +420,65 @@ async function navigate(url: string) {
 }
 
 await Promise.all([call("Page.enable"), call("Runtime.enable")]);
+if (accessToken) {
+	await call("Network.enable");
+	await call("Network.setCookie", {
+		name: "access_token",
+		value: accessToken,
+		url: appOrigin,
+		httpOnly: true,
+		sameSite: "Lax",
+	});
+}
+
+if (requestedTheme || requestedWorkspaceLayout) {
+	const previewPreferences = {
+		theme: requestedTheme ?? "system",
+		fontFamily: "inter",
+		textSize: "default",
+		motion: "system",
+		workspaceLayout: requestedWorkspaceLayout ?? "sidebar",
+		updatedAt: new Date().toISOString(),
+	};
+	await call("Fetch.enable", {
+		patterns: [
+			{
+				urlPattern: "*://*/api/proxy/profile/preferences*",
+				requestStage: "Request",
+			},
+		],
+	});
+	eventListeners.set("Fetch.requestPaused", [
+		({ params }) => {
+			const request = params?.request as
+				| { url?: string; method?: string }
+				| undefined;
+			const requestId = params?.requestId as string | undefined;
+			if (!requestId) return;
+			const isPreferencesRead =
+				request?.method === "GET" &&
+				request.url?.includes("/api/proxy/profile/preferences");
+			const method = isPreferencesRead
+				? "Fetch.fulfillRequest"
+				: "Fetch.continueRequest";
+			const paramsForCall = isPreferencesRead
+				? {
+						requestId,
+						responseCode: 200,
+						responseHeaders: [
+							{ name: "content-type", value: "application/json" },
+						],
+						body: Buffer.from(JSON.stringify(previewPreferences)).toString(
+							"base64",
+						),
+					}
+				: { requestId };
+			void call(method, paramsForCall).catch((error: unknown) => {
+				console.error("Could not fulfill appearance preview request:", error);
+			});
+		},
+	]);
+}
 await mkdir(outputDirectory, { recursive: true });
 
 type CaptureResult = {
@@ -407,7 +520,7 @@ try {
 					if (routeLoaded) break;
 					await Bun.sleep(100);
 				}
-				if (!routeLoaded) {
+				if (!routeLoaded && !allowRedirect) {
 					const pageState = await evaluate<string>(
 						`JSON.stringify({ url: location.href, readyState: document.readyState, title: document.title })`,
 					);
