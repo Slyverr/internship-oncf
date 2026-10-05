@@ -29,10 +29,7 @@ export const claimTypes = pgTable(
 			.notNull(),
 		isActive: boolean("is_active").default(true).notNull(),
 	},
-	(table) => [
-		unique("claim_types_name_key").on(table.name),
-		index("idx_claim_types_name").on(table.name),
-	],
+	(table) => [unique("claim_types_name_key").on(table.name)],
 );
 
 export const claimStatus = pgTable(
@@ -45,10 +42,7 @@ export const claimStatus = pgTable(
 			.notNull(),
 		isActive: boolean("is_active").default(true).notNull(),
 	},
-	(table) => [
-		unique("claim_status_name_key").on(table.name),
-		index("idx_claim_status_name").on(table.name),
-	],
+	(table) => [unique("claim_status_name_key").on(table.name)],
 );
 
 export const claims = pgTable(
@@ -74,7 +68,8 @@ export const claims = pgTable(
 			.notNull(),
 		updatedAt: timestamp("updated_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
-			.notNull(),
+			.notNull()
+			.$onUpdate(() => new Date().toISOString()),
 		closedByUserId: bigint("closed_by_user_id", { mode: "number" }),
 		closedAt: timestamp("closed_at", { mode: "string" }),
 	},

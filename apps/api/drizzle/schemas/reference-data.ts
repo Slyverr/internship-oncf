@@ -26,13 +26,13 @@ export const stations = pgTable(
 			.notNull(),
 		updatedAt: timestamp("updated_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
-			.notNull(),
+			.notNull()
+			.$onUpdate(() => new Date().toISOString()),
 		isActive: boolean("is_active").default(true).notNull(),
 	},
 	(table) => [
 		unique("stations_name_key").on(table.name),
 		unique("stations_station_code_key").on(table.stationCode),
-		index("idx_stations_name").on(table.name),
 		index("idx_stations_city").on(table.city),
 		index("idx_stations_active").on(table.isActive),
 	],
@@ -51,7 +51,8 @@ export const ports = pgTable(
 			.notNull(),
 		updatedAt: timestamp("updated_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
-			.notNull(),
+			.notNull()
+			.$onUpdate(() => new Date().toISOString()),
 		isActive: boolean("is_active").default(true).notNull(),
 	},
 	(table) => [
@@ -65,7 +66,6 @@ export const ports = pgTable(
 			"ports_type_check",
 			sql`(${table.type})::text = ANY (ARRAY['normal'::text, 'dry'::text])`,
 		),
-		index("idx_ports_name").on(table.name),
 		index("idx_ports_type").on(table.type),
 		index("idx_ports_city").on(table.city),
 		index("idx_ports_station").on(table.stationId),
@@ -84,7 +84,8 @@ export const berths = pgTable(
 			.notNull(),
 		updatedAt: timestamp("updated_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
-			.notNull(),
+			.notNull()
+			.$onUpdate(() => new Date().toISOString()),
 		isActive: boolean("is_active").default(true).notNull(),
 	},
 	(table) => [
@@ -114,7 +115,8 @@ export const loadingLocations = pgTable(
 			.notNull(),
 		updatedAt: timestamp("updated_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
-			.notNull(),
+			.notNull()
+			.$onUpdate(() => new Date().toISOString()),
 		isActive: boolean("is_active").default(true).notNull(),
 	},
 	(table) => [
@@ -140,12 +142,12 @@ export const sidings = pgTable(
 			.notNull(),
 		updatedAt: timestamp("updated_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
-			.notNull(),
+			.notNull()
+			.$onUpdate(() => new Date().toISOString()),
 		isActive: boolean("is_active").default(true).notNull(),
 	},
 	(table) => [
 		unique("sidings_name_key").on(table.name),
-		index("idx_sidings_name").on(table.name),
 		index("idx_sidings_city").on(table.city),
 		index("idx_sidings_active").on(table.isActive),
 	],
@@ -161,10 +163,7 @@ export const accessoryOperations = pgTable(
 			.notNull(),
 		isActive: boolean("is_active").default(true).notNull(),
 	},
-	(table) => [
-		unique("accessory_operations_name_key").on(table.name),
-		index("idx_accessory_operations_name").on(table.name),
-	],
+	(table) => [unique("accessory_operations_name_key").on(table.name)],
 );
 
 export const rejectionReasons = pgTable(
@@ -177,10 +176,7 @@ export const rejectionReasons = pgTable(
 			.notNull(),
 		isActive: boolean("is_active").default(true).notNull(),
 	},
-	(table) => [
-		unique("rejection_reasons_name_key").on(table.name),
-		index("idx_rejection_reasons_name").on(table.name),
-	],
+	(table) => [unique("rejection_reasons_name_key").on(table.name)],
 );
 
 export const movementTypes = pgTable(
@@ -194,10 +190,7 @@ export const movementTypes = pgTable(
 			.notNull(),
 		isActive: boolean("is_active").default(true).notNull(),
 	},
-	(table) => [
-		unique("movement_types_name_key").on(table.name),
-		index("idx_movement_types_name").on(table.name),
-	],
+	(table) => [unique("movement_types_name_key").on(table.name)],
 );
 
 export const pickupLocationTypes = pgTable(
@@ -211,10 +204,7 @@ export const pickupLocationTypes = pgTable(
 			.notNull(),
 		isActive: boolean("is_active").default(true).notNull(),
 	},
-	(table) => [
-		unique("pickup_location_types_name_key").on(table.name),
-		index("idx_pickup_location_types_name").on(table.name),
-	],
+	(table) => [unique("pickup_location_types_name_key").on(table.name)],
 );
 
 export const dispatchTypes = pgTable(
@@ -228,10 +218,7 @@ export const dispatchTypes = pgTable(
 			.notNull(),
 		isActive: boolean("is_active").default(true).notNull(),
 	},
-	(table) => [
-		unique("dispatch_types_name_key").on(table.name),
-		index("idx_dispatch_types_name").on(table.name),
-	],
+	(table) => [unique("dispatch_types_name_key").on(table.name)],
 );
 
 export const vessels = pgTable(
@@ -245,11 +232,11 @@ export const vessels = pgTable(
 			.notNull(),
 		updatedAt: timestamp("updated_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
-			.notNull(),
+			.notNull()
+			.$onUpdate(() => new Date().toISOString()),
 	},
 	(table) => [
 		unique("vessels_name_key").on(table.name),
-		index("idx_vessels_name").on(table.name),
 		index("idx_vessels_active").on(table.isActive),
 	],
 );
@@ -265,11 +252,11 @@ export const importers = pgTable(
 			.notNull(),
 		updatedAt: timestamp("updated_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
-			.notNull(),
+			.notNull()
+			.$onUpdate(() => new Date().toISOString()),
 	},
 	(table) => [
 		unique("importers_name_key").on(table.name),
-		index("idx_importers_name").on(table.name),
 		index("idx_importers_active").on(table.isActive),
 	],
 );
@@ -285,11 +272,11 @@ export const representatives = pgTable(
 			.notNull(),
 		updatedAt: timestamp("updated_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
-			.notNull(),
+			.notNull()
+			.$onUpdate(() => new Date().toISOString()),
 	},
 	(table) => [
 		unique("representatives_name_key").on(table.name),
-		index("idx_representatives_name").on(table.name),
 		index("idx_representatives_active").on(table.isActive),
 	],
 );
@@ -305,11 +292,11 @@ export const shippingCompanies = pgTable(
 			.notNull(),
 		updatedAt: timestamp("updated_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
-			.notNull(),
+			.notNull()
+			.$onUpdate(() => new Date().toISOString()),
 	},
 	(table) => [
 		unique("shipping_companies_name_key").on(table.name),
-		index("idx_shipping_companies_name").on(table.name),
 		index("idx_shipping_companies_active").on(table.isActive),
 	],
 );

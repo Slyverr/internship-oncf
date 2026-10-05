@@ -30,14 +30,13 @@ export const wagons = pgTable(
 			.notNull(),
 		updatedAt: timestamp("updated_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
-			.notNull(),
+			.notNull()
+			.$onUpdate(() => new Date().toISOString()),
 		isActive: boolean("is_active").default(true).notNull(),
 	},
 	(table) => [
 		unique("wagons_external_id_key").on(table.externalId),
 		unique("wagons_wagon_number_key").on(table.wagonNumber),
-		index("idx_wagons_external").on(table.externalId),
-		index("idx_wagons_number").on(table.wagonNumber),
 		index("idx_wagons_type").on(table.type),
 		index("idx_wagons_active").on(table.isActive),
 	],
@@ -55,14 +54,13 @@ export const trains = pgTable(
 			.notNull(),
 		updatedAt: timestamp("updated_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
-			.notNull(),
+			.notNull()
+			.$onUpdate(() => new Date().toISOString()),
 		isActive: boolean("is_active").default(true).notNull(),
 	},
 	(table) => [
 		unique("trains_external_id_key").on(table.externalId),
 		unique("trains_train_number_key").on(table.trainNumber),
-		index("idx_trains_external").on(table.externalId),
-		index("idx_trains_number").on(table.trainNumber),
 		index("idx_trains_status").on(table.status),
 		index("idx_trains_active").on(table.isActive),
 	],
@@ -306,7 +304,8 @@ export const programConvoi = pgTable(
 			.notNull(),
 		updatedAt: timestamp("updated_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
-			.notNull(),
+			.notNull()
+			.$onUpdate(() => new Date().toISOString()),
 	},
 	(table) => [
 		unique("program_convoi_forecast_program_id_train_id_key").on(

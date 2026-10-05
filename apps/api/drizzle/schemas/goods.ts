@@ -22,10 +22,7 @@ export const goodsTypes = pgTable(
 			.notNull(),
 		isActive: boolean("is_active").default(true).notNull(),
 	},
-	(table) => [
-		unique("goods_types_name_key").on(table.name),
-		index("idx_goods_types_name").on(table.name),
-	],
+	(table) => [unique("goods_types_name_key").on(table.name)],
 );
 
 export const goods = pgTable(
@@ -40,7 +37,8 @@ export const goods = pgTable(
 			.notNull(),
 		updatedAt: timestamp("updated_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
-			.notNull(),
+			.notNull()
+			.$onUpdate(() => new Date().toISOString()),
 		isActive: boolean("is_active").default(true).notNull(),
 	},
 	(table) => [
@@ -69,10 +67,7 @@ export const units = pgTable(
 			.notNull(),
 		isActive: boolean("is_active").default(true).notNull(),
 	},
-	(table) => [
-		unique("units_name_key").on(table.name),
-		index("idx_units_name").on(table.name),
-	],
+	(table) => [unique("units_name_key").on(table.name)],
 );
 
 export const attributes = pgTable(
@@ -92,7 +87,6 @@ export const attributes = pgTable(
 			"attributes_data_type_check",
 			sql`(${table.dataType})::text = ANY (ARRAY['string'::text, 'number'::text, 'date'::text, 'boolean'::text, 'decimal'::text])`,
 		),
-		index("idx_attributes_name").on(table.name),
 		index("idx_attributes_type").on(table.dataType),
 	],
 );

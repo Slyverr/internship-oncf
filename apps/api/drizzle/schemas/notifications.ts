@@ -31,7 +31,6 @@ export const notificationTypes = pgTable(
 	},
 	(table) => [
 		unique("notification_types_name_key").on(table.name),
-		index("idx_notification_types_name").on(table.name),
 		index("idx_notification_types_active").on(table.isActive),
 	],
 );
@@ -48,7 +47,6 @@ export const notificationChannels = pgTable(
 	},
 	(table) => [
 		unique("notification_channels_name_key").on(table.name),
-		index("idx_notification_channels_name").on(table.name),
 		index("idx_notification_channels_active").on(table.isActive),
 	],
 );

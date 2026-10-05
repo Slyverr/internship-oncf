@@ -39,10 +39,7 @@ export const orderStatus = pgTable(
 			.notNull(),
 		isActive: boolean("is_active").default(true).notNull(),
 	},
-	(table) => [
-		unique("order_status_name_key").on(table.name),
-		index("idx_order_status_name").on(table.name),
-	],
+	(table) => [unique("order_status_name_key").on(table.name)],
 );
 
 export const orders = pgTable(
@@ -92,7 +89,8 @@ export const orders = pgTable(
 			.notNull(),
 		updatedAt: timestamp("updated_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
-			.notNull(),
+			.notNull()
+			.$onUpdate(() => new Date().toISOString()),
 	},
 	(table) => [
 		unique("orders_order_number_key").on(table.orderNumber),
@@ -196,9 +194,6 @@ export const orders = pgTable(
 			foreignColumns: [sidings.id],
 			name: "orders_delivery_siding_id_fkey",
 		}),
-		index("idx_orders_number")
-			.on(table.orderNumber)
-			.where(sql`order_number IS NOT NULL`),
 		index("idx_orders_goods").on(table.goodsId),
 		index("idx_orders_customer").on(table.customerId),
 		index("idx_orders_created_by_user").on(table.createdByUserId),
@@ -318,7 +313,8 @@ export const orderAccessoryOperations = pgTable(
 			.notNull(),
 		updatedAt: timestamp("updated_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
-			.notNull(),
+			.notNull()
+			.$onUpdate(() => new Date().toISOString()),
 	},
 	(table) => [
 		foreignKey({

@@ -276,7 +276,6 @@ describe("UsersQuery registration review", () => {
 				expect.objectContaining({
 					registrationStatus: status,
 					isActive,
-					updatedAt: expect.any(String),
 				}),
 			);
 			expect(where).toHaveBeenCalled();

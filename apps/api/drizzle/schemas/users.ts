@@ -47,7 +47,8 @@ export const roles = pgTable(
 			.notNull(),
 		updatedAt: timestamp("updated_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
-			.notNull(),
+			.notNull()
+			.$onUpdate(() => new Date().toISOString()),
 		isActive: boolean("is_active").default(true).notNull(),
 	},
 	(table) => [
@@ -62,7 +63,6 @@ export const roles = pgTable(
 				sql`, `,
 			)})`,
 		),
-		index("idx_roles_name").on(table.name),
 		index("idx_roles_active").on(table.isActive),
 	],
 );
@@ -86,7 +86,6 @@ export const permissions = pgTable(
 			name: "permissions_parent_id_fkey",
 		}).onDelete("set null"),
 		unique("permissions_name_key").on(table.name),
-		index("idx_permissions_name").on(table.name),
 		index("idx_permissions_parent_id").on(table.parentId),
 	],
 );
@@ -147,7 +146,8 @@ export const users = pgTable(
 			.notNull(),
 		updatedAt: timestamp("updated_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
-			.notNull(),
+			.notNull()
+			.$onUpdate(() => new Date().toISOString()),
 		isActive: boolean("is_active").default(true).notNull(),
 		lastLogin: timestamp("last_login", { mode: "string" }),
 	},
@@ -179,7 +179,6 @@ export const users = pgTable(
 			"users_registration_status_check",
 			sql`${table.registrationStatus} IN ('PENDING', 'APPROVED', 'REJECTED')`,
 		),
-		index("idx_users_email").on(table.email),
 		index("idx_users_employee_code").on(table.employeeCode),
 		index("idx_users_type").on(table.type),
 		index("idx_users_role").on(table.roleId),
@@ -216,7 +215,8 @@ export const userPreferences = pgTable(
 			.notNull(),
 		updatedAt: timestamp("updated_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
-			.notNull(),
+			.notNull()
+			.$onUpdate(() => new Date().toISOString()),
 	},
 	(table) => [
 		primaryKey({ columns: [table.userId], name: "user_preferences_pkey" }),
@@ -306,7 +306,6 @@ export const userSessions = pgTable(
 			name: "user_sessions_user_id_fkey",
 		}).onDelete("cascade"),
 		index("idx_user_sessions_user").on(table.userId),
-		index("idx_user_sessions_token").on(table.sessionToken),
 		index("idx_user_sessions_expired").on(table.expiredAt),
 		index("idx_user_sessions_expired_cleanup")
 			.on(table.expiredAt, table.logoutAt)
@@ -377,7 +376,6 @@ export const passwordResetTokens = pgTable(
 			foreignColumns: [users.id],
 			name: "password_reset_tokens_user_id_fkey",
 		}).onDelete("cascade"),
-		index("idx_password_reset_tokens_token").on(table.token),
 		index("idx_password_reset_tokens_user").on(table.userId),
 	],
 );

@@ -131,7 +131,6 @@ export class RolesQuery {
 				}),
 				...(input.persona !== undefined && { persona: input.persona }),
 				...(input.isActive !== undefined && { isActive: input.isActive }),
-				updatedAt: new Date().toISOString(),
 			};
 			const [updated] = await tx
 				.update(roles)

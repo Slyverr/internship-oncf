@@ -150,7 +150,6 @@ export class CatalogQuery {
 		id: number,
 		values: UpdateManagedReferenceDataDto,
 	) {
-		const updatedAt = new Date().toISOString();
 		switch (resource) {
 			case "stations":
 				return this.drizzle.db
@@ -161,7 +160,6 @@ export class CatalogQuery {
 						address: values.address ?? null,
 						city: values.city ?? null,
 						isActive: values.isActive,
-						updatedAt,
 					})
 					.where(eq(stations.id, id))
 					.returning();
@@ -175,7 +173,6 @@ export class CatalogQuery {
 						phone: values.phone ?? null,
 						email: values.email ?? null,
 						isActive: values.isActive,
-						updatedAt,
 					})
 					.where(eq(agencies.id, id))
 					.returning();
@@ -188,7 +185,6 @@ export class CatalogQuery {
 						city: values.city ?? null,
 						stationId: values.stationId ?? null,
 						isActive: values.isActive,
-						updatedAt,
 					})
 					.where(eq(ports.id, id))
 					.returning();
@@ -199,7 +195,6 @@ export class CatalogQuery {
 						name: values.name,
 						portId: values.portId as number,
 						isActive: values.isActive,
-						updatedAt,
 					})
 					.where(eq(berths.id, id))
 					.returning();
@@ -210,20 +205,19 @@ export class CatalogQuery {
 						name: values.name,
 						city: values.city ?? null,
 						isActive: values.isActive,
-						updatedAt,
 					})
 					.where(eq(sidings.id, id))
 					.returning();
 			case "vessels":
 				return this.drizzle.db
 					.update(vessels)
-					.set({ name: values.name, isActive: values.isActive, updatedAt })
+					.set({ name: values.name, isActive: values.isActive })
 					.where(eq(vessels.id, id))
 					.returning();
 			case "shippingCompanies":
 				return this.drizzle.db
 					.update(shippingCompanies)
-					.set({ name: values.name, isActive: values.isActive, updatedAt })
+					.set({ name: values.name, isActive: values.isActive })
 					.where(eq(shippingCompanies.id, id))
 					.returning();
 		}

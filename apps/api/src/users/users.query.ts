@@ -220,7 +220,6 @@ export class UsersQuery {
 			.set({
 				registrationStatus: status,
 				isActive: status === RegistrationStatus.APPROVED,
-				updatedAt: new Date().toISOString(),
 			})
 			.where(
 				and(

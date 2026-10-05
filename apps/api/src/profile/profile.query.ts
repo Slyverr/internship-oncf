@@ -89,7 +89,7 @@ export class ProfileQuery {
 			.values({ userId, ...values })
 			.onConflictDoUpdate({
 				target: userPreferences.userId,
-				set: { ...values, updatedAt: new Date().toISOString() },
+				set: values,
 			})
 			.returning({
 				theme: userPreferences.theme,

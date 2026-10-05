@@ -26,12 +26,12 @@ export const agencies = pgTable(
 			.notNull(),
 		updatedAt: timestamp("updated_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
-			.notNull(),
+			.notNull()
+			.$onUpdate(() => new Date().toISOString()),
 		isActive: boolean("is_active").default(true).notNull(),
 	},
 	(table) => [
 		unique("agencies_name_key").on(table.name),
-		index("idx_agencies_name").on(table.name),
 		index("idx_agencies_city").on(table.city),
 		index("idx_agencies_active").on(table.isActive),
 	],
@@ -48,7 +48,8 @@ export const centers = pgTable(
 			.notNull(),
 		updatedAt: timestamp("updated_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
-			.notNull(),
+			.notNull()
+			.$onUpdate(() => new Date().toISOString()),
 		isActive: boolean("is_active").default(true).notNull(),
 	},
 	(table) => [
@@ -73,10 +74,7 @@ export const customerTypes = pgTable(
 			.notNull(),
 		isActive: boolean("is_active").default(true).notNull(),
 	},
-	(table) => [
-		unique("customer_types_name_key").on(table.name),
-		index("idx_customer_types_name").on(table.name),
-	],
+	(table) => [unique("customer_types_name_key").on(table.name)],
 );
 
 export const customers = pgTable(
@@ -96,7 +94,8 @@ export const customers = pgTable(
 			.notNull(),
 		updatedAt: timestamp("updated_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
-			.notNull(),
+			.notNull()
+			.$onUpdate(() => new Date().toISOString()),
 		isActive: boolean("is_active").default(true).notNull(),
 	},
 	(table) => [
@@ -130,7 +129,8 @@ export const customerParametrization = pgTable(
 			.notNull(),
 		updatedAt: timestamp("updated_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
-			.notNull(),
+			.notNull()
+			.$onUpdate(() => new Date().toISOString()),
 	},
 	(table) => [
 		unique(

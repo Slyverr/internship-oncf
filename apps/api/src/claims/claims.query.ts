@@ -346,7 +346,6 @@ export class ClaimsQuery {
 					.update(claims)
 					.set({
 						statusId: toStatusId,
-						updatedAt: new Date().toISOString(),
 					})
 					.where(and(eq(claims.id, claimId), eq(claims.statusId, fromStatusId)))
 					.returning({ id: claims.id });

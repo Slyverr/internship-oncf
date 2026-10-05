@@ -28,10 +28,7 @@ export const programStatus = pgTable(
 			.notNull(),
 		isActive: boolean("is_active").default(true).notNull(),
 	},
-	(table) => [
-		unique("program_status_name_key").on(table.name),
-		index("idx_program_status_name").on(table.name),
-	],
+	(table) => [unique("program_status_name_key").on(table.name)],
 );
 
 export const forecastPrograms = pgTable(
@@ -56,7 +53,8 @@ export const forecastPrograms = pgTable(
 			.notNull(),
 		updatedAt: timestamp("updated_at", { mode: "string" })
 			.default(sql`CURRENT_TIMESTAMP`)
-			.notNull(),
+			.notNull()
+			.$onUpdate(() => new Date().toISOString()),
 		sentToDtmAt: timestamp("sent_to_dtm_at", { mode: "string" }),
 		dtmStatus: varchar("dtm_status", { length: 50 }),
 	},

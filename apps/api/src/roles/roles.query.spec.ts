@@ -297,7 +297,6 @@ describe("RolesQuery", () => {
 			description: null,
 			persona: RolePersona.AGENT_COMMERCIAL,
 			isActive: true,
-			updatedAt: expect.any(String),
 		});
 		expect(activityValues).toHaveBeenCalledWith({
 			actorUserId: 7,

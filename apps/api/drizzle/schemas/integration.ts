@@ -59,7 +59,6 @@ export const dtmRequestTypes = pgTable(
 	},
 	(table) => [
 		unique("dtm_request_types_name_key").on(table.name),
-		index("idx_dtm_request_types_name").on(table.name),
 		index("idx_dtm_request_types_active").on(table.isActive),
 	],
 );
