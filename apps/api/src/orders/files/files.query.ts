@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { attachments, orderFiles } from "drizzle/schema";
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { DrizzleService } from "@/database/drizzle.service";
-import { withDbErrorHandling } from "@/database/drizzle.util";
+
 import type { OrderId } from "@/orders/orders.types";
 import type { OrderFileInsert, OrderFileView } from "./files.types";
 
@@ -11,10 +11,10 @@ export class FilesQuery {
 	constructor(private readonly drizzle: DrizzleService) {}
 
 	async createFile(values: OrderFileInsert) {
-		const [record] = await withDbErrorHandling(
-			() => this.drizzle.db.insert(orderFiles).values(values).returning(),
-			values,
-		);
+		const [record] = await this.drizzle.db
+			.insert(orderFiles)
+			.values(values)
+			.returning();
 		return record;
 	}
 

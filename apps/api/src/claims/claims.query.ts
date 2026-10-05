@@ -9,7 +9,7 @@ import {
 import { and, eq, type SQL } from "drizzle-orm";
 import { DrizzleService } from "@/database/drizzle.service";
 import { QueryColumns, QueryRelations } from "@/database/drizzle.types";
-import { withDbErrorHandling } from "@/database/drizzle.util";
+
 import type { NotificationInsert } from "@/notifications/notifications.types";
 import type {
 	ClaimId,
@@ -74,13 +74,12 @@ export class ClaimsQuery {
 	constructor(private readonly drizzle: DrizzleService) {}
 
 	async createClaim(values: ClaimInsert) {
-		const [created] = await withDbErrorHandling(
-			() =>
-				this.drizzle.db.insert(claims).values(values).returning({
-					id: claims.id,
-				}),
-			values,
-		);
+		const [created] = await this.drizzle.db
+			.insert(claims)
+			.values(values)
+			.returning({
+				id: claims.id,
+			});
 		return created;
 	}
 
@@ -281,31 +280,27 @@ export class ClaimsQuery {
 			notification?: NotificationInsert;
 		},
 	) {
-		const updated = await withDbErrorHandling(
-			() =>
-				this.drizzle.db.transaction(async (tx) => {
-					const [updatedClaim] = await tx
-						.update(claims)
-						.set(values)
-						.where(options?.where ?? eq(claims.id, id))
-						.returning({ id: claims.id });
-					if (!updatedClaim) return undefined;
+		const updated = await this.drizzle.db.transaction(async (tx) => {
+			const [updatedClaim] = await tx
+				.update(claims)
+				.set(values)
+				.where(options?.where ?? eq(claims.id, id))
+				.returning({ id: claims.id });
+			if (!updatedClaim) return undefined;
 
-					if (values.statusId !== undefined && options?.history) {
-						await tx.insert(claimStatusHistory).values({
-							claimId: id,
-							statusId: values.statusId,
-							changedByUserId: options.history.userId,
-							comment: options.history.comment ?? null,
-						});
-						if (options.notification) {
-							await tx.insert(notifications).values(options.notification);
-						}
-					}
-					return updatedClaim;
-				}),
-			values,
-		);
+			if (values.statusId !== undefined && options?.history) {
+				await tx.insert(claimStatusHistory).values({
+					claimId: id,
+					statusId: values.statusId,
+					changedByUserId: options.history.userId,
+					comment: options.history.comment ?? null,
+				});
+				if (options.notification) {
+					await tx.insert(notifications).values(options.notification);
+				}
+			}
+			return updatedClaim;
+		});
 
 		return updated;
 	}
@@ -334,53 +329,44 @@ export class ClaimsQuery {
 			notifications?: NotificationInsert[];
 		},
 	) {
-		const [comment] = await withDbErrorHandling(
-			() =>
-				this.drizzle.db.transaction(async (tx) => {
-					const [createdComment] = await tx
-						.insert(claimComments)
-						.values({
-							claimId,
-							authorUserId: userId,
-							comment: content,
-						})
-						.returning();
+		const [comment] = await this.drizzle.db.transaction(async (tx) => {
+			const [createdComment] = await tx
+				.insert(claimComments)
+				.values({
+					claimId,
+					authorUserId: userId,
+					comment: content,
+				})
+				.returning();
 
-					if (options?.statusTransition) {
-						const { fromStatusId, toStatusId, changedByUserId, comment } =
-							options.statusTransition;
-						const [updatedClaim] = await tx
-							.update(claims)
-							.set({
-								statusId: toStatusId,
-								updatedAt: new Date().toISOString(),
-							})
-							.where(
-								and(eq(claims.id, claimId), eq(claims.statusId, fromStatusId)),
-							)
-							.returning({ id: claims.id });
+			if (options?.statusTransition) {
+				const { fromStatusId, toStatusId, changedByUserId, comment } =
+					options.statusTransition;
+				const [updatedClaim] = await tx
+					.update(claims)
+					.set({
+						statusId: toStatusId,
+						updatedAt: new Date().toISOString(),
+					})
+					.where(and(eq(claims.id, claimId), eq(claims.statusId, fromStatusId)))
+					.returning({ id: claims.id });
 
-						if (updatedClaim) {
-							await tx.insert(claimStatusHistory).values({
-								claimId,
-								statusId: toStatusId,
-								changedByUserId,
-								comment: comment ?? null,
-							});
-						}
-					}
+				if (updatedClaim) {
+					await tx.insert(claimStatusHistory).values({
+						claimId,
+						statusId: toStatusId,
+						changedByUserId,
+						comment: comment ?? null,
+					});
+				}
+			}
 
-					if (options?.notifications?.length) {
-						await tx.insert(notifications).values(options.notifications);
-					}
+			if (options?.notifications?.length) {
+				await tx.insert(notifications).values(options.notifications);
+			}
 
-					return [createdComment];
-				}),
-			{
-				claimId,
-				content,
-			},
-		);
+			return [createdComment];
+		});
 		return comment;
 	}
 

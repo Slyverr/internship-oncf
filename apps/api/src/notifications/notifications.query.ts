@@ -4,7 +4,7 @@ import { notifications } from "drizzle/schema";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { DrizzleService } from "@/database/drizzle.service";
 import { QueryColumns, QueryRelations } from "@/database/drizzle.types";
-import { withDbErrorHandling } from "@/database/drizzle.util";
+
 import { NOTIFICATION_CHANNELS } from "@/database/reference-data";
 import type { NotificationId, NotificationInsert } from "./notifications.types";
 
@@ -68,13 +68,12 @@ export class NotificationsQuery {
 	constructor(private readonly drizzle: DrizzleService) {}
 
 	async createNotification(values: NotificationInsert) {
-		const [created] = await withDbErrorHandling(
-			() =>
-				this.drizzle.db.insert(notifications).values(values).returning({
-					id: notifications.id,
-				}),
-			values,
-		);
+		const [created] = await this.drizzle.db
+			.insert(notifications)
+			.values(values)
+			.returning({
+				id: notifications.id,
+			});
 		return created;
 	}
 
@@ -198,27 +197,20 @@ export class NotificationsQuery {
 	}
 
 	async updateNotificationRead(id: NotificationId, userId: number) {
-		const [updated] = await withDbErrorHandling(
-			() =>
-				this.drizzle.db
-					.update(notifications)
-					.set({
-						readAt: new Date().toISOString(),
-					})
-					.where(
-						and(
-							eq(notifications.id, id),
-							eq(notifications.recipientUserId, userId),
-						),
-					)
-					.returning({
-						id: notifications.id,
-					}),
-			{
-				id,
-				userId,
-			},
-		);
+		const [updated] = await this.drizzle.db
+			.update(notifications)
+			.set({
+				readAt: new Date().toISOString(),
+			})
+			.where(
+				and(
+					eq(notifications.id, id),
+					eq(notifications.recipientUserId, userId),
+				),
+			)
+			.returning({
+				id: notifications.id,
+			});
 		return updated;
 	}
 
@@ -245,42 +237,31 @@ export class NotificationsQuery {
 	}
 
 	async markNotificationAsSent(id: NotificationId) {
-		const [updated] = await withDbErrorHandling(
-			() =>
-				this.drizzle.db
-					.update(notifications)
-					.set({
-						status: "SENT",
-						sentAt: new Date().toISOString(),
-					})
-					.where(eq(notifications.id, id))
-					.returning({
-						id: notifications.id,
-					}),
-			{ id },
-		);
+		const [updated] = await this.drizzle.db
+			.update(notifications)
+			.set({
+				status: "SENT",
+				sentAt: new Date().toISOString(),
+			})
+			.where(eq(notifications.id, id))
+			.returning({
+				id: notifications.id,
+			});
 		return updated;
 	}
 
 	async markNotificationAsFailed(id: NotificationId, error: string) {
-		const [updated] = await withDbErrorHandling(
-			() =>
-				this.drizzle.db
-					.update(notifications)
-					.set({
-						status: "FAILED",
-						errorMessage: error,
-						retryCount: sql`${notifications.retryCount} + 1`,
-					})
-					.where(eq(notifications.id, id))
-					.returning({
-						id: notifications.id,
-					}),
-			{
-				id,
-				error,
-			},
-		);
+		const [updated] = await this.drizzle.db
+			.update(notifications)
+			.set({
+				status: "FAILED",
+				errorMessage: error,
+				retryCount: sql`${notifications.retryCount} + 1`,
+			})
+			.where(eq(notifications.id, id))
+			.returning({
+				id: notifications.id,
+			});
 		return updated;
 	}
 }

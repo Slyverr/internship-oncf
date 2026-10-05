@@ -3,7 +3,7 @@ import { trains, trainTracking, wagonTracking } from "drizzle/schema";
 import { eq } from "drizzle-orm";
 import { DrizzleService } from "@/database/drizzle.service";
 import { QueryColumns, QueryRelations } from "@/database/drizzle.types";
-import { withDbErrorHandling } from "@/database/drizzle.util";
+
 import type { TrainId, WagonId, WagonTrackingInsert } from "./tracking.types";
 
 type TrainsColumns = QueryColumns<"trains">;
@@ -143,10 +143,10 @@ export class TrackingQuery {
 	}
 
 	async createWagonTracking(values: WagonTrackingInsert) {
-		const [position] = await withDbErrorHandling(
-			() => this.drizzle.db.insert(wagonTracking).values(values).returning(),
-			values,
-		);
+		const [position] = await this.drizzle.db
+			.insert(wagonTracking)
+			.values(values)
+			.returning();
 		return position;
 	}
 
@@ -156,19 +156,15 @@ export class TrackingQuery {
 		dto: { latitude: string; longitude: string; status: string },
 	) {
 		return this.drizzle.db.transaction(async (tx) => {
-			const [position] = await withDbErrorHandling(
-				() =>
-					tx
-						.insert(trainTracking)
-						.values({
-							trainId: id,
-							latitude: dto.latitude,
-							longitude: dto.longitude,
-							status: dto.status,
-						})
-						.returning(),
-				dto,
-			);
+			const [position] = await tx
+				.insert(trainTracking)
+				.values({
+					trainId: id,
+					latitude: dto.latitude,
+					longitude: dto.longitude,
+					status: dto.status,
+				})
+				.returning();
 
 			await tx
 				.update(trains)

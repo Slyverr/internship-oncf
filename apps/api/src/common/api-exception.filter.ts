@@ -14,6 +14,7 @@ import {
 } from "@nestjs/common";
 import type { ValidationError } from "class-validator";
 import type { Response } from "express";
+import { constraintHandlers } from "../database/constraints";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -125,6 +126,18 @@ export function toValidationDetails(errors: ValidationError[]) {
 @Catch()
 export class ApiExceptionFilter implements ExceptionFilter {
 	catch(exception: unknown, host: ArgumentsHost) {
+		const constraint = findDatabaseConstraint(exception);
+		const constraintHandler =
+			constraint && Object.hasOwn(constraintHandlers, constraint)
+				? constraintHandlers[constraint]
+				: undefined;
+		if (constraintHandler) {
+			const { statusCode, code } = constraintHandler({});
+			const response = host.switchToHttp().getResponse<Response>();
+			response.status(statusCode).json(toErrorResponse(statusCode, { code }));
+			return;
+		}
+
 		const isHttpException = exception instanceof HttpException;
 		const statusCode = isHttpException
 			? exception.getStatus()
@@ -135,4 +148,17 @@ export class ApiExceptionFilter implements ExceptionFilter {
 			.status(statusCode)
 			.json(toErrorResponse(statusCode, exceptionBody));
 	}
+}
+
+function findDatabaseConstraint(exception: unknown): string | undefined {
+	const seen = new Set<object>();
+	let current = exception;
+
+	while (isRecord(current) && !seen.has(current)) {
+		seen.add(current);
+		if (typeof current.constraint === "string") return current.constraint;
+		current = current.cause;
+	}
+
+	return undefined;
 }

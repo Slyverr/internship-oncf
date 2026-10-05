@@ -11,7 +11,7 @@ import { hasOnePermission } from "@/auth/auth.utils";
 import { getCustomerScope } from "@/auth/customer-scope";
 import { DrizzleService } from "@/database/drizzle.service";
 import { QueryColumns, QueryRelations } from "@/database/drizzle.types";
-import { withDbErrorHandling } from "@/database/drizzle.util";
+
 import type { NotificationInsert } from "@/notifications/notifications.types";
 import type { ProgramId, ProgramInsert, ProgramUpdate } from "./programs.types";
 import { ListProgramQueryDto } from "./requests/list-program.dto";
@@ -76,27 +76,19 @@ export class ProgramsQuery {
 		history: { userId: number; userName: string },
 	) {
 		return this.drizzle.db.transaction(async (tx) => {
-			const [created] = await withDbErrorHandling(
-				() =>
-					tx
-						.insert(forecastPrograms)
-						.values(values)
-						.returning({ id: forecastPrograms.id }),
-				values,
-			);
-			await withDbErrorHandling(
-				() =>
-					tx.insert(forecastProgramHistory).values({
-						programId: created.id,
-						eventType: "CREATED",
-						newQuantity: values.quantityPlanned,
-						newStatusId: values.statusId,
-						newPlannedDate: values.plannedDate,
-						changedByName: history.userName,
-						changedByUserId: history.userId,
-					}),
-				values,
-			);
+			const [created] = await tx
+				.insert(forecastPrograms)
+				.values(values)
+				.returning({ id: forecastPrograms.id });
+			await tx.insert(forecastProgramHistory).values({
+				programId: created.id,
+				eventType: "CREATED",
+				newQuantity: values.quantityPlanned,
+				newStatusId: values.statusId,
+				newPlannedDate: values.plannedDate,
+				changedByName: history.userName,
+				changedByUserId: history.userId,
+			});
 			return created;
 		});
 	}
@@ -241,34 +233,24 @@ export class ProgramsQuery {
 						},
 					})
 				: undefined;
-			const [updated] = await withDbErrorHandling(
-				() =>
-					tx
-						.update(forecastPrograms)
-						.set(values)
-						.where(where)
-						.returning({ id: forecastPrograms.id }),
-				values,
-			);
+			const [updated] = await tx
+				.update(forecastPrograms)
+				.set(values)
+				.where(where)
+				.returning({ id: forecastPrograms.id });
 			if (!updated) return undefined;
 
 			if (previous && history) {
 				const events = this.buildUpdateHistory(previous, values, id, history);
 				for (const event of events) {
-					await withDbErrorHandling(
-						() => tx.insert(forecastProgramHistory).values(event),
-						event,
-					);
+					await tx.insert(forecastProgramHistory).values(event);
 				}
 				if (
 					notification &&
 					values.statusId !== undefined &&
 					values.statusId !== previous.statusId
 				) {
-					await withDbErrorHandling(
-						() => tx.insert(notifications).values(notification),
-						notification,
-					);
+					await tx.insert(notifications).values(notification);
 				}
 			}
 			return updated;
@@ -290,19 +272,15 @@ export class ProgramsQuery {
 				},
 			});
 			if (!program) return undefined;
-			await withDbErrorHandling(
-				() =>
-					tx.insert(forecastProgramHistory).values({
-						programId: id,
-						eventType: "DELETED",
-						oldQuantity: program.quantityPlanned,
-						oldStatusId: program.statusId,
-						oldPlannedDate: program.plannedDate,
-						changedByName: history.userName,
-						changedByUserId: history.userId,
-					}),
-				{ id, history },
-			);
+			await tx.insert(forecastProgramHistory).values({
+				programId: id,
+				eventType: "DELETED",
+				oldQuantity: program.quantityPlanned,
+				oldStatusId: program.statusId,
+				oldPlannedDate: program.plannedDate,
+				changedByName: history.userName,
+				changedByUserId: history.userId,
+			});
 			const [deleted] = await tx
 				.delete(forecastPrograms)
 				.where(eq(forecastPrograms.id, id))

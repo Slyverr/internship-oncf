@@ -1,9 +1,12 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { API_ERROR_CODES, API_VALIDATION_RULE_CODES } from "@ecommand/shared";
+import type { ArgumentsHost } from "@nestjs/common";
 import { HttpStatus } from "@nestjs/common";
 import type { ValidationError } from "class-validator";
+import { ConstraintCode, constraintHandlers } from "../database/constraints";
 import {
+	ApiExceptionFilter,
 	codeForStatus,
 	toErrorResponse,
 	toValidationDetails,
@@ -25,6 +28,66 @@ async function getSourceFiles(directory: string): Promise<string[]> {
 }
 
 describe("API error response contract", () => {
+	it("maps nested Drizzle constraint errors to the established response", () => {
+		const response = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+		const host = {
+			switchToHttp: () => ({ getResponse: () => response }),
+		} as unknown as ArgumentsHost;
+		const exception = new Error("Failed query", {
+			cause: new Error("PostgreSQL violation", {
+				cause: { constraint: "users_email_key" },
+			}),
+		});
+
+		new ApiExceptionFilter().catch(exception, host);
+
+		expect(response.status).toHaveBeenCalledWith(HttpStatus.CONFLICT);
+		expect(response.json).toHaveBeenCalledWith({
+			code: ConstraintCode.DUPLICATE_USER_EMAIL,
+			statusCode: HttpStatus.CONFLICT,
+		});
+	});
+
+	it("preserves the existing response mapping for every registered constraint", () => {
+		for (const [constraint, handler] of Object.entries(constraintHandlers)) {
+			const response = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+			const host = {
+				switchToHttp: () => ({ getResponse: () => response }),
+			} as unknown as ArgumentsHost;
+			const expected = handler({});
+
+			new ApiExceptionFilter().catch(
+				new Error("Failed query", {
+					cause: { constraint },
+				}),
+				host,
+			);
+
+			expect(response.status).toHaveBeenCalledWith(expected.statusCode);
+			expect(response.json).toHaveBeenCalledWith({
+				code: expected.code,
+				statusCode: expected.statusCode,
+			});
+		}
+	});
+
+	it("keeps unregistered database errors as generic internal errors", () => {
+		const response = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+		const host = {
+			switchToHttp: () => ({ getResponse: () => response }),
+		} as unknown as ArgumentsHost;
+
+		new ApiExceptionFilter().catch(new Error("database details"), host);
+
+		expect(response.status).toHaveBeenCalledWith(
+			HttpStatus.INTERNAL_SERVER_ERROR,
+		);
+		expect(response.json).toHaveBeenCalledWith({
+			code: API_ERROR_CODES.INTERNAL_ERROR,
+			statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+		});
+	});
+
 	it("returns stable codes for standard HTTP failures", () => {
 		expect(codeForStatus(HttpStatus.UNAUTHORIZED)).toBe(
 			API_ERROR_CODES.AUTHENTICATION_REQUIRED,

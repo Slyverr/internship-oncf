@@ -3,7 +3,7 @@ import { userPreferences, users } from "drizzle/schema";
 import { eq } from "drizzle-orm";
 import { DrizzleService } from "@/database/drizzle.service";
 import { QueryColumns, QueryRelations } from "@/database/drizzle.types";
-import { withDbErrorHandling } from "@/database/drizzle.util";
+
 import type { UserId, UserUpdate } from "@/users/users.types";
 import type { UpdateAppearancePreferencesDto } from "./requests/update-appearance-preferences.dto";
 
@@ -56,17 +56,13 @@ export class ProfileQuery {
 	}
 
 	async updateProfile(id: UserId, values: UserUpdate) {
-		const [updated] = await withDbErrorHandling(
-			() =>
-				this.drizzle.db
-					.update(users)
-					.set(values)
-					.where(eq(users.id, id))
-					.returning({
-						id: users.id,
-					}),
-			values,
-		);
+		const [updated] = await this.drizzle.db
+			.update(users)
+			.set(values)
+			.where(eq(users.id, id))
+			.returning({
+				id: users.id,
+			});
 		return updated;
 	}
 
@@ -88,25 +84,21 @@ export class ProfileQuery {
 		userId: UserId,
 		values: UpdateAppearancePreferencesDto,
 	) {
-		const [saved] = await withDbErrorHandling(
-			() =>
-				this.drizzle.db
-					.insert(userPreferences)
-					.values({ userId, ...values })
-					.onConflictDoUpdate({
-						target: userPreferences.userId,
-						set: { ...values, updatedAt: new Date().toISOString() },
-					})
-					.returning({
-						theme: userPreferences.theme,
-						fontFamily: userPreferences.fontFamily,
-						textSize: userPreferences.textSize,
-						motion: userPreferences.motion,
-						workspaceLayout: userPreferences.workspaceLayout,
-						updatedAt: userPreferences.updatedAt,
-					}),
-			{ userId, ...values },
-		);
+		const [saved] = await this.drizzle.db
+			.insert(userPreferences)
+			.values({ userId, ...values })
+			.onConflictDoUpdate({
+				target: userPreferences.userId,
+				set: { ...values, updatedAt: new Date().toISOString() },
+			})
+			.returning({
+				theme: userPreferences.theme,
+				fontFamily: userPreferences.fontFamily,
+				textSize: userPreferences.textSize,
+				motion: userPreferences.motion,
+				workspaceLayout: userPreferences.workspaceLayout,
+				updatedAt: userPreferences.updatedAt,
+			});
 		return saved;
 	}
 }

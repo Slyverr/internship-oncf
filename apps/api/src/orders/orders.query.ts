@@ -12,7 +12,7 @@ import {
 	QueryColumns,
 	QueryRelations,
 } from "@/database/drizzle.types";
-import { withDbErrorHandling } from "@/database/drizzle.util";
+
 import { DTM_REQUEST_TYPES } from "@/database/reference-data";
 import type { NotificationInsert } from "@/notifications/notifications.types";
 import type { UserId } from "@/users/users.types";
@@ -149,13 +149,12 @@ export class OrdersQuery {
 	constructor(private readonly drizzle: DrizzleService) {}
 
 	async createOrder(values: OrderInsert) {
-		const [created] = await withDbErrorHandling(
-			() =>
-				this.drizzle.db.insert(orders).values(values).returning({
-					id: orders.id,
-				}),
-			values,
-		);
+		const [created] = await this.drizzle.db
+			.insert(orders)
+			.values(values)
+			.returning({
+				id: orders.id,
+			});
 		return created;
 	}
 
@@ -466,17 +465,13 @@ export class OrdersQuery {
 					? await this.findOrderStatusInternal(tx, id)
 					: undefined;
 
-			const [updated] = await withDbErrorHandling(
-				() =>
-					tx
-						.update(orders)
-						.set(values)
-						.where(options.where ?? eq(orders.id, id))
-						.returning({
-							id: orders.id,
-						}),
-				values,
-			);
+			const [updated] = await tx
+				.update(orders)
+				.set(values)
+				.where(options.where ?? eq(orders.id, id))
+				.returning({
+					id: orders.id,
+				});
 
 			if (!updated) {
 				throw new ConflictException({
@@ -497,10 +492,7 @@ export class OrdersQuery {
 				});
 				if (options.notification) {
 					const notification = options.notification;
-					await withDbErrorHandling(
-						() => tx.insert(notifications).values(notification),
-						notification,
-					);
+					await tx.insert(notifications).values(notification);
 				}
 			}
 
@@ -526,16 +518,12 @@ export class OrdersQuery {
 			comment?: string;
 		},
 	) {
-		return withDbErrorHandling(
-			() =>
-				tx.insert(orderStatusHistory).values({
-					orderId: data.orderId,
-					statusId: data.statusId,
-					changedById: data.userId,
-					comment: data.comment ?? null,
-				}),
-			data,
-		);
+		return tx.insert(orderStatusHistory).values({
+			orderId: data.orderId,
+			statusId: data.statusId,
+			changedById: data.userId,
+			comment: data.comment ?? null,
+		});
 	}
 
 	async deleteOrder(id: OrderId) {

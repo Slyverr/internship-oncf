@@ -3,7 +3,7 @@ import { customers } from "drizzle/schema";
 import { eq } from "drizzle-orm";
 import { DrizzleService } from "@/database/drizzle.service";
 import { QueryColumns } from "@/database/drizzle.types";
-import { withDbErrorHandling } from "@/database/drizzle.util";
+
 import type {
 	CustomerId,
 	CustomerInsert,
@@ -135,27 +135,19 @@ export class CustomersQuery {
 	}
 
 	async createCustomer(values: CustomerInsert) {
-		const [created] = await withDbErrorHandling(
-			() =>
-				this.drizzle.db
-					.insert(customers)
-					.values(values)
-					.returning({ id: customers.id }),
-			values,
-		);
+		const [created] = await this.drizzle.db
+			.insert(customers)
+			.values(values)
+			.returning({ id: customers.id });
 		return created;
 	}
 
 	async updateCustomer(id: CustomerId, values: CustomerUpdate) {
-		const [updated] = await withDbErrorHandling(
-			() =>
-				this.drizzle.db
-					.update(customers)
-					.set(values)
-					.where(eq(customers.id, id))
-					.returning({ id: customers.id }),
-			values,
-		);
+		const [updated] = await this.drizzle.db
+			.update(customers)
+			.set(values)
+			.where(eq(customers.id, id))
+			.returning({ id: customers.id });
 		return updated;
 	}
 }

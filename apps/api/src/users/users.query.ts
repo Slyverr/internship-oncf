@@ -4,7 +4,7 @@ import { roles, userCustomers, users } from "drizzle/schema";
 import { and, eq } from "drizzle-orm";
 import { DrizzleService } from "@/database/drizzle.service";
 import { QueryColumns, QueryRelations } from "@/database/drizzle.types";
-import { withDbErrorHandling } from "@/database/drizzle.util";
+
 import type { UserEmail, UserId, UserInsert, UserUpdate } from "./users.types";
 
 type UsersColumns = QueryColumns<"users">;
@@ -136,27 +136,23 @@ export class UsersQuery {
 	}
 
 	async createUser(values: UserInsert, customerIds?: readonly number[]) {
-		return withDbErrorHandling(
-			() =>
-				this.drizzle.db.transaction(async (tx) => {
-					const [created] = await tx
-						.insert(users)
-						.values(values)
-						.returning({ id: users.id });
+		return this.drizzle.db.transaction(async (tx) => {
+			const [created] = await tx
+				.insert(users)
+				.values(values)
+				.returning({ id: users.id });
 
-					if (customerIds?.length) {
-						await tx.insert(userCustomers).values(
-							customerIds.map((customerId) => ({
-								userId: created.id,
-								customerId,
-							})),
-						);
-					}
+			if (customerIds?.length) {
+				await tx.insert(userCustomers).values(
+					customerIds.map((customerId) => ({
+						userId: created.id,
+						customerId,
+					})),
+				);
+			}
 
-					return created;
-				}),
-			{ ...values, customerIds },
-		);
+			return created;
+		});
 	}
 
 	async updateUserAndAssignments(
@@ -164,65 +160,54 @@ export class UsersQuery {
 		values: UserUpdate,
 		customerIds?: readonly number[],
 	) {
-		return withDbErrorHandling(
-			() =>
-				this.drizzle.db.transaction(async (tx) => {
-					const [updated] = await tx
-						.update(users)
-						.set(values)
-						.where(eq(users.id, id))
-						.returning({ id: users.id });
+		return this.drizzle.db.transaction(async (tx) => {
+			const [updated] = await tx
+				.update(users)
+				.set(values)
+				.where(eq(users.id, id))
+				.returning({ id: users.id });
 
-					if (!updated || customerIds === undefined) return updated;
+			if (!updated || customerIds === undefined) return updated;
 
-					await tx.delete(userCustomers).where(eq(userCustomers.userId, id));
-					if (customerIds.length > 0) {
-						await tx
-							.insert(userCustomers)
-							.values(
-								customerIds.map((customerId) => ({ userId: id, customerId })),
-							);
-					}
+			await tx.delete(userCustomers).where(eq(userCustomers.userId, id));
+			if (customerIds.length > 0) {
+				await tx
+					.insert(userCustomers)
+					.values(
+						customerIds.map((customerId) => ({ userId: id, customerId })),
+					);
+			}
 
-					return updated;
-				}),
-			{ ...values, id, customerIds },
-		);
+			return updated;
+		});
 	}
 
 	async deactivateUser(id: UserId) {
-		return withDbErrorHandling(
-			() =>
-				this.drizzle.db.transaction(async (tx) => {
-					const activeAdministrators = await tx
-						.select({ id: users.id })
-						.from(users)
-						.innerJoin(roles, eq(users.roleId, roles.id))
-						.where(
-							and(
-								eq(users.isActive, true),
-								eq(roles.persona, RolePersona.ADMIN),
-							),
-						)
-						.for("update");
+		return this.drizzle.db.transaction(async (tx) => {
+			const activeAdministrators = await tx
+				.select({ id: users.id })
+				.from(users)
+				.innerJoin(roles, eq(users.roleId, roles.id))
+				.where(
+					and(eq(users.isActive, true), eq(roles.persona, RolePersona.ADMIN)),
+				)
+				.for("update");
 
-					if (
-						activeAdministrators.length === 1 &&
-						activeAdministrators[0].id === id
-					) {
-						return "LAST_ACTIVE_ADMIN" as const;
-					}
+			if (
+				activeAdministrators.length === 1 &&
+				activeAdministrators[0].id === id
+			) {
+				return "LAST_ACTIVE_ADMIN" as const;
+			}
 
-					const [updated] = await tx
-						.update(users)
-						.set({ isActive: false })
-						.where(eq(users.id, id))
-						.returning({ id: users.id });
+			const [updated] = await tx
+				.update(users)
+				.set({ isActive: false })
+				.where(eq(users.id, id))
+				.returning({ id: users.id });
 
-					return updated;
-				}),
-			{ id },
-		);
+			return updated;
+		});
 	}
 
 	async reviewRegistration(
@@ -230,36 +215,31 @@ export class UsersQuery {
 		roleId: string,
 		status: RegistrationStatus.APPROVED | RegistrationStatus.REJECTED,
 	) {
-		const [updated] = await withDbErrorHandling(
-			() =>
-				this.drizzle.db
-					.update(users)
-					.set({
-						registrationStatus: status,
-						isActive: status === RegistrationStatus.APPROVED,
-						updatedAt: new Date().toISOString(),
-					})
-					.where(
-						and(
-							eq(users.id, id),
-							eq(users.roleId, roleId),
-							eq(users.registrationStatus, RegistrationStatus.PENDING),
-						),
-					)
-					.returning({ id: users.id }),
-			{ id, roleId, status },
-		);
+		const [updated] = await this.drizzle.db
+			.update(users)
+			.set({
+				registrationStatus: status,
+				isActive: status === RegistrationStatus.APPROVED,
+				updatedAt: new Date().toISOString(),
+			})
+			.where(
+				and(
+					eq(users.id, id),
+					eq(users.roleId, roleId),
+					eq(users.registrationStatus, RegistrationStatus.PENDING),
+				),
+			)
+			.returning({ id: users.id });
 		return updated;
 	}
 
 	async deleteUser(id: UserId) {
-		const [deleted] = await withDbErrorHandling(
-			() =>
-				this.drizzle.db.delete(users).where(eq(users.id, id)).returning({
-					id: users.id,
-				}),
-			{ id },
-		);
+		const [deleted] = await this.drizzle.db
+			.delete(users)
+			.where(eq(users.id, id))
+			.returning({
+				id: users.id,
+			});
 		return deleted;
 	}
 
