@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
 set -eu
 
-bun run typecheck
-bun run test
+CI=1 bun run typecheck
+CI=1 bun run test
