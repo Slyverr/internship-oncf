@@ -2,9 +2,10 @@ import { Injectable, Logger, OnModuleDestroy } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import type { AuthUser } from "@/auth/auth.types";
 import type { OrderDetail } from "@/orders/orders.types";
-import type { ProgramDetail, ProgramId } from "@/programs/programs.types";
+import type { ProgramDetail } from "@/programs/programs.types";
 import type { DtmGateway } from "./dtm.gateway";
 import { DtmQuery, type DtmSimulationResult } from "./dtm.query";
+import type { DtmSimulatorResponseMode } from "./dtm-simulator.types";
 
 const DEFAULT_SIMULATOR_DELAY_MS = 2_000;
 const MAX_SIMULATOR_DELAY_MS = 60_000;
@@ -12,7 +13,10 @@ const MAX_SIMULATOR_DELAY_MS = 60_000;
 @Injectable()
 export class DtmSimulatorAdapter implements DtmGateway, OnModuleDestroy {
 	private readonly logger = new Logger(DtmSimulatorAdapter.name);
-	private readonly pendingResponses = new Set<ReturnType<typeof setTimeout>>();
+	private readonly pendingResponses = new Map<
+		number,
+		{ timer: ReturnType<typeof setTimeout>; startedAt: number }
+	>();
 
 	constructor(
 		private readonly config: ConfigService,
@@ -35,7 +39,9 @@ export class DtmSimulatorAdapter implements DtmGateway, OnModuleDestroy {
 			user.id,
 			payload,
 		);
-		this.scheduleResponse(request.id, order.orderNumber);
+		if (this.getResponseMode() === "AUTO") {
+			this.scheduleResponse(request.id, order.orderNumber);
+		}
 	}
 
 	async submitProgram(program: ProgramDetail, user: AuthUser): Promise<void> {
@@ -54,31 +60,43 @@ export class DtmSimulatorAdapter implements DtmGateway, OnModuleDestroy {
 			user.id,
 			payload,
 		);
-		this.scheduleResponse(request.id, program.programNumber, program.id);
+		if (this.getResponseMode() === "AUTO") {
+			this.scheduleResponse(request.id, program.programNumber);
+		}
 	}
 
-	private scheduleResponse(
+	async resolvePendingRequest(
 		requestId: number,
-		identifier: string,
-		programId?: ProgramId,
+		result: DtmSimulationResult,
+		resolvedByUserId: number,
 	) {
+		const pending = this.pendingResponses.get(requestId);
+		const resolved = await this.dtmQuery.resolvePendingRequest(
+			requestId,
+			result,
+			resolvedByUserId,
+			pending ? Date.now() - pending.startedAt : undefined,
+		);
+
+		if (resolved && pending) {
+			clearTimeout(pending.timer);
+			this.pendingResponses.delete(requestId);
+		}
+
+		return resolved;
+	}
+
+	private scheduleResponse(requestId: number, identifier: string) {
 		const delayMs = this.readDelay();
 		const result = this.readResult();
 		const startedAt = Date.now();
 		const timer = setTimeout(() => {
-			this.pendingResponses.delete(timer);
-			const completion = programId
-				? this.dtmQuery.completeProgramRequest(
-						requestId,
-						programId,
-						result,
-						Date.now() - startedAt,
-					)
-				: this.dtmQuery.completeOrderRequest(
-						requestId,
-						result,
-						Date.now() - startedAt,
-					);
+			this.pendingResponses.delete(requestId);
+			const completion = this.dtmQuery.completeSimulatorRequest(
+				requestId,
+				result,
+				Date.now() - startedAt,
+			);
 			void completion.catch((error: unknown) => {
 				this.logger.error(
 					`Failed to record simulated DTM response for ${identifier}`,
@@ -86,11 +104,11 @@ export class DtmSimulatorAdapter implements DtmGateway, OnModuleDestroy {
 				);
 			});
 		}, delayMs);
-		this.pendingResponses.add(timer);
+		this.pendingResponses.set(requestId, { timer, startedAt });
 	}
 
 	onModuleDestroy() {
-		for (const timer of this.pendingResponses) clearTimeout(timer);
+		for (const { timer } of this.pendingResponses.values()) clearTimeout(timer);
 		this.pendingResponses.clear();
 	}
 
@@ -102,6 +120,13 @@ export class DtmSimulatorAdapter implements DtmGateway, OnModuleDestroy {
 			return DEFAULT_SIMULATOR_DELAY_MS;
 		}
 		return Math.min(Math.round(configured), MAX_SIMULATOR_DELAY_MS);
+	}
+
+	getResponseMode(): DtmSimulatorResponseMode {
+		return this.config.get<string>("DTM_SIMULATOR_RESPONSE_MODE", "manual") ===
+			"auto"
+			? "AUTO"
+			: "MANUAL";
 	}
 
 	private readResult(): DtmSimulationResult {

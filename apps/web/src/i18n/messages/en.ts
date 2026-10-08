@@ -28,6 +28,7 @@ export const en = {
 			operationId: "Accessory operation",
 			type: "Type",
 			status: "Status",
+			result: "Result",
 			priority: "Priority",
 			description: "Description",
 			resolution: "Resolution",
@@ -157,6 +158,9 @@ export const en = {
 		switchToSidebar: "Switch to sidebar navigation",
 		roleProfiles: "Access profiles",
 		integrations: "Integrations",
+		integrationOverview: "Overview",
+		integrationCredentials: "Service credentials",
+		dtmActivity: "DTM activity",
 	},
 	integrationCredentials: {
 		pageTitle: "Integration credentials",
@@ -197,6 +201,74 @@ export const en = {
 			"{name} will lose access immediately. Its audit record will be retained.",
 		rotateConfirmTitle: "Rotate this credential?",
 		revokeConfirmTitle: "Revoke this credential?",
+	},
+	integrationsOverview: {
+		description:
+			"Manage service access and review activity from connected systems.",
+		credentialsDescription:
+			"Create and manage credentials with the specific permissions each trusted system needs.",
+		dtmDescription:
+			"Review outbound DTM requests and handle simulated responses.",
+		openCredentials: "Manage service credentials",
+		openDtm: "Review DTM activity",
+	},
+	dtmActivity: {
+		pageTitle: "DTM activity",
+		description:
+			"Review outbound requests and simulated DTM responses. This page does not connect to ONCF.",
+		mode: "Connection mode",
+		simulatorMode: "Simulator",
+		disabledMode: "Not configured",
+		manualResponseMode: "Manual review",
+		autoResponseMode: "Automatic response",
+		simulatorDescription:
+			"This simulator never connects to an external DTM service.",
+		disabledDescription:
+			"No DTM adapter is configured. Requests are not sent to an external system.",
+		manualResponseDescription:
+			"Requests stay pending until an admin reviews and accepts or rejects them.",
+		autoResponseDescription:
+			"The simulator records its configured response after the configured delay. You can still resolve a request while it is pending.",
+		recentRequests: "Recent requests",
+		responsesRecorded: "Responses recorded",
+		latestLimit: "Showing the latest 100 requests",
+		requestType: "Request",
+		relatedRecord: "Related record",
+		requestedAt: "Requested",
+		status: "Status",
+		response: "Response",
+		duration: "Duration",
+		milliseconds: "ms",
+		actions: "Actions",
+		pending: "Pending",
+		success: "Accepted",
+		failed: "Rejected",
+		timeout: "Timed out",
+		requestNotSent: "No DTM requests have been recorded yet.",
+		requestNotSentDescription:
+			"Submit an approved order or forecast program to see its request here.",
+		loading: "Loading DTM activity…",
+		loadFailed: "DTM activity could not be loaded. Try again.",
+		actionFailed:
+			"The simulated response could not be saved. Refresh and try again.",
+		refresh: "Refresh activity",
+		viewDetails: "View request details",
+		resolveAccepted: "Accept simulated request",
+		resolveRejected: "Reject simulated request",
+		acceptTitle: "Accept this simulated request?",
+		rejectTitle: "Reject this simulated request?",
+		acceptDescription:
+			"Request {id} will be marked accepted in the simulator. This is not an ONCF response.",
+		rejectDescription:
+			"Request {id} will be marked rejected in the simulator. This is not an ONCF response.",
+		confirmAccepted: "Accept request",
+		confirmRejected: "Reject request",
+		requestDetails: "Request details",
+		requestId: "Request ID",
+		requestPayload: "Request payload",
+		responsePayload: "Response payload",
+		error: "Error",
+		noPayload: "No payload recorded.",
 	},
 	roleProfiles: {
 		pageTitle: "Access profiles",

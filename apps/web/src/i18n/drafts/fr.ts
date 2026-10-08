@@ -30,6 +30,7 @@ export const frDraft = {
 			operationId: "Prestation accessoire",
 			type: "Type",
 			status: "Statut",
+			result: "Résultat",
 			priority: "Priorité",
 			description: "Description",
 			resolution: "Résolution",
@@ -160,6 +161,9 @@ export const frDraft = {
 		switchToSidebar: "Passer à la navigation dans la barre latérale",
 		roleProfiles: "Profils d’accès",
 		integrations: "Intégrations",
+		integrationOverview: "Vue d’ensemble",
+		integrationCredentials: "Identifiants de service",
+		dtmActivity: "Activité DTM",
 	},
 	integrationCredentials: {
 		pageTitle: "Identifiants d’intégration",
@@ -200,6 +204,74 @@ export const frDraft = {
 			"{name} perdra immédiatement son accès. Son historique d’audit sera conservé.",
 		rotateConfirmTitle: "Renouveler cet identifiant ?",
 		revokeConfirmTitle: "Révoquer cet identifiant ?",
+	},
+	integrationsOverview: {
+		description:
+			"Gérez les accès des services et consultez l’activité des systèmes connectés.",
+		credentialsDescription:
+			"Créez et gérez des identifiants avec les autorisations nécessaires à chaque système de confiance.",
+		dtmDescription:
+			"Consultez les demandes DTM sortantes et traitez les réponses simulées.",
+		openCredentials: "Gérer les identifiants de service",
+		openDtm: "Consulter l’activité DTM",
+	},
+	dtmActivity: {
+		pageTitle: "Activité DTM",
+		description:
+			"Consultez les demandes sortantes et les réponses simulées du DTM. Cette page n’est pas connectée à l’ONCF.",
+		mode: "Mode de connexion",
+		simulatorMode: "Simulateur",
+		disabledMode: "Non configuré",
+		manualResponseMode: "Validation manuelle",
+		autoResponseMode: "Réponse automatique",
+		simulatorDescription:
+			"Ce simulateur ne se connecte jamais à un service DTM externe.",
+		disabledDescription:
+			"Aucun adaptateur DTM n’est configuré. Les demandes ne sont pas envoyées à un système externe.",
+		manualResponseDescription:
+			"Les demandes restent en attente jusqu’à ce qu’un administrateur les examine et les accepte ou les rejette.",
+		autoResponseDescription:
+			"Le simulateur enregistre la réponse configurée après le délai défini. Vous pouvez encore traiter une demande en attente.",
+		recentRequests: "Demandes récentes",
+		responsesRecorded: "Réponses enregistrées",
+		latestLimit: "Les 100 dernières demandes sont affichées",
+		requestType: "Demande",
+		relatedRecord: "Enregistrement associé",
+		requestedAt: "Demandée le",
+		status: "Statut",
+		response: "Réponse",
+		duration: "Durée",
+		milliseconds: "ms",
+		actions: "Actions",
+		pending: "En attente",
+		success: "Acceptée",
+		failed: "Rejetée",
+		timeout: "Délai dépassé",
+		requestNotSent: "Aucune demande DTM n’a encore été enregistrée.",
+		requestNotSentDescription:
+			"Soumettez une demande de transport ou un programme prévisionnel approuvé pour l’afficher ici.",
+		loading: "Chargement de l’activité DTM…",
+		loadFailed: "Impossible de charger l’activité DTM. Réessayez.",
+		actionFailed:
+			"Impossible d’enregistrer la réponse simulée. Actualisez la page et réessayez.",
+		refresh: "Actualiser l’activité",
+		viewDetails: "Afficher les détails de la demande",
+		resolveAccepted: "Accepter la demande simulée",
+		resolveRejected: "Rejeter la demande simulée",
+		acceptTitle: "Accepter cette demande simulée ?",
+		rejectTitle: "Rejeter cette demande simulée ?",
+		acceptDescription:
+			"La demande {id} sera marquée comme acceptée dans le simulateur. Ce n’est pas une réponse de l’ONCF.",
+		rejectDescription:
+			"La demande {id} sera marquée comme rejetée dans le simulateur. Ce n’est pas une réponse de l’ONCF.",
+		confirmAccepted: "Accepter la demande",
+		confirmRejected: "Rejeter la demande",
+		requestDetails: "Détails de la demande",
+		requestId: "ID de demande",
+		requestPayload: "Contenu envoyé",
+		responsePayload: "Contenu de la réponse",
+		error: "Erreur",
+		noPayload: "Aucun contenu enregistré.",
 	},
 	roleProfiles: {
 		pageTitle: "Profils d’accès",

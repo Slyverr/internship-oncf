@@ -1,16 +1,41 @@
 import { Injectable } from "@nestjs/common";
 import { dtmIntegrationLog, forecastPrograms } from "drizzle/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { DrizzleService } from "@/database/drizzle.service";
 import { DTM_REQUEST_TYPES } from "@/database/reference-data";
 import type { OrderId } from "@/orders/orders.types";
 import type { ProgramId } from "@/programs/programs.types";
 
 export type DtmSimulationResult = "ACCEPTED" | "REJECTED";
+export type DtmResolutionSource = "SIMULATOR" | "MANUAL_SIMULATOR";
 
 @Injectable()
 export class DtmQuery {
 	constructor(private readonly drizzle: DrizzleService) {}
+
+	findRecentRequests() {
+		return this.drizzle.db.query.dtmIntegrationLog.findMany({
+			columns: {
+				id: true,
+				status: true,
+				createdAt: true,
+				relatedEntityType: true,
+				relatedEntityId: true,
+				httpStatusCode: true,
+				errorMessage: true,
+				durationMs: true,
+				requestPayload: true,
+				responsePayload: true,
+			},
+			with: {
+				dtmRequestType: {
+					columns: { name: true },
+				},
+			},
+			orderBy: { createdAt: "desc", id: "desc" },
+			limit: 100,
+		});
+	}
 
 	async createProgramRequest(
 		programId: ProgramId,
@@ -60,55 +85,99 @@ export class DtmQuery {
 			.then(([request]) => request);
 	}
 
-	async completeOrderRequest(
+	async completeSimulatorRequest(
 		requestId: number,
 		result: DtmSimulationResult,
 		durationMs: number,
 	) {
-		const accepted = result === "ACCEPTED";
-		await this.drizzle.db
-			.update(dtmIntegrationLog)
-			.set({
-				responsePayload: JSON.stringify({
-					requestId: String(requestId),
-					status: result,
-					respondedAt: new Date().toISOString(),
-				}),
-				status: accepted ? "SUCCESS" : "FAILED",
-				httpStatusCode: accepted ? 200 : 422,
-				durationMs,
-			})
-			.where(eq(dtmIntegrationLog.id, requestId));
+		return this.completePendingRequest(
+			requestId,
+			result,
+			durationMs,
+			"SIMULATOR",
+		);
 	}
 
-	async completeProgramRequest(
+	async resolvePendingRequest(
 		requestId: number,
-		programId: ProgramId,
 		result: DtmSimulationResult,
-		durationMs: number,
+		resolvedByUserId: number,
+		durationMs?: number,
+	) {
+		return this.completePendingRequest(
+			requestId,
+			result,
+			durationMs,
+			"MANUAL_SIMULATOR",
+			resolvedByUserId,
+		);
+	}
+
+	private async completePendingRequest(
+		requestId: number,
+		result: DtmSimulationResult,
+		durationMs: number | undefined,
+		source: DtmResolutionSource,
+		resolvedByUserId?: number,
 	) {
 		const accepted = result === "ACCEPTED";
-		const responsePayload = JSON.stringify({
-			requestId: String(requestId),
-			status: result,
-			respondedAt: new Date().toISOString(),
-		});
+		const respondedAt = new Date();
 
-		await this.drizzle.db.transaction(async (tx) => {
+		return this.drizzle.db.transaction(async (tx) => {
+			const [pending] = await tx
+				.select({
+					createdAt: dtmIntegrationLog.createdAt,
+					relatedEntityType: dtmIntegrationLog.relatedEntityType,
+					relatedEntityId: dtmIntegrationLog.relatedEntityId,
+				})
+				.from(dtmIntegrationLog)
+				.where(
+					and(
+						eq(dtmIntegrationLog.id, requestId),
+						eq(dtmIntegrationLog.status, "PENDING"),
+					),
+				)
+				.for("update");
+
+			if (!pending) return false;
+
 			await tx
 				.update(dtmIntegrationLog)
 				.set({
-					responsePayload,
+					responsePayload: JSON.stringify({
+						requestId: String(requestId),
+						status: result,
+						respondedAt: respondedAt.toISOString(),
+						source,
+						...(resolvedByUserId !== undefined && { resolvedByUserId }),
+					}),
 					status: accepted ? "SUCCESS" : "FAILED",
 					httpStatusCode: accepted ? 200 : 422,
-					durationMs,
+					durationMs:
+						durationMs ??
+						Math.max(
+							0,
+							respondedAt.getTime() - new Date(pending.createdAt).getTime(),
+						),
 				})
-				.where(eq(dtmIntegrationLog.id, requestId));
+				.where(
+					and(
+						eq(dtmIntegrationLog.id, requestId),
+						eq(dtmIntegrationLog.status, "PENDING"),
+					),
+				);
 
-			await tx
-				.update(forecastPrograms)
-				.set({ dtmStatus: result })
-				.where(eq(forecastPrograms.id, programId));
+			if (
+				pending.relatedEntityType === "forecast_programs" &&
+				pending.relatedEntityId !== null
+			) {
+				await tx
+					.update(forecastPrograms)
+					.set({ dtmStatus: result })
+					.where(eq(forecastPrograms.id, pending.relatedEntityId));
+			}
+
+			return true;
 		});
 	}
 }

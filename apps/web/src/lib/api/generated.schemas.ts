@@ -972,6 +972,97 @@ export interface NotificationsMarkedReadDto {
   count: number;
 }
 
+export type DtmRequestDtoStatus = typeof DtmRequestDtoStatus[keyof typeof DtmRequestDtoStatus];
+
+
+export const DtmRequestDtoStatus = {
+  PENDING: 'PENDING',
+  SUCCESS: 'SUCCESS',
+  FAILED: 'FAILED',
+  TIMEOUT: 'TIMEOUT',
+} as const;
+
+export interface DtmRequestDto {
+  id: number;
+  requestType: string;
+  status: DtmRequestDtoStatus;
+  createdAt: string;
+  /** @nullable */
+  relatedEntityType?: string | null;
+  /** @nullable */
+  relatedEntityId?: number | null;
+  /** @nullable */
+  httpStatusCode?: number | null;
+  /** @nullable */
+  errorMessage?: string | null;
+  /** @nullable */
+  durationMs?: number | null;
+  /** @nullable */
+  requestPayload?: string | null;
+  /** @nullable */
+  responsePayload?: string | null;
+}
+
+export type DtmOperationsDtoMode = typeof DtmOperationsDtoMode[keyof typeof DtmOperationsDtoMode];
+
+
+export const DtmOperationsDtoMode = {
+  SIMULATOR: 'SIMULATOR',
+  DISABLED: 'DISABLED',
+} as const;
+
+/**
+ * @nullable
+ */
+export type DtmOperationsDtoResponseMode = typeof DtmOperationsDtoResponseMode[keyof typeof DtmOperationsDtoResponseMode] | null;
+
+
+export const DtmOperationsDtoResponseMode = {
+  MANUAL: 'MANUAL',
+  AUTO: 'AUTO',
+} as const;
+
+export interface DtmOperationsDto {
+  mode: DtmOperationsDtoMode;
+  /** @nullable */
+  responseMode?: DtmOperationsDtoResponseMode;
+  requests: DtmRequestDto[];
+}
+
+export type ResolveDtmRequestDtoResult = typeof ResolveDtmRequestDtoResult[keyof typeof ResolveDtmRequestDtoResult];
+
+
+export const ResolveDtmRequestDtoResult = {
+  ACCEPTED: 'ACCEPTED',
+  REJECTED: 'REJECTED',
+} as const;
+
+export interface ResolveDtmRequestDto {
+  result: ResolveDtmRequestDtoResult;
+}
+
+export type DtmRequestResolutionDtoResult = typeof DtmRequestResolutionDtoResult[keyof typeof DtmRequestResolutionDtoResult];
+
+
+export const DtmRequestResolutionDtoResult = {
+  ACCEPTED: 'ACCEPTED',
+  REJECTED: 'REJECTED',
+} as const;
+
+export type DtmRequestResolutionDtoStatus = typeof DtmRequestResolutionDtoStatus[keyof typeof DtmRequestResolutionDtoStatus];
+
+
+export const DtmRequestResolutionDtoStatus = {
+  SUCCESS: 'SUCCESS',
+  FAILED: 'FAILED',
+} as const;
+
+export interface DtmRequestResolutionDto {
+  id: number;
+  result: DtmRequestResolutionDtoResult;
+  status: DtmRequestResolutionDtoStatus;
+}
+
 export type CreateProgramDtoStatus = typeof CreateProgramDtoStatus[keyof typeof CreateProgramDtoStatus];
 
 
@@ -1940,6 +2031,7 @@ export const CreateRoleProfileDtoPermissionNamesItem = {
   'reports:action': 'reports:action',
   'reports:action:export': 'reports:action:export',
   'roles:manage': 'roles:manage',
+  'integrations:manage': 'integrations:manage',
   'permissions:manage': 'permissions:manage',
   'logs:read': 'logs:read',
   'profile:update': 'profile:update',
@@ -2050,6 +2142,7 @@ export const UpdateRoleProfileDtoPermissionNamesItem = {
   'reports:action': 'reports:action',
   'reports:action:export': 'reports:action:export',
   'roles:manage': 'roles:manage',
+  'integrations:manage': 'integrations:manage',
   'permissions:manage': 'permissions:manage',
   'logs:read': 'logs:read',
   'profile:update': 'profile:update',
@@ -2158,6 +2251,7 @@ export interface UpdateWagonPositionDto {
      */
   longitude: number;
   status?: string;
+  recordedAt?: string;
 }
 
 export interface WagonPositionDto {
@@ -2169,6 +2263,9 @@ export interface WagonPositionDto {
   longitude: string | null;
   /** @nullable */
   status: string | null;
+  source: string;
+  /** @nullable */
+  integrationCredentialId: number | null;
   recordedAt: string;
 }
 
@@ -2196,6 +2293,134 @@ export interface TrainPositionDto {
   /** @nullable */
   status: string | null;
   recordedAt: string;
+}
+
+export interface IntegrationCredentialDto {
+  id: number;
+  name: string;
+  keyId: string;
+  permissions: string[];
+  createdAt: string;
+  /** @nullable */
+  lastUsedAt?: string | null;
+  /** @nullable */
+  revokedAt?: string | null;
+}
+
+export type CreateIntegrationCredentialDtoPermissionsItem = typeof CreateIntegrationCredentialDtoPermissionsItem[keyof typeof CreateIntegrationCredentialDtoPermissionsItem];
+
+
+export const CreateIntegrationCredentialDtoPermissionsItem = {
+  'users:create': 'users:create',
+  'users:read': 'users:read',
+  'users:update': 'users:update',
+  'users:delete': 'users:delete',
+  'users:manage': 'users:manage',
+  'users:manage:other': 'users:manage:other',
+  'orders:create': 'orders:create',
+  'orders:read': 'orders:read',
+  'orders:update': 'orders:update',
+  'orders:delete': 'orders:delete',
+  'orders:manage': 'orders:manage',
+  'orders:manage:other': 'orders:manage:other',
+  'orders:manage:ownership': 'orders:manage:ownership',
+  'orders:manage:status': 'orders:manage:status',
+  'orders:action': 'orders:action',
+  'orders:action:submit': 'orders:action:submit',
+  'orders:action:approve': 'orders:action:approve',
+  'orders:action:reject': 'orders:action:reject',
+  'orders:action:cancel': 'orders:action:cancel',
+  'orders:action:send-to-dtm': 'orders:action:send-to-dtm',
+  'customers:create': 'customers:create',
+  'customers:read': 'customers:read',
+  'customers:update': 'customers:update',
+  'customers:delete': 'customers:delete',
+  'customers:manage': 'customers:manage',
+  'customers:manage:other': 'customers:manage:other',
+  'programs:create': 'programs:create',
+  'programs:read': 'programs:read',
+  'programs:update': 'programs:update',
+  'programs:delete': 'programs:delete',
+  'programs:manage': 'programs:manage',
+  'programs:manage:other': 'programs:manage:other',
+  'programs:manage:ownership': 'programs:manage:ownership',
+  'programs:manage:status': 'programs:manage:status',
+  'programs:action': 'programs:action',
+  'programs:action:submit': 'programs:action:submit',
+  'programs:action:approve': 'programs:action:approve',
+  'programs:action:confirm': 'programs:action:confirm',
+  'programs:action:cancel': 'programs:action:cancel',
+  'programs:action:send': 'programs:action:send',
+  'programs:action:execute': 'programs:action:execute',
+  'claims:create': 'claims:create',
+  'claims:read': 'claims:read',
+  'claims:update': 'claims:update',
+  'claims:delete': 'claims:delete',
+  'claims:manage': 'claims:manage',
+  'claims:manage:other': 'claims:manage:other',
+  'claims:manage:status': 'claims:manage:status',
+  'claims:action': 'claims:action',
+  'claims:action:comment': 'claims:action:comment',
+  'claims:action:start-progress': 'claims:action:start-progress',
+  'claims:action:await-info': 'claims:action:await-info',
+  'claims:action:start-treatment': 'claims:action:start-treatment',
+  'claims:action:resolve': 'claims:action:resolve',
+  'claims:action:reject': 'claims:action:reject',
+  'claims:action:send-to-dtm': 'claims:action:send-to-dtm',
+  'claims:action:close': 'claims:action:close',
+  'catalog:read': 'catalog:read',
+  'catalog:manage': 'catalog:manage',
+  'catalog:manage:units': 'catalog:manage:units',
+  'catalog:manage:goods': 'catalog:manage:goods',
+  'catalog:manage:goods-types': 'catalog:manage:goods-types',
+  'catalog:manage:accessory-operations': 'catalog:manage:accessory-operations',
+  'catalog:manage:rejection-reasons': 'catalog:manage:rejection-reasons',
+  'catalog:manage:stations': 'catalog:manage:stations',
+  'catalog:manage:agencies': 'catalog:manage:agencies',
+  'catalog:manage:ports': 'catalog:manage:ports',
+  'catalog:manage:berths': 'catalog:manage:berths',
+  'catalog:manage:sidings': 'catalog:manage:sidings',
+  'catalog:manage:vessels': 'catalog:manage:vessels',
+  'catalog:manage:shipping-companies': 'catalog:manage:shipping-companies',
+  'tracking:read': 'tracking:read',
+  'tracking:update': 'tracking:update',
+  'tracking:manage': 'tracking:manage',
+  'reports:read': 'reports:read',
+  'reports:manage:other': 'reports:manage:other',
+  'reports:action': 'reports:action',
+  'reports:action:export': 'reports:action:export',
+  'roles:manage': 'roles:manage',
+  'integrations:manage': 'integrations:manage',
+  'permissions:manage': 'permissions:manage',
+  'logs:read': 'logs:read',
+  'profile:update': 'profile:update',
+  'archival:read': 'archival:read',
+  'archival:manage': 'archival:manage',
+} as const;
+
+export interface CreateIntegrationCredentialDto {
+  /** @maxLength 100 */
+  name: string;
+  /** @minItems 1 */
+  permissions: CreateIntegrationCredentialDtoPermissionsItem[];
+}
+
+export interface CreatedIntegrationCredentialDto {
+  id: number;
+  name: string;
+  keyId: string;
+  permissions: string[];
+  createdAt: string;
+  /** @nullable */
+  lastUsedAt?: string | null;
+  /** @nullable */
+  revokedAt?: string | null;
+  secret: string;
+}
+
+export interface RevokedIntegrationCredentialDto {
+  id: number;
+  revoked: boolean;
 }
 
 export type CustomersControllerFindAllParams = {
@@ -2239,11 +2464,10 @@ status?: OrdersControllerFindAllStatus;
 movementTypeId?: string;
 startDate?: string;
 endDate?: string;
+hasAssignedWagons?: boolean;
 search?: string;
 sortBy?: string;
 sortOrder?: OrdersControllerFindAllSortOrder;
-/** Temporary until the generated client is refreshed from the updated API contract. */
-hasAssignedWagons?: boolean;
 };
 
 export type OrdersControllerFindAllStatus = typeof OrdersControllerFindAllStatus[keyof typeof OrdersControllerFindAllStatus];

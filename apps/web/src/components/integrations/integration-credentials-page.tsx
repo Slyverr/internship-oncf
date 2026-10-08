@@ -44,10 +44,11 @@ import {
 } from "@/components/ui/table";
 import { Messages } from "@/i18n";
 import { useLocale, useTranslate } from "@/i18n/locale-provider";
+import type { CreateIntegrationCredentialDtoPermissionsItem } from "@/lib/api/generated.schemas";
 import {
 	type IssuedIntegrationCredential,
 	integrationCredentialsApi,
-} from "@/lib/api/integration-credentials";
+} from "@/lib/integrations/integration-credentials-api";
 
 const credentialsKey = ["integration-credentials"];
 const TRACKING_PERMISSION = Permission.TRACKING_UPDATE;
@@ -63,9 +64,9 @@ export function IntegrationCredentialsPage() {
 	const queryClient = useQueryClient();
 	const [createOpen, setCreateOpen] = useState(false);
 	const [name, setName] = useState("");
-	const [selectedPermissions, setSelectedPermissions] = useState<string[]>([
-		TRACKING_PERMISSION,
-	]);
+	const [selectedPermissions, setSelectedPermissions] = useState<
+		CreateIntegrationCredentialDtoPermissionsItem[]
+	>([TRACKING_PERMISSION]);
 	const [revealed, setRevealed] = useState<IssuedIntegrationCredential | null>(
 		null,
 	);
