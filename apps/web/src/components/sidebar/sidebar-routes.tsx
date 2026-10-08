@@ -1,6 +1,7 @@
 import { CATALOG_MANAGEMENT_REQUIREMENTS, Permission } from "@ecommand/shared";
 import type { LucideIcon } from "lucide-react";
 import {
+	ActivityIcon,
 	BadgeAlertIcon,
 	Building2Icon,
 	CalendarIcon,
@@ -22,7 +23,37 @@ type SidebarRoute = {
 	exact: boolean;
 	permission?: Permission;
 	anyPermissionGroups?: readonly (readonly Permission[])[];
+	navigationGroup?: "integrations";
 };
+
+type SidebarRouteGroup = {
+	kind: "group";
+	id: "integrations";
+	url: string;
+	titleKey: MessageKey;
+	icon: LucideIcon;
+	children: SidebarRoute[];
+};
+
+export type SidebarNavigationItem = SidebarRoute | SidebarRouteGroup;
+
+export function isSidebarRouteActive(
+	route: Pick<SidebarRoute, "url" | "exact">,
+	pathname: string | null,
+) {
+	return route.exact
+		? pathname === route.url
+		: pathname === route.url || pathname?.startsWith(`${route.url}/`) === true;
+}
+
+export function isSidebarNavigationItemActive(
+	item: SidebarNavigationItem,
+	pathname: string | null,
+) {
+	return "kind" in item
+		? item.children.some((route) => isSidebarRouteActive(route, pathname))
+		: isSidebarRouteActive(item, pathname);
+}
 
 export const sidebarRoutes: SidebarRoute[] = [
 	{
@@ -88,11 +119,28 @@ export const sidebarRoutes: SidebarRoute[] = [
 		permission: Permission.ROLES_MANAGE,
 	},
 	{
-		titleKey: Messages.navigation.integrations,
+		titleKey: Messages.navigation.integrationOverview,
 		url: "/dashboard/integrations",
+		icon: Building2Icon,
+		exact: true,
+		permission: Permission.INTEGRATIONS_MANAGE,
+		navigationGroup: "integrations",
+	},
+	{
+		titleKey: Messages.navigation.integrationCredentials,
+		url: "/dashboard/integrations/credentials",
 		icon: KeyRoundIcon,
 		exact: false,
 		permission: Permission.INTEGRATIONS_MANAGE,
+		navigationGroup: "integrations",
+	},
+	{
+		titleKey: Messages.navigation.dtmActivity,
+		url: "/dashboard/integrations/dtm",
+		icon: ActivityIcon,
+		exact: false,
+		permission: Permission.INTEGRATIONS_MANAGE,
+		navigationGroup: "integrations",
 	},
 	{
 		titleKey: Messages.navigation.referenceData,
@@ -113,4 +161,38 @@ export function getVisibleSidebarRoutes(
 			(route.anyPermissionGroups?.some((group) => group.every(hasPermission)) ??
 				false),
 	);
+}
+
+export function getVisibleSidebarNavigation(
+	hasPermission: (permission: Permission) => boolean,
+): SidebarNavigationItem[] {
+	const visibleRoutes = getVisibleSidebarRoutes(hasPermission);
+	const integrationRoutes = visibleRoutes.filter(
+		(route) => route.navigationGroup === "integrations",
+	);
+	const integrationOverview = integrationRoutes.find(
+		(route) => route.url === "/dashboard/integrations",
+	);
+	if (!integrationOverview) {
+		return visibleRoutes.filter(
+			(route) => route.navigationGroup !== "integrations",
+		);
+	}
+	let groupAdded = false;
+
+	return visibleRoutes.flatMap<SidebarNavigationItem>((route) => {
+		if (route.navigationGroup !== "integrations") return [route];
+		if (groupAdded) return [];
+		groupAdded = true;
+		return [
+			{
+				kind: "group",
+				id: "integrations",
+				url: integrationOverview.url,
+				titleKey: Messages.navigation.integrations,
+				icon: KeyRoundIcon,
+				children: integrationRoutes,
+			},
+		];
+	});
 }

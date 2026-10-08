@@ -13,7 +13,10 @@ import {
 	RolePersona,
 } from "@ecommand/shared";
 import {
+	getVisibleSidebarNavigation,
 	getVisibleSidebarRoutes,
+	isSidebarNavigationItemActive,
+	isSidebarRouteActive,
 	sidebarRoutes,
 } from "../src/components/sidebar/sidebar-routes";
 import {
@@ -30,6 +33,24 @@ import { canCreateProgramForOrder } from "../src/lib/program-creation-eligibilit
 
 const referenceDataRoute = sidebarRoutes.find(
 	(route) => route.url === "/dashboard/catalog",
+);
+const integrationsRoute = sidebarRoutes.find(
+	(route) => route.url === "/dashboard/integrations",
+);
+const dtmActivityRoute = sidebarRoutes.find(
+	(route) => route.url === "/dashboard/integrations/dtm",
+);
+assert.ok(integrationsRoute);
+assert.ok(dtmActivityRoute);
+assert.equal(
+	isSidebarRouteActive(integrationsRoute, "/dashboard/integrations/dtm"),
+	false,
+	"the integrations route is not active on a nested DTM page",
+);
+assert.equal(
+	isSidebarRouteActive(dtmActivityRoute, "/dashboard/integrations/dtm"),
+	true,
+	"the DTM activity route alone is active on the DTM page",
 );
 assert.deepEqual(
 	referenceDataRoute?.anyPermissionGroups,
@@ -196,6 +217,8 @@ const expectedSidebarRoutes: Record<Role, string[]> = {
 		"/dashboard/users",
 		"/dashboard/roles",
 		"/dashboard/integrations",
+		"/dashboard/integrations/credentials",
+		"/dashboard/integrations/dtm",
 		"/dashboard/catalog",
 	],
 	[Role.AGENT_COMMERCIAL]: [
@@ -216,6 +239,28 @@ const expectedSidebarRoutes: Record<Role, string[]> = {
 		"/dashboard/claims",
 	],
 };
+
+const adminNavigation = getVisibleSidebarNavigation((permission) =>
+	DEFAULT_ROLE_PERMISSIONS[Role.ADMIN].includes(permission),
+);
+assert.equal(
+	adminNavigation.filter((item) => "kind" in item && item.id === "integrations")
+		.length,
+	1,
+	"integration destinations are grouped under one navigation entry",
+);
+const integrationsNavigation = adminNavigation.find(
+	(item) => "kind" in item && item.id === "integrations",
+);
+assert.ok(integrationsNavigation && "kind" in integrationsNavigation);
+assert.equal(
+	isSidebarNavigationItemActive(
+		integrationsNavigation,
+		"/dashboard/integrations/dtm",
+	),
+	true,
+	"the integrations navigation group stays active on nested destinations",
+);
 
 for (const role of Object.values(Role)) {
 	const permissions = new Set(DEFAULT_ROLE_PERMISSIONS[role]);
