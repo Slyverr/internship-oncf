@@ -4,6 +4,7 @@ import { ManagedReferenceResource } from "@ecommand/shared";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { PencilIcon } from "lucide-react";
 import { type FormEvent, type ReactNode, useEffect, useState } from "react";
+import { ReferenceDataSectionHeader } from "@/components/catalog/reference-data-section-header";
 import { TableActionButton } from "@/components/common/table-action-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -552,12 +553,7 @@ export function ManagedReferenceDataSection({
 
 	return (
 		<section className="min-w-0">
-			<div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-				<h2 className="text-base font-semibold">{title}</h2>
-				<Button type="button" onClick={openCreate}>
-					{t(Messages.referenceData.add)}
-				</Button>
-			</div>
+			<ReferenceDataSectionHeader title={title} onAdd={openCreate} />
 			{rows.isLoading ? (
 				<div className="rounded-lg border p-4 text-sm text-muted-foreground">
 					{t(Messages.common.loadingResource, { resource: title })}

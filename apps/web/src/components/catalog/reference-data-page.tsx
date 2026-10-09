@@ -14,7 +14,6 @@ import {
 	MapPinIcon,
 	PackageIcon,
 	PencilIcon,
-	PlusIcon,
 	RulerIcon,
 	ShipIcon,
 	TagIcon,
@@ -22,6 +21,7 @@ import {
 	WrenchIcon,
 } from "lucide-react";
 import { type FormEvent, useEffect, useState } from "react";
+import { ReferenceDataSectionHeader } from "@/components/catalog/reference-data-section-header";
 import { PageHeader } from "@/components/common/page-header";
 import { TableActionButton } from "@/components/common/table-action-button";
 import { Badge } from "@/components/ui/badge";
@@ -560,13 +560,7 @@ function SimpleCatalogSection({
 
 	return (
 		<section className="min-w-0">
-			<div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-				<h2 className="text-base font-semibold">{title}</h2>
-				<Button type="button" onClick={startCreate}>
-					<PlusIcon aria-hidden="true" />
-					{t(Messages.referenceData.add)}
-				</Button>
-			</div>
+			<ReferenceDataSectionHeader title={title} onAdd={startCreate} />
 			<CatalogTable
 				items={items}
 				isLoading={isLoading}
@@ -834,19 +828,11 @@ export function ReferenceDataPage() {
 				)}
 				{activeCategory === "goods" && (
 					<section className="min-w-0">
-						<div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-							<h2 className="text-base font-semibold">
-								{t(Messages.referenceData.sections.goods)}
-							</h2>
-							<Button
-								type="button"
-								onClick={startGoodCreate}
-								disabled={!goodsTypeOptions.some((type) => type.isActive)}
-							>
-								<PlusIcon aria-hidden="true" />
-								{t(Messages.referenceData.add)}
-							</Button>
-						</div>
+						<ReferenceDataSectionHeader
+							title={t(Messages.referenceData.sections.goods)}
+							onAdd={startGoodCreate}
+							addDisabled={!goodsTypeOptions.some((type) => type.isActive)}
+						/>
 						{goodsTypeOptions.some((type) => type.isActive) ? null : (
 							<p className="mb-4 text-sm text-muted-foreground">
 								{t(Messages.referenceData.goodsTypeRequired)}
