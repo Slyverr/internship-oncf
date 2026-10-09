@@ -16,6 +16,8 @@ import "./i18n-catalog-parity.test";
 import "./i18n-source.test";
 import "./notification-messages.test";
 import "./notification-utils.test";
+import "./realtime-event-routing.test";
+import "./realtime-toast.test";
 import "./number-utils.test";
 import "./openapi-validation.test";
 import "./permission-search.test";

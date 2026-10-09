@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/actions/auth";
 import { AppearancePreferencesSync } from "@/providers/appearance-preferences-sync";
 import { AuthProvider } from "@/providers/auth-provider";
+import { RealtimeProvider } from "@/providers/realtime-provider";
 
 export default async function Layout({
 	children,
@@ -13,7 +14,9 @@ export default async function Layout({
 
 	return (
 		<AuthProvider profile={profile}>
-			<AppearancePreferencesSync>{children}</AppearancePreferencesSync>
+			<RealtimeProvider>
+				<AppearancePreferencesSync>{children}</AppearancePreferencesSync>
+			</RealtimeProvider>
 		</AuthProvider>
 	);
 }

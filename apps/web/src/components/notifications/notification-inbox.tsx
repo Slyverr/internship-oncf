@@ -17,13 +17,15 @@ import {
 } from "@/lib/api/notifications";
 import { formatDisplayDateTime } from "@/lib/date-utils";
 import { getNotificationHref } from "@/lib/notification-utils";
+import { useRealtimeConnected } from "@/providers/realtime-provider";
 
 export function NotificationInbox() {
 	const locale = useLocale();
 	const t = useTranslate();
 	const client = useQueryClient();
+	const realtimeConnected = useRealtimeConnected();
 	const query = useNotificationsControllerFindAll({
-		query: { refetchInterval: 30000 },
+		query: { refetchInterval: realtimeConnected ? false : 30000 },
 	});
 	const markRead = useNotificationsControllerMarkAsRead();
 	const markAll = useNotificationsControllerMarkAllAsRead();

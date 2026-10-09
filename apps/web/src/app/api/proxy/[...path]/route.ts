@@ -46,6 +46,10 @@ async function handler(
 			...(responseContentType && {
 				"content-type": responseContentType,
 			}),
+			...(responseContentType?.includes("text/event-stream") && {
+				"cache-control": "no-cache, no-transform",
+				"x-accel-buffering": "no",
+			}),
 			...(contentDisposition && {
 				"content-disposition": contentDisposition,
 			}),

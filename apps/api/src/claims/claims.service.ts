@@ -160,6 +160,12 @@ export class ClaimsService {
 				notifications: notificationRecords,
 			},
 		);
+		for (const notification of notificationRecords) {
+			this.notifications.publishCreatedForUser(
+				notification.recipientUserId,
+				notification,
+			);
+		}
 		const [created] = await this.getComments(claimId, comment.id);
 		if (!created) {
 			throw new NotFoundException({
@@ -250,6 +256,12 @@ export class ClaimsService {
 			throw new ConflictException({
 				code: API_ERROR_CODES.CLAIM_TRANSITION_INVALID,
 			});
+		}
+		if (options?.notification) {
+			this.notifications.publishCreatedForUser(
+				options.notification.recipientUserId,
+				options.notification,
+			);
 		}
 		return updated;
 	}

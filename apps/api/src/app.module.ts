@@ -10,6 +10,7 @@ import { NotificationsModule } from "@/notifications/notifications.module";
 import { OrdersModule } from "@/orders/orders.module";
 import { ProfileModule } from "@/profile/profile.module";
 import { ProgramsModule } from "@/programs/programs.module";
+import { RealtimeModule } from "@/realtime/realtime.module";
 import { ReportsModule } from "@/reports/reports.module";
 import { RolesModule } from "@/roles/roles.module";
 import { TrackingModule } from "@/tracking/tracking.module";
@@ -22,6 +23,7 @@ import { AppController } from "./app.controller";
 		DrizzleModule,
 		UsersModule,
 		AuthModule,
+		RealtimeModule,
 		OrdersModule,
 		ProgramsModule,
 		CustomersModule,

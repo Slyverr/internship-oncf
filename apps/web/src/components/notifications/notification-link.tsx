@@ -18,17 +18,22 @@ import {
 } from "@/lib/api/notifications";
 import { formatDisplayDateTime } from "@/lib/date-utils";
 import { getNotificationHref } from "@/lib/notification-utils";
+import { useRealtimeConnected } from "@/providers/realtime-provider";
 
 export function NotificationLink() {
 	const locale = useLocale();
 	const t = useTranslate();
 	const [open, setOpen] = useState(false);
+	const realtimeConnected = useRealtimeConnected();
 	const client = useQueryClient();
 	const unreadQuery = useNotificationsControllerGetUnreadCount({
-		query: { refetchInterval: 30000 },
+		query: { refetchInterval: realtimeConnected ? false : 30000 },
 	});
 	const listQuery = useNotificationsControllerFindAll({
-		query: { enabled: open, refetchInterval: open ? 30000 : false },
+		query: {
+			enabled: open,
+			refetchInterval: open && !realtimeConnected ? 30000 : false,
+		},
 	});
 	const markRead = useNotificationsControllerMarkAsRead();
 	const markAll = useNotificationsControllerMarkAllAsRead();

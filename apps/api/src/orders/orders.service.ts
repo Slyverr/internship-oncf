@@ -247,6 +247,12 @@ export class OrdersService {
 				notification,
 			},
 		);
+		if (notification) {
+			this.notifications.publishCreatedForUser(
+				notification.recipientUserId,
+				notification,
+			);
+		}
 
 		return this.findOne(id);
 	}

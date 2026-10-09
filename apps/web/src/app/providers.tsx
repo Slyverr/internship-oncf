@@ -4,6 +4,7 @@ import type { AppearancePreferences } from "@ecommand/shared";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useState } from "react";
+import { Toaster } from "@/components/ui/toast";
 import type { AppLocale } from "@/i18n";
 import { LocaleProvider } from "@/i18n/locale-provider";
 import { shouldRetryApiRequest } from "@/lib/api-availability";
@@ -40,6 +41,7 @@ export function Providers({
 			<AppearanceProvider initialPreferences={initialAppearancePreferences}>
 				<QueryClientProvider client={queryClient}>
 					<ApiRecoveryMonitor />
+					<Toaster />
 					{children}
 					{enableQueryDevtools && (
 						<ReactQueryDevtools buttonPosition="bottom-right" />

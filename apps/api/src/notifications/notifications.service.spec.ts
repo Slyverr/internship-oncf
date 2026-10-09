@@ -13,6 +13,7 @@ jest.mock("./notifications.query", () => ({ NotificationsQuery: class {} }));
 
 describe("in-app notification delivery", () => {
 	const mapper = new NotificationsMapper();
+	const realtimeEvents = { publishToUser: jest.fn() };
 	const dto = {
 		userId: 12,
 		type: NotificationType.CLAIM_UPDATED,
@@ -23,6 +24,8 @@ describe("in-app notification delivery", () => {
 			status: ClaimStatus.RESOLVED,
 		},
 	};
+
+	beforeEach(() => realtimeEvents.publishToUser.mockClear());
 
 	it("makes in-app messages readable immediately while email remains pending", () => {
 		expect(mapper.toCreate(dto)).toMatchObject({
@@ -39,6 +42,7 @@ describe("in-app notification delivery", () => {
 		const service = new NotificationsService(
 			query as unknown as NotificationsQuery,
 			mapper,
+			realtimeEvents as never,
 		);
 		await expect(service.getUnreadCount(12)).resolves.toEqual({ count: 3 });
 		expect(query.findUnreadCount).toHaveBeenCalledWith(12);
@@ -49,6 +53,7 @@ describe("in-app notification delivery", () => {
 		const service = new NotificationsService(
 			query as unknown as NotificationsQuery,
 			mapper,
+			realtimeEvents as never,
 		);
 		await expect(service.findOne(23 as never)).rejects.toMatchObject({
 			response: { code: API_ERROR_CODES.NOTIFICATION_NOT_FOUND },
@@ -62,6 +67,7 @@ describe("in-app notification delivery", () => {
 		const service = new NotificationsService(
 			query as unknown as NotificationsQuery,
 			mapper,
+			realtimeEvents as never,
 		);
 		await expect(service.markAsRead(23 as never, 12)).rejects.toMatchObject({
 			response: { code: API_ERROR_CODES.NOTIFICATION_NOT_FOUND },
@@ -69,7 +75,11 @@ describe("in-app notification delivery", () => {
 	});
 
 	it("creates change records only for recipients other than the actor", () => {
-		const service = new NotificationsService({} as NotificationsQuery, mapper);
+		const service = new NotificationsService(
+			{} as NotificationsQuery,
+			mapper,
+			realtimeEvents as never,
+		);
 		const content = {
 			code: NotificationMessageCode.CLAIM_STATUS_CHANGED,
 			parameters: {
@@ -92,6 +102,41 @@ describe("in-app notification delivery", () => {
 		});
 	});
 
+	it("includes a concise notification summary in its live event", () => {
+		const service = new NotificationsService(
+			{} as NotificationsQuery,
+			mapper,
+			realtimeEvents as never,
+		);
+		const notification = service.createChangeRecord(12, 20, "claims", 4, {
+			code: NotificationMessageCode.CLAIM_STATUS_CHANGED,
+			parameters: {
+				recordCode: "CLM-0123456789",
+				status: ClaimStatus.RESOLVED,
+			},
+		});
+
+		if (!notification) throw new Error("Expected a notification record");
+		service.publishCreatedForUser(12, notification);
+
+		expect(realtimeEvents.publishToUser).toHaveBeenCalledWith(
+			12,
+			"notifications.changed",
+			{
+				change: "created",
+				notification: {
+					messageCode: NotificationMessageCode.CLAIM_STATUS_CHANGED,
+					messageParameters: {
+						recordCode: "CLM-0123456789",
+						status: ClaimStatus.RESOLVED,
+					},
+					relatedEntityType: "claims",
+					relatedEntityId: 4,
+				},
+			},
+		);
+	});
+
 	it("uses the generic code for legacy notifications without parsing English prose", async () => {
 		const query = {
 			findRelatedRecordCodes: jest.fn().mockResolvedValue([]),
@@ -107,6 +152,7 @@ describe("in-app notification delivery", () => {
 		const service = new NotificationsService(
 			query as unknown as NotificationsQuery,
 			mapper,
+			realtimeEvents as never,
 		);
 		const result = await service.findOne(3 as never);
 		expect(result).toMatchObject({
@@ -140,6 +186,7 @@ describe("in-app notification delivery", () => {
 		const service = new NotificationsService(
 			query as unknown as NotificationsQuery,
 			mapper,
+			realtimeEvents as never,
 		);
 
 		await expect(service.findOne(3 as never)).resolves.toMatchObject({

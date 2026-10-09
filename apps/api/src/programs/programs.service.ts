@@ -208,6 +208,12 @@ export class ProgramsService {
 				code: API_ERROR_CODES.PROGRAM_TRANSITION_INVALID,
 			});
 		}
+		if (notification) {
+			this.notifications.publishCreatedForUser(
+				notification.recipientUserId,
+				notification,
+			);
+		}
 
 		return this.findOne(id);
 	}

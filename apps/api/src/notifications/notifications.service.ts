@@ -6,9 +6,13 @@ import {
 } from "@ecommand/shared";
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { AuthUser } from "@/auth/auth.types";
+import {
+	REALTIME_EVENT_TYPES,
+	RealtimeEventsService,
+} from "@/realtime/realtime-events.service";
 import { NotificationsMapper } from "./notifications.mapper";
 import { NotificationsQuery } from "./notifications.query";
-import type { NotificationId } from "./notifications.types";
+import type { NotificationId, NotificationInsert } from "./notifications.types";
 import { CreateNotificationDto } from "./requests/create-notification.dto";
 
 @Injectable()
@@ -16,12 +20,18 @@ export class NotificationsService {
 	constructor(
 		private readonly notificationsQuery: NotificationsQuery,
 		private readonly notificationsMapper: NotificationsMapper,
+		private readonly realtimeEvents: RealtimeEventsService,
 	) {}
 
 	async create(dto: CreateNotificationDto) {
 		const values = this.notificationsMapper.toCreate(dto);
 		const created = await this.notificationsQuery.createNotification(values);
+		this.publishChanged(values.recipientUserId, "created", values);
 		return this.findOne(created.id);
+	}
+
+	publishCreatedForUser(userId: number, notification?: NotificationInsert) {
+		this.publishChanged(userId, "created", notification);
 	}
 
 	async findAll(user: AuthUser) {
@@ -59,12 +69,14 @@ export class NotificationsService {
 				code: API_ERROR_CODES.NOTIFICATION_NOT_FOUND,
 			});
 		}
+		this.publishChanged(userId, "read");
 		return this.findOne(id);
 	}
 
 	async markAllAsRead(userId: number) {
 		const updated =
 			await this.notificationsQuery.updateAllNotificationsRead(userId);
+		if (updated.length > 0) this.publishChanged(userId, "read");
 		return {
 			count: updated.length,
 			code: API_RESPONSE_CODES.NOTIFICATIONS_MARKED_READ,
@@ -192,5 +204,27 @@ export class NotificationsService {
 			});
 		}
 		return notification;
+	}
+
+	private publishChanged(
+		userId: number,
+		change: "created" | "read",
+		notification?: NotificationInsert,
+	) {
+		this.realtimeEvents.publishToUser(
+			userId,
+			REALTIME_EVENT_TYPES.notificationsChanged,
+			{
+				change,
+				...(notification && {
+					notification: {
+						messageCode: notification.messageCode,
+						messageParameters: notification.messageParameters,
+						relatedEntityType: notification.relatedEntityType,
+						relatedEntityId: notification.relatedEntityId,
+					},
+				}),
+			},
+		);
 	}
 }
