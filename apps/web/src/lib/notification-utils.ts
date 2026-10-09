@@ -5,6 +5,7 @@ const notificationRoutes: Record<string, string> = {
 	order: "orders",
 	programs: "programs",
 	program: "programs",
+	forecast_programs: "programs",
 	claims: "claims",
 	claim: "claims",
 };

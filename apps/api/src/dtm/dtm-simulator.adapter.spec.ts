@@ -6,8 +6,15 @@ import { DtmSimulatorAdapter } from "./dtm-simulator.adapter";
 
 describe("DtmSimulatorAdapter", () => {
 	const createOrderRequest = jest.fn().mockResolvedValue({ id: 92 });
-	const completeSimulatorRequest = jest.fn().mockResolvedValue(undefined);
-	const resolvePendingRequest = jest.fn().mockResolvedValue(true);
+	const completion = {
+		relatedEntityType: "orders",
+		relatedEntityId: 12,
+		relatedEntityCode: "ORD-ABCDEFGHIJ",
+		createdByUserId: 7,
+		relatedEntityOwnerUserId: 84,
+	};
+	const completeSimulatorRequest = jest.fn().mockResolvedValue(completion);
+	const resolvePendingRequest = jest.fn().mockResolvedValue(completion);
 	const createProgramRequest = jest.fn().mockResolvedValue({ id: 91 });
 	const query = {
 		createOrderRequest,
@@ -15,6 +22,11 @@ describe("DtmSimulatorAdapter", () => {
 		resolvePendingRequest,
 		createProgramRequest,
 	};
+	const realtimeEvents = {
+		publish: jest.fn(),
+		publishToUser: jest.fn(),
+	};
+	const notifications = { create: jest.fn().mockResolvedValue(undefined) };
 	const program = {
 		id: 5,
 		programNumber: "PRG-ABCDEFGHIJ",
@@ -34,9 +46,12 @@ describe("DtmSimulatorAdapter", () => {
 	beforeEach(() => {
 		jest.useFakeTimers();
 		createOrderRequest.mockReset().mockResolvedValue({ id: 92 });
-		completeSimulatorRequest.mockReset().mockResolvedValue(undefined);
-		resolvePendingRequest.mockReset().mockResolvedValue(true);
+		completeSimulatorRequest.mockReset().mockResolvedValue(completion);
+		resolvePendingRequest.mockReset().mockResolvedValue(completion);
 		createProgramRequest.mockReset().mockResolvedValue({ id: 91 });
+		realtimeEvents.publish.mockClear();
+		realtimeEvents.publishToUser.mockClear();
+		notifications.create.mockClear();
 	});
 
 	afterEach(() => {
@@ -54,9 +69,27 @@ describe("DtmSimulatorAdapter", () => {
 		const service = new DtmSimulatorAdapter(
 			config,
 			query as unknown as DtmQuery,
+			realtimeEvents as never,
+			notifications as never,
 		);
+		const programCompletion = {
+			...completion,
+			relatedEntityType: "forecast_programs",
+			relatedEntityCode: "PRG-ABCDEFGHIJ",
+		};
+		completeSimulatorRequest.mockResolvedValue(programCompletion);
 
 		await service.submitProgram(program, user);
+		expect(realtimeEvents.publish).toHaveBeenCalledWith(
+			"dtm.activity.changed",
+			expect.objectContaining({
+				requestId: 91,
+				status: "PENDING",
+				relatedEntityType: "forecast_programs",
+				relatedEntityCode: "PRG-ABCDEFGHIJ",
+			}),
+			{ permission: expect.any(String), userId: user.id },
+		);
 
 		expect(createProgramRequest).toHaveBeenCalledWith(5, 7, {
 			contract: "ecommand-dtm-simulator-v1",
@@ -73,11 +106,28 @@ describe("DtmSimulatorAdapter", () => {
 		await jest.advanceTimersByTimeAsync(1_999);
 		expect(completeSimulatorRequest).not.toHaveBeenCalled();
 		await jest.advanceTimersByTimeAsync(1);
-		expect(completeSimulatorRequest).toHaveBeenCalledWith(
-			91,
-			"ACCEPTED",
-			2_000,
+		expect(completeSimulatorRequest).toHaveBeenCalledWith(91, "ACCEPTED");
+		expect(realtimeEvents.publish).toHaveBeenLastCalledWith(
+			"dtm.activity.changed",
+			expect.objectContaining({
+				requestId: 91,
+				status: "ACCEPTED",
+				relatedEntityCode: "PRG-ABCDEFGHIJ",
+			}),
+			{ permission: expect.any(String), userId: user.id },
 		);
+		expect(notifications.create).toHaveBeenCalledWith({
+			userId: 84,
+			type: "DTM_RESPONSE",
+			channel: "IN_APP",
+			messageCode: "DTM_RESPONSE",
+			messageParameters: {
+				recordCode: "PRG-ABCDEFGHIJ",
+				status: "ACCEPTED",
+			},
+			relatedEntityType: "programs",
+			relatedEntityId: 12,
+		});
 		service.onModuleDestroy();
 	});
 
@@ -85,7 +135,7 @@ describe("DtmSimulatorAdapter", () => {
 		const values: Record<string, unknown> = {
 			DTM_MODE: "simulator",
 			DTM_SIMULATOR_RESPONSE_MODE: "auto",
-			DTM_SIMULATOR_DELAY_MS: "10",
+			DTM_SIMULATOR_DELAY_SECONDS: "0.01",
 			DTM_SIMULATOR_RESULT: "REJECTED",
 		};
 		const config = {
@@ -94,19 +144,21 @@ describe("DtmSimulatorAdapter", () => {
 		const service = new DtmSimulatorAdapter(
 			config,
 			query as unknown as DtmQuery,
+			realtimeEvents as never,
+			notifications as never,
 		);
 
 		await service.submitProgram(program, user);
 		await jest.advanceTimersByTimeAsync(10);
 
-		expect(completeSimulatorRequest).toHaveBeenCalledWith(91, "REJECTED", 10);
+		expect(completeSimulatorRequest).toHaveBeenCalledWith(91, "REJECTED");
 		service.onModuleDestroy();
 	});
 
 	it("records and acknowledges an order submission using simulator settings", async () => {
 		const values: Record<string, unknown> = {
 			DTM_SIMULATOR_RESPONSE_MODE: "auto",
-			DTM_SIMULATOR_DELAY_MS: "5",
+			DTM_SIMULATOR_DELAY_SECONDS: "0.005",
 			DTM_SIMULATOR_RESULT: "ACCEPTED",
 		};
 		const config = {
@@ -115,6 +167,8 @@ describe("DtmSimulatorAdapter", () => {
 		const service = new DtmSimulatorAdapter(
 			config,
 			query as unknown as DtmQuery,
+			realtimeEvents as never,
+			notifications as never,
 		);
 
 		await service.submitOrder(order, user);
@@ -131,7 +185,39 @@ describe("DtmSimulatorAdapter", () => {
 		});
 		expect(completeSimulatorRequest).not.toHaveBeenCalled();
 		await jest.advanceTimersByTimeAsync(5);
-		expect(completeSimulatorRequest).toHaveBeenCalledWith(92, "ACCEPTED", 5);
+		expect(completeSimulatorRequest).toHaveBeenCalledWith(92, "ACCEPTED");
+		expect(notifications.create).toHaveBeenCalledWith(
+			expect.objectContaining({
+				userId: 84,
+				messageCode: "DTM_RESPONSE",
+				messageParameters: {
+					recordCode: "ORD-ABCDEFGHIJ",
+					status: "ACCEPTED",
+				},
+			}),
+		);
+		service.onModuleDestroy();
+	});
+
+	it("clamps a negative automatic delay to zero", async () => {
+		const values: Record<string, unknown> = {
+			DTM_SIMULATOR_RESPONSE_MODE: "auto",
+			DTM_SIMULATOR_DELAY_SECONDS: "-0.025",
+		};
+		const config = {
+			get: jest.fn((key: string, fallback: unknown) => values[key] ?? fallback),
+		} as unknown as ConfigService;
+		const service = new DtmSimulatorAdapter(
+			config,
+			query as unknown as DtmQuery,
+			realtimeEvents as never,
+			notifications as never,
+		);
+
+		await service.submitOrder(order, user);
+		await jest.advanceTimersByTimeAsync(0);
+
+		expect(completeSimulatorRequest).toHaveBeenCalledWith(92, "ACCEPTED");
 		service.onModuleDestroy();
 	});
 
@@ -144,6 +230,8 @@ describe("DtmSimulatorAdapter", () => {
 		const service = new DtmSimulatorAdapter(
 			config,
 			query as unknown as DtmQuery,
+			realtimeEvents as never,
+			notifications as never,
 		);
 
 		await service.submitOrder(order, user);
@@ -151,8 +239,8 @@ describe("DtmSimulatorAdapter", () => {
 
 		await expect(
 			service.resolvePendingRequest(92, "REJECTED", 99),
-		).resolves.toBe(true);
-		expect(resolvePendingRequest).toHaveBeenCalledWith(92, "REJECTED", 99, 2);
+		).resolves.toEqual(completion);
+		expect(resolvePendingRequest).toHaveBeenCalledWith(92, "REJECTED", 99);
 
 		await jest.advanceTimersByTimeAsync(2_000);
 		expect(completeSimulatorRequest).not.toHaveBeenCalled();
@@ -166,9 +254,20 @@ describe("DtmSimulatorAdapter", () => {
 		const service = new DtmSimulatorAdapter(
 			config,
 			query as unknown as DtmQuery,
+			realtimeEvents as never,
+			notifications as never,
 		);
 
 		await service.submitOrder(order, user);
+		expect(realtimeEvents.publish).toHaveBeenCalledWith(
+			"dtm.request.pending",
+			{
+				requestId: 92,
+				relatedEntityType: "orders",
+				relatedEntityCode: "ORD-ABCDEFGHIJ",
+			},
+			{ permission: expect.any(String) },
+		);
 		await jest.advanceTimersByTimeAsync(60_000);
 
 		expect(completeSimulatorRequest).not.toHaveBeenCalled();

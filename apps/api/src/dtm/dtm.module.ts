@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { NotificationsModule } from "@/notifications/notifications.module";
 import { DTM_GATEWAY, selectDtmGateway } from "./dtm.gateway";
 import { DtmQuery } from "./dtm.query";
 import { DtmDisabledAdapter } from "./dtm-disabled.adapter";
@@ -8,6 +9,7 @@ import { DtmOperationsService } from "./dtm-operations.service";
 import { DtmSimulatorAdapter } from "./dtm-simulator.adapter";
 
 @Module({
+	imports: [NotificationsModule],
 	controllers: [DtmOperationsController],
 	providers: [
 		DtmQuery,

@@ -32,7 +32,7 @@ const e2eEnv: Record<string, string | undefined> = {
 	AUTH_LOGIN_MAX_ATTEMPTS: "3",
 	AUTH_LOGIN_LOCK_DURATION_SECONDS: "60",
 	DTM_MODE: "simulator",
-	DTM_SIMULATOR_DELAY_MS: "25",
+	DTM_SIMULATOR_DELAY_SECONDS: "0.025",
 	DTM_SIMULATOR_RESULT: "ACCEPTED",
 	WEB_APP_URL: "http://localhost:3000",
 };

@@ -31,6 +31,10 @@ export type NotificationMessage =
 			{ recordCode: string }
 	  >
 	| NotificationMessageBase<
+			NotificationMessageCode.DTM_RESPONSE,
+			{ recordCode: string; status: "ACCEPTED" | "REJECTED" }
+	  >
+	| NotificationMessageBase<
 			NotificationMessageCode.LEGACY_UPDATE,
 			Record<string, string>
 	  >;

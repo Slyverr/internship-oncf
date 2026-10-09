@@ -82,6 +82,22 @@ export function translateNotificationMessage(
 					locale,
 				),
 			};
+		case NotificationMessageCode.DTM_RESPONSE:
+			return {
+				title: translate(
+					Messages.notifications.messages.dtmResponse.title,
+					{},
+					locale,
+				),
+				body: translate(
+					Messages.notifications.messages.dtmResponse.body,
+					{
+						recordCode,
+						status: parameters.status === "ACCEPTED" ? "accepted" : "rejected",
+					},
+					locale,
+				),
+			};
 		case NotificationMessageCode.LEGACY_UPDATE:
 			return {
 				title: translate(

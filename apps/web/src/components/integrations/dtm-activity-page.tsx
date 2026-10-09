@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckIcon, EyeIcon, RefreshCwIcon, XIcon } from "lucide-react";
+import { CheckIcon, EyeIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { PageHeader } from "@/components/common/page-header";
@@ -40,6 +40,7 @@ import type {
 	ResolveDtmRequestDtoResult,
 } from "@/lib/api/generated.schemas";
 import { formatDisplayDateTime } from "@/lib/date-utils";
+import { useRealtimeConnected } from "@/providers/realtime-provider";
 
 const requestsKey = getDtmOperationsControllerListQueryKey();
 type DtmRequest = DtmRequestDto;
@@ -83,10 +84,35 @@ function statusVariant(status: DtmRequestDtoStatus) {
 	return "outline" as const;
 }
 
+function formatDuration(durationSeconds: number | null | undefined) {
+	if (durationSeconds == null) return "—";
+	const seconds = Math.round(Math.max(durationSeconds, 0));
+	if (seconds === 0) return durationSeconds === 0 ? "0s" : "<1s";
+	if (seconds < 60) return `${seconds}s`;
+	if (seconds < 3_600) {
+		const minutes = Math.floor(seconds / 60);
+		const remainingSeconds = seconds % 60;
+		return remainingSeconds === 0
+			? `${minutes}m`
+			: `${minutes}m ${remainingSeconds}s`;
+	}
+	if (seconds < 86_400) {
+		const hours = Math.floor(seconds / 3_600);
+		const remainingMinutes = Math.floor((seconds % 3_600) / 60);
+		return remainingMinutes === 0
+			? `${hours}h`
+			: `${hours}h ${remainingMinutes}m`;
+	}
+	const days = Math.floor(seconds / 86_400);
+	const remainingHours = Math.floor((seconds % 86_400) / 3_600);
+	return remainingHours === 0 ? `${days}d` : `${days}d ${remainingHours}h`;
+}
+
 export function DtmActivityPage() {
 	const t = useTranslate();
 	const locale = useLocale();
 	const queryClient = useQueryClient();
+	const realtimeConnected = useRealtimeConnected();
 	const [pendingResolution, setPendingResolution] =
 		useState<PendingResolution | null>(null);
 	const [selectedRequest, setSelectedRequest] = useState<DtmRequest | null>(
@@ -96,11 +122,7 @@ export function DtmActivityPage() {
 	const activity = useQuery({
 		queryKey: requestsKey,
 		queryFn: dtmOperationsControllerList,
-		refetchInterval: (query) =>
-			query.state.data?.mode === "SIMULATOR" &&
-			query.state.data.requests.some((request) => request.status === "PENDING")
-				? 1_000
-				: false,
+		refetchInterval: realtimeConnected ? false : 30_000,
 	});
 	const resolveRequest = useMutation({
 		mutationFn: ({ requestId, result }: PendingResolution) =>
@@ -132,10 +154,15 @@ export function DtmActivityPage() {
 
 	function relatedRecordLabel(request: DtmRequest) {
 		if (request.relatedEntityType === "orders") {
-			return `Order #${request.relatedEntityId}`;
+			if (request.relatedEntityCode) return request.relatedEntityCode;
+			return t(Messages.dtmActivity.relatedOrder, {
+				code: `#${request.relatedEntityId}`,
+			});
 		}
 		if (request.relatedEntityType === "forecast_programs") {
-			return `Forecast program #${request.relatedEntityId}`;
+			return t(Messages.dtmActivity.relatedProgram, {
+				code: request.relatedEntityCode ?? `#${request.relatedEntityId}`,
+			});
 		}
 		return request.relatedEntityType ?? "—";
 	}
@@ -145,17 +172,7 @@ export function DtmActivityPage() {
 			<PageHeader
 				title={t(Messages.dtmActivity.pageTitle)}
 				description={t(Messages.dtmActivity.description)}
-			>
-				<Button
-					type="button"
-					variant="outline"
-					disabled={activity.isFetching}
-					onClick={() => void activity.refetch()}
-				>
-					<RefreshCwIcon aria-hidden="true" />
-					{t(Messages.dtmActivity.refresh)}
-				</Button>
-			</PageHeader>
+			/>
 
 			<div className="grid gap-4 @5xl/workspace:grid-cols-3">
 				<Card>
@@ -216,9 +233,19 @@ export function DtmActivityPage() {
 			</div>
 
 			{activity.isError && (
-				<p role="alert" className="text-sm text-destructive">
-					{t(Messages.dtmActivity.loadFailed)}
-				</p>
+				<div role="alert" className="flex flex-wrap items-center gap-3">
+					<p className="text-sm text-destructive">
+						{t(Messages.dtmActivity.loadFailed)}
+					</p>
+					<Button
+						type="button"
+						variant="outline"
+						disabled={activity.isFetching}
+						onClick={() => void activity.refetch()}
+					>
+						{t(Messages.common.actions.retry)}
+					</Button>
+				</div>
 			)}
 			{actionFailed && (
 				<p role="alert" className="text-sm text-destructive">
@@ -243,8 +270,8 @@ export function DtmActivityPage() {
 								<TableHead>{t(Messages.dtmActivity.requestType)}</TableHead>
 								<TableHead>{t(Messages.dtmActivity.relatedRecord)}</TableHead>
 								<TableHead>{t(Messages.dtmActivity.requestedAt)}</TableHead>
-								<TableHead>{t(Messages.dtmActivity.status)}</TableHead>
-								<TableHead>{t(Messages.dtmActivity.response)}</TableHead>
+								<TableHead>{t(Messages.dtmActivity.requestStatus)}</TableHead>
+								<TableHead>{t(Messages.dtmActivity.dtmResponse)}</TableHead>
 								<TableHead>{t(Messages.dtmActivity.duration)}</TableHead>
 								<TableHead className="w-32 text-right">
 									{t(Messages.dtmActivity.actions)}
@@ -288,7 +315,8 @@ export function DtmActivityPage() {
 												{responseStatus ? (
 													<span className="inline-flex flex-wrap items-center gap-1">
 														<span>{responseStatus}</span>
-														{responseSource === "MANUAL_SIMULATOR" && (
+														{(responseSource === "SIMULATOR" ||
+															responseSource === "MANUAL_SIMULATOR") && (
 															<Badge variant="outline">
 																{t(Messages.dtmActivity.simulatorMode)}
 															</Badge>
@@ -299,9 +327,18 @@ export function DtmActivityPage() {
 												)}
 											</TableCell>
 											<TableCell className="whitespace-nowrap">
-												{request.durationMs === null
-													? "—"
-													: `${request.durationMs} ${t(Messages.dtmActivity.milliseconds)}`}
+												<span
+													title={
+														request.respondedAt
+															? formatDisplayDateTime(
+																	request.respondedAt,
+																	locale,
+																)
+															: undefined
+													}
+												>
+													{formatDuration(request.durationSeconds)}
+												</span>
 											</TableCell>
 											<TableCell>
 												<div className="flex justify-end gap-1">

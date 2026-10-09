@@ -73,10 +73,16 @@ export const dtmIntegrationLog = pgTable(
 		status: varchar("status", { length: 20 }).notNull(),
 		httpStatusCode: integer("http_status_code"),
 		errorMessage: text("error_message"),
-		durationMs: integer("duration_ms"),
+		respondedAt: timestamp("responded_at", {
+			withTimezone: true,
+			mode: "string",
+		}),
 		relatedEntityType: varchar("related_entity_type", { length: 50 }),
 		relatedEntityId: bigint("related_entity_id", { mode: "number" }),
-		createdAt: timestamp("created_at", { mode: "string" })
+		createdAt: timestamp("created_at", {
+			withTimezone: true,
+			mode: "string",
+		})
 			.default(sql`CURRENT_TIMESTAMP`)
 			.notNull(),
 		createdByUserId: bigint("created_by_user_id", { mode: "number" }),
@@ -116,10 +122,5 @@ export const dtmIntegrationLog = pgTable(
 			.where(
 				sql`(status)::text = ANY (ARRAY['FAILED'::text, 'TIMEOUT'::text])`,
 			),
-		index("idx_dtm_log_performance").on(
-			table.requestTypeId,
-			table.durationMs,
-			table.createdAt,
-		),
 	],
 );

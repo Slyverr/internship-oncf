@@ -121,6 +121,7 @@ describe("API bootstrap and authentication (e2e)", () => {
 			status: "SUCCESS",
 			httpStatusCode: 200,
 		});
+		expect(completedLog?.respondedAt).not.toBeNull();
 		expect(completedProgram?.dtmStatus).toBe("ACCEPTED");
 	});
 
@@ -178,6 +179,7 @@ describe("API bootstrap and authentication (e2e)", () => {
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200);
 		expect(refreshedOrder.body).toMatchObject({
+			orderStatus: { name: "IN_PROGRESS" },
 			dtmRequestStatus: "SUCCESS",
 			dtmResponseStatus: "ACCEPTED",
 		});

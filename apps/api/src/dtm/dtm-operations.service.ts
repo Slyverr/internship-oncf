@@ -43,7 +43,6 @@ export class DtmOperationsService {
 		if (!resolved) {
 			throw new ConflictException({ code: API_ERROR_CODES.CONFLICT });
 		}
-
 		return {
 			id: requestId,
 			result,

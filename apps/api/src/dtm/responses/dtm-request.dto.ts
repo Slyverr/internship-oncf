@@ -13,6 +13,12 @@ export class DtmRequestDto {
 	@ApiProperty()
 	createdAt!: string;
 
+	@ApiPropertyOptional({
+		nullable: true,
+		description: "Timestamp when the DTM response was recorded",
+	})
+	respondedAt!: string | null;
+
 	@ApiPropertyOptional({ nullable: true })
 	relatedEntityType!: string | null;
 
@@ -20,13 +26,20 @@ export class DtmRequestDto {
 	relatedEntityId!: number | null;
 
 	@ApiPropertyOptional({ nullable: true })
+	relatedEntityCode!: string | null;
+
+	@ApiPropertyOptional({ nullable: true })
 	httpStatusCode!: number | null;
 
 	@ApiPropertyOptional({ nullable: true })
 	errorMessage!: string | null;
 
-	@ApiPropertyOptional({ nullable: true })
-	durationMs!: number | null;
+	@ApiPropertyOptional({
+		nullable: true,
+		description:
+			"Elapsed time rounded to whole seconds and derived from request and response timestamps",
+	})
+	durationSeconds!: number | null;
 
 	@ApiPropertyOptional({ nullable: true })
 	requestPayload!: string | null;

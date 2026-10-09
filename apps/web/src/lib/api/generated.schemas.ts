@@ -881,6 +881,7 @@ export const NotificationMessageCode = {
   PROGRAM_STATUS_CHANGED: 'PROGRAM_STATUS_CHANGED',
   CLAIM_STATUS_CHANGED: 'CLAIM_STATUS_CHANGED',
   CLAIM_COMMENT_ADDED: 'CLAIM_COMMENT_ADDED',
+  DTM_RESPONSE: 'DTM_RESPONSE',
   LEGACY_UPDATE: 'LEGACY_UPDATE',
 } as const;
 
@@ -987,16 +988,26 @@ export interface DtmRequestDto {
   requestType: string;
   status: DtmRequestDtoStatus;
   createdAt: string;
+  /**
+     * Timestamp when the DTM response was recorded
+     * @nullable
+     */
+  respondedAt?: string | null;
   /** @nullable */
   relatedEntityType?: string | null;
   /** @nullable */
   relatedEntityId?: number | null;
   /** @nullable */
+  relatedEntityCode?: string | null;
+  /** @nullable */
   httpStatusCode?: number | null;
   /** @nullable */
   errorMessage?: string | null;
-  /** @nullable */
-  durationMs?: number | null;
+  /**
+     * Elapsed time rounded to whole seconds and derived from request and response timestamps
+     * @nullable
+     */
+  durationSeconds?: number | null;
   /** @nullable */
   requestPayload?: string | null;
   /** @nullable */

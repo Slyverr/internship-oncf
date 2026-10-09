@@ -14,7 +14,7 @@ ECommand is ONCF's freight operations workspace. Customers submit transport orde
 
 Admins can also create service credentials for a future tracking feed. These credentials are hashed at rest, shown only on creation or rotation, and limited to submitting wagon positions. This is an inbound integration scaffold, not a live ONCF connection; see [integration credential setup](docs/development/integration-credentials.md).
 
-For local simulation, set `DTM_MODE=simulator` in `apps/api/.env`. The default `DTM_SIMULATOR_RESPONSE_MODE=manual` keeps each request pending until an admin accepts or rejects it on `/dashboard/integrations/dtm`. Set it to `auto` to apply the delayed `DTM_SIMULATOR_RESULT` (`ACCEPTED` or `REJECTED`) after `DTM_SIMULATOR_DELAY_MS` (default `2000`). Automatic responses use in-process timers, so restarting the API cancels those timers; pending records remain visible and can still be resolved manually. Neither mode contacts ONCF.
+For local simulation, set `DTM_MODE=simulator` in `apps/api/.env`. The default `DTM_SIMULATOR_RESPONSE_MODE=manual` keeps each request pending until an admin accepts or rejects it on `/dashboard/integrations/dtm`. Set it to `auto` to apply the delayed `DTM_SIMULATOR_RESULT` (`ACCEPTED` or `REJECTED`) after `DTM_SIMULATOR_DELAY_SECONDS` (default `2`, bounded to `0`–`60`). Automatic responses use in-process timers, so restarting the API cancels those timers; pending records remain visible and can still be resolved manually. Neither mode contacts ONCF.
 
 ## Stack
 
