@@ -38,8 +38,8 @@ assert.match(
 );
 assert.match(
 	source,
-	/refetchInterval: open \? 5000 : false/,
-	"An open conversation must refresh often enough to show new messages without polling while closed.",
+	/refetchInterval: open && !realtimeConnected \? 5000 : false/,
+	"An open conversation must poll for new messages only while the live connection is down.",
 );
 assert.match(
 	source,

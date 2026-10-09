@@ -61,6 +61,7 @@ import {
 } from "@/lib/date-utils";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
+import { useRealtimeConnected } from "@/providers/realtime-provider";
 
 interface ClaimConversationProps {
 	claimId: number;
@@ -216,6 +217,7 @@ export function ClaimConversation({
 	const getErrorMessage = useFormErrorMessage();
 	const locale = useLocale();
 	const { profile, hasPermission } = useAuth();
+	const realtimeConnected = useRealtimeConnected();
 	const canComment = hasPermission(Permission.CLAIMS_ACTION_COMMENT);
 	const [open, setOpen] = useState(false);
 	const [content, setContent] = useState("");
@@ -233,10 +235,13 @@ export function ClaimConversation({
 	const previousCommentCount = useRef(0);
 	const [hasNewMessages, setHasNewMessages] = useState(false);
 	const commentsQuery = useClaimsControllerGetComments(claimNumber, {
-		query: { enabled: open, refetchInterval: open ? 5000 : false },
+		query: {
+			enabled: open,
+			refetchInterval: open && !realtimeConnected ? 5000 : false,
+		},
 	});
 	const notificationsQuery = useNotificationsControllerFindAll({
-		query: { refetchInterval: 30000 },
+		query: { refetchInterval: realtimeConnected ? false : 30000 },
 	});
 	const addComment = useClaimsControllerAddComment();
 	const markRead = useNotificationsControllerMarkAsRead();

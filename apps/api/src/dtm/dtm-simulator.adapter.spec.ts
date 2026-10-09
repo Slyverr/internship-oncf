@@ -1,3 +1,4 @@
+import { Permission } from "@ecommand/shared";
 import { ConfigService } from "@nestjs/config";
 import type { AuthUser } from "@/auth/auth.types";
 import type { ProgramDetail } from "@/programs/programs.types";
@@ -24,6 +25,7 @@ describe("DtmSimulatorAdapter", () => {
 	};
 	const realtimeEvents = {
 		publish: jest.fn(),
+		publishToPermission: jest.fn(),
 		publishToUser: jest.fn(),
 	};
 	const notifications = { create: jest.fn().mockResolvedValue(undefined) };
@@ -50,6 +52,7 @@ describe("DtmSimulatorAdapter", () => {
 		resolvePendingRequest.mockReset().mockResolvedValue(completion);
 		createProgramRequest.mockReset().mockResolvedValue({ id: 91 });
 		realtimeEvents.publish.mockClear();
+		realtimeEvents.publishToPermission.mockClear();
 		realtimeEvents.publishToUser.mockClear();
 		notifications.create.mockClear();
 	});
@@ -115,6 +118,10 @@ describe("DtmSimulatorAdapter", () => {
 				relatedEntityCode: "PRG-ABCDEFGHIJ",
 			}),
 			{ permission: expect.any(String), userId: user.id },
+		);
+		expect(realtimeEvents.publishToPermission).toHaveBeenCalledWith(
+			Permission.PROGRAMS_READ,
+			"programs.changed",
 		);
 		expect(notifications.create).toHaveBeenCalledWith({
 			userId: 84,
@@ -186,6 +193,10 @@ describe("DtmSimulatorAdapter", () => {
 		expect(completeSimulatorRequest).not.toHaveBeenCalled();
 		await jest.advanceTimersByTimeAsync(5);
 		expect(completeSimulatorRequest).toHaveBeenCalledWith(92, "ACCEPTED");
+		expect(realtimeEvents.publishToPermission).toHaveBeenCalledWith(
+			Permission.ORDERS_READ,
+			"orders.changed",
+		);
 		expect(notifications.create).toHaveBeenCalledWith(
 			expect.objectContaining({
 				userId: 84,

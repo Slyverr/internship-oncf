@@ -10,7 +10,12 @@ import {
 	ForbiddenException,
 	Injectable,
 	NotFoundException,
+	Optional,
 } from "@nestjs/common";
+import {
+	REALTIME_EVENT_TYPES,
+	RealtimeEventsService,
+} from "@/realtime/realtime-events.service";
 import { CreateRoleProfileDto } from "./requests/create-role-profile.dto";
 import { UpdateRoleProfileDto } from "./requests/update-role-profile.dto";
 import {
@@ -22,7 +27,10 @@ import { RolesQuery } from "./roles.query";
 
 @Injectable()
 export class RolesService {
-	constructor(private readonly rolesQuery: RolesQuery) {}
+	constructor(
+		private readonly rolesQuery: RolesQuery,
+		@Optional() private readonly realtimeEvents?: RealtimeEventsService,
+	) {}
 
 	async findProfiles() {
 		const profiles = await this.rolesQuery.findProfiles();
@@ -51,6 +59,7 @@ export class RolesService {
 		this.validateProfile(input.name, input.persona, input.permissionNames);
 		await this.ensurePermissionsActive(input.permissionNames);
 		const created = await this.rolesQuery.createProfile(input, actorUserId);
+		this.publishChanged();
 		return (await this.findProfiles()).find(({ id }) => id === created.id);
 	}
 
@@ -89,7 +98,12 @@ export class RolesService {
 				code: API_ERROR_CODES.ROLE_PROFILE_IN_USE,
 			});
 		}
+		this.publishChanged();
 		return (await this.findProfiles()).find((profile) => profile.id === id);
+	}
+
+	private publishChanged() {
+		this.realtimeEvents?.publish(REALTIME_EVENT_TYPES.rolesChanged);
 	}
 
 	private async ensurePermissionsActive(names: readonly Permission[]) {

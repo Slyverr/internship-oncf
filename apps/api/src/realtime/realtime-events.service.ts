@@ -17,6 +17,15 @@ export const REALTIME_EVENT_TYPES = {
 	dtmRequestPending: "dtm.request.pending",
 	ordersChanged: "orders.changed",
 	programsChanged: "programs.changed",
+	claimsChanged: "claims.changed",
+	trackingChanged: "tracking.changed",
+	catalogChanged: "catalog.changed",
+	customersChanged: "customers.changed",
+	usersChanged: "users.changed",
+	rolesChanged: "roles.changed",
+	integrationCredentialsChanged: "integration-credentials.changed",
+	profileChanged: "profile.changed",
+	profilePreferencesChanged: "profile.preferences.changed",
 } as const;
 
 const CHANNEL = "ecommand_realtime_events";
@@ -31,6 +40,7 @@ export type RealtimeEvent = {
 type TargetedRealtimeEvent = RealtimeEvent & {
 	userId?: number;
 	permission?: Permission;
+	permissions?: Permission[];
 	originId?: string;
 };
 
@@ -62,7 +72,11 @@ export class RealtimeEventsService implements OnModuleInit, OnModuleDestroy {
 	publish(
 		type: string,
 		data: Record<string, unknown> = {},
-		target: { userId?: number; permission?: Permission } = {},
+		target: {
+			userId?: number;
+			permission?: Permission;
+			permissions?: Permission[];
+		} = {},
 	) {
 		const event: TargetedRealtimeEvent = {
 			id: randomUUID(),
@@ -92,14 +106,28 @@ export class RealtimeEventsService implements OnModuleInit, OnModuleDestroy {
 		this.publish(type, data, { permission });
 	}
 
+	publishToPermissions(
+		permissions: readonly Permission[],
+		type: string,
+		data: Record<string, unknown> = {},
+	) {
+		this.publish(type, data, { permissions: [...permissions] });
+	}
+
 	streamFor(user: AuthUser): Observable<{ id?: string; data: RealtimeEvent }> {
 		const userEvents = this.events.pipe(
 			filter(
 				(event) =>
-					(event.userId === undefined && event.permission === undefined) ||
+					(event.userId === undefined &&
+						event.permission === undefined &&
+						event.permissions === undefined) ||
 					(event.userId !== undefined && event.userId === user.id) ||
 					(event.permission !== undefined &&
-						user.permissions.has(event.permission)),
+						user.permissions.has(event.permission)) ||
+					(event.permissions?.some((permission) =>
+						user.permissions.has(permission),
+					) ??
+						false),
 			),
 			map(({ id, type, occurredAt, data }) => ({
 				id,
@@ -168,12 +196,7 @@ export class RealtimeEventsService implements OnModuleInit, OnModuleDestroy {
 			this.listener = client;
 			this.reconnectDelayMs = 1_000;
 			if (this.listenerHasConnected) {
-				this.events.next({
-					id: randomUUID(),
-					type: "realtime.resync",
-					occurredAt: new Date().toISOString(),
-					data: {},
-				});
+				this.publish("realtime.resync");
 			}
 			this.listenerHasConnected = true;
 			this.logger.log("Connected to shared PostgreSQL realtime channel");

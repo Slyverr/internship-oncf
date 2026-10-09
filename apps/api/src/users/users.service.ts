@@ -11,9 +11,14 @@ import {
 	ConflictException,
 	Injectable,
 	NotFoundException,
+	Optional,
 } from "@nestjs/common";
 import { AuthUser } from "@/auth/auth.types";
 import { ROLES } from "@/database/reference-data";
+import {
+	REALTIME_EVENT_TYPES,
+	RealtimeEventsService,
+} from "@/realtime/realtime-events.service";
 import { CreateUserDto } from "./requests/create-user.dto";
 import type { RegistrationReviewDecision } from "./requests/review-user-registration.dto";
 import { UpdateUserDto } from "./requests/update-user.dto";
@@ -26,6 +31,7 @@ export class UsersService {
 	constructor(
 		private readonly usersQuery: UsersQuery,
 		private readonly usersMapper: UsersMapper,
+		@Optional() private readonly realtimeEvents?: RealtimeEventsService,
 	) {}
 
 	async findAll() {
@@ -85,6 +91,7 @@ export class UsersService {
 				? (dto.customerIds ?? [])
 				: undefined,
 		);
+		this.publishChanged();
 		return this.findOne(created.id);
 	}
 
@@ -103,6 +110,7 @@ export class UsersService {
 			lastName: input.lastName.trim(),
 		});
 		await this.usersQuery.createUser(values);
+		this.publishChanged();
 		return { code: API_RESPONSE_CODES.REGISTRATION_SUBMITTED_FOR_REVIEW };
 	}
 
@@ -129,6 +137,7 @@ export class UsersService {
 			});
 		}
 
+		this.publishChanged();
 		return this.findOne(id);
 	}
 
@@ -152,6 +161,8 @@ export class UsersService {
 		}
 
 		await this.usersQuery.updateUserAndAssignments(id, values, customerIds);
+		this.publishChanged();
+		this.realtimeEvents?.publishToUser(id, REALTIME_EVENT_TYPES.profileChanged);
 		return this.findOne(id);
 	}
 
@@ -162,11 +173,20 @@ export class UsersService {
 				code: API_ERROR_CODES.LAST_ACTIVE_ADMIN,
 			});
 		}
-		return this.ensure(user);
+		const result = this.ensure(user);
+		this.publishChanged();
+		return result;
 	}
 
 	async exists(id: UserId) {
 		return this.usersQuery.findUserExists(id);
+	}
+
+	private publishChanged() {
+		this.realtimeEvents?.publishToPermission(
+			Permission.USERS_READ,
+			REALTIME_EVENT_TYPES.usersChanged,
+		);
 	}
 
 	private ensure<T>(user: T | undefined): T {

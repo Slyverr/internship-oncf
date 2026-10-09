@@ -3,7 +3,12 @@ import {
 	Injectable,
 	InternalServerErrorException,
 	NotFoundException,
+	Optional,
 } from "@nestjs/common";
+import {
+	REALTIME_EVENT_TYPES,
+	RealtimeEventsService,
+} from "@/realtime/realtime-events.service";
 import type { UserId } from "@/users/users.types";
 import { ProfileQuery } from "./profile.query";
 import { UpdateAppearancePreferencesDto } from "./requests/update-appearance-preferences.dto";
@@ -11,7 +16,10 @@ import { UpdateProfileDto } from "./requests/update-profile.dto";
 
 @Injectable()
 export class ProfileService {
-	constructor(private readonly profileQuery: ProfileQuery) {}
+	constructor(
+		private readonly profileQuery: ProfileQuery,
+		@Optional() private readonly realtimeEvents?: RealtimeEventsService,
+	) {}
 
 	async findOne(id: UserId) {
 		const user = await this.profileQuery.findProfile(id);
@@ -39,6 +47,7 @@ export class ProfileService {
 
 	async update(id: UserId, dto: UpdateProfileDto) {
 		await this.profileQuery.updateProfile(id, dto);
+		this.realtimeEvents?.publishToUser(id, REALTIME_EVENT_TYPES.profileChanged);
 		return this.findOne(id);
 	}
 
@@ -47,6 +56,11 @@ export class ProfileService {
 	}
 
 	async updatePreferences(id: UserId, dto: UpdateAppearancePreferencesDto) {
-		return this.profileQuery.savePreferences(id, dto);
+		const saved = await this.profileQuery.savePreferences(id, dto);
+		this.realtimeEvents?.publishToUser(
+			id,
+			REALTIME_EVENT_TYPES.profilePreferencesChanged,
+		);
+		return saved;
 	}
 }

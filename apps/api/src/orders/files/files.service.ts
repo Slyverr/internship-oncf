@@ -1,7 +1,11 @@
-import { API_ERROR_CODES } from "@ecommand/shared";
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { API_ERROR_CODES, Permission } from "@ecommand/shared";
+import { Injectable, NotFoundException, Optional } from "@nestjs/common";
 import { AttachmentsService } from "@/attachments/attachments.service";
 import type { OrderId } from "@/orders/orders.types";
+import {
+	REALTIME_EVENT_TYPES,
+	RealtimeEventsService,
+} from "@/realtime/realtime-events.service";
 import type { UploadedFile } from "@/storage/storage.types";
 import { FilesQuery } from "./files.query";
 import type { OrderFileView } from "./files.types";
@@ -12,6 +16,7 @@ export class FilesService {
 	constructor(
 		private readonly filesQuery: FilesQuery,
 		private readonly attachmentsService: AttachmentsService,
+		@Optional() private readonly realtimeEvents?: RealtimeEventsService,
 	) {}
 
 	async uploadFile(
@@ -29,6 +34,7 @@ export class FilesService {
 			description: dto.description ?? null,
 			uploadedByUserId: userId,
 		});
+		this.publishOrderChanged();
 
 		return {
 			id: link.id,
@@ -72,5 +78,13 @@ export class FilesService {
 		}
 
 		await this.filesQuery.softDelete(orderId, fileId);
+		this.publishOrderChanged();
+	}
+
+	private publishOrderChanged() {
+		this.realtimeEvents?.publishToPermission(
+			Permission.ORDERS_READ,
+			REALTIME_EVENT_TYPES.ordersChanged,
+		);
 	}
 }

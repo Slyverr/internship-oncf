@@ -2,13 +2,19 @@ import {
 	API_ERROR_CODES,
 	ManagedReferenceResource,
 	type ManagedReferenceResource as ManagedReferenceResourceType,
+	Permission,
 } from "@ecommand/shared";
 import {
 	BadRequestException,
 	ConflictException,
 	Injectable,
 	NotFoundException,
+	Optional,
 } from "@nestjs/common";
+import {
+	REALTIME_EVENT_TYPES,
+	RealtimeEventsService,
+} from "@/realtime/realtime-events.service";
 import { CatalogMapper } from "./catalog.mapper";
 import { CatalogQuery } from "./catalog.query";
 import {
@@ -35,6 +41,7 @@ export class CatalogService {
 	constructor(
 		private readonly catalogQuery: CatalogQuery,
 		private readonly catalogMapper: CatalogMapper,
+		@Optional() private readonly realtimeEvents?: RealtimeEventsService,
 	) {}
 
 	async findManagedReferenceData(resource: ManagedReferenceResourceType) {
@@ -56,7 +63,9 @@ export class CatalogService {
 			resource,
 			dto,
 		);
-		return this.ensure(created?.[0]);
+		const result = this.ensure(created?.[0]);
+		this.publishChanged();
+		return result;
 	}
 
 	async updateManagedReferenceData(
@@ -86,7 +95,9 @@ export class CatalogService {
 			id,
 			dto,
 		);
-		return this.ensure(updated?.[0]);
+		const result = this.ensure(updated?.[0]);
+		this.publishChanged();
+		return result;
 	}
 
 	private validateRequiredFields(
@@ -139,16 +150,20 @@ export class CatalogService {
 
 	async createUnit(dto: CreateUnitDto) {
 		const values = this.catalogMapper.toCreateUnit(dto);
-		return this.catalogQuery.createUnit(values);
+		const result = await this.catalogQuery.createUnit(values);
+		this.publishChanged();
+		return result;
 	}
 
 	async updateUnit(id: string, dto: UpdateUnitDto) {
-		return this.ensure(
+		const result = this.ensure(
 			await this.catalogQuery.updateUnit(
 				id,
 				this.catalogMapper.toUpdateUnit(dto),
 			),
 		);
+		this.publishChanged();
+		return result;
 	}
 
 	async findAllGoodsTypes() {
@@ -161,7 +176,9 @@ export class CatalogService {
 
 	async createGoodsType(dto: CreateGoodsTypeDto) {
 		const values = this.catalogMapper.toCreateGoodsType(dto);
-		return this.catalogQuery.createGoodsType(values);
+		const result = await this.catalogQuery.createGoodsType(values);
+		this.publishChanged();
+		return result;
 	}
 
 	async updateGoodsType(id: string, dto: UpdateGoodsTypeDto) {
@@ -170,12 +187,14 @@ export class CatalogService {
 				code: API_ERROR_CODES.CATALOG_GOODS_TYPE_HAS_ACTIVE_GOODS,
 			});
 		}
-		return this.ensure(
+		const result = this.ensure(
 			await this.catalogQuery.updateGoodsType(
 				id,
 				this.catalogMapper.toUpdateGoodsType(dto),
 			),
 		);
+		this.publishChanged();
+		return result;
 	}
 
 	async findAllGoods() {
@@ -193,7 +212,9 @@ export class CatalogService {
 			});
 		}
 		const values = this.catalogMapper.toCreateGood(dto);
-		return this.catalogQuery.createGood(values);
+		const result = await this.catalogQuery.createGood(values);
+		this.publishChanged();
+		return result;
 	}
 
 	async updateGood(id: number, dto: UpdateGoodDto) {
@@ -205,12 +226,14 @@ export class CatalogService {
 				code: API_ERROR_CODES.CATALOG_GOODS_TYPE_INACTIVE,
 			});
 		}
-		return this.ensure(
+		const result = this.ensure(
 			await this.catalogQuery.updateGood(
 				id,
 				this.catalogMapper.toUpdateGood(dto),
 			),
 		);
+		this.publishChanged();
+		return result;
 	}
 
 	async findAllAccessoryOperations() {
@@ -223,16 +246,20 @@ export class CatalogService {
 
 	async createAccessoryOperation(dto: CreateAccessoryOperationDto) {
 		const values = this.catalogMapper.toCreateAccessoryOperation(dto);
-		return this.catalogQuery.createAccessoryOperation(values);
+		const result = await this.catalogQuery.createAccessoryOperation(values);
+		this.publishChanged();
+		return result;
 	}
 
 	async updateAccessoryOperation(id: string, dto: UpdateAccessoryOperationDto) {
-		return this.ensure(
+		const result = this.ensure(
 			await this.catalogQuery.updateAccessoryOperation(
 				id,
 				this.catalogMapper.toUpdateAccessoryOperation(dto),
 			),
 		);
+		this.publishChanged();
+		return result;
 	}
 
 	async findAllRejectionReasons() {
@@ -245,15 +272,26 @@ export class CatalogService {
 
 	async createRejectionReason(dto: CreateRejectionReasonDto) {
 		const values = this.catalogMapper.toCreateRejectionReason(dto);
-		return this.catalogQuery.createRejectionReason(values);
+		const result = await this.catalogQuery.createRejectionReason(values);
+		this.publishChanged();
+		return result;
 	}
 
 	async updateRejectionReason(id: string, dto: UpdateRejectionReasonDto) {
-		return this.ensure(
+		const result = this.ensure(
 			await this.catalogQuery.updateRejectionReason(
 				id,
 				this.catalogMapper.toUpdateRejectionReason(dto),
 			),
+		);
+		this.publishChanged();
+		return result;
+	}
+
+	private publishChanged() {
+		this.realtimeEvents?.publishToPermission(
+			Permission.CATALOG_READ,
+			REALTIME_EVENT_TYPES.catalogChanged,
 		);
 	}
 

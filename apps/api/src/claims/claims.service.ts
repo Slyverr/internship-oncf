@@ -9,6 +9,7 @@ import {
 	ConflictException,
 	Injectable,
 	NotFoundException,
+	Optional,
 } from "@nestjs/common";
 import { claims } from "drizzle/schema";
 import { and, eq } from "drizzle-orm";
@@ -17,6 +18,10 @@ import { hasOnePermission } from "@/auth/auth.utils";
 import { getCustomerScope } from "@/auth/customer-scope";
 import { CLAIM_STATUSES } from "@/database/reference-data";
 import { NotificationsService } from "@/notifications/notifications.service";
+import {
+	REALTIME_EVENT_TYPES,
+	RealtimeEventsService,
+} from "@/realtime/realtime-events.service";
 import { CLAIM_STATUS_BY_ID, CLAIM_TRANSITION } from "./claims.constants";
 import { ClaimsMapper } from "./claims.mapper";
 import { ClaimsQuery } from "./claims.query";
@@ -31,12 +36,14 @@ export class ClaimsService {
 		private readonly notifications: NotificationsService,
 		private readonly claimsQuery: ClaimsQuery,
 		private readonly claimsMapper: ClaimsMapper,
+		@Optional() private readonly realtimeEvents?: RealtimeEventsService,
 	) {}
 
 	async create(dto: CreateClaimDto, user: AuthUser) {
 		await this.ensureOrderCustomer(dto.customerId, dto.orderId);
 		const values = this.claimsMapper.toCreate(dto, user);
 		const created = await this.claimsQuery.createClaim(values);
+		this.publishChanged();
 		return this.findOne(created.id);
 	}
 
@@ -104,7 +111,9 @@ export class ClaimsService {
 	async remove(identifier: ClaimIdentifier) {
 		const id = await this.resolveClaimId(identifier);
 		const deleted = await this.claimsQuery.deleteClaim(id);
-		return this.ensure(deleted);
+		const result = this.ensure(deleted);
+		this.publishChanged();
+		return result;
 	}
 
 	async addComment(
@@ -166,6 +175,7 @@ export class ClaimsService {
 				notification,
 			);
 		}
+		this.publishChanged();
 		const [created] = await this.getComments(claimId, comment.id);
 		if (!created) {
 			throw new NotFoundException({
@@ -263,6 +273,7 @@ export class ClaimsService {
 				options.notification,
 			);
 		}
+		this.publishChanged();
 		return updated;
 	}
 
@@ -338,6 +349,13 @@ export class ClaimsService {
 		);
 
 		return this.findOne(claimId);
+	}
+
+	private publishChanged() {
+		this.realtimeEvents?.publishToPermission(
+			Permission.CLAIMS_READ,
+			REALTIME_EVENT_TYPES.claimsChanged,
+		);
 	}
 
 	private async resolveClaimId(identifier: ClaimIdentifier): Promise<ClaimId> {

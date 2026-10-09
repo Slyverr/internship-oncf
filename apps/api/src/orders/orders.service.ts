@@ -11,6 +11,7 @@ import {
 	Inject,
 	Injectable,
 	NotFoundException,
+	Optional,
 } from "@nestjs/common";
 import { orders } from "drizzle/schema";
 import { and, eq } from "drizzle-orm";
@@ -20,6 +21,10 @@ import { ListQueryDto } from "@/common/requests/list-query.dto";
 import { ORDER_STATUSES } from "@/database/reference-data";
 import { DTM_GATEWAY, type DtmGateway } from "@/dtm/dtm.gateway";
 import { NotificationsService } from "@/notifications/notifications.service";
+import {
+	REALTIME_EVENT_TYPES,
+	RealtimeEventsService,
+} from "@/realtime/realtime-events.service";
 import {
 	ORDER_QUANTITY_PATTERN,
 	ORDER_STATUS_BY_ID,
@@ -39,11 +44,13 @@ export class OrdersService {
 		private readonly ordersQuery: OrdersQuery,
 		private readonly ordersMapper: OrdersMapper,
 		@Inject(DTM_GATEWAY) private readonly dtm: DtmGateway,
+		@Optional() private readonly realtimeEvents?: RealtimeEventsService,
 	) {}
 
 	async create(dto: CreateOrderDto, user: AuthUser) {
 		const values = this.ordersMapper.toCreate(dto, user);
 		const created = await this.ordersQuery.createOrder(values);
+		this.publishChanged();
 		return this.findOne(created.id);
 	}
 
@@ -164,6 +171,7 @@ export class OrdersService {
 			where: and(eq(orders.id, id), eq(orders.statusId, order.statusId)),
 			history: { userId: user.id },
 		});
+		this.publishChanged();
 
 		return this.findOne(id);
 	}
@@ -199,7 +207,9 @@ export class OrdersService {
 		}
 
 		const deleted = await this.ordersQuery.deleteOrder(id);
-		return this.ensure(deleted);
+		const result = this.ensure(deleted);
+		this.publishChanged();
+		return result;
 	}
 
 	private async transition(
@@ -253,6 +263,7 @@ export class OrdersService {
 				notification,
 			);
 		}
+		this.publishChanged();
 
 		return this.findOne(id);
 	}
@@ -262,5 +273,12 @@ export class OrdersService {
 			throw new NotFoundException({ code: API_ERROR_CODES.ORDER_NOT_FOUND });
 		}
 		return value;
+	}
+
+	private publishChanged() {
+		this.realtimeEvents?.publishToPermission(
+			Permission.ORDERS_READ,
+			REALTIME_EVENT_TYPES.ordersChanged,
+		);
 	}
 }

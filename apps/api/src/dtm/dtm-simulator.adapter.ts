@@ -251,6 +251,10 @@ export class DtmSimulatorAdapter implements DtmGateway, OnModuleDestroy {
 		]);
 		const entityType = completion.relatedEntityType ?? fallbackType;
 		if (entityType === "orders") {
+			this.realtimeEvents.publishToPermission(
+				Permission.ORDERS_READ,
+				REALTIME_EVENT_TYPES.ordersChanged,
+			);
 			for (const userId of recipientUserIds) {
 				if (userId === null) continue;
 				this.realtimeEvents.publishToUser(
@@ -263,6 +267,10 @@ export class DtmSimulatorAdapter implements DtmGateway, OnModuleDestroy {
 				);
 			}
 		} else if (entityType === "forecast_programs") {
+			this.realtimeEvents.publishToPermission(
+				Permission.PROGRAMS_READ,
+				REALTIME_EVENT_TYPES.programsChanged,
+			);
 			for (const userId of recipientUserIds) {
 				if (userId === null) continue;
 				this.realtimeEvents.publishToUser(

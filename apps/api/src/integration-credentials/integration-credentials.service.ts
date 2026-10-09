@@ -8,14 +8,22 @@ import {
 	BadRequestException,
 	Injectable,
 	NotFoundException,
+	Optional,
 	UnauthorizedException,
 } from "@nestjs/common";
+import {
+	REALTIME_EVENT_TYPES,
+	RealtimeEventsService,
+} from "@/realtime/realtime-events.service";
 import { IntegrationCredentialsQuery } from "./integration-credentials.query";
 
 const KEY_PREFIX = "ec_int_";
 @Injectable()
 export class IntegrationCredentialsService {
-	constructor(private readonly query: IntegrationCredentialsQuery) {}
+	constructor(
+		private readonly query: IntegrationCredentialsQuery,
+		@Optional() private readonly realtimeEvents?: RealtimeEventsService,
+	) {}
 
 	list() {
 		return this.query.findAll();
@@ -44,12 +52,14 @@ export class IntegrationCredentialsService {
 			permissions,
 			createdByUserId: actorUserId,
 		});
+		this.publishChanged();
 		return { ...credential, secret: token };
 	}
 
 	async revoke(id: number, actorUserId: number) {
 		const result = await this.query.revoke(id, actorUserId);
 		if (!result) throw new NotFoundException();
+		this.publishChanged();
 		return { id, revoked: true };
 	}
 
@@ -61,6 +71,7 @@ export class IntegrationCredentialsService {
 			actorUserId,
 		);
 		if (!credential) throw new NotFoundException();
+		this.publishChanged();
 		return {
 			...credential,
 			secret: `${KEY_PREFIX}${credential.keyId}.${secret}`,
@@ -91,5 +102,12 @@ export class IntegrationCredentialsService {
 
 	private hash(secret: string) {
 		return createHash("sha256").update(secret).digest("hex");
+	}
+
+	private publishChanged() {
+		this.realtimeEvents?.publishToPermission(
+			Permission.INTEGRATIONS_MANAGE,
+			REALTIME_EVENT_TYPES.integrationCredentialsChanged,
+		);
 	}
 }

@@ -13,6 +13,7 @@ import type { OrderDetailDto } from "@/lib/api/generated.schemas";
 import { useOrdersControllerFindOne } from "@/lib/api/orders";
 import { canCreateProgramForOrder } from "@/lib/program-creation-eligibility";
 import { useAuth } from "@/providers/auth-provider";
+import { useRealtimeConnected } from "@/providers/realtime-provider";
 import { OrderPrintDocument } from "./order-print-document";
 
 interface OrderDetailsClientProps {
@@ -22,11 +23,14 @@ interface OrderDetailsClientProps {
 export function OrderDetailsClient({ order }: OrderDetailsClientProps) {
 	const t = useTranslate();
 	const { profile, hasPermission } = useAuth();
+	const realtimeConnected = useRealtimeConnected();
 	const { data: currentOrder } = useOrdersControllerFindOne(order.orderNumber, {
 		query: {
 			initialData: order,
 			refetchInterval: (query) =>
-				query.state.data?.dtmRequestStatus === "PENDING" ? 1_000 : false,
+				!realtimeConnected && query.state.data?.dtmRequestStatus === "PENDING"
+					? 1_000
+					: false,
 		},
 	});
 

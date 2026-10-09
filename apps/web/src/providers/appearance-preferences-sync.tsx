@@ -85,6 +85,7 @@ export function AppearancePreferencesSync({
 	const hydrated = useRef(false);
 	const initializedCookieSnapshot = useRef(false);
 	const lastCookiePreferences = useRef(JSON.stringify(preferences));
+	const lastAppliedServerUpdatedAt = useRef<string | null>(null);
 	const lastSent = useRef<string | null>(null);
 	const saveQueue = useRef<Promise<void>>(Promise.resolve());
 	const currentPreferences = useRef(preferences);
@@ -163,6 +164,7 @@ export function AppearancePreferencesSync({
 
 		hydrated.current = true;
 		if (preferencesQuery.data) {
+			lastAppliedServerUpdatedAt.current = preferencesQuery.data.updatedAt;
 			const serverPreferences = toPreferences(preferencesQuery.data);
 			const appearanceCookie = document.cookie
 				.split(";")
@@ -214,6 +216,37 @@ export function AppearancePreferencesSync({
 		profile.id,
 		setPreferences,
 	]);
+
+	useEffect(() => {
+		const serverSnapshot = preferencesQuery.data;
+		if (!hydrated.current || !serverSnapshot) return;
+		if (lastAppliedServerUpdatedAt.current === serverSnapshot.updatedAt) return;
+
+		lastAppliedServerUpdatedAt.current = serverSnapshot.updatedAt;
+		const serverPreferences = toPreferences(serverSnapshot);
+		const serializedServerPreferences = JSON.stringify(serverPreferences);
+		const currentSerialized = JSON.stringify(currentPreferences.current);
+		if (currentSerialized === serializedServerPreferences) {
+			lastSent.current = serializedServerPreferences;
+			lastCookiePreferences.current = serializedServerPreferences;
+			writeAppearancePreferenceCookie(
+				serverPreferences,
+				profile.id,
+				serverSnapshot.updatedAt,
+			);
+			return;
+		}
+		if (status !== "saved" || currentSerialized !== lastSent.current) return;
+
+		lastSent.current = serializedServerPreferences;
+		lastCookiePreferences.current = serializedServerPreferences;
+		writeAppearancePreferenceCookie(
+			serverPreferences,
+			profile.id,
+			serverSnapshot.updatedAt,
+		);
+		setPreferences(serverPreferences);
+	}, [preferencesQuery.data, profile.id, setPreferences, status]);
 
 	useEffect(() => {
 		if (!hydrated.current) return;

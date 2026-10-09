@@ -16,8 +16,13 @@ assert.deepEqual(
 );
 assert.deepEqual(
 	getRealtimeInvalidationKeys("orders.changed", { code: "ORD-123" }),
-	[["/orders"], ["/orders/ORD-123"]],
-	"order workflow events refresh the agent list and active order detail",
+	[
+		["/orders"],
+		["order-report"],
+		["dashboard-order-activity"],
+		["/orders/ORD-123"],
+	],
+	"order workflow events refresh lists, reports, dashboard activity, and active details",
 );
 assert.deepEqual(
 	getRealtimeInvalidationKeys("programs.changed", { code: "PRG-123" }),
@@ -29,15 +34,20 @@ assert.deepEqual(
 	[],
 	"unregistered event types do not trigger unrelated data refreshes",
 );
-assert.equal(
-	getRealtimeInvalidationKeys("realtime.resync").length,
-	5,
+assert.deepEqual(
+	getRealtimeInvalidationKeys("realtime.resync"),
+	getAllRealtimeInvalidationKeys(),
 	"a recovered shared event connection refreshes every registered live query",
 );
-assert.equal(
-	getAllRealtimeInvalidationKeys().length,
-	5,
-	"reconnection refreshes each currently registered live query",
+assert.deepEqual(
+	getRealtimeInvalidationKeys("customers.changed"),
+	[["order-report"], ["dashboard-order-activity"]],
+	"customer changes refresh customer-dependent order reports and dashboard activity",
+);
+assert.deepEqual(
+	getRealtimeInvalidationKeys("catalog.changed"),
+	[["active-reference-data"], ["managed-reference-data"]],
+	"catalog changes refresh active and managed reference data",
 );
 
 console.log("ecommand-web test: Realtime event query routing checks passed.");

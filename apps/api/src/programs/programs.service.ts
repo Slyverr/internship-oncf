@@ -2,6 +2,7 @@ import {
 	API_ERROR_CODES,
 	NotificationMessageCode,
 	OrderStatus,
+	Permission,
 	ProgramStatus,
 } from "@ecommand/shared";
 import {
@@ -10,6 +11,7 @@ import {
 	Inject,
 	Injectable,
 	NotFoundException,
+	Optional,
 } from "@nestjs/common";
 import { forecastPrograms } from "drizzle/schema";
 import { and, eq } from "drizzle-orm";
@@ -18,6 +20,10 @@ import { canAccessCustomer } from "@/auth/customer-scope";
 import { PROGRAM_STATUSES } from "@/database/reference-data";
 import { DTM_GATEWAY, type DtmGateway } from "@/dtm/dtm.gateway";
 import { NotificationsService } from "@/notifications/notifications.service";
+import {
+	REALTIME_EVENT_TYPES,
+	RealtimeEventsService,
+} from "@/realtime/realtime-events.service";
 import { PROGRAM_STATUS_BY_ID, PROGRAM_TRANSITION } from "./programs.constants";
 import { ProgramsMapper } from "./programs.mapper";
 import { ProgramsQuery } from "./programs.query";
@@ -37,6 +43,7 @@ export class ProgramsService {
 		private readonly programsQuery: ProgramsQuery,
 		private readonly programsMapper: ProgramsMapper,
 		@Inject(DTM_GATEWAY) private readonly dtm: DtmGateway,
+		@Optional() private readonly realtimeEvents?: RealtimeEventsService,
 	) {}
 
 	async create(dto: CreateProgramDto, user: AuthUser) {
@@ -77,6 +84,7 @@ export class ProgramsService {
 			userId: user.id,
 			userName: user.email,
 		});
+		this.publishChanged();
 		return this.findOne(created.id);
 	}
 
@@ -111,6 +119,7 @@ export class ProgramsService {
 			userId: user.id,
 			userName: user.email,
 		});
+		this.publishChanged();
 		return this.findOne(id);
 	}
 
@@ -148,7 +157,9 @@ export class ProgramsService {
 			userId: user.id,
 			userName: user.email,
 		});
-		return this.ensure(deleted);
+		const result = this.ensure(deleted);
+		this.publishChanged();
+		return result;
 	}
 
 	private ensure<T>(program: T | undefined): T {
@@ -214,7 +225,15 @@ export class ProgramsService {
 				notification,
 			);
 		}
+		this.publishChanged();
 
 		return this.findOne(id);
+	}
+
+	private publishChanged() {
+		this.realtimeEvents?.publishToPermission(
+			Permission.PROGRAMS_READ,
+			REALTIME_EVENT_TYPES.programsChanged,
+		);
 	}
 }

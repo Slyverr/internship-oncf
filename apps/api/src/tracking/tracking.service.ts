@@ -1,5 +1,9 @@
-import { API_ERROR_CODES } from "@ecommand/shared";
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { API_ERROR_CODES, Permission } from "@ecommand/shared";
+import { Injectable, NotFoundException, Optional } from "@nestjs/common";
+import {
+	REALTIME_EVENT_TYPES,
+	RealtimeEventsService,
+} from "@/realtime/realtime-events.service";
 import { UpdateTrainPositionDto } from "./requests/update-train-position.dto";
 import { UpdateWagonPositionDto } from "./requests/update-wagon-position.dto";
 import { TrackingQuery } from "./tracking.query";
@@ -7,7 +11,10 @@ import type { TrainId, WagonId } from "./tracking.types";
 
 @Injectable()
 export class TrackingService {
-	constructor(private readonly trackingQuery: TrackingQuery) {}
+	constructor(
+		private readonly trackingQuery: TrackingQuery,
+		@Optional() private readonly realtimeEvents?: RealtimeEventsService,
+	) {}
 
 	async trackWagon(wagonNumber: string) {
 		const wagon = await this.trackingQuery.findTrackedWagon(wagonNumber);
@@ -41,13 +48,15 @@ export class TrackingService {
 			});
 		}
 
-		return this.trackingQuery.createWagonTracking({
+		const tracking = await this.trackingQuery.createWagonTracking({
 			wagonId: id,
 			latitude: String(dto.latitude),
 			longitude: String(dto.longitude),
 			status: dto.status ?? "IN_TRANSIT",
 			...(dto.recordedAt && { recordedAt: dto.recordedAt }),
 		});
+		this.publishChanged();
+		return tracking;
 	}
 
 	async updateWagonPositionByNumber(
@@ -64,7 +73,7 @@ export class TrackingService {
 		if (integrationCredentialId === undefined) {
 			return this.updateWagonPosition(wagon.id, dto);
 		}
-		return this.trackingQuery.createWagonTracking({
+		const tracking = await this.trackingQuery.createWagonTracking({
 			wagonId: wagon.id,
 			latitude: String(dto.latitude),
 			longitude: String(dto.longitude),
@@ -73,6 +82,8 @@ export class TrackingService {
 			integrationCredentialId,
 			...(dto.recordedAt && { recordedAt: dto.recordedAt }),
 		});
+		this.publishChanged();
+		return tracking;
 	}
 
 	async updateTrainPosition(id: TrainId, dto: UpdateTrainPositionDto) {
@@ -83,10 +94,19 @@ export class TrackingService {
 			});
 		}
 
-		return this.trackingQuery.updateTrainPosition(id, {
+		const tracking = await this.trackingQuery.updateTrainPosition(id, {
 			latitude: String(dto.latitude),
 			longitude: String(dto.longitude),
 			status: dto.status ?? "IN_TRANSIT",
 		});
+		this.publishChanged();
+		return tracking;
+	}
+
+	private publishChanged() {
+		this.realtimeEvents?.publishToPermission(
+			Permission.TRACKING_READ,
+			REALTIME_EVENT_TYPES.trackingChanged,
+		);
 	}
 }

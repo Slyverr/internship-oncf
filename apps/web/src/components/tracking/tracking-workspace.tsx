@@ -28,6 +28,7 @@ import type { OrderListDto } from "@/lib/api/generated.schemas";
 import { useOrdersControllerFindAll } from "@/lib/api/orders";
 import { useTrackingControllerTrackOrder } from "@/lib/api/tracking";
 import { formatDisplayDate } from "@/lib/date-utils";
+import { useRealtimeConnected } from "@/providers/realtime-provider";
 
 export function TrackingWorkspace({
 	initialOrderNumber = "",
@@ -36,6 +37,7 @@ export function TrackingWorkspace({
 }) {
 	const locale = useLocale();
 	const t = useTranslate();
+	const realtimeConnected = useRealtimeConnected();
 	const [orderSearch, setOrderSearch] = useState(initialOrderNumber);
 	const [debouncedOrderSearch, setDebouncedOrderSearch] =
 		useState(initialOrderNumber);
@@ -67,7 +69,7 @@ export function TrackingWorkspace({
 			query: {
 				enabled: !submittedOrderNumber,
 				retry: false,
-				refetchInterval: 30_000,
+				refetchInterval: realtimeConnected ? false : 30_000,
 			},
 		},
 	);
@@ -77,7 +79,11 @@ export function TrackingWorkspace({
 			? [selectedOrder, ...orderOptions]
 			: orderOptions;
 	const tracking = useTrackingControllerTrackOrder(submittedOrderNumber, {
-		query: { enabled: Boolean(submittedOrderNumber), retry: false },
+		query: {
+			enabled: Boolean(submittedOrderNumber),
+			retry: false,
+			refetchInterval: realtimeConnected ? false : 30_000,
+		},
 	});
 	const wagons = tracking.data ?? [];
 	const selectedWagon =

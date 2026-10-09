@@ -5,19 +5,23 @@ import { ProgramActions } from "@/components/programs/program-actions";
 import { ProgramOverview } from "@/components/programs/program-overview";
 import type { ProgramDetailDto } from "@/lib/api/generated.schemas";
 import { useProgramsControllerFindOne } from "@/lib/api/programs";
+import { useRealtimeConnected } from "@/providers/realtime-provider";
 
 interface ProgramDetailsClientProps {
 	program: ProgramDetailDto;
 }
 
 export function ProgramDetailsClient({ program }: ProgramDetailsClientProps) {
+	const realtimeConnected = useRealtimeConnected();
 	const { data: currentProgram } = useProgramsControllerFindOne(
 		program.programNumber,
 		{
 			query: {
 				initialData: program,
 				refetchInterval: (query) =>
-					query.state.data?.dtmStatus === "PENDING" ? 1_000 : false,
+					!realtimeConnected && query.state.data?.dtmStatus === "PENDING"
+						? 1_000
+						: false,
 			},
 		},
 	);

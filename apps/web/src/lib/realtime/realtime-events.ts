@@ -26,8 +26,50 @@ const eventInvalidationKeys: Record<string, QueryKey[]> = {
 		getNotificationsControllerGetUnreadCountQueryKey(),
 	],
 	"dtm.activity.changed": [getDtmOperationsControllerListQueryKey()],
-	"orders.changed": [getOrdersControllerFindAllQueryKey()],
+	"orders.changed": [
+		getOrdersControllerFindAllQueryKey(),
+		["order-report"],
+		["dashboard-order-activity"],
+	],
 	"programs.changed": [getProgramsControllerFindAllQueryKey()],
+	"customers.changed": [["order-report"], ["dashboard-order-activity"]],
+	"catalog.changed": [["active-reference-data"], ["managed-reference-data"]],
+	"integration-credentials.changed": [["integration-credentials"]],
+};
+
+const eventInvalidationPaths: Record<string, string[]> = {
+	"orders.changed": ["/orders"],
+	"programs.changed": ["/programs"],
+	"claims.changed": ["/claims"],
+	"tracking.changed": ["/tracking"],
+	"catalog.changed": ["/catalog"],
+	"customers.changed": [
+		"/customers",
+		"/orders",
+		"/programs",
+		"/claims",
+		"/users",
+	],
+	"users.changed": ["/users"],
+	"roles.changed": ["/roles", "/users"],
+	"integration-credentials.changed": ["/integration-credentials"],
+	"profile.changed": ["/profile"],
+	"profile.preferences.changed": ["/profile/preferences"],
+};
+
+const eventServerRefreshPaths: Record<string, string[]> = {
+	"orders.changed": ["/dashboard/orders"],
+	"programs.changed": ["/dashboard/programs"],
+	"claims.changed": ["/dashboard/claims"],
+	"customers.changed": [
+		"/dashboard/customers",
+		"/dashboard/orders",
+		"/dashboard/programs",
+		"/dashboard/claims",
+		"/dashboard/users",
+	],
+	"users.changed": ["/dashboard/users"],
+	"roles.changed": ["/dashboard/roles", "/dashboard/users"],
 };
 
 export function getRealtimeInvalidationKeys(
@@ -49,4 +91,18 @@ export function getRealtimeInvalidationKeys(
 
 export function getAllRealtimeInvalidationKeys(): QueryKey[] {
 	return [...new Set(Object.values(eventInvalidationKeys).flat())];
+}
+
+export function getRealtimeInvalidationPaths(eventType: string): string[] {
+	if (eventType === "realtime.resync") {
+		return [...new Set(Object.values(eventInvalidationPaths).flat())];
+	}
+	return eventInvalidationPaths[eventType] ?? [];
+}
+
+export function getRealtimeServerRefreshPaths(eventType: string): string[] {
+	if (eventType === "realtime.resync") {
+		return [...new Set(Object.values(eventServerRefreshPaths).flat())];
+	}
+	return eventServerRefreshPaths[eventType] ?? [];
 }
