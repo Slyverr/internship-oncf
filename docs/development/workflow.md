@@ -102,7 +102,9 @@ When adding French, add a reviewed, structurally complete catalog beside `en.ts`
 - Preserve permission-specific defaults and fields when splitting a form. A step must not expose fields the current user cannot manage.
 - Prefer shared components for repeated behavior, but keep step-specific business rules in the feature form. Do not turn unrelated forms into one highly configurable generic form.
 
-Keep apps/web/src/components/ui focused on primitives used by current screens. Add a primitive from the configured shadcn registry when a feature needs it instead of keeping the full unused catalog checked in.
+## Shared UI primitives
+
+Treat `apps/web/src/components/ui` as shared shadcn-style primitives that should remain easy to compare with and update from the configured shadcn registry. Keep feature-specific behavior, copy, and page layout in feature components or wrappers; change a primitive only for an app-wide behavior, accessibility, or design-system fix. Avoid deleting unused imported primitives just to shrink the folder, since that creates avoidable upstream update churn. Keep necessary primitive changes small and isolated, and review them separately when applying upstream updates.
 
 ## Web layout and visual system
 
