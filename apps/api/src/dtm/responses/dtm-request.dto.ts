@@ -32,7 +32,7 @@ export class DtmRequestDto {
 	httpStatusCode!: number | null;
 
 	@ApiPropertyOptional({ nullable: true })
-	errorMessage!: string | null;
+	errorDetails!: string | null;
 
 	@ApiPropertyOptional({
 		nullable: true,

@@ -42,6 +42,7 @@ describe("ClaimsService workflows", () => {
 	let notifications: {
 		notifyChange: jest.Mock;
 		createChangeRecord: jest.Mock;
+		publishCreatedForUser: jest.Mock;
 	};
 
 	beforeEach(() => {
@@ -69,6 +70,7 @@ describe("ClaimsService workflows", () => {
 		notifications = {
 			notifyChange: jest.fn().mockResolvedValue(undefined),
 			createChangeRecord: jest.fn().mockReturnValue({ id: "notification" }),
+			publishCreatedForUser: jest.fn(),
 		};
 		service = new ClaimsService(notifications as never, query, mapper);
 		query.updateClaim.mockResolvedValue({ id } as never);

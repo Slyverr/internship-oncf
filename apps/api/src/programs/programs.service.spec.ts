@@ -14,6 +14,7 @@ import type { ProgramId } from "./programs.types";
 describe("ProgramsService lifecycle", () => {
 	const notifyChange = jest.fn();
 	const createChangeRecord = jest.fn().mockReturnValue({ id: "notification" });
+	const publishCreatedForUser = jest.fn();
 	const toCreate = jest.fn();
 	const submitProgram = jest.fn();
 	const query = {
@@ -26,7 +27,7 @@ describe("ProgramsService lifecycle", () => {
 		updateProgram: jest.fn(),
 	};
 	const service = new ProgramsService(
-		{ notifyChange, createChangeRecord } as never,
+		{ notifyChange, createChangeRecord, publishCreatedForUser } as never,
 		query as unknown as ProgramsQuery,
 		{ toCreate } as never,
 		{ submitProgram } as never,
@@ -54,6 +55,7 @@ describe("ProgramsService lifecycle", () => {
 		query.updateProgram.mockReset();
 		notifyChange.mockReset();
 		createChangeRecord.mockClear();
+		publishCreatedForUser.mockClear();
 		toCreate.mockReset();
 		submitProgram.mockReset();
 	});

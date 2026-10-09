@@ -1002,7 +1002,7 @@ export interface DtmRequestDto {
   /** @nullable */
   httpStatusCode?: number | null;
   /** @nullable */
-  errorMessage?: string | null;
+  errorDetails?: string | null;
   /**
      * Elapsed time rounded to whole seconds and derived from request and response timestamps
      * @nullable

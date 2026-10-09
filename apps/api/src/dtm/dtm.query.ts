@@ -97,8 +97,9 @@ export class DtmQuery {
 			),
 		]);
 
-		return requests.map((request) => ({
+		return requests.map(({ errorMessage, ...request }) => ({
 			...request,
+			errorDetails: errorMessage,
 			relatedEntityCode:
 				request.relatedEntityType && request.relatedEntityId !== null
 					? (references.get(

@@ -434,13 +434,13 @@ export function DtmActivityPage() {
 						</DialogDescription>
 					</DialogHeader>
 					<DialogBody className="grid gap-4">
-						{selectedRequest?.errorMessage && (
+						{selectedRequest?.errorDetails && (
 							<div className="grid gap-1">
 								<h3 className="text-sm font-medium">
 									{t(Messages.dtmActivity.error)}
 								</h3>
 								<p className="text-sm text-destructive">
-									{selectedRequest.errorMessage}
+									{selectedRequest.errorDetails}
 								</p>
 							</div>
 						)}

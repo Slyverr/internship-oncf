@@ -41,6 +41,7 @@ describe("OrdersService workflows", () => {
 	let notifications: {
 		notifyChange: jest.Mock;
 		createChangeRecord: jest.Mock;
+		publishCreatedForUser: jest.Mock;
 	};
 	let dtm: jest.Mocked<DtmGateway>;
 
@@ -54,6 +55,7 @@ describe("OrdersService workflows", () => {
 		notifications = {
 			notifyChange: jest.fn().mockResolvedValue(undefined),
 			createChangeRecord: jest.fn().mockReturnValue({ id: "notification" }),
+			publishCreatedForUser: jest.fn(),
 		};
 		dtm = { submitOrder: jest.fn(), submitProgram: jest.fn() };
 		service = new OrdersService(notifications as never, query, mapper, dtm);
